@@ -14,12 +14,14 @@ MEM="${AP36_MEM_OVERRIDE:-$W/MEM_GATE_OG-ap-36.json}"
 ASK="${AP36_ASK_OVERRIDE:-$W/NEVER_WIDEN_ASK_OG-ap-36.md}"
 CT1="${AP36_CT1_OVERRIDE:-$W/CT1_CONCURRENT_OG-ap-36.json}"
 [ -f "$REC" ] && [ -f "$ASK" ] && [ -f "$MEM" ] && [ -f "$CT1" ] || { echo "ap36_release.json, MEM_GATE_OG-ap-36.json, CT1_CONCURRENT_OG-ap-36.json or the ask absent"; echo "RESULT: FAIL"; exit 1; }
-read -r base rel trunk <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''))" "$(native "$REC")" | tr -d '\r')"
+read -r base rel trunk meas <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''),d.get('measured_release_sha',''))" "$(native "$REC")" | tr -d '\r')"
+[ -n "$meas" ] || meas=$rel
+git cat-file -e "${meas}^{commit}" || { echo "measured_release_sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "base, release or trunk sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
 [ -n "$AP36_LIVE_OVERRIDE" ] && live=$AP36_LIVE_OVERRIDE
-ALLOW="^($GW/(app/(tools|client_core|client_adapter_bd49f)\.py|deploy-to-ec2\.sh|tests/test_og_(en21|en22|en23|db3)\.py)|infra/logic/registry/[A-Za-z0-9_]+\.json)$"
+ALLOW="^($GW/(app/(tools|client_core|client_adapter_bd49f)\.py|deploy-to-ec2\.sh|tests/test_og_(en21|en22|en23|en24|db3)\.py)|infra/logic/registry/[A-Za-z0-9_]+\.json)$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); n=$(printf '%s\n' "$files" | grep -c .)
 outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 tf=$(printf '%s\n' "$files" | grep -c '\.tf$')
@@ -33,7 +35,17 @@ for p in $files; do
   a=$(git rev-parse "$rel:$p" 2>/dev/null | tr -d '\r'); b=$(git rev-parse "$trunk:$p" 2>/dev/null | tr -d '\r')
   [ -n "$a" ] && [ "$a" = "$b" ] || neq=$((neq+1))
 done
-rec=$(python - "$(native "$MEM")" "$rel" <<'PYEOF'
+# the memory/plateau/wall/equality/health record may have been measured on an EARLIER release (OG-ap-36 amendment A3: a later release adds one line of
+# client_core._answer and one test, nothing on the read path); then that release must differ from this one only in those two files and by at most 4 changed lines
+mdelta="memory record measured on this release: yes"; mok=1
+if [ "$meas" != "$rel" ]; then
+  mfiles=$(git diff --name-only "$meas" "$rel" | tr -d '\r'); mout=$(printf '%s\n' "$mfiles" | grep -vE "^$GW/(app/client_core\.py|tests/test_og_en24\.py)$" | grep -c .)
+  mhunks=$(git diff -U0 "$meas" "$rel" -- "$GW/app/client_core.py" | grep -c '^@@'); mlines=$(git diff -U0 "$meas" "$rel" -- "$GW/app/client_core.py" | grep -cE '^[+-][^+-]')
+  mdelta="memory record measured on release ${meas:0:10}; this release differs from it in files outside client_core.py and test_og_en24.py: $mout (want 0); client_core.py hunks $mhunks (want 1), changed lines $mlines (want 4 or fewer)"
+  [ "$mout" = 0 ] && [ "$mhunks" = 1 ] && [ "$mlines" -le 4 ] || mok=0
+  mdelta="$mdelta: $([ "$mok" = 1 ] && echo ok || echo NOT OK)"
+fi
+rec=$(python - "$(native "$MEM")" "$meas" <<'PYEOF'
 import json, re, statistics, sys
 raw = open(sys.argv[1], encoding="utf-8").read()
 d = json.loads(raw)
@@ -104,8 +116,9 @@ halves=$(printf '%s' "$halves" | tr -d '\r')
 echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$live" ] && echo yes || echo no) (manifest ${dep:0:10}/${prev:0:10}); release ${rel:0:10}; trunk ${trunk:0:10}"
 echo "files differing $n; outside the take list $outside (want 0); take-list code files missing $missing (want 0); not byte-equal to trunk's $neq (want 0)"
 echo "terraform files differing $tf (want 0); destructive_ops, harvest, catalog or manifest files in the diff $barred (want 0)"
+echo "$mdelta"
 printf '%s\n' "$rec" | sed '$d'
 printf '%s\n' "$ct1" | sed '$d'
 echo "ask has the three halves $halves"
-[ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$tf" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$ct1" | tail -1)" = OK ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$tf" = 0 ] && [ "$barred" = 0 ] && [ "$mok" = 1 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$ct1" | tail -1)" = OK ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
