@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-s3-ib2",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-s3-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "f4338e6640"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R65_T.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-FWD5.live-cross-firm-s3-ib2.md",
+  "vintage_commit": "f4338e6640"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "aws:dynamodb opal-users-v2 two synthetic principals (digests 28cb5947d068 and 7b925797fd61), each minted once and removed once in the third sitting",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "both MINT-OK READBACK-OK with their MINT-SCOPE lines; both removed (REMOVE-OK) and read ABSENT by the email GSI and a ConsistentRead; r56_checks absent R56-ABSENT-OK",
+   "artifact_covered_by": [
+    "AR75-tz-AC2"
+   ],
+   "commit_or_etag": "two rows minted and removed in one sitting (20261017, about 00:38Z)"
+  },
+  {
+   "path_or_key": "aws:ticket-center control and firm-B reports of the third sitting on the reused 5174 server (packaged/ and synthetic/ under the IB2 irpt_anlreq_fwd5_s3 folder, fwd5_control_report.json and fwd5_run_report.json each)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "packaged: control exit 0 (ALLOWED 2, DENIED 11, UNREACHED 0, EXCLUDED 2), firm-B exit 0 (REFUSED 13, LEAK 0, UNREACHED 0, EXCLUDED 2); synthetic: control exit 0 (ALLOWED 6, DENIED 7), firm-B exit 0 (REFUSED 13, LEAK 0); route names, statuses and codes only; the served checkout 1f525845f6b7 did not change across the runs",
+   "artifact_covered_by": [
+    "AR75-tz-AC1",
+    "AR75-tz-AC3"
+   ],
+   "commit_or_etag": "reports written by the driver in the sitting"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR75-tz-AC1",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py fence",
+   "expect": "R56-FENCE-OK",
+   "output_evidence": "R56-FENCE-FAIL packaged target: the control did not serve ['original-upload', 'report-pdf', 'commentary-pdf'] (shown=['ticket-read', 'ticket-list'] past=['request-history', 'export-receipt', 'request-read-no-selection'])\nexit=1",
+   "denominator": "2 targets x 15 route rows; packaged control served 2 routes",
+   "status": "FAIL",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py fence",
+   "method": "command",
+   "status_reason": "The honest grade (the order allows it): on the PACKAGED target the entitled control was DENIED NOT_AUTHORIZED on the three file routes (original-upload, report-pdf, commentary-pdf), so the firm-B refusal there is not shown as the fence (CTO RE-SIGN 4: a broken control on that route). The fence is SHOWN on ticket-read and ticket-list."
+  },
+  {
+   "criterion_id": "AR75-tz-AC2",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py absent",
+   "expect": "R56-ABSENT-OK",
+   "output_evidence": "R56-ABSENT-OK both principals: no PROFILE row (consistent), index count 0\nexit=0",
+   "denominator": "2 principals, each read ABSENT by the GSI and a consistent read",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py absent",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AR75-tz-AC3",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py report",
+   "expect": "R56-REPORT-OK",
+   "output_evidence": "R56-REPORT-OK packaged: REFUSED=13 LEAK=0 UNREACHED=0 EXCLUDED=2 of 15, rc 0 || synthetic: REFUSED=13 LEAK=0 UNREACHED=0 EXCLUDED=2 of 15, rc 0\nexit=0",
+   "denominator": "2 firm-B run reports, 15 rows each",
+   "status": "PASS",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_ANLREQ_T2/R56_CHECKS/r56_checks.py report",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (the driver selftest FWD5-SELFTEST-OK checks=59 ran at step 1).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the positive control ran first per target as an entitled identity and read ALLOWED on ticket-read and ticket-list; both principals read ABSENT after",
+   "observed": "both control exits 0; ABSENT for both",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the commentary-draft and meeting rows",
+   "reason": "EXCLUDED by the driver in all four runs (commentary-draft rides the ticket read body; meeting is a write attempt outside the DONE WHEN)"
+  },
+  {
+   "item": "the fence on the packaged target's original-upload, report-pdf and commentary-pdf, and on opal-report, request-read, job-status (NOT_AUTHORIZED) and narrative (FIRM_BINDING)",
+   "reason": "the entitled control was DENIED there; per RE-SIGN 4 that is a broken control on the route, reported by route name and grading nothing. The firm-B refusal on those routes is not claimed as the fence."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261017T0037Z_irpt-fwd5-live-cross-firm-s3-r65-20261017_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "fwd5_sitting_s3.py (one process holding both passwords in memory) running fwd5_mint.py and fwd5_driver.py",
+   "invocation": "python org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_fwd5_s3/fwd5_sitting_s3.py",
+   "result": "4 runs exit 0; AC1 FAIL (broken packaged control), AC2 PASS, AC3 PASS"
+  }
+ ]
+}
