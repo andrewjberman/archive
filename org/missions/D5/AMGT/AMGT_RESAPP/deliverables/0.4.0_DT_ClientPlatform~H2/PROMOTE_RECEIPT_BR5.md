@@ -55,3 +55,16 @@ STATUS: PREPARED ONLY, as the order directs. No approval row was registered and 
 - Overlap shas: `git rev-list origin/PROD..origin/DEV`, measured after the promote and a fetch (DEV 990164ae, PROD 932cea99): **111** shas, 111 unique, all 40-hex, written to `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/FOLDBACK_OVERLAP_SHAS_R111.txt`. Exactly one commit on the fold branch lies outside that set (the fold merge).
 - AC4 as read now (guarded command): `3` (not `0`); NOT MET until step 7.
 - Fold worktree removed; main portal tree on DEV.
+
+## Fold-back (landed)
+
+STATUS: DONE under AMENDMENT 1 step 7 (the CTO's one-time named waiver, `org/missions/D5/AMGT/AMGT_RESAPP/ledger/CTO_WAIVER_FOLDBACK_DEV_OVERLAP_R111_20261017.md`, for `cand/dell1/prod-into-dev-fold-r111` at fold merge `f3aa4207` only).
+
+- Re-count before registering: `git rev-list origin/PROD..origin/DEV | wc -l` = 111; `git rev-parse origin/DEV` = `990164aecc45c314dfe76d36cfb80de354d35760` (unchanged); origin/PROD `932cea99`. The waiver's 111 shas equal the live set (`cmp` identical).
+- Register `--check-only` output: `APPROVAL-REGISTER result=OK row=- head_sha=f3aa4207de45d8f19c36b2c84359aa3571af3d9e commits=112 check-only=yes waived=111`.
+- Registered: `APPROVAL-REGISTER result=OK row=dell1-20261017T182833Z-e870 head_sha=f3aa4207de45d8f19c36b2c84359aa3571af3d9e commits=112 waived=111` (opal-internal, pages none). Approval: `state=APPROVED valid=yes by=1.0.0_SA_CTO~DELL1`.
+- Proof line: `TREE-EQUALS-DEV`, re-printed in the same call, immediately before the merge-forward.
+- Merge-forward result line: `MERGE-FORWARD branch=cand/dell1/prod-into-dev-fold-r111 result=MERGED reason=- dev_before=990164aecc45c314dfe76d36cfb80de354d35760 dev_after=0f6dc96b0f1829713fc164f80cbf08ae5425c818 pushed=yes merge=0f6dc96b0f1829713fc164f80cbf08ae5425c818` (DEV-PUSH-GATE result=ADMITTED).
+- DEV head after, `ls-remote` read: `0f6dc96b0f1829713fc164f80cbf08ae5425c818	refs/heads/DEV`. DEV's tree is unchanged (`16977dce708d` before and after; `git diff 990164ae origin/DEV` empty).
+- `git -C portal rev-list --count origin/DEV..origin/PROD` after a fetch: **0** (AC4, guarded command; PROD `932cea99` is off `99d2b2a7`).
+- Fold worktree removed and pruned; main portal tree on DEV. Ledger `amgt-resapp-br5-prod-into-dev-fold-20261017` CLOSED.
