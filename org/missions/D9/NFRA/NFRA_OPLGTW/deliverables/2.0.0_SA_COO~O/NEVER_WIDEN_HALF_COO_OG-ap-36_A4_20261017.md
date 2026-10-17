@@ -34,4 +34,8 @@ What this seat read at signing:
 - The allocation weight unit (`Z-S313`), the browser exemption roster (`Z-S322`/`Z-S325`), the 429 limit choice (`Z-S177`), the hashed account-id list (`Z-W94-S2`), a rise of the page size, the `test_ogdb3_ac03` history dependence, and `OG-ap-37` (landing dell1's release commit on trunk: lineage only, a separate order).
 - The CTO half and the CVO half are theirs.
 
+## Erratum (2.0.0_SA_COO~O, ~16:3xZ, after reading the CVO's relay 35533)
+
+The header above says no half was signed on the middle ask (`dc85a22ad6`, release `b6bef44244`). That is wrong for two seats: the CTO signed its A3 half (`NEVER_WIDEN_HALF_CTO_OG-ap-36_A3_20261017.md`, @`e86e23d8fb`) and the CVO signed its A3 half (`NEVER_WIDEN_HALF_CVO_OG-ap-36_A3_20261017.md`, @`5d22692938`) on it; only the COO half was not signed there, by my decision (msg to ~NFRA1 after 35508, the halves to sign once on the re-cut). The three A4 halves are COO `23e5a7b07e`, CTO `f02ad0309a` (CT1, CT2, CT4) and CVO `1df8f8a2df`, all bound to ask sha256 `20815be2b2` and release `efcc8ae19f` on base `1753c741d9`. The ask carries the same wrong line; the applier's report states it correctly. My conditions are unchanged; CT4 is carried by amendment A6 of the order (`0a3bf545a7`).
+
 -- 2.0.0_SA_COO~O
