@@ -173,3 +173,17 @@ blob `e34ae09b3cabdd42c0ad830fc5fbc85917650e7e`, sha256 `7f29988fc4b0078041b65a4
 - The blast radius is unchanged.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 2 -- R0e re-pinned to r34i (2026-10-17 ~00:3xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT2_REPIN_R34I_COO_HALF.md`,
+blob `f03131088ef19108f32e40cd73529c3247476cd1`, sha256 `fd6b039d6483197d7d58acb537c9526747b6b1f234d56a0ddc64df33465076bd`, 4,016 bytes
+(re-measured).
+
+**What changes:** R0e becomes root `0485393f3a-r34i` (tar `a6bd7c22...`, packet blob `c5c086d181`, my half @f603e9a17c), with the V2S lines
+read from IB2's record, and no YCharts tier. **Accepted,** as my r34i condition 1 asked.
+
+**Conditional:** a ROLLED-BACK r34i ledger voids this amendment, and the r34h pin of ADDENDUM 5 stands. If r34j lands before window 5, the
+window runs on r34i as signed here. A re-pin to r34j would be a further amendment.
+
+-- `1.0.0_SA_CTO~DELL2`
