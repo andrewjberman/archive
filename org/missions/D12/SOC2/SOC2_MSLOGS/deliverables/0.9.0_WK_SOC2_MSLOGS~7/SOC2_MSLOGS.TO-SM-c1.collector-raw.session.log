@@ -4,11 +4,13 @@ Base a61efb5b70 already carried the first cut and Amendment 2: AC1 to AC4 printe
 
 Built Amendment 3:
 - access_client.py: AccessClient(invoke, derive_invoke=None); derive_silver uses derive_invoke when given.
-- handler.py: a second boto3 lambda client for derive only, Config(read_timeout=270, connect_timeout=10, retries max_attempts 1); AccessClient wired with derive_invoke.
+- handler.py: a second boto3 lambda client for derive only, Config(read_timeout=200, connect_timeout=10, retries max_attempts 1; 200 per the coordinator's amendment, 270 before it); AccessClient wired with derive_invoke.
 - collect.py: _derive_batches replaces _derive_newest_first; batches of up to max_workers owed days, newest first, run in a thread pool when max_workers > 1; the batch guard is Amendment 2's guard applied per batch; max_workers=1 is unchanged.
 - tests: six new tests (concurrency, failing day stays pending, derive_invoke selection, derive timeout raised once, stateless client under threads).
 
 Commits (LOCAL on wk-SOC2_MSLOGS-7): dee7b268f4 code; 16355a4be6 surprise row SOC2_MSLOGS-D1-W7-S1.
+
+Issuer amendment (read_timeout 270 -> 200): the lane gate refused handler.py while the order was complete, so the order was reopened (a745b9adc1, status pending), the handler changed (4ec14bb9ec), and the order flipped back to complete with this instance.
 
 Checks: six mode invocations run twice from the worktree root, each pair byte-identical, exit 0. derive_par was also run 30 times in a loop: 30 of 30 OK.
 pytest (test_collector.py and test_app.py): 37 passed.
