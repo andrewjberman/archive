@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "six live reads, once each; the leak regex was run inside the script before each line was kept and again as ARR-AC2",
+   "observed": "7 of 7 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E.fresh-synthetic-commentary-end-to-end-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E.fresh-synthetic-commentary-end-to-end-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "3b27ec8fac"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E.fresh-synthetic-commentary-end-to-end-ib2.md",
+  "vintage_commit": "3b27ec8fac"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "aws:dynamodb opal-users-v2 one synthetic staff users row (minted once, removed once, read ABSENT on a consistent get and the email index)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "MINT-OK READBACK-OK; login ok; the upload door refused NOT_AUTHORIZED; removal read ABSENT twice (in-run and a fresh read)",
+   "artifact_covered_by": [
+    "E2E-AC1",
+    "E2E-AC3"
+   ],
+   "commit_or_etag": "row removed; nothing deployed"
+  },
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the fifteen lines of the receipt",
+   "artifact_covered_by": [
+    "E2E-AC1",
+    "E2E-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "E2E-AC1",
+   "invocation": "grep -c -E '^(R0|A|L|U|T|S|P1|P2|P3|P4|P5|R|DLQ|D) |^RUN-DONE (PASS|STOP at )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt",
+   "expect": "^15$",
+   "output_evidence": "15\nexit=0",
+   "denominator": "14 hop lines + RUN-DONE",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R0|A|L|U|T|S|P1|P2|P3|P4|P5|R|DLQ|D) |^RUN-DONE (PASS|STOP at )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "E2E-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.(com|org|net|io)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1 (grep -c prints 0 and exits 1 on no match)",
+   "denominator": "15 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.(com|org|net|io)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "E2E-AC3",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-commentary-e2e-20261017_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- STOPPED AT U\nexit=0",
+   "denominator": "1 ledger entry",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-commentary-e2e-20261017_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "steps T, S, P1-P5 and R",
+   "reason": "NOT RUN: the upload door refused NOT_AUTHORIZED at step U, the CTO condition 3 expected first stop; no second upload is tried in this pair"
+  }
+ ],
+ "session_log": "org/critical_paths/change_management/ (ledger irpt-commentary-e2e-20261017)",
+ "compiler_tools": [
+  {
+   "tool": "e2e_run.py (one process: mint through fwd1_mint, login, upload, delete by recorded key)",
+   "invocation": "--go once",
+   "result": "stopped at U NOT_AUTHORIZED; E2E-AC1 15, AC2 0, AC3 CLOSED"
+  }
+ ]
+}
