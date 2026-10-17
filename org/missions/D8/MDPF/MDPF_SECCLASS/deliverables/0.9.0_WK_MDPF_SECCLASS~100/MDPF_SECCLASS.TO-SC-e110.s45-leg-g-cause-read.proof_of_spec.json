@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e110",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e110.s45-leg-g-cause-read.md",
+    "group": "OTHER",
+    "vintage_commit": "86c308e3ef"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R28.md",
+    "vintage_commit": "7e9fe5a8ec",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e110.s45-leg-g-cause-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~100",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~100/S45_CAUSE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only cause file: 13 ticker entries (canonical rows and mv recomputed from gold/canonical/holdings/2026-10-02.parquet at wtAhSnBVfcTlrV.Y6Ml3Jh.ggcyBgQkf, class read by get-item from etf-classifications), the served 2026-10-02 unclassified+other at 3BY8 and 87Cv (1924.34 both), first_divergence instrument-expectation, conclusion and fix. No instrument, code or table was changed.",
+      "artifact_covered_by": [
+        "SC28-e110-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended five rows MDPF_SECCLASS-D1-W100-S1 to S5 (OBSERVATION, INERT). Append only; no existing row edited; every fenced json block parses.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC28-e110-AC1",
+      "criterion_verbatim": "the file has an entry for each of the 13 seeded tickers whose canonical numbers and the two served numbers the checker recomputes from S3 within 0.01, a divergence from the list, a conclusion and a stated fix.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R28_CHECKS/check_s45_cause.py read",
+      "output_evidence": "S45-CAUSE ok=True problems=[]  (run under timeout 120, rc=0; selftest earlier: S45-CAUSE-SELFTEST green True, five negative arms True, S45-CAUSE-SELFTEST ok=True)",
+      "denominator": "13 of 13 seeded tickers have an entry; 2 of 2 served numbers reconcile; 0 problems",
+      "status": "PASS",
+      "expect": "S45-CAUSE ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own selftest, five negative arms: a seeded ticker with no entry, a canonical_mv that does not reconcile, a served number that does not reconcile, a divergence outside the list, a fix under 20 characters",
+      "expected": "each negative arm returns True (the arm fires)",
+      "observed": "S45-CAUSE-SELFTEST green: True; negatives True for all five arms; S45-CAUSE-SELFTEST ok=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A with reason: the recompute reads pinned S3 version ids (canonical wtAh..., served 3BY8... and 87Cv...), so the values are fixed; the read was run once in this cell, not twice.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the fix leg G would need (an instrument change or a code change)",
+      "reason": "stated in S45_CAUSE.json fix, not done: the order says change nothing, and seed22_legg_read.py is read-only to this cell."
+    },
+    {
+      "item": "the 9 held-out tickers",
+      "reason": "outside SC-e-110, which covers the 13 seeded tickers; not graded."
+    },
+    {
+      "item": "the latest served object and its 2026-10-02 unclassified+other of 7057.84",
+      "reason": "the order fixes post at 87Cv; the later fire is recorded as surprise S2 and S1 rather than graded here."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W100-S1: leg G expects 124,848.36 to leave unclassified+other, read from the legacy lots partition; that bucket held 1,924.34 before and after the first fire.",
+    "MDPF_SECCLASS-D1-W100-S2: leg G grades the latest served object against the pre-seed version; 14 of 14 window dates fail, 12 with zero seeded dollars.",
+    "MDPF_SECCLASS-D1-W100-S3: NAME:: row for LORD ABBETT CONVERTIBLE I classes cash; C_06 does not reach it because the resolution table resolves first.",
+    "MDPF_SECCLASS-D1-W100-S4: served 2026-10-02 moves differ from canonical LCFYX and GLPI rows by +0.56 and -0.60; not reconciled.",
+    "MDPF_SECCLASS-D1-W100-S5: CUBE leaves unclassified on 2026-10-08 to 10-14 in the first post-seed fire; canonical 2026-10-02 holds no CUBE."
+  ],
+  "session_log": "Verified worktree branch wk-MDPF_SECCLASS-100 and TREE-OK. Read the order and check_s45_cause.py. Downloaded canonical 2026-10-02 at wtAh (the pinned version) and summed the 13 tickers. Read etf_classifier.py and etf_classifications_dynamodb.py at HEAD (worktree is sparse), C_06 classify_series and classify_holding. get-item on the 13 seeded keys and 5 NAME:: keys of etf-classifications. Downloaded served mix versions 3BY8 and 87Cv and diffed per date; downloaded legacy gold/holdings_lots/2026-10-02 (version AAxZkgyy...) and reproduced leg G's 124848.36; downloaded gold/dimensions/ticker_resolution.parquet to confirm the name hops. Ran leg G read at its own path (rc=1). Wrote S45_CAUSE.json and ran the checker. Scratch under .scratch/s45 (uncommitted).",
+  "compiler_tools": [
+    {
+      "tool": "check_s45_cause.py (R28_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R28_CHECKS/check_s45_cause.py read",
+      "result": "S45-CAUSE ok=True problems=[]; rc=0"
+    },
+    {
+      "tool": "seed22_legg_read.py (R27_CHECKS, read-only, run at its own path)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/seed22_legg_read.py read --pre-version-id 3BY8Etw3LetRaRFcOofjaAT98PSfp4Z3",
+      "result": "SEED22-LEGG ok=False window_dates=14 moved=14 bad=14 tol=250; rc=1 (the cell's premise: leg G fails on the seed)"
+    }
+  ]
+}
