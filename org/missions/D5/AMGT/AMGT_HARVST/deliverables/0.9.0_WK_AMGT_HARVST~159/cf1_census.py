@@ -148,10 +148,16 @@ print("# METHOD sort: PHRASE by count descending then phrase ascending; section 
 
 
 def _reports_for(security_key, client=None):
-    rows = [r for r in silver_rows if r.get("security_key") == security_key]
+    # the same filter as typed.reports_for (lib/research/corpus/typed.py:596-600): the MISFILED_REPORTS
+    # exclusion is part of the code under test, so it is applied here too (the silver read is not repeated)
+    excluded = {(e["security_key"], e["report_id"]) for e in typed.MISFILED_REPORTS}
+    rows = [r for r in silver_rows if r.get("security_key") == security_key
+            and (r.get("security_key"), r.get("report_id")) not in excluded]
     return typed._order_reports(rows)
 
 
+print("# EXCLUSION typed.MISFILED_REPORTS applied as typed.reports_for does: %s"
+      % ",".join("%s:%s" % (e["security_key"], e["report_id"]) for e in typed.MISFILED_REPORTS))
 typed.reports_for = _reports_for
 
 # ---------------------------------------------------------------------------
