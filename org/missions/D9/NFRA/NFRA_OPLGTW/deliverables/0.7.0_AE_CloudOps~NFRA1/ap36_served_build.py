@@ -10,6 +10,7 @@ COO's ruling, msg 35543: the served read is graded 26 of 27 with per_tool_except
   ap36_harvest_md5.json       the host md5 of app/harvest_research.py and the md5 of its 1753c741d9 blob (CT4)
   ap36_baseline.json          the probe just before the switch
   ap36_readback1.jsonl / ap36_readback2.jsonl   the two 30-minute service read-backs (the first spans the 17:21Z restart the seat caused)
+  ap36_hostcheck.json         chronyc tracking and systemctl --failed read after read-back 2 (the CVO's condition, A8), with the restore
   ap36_wincalls.json          the /mcp calls and window calls the service served from the deploy to the end of read-back 2          <- ap34_wincalls.py
 Counts, seconds, percentages, dates and booleans only. usage: python ap36_served_build.py   (repository root of the worktree that holds the records)"""
 from __future__ import annotations
@@ -47,6 +48,7 @@ def series(name):
 s27, arms, md5 = load("ap36_served27.json"), load("ap36_arms.json"), load("ap36_host_md5_after.json")
 tl_before, tl_after = load("ap36_toolslist_before.json"), load("ap36_toolslist_after.json")
 hv, e11, base, wincalls = load("ap36_harvest_md5.json"), load("ap36_e11.json"), load("ap36_baseline.json"), load("ap36_wincalls.json")
+hostcheck = load("ap36_hostcheck.json")
 b27 = s27.get("body", s27)
 names = set(md5["env"]["reader_role_arn_keys"])
 D = arms["detail"]
@@ -71,7 +73,11 @@ body = {
     "reader_env_keys_present": sum(1 for k in SEVEN if k in names),
     "registry_count": b27.get("registry_count"),
     "per_tool_good": b27.get("per_tool_good"),
-    "per_tool_exception": "etfs_compare_peers",
+    "per_tool_exception": ["etfs_compare_peers"],
+    "host_clock": {"leap_status": hostcheck["chronyc_tracking"]["leap_status"], "synchronised": hostcheck["chronyc_tracking"]["synchronised"],
+                   "read_at": hostcheck["read_at"], "system_time_offset_seconds": hostcheck["chronyc_tracking"]["system_time_offset_seconds"]},
+    "systemd_failed_units": hostcheck["systemctl_failed"]["units_read_at_18_16_58Z_after"],
+    "systemd_failed_units_before_restore": hostcheck["systemctl_failed"]["units_read_at_18_16_04Z"],
     "exception_row": "NFRA_OPLGTW-Z-S375",
     "host_md5": {"equal": md5["equal_lf"] + md5["equal_crlf_only"], "differ": len(md5["differ"]), "missing_on_host": len(md5["missing_on_host"]),
                  "expected_files": md5["denominator_expected_files"], "host_files": md5["denominator_host_files"]},
@@ -106,7 +112,7 @@ body = {
                "The host percent maximum in the read-backs includes the harness and the arms run by this seat in new processes during the windows."],
 }
 io.open(W + "CODE6_SERVED.json", "w", encoding="utf-8", newline=chr(10)).write(json.dumps({"body": body}, indent=1) + chr(10))
-print(json.dumps({k: body[k] for k in ("live_commit", "health_status", "env_key_count", "reader_env_keys_present", "registry_count", "per_tool_good", "per_tool_exception", "exception_row", "host_md5",
+print(json.dumps({k: body[k] for k in ("live_commit", "health_status", "env_key_count", "reader_env_keys_present", "registry_count", "per_tool_good", "per_tool_exception", "exception_row", "host_clock", "systemd_failed_units", "host_md5",
                                        "tools_list_before", "tools_list_after", "muse_env_present", "marker_sha", "harvest_research_md5", "readback", "memory_basis", "e12_basis", "arms")}, indent=1))
 print(json.dumps({k: v for k, v in rb2.items() if k != "samples"}, indent=1))
 print(json.dumps(body["window_calls_served_by_the_service"], indent=1))
