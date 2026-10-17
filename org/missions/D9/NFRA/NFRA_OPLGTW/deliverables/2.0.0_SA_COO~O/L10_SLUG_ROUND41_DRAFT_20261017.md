@@ -41,6 +41,7 @@ PENDING until the Phase B read-back. Candidates already known (the CTO ranks the
 5. The eight `absent_reason` codes that now surface (`OG-en-24`): whether any caller or the CVO's reading wants a documented list of them in the catalog.
 6. `safe-merge.sh --continue` refuses a merge that stages no files (a lineage-only landing such as `OG-ap-37`; the drain's fast lane accepts the same shape): a `--lineage-only` flag for the script's owner (`0.0.0_AB_MSTR`), not urgent (row `Z-S378`, ruled in `Z-S379`).
 7. The thin fees silver belongs to the laptop CTO (the probe is theirs); no gateway cell.
+8. A sanctioned way to call a tool THROUGH the service for a measurement (the service takes only gateway-signed bearers, so the applier has none; `OG-ap-38` C16 records `fresh_process` and withholds the `Z-S375` disarm when no path exists): a named, order-scoped probe identity or a loopback health-grade tool call, designed by the CTO, never improvised by an applier. Needed only if Phase B reads `fresh_process`.
 Lessons for the record (not rules): the first Phase A stop was a whole-partition Python conversion hidden behind an off-loop wrapper (the loop stayed starved by the GIL even after the move); an issuer who relaxes a limit after a failed measurement ships the defect, so the limits stayed and the cause was fixed; an idle seat reads mail at its own watcher re-arm, and a failed `unstick` is not a stall.
 
 ## 5. Push state
