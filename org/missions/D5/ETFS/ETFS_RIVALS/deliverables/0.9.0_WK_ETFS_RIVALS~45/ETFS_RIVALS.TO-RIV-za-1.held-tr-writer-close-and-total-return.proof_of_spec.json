@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ETFS_RIVALS.TO-RIV-za-1.held-tr-writer-close-and-total-return",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/decompositions/ETFS_RIVALS_DECOMP.md",
+    "vintage_commit": "3e426f83ad",
+    "to_ref": "org/missions/D5/ETFS/ETFS_RIVALS/task-orders/ETFS_RIVALS.TO-RIV-za-1.held-tr-writer-close-and-total-return.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/ETFS/ETFS_RIVALS/prd/ETFS_RIVALS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "3e426f83ad"
+  },
+  "assignee": "0.9.0_WK_ETFS_RIVALS~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/enrichment_bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "7726ff1a08",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 7726ff1a08 on wk-ETFS_RIVALS-45 (LOCAL); no deploy, no S3 write (LocalSink in tests), no vendor call (every Bloomberg hook stubbed)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/etfs/scripts/rivalfunds/tests/test_riv_za1_held_tr.py",
+      "kind": "test",
+      "commit_or_etag": "7726ff1a08",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code commit 7726ff1a08 on wk-ETFS_RIVALS-45 (LOCAL); no deploy, no S3 write (LocalSink under tmp_path), no vendor call (stubbed)"
+    },
+    {
+      "path_or_key": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+      "kind": "doc",
+      "commit_or_etag": "7726ff1a08",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one surprise row ETFS_RIVALS-D1-W45-S1 appended in code commit 7726ff1a08; no deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the plan, the dry run and the refusal: two points per unit plus lookups, nothing requested or recorded on a dry run or a refusal.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round32/checks/za1_held_tr_check.py -k ac1",
+      "output_evidence": "..  [100%]\n2 passed, 3 deselected in 4.52s\nrc=0 (run before the commit: 2 passed, 3 deselected in 0.95s)",
+      "expect": "2 passed",
+      "denominator": "2 of 5 checks in za1_held_tr_check.py selected by -k ac1 (2 passed, 0 failed); run under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the live landing: one timed object per date carrying close, total return, currency and its own trading date; a misdated value is not written; a second run overwrites nothing.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round32/checks/za1_held_tr_check.py -k ac2",
+      "output_evidence": "..  [100%]\n2 passed, 3 deselected in 1.34s\nrc=0 (run before the commit: 2 passed, 3 deselected in 0.74s)",
+      "expect": "2 passed",
+      "denominator": "2 of 5 checks in za1_held_tr_check.py selected by -k ac2 (2 passed, 0 failed); run under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the readers: the merged G4 row takes the held-tr price group over a backfill row, and drop_backfill keeps it.",
+      "method": "test_suite",
+      "invocation": "cd data/etfs/scripts; python -m pytest -q -p no:cacheprovider ../../../org/missions/D5/ETFS/ETFS_RIVALS/deliverables/2.0.0_SA_COO~RV/round32/checks/za1_held_tr_check.py -k ac3",
+      "output_evidence": ".  [100%]\n1 passed, 4 deselected in 0.95s\nrc=0 (run before the commit: 1 passed, 4 deselected in 0.60s)",
+      "expect": "1 passed",
+      "denominator": "1 of 5 checks in za1_held_tr_check.py selected by -k ac3 (1 passed, 0 failed); run under timeout 120 (rc 0, not 124)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "the three -k invocations run once before the code commit and once after it; the summary lines compared",
+      "observed": "ac1 2 passed, 3 deselected and ac2 2 passed, 3 deselected and ac3 1 passed, 4 deselected in both runs; the check file at the base 3e426f83ad fails 5 of 5 (the run before the cell)",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "the order names no mutant; its checks are the round-32 check file, run unedited",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Flipping the task order <status> to complete",
+      "reason": "The order says to leave the <status> flip to the issuer; this instance is not a met-order claim until the issuer flips."
+    },
+    {
+      "item": "The live held-tr run over the three TR-HELD request files, the served-rankings never-widen pair and the Lambda package question",
+      "reason": "Issuer acts at the drain under a never-widen pair; this cell is LOCAL and made no vendor, S3, deploy or Secrets Manager call."
+    },
+    {
+      "item": "The two failing budget tests in the full rivalfunds suite (test_r9cb1_bbg_budget.py, test_r15bf1_market_range.py)",
+      "reason": "Outside this cell's <paths>; they fail on the committed bbg_budget.json at the base and are reported (surprise ETFS_RIVALS-D1-W45-S1), not edited."
+    }
+  ],
+  "surprises": [
+    "ETFS_RIVALS-D1-W45-S1: two budget tests (test_r9cb1_bbg_budget.py ceiling under 175000; test_r15bf1_market_range.py remaining 137) fail on the committed bbg_budget.json at HEAD 3e426f83ad, outside this cell's paths; reported, not edited"
+  ],
+  "session_log": "org/missions/D5/ETFS/ETFS_RIVALS/surprise-channel/investigations/INVESTIGATION_v1.dell1.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/etfs/scripts/rivalfunds/enrichment_bloomberg.py data/etfs/scripts/rivalfunds/tests/test_riv_za1_held_tr.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_ETFS_RIVALS~45 <0.9.0_WK_ETFS_RIVALS~45@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "7726ff1a08 feat(ETFS_RIVALS round 32, 0.9.0_WK_ETFS_RIVALS~45): RIV-za-1 held-tr mode (LOCAL on wk-ETFS_RIVALS-45)"
+    }
+  ]
+}
