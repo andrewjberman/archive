@@ -52,7 +52,7 @@ chain_ok = (meds_ok and mom <= 20 and mx <= 30 and isn(ch.get("first_run_median_
             and all(isn(r.get("host_peak_pct")) and r["host_peak_pct"] < 75 for r in runs))
 un = b.get("unit") or {}
 unit_ok = un.get("cgroup_v2") is True and un.get("memory_controller") is True and un.get("verify_rc") == 0 and un.get("scratch_removed") is True
-runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40}"', '""', raw))
+bignums = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40}"', '""', raw))
 # the CTO's CT1 (msg 35566, A3): the 27-tool read, live code against candidate, each in a fresh process under the guard: every tool's answer EQUAL, or a listed refusal where the live code also failed;
 # a tool that answered on the live code and refuses or differs on the candidate is a STOP
 t27 = b.get("tool27") or {}
@@ -60,7 +60,7 @@ names = lambda k: t27.get(k) if isinstance(t27.get(k), list) else None
 eq_n, both, better, bad_ref, bad_diff = t27.get("equal"), names("both_failed"), names("candidate_answered_live_failed"), names("live_answered_candidate_refused"), names("answers_differ")
 t27_ok = (t27.get("tools") == 27 and isn(eq_n) and both is not None and better is not None and bad_ref == [] and bad_diff == []
           and eq_n + len(both) + len(better) == 27 and t27.get("guard") in GUARDS)
-ok = same and peers_ok and valid_ok and chain_ok and unit_ok and t27_ok and not runs
+ok = same and peers_ok and valid_ok and chain_ok and unit_ok and t27_ok and not bignums
 print("host runs on release_sha %s, every one under a hard guard (oom_score_adj 1000, and an address-space or cgroup memory limit of 1400 MB)" % ("equal" if same else "NOT equal"))
 print("the call that ran away: candidate %s, peak RSS %s MB (limit 700), %s s (limit 30); the live code under the same guard: %s: %s" % (
     pe.get("candidate_outcome"), pe.get("candidate_peak_rss_mb"), pe.get("candidate_wall_s"), pe.get("live_outcome"), "ok" if peers_ok else "NOT OK"))

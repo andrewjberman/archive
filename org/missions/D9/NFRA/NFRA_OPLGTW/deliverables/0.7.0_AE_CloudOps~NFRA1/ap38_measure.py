@@ -378,7 +378,78 @@ def driver(md5s_json, tuned=False, cgroup=False, chainonly=False):
     return body
 
 
-def runner(outp, release_sha, tuned=False, cgroup=False, chainonly=False):
+def _run_harness(stage, tag):
+    """The CT1 harness (W/ap38_ct1_harness.py) against one staged code folder, in a fresh process under the cgroup guard. Returns the parsed body or a failure note."""
+    env = dict(os.environ)
+    env.update({"AP38_STAGE": stage, "AP38_SKIP_PEERS": "1"})
+    cmd = ["systemd-run", "--scope", "--quiet", "-p", "MemoryMax=1400M", "-p", "MemoryHigh=1100M", "-p", "MemorySwapMax=0", "--", PY, GUARD, "--cgroup", "150", "/tmp/ap38_ct1_harness.py"]
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=240, env=env)
+    out = p.stdout
+    if "CODE_SERVED_JSON" not in out:
+        return {"tag": tag, "failed": True, "exit_code": p.returncode, "stdout_tail": out[-300:], "stderr_tail": p.stderr[-400:]}
+    try:
+        body = json.loads(out.split("CODE_SERVED_JSON", 1)[1].strip()).get("body", {})
+    except ValueError:
+        return {"tag": tag, "failed": True, "exit_code": p.returncode, "stdout_tail": out[-300:]}
+    body["tag"], body["exit_code"] = tag, p.returncode
+    return body
+
+
+def ct1_driver(md5s_json):
+    """CTO CT1 on the ask: the 27-tool read, live code against candidate code, every run a fresh process under the guard. Live runs TWICE (the second calibrates what moves between two runs of the same code)."""
+    global GUARD_NAME
+    GUARD_MODE[0], GUARD_NAME = "cgroup", CGROUP_GUARD_NAME
+    exp = json.loads(md5s_json)
+    base = "/tmp/ap38_ct1_stage_%d" % os.getpid()
+    cand, live = base + "_cand", base + "_live"
+    res = {"guard": GUARD_NAME, "skipped_call": "etfs_compare_peers (the live runaway is measured only under the address-space guard, Phase A step 3(a))", "scratch_removed": False}
+    try:
+        for d in (cand, live):
+            os.makedirs(d, mode=0o700)
+            shutil.copytree(os.path.join(SERVICE, "app"), os.path.join(d, "app"), ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            shutil.copytree(os.path.join(SERVICE, "lib"), os.path.join(d, "lib"), ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        for rel in CAND_FILES:
+            shutil.copyfile("/tmp/ap38_cand_" + os.path.basename(rel), os.path.join(cand, rel))
+        res["staged_md5_equals_release"] = {rel: hashlib.md5(open(os.path.join(cand, rel), "rb").read()).hexdigest() == md5 for rel, md5 in exp.items() if rel in CAND_FILES}
+        res["host_pct_idle"] = round(host_pct(), 1)
+        l1, l2, c = _run_harness(live, "live1"), _run_harness(live, "live2"), _run_harness(cand, "candidate")
+        res["runs"] = {r["tag"]: {k: r.get(k) for k in ("failed", "exit_code", "verdict", "per_tool_good", "registry_count", "health_status", "stdout_tail", "stderr_tail")} for r in (l1, l2, c)}
+        if any(r.get("failed") for r in (l1, l2, c)):
+            res["fatal"] = "a harness run did not produce a record"
+            return res
+        t1, t2, tc = l1["ct1_trace"], l2["ct1_trace"], c["ct1_trace"]
+        res["calls"] = {"live1": len(t1), "live2": len(t2), "candidate": len(tc)}
+        equal, volatile, differing, regress = 0, [], [], []
+        for i in range(min(len(t1), len(t2), len(tc))):
+            a, b_, k = t1[i], t2[i], tc[i]
+            moved = sorted(x for x in set((a.get("keys") or {}) | (b_.get("keys") or {})) if (a.get("keys") or {}).get(x) != (b_.get("keys") or {}).get(x))
+            if a.get("digest") != b_.get("digest"):
+                volatile.append({"i": i, "line": a.get("line"), "keys_that_moved_between_two_live_runs": moved})
+            ck = k.get("keys") or {}
+            lk = a.get("keys") or {}
+            diff = sorted(x for x in set(ck) | set(lk) if x not in moved and ck.get(x) != lk.get(x))
+            same = (a.get("digest") == k.get("digest")) or (a.get("digest") != b_.get("digest") and not diff and a.get("outcome") == k.get("outcome"))
+            if same:
+                equal += 1
+                continue
+            row = {"i": i, "line": a.get("line"), "live_outcome": a.get("outcome"), "candidate_outcome": k.get("outcome"), "live_code": a.get("code"), "candidate_code": k.get("code"),
+                   "live_absent": a.get("absent"), "candidate_absent": k.get("absent"), "keys_that_differ": diff}
+            differing.append(row)
+            if a.get("outcome") in ("enveloped",) and k.get("outcome") in ("refused", "error"):
+                regress.append(row)
+        res["comparison"] = {"calls_compared": min(len(t1), len(t2), len(tc)), "equal": equal, "differing": len(differing), "answered_on_live_but_refused_or_errored_on_candidate": len(regress),
+                             "volatile_between_two_live_runs": len(volatile)}
+        res["differing_calls"], res["regressions"], res["volatile_calls"] = differing, regress, volatile
+        res["per_tool_good_live"], res["per_tool_good_candidate"] = l1.get("per_tool_good"), c.get("per_tool_good")
+    finally:
+        for d in (cand, live):
+            shutil.rmtree(d, ignore_errors=True)
+        res["scratch_removed"] = not any(os.path.exists(d) for d in (cand, live))
+        res["host_pct_after"] = round(host_pct(), 1)
+    return res
+
+
+def runner(outp, release_sha, tuned=False, cgroup=False, chainonly=False, ct1=False):
     import boto3
     g = "infra/aws/ec2/opal-gateway/"
     me = os.path.abspath(__file__)
@@ -391,9 +462,10 @@ def runner(outp, release_sha, tuned=False, cgroup=False, chainonly=False):
         s3.put_object(Bucket=BUCKET, Key="ec2/opal-gateway/ap38_cand_" + os.path.basename(rel), Body=blob)
     s3.put_object(Bucket=BUCKET, Key="ec2/opal-gateway/ap38_measure.py", Body=io.open(me, "rb").read())
     s3.put_object(Bucket=BUCKET, Key="ec2/opal-gateway/ap38_guard.py", Body=io.open(os.path.join(here, "ap38_guard.py"), "rb").read())
+    s3.put_object(Bucket=BUCKET, Key="ec2/opal-gateway/ap38_ct1_harness.py", Body=io.open(os.path.join(here, "ap38_ct1_harness.py"), "rb").read())
     pulls = " && ".join("aws s3 cp s3://%s/ec2/opal-gateway/%s /tmp/%s --region us-east-1 >/dev/null" % (BUCKET, n, n)
-                        for n in ("ap38_measure.py", "ap38_guard.py", "ap38_cand_typed_scope.py", "ap38_cand_etfs_rivals_flow.py", "ap38_cand_opal-gateway.service"))
-    cmd = "cd /opt/opal-gateway && rm -f /tmp/ap38_measure.py /tmp/ap38_guard.py /tmp/ap38_cand_* && %s && %s /tmp/ap38_measure.py --driver '%s'%s%s" % (pulls, PY, json.dumps(exp), " tuned" if tuned else "", (" cgroup" if cgroup else "") + (" chainonly" if chainonly else ""))
+                        for n in ("ap38_measure.py", "ap38_guard.py", "ap38_ct1_harness.py", "ap38_cand_typed_scope.py", "ap38_cand_etfs_rivals_flow.py", "ap38_cand_opal-gateway.service"))
+    cmd = "cd /opt/opal-gateway && rm -f /tmp/ap38_measure.py /tmp/ap38_guard.py /tmp/ap38_ct1_harness.py /tmp/ap38_cand_* && %s && %s /tmp/ap38_measure.py --driver '%s'%s%s" % (pulls, PY, json.dumps(exp), " tuned" if tuned else "", (" cgroup" if cgroup else "") + (" chainonly" if chainonly else "") + (" ct1" if ct1 else ""))
     ssm = boto3.client("ssm")
     cid = ssm.send_command(InstanceIds=[INSTANCE], DocumentName="AWS-RunShellScript", Parameters={"commands": [cmd]}, TimeoutSeconds=1500)["Command"]["CommandId"]
     inv = None
@@ -428,10 +500,10 @@ if __name__ == "__main__":
     elif "--driver" in a:
         print("AP38_DRIVER_JSON")
         try:
-            print(json.dumps(driver(a[a.index("--driver") + 1], tuned=("tuned" in a), cgroup=("cgroup" in a), chainonly=("chainonly" in a)), separators=(",", ":"), default=str))
+            print(json.dumps(ct1_driver(a[a.index("--driver") + 1]) if "ct1" in a else driver(a[a.index("--driver") + 1], tuned=("tuned" in a), cgroup=("cgroup" in a), chainonly=("chainonly" in a)), separators=(",", ":"), default=str))
         except Exception:
             import traceback
             print(json.dumps({"fatal": traceback.format_exc()[-900:]}))
             sys.exit(1)
     else:
-        runner(a[1], a[2], tuned=("tuned" in a[3:]), cgroup=("cgroup" in a[3:]), chainonly=("chainonly" in a[3:]))
+        runner(a[1], a[2], tuned=("tuned" in a[3:]), cgroup=("cgroup" in a[3:]), chainonly=("chainonly" in a[3:]), ct1=("ct1" in a[3:]))
