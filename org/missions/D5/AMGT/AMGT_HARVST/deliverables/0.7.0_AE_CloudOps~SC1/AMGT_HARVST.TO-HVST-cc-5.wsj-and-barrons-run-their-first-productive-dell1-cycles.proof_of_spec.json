@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cc-5.wsj-and-barrons-run-their-first-productive-dell1-cycles",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-5.wsj-and-barrons-run-their-first-productive-dell1-cycles.md",
+    "group": "OTHER",
+    "vintage_commit": "00c137e5b2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "83c6a7fa43",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cc-5.wsj-and-barrons-run-their-first-productive-dell1-cycles.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_stopped.out",
+      "kind": "doc",
+      "commit_or_etag": "01cbfa54ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 1 (verified, not redone): STOP-FILE no further cycle at 15:53:55Z, sa cycle 20261016T084018Z stopped_by_operator, task Ready, census 0 runner processes with a planted positive control.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_register.out",
+      "kind": "doc",
+      "commit_or_etag": "01cbfa54ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 2: -Plan graded 8 of 8 (cc5_plan.out), registered once from the same pin, no seed; T0=2026-10-16T16:19:39Z (cc5_t0.txt) then Start-ScheduledTask once.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_reads.out",
+      "kind": "doc",
+      "commit_or_etag": "01cbfa54ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 3: reads at +3 and +15 minutes, R1 to R5 TRUE, R7 0.0000 GiB.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_first_cycles.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Steps 4 and 5: wsj 20261016T161944Z (accepted=0, ZERO_UPLOADS_CAUSE from the 242 run records), barrons 20261016T172219Z (accepted=86, upload_lines=209, s3_get 0/0), SA_RESTART_DUPLICATES=0 SA_RESTART_UPLOAD_GETS=0 with dated updates through interim 15.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_hourly.py",
+      "kind": "script",
+      "commit_or_etag": "01cbfa54ff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only hourly interim reader (check --since T0, per-command GET sums, R7 projection, Branch F flags); writes cc5_check_interim<N>.out. Interims 1 to 17 all ended DUPLICATES=0 with Branch F flags none.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the task's registered Arguments read --publishers wsj barrons sa --refresh-once",
+      "method": "command",
+      "invocation": "powershell -NoProfile -Command \"(Get-ScheduledTask -TaskName 'Opal Data Harvest - Continuous Cycle').Actions.Arguments\"",
+      "expect": "--publishers wsj barrons sa --refresh-once",
+      "output_evidence": "-m lib.opal_data_harvest.cycle_runner --state-dir \"C:\\dev\\ajb_workspace\\.runtime\\harvest-cycle\\state\" --runtime-root \"C:\\dev\\ajb_workspace\\.runtime\\harvest-cycle\\runtime\" --stop-file \"C:\\dev\\ajb_workspace\\.runtime\\harvest-cycle\\STOP\" --publishers wsj barrons sa --refresh-once",
+      "denominator": "Run on dell1 at 2026-10-17T09:5xZ, read from the scheduler. At the base the same read gave --publishers sa wsj barrons, which the expect rejects.",
+      "status": "PASS",
+      "status_reason": "The literal invocation returns the registered list and the expect matches it."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cc5_first_cycles.out carries a CYCLE wsj line and a CYCLE barrons line in the stated form",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_first_cycles.out",
+      "expect": "(?s)CYCLE wsj \\S+ asked=\\d+ new=\\d+ accepted=\\d+ failed=\\d+ upload_lines=\\d+ s3_get_count=\\d+ s3_get_bytes=\\d+.*CYCLE barrons \\S+ asked=\\d+ new=\\d+ accepted=\\d+ failed=\\d+ upload_lines=\\d+ s3_get_count=\\d+ s3_get_bytes=\\d+",
+      "output_evidence": "CYCLE wsj 20261016T161944Z asked=242 new=0 accepted=0 failed=0 upload_lines=1 s3_get_count=0 s3_get_bytes=0 ... CYCLE barrons 20261016T172219Z asked=242 new=86 accepted=86 failed=0 upload_lines=209 s3_get_count=0 s3_get_bytes=0",
+      "denominator": "wsj: 242 JOB lines, 242 run records read, cycle record completed=True. barrons: 242 JOB lines, stored sums to 86 = cycle record new=86, 209 UPLOAD lines all rc=0. The cycle record counts 452 ledger lines for barrons against 451 in my read (242 run + 209 upload-harvest); both give GET sums 0/0 and the one-line gap is not traced.",
+      "status": "PASS",
+      "status_reason": "Both lines are present in the stated form; the wsj zero-upload cause is read from the run records, not the summary."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cc5_first_cycles.out carries SA_RESTART_DUPLICATES=0 SA_RESTART_UPLOAD_GETS=0",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_first_cycles.out",
+      "expect": "(?m)^SA_RESTART_DUPLICATES=0 SA_RESTART_UPLOAD_GETS=0$",
+      "output_evidence": "SA_RESTART_DUPLICATES=0 SA_RESTART_UPLOAD_GETS=0",
+      "denominator": "sa restarted fresh at 2026-10-17T05:15:32Z. At interim 17 (09:42Z): 15 sa JOB lines since cc-5 T0, 14 no_acceptable_new_articles and 1 new_articles (security-d13cdd57ffa64286, stored=1, article rows=1 duplicates=0 new_keys=1); upload-harvest ledger lines since the restart sum get_count 0, max single line 0; check --since T0 DUPLICATES=0 rc=0; R7 0.0000 GiB. The basis is one stored article, a thin positive arm: it shows a new key stored without a re-store, and does not show the held-article re-store path exercised against a large held set.",
+      "status": "PASS",
+      "status_reason": "The file carries the line and the later reads through interim 17 do not move it."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "seed_silver_known.py",
+      "invocation": "check --since T0 (hourly, interims 1 to 17) and --since the sa restart time",
+      "result": "every check ended DUPLICATES=0 rc=0"
+    },
+    {
+      "tool": "install-cycle-schedule.ps1",
+      "invocation": "-Plan then once (wsj,barrons,sa), same pin, no seed",
+      "result": "PASS; read back from the scheduler"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run",
+      "result": "NOT RUN: the preflight assigns --drift to L5 (the issuer)."
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "NOT RUN per the preflight (L5). This seat made no Secrets Manager call and no sign-in."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "not run",
+      "result": "NOT RUN per the preflight (L5); answered by measured reads: no new seed, sa restart read for duplicates and upload GETs, wsj zero uploads read from run records."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant planted: the subject is a live scheduled task on a WORLD-risk act. Discriminating arms measured: the process census found a planted child where it found no runner; the barrons cycle read non-zero accepted (86) while wsj read zero, so the accepted column varies with the world; the sa article table read rows=0 before its first stored article and rows=1 after.",
+      "expected": "Every read varies with the world.",
+      "observed": "wsj accepted=0 and barrons accepted=86 on the same reader; sa article rows moved 0 to 1 with the stored=1 job.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Reads at +3 and +15 minutes from T0, then hourly interims 1 to 17; the act ran once (one registration, one start).",
+      "observed": "DUPLICATES=0 on every check; upload GETs 0 on every ledger line; Branch F flags none on every interim.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "wsj and barrons cycles after their first, and the sa cycle's end (about 66 hours).",
+      "reason": "The order owes each publisher's first cycle and the sa restart condition; later cycles are not graded here."
+    },
+    {
+      "item": "The sa restart against a large held set re-storing: only one sa job has stored an article since the restart.",
+      "reason": "The check is read at each hourly interim; a later non-zero duplicate would be Branch F at once. Not exercised beyond one stored article."
+    },
+    {
+      "item": "Any sign-in, kill, key sent to a window, or Secrets Manager call by this seat.",
+      "reason": "None made. The stop was by the stop file (first seat HV1 at 15:53:55Z); this seat verified it."
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round88/cc5_first_cycles.out"
+}
