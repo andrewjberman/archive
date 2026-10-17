@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-hm-10",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "93d3118efb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "93d3118efb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-hm-10.host-role-may-assume-the-hmac-list-stage-role.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~455",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DECLARED ONLY. Two additions in the mdpf_runner inline policy's statement list and one name module, 21 added lines and 0 deleted (git diff --numstat at this worktree before the commit). No terraform init, plan or apply and no AWS call. Applying it is a separate never-widen WORLD order under the HMAC list producer's sign-off.",
+      "artifact_covered_by": [
+        "IBHM10-AC1",
+        "IBHM10-AC2",
+        "IBHM10-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBHM10-AC1",
+      "criterion_verbatim": "the commit's iam.tf diff deletes nothing and adds exactly one opal_name module block for the stage role, one statement with Sid IrptHmacListStageAssumeRole, Action sts:AssumeRole, Resource built from that module's name, no wildcard, no Principal",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r253/p253_cells.py\" . IBHM10-AC1",
+      "output_evidence": "PRE-COMMIT RUN (rc=1): \"FAIL: the commit adds nothing to infra/aws/terraform/mdpf-pipeline/iam.tf\" / \"IBHM10-AC1 FAIL\". The checker reads git diff HEAD~1 HEAD, so before the commit it measures the prior commit. The post-commit run is recorded in IBhm10_criteria_output.txt, record 2.",
+      "denominator": "1 of 1 check invocation; 0 runs of the commit diff possible before the commit",
+      "status": "FAIL",
+      "status_reason": "pre-commit measurement of the prior commit by the checker's HEAD~1..HEAD read; the declaration itself is judged by the post-commit run in IBhm10_criteria_output.txt record 2",
+      "expect": "IBHM10-AC1 PASS"
+    },
+    {
+      "criterion_id": "IBHM10-AC2",
+      "criterion_verbatim": "the stage role's name module is present and its builder output is the name the statement's Resource uses (the AC1 check re-reads the module block of the same commit)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r253/p253_cells.py\" . IBHM10-AC2",
+      "output_evidence": "PRE-COMMIT RUN (rc=1): \"FAIL: no added module block irpt_hmac_list_stage_role_name\" / \"IBHM10-AC2 FAIL\". Same cause as AC1: the checker reads HEAD~1..HEAD. The post-commit run is recorded in IBhm10_criteria_output.txt, record 2.",
+      "denominator": "1 of 1 check invocation; 0 runs of the commit diff possible before the commit",
+      "status": "FAIL",
+      "status_reason": "pre-commit measurement of the prior commit by the checker's HEAD~1..HEAD read; the declaration itself is judged by the post-commit run in IBhm10_criteria_output.txt record 2",
+      "expect": "IBHM10-AC2 PASS"
+    },
+    {
+      "criterion_id": "IBHM10-AC3",
+      "criterion_verbatim": "the worker's one commit (HEAD~1..HEAD) touches only iam.tf and the order's paths",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r253/p253_cells.py\" . IBHM10-AC3",
+      "output_evidence": "NOT RUN AT COMMIT TIME. AC3 reads HEAD~1..HEAD, which exists only after the one commit this order makes. The post-commit run is recorded in IBhm10_criteria_output.txt, record 2.",
+      "denominator": "1 of 1 criterion; 0 runs possible before the commit",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "rides the run after the one commit, which the order names; the post-commit result is in IBhm10_criteria_output.txt record 2",
+      "expect": "IBHM10-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant control is named by the order: the order names three criteria and no mutation.",
+      "expected": "N/A (the order names no mutant)",
+      "observed": "not run by this worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once before the commit; the two lines are reproduced verbatim in IBhm10_criteria_output.txt",
+      "observed": "AC1 rc=1 and AC2 rc=1 before the commit, both for the reason stated in their output_evidence",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt -check -diff on iam.tf",
+      "reason": "the order's condition is that .tools/terraform.exe exists in the worktree and runs offline; the file is absent (ls: No such file or directory), so the step does not apply."
+    },
+    {
+      "item": "terraform init, plan and apply, and any AWS call",
+      "reason": "forbidden by the order's bounds: DECLARE only; the apply is a separate never-widen WORLD order under the HMAC list producer's sign-off."
+    },
+    {
+      "item": "AC3 before the commit",
+      "reason": "AC3 reads HEAD~1..HEAD; see IBHM10-AC3 status_reason."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W455-S1: the AC1 and AC2 checks read git diff HEAD~1 HEAD, so they cannot PASS before the one commit the order makes; the order's record-before-commit step has no PASS to record.",
+    "IRPT_BCKEND-D2-W455-S2: this worktree is sparse-checked-out, so org/surprise_channel/ is tracked at HEAD but absent on disk; the row schema was read with git show."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~455/IBhm10_notes.md",
+  "compiler_tools": [
+    {
+      "tool": "p253_cells.py (r253 check, issuer's, read-only)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r253/p253_cells.py\" . IBHM10-AC1|IBHM10-AC2|IBHM10-AC3",
+      "result": "pre-commit: AC1 rc=1, AC2 rc=1 (HEAD~1..HEAD is the prior commit); post-commit results in IBhm10_criteria_output.txt record 2"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "not run",
+      "result": "no .tools/terraform.exe in the worktree; no init, plan or apply"
+    }
+  ]
+}
