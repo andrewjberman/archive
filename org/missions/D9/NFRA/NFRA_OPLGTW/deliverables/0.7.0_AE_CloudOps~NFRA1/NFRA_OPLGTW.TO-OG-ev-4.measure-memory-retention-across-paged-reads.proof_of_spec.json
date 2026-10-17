@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "29fca12c0c"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "29fca12c0c",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-4.measure-memory-retention-across-paged-reads.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/MEMORY_RETENTION.json",
+   "kind": "doc",
+   "commit_or_etag": "3881cf4ace",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Numbers and fixed words only, assembled by ev4_build.py from the host driver record: six variants of a three-page transactions chain, median growth per page A 135.9, B 146.8, C 110.7, D 26.7, E 104.5, F 42.4 MB; flattening variant none.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "threshold_mb_per_page"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev4_measure.py",
+   "kind": "script",
+   "commit_or_etag": "3881cf4ace",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The read-only host measurement: the release app staged in a scratch folder (removed), each variant in a fresh process, a 78 percent kill and a 75 percent stop, the service untouched.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "KILL_PCT"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev4_driver.json",
+   "kind": "doc",
+   "commit_or_etag": "3881cf4ace",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The host driver record the measurement was assembled from.",
+   "artifact_covered_by": [
+    "AC1"
+   ],
+   "introduces": [
+    "idle_host_pct"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the record is complete and self-consistent: six variants with numeric pages, each median recomputed from its pages, the flattening variant following the stated rule, and nothing but numbers and fixed words in it.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ev4.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)variant A: pages \\d+.*variant F: pages \\d+.*flattening: threshold 20 MB per page, variant (\\w+) \\(rule says \\1\\).*release_sha is 40 hex and host_total_mb is an int: yes.*content hygiene: long digit runs 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "variant A: pages 3, median growth 135.8 MB per page, record says 135.9\nvariant B: pages 3, median growth 146.8 MB per page, record says 146.8\nvariant C: pages 3, median growth 110.7 MB per page, record says 110.7\nvariant D: pages 3, median growth 26.7 MB per page, record says 26.7\nvariant E: pages 3, median growth 104.5 MB per page, record says 104.5\nvariant F: pages 3, median growth 42.4 MB per page, record says 42.4\nflattening: threshold 20 MB per page, variant none (rule says none)\nrelease_sha is 40 hex and host_total_mb is an int: yes\ncontent hygiene: long digit runs 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "six variants (A to F), three pages each, none stopped; idle host 28.1 percent used; the highest host reading 69.5 percent.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "AC1 outputs identical.",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant. The discriminating arms are the issuer's pre-cut controls (a verdict naming B when C is flatter; none though C is flat; a median that differs from the pages; F missing; an e-mail in the record); the measurement's own discriminator is variant A, the release as is, which reproduced the growth OG-ap-32 found (135.9 MB per page against 110 to 165).",
+   "expected": "A shows the retention that OG-ap-32 measured; a mitigation shows a lower median",
+   "observed": "A 135.9 MB per page; D 26.7; F 42.4",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a combination of D and F, and more than three pages",
+   "reason": "The order fixes six variants and one chain of three pages each, no loops; D's third growth (3.2 MB) suggests flattening that three pages cannot separate from noise."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S342: OBSERVATION -- the retained memory sits in glibc's per-thread arenas; MALLOC_ARENA_MAX=2 cuts the median growth from 135.9 to 26.7 MB per page; no variant meets the 20 MB rule."
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1 (msg 35319). Read-only: the release app staged in a scratch folder on the host from the running service's own files plus the release's adapter and catalog (md5 equal to the release), the test account resolved once in a separate process, six fresh processes, the scratch folder removed. The gateway service was not touched.",
+ "compiler_tools": [
+  {
+   "tool": "pyarrow/boto3 via the staged release app",
+   "invocation": "ev4_measure.py --driver (S3 -> SSM, Rule 12)",
+   "result": "PASS",
+   "note": "Seconds, MB and percentages only."
+  }
+ ]
+}
