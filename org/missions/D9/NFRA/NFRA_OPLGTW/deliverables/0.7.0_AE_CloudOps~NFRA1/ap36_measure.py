@@ -336,7 +336,7 @@ def driver(md5s_json):
         os.chmod(os.path.join(live, "ref.txt"), 0o600)
         env = dict(os.environ)
         env.pop("MALLOC_ARENA_MAX", None)
-        steps = [("plateau_cand", ["--plateau", cand]), ("chain_cand", ["--chain", cand, "4"]), ("chain_live", ["--chain", live, "4"])]
+        steps = [("plateau_cand", ["--plateau", cand]), ("chain_cand", ["--chain", cand, "6"]), ("chain_live", ["--chain", live, "6"])]
         for tag, args in steps:
             settle(idle)
             res[tag] = child(args, env)

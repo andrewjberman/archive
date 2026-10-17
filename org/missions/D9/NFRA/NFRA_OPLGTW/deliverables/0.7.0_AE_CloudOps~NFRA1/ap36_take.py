@@ -13,7 +13,7 @@ TRUNK, OUT = sys.argv[1:3]
 LIVE = "9d5b7125571520b977401634a01935924f4c9787"
 G = "infra/aws/ec2/opal-gateway/"
 APP = ["tools", "client_core", "client_adapter_bd49f"]
-TESTS = ["test_og_en21", "test_og_en22", "test_og_db3"]
+TESTS = ["test_og_en21", "test_og_en22", "test_og_en23", "test_og_db3"]
 paths = [G + "app/%s.py" % m for m in APP] + [G + "deploy-to-ec2.sh"] + [G + "tests/%s.py" % t for t in TESTS]
 taken, skipped = [], []
 for p in paths:
