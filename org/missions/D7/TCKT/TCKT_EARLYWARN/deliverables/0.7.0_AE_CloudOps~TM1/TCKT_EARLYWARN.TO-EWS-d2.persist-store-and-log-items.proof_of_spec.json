@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "TCKT_EARLYWARN.TO-EWS-d2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_EARLYWARN/task-orders/TCKT_EARLYWARN.TO-EWS-d2.persist-store-and-log-items.md",
+  "group": "OTHER",
+  "vintage_commit": "e3d121b4bb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D7/TCKT/TCKT_EARLYWARN/decompositions/TCKT_EARLYWARN_DECOMP.md",
+  "vintage_commit": "e3d121b4bb",
+  "to_ref": "org/missions/D7/TCKT/TCKT_EARLYWARN/task-orders/TCKT_EARLYWARN.TO-EWS-d2.persist-store-and-log-items.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~TM1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier1_exec/0.7.0_AE_CloudOps~TM1/deliverables/EWS_DEPLOY.json",
+   "kind": "aws_resource",
+   "commit_or_etag": "a6bab9f636",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "task 19419353d2f44a5e8321fd8f5c787fd4 RUNNING on task definition :3 (image sha256:2a01db8eea78ea6bb75d37189ea094c2dcbe11527b39f47c9ae1204015cc407c) since 2026-10-17T09:58Z; store object s3://opal-data-49financial/schwab/49financial/state/ews_store/current/ews.db 29679616 bytes written 13:35:30Z; ledger ews-d2-persist-store-20261017 CLOSED 7 of 7 legs",
+   "artifact_covered_by": [
+    "EWS-d2-AC1",
+    "EWS-d2-AC2",
+    "EWS-d2-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "EWS-d2-AC1",
+   "criterion_verbatim": "`EWS-d2-AC1` -- the role, SIMULATED, may Get and Put the manifest's store key, and may not Delete it nor Put on a sibling prefix of the same bucket.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py persist-iam",
+   "output_evidence": "EWS-PIAM-OK; rc=0, run by the lane at the repo root 2026-10-17 10:00Z and again 13:37Z. Beyond the arm: simulate-principal-policy with the bucket policy passed as --resource-policy, one resource per call: PutObject allowed, GetObject allowed, DeleteObject explicitDeny, PutObject on a sibling prefix explicitDeny. The arm itself ignores the bucket policy (row TCKT_EARLYWARN-D1-S7), so the real Put is graded by EWS-d2-AC3.",
+   "denominator": "1 of 1 criterion; lane run 2 of 2 read EWS-PIAM-OK",
+   "status": "PASS",
+   "expect": "EWS-PIAM-OK",
+   "judgment": false
+  },
+  {
+   "criterion_id": "EWS-d2-AC2",
+   "criterion_verbatim": "`EWS-d2-AC2` -- in the container log the latest `run_pending` pass line is followed by an `items_opened rule=<name> n=<int>` line for each of three distinct rules.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py counts",
+   "output_evidence": "EWS-CNT-OK; rc=0, run by the lane at the repo root 2026-10-17 13:36Z. Log, task 19419353: 13:35:23Z run_pending dates_processed=573 last_processed=2026-10-15; 13:35:29Z items_opened rule=SLEEPING_MONEY n=2829 open=114; rule=FEE_TRIPWIRE n=751 open=96; rule=PAYDAY_GUARD n=125 open=0. Counts only, no client row, id or amount in a line.",
+   "denominator": "1 of 1 criterion; 3 of 3 Schwab rules logged; lane run 1 of 1 read EWS-CNT-OK",
+   "status": "PASS",
+   "expect": "EWS-CNT-OK",
+   "judgment": false
+  },
+  {
+   "criterion_id": "EWS-d2-AC3",
+   "criterion_verbatim": "`EWS-d2-AC3` -- the store object exists and is non-empty; this arm is DATE-GATED to the end of the replacement task's first pass (about 3.5 hours after the apply), and the order stays open until it reads EWS-POBJ-OK.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py persist-object",
+   "output_evidence": "EWS-POBJ-OK; rc=0, run by the lane at the repo root 2026-10-17 13:36Z, 6 minutes after the put. head-object: 29679616 bytes, LastModified 13:35:30Z, VersionId kHIVWxgRTnRIqzUGt_b9pOqRDh.324Qi, AES256; log line store_persisted bytes=29679616. A downloaded copy (deleted after reading) passed sqlite integrity_check, held 3705 items (2829+751+125) and a history row with last_processed 2026-10-15, so a restart resumes there.",
+   "denominator": "1 of 1 criterion; lane run 1 of 1 read EWS-POBJ-OK; object count under the prefix 1",
+   "status": "PASS",
+   "expect": "EWS-POBJ-OK",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "the earlier arms re-run at the repo root after the apply and again after the first pass",
+   "observed": "running EWS-RUN-OK, iam EWS-IAM-OK, ledger EWS-LED-OK, persist-iam EWS-PIAM-OK on every run, rc=0",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "the same checks against a temporary copy of the manifest (module import, no tracked file edited): persist_key moved to a sibling prefix, and persist_key naming an object that does not exist",
+   "expected": "persist-iam EWS-BAD on the sibling key; persist-object no EWS-POBJ-OK on the absent key",
+   "observed": "persist-iam: EWS-BAD s3:GetObject on .../state/other_prefix/ews.db reads implicitDeny, wanted allowed (rc=1); persist-object: HeadObject 404 Not Found, no OK token. The order's stated base reading (EWS-BAD the deploy manifest lacks the key 'persist_bucket') was not re-run by the lane: the manifest was extended before any arm ran.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the SQLite header check before the launcher opens a fetched object",
+   "reason": "carried by the CTO half (C-3) to a later cell, not this order; a corrupt object would loop the task, rollback by object version (versioning Enabled)"
+  },
+  {
+   "item": "a restart of the task to exercise the resume path",
+   "reason": "the order and CTO msg 7416 say do not touch the running task; resume is evidenced by the persisted history row (last_processed 2026-10-15), not by a restart"
+  },
+  {
+   "item": "the old task's stop before the new task started",
+   "reason": "the service runs minimum healthy 0 percent, so ECS stopped the old task first (running 0 for about 70 seconds at 09:56Z) instead of keeping it until the new one was up as requirement 4 describes; the old store was ephemeral and its first pass was already complete, so nothing was lost"
+  }
+ ],
+ "surprises": [
+  "TCKT_EARLYWARN-D1-S7: the builder's state address sits behind the opal-data-49financial fence, which did not admit the role (ruled option A, never-widen halves signed, applied)"
+ ],
+ "session_log": "org/tier1_exec/0.7.0_AE_CloudOps~TM1/deliverables/",
+ "compiler_tools": [
+  {
+   "tool": "python ews_check.py running|iam|ledger|persist-iam|counts|persist-object",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/TCKT_EARLYWARN_Q1/EWS_CHECKS/ews_check.py <arm>",
+   "result": "EWS-RUN-OK, EWS-IAM-OK, EWS-LED-OK, EWS-PIAM-OK, EWS-CNT-OK, EWS-POBJ-OK, rc=0 each"
+  },
+  {
+   "tool": "python .tools/deploy_ledger.py",
+   "invocation": "python .tools/deploy_ledger.py close-leg --slug ews-d2-persist-store-20261017",
+   "result": "7 of 7 legs closed with proof"
+  }
+ ]
+}
