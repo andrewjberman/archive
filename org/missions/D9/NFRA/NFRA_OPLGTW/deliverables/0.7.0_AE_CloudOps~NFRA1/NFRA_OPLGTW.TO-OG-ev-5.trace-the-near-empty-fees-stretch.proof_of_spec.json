@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-5",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "5bee627be9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "5bee627be9",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-5.trace-the-near-empty-fees-stretch.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/FEES_TRACE.json",
+   "kind": "doc",
+   "commit_or_etag": "296ebe49f2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counts, dates and fixed words only: the stretch 2026-08-17 to 2026-09-15 (30 days, the CVO's, 109 source rows, agreed), verdict source (ratio 0.173), the account not assessable (median 0).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/FEES_TRACE_COUNTS.json",
+   "kind": "doc",
+   "commit_or_etag": "296ebe49f2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Per dated partition: ALL source rows, rows kept by the 49F fence, the account's rows, the account's non-zero fee amounts; 394 of 394 partitions of the window, read in a new process on the host through the installed adapter's read path.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev5_trace.py",
+   "kind": "script",
+   "commit_or_etag": "296ebe49f2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The read-only host program (Rule 12, S3 to SSM): bd._read_partitions 30 partitions a page, host memory checked between pages (stop at 75 percent; the peak stayed below it), audit sink stubbed, nothing written.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev5_build.py",
+   "kind": "script",
+   "commit_or_etag": "296ebe49f2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Assembles FEES_TRACE.json from the counts and lib/trading_calendar.py; checks the CVO's 109.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the record is complete and self-consistent: a stretch of 30 days or more, the source's partitions in it equal the expected, the verdict follows the stated 25 percent rule from the counts, and nothing but counts, dates and fixed words is in it.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/ev5.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)stretch: \\d+ days \\(want 30 or more\\); source rows \\d+, account rows \\d+; partitions in the stretch (\\d+) of \\1 expected.*verdict (\\w+) \\(rule says \\2\\).*content hygiene: long digit runs 0 \\(want 0\\); e-mail addresses 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "stretch: 30 days (want 30 or more); source rows 109, account rows 0; partitions in the stretch 21 of 21 expected\nverdict source (rule says source)\ncontent hygiene: long digit runs 0 (want 0); e-mail addresses 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "394 of 394 fees partitions of the 13-month window; 30 stretch dates, 21 trading days, all 21 present",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the issuer's pre-cut controls (a verdict contradicting the counts three ways; a 20-day stretch; a missing partition; an e-mail in the record) are the discriminating arms.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "partitions on non-trading dates in the stretch",
+   "reason": "The order defines the partitions expected as the stretch's trading days; the table is daily (9 weekend-dated partitions, 63 rows, in the stretch), so the equality in AC1 is read on the 21 trading-day partitions and the rest is stated in the record's extra fields and in the observation row filed at the close."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1 (GO msg 35460). One run of ev5_trace.py on the host (new process, read only), the per-date counts, the stretch taken from the CVO's row and checked, the 25 percent rule applied by ev5_build.py. An OBSERVATION row (thin July to September; daily partitions) is filed in the surprise channel at the close.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 / ssm / s3",
+   "invocation": "ev5_trace.py (Rule 12, S3 to SSM)",
+   "result": "PASS",
+   "note": "Counts and dates only; 394 partitions, memory below the stop."
+  }
+ ]
+}
