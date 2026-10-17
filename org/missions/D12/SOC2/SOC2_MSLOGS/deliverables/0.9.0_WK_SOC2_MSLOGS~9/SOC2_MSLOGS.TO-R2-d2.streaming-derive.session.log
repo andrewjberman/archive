@@ -1,0 +1,23 @@
+SOC2_MSLOGS.TO-R2-d2 -- worker 0.9.0_WK_SOC2_MSLOGS~9 -- worktree C:/Dev/ajb_wk/soc2-r2-9 -- branch wk-SOC2_MSLOGS-9
+
+1. GO received from 2.0.0_SA_COO~S1 after TO-R2-s2 was accepted; order status staged, read as the GO marker.
+2. First act: git rev-parse --abbrev-ref HEAD -> wk-SOC2_MSLOGS-9; TREE-OK; tree clean.
+3. Read the derive path (handler._derive_silver, silver_builder.build) and the check's derive, derive_run and _synth.
+4. Design: build() unchanged. build_stream(parts, only_date, tmpdir) writes one stable-sorted gzip run per object
+   (lines of [instant in microseconds, COLUMNS values]) into a TemporaryDirectory, then k-way merges the runs by
+   (instant, listing index, position) into a ParquetWriter in row groups of 1000. handler passes a generator that
+   yields one object at a time and counts the records read.
+5. Edits: silver_builder.py (build_stream and helpers, docstring), handler.py (_derive_silver, DOOR CONTRACT line),
+   tests/test_silver_builder.py (+5 tests, import pytest), tests/test_handler.py (StubBuilder.build_stream, StreamBuilder,
+   +2 tests).
+6. First full run of s1_check_r2.py derive -> R2-DERIVE-REFUSED derive left temporary files behind: ['ho1_ibz_k10o'], rc=1.
+   The door-only subprocess at 16 objects reported leaked []; the entry was created 06:43:40 Z in the shared temp directory
+   during the run by another process. Filed as row SOC2_MSLOGS-D1-W9-S1 (OBSERVATION, INERT).
+7. Door-only subprocesses: door 16 -> peak 63024389, n 48000, rows 23430, leaked []; door 4 -> peak 50718611, n 12000,
+   rows 5851, leaked []; naive 16 -> peak 350553559, rows 23430. Digest of door 16 equals the naive digest.
+8. Re-run of s1_check_r2.py derive -> R2-DERIVE-OK vs_build=0.18 growth=1.24 rows=23430, rc=0.
+9. pytest infra/aws/lambda/globgrph-trino-access/tests -q -> 230 passed, rc=0. test_silver_builder.py -> 26 passed.
+10. ruff --target-version py39 --select E,F,W --ignore E501 on the four files -> All checks passed, rc=0; ASCII only.
+11. Commit 0e8509d196 via safe-commit (commit-gate OK, surprise-row-gate OK on the code commit, to-pipeline-gate OK).
+    The risk-reflex printed HOLD notes that cite other projects' handler.py basenames (an IRPT backend deploy record);
+    not this Lambda; the commit was not refused.
