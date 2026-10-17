@@ -1,0 +1,31 @@
+NFRA_OPLGTW.TO-OG-en-18 -- 0.9.0_WK_NFRA_OPLGTW~130 -- session log
+worktree C:/tmp/wk-oplgtw-130 -- branch wk-NFRA_OPLGTW-130 -- cut at 887e203b8c
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-130; test -d org && test -d .tools -> TREE-OK.
+   Premises re-grounded: client_adapter_bd49f.py has PAGE_PARTITIONS = 60, _read_partitions(ctx, prefix, parts, columns)
+   and _window_read(ctx, prefix, plan, columns) as the order describes; the three check scripts (_named.sh, _wkbound.sh,
+   en18.AC3.sh) and the _root.sh helper exist; tests test_og_en4.py and test_og_en12.py exist.
+2. Baseline before any change: python -m pytest on en17, en15, en13, cl2, en12, en4 -> 26 passed.
+3. Adapter change: each pool task reads one partition, fences it, keeps only the account's rows; PAGE_PARTITIONS 30;
+   WINDOW_READ_GATE = threading.BoundedSemaphore(1) and WINDOW_GATE_WAIT_SECONDS = 15 around the windowed reads of
+   get_transactions and get_fees (the answers moved to _transactions_answer and _fees_answer); window_read_busy answer.
+4. Run after the adapter change, before any pinned test was touched: 4 failed, 22 passed. The failures were the pins of
+   the page size: en17 ac01 (PAGE_PARTITIONS == 60), en17 ac02 (7 pages, [60]*6+[36]), en17 ac03 (61-partition walk),
+   en15 ac03 (the cap of 60 reads).
+5. Pinned truth updated to the new page size, no assertion weakened: en17 (the 61 and 395 windows and the 396 walk now
+   take P+1, 14 and 13x30+6 pages, 366 for page 2); en15 ac03 (page = PAGE_PARTITIONS, cursor = dates[-page-1]).
+   Run after: 26 passed.
+6. tests/test_og_en18.py written (ac01, ac02, ac03). Run: 3 passed; repeated 3 times: 3 passed each time (STABLE).
+7. Mutant (scratch copy only, removed after the run): the worker returns the full partition row list instead of the
+   account's rows. Result: test_ogen18_ac01 FAILED with ('alive at once', 'transactions', 30) against the bound 16
+   (FIRED-AS-EXPECTED).
+8. Wider set, not in the AC3 set: tests/test_og_cl7.py passes; tests/test_og_ch1.py has 2 of 6 failing (ac02 registry
+   ValueError, ac04 roster file absent). The same 2 fail on a HEAD extract of the gateway (control in scratch, removed).
+   Carried as NFRA_OPLGTW-Z-S334 (known red since round 38); not in this order's paths; not touched.
+9. Commit 8ec557f953 (safe-commit, four files: client_adapter_bd49f.py, test_og_en18.py, test_og_en17.py,
+   test_og_en15.py). safe-commit printed WARN client-data-check: hashed account-id list ABSENT on this box, so this commit
+   was not checked for client account ids. Row NFRA_OPLGTW-Z-W130-S1.
+10. Criteria, from the worktree root, after commit 8ec557f953:
+    AC1 _named.sh tests/test_og_en18.py test_ogen18_ac01 test_ogen18_ac02 test_ogen18_ac03 -> pytest rc=0; named tests passed 3 of 3; failed/error lines 0; RESULT: PASS; exit=0
+    AC2 _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~130 -> files touched 4; product files 4; outside the allowed set 0 (want 0); RESULT: PASS; exit=0
+    AC3 en18.AC3.sh -> forward: passed 29; failed 0; reverse: passed 29; failed 0; RESULT: PASS; exit=0
