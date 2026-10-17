@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-24",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "9998b55793",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-24.keep-the-adapters-absent-reason.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2b066d9ad"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~138",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "cde84ef947",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "code only, one line in _answer; the release and deploy are out of this order's scope",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en24.py",
+      "kind": "test",
+      "commit_or_etag": "cde84ef947",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "offline test file (3 named tests); no deploy",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the three named tests pass (a refused second call carries window_read_busy for transactions and fees; the line changes nothing else; the five no_partition_at_as_of refusals carry their reason)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en24.py test_ogen24_ac01 test_ogen24_ac02 test_ogen24_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial touch only the listed files",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~138 '^infra/aws/ec2/opal-gateway/(app/client_core\\.py|tests/test_og_(en24|en23|en22|en20|en19|en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~138: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched, 2 product files, 0 outside the allowed set (run at commit cde84ef947)",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~138: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the twelve window test files pass together in both orders with the same count",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh en24set tests/test_og_en4.py tests/test_og_en12.py tests/test_og_cl2.py tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en22.py tests/test_og_en23.py tests/test_og_en24.py; echo \"exit=$?\"",
+      "output_evidence": "en24set forward: passed 42; failed 0\nen24set reverse: passed 42; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "42 of 42 forward, 42 of 42 reverse, 12 files",
+      "status": "PASS",
+      "expect": "(?s)en24set forward: passed (\\d+); failed 0.*en24set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "revert the one-line fix in client_core._answer to the plain meta[_absent_reason] read; the named file must fail",
+      "expected": "the three named tests fail",
+      "observed": "3 failed: ac01 AssertionError ('transactions', None) / assert None == 'window_read_busy'; ac02 assert None == 'account_not_in_partition'; ac03 ('client_resolve_account', None)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of tests/test_og_en24.py compared (plus the forward and reverse runs of AC3)",
+      "observed": "run 1: 3 passed in 1.07s; run 2: 3 passed in 1.08s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release, deploy, IAM, env key, registry change",
+      "reason": "outside the order's bounds: code only"
+    },
+    {
+      "item": "test_og_ch1.py::test_ogch1_ac04 on this worktree (roster file absent)",
+      "reason": "outside <paths>; the untracked data file was not copied into the worktree; logged as NFRA_OPLGTW-Z-W138-S1"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W138-S1: on worktree C:/tmp/wk-oplgtw-138 the untracked file data/mdpf/config/partner_roster.json is absent, so tests/test_og_ch1.py::test_ogch1_ac04 fails on its path walk (outside <paths>; not fixed, no action taken)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~138/NFRA_OPLGTW.TO-OG-en-24.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_og_en24.py",
+      "result": "3 passed (run 1 and run 2)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_og_en4.py tests/test_og_en12.py tests/test_og_cl2.py tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en22.py tests/test_og_en23.py tests/test_og_en24.py",
+      "result": "42 passed, 0 failed"
+    }
+  ]
+}
