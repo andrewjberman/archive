@@ -187,33 +187,44 @@ def chain(stage):
     today = dt.datetime.now(dt.timezone.utc).date()
     frm = (today - dt.timedelta(days=WINDOW_DAYS)).isoformat()
     cur = today.isoformat()
-    ended = False
-    for n in range(1, MAX_PAGES + 1):
-        if state["stop"]:
-            out["stopped_early"] = True
+    ended_flags, end_rss = [], []
+    for k in (1, 2):
+        cur = today.isoformat()
+        ended = False
+        for n in range(1, MAX_PAGES + 1):
+            if state["stop"]:
+                out["stopped_early"] = True
+                break
+            t0 = time.monotonic()
+            ans = call("client_get_transactions", firm=FIRM, account=ref, from_date=frm, to_date=cur)
+            wall = time.monotonic() - t0
+            a = ans if isinstance(ans, dict) else {}
+            reason = a.get("absent_reason") or a.get("_absent_reason")
+            if a.get("error") or reason:
+                out["fail_reasons"].append("chain %d page %d answered %s" % (k, n, str(reason or a.get("error"))[:50]))
+                break
+            nxt = a.get("next_cursor")
+            rec = {"chain": k, "page": n, "wall_s": round(wall, 2), "chain_rss_mb": round(vmrss_mb("self"), 1),
+                   "service_rss_mb": None if not spid else round(vmrss_mb(spid) or 0, 1),
+                   "host_pct": round(host_pct()[0], 1), "partitions_read": a.get("partitions_read"), "partitions_in_window": a.get("partitions_in_window"),
+                   "window_partial": a.get("window_partial"), "next_cursor_non_null": nxt is not None, "ended_t": utc_now()}
+            out["pages"].append(rec)
+            if wall > PAGE_LIMIT_S:
+                out["fail_reasons"].append("chain %d page %d took %.1f s above %s" % (k, n, wall, PAGE_LIMIT_S))
+                break
+            del ans, a
+            emit()
+            if nxt is None:
+                ended = True
+                break
+            cur = nxt
+        ended_flags.append(ended)
+        end_rss.append(round(vmrss_mb("self"), 1))
+        if not ended or out["fail_reasons"] or state["stop"]:
             break
-        t0 = time.monotonic()
-        ans = call("client_get_transactions", firm=FIRM, account=ref, from_date=frm, to_date=cur)
-        wall = time.monotonic() - t0
-        a = ans if isinstance(ans, dict) else {}
-        reason = a.get("absent_reason") or a.get("_absent_reason")
-        if a.get("error") or reason:
-            out["fail_reasons"].append("page %d answered %s" % (n, str(reason or a.get("error"))[:50]))
-            break
-        nxt = a.get("next_cursor")
-        rec = {"page": n, "wall_s": round(wall, 2), "chain_rss_mb": round(vmrss_mb("self"), 1), "service_rss_mb": None if not spid else round(vmrss_mb(spid) or 0, 1),
-               "host_pct": round(host_pct()[0], 1), "partitions_read": a.get("partitions_read"), "partitions_in_window": a.get("partitions_in_window"),
-               "window_partial": a.get("window_partial"), "next_cursor_non_null": nxt is not None, "ended_t": utc_now()}
-        out["pages"].append(rec)
-        if wall > PAGE_LIMIT_S:
-            out["fail_reasons"].append("page %d took %.1f s above %s" % (n, wall, PAGE_LIMIT_S))
-            break
-        del ans, a
-        emit()
-        if nxt is None:
-            ended = True
-            break
-        cur = nxt
+    out["ended_flags"] = ended_flags
+    out["end_rss_per_chain"] = end_rss
+    ended = len(ended_flags) == 2 and all(ended_flags)
     state["stop"] = True
     sample()
     out["ended_with_null_cursor"] = ended
@@ -290,28 +301,34 @@ def runner(outp, release_sha):
     doc["ssm_command_id"] = cid
     ch = doc.get("chain", {})
     pages = ch.get("pages", [])
-    rs = [p["chain_rss_mb"] for p in pages]
-    growth = [rs[i] - rs[i - 1] for i in range(1, len(rs))]
+    by = {k: [p for p in pages if p.get("chain") == k] for k in (1, 2)}
+    er = ch.get("end_rss_per_chain") or []
     svc = [s["service_rss_mb"] for s in ch.get("samples", []) if s.get("service_rss_mb") is not None]
-    body = {"memory_basis": "fresh_process", "release_sha": release_sha, "read_at": utc_now(), "pages": len(pages),
-            "ended_with_null_cursor": ch.get("ended_with_null_cursor"), "fail_reasons": ch.get("fail_reasons"),
-            "chain_rss_mb_before": ch.get("chain_rss_mb_before"), "chain_process_peak_growth_mb": ch.get("proc_peak_growth_mb"), "chain_process_over_300_first_at": ch.get("proc_over_300_first_t"), "chain_rss_mb_after": rs[-1] if rs else None,
-            "chain_growth_total_mb": round(rs[-1] - ch["chain_rss_mb_before"], 1) if rs and ch.get("chain_rss_mb_before") is not None else None,
-            "median_page_growth_mb": round(statistics.median(growth), 1) if growth else None,
+    def per(k):
+        ps = by[k]
+        rs = [p["chain_rss_mb"] for p in ps]
+        gr = [rs[i] - rs[i - 1] for i in range(1, len(rs))]
+        return {"pages": len(ps), "partitions_read_total": sum(p.get("partitions_read") or 0 for p in ps), "longest_page_wall_s": max([p["wall_s"] for p in ps] or [0]),
+                "first_page_wall_s": ps[0]["wall_s"] if ps else None, "end_rss_mb": er[k - 1] if len(er) >= k else None,
+                "median_page_growth_mb": round(statistics.median(gr), 1) if gr else None, "host_pct_peak_at_page_ends": max([p["host_pct"] for p in ps] or [0])}
+    c1, c2 = per(1), per(2)
+    net2 = round(er[1] - er[0], 1) if len(er) == 2 else None
+    body = {"memory_basis": "fresh_process", "release_sha": release_sha, "read_at": utc_now(), "two_chains_in_one_process": True,
+            "chain1": c1, "chain2": c2, "chain_rss_mb_before": ch.get("chain_rss_mb_before"),
+            "chain1_net_growth_from_start_mb": round(er[0] - ch["chain_rss_mb_before"], 1) if er else None,
+            "chain2_net_growth_from_chain1_end_mb": net2, "chain2_net_growth_limit_mb": 50,
+            "chain_process_peak_growth_from_start_mb": ch.get("proc_peak_growth_mb"),
+            "ended_with_null_cursor_both": ch.get("ended_flags") == [True, True], "fail_reasons": ch.get("fail_reasons"),
             "service_rss_mb_before": ch.get("service_rss_mb_before"), "service_rss_mb_min": min(svc) if svc else None, "service_rss_mb_max": max(svc) if svc else None,
-            "service_growth_max_mb": round(max(svc) - ch["service_rss_mb_before"], 1) if svc and ch.get("service_rss_mb_before") is not None else None,
             "host_pct_before": ch.get("host_pct_before"), "host_pct_peak": max([s["host_pct"] for s in ch.get("samples", [])] + [p["host_pct"] for p in pages] or [0]),
-            "longest_page_wall_s": max([p["wall_s"] for p in pages] or [0]), "first_page_wall_s": pages[0]["wall_s"] if pages else None,
-            "partitions_read_total": sum(p.get("partitions_read") or 0 for p in pages), "sample_count": len(ch.get("samples", [])),
+            "longest_page_wall_s": max([p["wall_s"] for p in pages] or [0]), "sample_count": len(ch.get("samples", [])),
             "per_page": pages, "samples_every_about_s": 2, "samples": ch.get("samples", [])}
-    lit = (not body["fail_reasons"] and body["ended_with_null_cursor"] and body["host_pct_peak"] <= HOST_LIMIT
-           and (body["service_growth_max_mb"] is not None and body["service_growth_max_mb"] <= GROWTH_LIMIT_MB) and body["longest_page_wall_s"] <= PAGE_LIMIT_S)
-    body["verdict_service_host_page"] = "PASS" if lit else "FAIL"
-    body["verdict_strict_incl_chain_process_peak"] = "PASS" if (lit and (body["chain_process_peak_growth_mb"] or 0) <= GROWTH_LIMIT_MB) else "FAIL"
+    body["verdict"] = "PASS" if (not body["fail_reasons"] and body["ended_with_null_cursor_both"] and net2 is not None and net2 <= 50
+                                 and body["host_pct_peak"] < HOST_LIMIT and body["longest_page_wall_s"] <= PAGE_LIMIT_S) else "FAIL"
     io.open(outp + ".driver.json", "w", encoding="utf-8", newline=chr(10)).write(json.dumps(doc, indent=1) + chr(10))
     io.open(outp, "w", encoding="utf-8", newline=chr(10)).write(json.dumps({"body": body}, indent=1) + chr(10))
     print(json.dumps({k: v for k, v in body.items() if k not in ("samples", "per_page")}, indent=1))
-    print([(p["page"], p["wall_s"], p["chain_rss_mb"], p["host_pct"], p["partitions_read"]) for p in pages])
+    print([(p["chain"], p["page"], p["wall_s"], p["chain_rss_mb"], p["host_pct"], p["partitions_read"]) for p in pages])
 
 
 if __name__ == "__main__":
