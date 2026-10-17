@@ -1,0 +1,74 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "six live reads, once each; the leak regex was run inside the script before each line was kept and again as ARR-AC2",
+   "observed": "7 of 7 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-RESIDENT-COMMENTARY.five-live-reads-for-the-pdf-retention-gap-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-RESIDENT-COMMENTARY.five-live-reads-for-the-pdf-retention-gap-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "6db506cf65"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-RESIDENT-COMMENTARY.five-live-reads-for-the-pdf-retention-gap-ib2.md",
+  "vintage_commit": "6db506cf65"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five live read-only reads (host journal and release via SSM, drafter configuration, DLQ age); nothing written in AWS or on the host",
+   "artifact_covered_by": [
+    "RRC-AC1",
+    "RRC-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RRC-AC1",
+   "invocation": "grep -c -E '^(R1|R2|R3|R4|R5) (release=|window=|resident_env |drafter sha=|dlq_oldest_age_max_s=|DENIED |NOT-RUN |ERROR )|^READS-DONE [0-9]+ of 5 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+   "expect": "^6$",
+   "output_evidence": "6\nexit=0",
+   "denominator": "5 read lines + 1 closing line",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1|R2|R3|R4|R5) (release=|window=|resident_env |drafter sha=|dlq_oldest_age_max_s=|DENIED |NOT-RUN |ERROR )|^READS-DONE [0-9]+ of 5 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "RRC-AC2",
+   "invocation": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|https://sqs\\.|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1 (grep -c prints 0 and exits 1 on no match)",
+   "denominator": "6 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|https://sqs\\.|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+   "method": "command"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_reads/A_COMMENTARY_READS.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_root.py with host_reads.sh (sha256-checked script file), boto3 reads",
+   "invocation": "R1-R3 on the resident host; R4 and R5 from AWS",
+   "result": "RRC-AC1 6, RRC-AC2 0"
+  }
+ ]
+}
