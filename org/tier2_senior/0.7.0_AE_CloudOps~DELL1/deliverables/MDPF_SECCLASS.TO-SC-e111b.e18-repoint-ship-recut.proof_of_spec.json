@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "MDPF_SECCLASS.TO-SC-e111b.e18-repoint-ship-recut",
+ "genre": "DEPLOY",
+ "firm": "MDPF",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "4dda49c7e3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R28.md",
+  "vintage_commit": "7e9fe5a8ec",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/MDPF_SECCLASS.TO-SC-e111b.e18-repoint-ship-recut.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~DELL1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-bd/code/gold/E_18.detect_new_securities.py",
+   "kind": "s3_object",
+   "commit_or_etag": "f5c03ee69eaa1810159aefb6e2145bb4",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy on box/dell1 at 2026-10-17T08:36Z (object LastModified 08:36:35Z), HALT_ACK=1 for the already-read GO msg 7445: `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py`, 'DEPLOYED [bd] ...E_18...', 'VERIFY OK comp-pipescript deployed', 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'. Pre-act ETag a7820a205692444dadb59e526200bff6 at VersionId wb5QYkh7QEfrvMEscg.EgAui0MeBaNwB (rollback handle, unused); post-act VersionId ij219ZfHeFTL7H_e8evmlrOipp2QHz_c, 13,186 B.",
+   "artifact_covered_by": [
+    "SC28-e111b-AC1"
+   ]
+  },
+  {
+   "path_or_key": "s3://opal-data-bd/code/gold/gold_dispatch.sh",
+   "kind": "s3_object",
+   "commit_or_etag": "165933f6dd0068a649f9757d9b86f303",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy.sh does not ship a .sh ('no deploy-scope script files detected'), so `aws s3 cp data/black_diamond/scripts/gold/gold_dispatch.sh s3://opal-data-bd/code/gold/gold_dispatch.sh --sse AES256` at 2026-10-17T08:38:26Z (the FB-j-3 / FB-j-7 route). Read back by head-object: ETag 165933f6dd0068a649f9757d9b86f303 = repo md5, 76,036 B, SSE AES256. Pre-act ETag 882a910b27d1a855c5d31547eb44f3a1 at VersionId .bNYVetB5sGV8bZki7EgXBfChCH_uPyE (rollback handle, unused); post-act VersionId fzd8_e.BSTe4C757WgGhHx88DBf.v0iy. comp-pipescript deployed does not index a .sh (ABSENT IN TREE), so the match is by e108_shipped_check md5.",
+   "artifact_covered_by": [
+    "SC28-e111b-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "SC28-e111b-AC1",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e108_shipped_check.py -- expect 'E108-SHIPPED ok=True'",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e108_shipped_check.py",
+   "expect": "E108-SHIPPED ok=True",
+   "output_evidence": "E108-SHIPPED ok=True e18=f5c03ee6|f5c03ee6|MATCH dispatch=165933f6|165933f6|MATCH e18_old_list_lines=0 dispatch_syntax=0 chain=True (rc=0), read right after the ship and again at close. Preserved at org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/e111_ac1_post_ship.txt.",
+   "denominator": "2 of 2 moving keys at their signed md5s. Code/gold watch set, one list_object_versions page each: pre=290 latest keys (370 versions, 100 delete markers), post=290 (372 versions), added=0 removed=0 moved=[E_18, gold_dispatch.sh] (E111_LEGP_20261017.json vs E111_LEGD_AFTER_20261017.json). The discriminator moved: the order records the same check at the base as 'ok=False e18=a7820a20|f5c03ee6|DIFF dispatch=882a910b|165933f6|DIFF e18_old_list_lines=17 chain=False' (issuer read ~08:3xZ); this seat read the served base ETags in step 0 (08:30-08:34Z) and did not run the check itself before the ship.",
+   "status": "PASS"
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "safe-deploy.sh",
+   "invocation": "bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py; bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/gold_dispatch.sh",
+   "result": "E_18: gate PASS, 1 of 1 deployed and verified, seat-gates CROSSBOX-DEPLOY CLEAR. gold_dispatch.sh: no-op, 'no deploy-scope script files detected' (shipped by aws s3 cp --sse AES256)."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": ".tools/deploy_ledger.py open --leg V|P|D1|D2|C|Q|G ; close-leg ; close",
+   "result": "Entry secclass-e111b-e18-repoint-ship-dell1-20261017 opened with 7 legs before the act, every leg closed with proof, entry CLOSED."
+  },
+  {
+   "tool": "e111_legp.py",
+   "invocation": "python -I e111_legp.py gold|table|diff",
+   "result": "code/gold census 290 keys before and after; etf-classifications 11375 items, 13 seeded present, 9 held-out absent, first 200 keys equal before and after the single."
+  },
+  {
+   "tool": "e108_shipped_check.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R27_CHECKS/e108_shipped_check.py",
+   "result": "ok=True after the ship and at close."
+  }
+ ],
+ "controls": {
+  "ship_check": {
+   "description": "AC1's served-equals-repo test discriminates landed from not landed: at the base the served E_18 and dispatcher md5s differ from the repo's and the old-list line count is 17, so a no-op ship reads ok=False.",
+   "expected_landed": "E108-SHIPPED ok=True e18=f5c03ee6|f5c03ee6|MATCH dispatch=165933f6|165933f6|MATCH e18_old_list_lines=0",
+   "expected_not_landed": "E108-SHIPPED ok=False e18=a7820a20|f5c03ee6|DIFF dispatch=882a910b|165933f6|DIFF e18_old_list_lines=17",
+   "observed": "landed arm read here after the ship; not-landed arm recorded by the issuer in the order at the base; step-0 head-objects here read the base ETags a7820a20 and 882a910b.",
+   "status": "PASS"
+  },
+  "window_and_watch_set": {
+   "description": "Arms that could STOP the act: served base ETags exact, repo md5s exact, runner stopped, no trigger-pending, code/gold watch set moved only the two keys.",
+   "expected_landed": "watch set moved = [E_18, gold_dispatch.sh], added 0, removed 0",
+   "expected_not_landed": "any other key moved is a STOP with a same-session restore by VersionId",
+   "observed": "step 0 and the in-shell re-read at 08:34Z: base ETags exact, md5 f5c03ee6 and 165933f6, 0 gold-layer-runner instances pending/running/stopping, trigger-pending 404; post census moved=2 added=0 removed=0.",
+   "status": "PASS"
+  }
+ },
+ "risk_class": "WORLD",
+ "never_widen_pair": {
+  "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_COO_HALF_SECCLASS_E18_REPOINT_SHIP_20261016.md@9de34e1632",
+  "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_CTO_HALF_SECCLASS_E18_REPOINT_SHIP_20261016.md@d245ef138e"
+ },
+ "rollback": "Restore both keys by base VersionId (E_18 wb5QYkh7QEfrvMEscg.EgAui0MeBaNwB, gold_dispatch.sh .bNYVetB5sGV8bZki7EgXBfChCH_uPyE) with the base bytes, then re-run e108_shipped_check expecting the base line. Not used: the issuer accepted the ship (msg 7450, CTO msg 7449).",
+ "declared_exclusions": [
+  {
+   "item": "Leg Q criterion 'the nine held-out tickers reported unresolved'.",
+   "reason": "Not met as written: E_18's resolution filter skips the nine (log 'Already resolved: 9', 0 candidates); the single also ran with --upload (0 candidates, 0 writes). Table unchanged. ACCEPTED by 2.0.0_SA_COO~M1 msg 7450 and the CTO msg 7449; see org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/E111_LEGQ_FINDINGS_20261017.md."
+  },
+  {
+   "item": "Leg G: the first scheduled fire after the ship.",
+   "reason": "The issuer's by the order ('LEG G is the issuer's'). Not measurable until the fire runs."
+  },
+  {
+   "item": "comp-adversary on the named-ship set.",
+   "reason": "Declared RUN by the issuer in the order's preflight; this seat did not run it. The equivalent here is the printed member list and the 290-key watch set."
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/session_e111b_e18_repoint_ship_0829-0900Z.md"
+}
