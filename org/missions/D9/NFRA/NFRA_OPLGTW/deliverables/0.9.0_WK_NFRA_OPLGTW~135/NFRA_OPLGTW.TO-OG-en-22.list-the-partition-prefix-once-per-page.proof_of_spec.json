@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-22",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~135",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5bee627be9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5bee627be9",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-22.list-the-partition-prefix-once-per-page.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_core.py",
+      "kind": "script",
+      "commit_or_etag": "53e2aebf97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ctx.partition_keys(prefix) added (one typed_scope.list_keys listing of the served prefix, the read_rows rule per key); read_rows gains key=None. With key=None the listing and the layout pick are the previous code. No release, no deploy, no AWS call."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "53e2aebf97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_read_partitions takes the index once per call when ctx offers partition_keys and passes key= to each read; a partition with no key answers no rows. Filter, fence, sort, cursor, gate, page size and worker count untouched. app/tools.py not touched."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en22.py",
+      "kind": "script",
+      "commit_or_etag": "53e2aebf97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: test_ogen22_ac01..ac03 against a real Ctx with typed_scope.list_keys and read_parquet replaced by an in-memory store (396 partitions, mixed layouts). No existing test was edited: the ten window files pass unchanged."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one surprise row NFRA_OPLGTW-Z-W135-S1 appended (the agent definition and the row schema are not materialized in this sparse worktree)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass (test_ogen22_ac01, test_ogen22_ac02, test_ogen22_ac03).",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en22.py test_ogen22_ac01 test_ogen22_ac02 test_ogen22_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 named tests of 3; 0 failed; 0 error",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~135 '^infra/aws/ec2/opal-gateway/(app/(client_core|client_adapter_bd49f)\\.py|tests/test_og_(en22|en20|en19|en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~135: files touched 3; product files 3; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched of the 3 product files; 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~135: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the ten window test files pass together in both orders with the same count.",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh en22set tests/test_og_en4.py tests/test_og_en12.py tests/test_og_cl2.py tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en22.py; echo \"exit=$?\"",
+      "output_evidence": "en22set forward: passed 36; failed 0\nen22set reverse: passed 36; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "36 passed forward of 36; 36 passed reverse of 36; 0 failed in either order",
+      "status": "PASS",
+      "expect": "(?s)en22set forward: passed (\\d+); failed 0.*en22set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negative arm is built into test_ogen22_ac01: the base path (the NoIndex wrapper, a real Ctx with partition_keys hidden) is run on the same store and must list the served prefix 31 times for one page of 30 partitions, while the indexed path must list it 2 times. A regression to the per-partition listing therefore fails AC1. No scratch mutant file was built.",
+      "expected": "base listings 31; indexed listings 2; base output equal to indexed output",
+      "observed": "AC1 passes with the assertions above in force: the indexed page lists 2 times and the base page lists 31 times (the test's own counters); the two answers are equal",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 run twice, in full, after the last product commit (53e2aebf97); the two runs compared",
+      "observed": "run 1 and run 2 identical: AC1 pytest rc=0, 3 of 3 passed; AC2 files touched 3, product 3, outside 0; AC3 en22set forward 36 passed, reverse 36 passed; all RESULT: PASS, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Page wall time before and after on the same 13-month window.",
+      "reason": "Measured by the applier in the release's Phase A on the host, not by this worker (order section 1, issuer note). The offline proof is the listing count and byte-equality."
+    },
+    {
+      "item": "Any release, deploy, IAM, env key or registry change.",
+      "reason": "The order's bounds forbid them; the cell is code and offline tests only."
+    },
+    {
+      "item": "The full gateway test suite.",
+      "reason": "Not a criterion of this order. The ten window files named by AC3 are the criterion's denominator."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W135-S1"
+  ],
+  "session_log": "The trail is this instance, the commit 53e2aebf97 (client_core.py, client_adapter_bd49f.py, tests/test_og_en22.py) on branch wk-NFRA_OPLGTW-135, the investigation row NFRA_OPLGTW-Z-W135-S1, and the criterion invocations recorded above. Outside the three criteria, test_og_ch1.py was run once and its AC4 fails because data/mdpf/config/partner_roster.json (tracked at HEAD) is not materialized in this sparse worktree; that file is not in the order's paths and is not a criterion here.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~135 <0.9.0_WK_NFRA_OPLGTW~135@opal.agent>\" -F .scratch/msg_og_en22_code.txt -- infra/aws/ec2/opal-gateway/app/client_core.py infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py infra/aws/ec2/opal-gateway/tests/test_og_en22.py",
+      "result": "rc 0; commit 53e2aebf97; commit-gate passed; gitlink-publication-check refusals=0"
+    }
+  ]
+}
