@@ -102,7 +102,8 @@ def refusing(status=403, payload=b"forbidden"):
 def run_main(tmp_path, base, routes=None, stdin_text=None, extra=()):
     out = str(tmp_path / "out")
     argv = ["--go", GO, "--base", base, "--email", EMAIL, "--ticket", TICKET, "--firm-a", FIRM_A,
-            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--out", out] + list(extra)
+            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--report-id", REQ, "--export-id", REQ,
+            "--out", out] + list(extra)
     text = stdin_text if stdin_text is not None else json.dumps({"password": PASSWORD})
     rc = drv.main(argv, stdin=io.StringIO(text), routes=routes)
     return rc, out

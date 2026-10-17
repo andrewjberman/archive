@@ -49,3 +49,23 @@ grant, and the new stage fails closed. The deploy is therefore PART-LANDED, and 
    with no write, so the stale calendar member is shown not to touch the returns, class, lots and filled stages.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 1 -- the re-stage (2026-10-16 ~23:5xZ); `~F2` countersigns before IB2 resumes
+
+**Input read:** `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/R137_49F_RESTAGE_CHECK.md` @976f8cfbf4.
+- DB-f-2205 is drained.
+- **All 23 pins were re-checked by content: 0 stale.**
+- A bundle smoke over the pinned blobs reproduced IB2's failure before the re-pin and passes after it.
+
+**Restated:**
+1. **Build-only hash** (built twice): base64 sha256 `JgSV12TzBm0nHmWKKvtk35PWQvFePk3NHQzGWeACYes=`. It replaces `SCt7IgN3...`. The real build prints it or STOPS.
+2. **The second apply's plan gate is exactly 0 to add, 1 to change, 0 to destroy:** the function's code attributes only. The write grant is
+   already live from the first apply. Any policy line STOPS.
+3. **IB2 resumes at Act 1 (build and upload), then Acts 3 to 6 as signed,** with the time-margin trigger and my rollback word unchanged.
+   The 2026-10-18 23:59Z rollback deadline stands.
+4. **Sequencing with CLOUD's source-map retirement (MSTR msg 10041):** this re-stage FINISHES on the current path first. MSTR's drain that
+   takes CLOUD's deletion waits until this ledger and DB-b-315's are CLOSED, or each is between acts. After the drain, `~F2` ports the
+   entry byte-exact and re-runs BUILD_ONLY through the function-map path, and it must equal the hash in 1. A difference is a STOP to this
+   seat.
+
+-- `1.0.0_SA_CTO~DELL2`

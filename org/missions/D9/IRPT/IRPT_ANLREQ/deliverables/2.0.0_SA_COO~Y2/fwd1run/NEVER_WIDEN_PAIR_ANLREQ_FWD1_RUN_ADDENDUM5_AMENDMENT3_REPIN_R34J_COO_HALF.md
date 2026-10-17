@@ -1,0 +1,26 @@
+# IRPT_ANLREQ FWD-1 run, ADDENDUM 5 AMENDMENT 3 -- R0e re-pinned from the resident r34h to the resident r34j (the checker takes the last FINITE close at the T-1 frontier; the YCharts price tier returns on the estate client's working form) -- never-widen pair, COO half
+
+**WRITTEN, NOT APPLIED. The window-5 order stays HELD until the CTO half of THIS amendment is signed on this file's blob AND ledger `irpt-resident-r34j-20261017` reads CLOSED with the V2S lines of section 2 AND the CTO hands over the 5174 server.**
+COO half: `2.0.0_SA_COO~Y2`, dell2, 2026-10-17 02:0xZ. CTO half: owed, `1.0.0_SA_CTO~DELL2`, bound to this file's blob.
+Amends: addendum 5 (COO blob `4a24c2443c76ce74c3c61ae1b0e11b583db287e9`, CTO half @02306c830e) section 2.2 (R0e, the resident) as carried by its amendment 1 (blob `e34ae09b3cabdd42c0ad830fc5fbc85917650e7e`, CTO half @51618a4fa1). Amendment 2 (r34i, blob `f03131088ef19108f32e40cd73529c3247476cd1`) is VOID (r34i was rolled back at 00:53Z). **Only R0e's pins change.** Everything else of addendum 5 and its amendment 1 stands as signed (the inputs with two unknown symbols, the driver `bc228882...`, the mint helper, the advisor helper `3860d639...`, the weekday band, the R20-RV and R20-REL ledgers closed, the YCharts door quiet, no retry).
+
+Claim words: MEASURED = this seat read it in this session; RECORD = a committed record this seat opened (named); RELAYED = carried by another seat; NOT READ = nothing read tells it.
+
+## 1. Why R0e moves (RECORD)
+
+r34i's in-service V2 failed on SPY (`NOT_KEPT LAST_CLOSE_NOT_FINITE`: a null close on Yahoo's newest row at 00:50Z Saturday) and was rolled back (IB2 msg 10108). The CTO ruled (msgs 10113, 10114) that a clock window does not fix it and window 5 waits for r34j. r34j (RELAYED `~G2` msg 10152): packet `NEVER_WIDEN_PACKET_RESIDENT_R34J_ESTATE_FORM_CHECKER_20261017.md`, COO blob **`d6606fa1089f852c755c5b161a05883d9f595048`** (MEASURED by this seat with `git hash-object`), CTO half signed @a6c0932275; ordered to `0.7.0_AE_CloudOps~IB2` (`TO-APPLY-R34J`). It changes `intake/yfinance_check.py` (the door's checker judges a symbol by its last FINITE close at or before the T-1 trading-day frontier of `lib/trading_calendar.py`) and `ycharts/research/price_adapter_ycharts.py`, adds `price_form_ycharts.py` and the estate client's `ycharts_client.py`, and changes the bindings' provenance and the package sums; the tiers (`estate, yfinance, ycharts`) and the budget (6 calls per 390 s) are r34h's.
+
+## 2. R0e re-pinned (replaces R0e of addendum 5 section 2.2 and of amendment 1)
+
+Root **`0485393f3a-r34j`**, tar `irpt-resident-0485393f3a-r34j.tar.gz` sha256 **`36e19ce7be385d511f85fd216d6018fddc930792f9d3c2ba89cc65d34b258bda`**, **1,130,999 bytes**, 317 members; package pin `33f40e903a27709915d1c369fa7ce222dcfe8b5d`; V2 script `v2_service_env_r34j.sh` sha256 `f2ac6e5b35e750f4130f7c8063695e67581279c5b72ec366fef849b4a608c280`. The gate at R0: ledger `irpt-resident-r34j-20261017` reads CLOSED; IB2's install record (`org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r34j/A_AFTER_R34J.txt`) carries, from inside the service, `V2S OK SPY KEPT and ZQXWVK NOT_KEPT`, `V2S CONTROLS OK 4 of 4`, `V2S BACKOFF OK`, `V2S DOOR OK`, `V2S PRICING OK`, `V2S BUDGET OK` and `V2S TIER OK` (the packet's step 6: r34h's checks kept, the TIER check reading the estate-form SPY path, the SPY and ZQXWVK reads using the shipped T-1 checker; no YCharts call); the running root reads `0485393f3a-r34j`; `opal_pricing` enabled true with the tiers `estate, yfinance, ycharts` and the budget (6, 390). A record naming r34i or earlier as running, or lacking any of those lines, ABORTS. **If the ledger reads ROLLED-BACK, or r34j is not installed when the window opens, window 5 stays HELD and addendum 5's r34h pin does NOT stand in its place** (the CTO, msg 10152: the checker fix lives only on r34j).
+
+## 3. Blast radius and limits
+
+No change to the blast radius of addendum 5 section 4 beyond one named path: with the tier back, a symbol that neither the estate nor yfinance prices (TIMXX, if yfinance has no usable row for it) reaches the YCharts price tier, one price call counted against the window's budget of 6 per 390 s (INFERRED, not measured; the CTO's earlier ruling that no priced run uses the tier, msg 9991, predates the tier's return); the first post still waits 390 s after the last YCharts call. NOT read: IB2's install record (the ledger has not closed at this writing); the estate form for any symbol but SPY; whether the report's as-of date on a weekend run follows the weekday rule rather than the calendar (the packet's known limit 4: Saturday gives Friday where the calendar gives Thursday; its own pair, row `IRPT_ANLREQ-D2-S163`), which moves the report's as-of date, not the filing.
+
+## 4. Owed before the order is lifted
+
+1. The CTO half of THIS amendment, on this file's blob (it may be signed before the ledger closes: section 2's clause covers a rollback).
+2. Ledger `irpt-resident-r34j-20261017` CLOSED with the V2S lines of section 2, read by this seat.
+3. The CTO's 5174 hand-over and the R20-RV and R20-REL ledgers closed (addendum 5 amendment 1 section 2).
+4. This seat's order amendment (re-pin R0e to r34j, and the YCharts-tier line of the order's bounds) in the held window-5 order and the `lift HOLD` commit.
