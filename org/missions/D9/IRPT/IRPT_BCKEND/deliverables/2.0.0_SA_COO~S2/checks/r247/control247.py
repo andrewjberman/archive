@@ -18,7 +18,7 @@ import p247_cells as P  # noqa: E402
 
 GOOD = {
     "gates": {
-        "packet_sha256_prefix": P.PACKET_SHA256_PREFIX, "addendum_1_blob": P.A1_DRAFT_BLOB, "addendum_2_blob": P.A2_COO_BLOB,
+        "packet_sha256_prefix": P.PACKET_SHA256_PREFIX, "addendum_1_blob": P.A1_DRAFT_BLOB, "addendum_2_blob": P.A2_COO_BLOB, "addendum_3_blob": P.A3_COO_BLOB, "export_bundle_with_sha256_refusal_live_and_read_back": True,
         "all_halves_signed": True, "hop2_ledger_closed": True, "one_change_at_a_time": True, "open_deploys_worktrees_read": 80,
         "before": {"read_function_sha256": P.READ_BEFORE, "export_function_sha256": P.EXPORT_BEFORE, "report_route_absent": True},
     },
@@ -39,7 +39,7 @@ def run(tree, cid):
 
 def build(rec):
     tree = Path(tempfile.mkdtemp(prefix="c247_"))
-    for rel in (P.PAIR_COO, P.PAIR_CTO, P.A1_DRAFT, P.A1_COO, P.A2_COO):
+    for rel in (P.PAIR_COO, P.PAIR_CTO, P.A1_DRAFT, P.A1_COO, P.A2_COO, P.A3_COO):
         dst = tree / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / rel, dst)
@@ -64,6 +64,8 @@ NEG = [
     ("IB247-1-AC1", mutate(("gates", "hop2_ledger_closed"), False)),
     ("IB247-1-AC1", mutate(("gates", "before", "read_function_sha256"), "OTHER=")),
     ("IB247-1-AC1", mutate(("gates", "addendum_2_blob"), "0" * 40)),
+    ("IB247-1-AC1", mutate(("gates", "export_bundle_with_sha256_refusal_live_and_read_back"), False)),
+    ("IB247-1-AC1", mutate(("gates", "addendum_3_blob"), "0" * 40)),
     ("IB247-1-AC2", mutate(("h3", "route_present_after"), False)),
     ("IB247-1-AC2", mutate(("h3", "existing_routes_changed"), 1)),
     ("IB247-1-AC2", mutate(("h4a", "after_sha256"), "ZZZZ")),
@@ -71,6 +73,7 @@ NEG = [
     ("IB247-1-AC3", mutate(("h4b", "fence_row", "regenerated_and_read_back"), False)),
     ("IB247-1-AC3", mutate(("h4b", "statements_added"), 2)),
     ("IB247-1-AC3", mutate(("h4b", "statement", "resource"), "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/*")),
+    ("IB247-1-AC3", mutate(("h4b", "statement", "actions"), ["s3:GetObject", "s3:GetObjectVersion"])),
     ("IB247-1-AC3", mutate(("counters", "rollback_performed"), True)),
     ("IB247-1-AC3", mutate(("counters", "console_edits"), 1)),
 ]

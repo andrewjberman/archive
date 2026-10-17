@@ -21,16 +21,18 @@ PAIR_CTO = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_551_SERVE_PATH_HOPS_2_4_CTO
 A1_DRAFT = D + "2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_1_EXPORT_FILLED_READ_GRANT_DRAFT.md"
 A1_COO = D + "2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_1_COO_HALF.md"
 A2_COO = D + "2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_2_FENCE_ROW_COO_HALF.md"
+A3_COO = D + "2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_3_GETOBJECT_ONLY_SHA256_REFUSAL_COO_HALF.md"
 PACKET_SHA256_PREFIX = "7daa29f0fe10"
 A1_DRAFT_BLOB = "9462b5ad35af646c96ede013f03d4449e8815033"
 A1_COO_BLOB = "a09b331c4153cba7aea872001ed7998145d0e984"
 A2_COO_BLOB = "b5c303ea69ffa4195ec441d455d9f1978c327678"
+A3_COO_BLOB = "87a46d9cf370c293dae46a413cba213db721b5ef"
 READ_FN, EXPORT_FN = "irpt-49f-reporting-read-lambda", "irpt-export-render"
 READ_BEFORE = "WjnDxvu2biEPXcwuF8oXJWRUqFaeUY550xnRxa2daa0="
 EXPORT_BEFORE = "5/9LZBbTEWOfrnNZufc6Mqz5pbDxTxYAxpWcZVURGs4="
 REPORT_ROUTE = "GET /api/scoped/investor-reporting/reporting/client/{client_id}/report"
 STATEMENT_RESOURCE = "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/client=*/filled_report.json"
-STATEMENT_ACTIONS = ["s3:GetObject", "s3:GetObjectVersion"]
+STATEMENT_ACTIONS = ["s3:GetObject"]  # ADDENDUM 3: GetObjectVersion withdrawn (XA-20261017T010553Z-d493)
 ROOT = Path(".")
 CID = ""
 
@@ -69,24 +71,26 @@ def plan_is(p, add, change, destroy):
 
 
 def ac1(r):
-    for rel, want in ((A1_DRAFT, A1_DRAFT_BLOB), (A1_COO, A1_COO_BLOB), (A2_COO, A2_COO_BLOB)):
+    for rel, want in ((A1_DRAFT, A1_DRAFT_BLOB), (A1_COO, A1_COO_BLOB), (A2_COO, A2_COO_BLOB), (A3_COO, A3_COO_BLOB)):
         if blob(rel) != want:
             fail("%s must hold its signed blob %s" % (rel, want))
     if not text(PAIR_COO).strip():
         fail("the pair's COO half must be present")
     cto = text(PAIR_CTO)
-    for key in (PACKET_SHA256_PREFIX, A1_DRAFT_BLOB[:10], A2_COO_BLOB[:10]):
+    for key in (PACKET_SHA256_PREFIX, A1_DRAFT_BLOB[:10], A2_COO_BLOB[:10], A3_COO_BLOB[:10]):
         if key not in cto:
             fail("the CTO half must name the signed bytes %s" % key)
-    if len(re.findall(r"(?<![A-Za-z])SIGNED", cto)) < 3:
-        fail("the CTO half must read SIGNED for the pair, ADDENDUM 1 and ADDENDUM 2")
+    if len(re.findall(r"(?<![A-Za-z])SIGNED", cto)) < 4:
+        fail("the CTO half must read SIGNED for the pair and ADDENDUM 1, 2 and 3")
     g = r.get("gates") or {}
-    if g.get("packet_sha256_prefix") != PACKET_SHA256_PREFIX or g.get("addendum_1_blob") != A1_DRAFT_BLOB or g.get("addendum_2_blob") != A2_COO_BLOB:
-        fail("gates must carry the packet prefix and the two addendum blobs")
+    if g.get("packet_sha256_prefix") != PACKET_SHA256_PREFIX or g.get("addendum_1_blob") != A1_DRAFT_BLOB or g.get("addendum_2_blob") != A2_COO_BLOB or g.get("addendum_3_blob") != A3_COO_BLOB:
+        fail("gates must carry the packet prefix and the three addendum blobs")
     if g.get("all_halves_signed") is not True or g.get("hop2_ledger_closed") is not True:
         fail("gates.all_halves_signed and gates.hop2_ledger_closed must be true (hop 2 first, CTO msg 9614)")
     if g.get("one_change_at_a_time") is not True or not isinstance(g.get("open_deploys_worktrees_read"), int) or g["open_deploys_worktrees_read"] < 1:
         fail("gates.one_change_at_a_time must be true and the worktree union of .open_deploys must be printed with a denominator of 1 or more (CVO msg 8750)")
+    if g.get("export_bundle_with_sha256_refusal_live_and_read_back") is not True:
+        fail("gates.export_bundle_with_sha256_refusal_live_and_read_back must be true BEFORE the IAM statement (CTO half of ADDENDUM 3: otherwise the old code passes a VersionId the new grant no longer allows)")
     b = g.get("before") or {}
     if b.get("read_function_sha256") != READ_BEFORE or b.get("export_function_sha256") != EXPORT_BEFORE or b.get("report_route_absent") is not True:
         fail("gates.before must equal the order's BEFORE state (read %s, export %s, report route absent); a different value is a STOP and a re-cut" % (READ_BEFORE, EXPORT_BEFORE))
