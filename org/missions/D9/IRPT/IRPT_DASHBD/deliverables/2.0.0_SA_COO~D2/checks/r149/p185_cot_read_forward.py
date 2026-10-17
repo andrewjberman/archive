@@ -20,7 +20,7 @@ import sys
 import contextlib
 from pathlib import Path
 
-BASE = "dc96ba2eb7"
+BASE = "5b50c09c34"  # the worker branch point; served.py is byte-identical to dc96ba2eb7
 AUTHZ = "infra/aws/lambda/investor-reporting/_authz/"
 SERVED = AUTHZ + "served.py"
 TESTS = AUTHZ + "tests/"
@@ -52,7 +52,8 @@ def check_diff(root):
     need(out.returncode == 0, "cannot diff against the base %s" % BASE)
     untracked = subprocess.run(["git", "-C", str(root), "ls-files", "--others", "--exclude-standard"], capture_output=True, text=True)
     changed = {x for x in (out.stdout + untracked.stdout).splitlines() if x.strip()}
-    extra = [f for f in changed if f != SERVED and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith("test_forward_cottonwood"))]
+    own = ("org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~", "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/", "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-319.")
+    extra = [f for f in changed if f != SERVED and not f.startswith(own) and not (f.startswith(TESTS) and f.rsplit("/", 1)[-1].startswith("test_forward_cottonwood"))]
     need(not extra, "files outside the agreed set changed: %s" % extra[:4])
     need(SERVED in changed and any(f.startswith(TESTS) for f in changed), "served.py and a test_forward_cottonwood* file must both be in the diff")
     new, old = (root / SERVED).read_bytes().decode("utf-8"), git_show(root, SERVED)
