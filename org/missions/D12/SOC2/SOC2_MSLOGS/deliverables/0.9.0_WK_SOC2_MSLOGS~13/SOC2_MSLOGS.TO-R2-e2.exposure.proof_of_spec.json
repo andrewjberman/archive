@@ -15,18 +15,40 @@
   "assignee": "0.9.0_WK_SOC2_MSLOGS~13",
   "artifacts_produced": [
     {
-      "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/exposure.py",
+      "kind": "script",
+      "commit_or_etag": "f633086f3f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL: surprise row SOC2_MSLOGS-D1-W13-S1 staged in the commit that carries this instance on wk-SOC2_MSLOGS-13. Nothing deployed."
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-13 at f633086f3f. Not deployed to the Lambda; handler.py wiring is the issuer's at the merge; no AWS call."
     },
     {
-      "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~13/SOC2_MSLOGS.TO-R2-e2.exposure.session.log",
-      "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py",
+      "kind": "test",
+      "commit_or_etag": "f633086f3f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL: session log of the dry run, committed with this instance on wk-SOC2_MSLOGS-13. No AWS call, no network."
+      "deploy_evidence": "LOCAL: synthetic records only, committed on wk-SOC2_MSLOGS-13 at f633086f3f."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/read_exposure.py",
+      "kind": "script",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: committed on wk-SOC2_MSLOGS-13 at f633086f3f. The real door_client invoker is not run here (no network, no AWS call).",
+      "artifact_covered_by": ["R2-e2-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_read_exposure.py",
+      "kind": "test",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: injected invoker and a stubbed door_client module; no network."
+    },
+    {
+      "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: surprise rows SOC2_MSLOGS-D1-W13-S1 (BLOCKING, resolved by the issuer) and SOC2_MSLOGS-D1-W13-S2 (OBSERVATION) committed at f633086f3f."
     }
   ],
   "acceptance": [
@@ -35,58 +57,62 @@
       "criterion_verbatim": "`R2-e2-AC1` -- from detail rows the door module lists what was opened and what left to an outside recipient, says plainly what the feed does not record, and carries no raw record.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door",
-      "output_evidence": "R2-EXPOSURE_DOOR-REFUSED missing C:\\Dev\\ajb_wk\\soc2-r2-13\\infra\\aws\\lambda\\globgrph-trino-access\\exposure.py (rc=1, run under timeout 120); expected token R2-EXPOSURE-OK not printed.",
-      "denominator": "0 of 1 check invocations exits 0; the door module does not exist in this worktree",
-      "status": "FAIL",
-      "status_reason": "The worktree sparse-checkout omits infra/aws/, so exposure.py is absent and the cell was not built. Surprise SOC2_MSLOGS-D1-W13-S1 (BLOCKING) holds the premise failure. The order stays open until the issuer re-cuts it on a worktree that carries the paths."
+      "output_evidence": "R2-EXPOSURE-OK opened=5 left=4 (rc=0; run under timeout 120). The check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0 with an empty refusal list; the mutant run of the same check was refused, 1 of 1, rc=1",
+      "status": "PASS"
     },
     {
       "criterion_id": "R2-e2-AC2",
       "criterion_verbatim": "`R2-e2-AC2` -- the client asks for exactly the `exposure` payload, refuses a bad account before any call, and prints the three sections in Eastern time.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client",
-      "output_evidence": "R2-EXPOSURE_CLIENT-REFUSED missing C:\\Dev\\ajb_wk\\soc2-r2-13\\data\\m365_metadata\\scripts\\silver\\read_exposure.py (rc=1, run under timeout 120); expected token R2-EXPCLIENT-OK not printed.",
-      "denominator": "0 of 1 check invocations exits 0; the client module does not exist in this worktree",
-      "status": "FAIL",
-      "status_reason": "The worktree sparse-checkout omits data/, so read_exposure.py is absent and the cell was not built. Surprise SOC2_MSLOGS-D1-W13-S1 (BLOCKING) holds the premise failure. The order stays open until the issuer re-cuts it on a worktree that carries the paths."
+      "output_evidence": "R2-EXPCLIENT-OK (rc=0; run under timeout 120). The check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0 with an empty refusal list",
+      "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant was applied: there is no module in this worktree to mutate, so no control fired.",
-      "expected": "a mutant of exposure.py or read_exposure.py refused by s1_check_r2.py",
-      "observed": "not applied; both check runs refused on the missing file, which is the premise failure, not a control result",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "description": "exposure.py forward-rule domain filter removed in place (the same-domain boss@opalinvest.com was then listed as left); exposure_door must refuse.",
+      "expected": "R2-EXPOSURE-REFUSED naming the left list, rc=1",
+      "observed": "R2-EXPOSURE-REFUSED left is [... ('e1', 'forward_rule', 'boss@opalinvest.com') ...], wanted [... without it ...] rc=1. File restored from .scratch/exposure.good.py and cmp-verified; the check passed again (R2-EXPOSURE-OK opened=5 left=4).",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A-WITH-REASON: the two check runs are refusals on a missing file; running them twice proves nothing about the cell",
-      "observed": "not run twice; the refusal lines are recorded verbatim in the acceptance rows",
-      "status": "N/A-WITH-REASON"
+      "method": "exposure_door and exposure_client each run twice on the same committed tree, outputs compared",
+      "observed": "R2-EXPOSURE-OK opened=5 left=4 rc=0 on both runs; R2-EXPCLIENT-OK rc=0 on both runs",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "Building exposure.py and read_exposure.py, and their tests",
-      "reason": "BLOCKING: the write paths are absent from the sparse checkout. The BOUNDS clause forbids rebuilding or reconstructing the tree to make the order executable, so the order stops here."
+      "item": "handler.py wiring of the exposure op",
+      "reason": "another queue's file; the issuer wires the op into handler.py at the merge."
     },
     {
-      "item": "pytest run named in the REPORT line",
-      "reason": "the two test files live under the omitted paths and do not exist in this worktree."
+      "item": "real door_client invoker and write_desktop run",
+      "reason": "door_client.py is another cell's and is not in this worktree; tests inject the invoker and stub the desktop writer, and main is never run against the real door."
     },
     {
-      "item": "Widening the sparse checkout",
-      "reason": "a checkout change outside the worker grant; the surprise row carries the fix to the issuer."
+      "item": "deploy of exposure.py to the globgrph-trino-access Lambda",
+      "reason": "LOCAL cell; the order calls nothing live (no AWS call, no network, no Terraform)."
     }
   ],
   "surprises": [
-    "SOC2_MSLOGS-D1-W13-S1: the worktree sparse-checkout omits data/ and infra/aws/, so the two TO-R2-e2 new-file paths are absent and both acceptance checks refuse (BLOCKING, INERT)."
+    "SOC2_MSLOGS-D1-W13-S1: the worktree sparse checkout omitted data/ and infra/aws/, so run 1 refused both checks; the issuer widened the scope (row stays as filed, BLOCKING, INERT).",
+    "SOC2_MSLOGS-D1-W13-S2: the EXPOSURE contract's two open readings (anonymous_link with invalid raw_json; NOT RECORDED lines with no time) were resolved as stated in the build (OBSERVATION, INERT)."
   ],
   "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~13/SOC2_MSLOGS.TO-R2-e2.exposure.session.log",
   "compiler_tools": [
     {
       "tool": "python s1_check_r2.py",
-      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door ; timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client",
-      "result": "R2-EXPOSURE_DOOR-REFUSED rc=1; R2-EXPOSURE_CLIENT-REFUSED rc=1"
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door ; python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client",
+      "result": "R2-EXPOSURE-OK opened=5 left=4 rc=0; R2-EXPCLIENT-OK rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py data/m365_metadata/scripts/tests/test_read_exposure.py -q",
+      "result": "31 passed in 0.09s, rc=0"
     }
   ]
 }
