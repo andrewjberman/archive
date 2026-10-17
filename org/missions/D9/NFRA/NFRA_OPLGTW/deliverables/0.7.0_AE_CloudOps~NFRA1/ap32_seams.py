@@ -11,8 +11,8 @@ import sys
 
 LIVE, TRUNK, OUT = sys.argv[1:4]
 G = "infra/aws/ec2/opal-gateway/"
-APP = ["client_adapter_bd49f"]
-TESTS = ["test_og_en17", "test_og_en15", "test_og_cl2"]
+APP = ["client_adapter_bd49f"] + ["harvest_figures", "harvest_identity", "harvest_research"]
+TESTS = ["test_og_en17", "test_og_en18", "test_og_en15", "test_og_en13", "test_og_cl2"]
 take = {G + "app/%s.py" % m for m in APP} | {G + "app/refs/DATA_CATALOG.yaml"}
 tests = {G + "tests/%s.py" % t for t in TESTS}
 
