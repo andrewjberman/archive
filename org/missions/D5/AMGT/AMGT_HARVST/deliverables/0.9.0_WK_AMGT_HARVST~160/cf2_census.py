@@ -12,7 +12,7 @@ its HEAD revision loaded from `git show HEAD:lib/research/corpus/continuation.py
 Reads ONLY (through the repo shim .tools/aws, s3api list-objects-v2 and get-object):
   - the silver research-report parts (store.silver_latest, read ONCE);
   - each row's extraction object (v2 when it exists, else v1; continuation._read_reports_with_bytes).
-No gold object is read or written. Nothing is written to S3. Budget enforced: 800 requests, 500 MiB.
+No gold object is read or written. Nothing is written to S3. Budget enforced: 1200 requests, 700 MiB (AMENDMENT 2).
 """
 import importlib.util
 import io
@@ -30,10 +30,13 @@ SCRATCH = os.path.join(ROOT, ".scratch", "cf2")
 os.makedirs(SCRATCH, exist_ok=True)
 GOLD_PREFIX = "amgt/harvest/gold/research-continuation/security_key=%s/"
 BUCKET = "opal-data-harvest"
-BUDGET_REQUESTS = 800
-BUDGET_BYTES = 500 * 1024 * 1024
+BUDGET_REQUESTS = 1200  # AMENDMENT 2 (order 1d): 1200 requests in all
+BUDGET_BYTES = 700 * 1024 * 1024  # AMENDMENT 2 (order 1d): 700 MiB in all
 ALL_SECURITIES_IN_TABLE = 94
 HEAD_PATH = "lib/research/corpus/continuation.py"
+# the round-90 baseline is the base the order was cut from (dca8722353). HEAD moves with the
+# worktree commits, so HEAD is NOT the baseline once the build is committed (AMENDMENT 2 re-run).
+BASE_REV = "dca8722353"
 
 from botocore.exceptions import ClientError  # noqa: E402
 
@@ -48,9 +51,9 @@ _guard = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_guard)
 
 # the code as it stood at HEAD, loaded as a second module (the "before")
-_head_proc = subprocess.run(["git", "show", "HEAD:" + HEAD_PATH], cwd=ROOT, capture_output=True)
+_head_proc = subprocess.run(["git", "show", BASE_REV + ":" + HEAD_PATH], cwd=ROOT, capture_output=True)
 if _head_proc.returncode != 0:
-    raise SystemExit("git show HEAD:%s rc=%d: %s" % (HEAD_PATH, _head_proc.returncode,
+    raise SystemExit("git show %s:%s rc=%d: %s" % (BASE_REV, HEAD_PATH, _head_proc.returncode,
                                                       _head_proc.stderr.decode("utf-8", "replace")[:300]))
 _head_file = os.path.join(SCRATCH, "continuation_head.py")
 with open(_head_file, "wb") as fh:
@@ -147,8 +150,8 @@ silver_rows = list(latest.values())
 all_securities = sorted({r.get("security_key") for r in silver_rows})
 print("# DENOMINATOR silver_rows=%d distinct_securities=%d (table denominator %d)"
       % (len(silver_rows), len(all_securities), ALL_SECURITIES_IN_TABLE))
-print("# METHOD before = continuation.py at HEAD (git show HEAD:%s, loaded as a second module); "
-      "after = the worktree continuation.py; both run on the SAME items from _read_reports_with_bytes" % HEAD_PATH)
+print("# METHOD before = continuation.py at the round-90 base (git show %s:%s, loaded as a second module); "
+      "after = the worktree continuation.py; both run on the SAME items from _read_reports_with_bytes" % (BASE_REV, HEAD_PATH))
 print("# METHOD CHANGED = fund_of_record or last_stated_position differs in value, absent reason or key set; "
       "position_before/after = the first 60 characters of the value text")
 print("# METHOD stance_after = the after value's stance (holding when the key is absent), none when the position is absent")
