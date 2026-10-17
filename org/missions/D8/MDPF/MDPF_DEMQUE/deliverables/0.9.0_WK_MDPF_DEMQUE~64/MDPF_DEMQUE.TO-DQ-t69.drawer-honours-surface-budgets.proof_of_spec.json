@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t69",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t69.drawer-honours-surface-budgets.md",
+    "group": "OTHER",
+    "vintage_commit": "626c692706"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "626c692706",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t69.drawer-honours-surface-budgets.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~64",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "14ca9703e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "surface_budget, daily_total, surface_tag, actuals_rows, cells_of, row_surface, surface_drawn_today added; quote(..., drawn_surface_today=0) walks a surface-tagged non-tier-1 history backfill on the surface budget (_history_surface); record_actual(..., surface=None) writes the member only when not None; --quote --actuals passes the surface's drawn figure. Untagged and tier-1 quotes are unchanged (AC2 negative arm: 5858).",
+      "artifact_covered_by": [
+        "DQ9-t69-AC1",
+        "DQ9-t69-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "14ca9703e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_drawn_history_today leaves out surface-tagged actuals rows; _surface_room, _daily_total_left, _usable, day_room added; run() draws each history request against its surface pool or the untagged pool, capped by the daily total left; the stop test counts a usable surface room; marker and result gain surface_rooms and daily_total_left; --room (read only). The TRADING_DAY gate is untouched.",
+      "artifact_covered_by": [
+        "DQ9-t69-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_surface_room.py",
+      "kind": "test",
+      "commit_or_etag": "14ca9703e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the five named tests of the order. Stub client (TradingStub), tmp_path, a no-op budget recorder, a stubbed priority gate; the real allowance is read only and the temp allowance is a copy. 5 passed at 14ca9703e7.",
+      "artifact_covered_by": [
+        "DQ9-t69-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_bbg_backfill.py",
+      "kind": "test",
+      "commit_or_etag": "14ca9703e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDITED existing test test_backfill_stops_at_the_days_allowance: its request is surface D, so the quote reads budgets.surfaces.D (100000) in place of the 5858 ceiling. This is the one edit the order permits (a test that pins the old rule for a request that now carries a surface). Named in surprise row MDPF_DEMQUE-D1-W64-S1.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "14ca9703e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three appended rows: MDPF_DEMQUE-D1-W64-S1 (BLOCKING, ARMED: bbg_backfill passes no drawn_surface_today), MDPF_DEMQUE-D1-W64-S2 (BLOCKING, ARMED: the budget-ledger term can shrink an untagged room across a UTC-midnight run), MDPF_DEMQUE-D1-W64-S3 (OBSERVATION, INERT: the CLI extension). The surprise-row gate passed at commit (3 new rows).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t69-AC1",
+      "criterion_verbatim": "`DQ9-t69-AC1` -- the five named tests.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t69_tests.py",
+      "output_evidence": "============================== 5 passed in 2.21s ==============================  then the check prints SURF-OK; rc=0 at the worktree root. The five PASSED lines name test_a_surface_c_request_quotes_the_surface_budget_less_what_surface_c_drew_today, test_an_untagged_request_still_quotes_the_history_ceiling, test_the_drawer_draws_a_surface_c_request_past_the_history_ceiling_on_a_non_trading_day, test_surface_cells_never_exceed_the_daily_total_and_each_surface_has_its_own_room and test_a_trading_day_still_draws_nothing_for_a_surface_tagged_request.",
+      "denominator": "5 of 5 named tests PASSED by name; the file holds 5 tests, 5 passed, 0 failed",
+      "status": "PASS",
+      "expect": "SURF-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t69-AC2",
+      "criterion_verbatim": "`DQ9-t69-AC2` -- the real allowance file and the real surface-C request ETFS_RIVALS-C1-CLOSE-OWED-REST-20261017 through the real bbg_quote.py CLI: 400000 a fire and a finish on 2026-10-17; the same request without its tag quotes 5858 (the difference control).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t69_real.py",
+      "output_evidence": "SURF-OK; rc=0. Deciding values from the real CLI (bbg_quote.py --quote <real request> --today 2026-10-17): allowance_today 400000, finish_date 2026-10-17, finish_date_claim held, claims surface C / surface_budget held, cells_remaining 93104. Difference control (the same request with its surface member removed, in a scratch copy): allowance_today 5858, finish_date 2026-12-05, claims ceiling measured / reserve held.",
+      "denominator": "1 of 1 criterion; within it 2 CLI quotes of one request (tagged and untagged): 2 of 2 read as the order states",
+      "status": "PASS",
+      "expect": "SURF-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t69-AC3",
+      "criterion_verbatim": "`DQ9-t69-AC3` -- the drawer's own --room on the real allowance and the real requests folder: Saturday 2026-10-17 reads untagged 5858, the five surface budgets, daily total left 2500000; Monday 2026-10-19 reads trading day with every room 0.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t69_room.py",
+      "output_evidence": "SURF-OK; rc=0. Saturday read: {\"daily_total_left\": 2500000, \"day\": \"2026-10-17\", \"surfaces\": {\"A\": 350000, \"B\": 1500000, \"C\": 400000, \"D\": 100000, \"E\": 150000}, \"trading_day\": false, \"untagged\": 5858}. Monday read: {\"daily_total_left\": 2500000, \"day\": \"2026-10-19\", \"surfaces\": {\"A\": 0, \"B\": 0, \"C\": 0, \"D\": 0, \"E\": 0}, \"trading_day\": true, \"untagged\": 0} (the two reads made with an empty budget directory and no actuals ledger, so nothing is drawn and no carry-over).",
+      "denominator": "2 of 2 reads (Saturday 2026-10-17 non-trading, Monday 2026-10-19 trading); each read carries 1 untagged figure, 5 surface figures and the daily total, all matching the order",
+      "status": "PASS",
+      "expect": "SURF-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "surface_tag forced to return None (every request untagged) in process, by a one-line monkeypatch of bbg_quote.surface_tag before pytest runs test_demque_surface_room.py; no worktree file edited",
+      "expected": "at least one named surface test fails, because the surface walk and the surface rooms are both reached only through surface_tag",
+      "observed": "3 failed, 2 passed: FAILED test_a_surface_c_request_quotes_the_surface_budget_less_what_surface_c_drew_today, FAILED test_the_drawer_draws_a_surface_c_request_past_the_history_ceiling_on_a_non_trading_day, FAILED test_surface_cells_never_exceed_the_daily_total_and_each_surface_has_its_own_room; the two untagged and trading-day tests pass; rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice at the committed tree 14ca9703e7 (once during the build, once before this proof was written): the same SURF-OK and rc=0 both times. The demque folder was run once at the final tree.",
+      "observed": "AC1 SURF-OK rc=0 twice; AC2 SURF-OK rc=0 twice; AC3 SURF-OK rc=0 twice. Folder at the final tree: 4 failed, 219 passed, 8 collection errors; the four failing ids and the eight collection errors are the same as at the base (see declared_exclusions).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole-folder no-failure bar of the build step",
+      "reason": "at the base (626c692706) the folder has 4 failed, 214 passed, 8 collection errors; at the final tree it has 4 failed, 219 passed, 8 collection errors. The 4 failures (test_demque_bbg_backfill.py vendor_limit_warning [field] and [response]; test_demque_bbg_ledger_upload.py two tests) and the 8 collection errors (test_demque_active_windows, b1_names_mode, b1_request, card_a_slice, land, need_class, p1_coverage, secclass_sync: missing integrations/ or commonwealth_signs in this worktree) fail identically at the base. The +5 are the new tests. Filed as MDPF_DEMQUE-D1-W63-S1 by the sibling worker."
+    },
+    {
+      "item": "bbg_backfill.py (the quote caller that runs a surface-tagged request through its own room)",
+      "reason": "not in this order's <paths>; its quote call passes no drawn_surface_today. Filed as MDPF_DEMQUE-D1-W64-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1). The one test pinned to that caller was edited to the surface figure; no other edit."
+    },
+    {
+      "item": "the budget-ledger term of the untagged figure (production's cells in bbg_budget_<day>.jsonl)",
+      "reason": "kept as the order states. It can carry a surface draw under its UTC date, so a surface draw can shrink an untagged room across a UTC-midnight run. Filed as MDPF_DEMQUE-D1-W64-S2 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1). The new tests make the budget recorder a no-op."
+    },
+    {
+      "item": "the --quote --actuals CLI path",
+      "reason": "made surface-aware beyond the named keyword (drawn_surface_today and surface rows left out of drawn_today). Filed as MDPF_DEMQUE-D1-W64-S3 (OBSERVATION, INERT)."
+    },
+    {
+      "item": "reference requests that carry a surface tag",
+      "reason": "they keep the reference room and draw against the daily total; their actuals rows carry the surface member, as the order's literal rule says. Surface rooms count history rows only, as the order's rule says."
+    },
+    {
+      "item": "any vendor call, S3 write, ledger write under org/ or ~/.opal, queue, price store, pacer state, draw (--apply), bbg_quote.py --record, and any change to bbg_allowance.json, a request file or a quote file",
+      "reason": "order BOUNDS. The checks and the CLI reads were offline and read-only; the test fixtures write only tmp_path. Nothing is merged; the issuer drains box/dell1."
+    },
+    {
+      "item": "account numbers",
+      "reason": "none printed or committed."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W64-S1: bbg_backfill.run takes its draw room from the quote's allowance_today with no drawn_surface_today, so a surface-D request it runs reads the full surface room on a day the drawer already drew surface D (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1).",
+    "MDPF_DEMQUE-D1-W64-S2: the untagged figure also adds the production budget ledger, which holds the drawer's own draws under their UTC date, so a surface draw can shrink an untagged room across a UTC-midnight run (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Q1).",
+    "MDPF_DEMQUE-D1-W64-S3: the --quote --actuals CLI path was made surface-aware beyond the named keyword (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~64/MDPF_DEMQUE.TO-DQ-t69.drawer-honours-surface-budgets.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~64 <0.9.0_WK_MDPF_DEMQUE~64@opal.agent>\" -F .scratch/msg_dq_t69_code.txt -- data/mdpf/scripts/demque/bbg_quote.py data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_surface_room.py data/mdpf/scripts/demque/test_demque_bbg_backfill.py org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 14ca9703e7 on wk-MDPF_DEMQUE-64 (LOCAL): 5 files, 532 insertions, 36 deletions; commit-gate, surprise-row-gate (3 new rows, OK), to-pipeline-gate and missions-tree-check OK; WARN client-data-check: the hashed account-id list is absent, so the commit was not checked for account ids (no account data in it)."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q --continue-on-collection-errors -p no:cacheprovider data/mdpf/scripts/demque (from the worktree root)",
+      "result": "4 failed, 219 passed, 8 errors (base 626c692706: 4 failed, 214 passed, 8 errors); the failing and erroring ids are the same as at the base; rc=1 as at the base"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~64/MDPF_DEMQUE.TO-DQ-t69.drawer-honours-surface-budgets.proof_of_spec.json DQ9-t69-AC1,DQ9-t69-AC2,DQ9-t69-AC3",
+      "result": "VALID (rc=0): structural=jsonschema, acceptance rows=3, violations=0; surprises frame: 3 entries, 3 open with a row id, 3 resolve to the channel row; invocation alignment 3/3 match; 0 PASS rows on network criteria"
+    }
+  ]
+}
