@@ -17,6 +17,7 @@ Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or 
 """
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +50,8 @@ SCHEMA_HASH = "ac652e2f71b18427b52f321858163768158f850ec173d1e592c7c3abe815bb6a"
 GOLD_BUCKET = "opal-data-inflection"
 GOLD_PREFIX = "irpt/inflection/gold/account_transaction/"
 MAX_DAYS = 25
+# the launcher's one summary line; it names the ONE snapshot partition read (the Orion partitions are full snapshots)
+SNAPSHOT_LINE = re.compile(r"INF_G_01 run_day (\d{4}-\d{2}-\d{2}) snapshot (\d{4}-\d{2}-\d{2}) upload (True|False)")
 # the simulation lines the packet's Act 3 names: (decision, short label)
 # the new role is simulated; the gold-bucket lines carry the live bucket policy as the resource policy (without it the fence reads as allowed: a false green)
 SIM_REQUIRED = [("allowed", "silver GetObject"), ("allowed", "silver ListBucket"), ("allowed", "gold PutObject"), ("allowed", "gold ListBucket on the gold prefix"),
@@ -116,6 +119,10 @@ def events_problems(rec):
     asm = dr.get("assumed") if isinstance(dr, dict) else None
     if not (isinstance(asm, dict) and asm.get("role") == NEW_ROLE and asm.get("session") == SESSION_NAME and isinstance(fw, dict) and fw.get("assumed") == asm):
         pr.append("the dry run and the first write must each print the assumed role %s and session %s" % (NEW_ROLE, SESSION_NAME))
+    for who, part in (("dry run", dr), ("first write", fw)):
+        m = SNAPSHOT_LINE.fullmatch(str(part.get("snapshot_line", "")).strip()) if isinstance(part, dict) else None
+        if not (m and part.get("snapshot_partitions") == 1 and m.group(2) <= m.group(1) and part.get("run_day") == m.group(1)):
+            pr.append("the %s must record the launcher's snapshot line verbatim (run day = the record's run_day, ONE snapshot not after it) and snapshot_partitions 1" % who)
     if not (dr.get("target_objects_after") == 0 and dr.get("repeated_source_lines") == 0 and isinstance(dr.get("window"), dict) and dr["window"].get("newest_written") is None):
         pr.append("the dry run must write nothing (0 objects at the target after), repeat no source line, and show an empty target (newest_written null)")
     ds = fw.get("days_written") if isinstance(fw, dict) else None
@@ -278,6 +285,7 @@ def selftest():
             bad += 1
             print("SELFTEST FAIL %s: got %r want %r" % (name, got, want))
 
+    snap = {"snapshot_line": "INF_G_01 run_day 2026-10-16 snapshot 2026-10-16 upload False", "snapshot_partitions": 1}
     rec = {"claim": "measured", "applier": APPLIER, "ledger_entry": "x", "ledger_closed": False, "reads": {},
            "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True,
                      "one_change_at_a_time": {"worktrees_read": 90, "open_markers_naming_this_surface": 0}},
@@ -285,8 +293,8 @@ def selftest():
            "before": {}, "apply_finished_utc": "2026-10-20T13:00:00Z", "uploads": {}, "runner": {},
            "plan": {"add": 3, "change": 0, "destroy": 0, "addresses": list(NEW_ADDRESSES), "statement_sids": list(SIDS), "replan_no_changes": True, "naming_gate_refuse": 0},
            "simulation": {"lines": [{"decision": dec, "label": lab, "with_resource_policy": lab in SIM_WITH_RESOURCE_POLICY} for dec, lab in SIM_REQUIRED]},
-           "dry_run": {"assumed": {"role": NEW_ROLE, "session": SESSION_NAME}, "s6": {"events": 96, "with_equal_amount_line": 96, "missing": 0}, "target_objects_after": 0, "repeated_source_lines": 0, "window": {"newest_written": None}},
-           "first_write": {"assumed": {"role": NEW_ROLE, "session": SESSION_NAME}, "days_written": 2, "days": ["2026-10-15", "2026-10-16"], "columns": 19, "schema_hash": SCHEMA_HASH, "claims_ok": True, "repeated_source_lines": 0,
+           "dry_run": {"assumed": {"role": NEW_ROLE, "session": SESSION_NAME}, **snap, "run_day": "2026-10-16", "s6": {"events": 96, "with_equal_amount_line": 96, "missing": 0}, "target_objects_after": 0, "repeated_source_lines": 0, "window": {"newest_written": None}},
+           "first_write": {"assumed": {"role": NEW_ROLE, "session": SESSION_NAME}, **snap, "days_written": 2, "days": ["2026-10-15", "2026-10-16"], "columns": 19, "schema_hash": SCHEMA_HASH, "claims_ok": True, "repeated_source_lines": 0,
                            "since": "2026-10-15", "run_day": "2026-10-16"}}
     arm("head-green", head_problems(rec), [])
     arm("events-green", events_problems(rec), [])
@@ -295,6 +303,9 @@ def selftest():
     arm("plan-one-add", len(head_problems(dict(rec, plan=dict(rec["plan"], add=1)))), 1)
     nores = [dict(x, with_resource_policy=False) for x in rec["simulation"]["lines"]]
     arm("sim-without-resource-policy", len(head_problems(dict(rec, simulation={"lines": nores}))), 1)
+    arm("snapshot-two-partitions", len(events_problems(dict(rec, dry_run=dict(rec["dry_run"], snapshot_partitions=2)))), 1)
+    arm("snapshot-after-run-day", len(events_problems(dict(rec, dry_run=dict(rec["dry_run"], snapshot_line="INF_G_01 run_day 2026-10-16 snapshot 2026-10-17 upload False")))), 1)
+    arm("snapshot-line-missing", len(events_problems(dict(rec, first_write={k: v for k, v in rec["first_write"].items() if k != "snapshot_line"}))), 1)
     arm("write-no-assumed-role", len(events_problems(dict(rec, dry_run=dict(rec["dry_run"], assumed={"role": ROLE, "session": SESSION_NAME})))), 1)
     arm("sim-missing-line", len(head_problems(dict(rec, simulation={"lines": rec["simulation"]["lines"][:-1]}))), 1)
     arm("gate-monday-not-passed", len(head_problems(dict(rec, gates=dict(rec["gates"], monday_49f_read_passed=False)))), 1)
