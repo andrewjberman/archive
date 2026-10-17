@@ -33,7 +33,7 @@ base = {
     "build": {"commit": build, "retained_export_blob": blob, "built_sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", "import_smoke_rc": 0},
     "apply": {"plan": {"add": 0, "change": 1, "destroy": 0, "resources": ["aws_lambda_function.export_render"]},
               "after_sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", "replan_changes": 0, "env_vars_before": 14, "env_vars_after": 14,
-              "switch_changes": 0, "stamp_file": "function-map"},
+              "switch_changes": 0, "stamp_file": "function-map", "read_stamp_sha256": "z634S2QsrfCpY4c3cD2UGwicdmLDo6/Rmng8SrEskCQ="},
     "counters": {"rollback_performed": False, "console_edits": 0, "invokes": 0, "iam_changes": 0},
 }
 
@@ -89,6 +89,8 @@ negs = [
     ("AC3", ["apply", "after_sha256"], "5bIgn/MLNgtNtDnRpmE3OejAMw2IpoJBmzzRfHvFLXI="),
     ("AC3", ["apply", "replan_changes"], 1),
     ("AC3", ["apply", "env_vars_after"], 15),
+    ("AC3", ["apply", "read_stamp_sha256"], "WjnDxvu2biEPXcwuF8oXJWRUqFaeUY550xnRxa2daa0="),
+    ("AC3", ["apply", "stamp_file"], "lambda-source-map"),
     ("AC3", ["counters", "iam_changes"], 1),
     ("AC3", ["counters", "rollback_performed"], True),
 ]
