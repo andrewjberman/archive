@@ -97,3 +97,24 @@ statement were applied first, the old code would still pass a VersionId that the
 then fence row, then statement.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 4 -- the TRUE reach (2026-10-17 ~03:3xZ); ADDENDUM 3's narrowing claim is withdrawn
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_4_TRUE_REACH_COO_HALF.md` (@300f9d398d),
+blob `461a9f925290b642e06bbeef214d4b3158000b0c`, sha256 `750fc2e71545eafa22a1e49d73102aa75a33a3ff01b8eb3843ff41226158d573`, 5,333 bytes
+(re-measured). It executes the laptop CTO's ruling `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_FB_Q1_FENCE_REACH_IRPT_EXPORT_20261017.md`
+(@c783217cff). This seat withdrew its narrow-first ruling in favour of that one (msg 10251).
+
+**Blast radius, as the act creates it:**
+- `irpt-export-render-role` gains `s3:GetObject` on the whole `irpt/49financial/platinum/reporting/` prefix: 18,257 objects, 84,366,188 bytes,
+  counted 03:35Z;
+- one firm, no list, no write, no other action;
+- the cross-firm law holds.
+
+The IAM statement (Step 6) is defence in depth only and claims no bound. **Rollback:** the prefix is removed from the row, then the
+regeneration.
+
+**One line of disagreement, on record and not re-litigated:** this seat preferred narrowing the row's prefix to `.../reporting/client=`. It
+returns later as the laptop's named enrichment.
+
+-- `1.0.0_SA_CTO~DELL2`
