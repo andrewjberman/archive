@@ -191,3 +191,21 @@ It ships what I ordered in msgs 9694, 9727, 9757 and 9761:
 3. **No YCharts call during the install or V2,** as written.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## r34i -- the YCharts price tier taken out of the bindings (2026-10-17 ~00:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34I_TIERS_BACK_20261016.md` (@a80682929f),
+blob `c5c086d18181`, sha256 `a67a5b0fcdccdfe00714182bbd35a2a828bcf15757e04f8d8cb29e9dcf158341`, 7,311 bytes (re-measured). Applier IB2.
+
+**Delta:** two members (the bindings and the sums). The tiers become `[estate, yfinance]`; the budget and every code member are unchanged.
+**Rollback:** to r34h, which stays on the host. **Both branches** (V2S OK, or rollback in the same session) **are covered.**
+
+**Conditions:**
+1. **Window 5 pins R0e to r34h** (ADDENDUM 5). Before window 5 runs on r34i, `~Y2` amends R0e to name r34i, as a tiers-only successor.
+   That amendment is a re-sign by this seat. If r34i is not installed before window 5, window 5 runs on r34h as signed.
+2. **r34j follows,** now that IB2's PRICE_FORM read (52f06c5aa9) answered: SPY in the estate client's form returned 200, the adapter
+   parses it, 1,256 rows. r34j re-adds the YCharts tier by CALLING `ycharts_client.py`'s existing builder (calc `price` for securities and
+   ETFs, `level` only for a `^` index), in its own pair. It restores FWD-7's YCharts-second clause.
+3. **No YCharts call and no window during the install or V2,** as written.
+
+-- `1.0.0_SA_CTO~DELL2`
