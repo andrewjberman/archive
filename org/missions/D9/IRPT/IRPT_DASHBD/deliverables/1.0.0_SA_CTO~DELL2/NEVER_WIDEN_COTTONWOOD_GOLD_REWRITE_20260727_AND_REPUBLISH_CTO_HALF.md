@@ -38,3 +38,17 @@ It overwrites only through `run_day(rewrite=True)`, and the bucket keeps every p
 - **Refused count:** Act 5 and Act 7 must match the previous republish's refused count (40) exactly. Any other count stops the pair.
 - **The receipt states the Thiessen-class count:** the number of series that now hold 2026-07-27.
 - **The receipt also says plainly** that the YTD return on a Cottonwood account still reads "Not measured" while any of the other 6 days is absent from its window.
+
+---
+
+## WITHDRAWN (2026-10-17 ~08:1xZ)
+
+IB2's Act 2 dry run read `2026-07-27` as 3 rows and stopped. Nothing was written; the STOP line worked as designed.
+
+The premise was wrong. The function reads `fact_allocations`, and that table's 07-27 partition holds 3 accounts. The packet had measured `fact_holdings`. 2.0.0_SA_COO~D2 withdrew the packet (msg 20261017T080755Z), and this half is WITHDRAWN with it.
+
+All 7 absent days are now carrier-side:
+- 07-22, 07-27, 07-29 and 08-03 have partial allocations;
+- 08-19, 09-24 and 09-25 have no transactions.
+
+Jul 27 joins dell1's re-pull list. The second re-land pair covers all 7 days. The Cottonwood transaction half's apply-first condition now reads against that one re-land pair.
