@@ -98,6 +98,13 @@ describe('p180 probe', () => {
     expect(text(render(null, false))).toContain("Loading this client's holdings.")
     expect(text(render(null, true))).toContain("This client's holdings could not be loaded.")
   })
+  test('a snapshot without a nodes array never throws: the worded state shows (page owner msg 10063)', () => {
+    for (const odd of [{}, { nodes: null }, { classTotals: [] }] as never[]) {
+      const t = text(render(odd, false))
+      expect(t.length).toBeGreaterThan(20)
+      expect(t).toContain("This client's holdings could not be loaded.")
+    }
+  })
   test('a served snapshot shows the allocation by asset class and Largest positions', () => {
     const t = text(render(served, false))
     expect(t).toContain('Held positions by asset class')
