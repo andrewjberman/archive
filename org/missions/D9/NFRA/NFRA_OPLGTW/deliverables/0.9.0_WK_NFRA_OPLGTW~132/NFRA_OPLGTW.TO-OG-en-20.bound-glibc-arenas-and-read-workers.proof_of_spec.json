@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-20",
+  "firm": "49F",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~132",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "983095f7af"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "983095f7af",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-20.bound-glibc-arenas-and-read-workers.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "fe677ec3f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "gateway code; the order preflight declares no deploy (comp-schedule DECLARED-NOT-APPLICABLE) and no release in this cell. Adds _tune_allocator() (mallopt M_ARENA_MAX=-8, 2, called once at import, never raises) and READ_WORKERS 16 -> 8."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en20.py",
+      "kind": "test",
+      "commit_or_etag": "fe677ec3f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file (test_ogen20_ac01 allocator, test_ogen20_ac02 workers and paging); no deploy in this cell"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en17.py",
+      "kind": "test",
+      "commit_or_etag": "fe677ec3f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned READ_WORKERS 16 moved to the new truth 8 (test_ogen17_ac01: the constant assertion and the two in-flight bounds, 16 -> 8) and the docstring's bound; no deploy in this cell"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en18.py",
+      "kind": "test",
+      "commit_or_etag": "fe677ec3f0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "docstring only: READ_WORKERS (16) -> (8). The test's assertions read bd49f.READ_WORKERS and needed no edit; no deploy in this cell"
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c31f6a18ee",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three new surprise rows NFRA_OPLGTW-Z-W132-S1..S3 appended; the commit-time surprise-row gate passed (3 new of 1031 checked)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the two named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en20.py test_ogen20_ac01 test_ogen20_ac02; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests (test_ogen20_ac01, test_ogen20_ac02)",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 2 of 2; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~132 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\\.py|tests/test_og_(en20|en19|en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~132: files touched 5; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "5 files touched by the commits of 0.9.0_WK_NFRA_OPLGTW~132 (4 product files, 1 standing record path); 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~132: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the window test files pass together in both orders with the same count.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en20.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "en4, en12, cl2, en13, en15, en17, en18, en19, en20 forward: passed 33; failed 0\nen20, en19, en18, en17, en15, en13, cl2, en12, en4 reverse: passed 33; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "9 window test files; 33 passed forward and 33 passed reverse (31 before OG-en-20 plus the 2 new tests); 0 failed in either order",
+      "status": "PASS",
+      "expect": "(?s)en4, en12, cl2, en13, en15, en17, en18, en19, en20 forward: passed (\\d+); failed 0.*reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mallopt call in _tune_allocator replaced by a constant True (no call made); tests/test_og_en20.py run against that variant, then the line restored and the adapter confirmed equal to commit fe677ec3f0.",
+      "expected": "test_ogen20_ac01 fails on the mallopt call record",
+      "observed": "1 failed, 1 passed: test_ogen20_ac01 at the lib.calls == [(-8, 2)] check (AssertionError: []); test_ogen20_ac02 still passed. Restored: 2 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "forward and reverse runs of the nine window files compared (AC3)",
+      "observed": "forward 33 passed, 0 failed; reverse 33 passed, 0 failed; equal counts",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The measured COMBINATION (mallopt cap plus READ_WORKERS 8) on the host, and the per-page growth.",
+      "reason": "Not measured in this cell. The order's measurement is the next release's Phase A on the candidate code (issuer note: the combination is not yet measured). No deploy and no release here; the offline tests are this order's measurement."
+    },
+    {
+      "item": "Threads the service already started keep their arenas; mallopt affects arenas created after the call.",
+      "reason": "The honest limit recorded by the issuer. The import-time call runs before the read pool is first built in a fresh process; no live service was touched."
+    },
+    {
+      "item": "The per-partition prefix listing (Z-S328, client_core.py) that also dominates page wall time.",
+      "reason": "A separate cell by the issuer's note; outside this order's paths."
+    },
+    {
+      "item": "The whole gateway suite as a criterion.",
+      "reason": "The order's criteria are AC1 (two named tests), AC2 (write-set bound) and AC3 (the nine window files in both orders). Only the window files were run as the criterion."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W132-S1: .claude/agents/worker.md, named in the worker face as the rules location, is not in this worktree; the rules came from the session context.",
+    "NFRA_OPLGTW-Z-W132-S2: org/surprise_channel/schemas/investigation_item.schema.json is not on disk in this worktree; the row shape followed the rows already in the channel file.",
+    "NFRA_OPLGTW-Z-W132-S3: the portal gitlink is dirty in this worktree before any edit (index d1f9ca2967, checkout ce3b0cc4d1); outside <paths>, not committed."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commits fe677ec3f0 (code and tests) and c31f6a18ee (surprise rows) on branch wk-NFRA_OPLGTW-132, and the criterion invocations recorded above.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_en20.py -v (from infra/aws/ec2/opal-gateway)",
+      "result": "2 passed (test_ogen20_ac01, test_ogen20_ac02); mutant control with the mallopt call removed: 1 failed (test_ogen20_ac01), restored: 2 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider over tests/test_og_en4.py, en12, cl2, en13, en15, en17, en18, en19, in forward and reverse order (via en20.AC3.sh)",
+      "result": "33 passed in each order, 0 failed (31 existing plus 2 new)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~132 <0.9.0_WK_NFRA_OPLGTW~132@opal.agent>\" -F .scratch/msg_og_en20.txt -- (4 paths)",
+      "result": "rc 0; commit fe677ec3f0; gitlink-publication-check refusals=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~132 <0.9.0_WK_NFRA_OPLGTW~132@opal.agent>\" -F .scratch/msg_rows_og_en20.txt -- INVESTIGATION_v1.md",
+      "result": "rc 0; surprise-row-gate OK: 3 new rows of 1031 total checked; commit c31f6a18ee"
+    }
+  ]
+}
