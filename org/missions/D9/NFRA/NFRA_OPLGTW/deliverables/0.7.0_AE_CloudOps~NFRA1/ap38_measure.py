@@ -26,6 +26,8 @@ SERVICE = "/opt/opal-gateway"
 PY = "/opt/opal-gateway/.venv/bin/python"
 GUARD = "/tmp/ap38_guard.py"
 GUARD_NAME = "oom_score_adj_1000_rlimit_as_1400mb"
+CGROUP_GUARD_NAME = "oom_score_adj_1000_cgroup_memmax_1400mb"
+GUARD_MODE = ["rlimit"]            # "cgroup" with --driver ... cgroup: each child runs in a transient systemd scope with MemoryMax=1400M (and MemoryHigh, no swap)
 FIRM = "49financial"
 WINDOW_DAYS = 395
 STOP_PCT = 75.0
@@ -276,7 +278,11 @@ TUNED_ENV = {}      # set by --driver ... tuned: Arrow's pools shrunk so pyarrow
 def guarded(args, wall=120):
     env = dict(os.environ)
     env.update(TUNED_ENV)
-    p = subprocess.run([PY, GUARD, str(wall), os.path.abspath(__file__)] + args, capture_output=True, text=True, timeout=wall + 60, env=env)
+    if GUARD_MODE[0] == "cgroup":
+        cmd = ["systemd-run", "--scope", "--quiet", "-p", "MemoryMax=1400M", "-p", "MemoryHigh=1100M", "-p", "MemorySwapMax=0", "--", PY, GUARD, "--cgroup", str(wall), os.path.abspath(__file__)] + args
+    else:
+        cmd = [PY, GUARD, str(wall), os.path.abspath(__file__)] + args
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=wall + 60, env=env)
     lines = [ln for ln in p.stdout.splitlines() if ln.startswith("AP38_RESULT ")]
     res = json.loads(lines[-1].split(" ", 1)[1]) if lines else {}
     res["exit_code"] = p.returncode
@@ -292,8 +298,28 @@ def sh(cmd):
     return p.returncode, (p.stdout + p.stderr).strip()
 
 
-def driver(md5s_json, tuned=False):
+def _chain_part(body, cand, live):
+    cc_ = guarded(["--chain", cand, "4"])
+    cl_ = guarded(["--chain", live, "4"])
+    pgc, pgl = cc_.get("pages") or [], cl_.get("pages") or []
+    growth = [pgc[i]["rss_mb"] - pgc[i - 1]["rss_mb"] for i in range(1, len(pgc))]
+    equal = len(pgc) == len(pgl) and len(pgc) >= 4 and all(a["rows"] == b["rows"] and a["sha"] == b["sha"] and a["next"] == b["next"] and a["used"] == b["used"] for a, b in zip(pgc, pgl))
+    body["chain"] = {"pages": len(pgc), "median_growth_mb": round(statistics.median(growth), 1) if growth else None, "first_page_wall_s": pgc[0]["wall_s"] if pgc else None,
+                     "host_peak_pct": max(cc_.get("host_peak_pct") or 0, cl_.get("host_peak_pct") or 0), "pages_equal_live": bool(equal),
+                     "live_pages": len(pgl), "live_first_page_wall_s": pgl[0]["wall_s"] if pgl else None, "rows_per_page": [p["rows"] for p in pgc],
+                     "candidate_rss_mb_per_page": [p["rss_mb"] for p in pgc], "live_rss_mb_per_page": [p["rss_mb"] for p in pgl],
+                     "live_median_growth_mb": (round(statistics.median([pgl[i]["rss_mb"] - pgl[i - 1]["rss_mb"] for i in range(1, len(pgl))]), 1) if len(pgl) > 1 else None),
+                     "candidate_stop": cc_.get("stop"), "live_stop": cl_.get("stop"), "candidate_diag": {k: cc_.get(k) for k in ("error_text", "where", "exit_code", "guard_marker", "stderr_tail")},
+                     "live_diag": {k: cl_.get(k) for k in ("error_text", "where", "exit_code", "guard_marker", "stderr_tail")}, "candidate_vm_hwm_mb": cc_.get("vm_hwm_mb"), "live_vm_hwm_mb": cl_.get("vm_hwm_mb"), "guard": GUARD_NAME}
+    return body
+
+
+def driver(md5s_json, tuned=False, cgroup=False, chainonly=False):
+    global GUARD_NAME
     exp = json.loads(md5s_json)
+    if cgroup:
+        GUARD_MODE[0] = "cgroup"
+        GUARD_NAME = CGROUP_GUARD_NAME
     if tuned:
         TUNED_ENV.update({"ARROW_DEFAULT_MEMORY_POOL": "system", "OMP_NUM_THREADS": "1", "ARROW_IO_THREADS": "1"})
     base = "/tmp/ap38_stage_%d" % os.getpid()
@@ -318,6 +344,8 @@ def driver(md5s_json, tuned=False):
             return body
         shutil.copyfile(os.path.join(live, "ref.txt"), os.path.join(cand, "ref.txt"))
         os.chmod(os.path.join(cand, "ref.txt"), 0o600)
+        if chainonly:                        # the chain alone (the runaway call is NOT repeated under a 1400 MB cgroup ceiling on a 1.8 GB host)
+            return _chain_part(body, cand, live)
         # (a) the call that ran away
         pc = guarded(["--peers", cand, "x", "y"])
         pl = guarded(["--peers", live, "x", "y"])
@@ -332,17 +360,7 @@ def driver(md5s_json, tuned=False):
         pv = guarded(["--peers", cand, str(pc.get("first_period")), str(pc.get("first_axis"))]) if pc.get("first_period") and pc.get("first_axis") else {}
         body["valid_pair"] = {"answered": pv.get("outcome") in ("rows", "empty_section") and pv.get("outcome") == "rows", "peak_rss_mb": pv.get("vm_hwm_mb"), "rows_matched": pv.get("rows_matched"),
                               "outcome": pv.get("outcome"), "wall_s": pv.get("wall_s")}
-        # (c) the 49F chain, candidate against live, one call at a time
-        cc_ = guarded(["--chain", cand, "4"])
-        cl_ = guarded(["--chain", live, "4"])
-        pgc, pgl = cc_.get("pages") or [], cl_.get("pages") or []
-        growth = [pgc[i]["rss_mb"] - pgc[i - 1]["rss_mb"] for i in range(1, len(pgc))]
-        equal = len(pgc) == len(pgl) and len(pgc) >= 4 and all(a["rows"] == b["rows"] and a["sha"] == b["sha"] and a["next"] == b["next"] and a["used"] == b["used"] for a, b in zip(pgc, pgl))
-        body["chain"] = {"pages": len(pgc), "median_growth_mb": round(statistics.median(growth), 1) if growth else None, "first_page_wall_s": pgc[0]["wall_s"] if pgc else None,
-                         "host_peak_pct": max(cc_.get("host_peak_pct") or 0, cl_.get("host_peak_pct") or 0), "pages_equal_live": bool(equal),
-                         "live_pages": len(pgl), "live_first_page_wall_s": pgl[0]["wall_s"] if pgl else None, "rows_per_page": [p["rows"] for p in pgc],
-                         "candidate_stop": cc_.get("stop"), "live_stop": cl_.get("stop"), "candidate_diag": {k: cc_.get(k) for k in ("error_text", "where", "exit_code", "guard_marker", "stderr_tail")},
-                         "live_diag": {k: cl_.get(k) for k in ("error_text", "where", "exit_code", "guard_marker", "stderr_tail")}, "candidate_vm_hwm_mb": cc_.get("vm_hwm_mb"), "live_vm_hwm_mb": cl_.get("vm_hwm_mb"), "guard": GUARD_NAME}
+        _chain_part(body, cand, live)
         # (d) the unit
         os.makedirs(unitdir, mode=0o700)
         shutil.copyfile("/tmp/ap38_cand_opal-gateway.service", os.path.join(unitdir, "opal-gateway.service"))
@@ -360,7 +378,7 @@ def driver(md5s_json, tuned=False):
     return body
 
 
-def runner(outp, release_sha, tuned=False):
+def runner(outp, release_sha, tuned=False, cgroup=False, chainonly=False):
     import boto3
     g = "infra/aws/ec2/opal-gateway/"
     me = os.path.abspath(__file__)
@@ -375,7 +393,7 @@ def runner(outp, release_sha, tuned=False):
     s3.put_object(Bucket=BUCKET, Key="ec2/opal-gateway/ap38_guard.py", Body=io.open(os.path.join(here, "ap38_guard.py"), "rb").read())
     pulls = " && ".join("aws s3 cp s3://%s/ec2/opal-gateway/%s /tmp/%s --region us-east-1 >/dev/null" % (BUCKET, n, n)
                         for n in ("ap38_measure.py", "ap38_guard.py", "ap38_cand_typed_scope.py", "ap38_cand_etfs_rivals_flow.py", "ap38_cand_opal-gateway.service"))
-    cmd = "cd /opt/opal-gateway && rm -f /tmp/ap38_measure.py /tmp/ap38_guard.py /tmp/ap38_cand_* && %s && %s /tmp/ap38_measure.py --driver '%s'%s" % (pulls, PY, json.dumps(exp), " tuned" if tuned else "")
+    cmd = "cd /opt/opal-gateway && rm -f /tmp/ap38_measure.py /tmp/ap38_guard.py /tmp/ap38_cand_* && %s && %s /tmp/ap38_measure.py --driver '%s'%s%s" % (pulls, PY, json.dumps(exp), " tuned" if tuned else "", (" cgroup" if cgroup else "") + (" chainonly" if chainonly else ""))
     ssm = boto3.client("ssm")
     cid = ssm.send_command(InstanceIds=[INSTANCE], DocumentName="AWS-RunShellScript", Parameters={"commands": [cmd]}, TimeoutSeconds=1500)["Command"]["CommandId"]
     inv = None
@@ -410,10 +428,10 @@ if __name__ == "__main__":
     elif "--driver" in a:
         print("AP38_DRIVER_JSON")
         try:
-            print(json.dumps(driver(a[a.index("--driver") + 1], tuned=("tuned" in a)), separators=(",", ":"), default=str))
+            print(json.dumps(driver(a[a.index("--driver") + 1], tuned=("tuned" in a), cgroup=("cgroup" in a), chainonly=("chainonly" in a)), separators=(",", ":"), default=str))
         except Exception:
             import traceback
             print(json.dumps({"fatal": traceback.format_exc()[-900:]}))
             sys.exit(1)
     else:
-        runner(a[1], a[2], tuned=("tuned" in a[3:]))
+        runner(a[1], a[2], tuned=("tuned" in a[3:]), cgroup=("cgroup" in a[3:]), chainonly=("chainonly" in a[3:]))
