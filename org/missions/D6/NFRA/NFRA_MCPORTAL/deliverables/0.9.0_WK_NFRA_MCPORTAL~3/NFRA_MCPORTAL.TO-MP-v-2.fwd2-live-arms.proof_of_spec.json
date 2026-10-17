@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-v-2",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "532d1e68bb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "2acb297725",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-v-2.fwd2-live-arms.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/v2_run.json",
+      "kind": "doc",
+      "commit_or_etag": "86942b2d71",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Window record {t0: 2026-10-17T04:52:43Z, t1: 2026-10-17T04:56:48Z} written by v2_walk.js and committed at 86942b2d71. Not an executable artifact.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/v2_walk.js",
+      "kind": "script",
+      "commit_or_etag": "86942b2d71",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Node script that drives the headed msedge walk through the portal's playwright-core 1.62.1. It was run once; its output is in the ignored .scratch/walk.log. It prints statuses only and writes no cookie, token or header to the repo.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "admin_api.py Route census at HEAD=12; refused=13 of 13; admitted=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "cd C:/tmp/mp-v2-3 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round5/checks/v2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "window 2026-10-17T04:52:43Z .. 2026-10-17T04:56:48Z; ssm command=3ba5b32a-d7ed-4abc-9624-fd2a0018c0c6 status=Success; access-log lines in window=74\nadmin_api.py Route census at HEAD=12 (cut: 12)\nGET /: 403=0 200=1; GET /api/admin/whoami: 403=0 200=0; GET /api/admin/grants/*/*: 403=0 200=0; POST /api/admin/grants/*/*/narrow: 403=0 200=0; POST /api/admin/grants/*/*/widen: 403=0 200=0; GET /api/admin/changes: 403=0 200=0; GET /api/admin/fabric/boxes: 403=0 200=0; GET /api/admin/fabric/overlap: 403=0 200=0; GET /api/admin/fabric/gitstate: 403=0 200=0; GET /api/admin/fabric/calls: 403=0 200=0; POST /api/admin/fabric/calls/close: 403=0 200=0; GET /api/admin/gateway/breakdown: 403=0 200=0; GET /api/admin/people: 403=0 200=0\nrefused=0 of 13; admitted=1\nRESULT: FAIL\nexit=1 (second run, same window; identical lines to the first run)",
+      "denominator": "13 of 13 owner-gated requests (GET /, plus the 12 Route handlers at HEAD=12): refused=0 of 13, admitted=1 (GET / 200)",
+      "status": "FAIL",
+      "status_reason": "The gateway's own access log for the window holds no 403 on any of the 13 requests and one 200, on GET /. The walk stopped at that owner route per task order section 2 bound 2, so routes 2-13 were not sent. Recorded verbatim, not repaired. The finding is filed as NFRA_MCPORTAL-Z-W3-S4 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~MP)."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "GET /sprint in window: 200>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "cd C:/tmp/mp-v2-3 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/round5/checks/v2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "window 2026-10-17T04:52:43Z .. 2026-10-17T04:56:48Z; ssm command=e47c26af-c16f-49bc-8d16-ba4ccabd8188 status=Success; access-log lines in window=74\nGET /sprint in window: 200=2 of 2\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 GET /sprint lines in the window, both 200",
+      "status": "PASS",
+      "status_reason": "Mechanical PASS by output. The walk's own GET /sprint was not sent (it stopped at GET /), so the two 200 lines are the signed-in browser's /sprint page loads in the window. The 200 on /sprint does not stand in for the refusal arm AC1 grades."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The governing task order names no mutant for AC1 or AC2, and neither criterion is judgment=\"true\"; the walk's own refusal arm is graded by AC1 itself.",
+      "expected": "N/A -- the governing task order names no mutant for AC1/AC2.",
+      "observed": "N/A -- no mutant is named by the spec.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "v2.AC1.sh run twice against the same window file (t0 2026-10-17T04:52:43Z, t1 2026-10-17T04:56:48Z); both runs printed the same 13 counts and RESULT: FAIL. v2.AC2.sh run once; not repeated.",
+      "observed": "AC1 run 1 and run 2: refused=0 of 13; admitted=1; RESULT: FAIL, exit=1, identical lines. AC2 run 1: GET /sprint in window: 200=2 of 2; RESULT: PASS, exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Walk requests 2-13 (GET /api/admin/whoami through GET /api/admin/people) and the walk's own GET /sprint.",
+      "reason": "Task order section 2 bound 2: a 200 on an owner route is a finding, not a retry, and the walk stops there. GET / returned 200 at 04:55:48Z, so the walk stopped before routes 2-13 and before /sprint. No further request was sent."
+    },
+    {
+      "item": "A retry of the walk, and any second sign-in or account.",
+      "reason": "Task order section 1 step 3 and section 2 bound 2: no retry on a 200, and no other account. The one sign-in completed as the task order's named account."
+    },
+    {
+      "item": "Repair of AC1, or any change to the gate or the route.",
+      "reason": "Task order section 2 standing rule: REFUSE a criterion you cannot meet as written, and never repair a criterion. The gate and route are outside this worker's paths."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W3-S4: GET / returned 200 to the signed-in session of the task order's non-owner account; the gateway's own access log holds the same 200 in the window (refused=0 of 13). BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~MP. Walk stopped at that route.",
+    "NFRA_MCPORTAL-Z-W3-S5: the read-only path infra/aws/ec2/opal-gateway/ is absent from this worktree (sparse checkout); the owner gate and the admin route file were read from HEAD with git show. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": "node v2_walk.js (headed msedge via portal playwright-core 1.62.1, persistent profile under the worktree .scratch/)",
+      "invocation": "node org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/v2_walk.js > .../.scratch/walk.log 2>&1 (run_in_background)",
+      "result": "t0 04:52:43Z; sign-in completed 04:55:48Z; GET / -> 200; STOP at the owner route; t1 04:56:48Z; v2_run.json written; exit 3"
+    },
+    {
+      "tool": ".tools/aws read-only SSM via the v2.AC1.sh and v2.AC2.sh journal read (journalctl -u opal-gateway, window UTC)",
+      "invocation": "cd C:/tmp/mp-v2-3 && timeout 120 bash .../round5/checks/v2.AC1.sh; timeout 120 bash .../round5/checks/v2.AC2.sh",
+      "result": "AC1 Success, 74 access-log lines, refused=0 of 13, admitted=1, FAIL; AC2 Success, 200=2 of 2, PASS"
+    },
+    {
+      "tool": "git show HEAD (route census and owner gate read; the worktree does not materialise infra/aws/ec2/opal-gateway/)",
+      "invocation": "git show HEAD:infra/aws/ec2/opal-gateway/app/admin_api.py | grep -cE '^\\s*Route\\('; git show HEAD:infra/aws/ec2/opal-gateway/app/owner_gate.py",
+      "result": "12 Route( lines; require_owner: 401 no identity, 403 verified non-owner"
+    }
+  ]
+}
