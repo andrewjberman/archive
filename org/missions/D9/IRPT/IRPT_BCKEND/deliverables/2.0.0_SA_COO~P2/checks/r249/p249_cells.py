@@ -3,7 +3,7 @@
 Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id> FAIL" last.
 
   IBHM3A  IB-hm-3a  registry rows so the naming builders emit the three firm key addresses, the stage role name, its policy name and the secret name
-    AC1  every recorded builder call is RE-RUN against the worktree and returns exactly the recorded result (no refusal); three address results in the globgrph bucket, one per firm; two name results
+    AC1  every recorded builder call is RE-RUN against the worktree and returns exactly the recorded result (no refusal); three address results under the globgrph product folder of opal-data-assets, one per firm; two name results
     AC2  the naming tests pass and the worker's ONE commit (HEAD~1..HEAD) touches only registry files, an optional naming test, and the order's paths
     AC3  the secret is a registered SECRET row of system irpt in slash grammar; the role and policy names are irpt names; the record holds no key material
 """
@@ -19,11 +19,25 @@ sys.path.insert(0, str(HERE.parent / "r196"))
 import p196_cells as P6  # noqa: E402
 
 D = P6.D
-REC = D + "0.9.0_WK_IRPT_BCKEND~450/IBhm3a_resolved.json"
-DELIV = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~450/"
-BUCKET = "s3://opal-313476888478-globgrph/"
+REC = D + "0.9.0_WK_IRPT_BCKEND~452/IBhm3a_resolved.json"
+DELIV = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~452/"
+BUCKET = "s3://opal-data-assets/globgrph/"
 RES = "infra/logic/registry/resources.json"
 fail, load = P6.fail, P6.load
+# the eleven naming tests that are red at the base in the SPARSE worker worktree (measured by the issuer at the cut); a worker may not add to them
+BASE_RED = frozenset((
+    "lib/tests/test_opal_naming.py::test_cmd_targets_exit_code_tracks_unclassified",
+    "lib/tests/test_opal_naming.py::test_lambda_plane_consumers_is_import_aware_not_a_bare_substring",
+    "lib/tests/test_opal_naming.py::test_targets_report_covers_every_known_target_exactly_once",
+    "lib/tests/test_opal_naming.py::test_terraform_plane_consumers_finds_the_declared_consuming_root",
+    "lib/tests/test_opal_naming_bronze_homes.py::test_runner_code_plane_is_measured_from_the_dispatch_script",
+    "lib/tests/test_opal_naming_firm_access_ts.py::test_everything_outside_the_block_is_the_hand_kept_base",
+    "lib/tests/test_opal_naming_firm_notes.py::test_t1_generated_block_equals_fresh_render",
+    "lib/tests/test_opal_naming_firm_notes.py::test_t2_every_old_comment_text_appears_in_the_block",
+    "lib/tests/test_opal_naming_firm_notes.py::test_t2b_notes_are_the_old_comments_per_firm_in_order",
+    "lib/tests/test_opal_naming_firm_notes.py::test_t3_firm_pages_equal_the_old_literal",
+    "lib/tests/test_opal_naming_firm_notes.py::test_t4_lines_outside_the_block_are_byte_identical",
+))
 
 
 def _naming():
@@ -69,8 +83,12 @@ def ac1(r):
 
 def ac2(_):
     p = subprocess.run([sys.executable, "-m", "pytest", "lib/tests", "-q", "-k", "naming", "--color=no", "-p", "no:cacheprovider"], cwd=str(P6.ROOT), capture_output=True, text=True, timeout=600)
-    if p.returncode != 0:
-        fail("naming tests rc %s: %s" % (p.returncode, p.stdout[-300:].replace("\n", " | ")))
+    if p.returncode == 2 or "error" in p.stdout.splitlines()[-1].lower():
+        fail("the naming tests did not collect cleanly (rc %s): %s" % (p.returncode, p.stdout[-300:].replace("\n", " | ")))
+    failed = {ln.split(" - ")[0].replace("FAILED ", "", 1).strip() for ln in p.stdout.splitlines() if ln.startswith("FAILED ")}
+    new_red = sorted(failed - BASE_RED)
+    if new_red:
+        fail("naming tests that were not red at the base now fail: %s" % ", ".join(new_red))
     g = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "HEAD"], cwd=str(P6.ROOT), capture_output=True, text=True, timeout=60)
     if g.returncode != 0:
         fail("git diff HEAD~1 HEAD failed: %s" % g.stderr.strip()[:200])
@@ -98,7 +116,7 @@ def ac3(r):
     for c in r.get("calls", []):
         if c.get("fn") == "name" and not str(c.get("result", "")).startswith("irpt-"):
             fail("the role and policy names must be irpt names, read %r" % c.get("result"))
-    if re.search(r"[A-Za-z0-9+/]{40,}", json.dumps(r)):
+    if re.search(r"[A-Za-z0-9+/]{40,}", re.sub(r"s3://[^\"\s]+", "", json.dumps(r))):
         fail("the record holds a long base64-like run (key material?)")
     print("OK: one irpt SECRET row in slash grammar, irpt role and policy names, no key material")
 
