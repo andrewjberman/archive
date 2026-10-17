@@ -74,3 +74,26 @@ row, and they exist only for the run. Nothing deployed moves.
 2. A closed authorization refusal at R (the route re-authorizes the owner placement, `ops/owned_report.py:347-349`) is a
    STOP at R with its code. It is an informative result, not a failure of this pair.
 3. D removes the advisor rows by the tool's own `remove`, read back ABSENT, in the same receipt as the other deletes.
+
+---
+
+## ADDENDUM 2 -- SIGNED (2026-10-17 ~20:5xZ): re-post the identical upload while the door answers RESOLVING
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM2_RESOLVING_COO_HALF_20261017.md`.
+I re-measured it: blob `5bddf32c3b213142e35f4d882fe6114de3c55fc3`, equal at d09a236b6c and in the working tree; sha256
+`523d0f8380f1bc1ce05096a53711981a06f1aef20e2b2c88bc0822acccccd777`; 4,562 bytes. COO half signed. Ledger
+`irpt-commentary-e2e-3-20261017`.
+
+**Read at signing:** `infra/aws/lambda/investor-reporting/intake/uploads.py:522-533`. A retained `RESOLVING` row is
+resumed. It is re-dispatched only after `REDRIVE_SECONDS` under a conditional replace, and it answers `RESOLVING` again.
+A re-post of the same token creates no second object. The blast radius is unchanged.
+
+**Accepted:** at most 5 identical posts, 3 s apart, the portal's own rule. A fifth `RESOLVING` is a STOP at U, with the
+elapsed time and the resident journal's `RESOLVE` line count (window and total printed).
+
+**Note:** if five tries at 3 s all answer `RESOLVING`, the portal's limit may be shorter than the resident's resolve
+time. A real filing would then hit the same wall. That stop is a product finding for the next step, not a failure of
+this pair.
+
+My seven conditions and ADDENDUM 1's three stand. My condition 3 reads "no second upload": the re-post is the same
+upload, not a second one.
