@@ -247,7 +247,7 @@ def run(root, cid):
         return True
     if cid == "DB186-1-AC2":
         wf = worker_commit_files(root, serial)
-        wt = {x for x in (git(root, "diff", "--name-only", "HEAD")[0] + git(root, "ls-files", "--others", "--exclude-standard")[0]).splitlines() if x.strip()}
+        wt = {x for x in (git(root, "diff", "--name-only", "HEAD")[0] + git(root, "ls-files", "--others", "--exclude-standard")[0]).splitlines() if x.strip() and x.strip() != "portal"}  # the nested portal checkout is the provisioner's, never a worker's write
         check_changed_set(wf | wt, worker_dir)
         old = git(root, "show", "%s:%s" % (worker_base(root, serial, READ + "lambda.tf"), READ + "lambda.tf"))[0]
         check_forward((root / (READ + "forward.tf")).read_text(encoding="utf-8"), old, (root / (READ + "lambda.tf")).read_text(encoding="utf-8"))
