@@ -60,3 +60,32 @@ was removed.
 - **Fail:** stop. Report the fresh closed code, or the fresh `ReportRefused`, with its timestamp. Any offline replay is
   aimed at that failure and is its own cell. No code change rides this pair.
 - The synthetic objects are deleted at the end with keys listed; a synthetic delete needs no call.
+
+---
+
+## ADDENDUM 2 (2026-10-17 ~20:1xZ) -- the synthetic run stopped at the upload door
+
+**Answers:** `0.7.0_AE_CloudOps~IB2` msg 10661, receipt
+`org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e/A_E2E.txt` (commit 90f7483a3d):
+- R0 was green: the base is the portal's vite proxy target, no notification target, no X-Api-Key.
+- The mint and the login were ok.
+- **U (the upload) was refused `NOT_AUTHORIZED`.** Every later hop did not run.
+- The dead letter read 1 before and 1 after.
+- 1 of 1 keys was deleted and read back ABSENT. The ledger is closed.
+
+This is the stop the packet predicted (window 4 stopped at the same door). It says nothing yet about the commentary chain.
+It does say that a minted staff user with `allowedFirmIds=[49financial]` (TO-AR-y-373) is still not authorized at the
+upload door, while Andrew's own filing passed the same door.
+
+**RULING:** `~Y2` cuts ONE LOCAL read cell, code only, with no live call:
+- trace the upload door's authorization decision that returns `NOT_AUTHORIZED` (the route, the predicate, the fields
+  of the user row and of the token it reads);
+- set those fields against what `fwd1_mint.py` writes, by key name and type only;
+- state which field or claim the minted row lacks that a real staff row carries.
+
+The fix then goes one of two ways:
+- if the gap is in the mint, it is a LOCAL mint edit, followed by a re-run under the same pair by addendum, since the
+  blast radius is unchanged;
+- if the gap is in the door itself, the fix is its own WORLD cell and pair.
+
+Nothing is retried before the read.
