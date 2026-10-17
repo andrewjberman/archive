@@ -1,0 +1,106 @@
+{
+  "claim": "inferred from the CRM extract Files.zip (sha256 c66bae52) and the dell1 match sheet 20261016T0225Z (1)",
+  "worker": "0.9.0_WK_IRPT_DASHBD~256",
+  "inputs": {
+    "files_zip_sha256_prefix": "c66bae52",
+    "published_raw_lines": 939,
+    "directory_entries": 271,
+    "sheet_rows": 83,
+    "pairs_rows": 118
+  },
+  "crm": {
+    "tables": [
+      "households",
+      "client 360 households",
+      "contacts",
+      "users",
+      "activities",
+      "connections",
+      "manual insurance"
+    ],
+    "household_id_spaces": 2,
+    "advisor_field_found": true,
+    "advisor_field": {
+      "table": "Crmhouseholds",
+      "column": "AdvisorID"
+    },
+    "advisor_email_field": {
+      "table": "Users",
+      "column": "EmailAddress"
+    },
+    "text_sources": [
+      "activity notes",
+      "portfolio positions",
+      "portfolio performance",
+      "imaging index listings"
+    ]
+  },
+  "methods": [
+    {
+      "id": "MD",
+      "rule": "exact equality of a sheet account with a published key after trimming and upper-casing, the sheet row HIGH with no conflict flag, and the household advisor equal to the sheet advisor; a certain direct link that grants HIGH",
+      "grants_access": true,
+      "accounts_linked": 0
+    },
+    {
+      "id": "MP",
+      "rule": "exact equality of a sheet account with the old account of a deterministic pair whose new account is a published key; the sheet row HIGH with no conflict flag and the household advisor equal to the sheet advisor; a certain link through a deterministic pair that grants HIGH",
+      "grants_access": true,
+      "accounts_linked": 0
+    },
+    {
+      "id": "MX",
+      "rule": "a deterministic pair gives the certain account-to-key link; an exact account number cited in the activity notes of exactly one household, at least twice, and in no other household's notes gives the certain household link; the household advisor must equal the portfolio advisor of that account (two independent sources agreeing); grants HIGH",
+      "grants_access": true,
+      "accounts_linked": 4
+    },
+    {
+      "id": "MC",
+      "rule": "a deterministic pair whose old account is cited in the notes under one household: MEDIUM where the pair list household or the sheet household names the same household (two independent sources agreeing), otherwise LOW; never grants access",
+      "grants_access": false,
+      "accounts_linked": 4
+    },
+    {
+      "id": "MY",
+      "rule": "an unconfirmed pair (to_confirm yes) whose old account is cited in the notes under one household is a candidate only, LOW at most; the unconfirmed pairs never grant access",
+      "grants_access": false,
+      "accounts_linked": 54
+    }
+  ],
+  "result": {
+    "published": 939,
+    "high": 4,
+    "medium": 0,
+    "low": 58,
+    "unmatched": 877,
+    "conflicts": 0
+  },
+  "join": {
+    "sheet_high_direct": 0,
+    "sheet_high_via_deterministic_pairs": 0,
+    "extended_high": 4,
+    "grant_ready_total": 4,
+    "left_out": 935,
+    "high_without_advisor": 0,
+    "advisors_distinct": 1,
+    "advisors_with_email": 0
+  },
+  "outputs": {
+    "match_table": {
+      "path": "C:/opal-intake/work/cot_extended_match.csv",
+      "output_sha256": "b86f4d210ae8df1b2a73d19e4c7b832d4f342f0bb6365e2f36c738364fd15dae",
+      "lines": 940
+    }
+  },
+  "script": {
+    "path": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~256/cot_extended_match.py",
+    "script_sha256": "2cee53a6d497fd7428eb57881e8b324bd0cc808f3b8115a2d008a63b358551b1",
+    "reproducible": true
+  },
+  "notes": "Words and counts only. The extract was read in memory from the nested zips; nothing was extracted to disk or into the repo, and the match table sits outside the repo. Linked: the 115 old pair accounts (all alphanumeric, none all-digit) appear as exact tokens in 138 activity rows naming 77 accounts; a row's regardingid resolved to a household by household id or by the contact's household id, and no row had an id in both spaces. Four published keys reached HIGH through a deterministic pair, a certain household and an advisor equal to the portfolio advisor (MX). Sheet direct and sheet-via-pair gave no HIGH link: no sheet account equals a published key, and no HIGH sheet row sits on a deterministic pair. The 107 unconfirmed pairs granted nothing and gave LOW candidates only (MY). Not linked: 877 keys have no household candidate and 58 are LOW. No published key appears as a token in any text member of the extract or in the imaging index, and the 870 directory account ids are opaque and none equals a published key, so for the large majority of the 939 keys no certain rule reaches the extract at all; only the 92 published keys on the pair list have a bridge, through the old account. The imaging index carries 78 of the 115 old accounts beside client names with no household id; names were not used as a link (CTO msg 10304 excludes fuzzy name matching). Advisors: the CRM names four household advisor codes; the Users table holds seven email addresses, but no certain key joins Users.UserID to a household advisor code (zero equal values), so no advisor email is joined and advisors_with_email is zero. Ambiguity ruled out: the sheet household cell resolved to a HouseholdID and HHID agreeing on one CRM row for 78 of 83 rows; the other five cells are blank or unpaired and grant nothing.",
+  "reads": {
+    "vendor_calls": 0,
+    "secret_reads": 0,
+    "extracted_to_repo": false
+  }
+}
