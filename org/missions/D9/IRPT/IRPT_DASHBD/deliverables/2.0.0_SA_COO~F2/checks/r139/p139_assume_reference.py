@@ -17,7 +17,7 @@ def sub(old, new):
 sub('''DEFAULT_CAP = 25
 ''', '''DEFAULT_CAP = 25
 # The role this launcher assumes for its reads and writes (the narrow account-transaction role), and the fixed session name its trust names.
-SESSION_NAME = "inf-g-01-account-transaction"
+SESSION_NAME = "g01-account-transaction"
 ''')
 sub('''    root = _repo_root()
     if root is None:

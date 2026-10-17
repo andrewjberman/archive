@@ -24,7 +24,7 @@ rs = [p["rss_mb"] for p in pages]
 growth = [rs[i] - rs[i - 1] for i in range(1, len(rs))]
 median_growth = round(statistics.median(growth), 1)
 peak = max([p["host_pct"] for p in pages] + [cc["host_pct_before"]])
-a_ok = len(pages) == 4 and median_growth <= 20 and pages[0]["wall_s"] <= 45 and peak < 75
+a_ok = len(pages) == 6 and median_growth <= 20 and pages[0]["wall_s"] <= 45 and peak < 75
 # (b) the plateau test
 c1, c2 = d["plateau_cand"]["chains"][0], d["plateau_cand"]["chains"][1]
 net = round(c2["rss_end_mb"] - c1["rss_end_mb"], 1)
