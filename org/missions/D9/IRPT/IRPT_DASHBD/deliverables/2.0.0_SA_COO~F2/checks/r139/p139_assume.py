@@ -7,7 +7,7 @@
   existing flat-directory test only exercised `plan()`. The launcher must read the naming registry through the verified bundle when it is not in the repo layout (as `_producers()` does).
 
   DBF139-5-AC1  `assumed_s3_client(sts=None, client_factory=None)`: the role ARN is arn:aws:iam::<caller account>:role/<builder name of the account-transaction role>, the session name is the
-                fixed `inf-g-01-account-transaction`, the temporary credentials go to the S3 client, and a failed assume REFUSES naming the role (not the account)
+                fixed `g01-account-transaction`, the temporary credentials go to the S3 client, and a failed assume REFUSES naming the role (not the account)
   DBF139-5-AC2  `main()` with no injected client uses `assumed_s3_client()` (not a plain boto3 client) and with an injected client makes no STS call
   DBF139-5-AC3  a FLAT-directory run (launcher + zip + receipt only) completes `main(--dry-run)` against a fake S3 holding one synthetic snapshot and prints the S6 line
 
@@ -24,7 +24,7 @@ from pathlib import Path
 
 LAUNCHER = "data/inf/scripts/gold/INF_G_01.account_transaction_gold.py"
 TESTS_DIR = "data/inf/scripts/gold/tests"
-SESSION = "inf-g-01-account-transaction"
+SESSION = "g01-account-transaction"
 
 
 class Fail(Exception):
