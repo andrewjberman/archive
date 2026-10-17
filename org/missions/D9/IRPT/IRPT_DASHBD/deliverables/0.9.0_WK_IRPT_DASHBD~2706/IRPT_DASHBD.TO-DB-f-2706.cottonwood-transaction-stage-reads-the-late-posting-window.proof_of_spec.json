@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2706",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2706.cottonwood-transaction-stage-reads-the-late-posting-window.md",
+    "group": "OTHER",
+    "vintage_commit": "e707f85c1a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R139_F.md",
+    "vintage_commit": "e707f85c1a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2706.cottonwood-transaction-stage-reads-the-late-posting-window.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2706",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2706 from base e707f85c1a. The first act printed the branch and TREE-OK. The worker face was read whole. Baseline at base: the three checker criteria FAIL (no TX_WINDOW; no transaction_owed_days; no trading_lag) and the function's tests directory is 35 passed. The handler gained TX_WINDOW, trading_lag, window_end_day, window_complete, newest_writable_day, transaction_owed_days, _business_day (the producer's rule through cbd.parse_trade_date and atc.business_date_with_claim), a rewritten transaction_frame (the window partitions only, the blank-id refusal, the dedup on TransactionID, the business-day filter), emit_transactions (the once-and-full-window rule, the window and already-landed reasons), _landed_transaction_days, _newest_landed_transaction and _window_info; the scheduled fire runs the stage once after the returns on transaction_owed_days and reports transaction_window; the transaction event reports transaction_window; the day, days and rewrite events never run the stage. The producer file is not edited. The tests directory's test_transaction_emission.py is rewritten to the new rule (19 functions retired or kept; 28 new names); test_handler.py is unchanged and passes. Code committed at a1638e91c0. No second commit: no staged_from pin moves (surprise IRPT_DASHBD-D2-W2706-S1). No AWS call, no Terraform command, no upload, no push. The order status is not flipped (the issuer flips it).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-return-daily/handler.py",
+      "kind": "script",
+      "commit_or_etag": "a1638e91c0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git show --stat a1638e91c0: handler.py 169 lines changed in the commit with its tests. Not packaged, built, uploaded or applied; the Cottonwood pair's later acts carry it.",
+      "artifact_covered_by": ["DBF139-6-AC1", "DBF139-6-AC2", "DBF139-6-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/account-return-daily/tests/test_transaction_emission.py",
+      "kind": "test",
+      "commit_or_etag": "a1638e91c0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rewritten to the new rule: 35 test functions (36 cases), fake clients only; the directory reads 52 passed at a1638e91c0 with test_handler.py unchanged.",
+      "artifact_covered_by": ["DBF139-6-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2706/RD_COTTONWOOD_WINDOW_FACTS_R139.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "claim measured; files_touched 2; pins_moved none; tests_before 35 passed; tests_after 52 passed; aws_calls 0; uploads 0; pushes 0.",
+      "artifact_covered_by": ["DBF139-6-AC1", "DBF139-6-AC2", "DBF139-6-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_DASHBD-D2-W2706-S1 to S3 appended as bytes, OBSERVATION and INERT each; the surprise-row gate is run by safe-commit at the commit.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF139-6-AC1",
+      "criterion_verbatim": "DBF139-6-AC1 -- the window primitives (window_end_day, window_complete, newest_writable_day) read the calendar as stated, and transaction_frame returns exactly the deduped rows of the business day from the window partitions only (the late row at lag 14 kept, the lag 15 row and other business days excluded, no partition outside the window read, a blank TransactionID refused). Base: FAIL (no TX_WINDOW).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_cotwindow.py\" . DBF139-6-AC1",
+      "output_evidence": "DBF139-6-AC1 PASS (rc 0), run at a1638e91c0 from the worktree root; the last line of the run is 'DBF139-6-AC1 PASS'.",
+      "denominator": "1 of 1 checker criterion for DBF139-6-AC1; the frame holds 11 of 11 expected distinct TransactionIDs (the late id at lag 14 kept, the lag-15 id and the other business days excluded); the reader read no partition outside lags 0 to 14; the blank id refused.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF139-6-AC2",
+      "criterion_verbatim": "DBF139-6-AC2 -- transaction_owed_days returns the stated days (capped, floored, nothing landed gives the newest writable day only); emit_transactions writes a full-window day once with the deduped row count, names an incomplete window and an already landed day in failed without writing, and a dry run passes upload False. Base: FAIL (no transaction_owed_days).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_cotwindow.py\" . DBF139-6-AC2",
+      "output_evidence": "DBF139-6-AC2 PASS (rc 0), run at a1638e91c0 from the worktree root; the last line of the run is 'DBF139-6-AC2 PASS'.",
+      "denominator": "1 of 1 checker criterion for DBF139-6-AC2; 5 owed-day assertions; a full-window day written once with 11 of 11 deduped rows; the incomplete window and the already landed day each named in failed; the dry run passes upload False.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF139-6-AC3",
+      "criterion_verbatim": "DBF139-6-AC3 -- the scheduled fire runs the stage on the transaction owed days (not the returns days) and reports transaction_window; day, days and rewrite events never run the stage; the function's tests directory is green; and the function-map entry still pins the files it packages (DBF138-6-AC1 to AC3 PASS). Base: FAIL (no trading_lag).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_cotwindow.py\" . DBF139-6-AC3",
+      "output_evidence": "DBF139-6-AC3 PASS (rc 0), run at a1638e91c0 from the worktree root; the run executes the directory's pytest (52 passed, rc 0) and DBF138-6-AC1, AC2 and AC3 (each PASS); the last line of the run is 'DBF139-6-AC3 PASS'.",
+      "denominator": "1 of 1 checker criterion for DBF139-6-AC3; 52 of 52 tests of the function's tests directory pass; 3 of 3 round-138 bundle criteria PASS; the scheduled fire reported transaction_window and wrote the owed day; the day, days and rewrite events ran the stage 0 times.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TX_WINDOW set to 13 in handler.py at a1638e91c0 (a scratch mutation, restored from git bytes, tree clean after): the window must then drop the lag-14 row and AC1 must fail.",
+      "expected": "DBF139-6-AC1 FAIL",
+      "observed": "DBF139-6-AC1 FAIL (rc 1; reason: TX_WINDOW must be 14); after the restore DBF139-6-AC1 PASS (rc 0) and git diff clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "DBF139-6-AC1 run twice on the committed tree at a1638e91c0, outputs and return codes compared",
+      "observed": "both runs rc 0 and last line 'DBF139-6-AC1 PASS'; identical output",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "p139_cotwindow.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_cotwindow.py\" --selftest",
+      "result": "selftest PASS (5 arms) rc 0."
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --select E9,F handler.py tests/test_transaction_emission.py",
+      "result": "All checks passed! (the handler and the rewritten test file, at a1638e91c0)"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, any Terraform command, any upload, any push.",
+      "reason": "The order is WORLD by its floor: code and tests in a branch only; the tests use fakes and the producer's upload=False path."
+    },
+    {
+      "item": "A second commit for the function-map re-pin.",
+      "reason": "No staged_from pin moves: handler.py and the tests are not staged members, and the producer chain is unedited (surprise IRPT_DASHBD-D2-W2706-S1)."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W2706-S1: the order's re-pin premise fails: handler.py is listed in the function-map entry's files with no pin or sha256, so no staged_from pin moves and no re-pin commit was made.",
+    "IRPT_DASHBD-D2-W2706-S2: a window-complete day whose window holds no line of that business day is refused by the producer's empty-partition rule and named on each fire that owes it; the order states no rule for a zero-row day.",
+    "IRPT_DASHBD-D2-W2706-S3: the window checker prints a WARN that the hardcoded NYSE fallback calendar answers, because pandas_market_calendars is absent on this box; the window arithmetic was measured on that fallback."
+  ]
+}

@@ -1,0 +1,130 @@
+diff --git a/data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py b/data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py
+index f4d45c5609..f743f4790a 100644
+--- a/data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py
++++ b/data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py
+@@ -420,6 +420,33 @@ def accounts_in_partition(reader, day):
+     return {k for k in (_key(a) for a in t[ACCOUNT_COLUMN]) if k is not None}
+ 
+ 
++LATE_WINDOW_TRADING_DAYS = 14  # a day's trades can post to a silver partition up to this many trading days later (CTO ruling, dell1 finding)
++
++
++def shift_trading_days(day_iso, n):
++    """The trading day n trading days after (n >= 0) or before (n < 0) the trading day day_iso."""
++    d = dt.date.fromisoformat(day_iso)
++    if n >= 0:
++        return tc.trading_days_between(d, d + dt.timedelta(days=2 * n + 14))[n].isoformat()
++    return tc.trading_days_between(d - dt.timedelta(days=-2 * n + 14), d)[n - 1].isoformat()
++
++
++def transaction_partitions(reader, start, end):
++    """The fact_transactions partitions the window (start, end] reads: from `start` through the LATE_WINDOW_TRADING_DAYS-th trading
++    day after `end` (a day's trades land in LATER partitions, each partition being a rolling pull)."""
++    horizon = shift_trading_days(end, LATE_WINDOW_TRADING_DAYS)
++    return [p for p in reader.list_partitions("fact_transactions") if start <= p <= horizon]
++
++
++def transaction_rows_dated(reader, day):
++    """True when a fact_transactions row whose Trade Date is `day` exists in the partitions from `day` through the late window."""
++    for p in transaction_partitions(reader, day, day):
++        t = reader.read_parquet("fact_transactions", p).to_pydict()
++        if any(parse_trade_date(x) == day for x in t["Trade Date"]):
++            return True
++    return False
++
++
+ def derive(reader, accounts, start, end, floor_day=None):
+     """(rows, summary) for the accounts over the trading days start..end (ISO). Reads through the reader only.
+ 
+@@ -452,12 +479,17 @@ def derive(reader, accounts, start, end, floor_day=None):
+             values[acc][p] = v
+     census = {"partitions": 0, "rows": 0, "by_word": {}, "by_word_type": {}, "sign": {}}
+     acct_rows = []
+-    trans_parts = [p for p in reader.list_partitions("fact_transactions") if p >= start]
++    trans_parts = transaction_partitions(reader, start, end)
+     cols = ["AccountID", "Trade Date", "External Flow", "Transaction Type", "Market Value"]
++    by_id = {}
+     for p in trans_parts:
+         t = reader.read_parquet("fact_transactions", p).to_pydict()
+         census["partitions"] += 1
+-        for acc, trade, word, ttype, mv in zip(*[t[c] for c in cols]):
++        ids = t["TransactionID"] if "TransactionID" in t else [None] * len(t[cols[0]])
++        for i, (tid, row) in enumerate(zip(ids, zip(*[t[c] for c in cols]))):
++            by_id[tid if tid is not None else ("row", p, i)] = row
++    for acc, trade, word, ttype, mv in by_id.values():
++        if True:
+             w = "<NULL>" if word is None else str(word).strip()
+             census["rows"] += 1
+             census["by_word"][w] = census["by_word"].get(w, 0) + 1
+@@ -577,8 +609,8 @@ def presence_hold(reader, day):
+         missing.append("fact_allocations partition absent")
+     elif reader.read_parquet("fact_allocations", day).num_rows == 0:
+         missing.append("fact_allocations partition empty")
+-    if day not in reader.list_partitions("fact_transactions"):
+-        missing.append("fact_transactions partition absent")
++    if day not in reader.list_partitions("fact_transactions") and not transaction_rows_dated(reader, day):
++        missing.append("fact_transactions partition absent and no row dated the day in the partitions of the day through the late window")
+     return None if not missing else "HOLD %s: %s" % (day, "; ".join(missing))
+ 
+ 
+diff --git a/infra/aws/lambda/investor-reporting/account-return-daily/handler.py b/infra/aws/lambda/investor-reporting/account-return-daily/handler.py
+index a8f899534e..d9d33853e6 100644
+--- a/infra/aws/lambda/investor-reporting/account-return-daily/handler.py
++++ b/infra/aws/lambda/investor-reporting/account-return-daily/handler.py
+@@ -127,6 +127,22 @@ def _run(s3, reader, days, upload, rewrite=False):
+     return results, held
+ 
+ 
++SETTLE_LAG_TRADING_DAYS = 14  # a day is rewritten once, this many trading days later, when its late-posting window is complete (CTO ruling)
++
++
++def settle_days(s3, owed):
++    """The landed days a scheduled fire settles: each owed day's day SETTLE_LAG_TRADING_DAYS trading days earlier, when it is at or after
++    FLOOR_DAY, landed, and not itself owed. Oldest first, no duplicate."""
++    bucket, prefix = cbd.gold_prefix()
++    landed = set(landed_days(s3, bucket, prefix))
++    out = []
++    for d in owed:
++        back = cbd.shift_trading_days(d, -SETTLE_LAG_TRADING_DAYS)
++        if back >= FLOOR_DAY and back in landed and back not in owed and back not in out:
++            out.append(back)
++    return sorted(out)
++
++
+ def _clients(s3, reader):
+     """The boto3 S3 client and the adapter's silver reader, each when not injected. Creating a client makes no call."""
+     if s3 is None:
+@@ -258,6 +274,7 @@ def lambda_handler(event, context=None, s3=None, reader=None):
+     if days is not None and len(days) > MAX_BACKFILL_DAYS:
+         raise SystemExit("refused: %d days in one event; the most is %d" % (len(days), MAX_BACKFILL_DAYS))
+     s3, reader = _clients(s3, reader)
++    scheduled = days is None
+     if days is None:
+         bucket, prefix = cbd.gold_prefix()
+         newest = newest_landed_day(s3, bucket, prefix)
+@@ -267,5 +284,23 @@ def lambda_handler(event, context=None, s3=None, reader=None):
+     results, held = _run(s3, reader, days, upload)
+     written = [d for d in dict.fromkeys(days) if not results[d].get("held")]
+     transaction_written, transaction_failed = emit_transactions(s3, reader, written, upload)
+-    return {"ok": True, "days": days, "results": results, "held": held, "transaction_rows": transaction_written,
+-            "transaction_failed": transaction_failed}
++    out = {"ok": True, "days": days, "results": results, "held": held, "transaction_rows": transaction_written,
++           "transaction_failed": transaction_failed}
++    if scheduled:
++        # the settle: each owed day's day 14 trading days earlier is rewritten once, with its late-posting window complete (never raises)
++        settled, settle_failed = {}, {}
++        try:
++            to_settle = settle_days(s3, days)
++            for day in to_settle:
++                try:
++                    res, _held = _run(s3, reader, [day], upload, rewrite=True)
++                    settled[day] = res[day]
++                except (Exception, SystemExit) as exc:  # noqa: BLE001
++                    settle_failed[day] = "%s: %s" % (type(exc).__name__, str(exc)[:300])
++                    print("SETTLE_FAILED %s %s" % (day, settle_failed[day]))
++        except (Exception, SystemExit) as exc:  # noqa: BLE001
++            settle_failed["*"] = "%s: %s" % (type(exc).__name__, str(exc)[:300])
++            print("SETTLE_FAILED * %s" % settle_failed["*"])
++        out["settled"] = settled
++        out["settle_failed"] = settle_failed
++    return out
