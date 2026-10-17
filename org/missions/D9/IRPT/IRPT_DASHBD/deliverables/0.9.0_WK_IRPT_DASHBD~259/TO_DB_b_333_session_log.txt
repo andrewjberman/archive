@@ -1,0 +1,15 @@
+TO_DB_b_333 session log -- 0.9.0_WK_IRPT_DASHBD~259 -- branch wk-IRPT_DASHBD-259 -- LOCAL only, nothing pushed, nothing deployed
+
+1. preflight: git rev-parse --abbrev-ref HEAD = wk-IRPT_DASHBD-259; org and .tools present (TREE-OK).
+2. baseline, before any edit: the four existing suites (adapter, rewrite, handler, transaction emission) = 99 passed.
+3. edits: adapter 77 changed lines (cap 150); handler 38 changed lines (cap 120); new test file test_cottonwood_late_window.py, 23 tests, fakes only.
+4. after edits: new test file 23 passed; the four existing suites 99 passed, unchanged; ruff check on the adapter and the handler: All checks passed; ruff on the new test file: passed after one rename of an ambiguous identifier.
+5. commits: fa48b9d8b7 (code: adapter, handler, new test file); 6d09a01d3f (surprise rows S1 to S3 in the investigation file).
+6. checker p199_cot_late_window.py, run from the worktree root:
+   DBC199-1-AC1: FAIL -- files outside the agreed set changed: ['portal'] (the portal submodule entry is dirty in this worktree; the committed diff since the branch point is the three named files).
+   DBC199-2-AC1: PASS -- the cell's tests and the issuer's probe pass against the code.
+   DBC199-3-AC1: PASS -- live: 277 distinct TransactionIDs with a flow on 2026-07-24; 30 of 880 accounts would be inflated by the raw sum; 880 accounts equal to the independent deduplicated sum.
+7. the portal submodule was not touched: no checkout, reset, submodule update or stash was run.
+8. the order stayed open on the first run: DBC199-1-AC1 failed on the dirty portal gitlink (row IRPT_DASHBD-D2-W259-S1).
+9. the issuer ruled the checker clause the defect and fixed it at 9704c91f73 (main tree). Re-run from this worktree, all three by the main-tree checker path: DBC199-1-AC1 PASS; DBC199-2-AC1 PASS; DBC199-3-AC1 PASS (live 277 / 30 / 880).
+10. proof instance AC1 row updated to PASS; proof-of-spec-check VALID rc 0; order status flipped to complete. No code was touched in this step.
