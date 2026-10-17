@@ -46,30 +46,29 @@
       "criterion_verbatim": "handler.BRONZE_DAY equals the builder's bronze day prefix, key_ok still admits a builder-shaped key, and the naming gate refuses no audit_records line in any top-level module of the door directory.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py naming",
-      "output_evidence": "Printed the OK verdict line (files=2) with rc=0, which is NOT evidence for the gate arm: the gate itself printed 'NAMING ERROR function-map folder missing: C:\\Dev\\ajb_wk\\soc2-r2-9\\infra/aws/lambda/ci/function-map/' and exited 1 for the all-added handler diff, so the check's refusal list was empty by construction (surprise rows SOC2_MSLOGS-D1-W9-S2 and -S3). The two non-gate arms are genuine: BRONZE_DAY % '20261016' equals the builder output (probe: prefix equal True); key_ok admits the builder-shaped bronze key and refuses the 7-digit date, the dashed date, the wrong object name and the dot-dot key (probe: five of five as expected).",
-      "denominator": "Gate arm: 0 of N top-level door modules graded (N = 2 by the check's own count, names of the module listing: handler.py and silver_builder.py); the gate refused to grade all of them. Non-gate arms: 2 of 2 genuine (prefix equality and key_ok admit), plus 4 refused keys of 4 in the probe. Run from C:/Dev/ajb_wk/soc2-r2-9 under timeout 120.",
-      "status": "FAIL",
-      "expect": "R2-NAMING-OK",
-      "status_reason": "The gate arm is UNMEASURED: the naming gate exits 1 with NAMING ERROR (function-map folder outside the worktree sparse cone, surprise row SOC2_MSLOGS-D1-W9-S2) before grading any line, and the check counts only NAMING REFUSE lines, so its OK is a false pass (surprise row SOC2_MSLOGS-D1-W9-S3). The criterion cannot be met in this worktree; the issuer must measure the gate in a worktree that carries the function-map."
+      "output_evidence": "R2-NAMING-OK files=2\nrc=0\nGate on the door modules (naming-gate.py --diff, all-added diff of each module; output saved in the worktree at .scratch/gate_door_full.txt):\nhandler.py: NAMING CONFORMANT handler.py:54 m365-metadata/trino/ ; NO audit_records line refused; REFUSE lines only at 58,59,60,98,99,100 (silver, state and gold keys: the CTO's registry HOLE, reported verbatim below); NAMING-GATE: WARN 7 graded.\nsilver_builder.py: NAMING-GATE: PASS 0 graded.\nVerbatim HOLE lines (silver/state/gold, each why: 'NEW and OUT-OF-PATTERN as S3Key: REFUSE; LIVE-READ-FAILED: CensusError ...'): NAMING REFUSE handler.py:58 gold/collection_coverage/ ; :59 state/subscription_cursor/current/cursor.json ; :60 silver/activity_events/ ; :98 silver/activity_events/date=\\d{4}-\\d{2}-\\d{2}/data\\.parquet ; :99 state/subscription_cursor/current/cursor\\.json ; :100 gold/collection_coverage/date=\\d{4}-\\d{2}-\\d{2}/coverage_\\d{8}T\\d{6}Z\\.json",
+      "denominator": "2 of 2 top-level door modules gated (handler.py, silver_builder.py); audit_records lines refused: 0 of 2 (base 10fde29e7c: 2 of 2 bronze lines refused at handler.py:61 and :88, the mutant control); the gate's REFUSE lines in handler.py: 6 of 7 graded, all silver/state/gold (the HOLE). Run from C:/Dev/ajb_wk/soc2-r2-9 under timeout 120.",
+      "status": "PASS",
+      "expect": "R2-NAMING-OK"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "The base handler before this order (commit 10fde29e7c), whose BRONZE_DAY and bronze grammar typed the audit_records prefix literally. Its figures are the order's recorded dry run at the base (2026-10-17 ~06:2xZ), recorded by the issuer in the environment that carries the function-map; not re-run by this worker.",
-      "expected": "R2-NAMING-REFUSED: the naming gate still refuses 2 audit_records line(s).",
-      "observed": "Not run here: the gate cannot grade in this worktree, so no discriminating mutant run exists. Issuer-recorded base dry run: R2-NAMING-REFUSED the naming gate still refuses 2 audit_records line(s).",
-      "status": "N/A-SPEC-NAMES-NONE"
+      "description": "The base handler 10fde29e7c, graded as an all-added diff (.scratch/mk_base_diff.py, same gate, same registry).",
+      "expected": "the gate refuses the bronze audit_records lines",
+      "observed": "naming-gate on the base: NAMING REFUSE handler.py:61 bronze/audit_records/date=%s/ and :88 bronze/audit_records/date=\\d{8}/ (2 of 2 bronze lines), NAMING-GATE: WARN 9 graded. The same gate on f70978d8d9 refuses 0 audit_records lines.",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "One build.sh run and the zip listing read from the zip; the names.py content read from the zip.",
-      "observed": "Not run as a second comparison: one build.sh run only (reason). Single run: zip holds handler.py, names.py, silver_builder.py; names.py holds BRONZE_DAY_PREFIX = 'm365-metadata/trino/bronze/audit_records/date=%s/'. No second run was made.",
-      "status": "N/A-WITH-REASON"
+      "method": "The handler gate run twice on the same all-added diff, and the check run twice.",
+      "observed": "Handler gate output identical across two runs (19 lines, compared ignoring line endings); the check printed R2-NAMING-OK files=2 rc=0 both times.",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "The gate's verdict on the bronze lines and on the silver, state and gold lines of handler.py",
-      "reason": "The naming gate cannot grade in this worktree: its function-map folder is tracked but outside the sparse-checkout cone (surprise row SOC2_MSLOGS-D1-W9-S2). The face says to report the gate's exact lines verbatim; none exist here. The function-map was not copied or added to the cone (reconstruction is forbidden)."
+      "item": "The silver, state and gold REFUSE lines of handler.py (lines 58, 59, 60, 98, 99, 100)",
+      "reason": "The CTO registry HOLE (no registry module places these prefixes); the order says to leave them and report them verbatim, and they are reported in the acceptance row. Not hidden, not edited."
     },
     {
       "item": "Live AWS call, Lambda update, Terraform, and any read of a stored object",
@@ -106,6 +105,11 @@
       "tool": "safe-commit gates",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_SOC2_MSLOGS~9 <0.9.0_WK_SOC2_MSLOGS~9@opal.agent>\" -F <msgfile> -- <paths>",
       "result": "commit at f70978d8d9: commit-gate OK; surprise-row-gate OK; to-pipeline-gate OK; NAMING ERROR (function-map folder missing) printed, not refused; client-data-check WARN printed"
+    },
+    {
+      "tool": "naming-gate.py --diff (door modules, and base 10fde29e7c)",
+      "invocation": "python .tools/naming-gate.py --diff <all-added diff of each module>",
+      "result": "handler.py WARN 7 graded (0 audit_records REFUSE); silver_builder.py PASS 0 graded; base handler 9 graded with 2 audit_records REFUSE"
     }
   ]
 }
