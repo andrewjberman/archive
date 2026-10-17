@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-db-3",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~136",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5bee627be9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5bee627be9",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-db-3.deploy-writes-the-release-sha-marker.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "kind": "script",
+      "commit_or_etag": "d34f006418",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One comment line and one code line inserted after the tar extract (line 363 comment, line 364 code), 2 insertions and 0 other changes against 5bee627be9. The code line writes the release FULL_SHA to REMOTE_DIR's marker through sudo tee, so the file holds the 40-character sha and a newline. bash -n is clean. The script was not run and no AWS call was made; the marker reaches the host only through the next release."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_db3.py",
+      "kind": "test",
+      "commit_or_etag": "d34f006418",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file; three named tests test_ogdb3_ac01, test_ogdb3_ac02 and test_ogdb3_ac03. They read the script as text and run the marker line under bash; no AWS, no network."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "bfd0ab129b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three new surprise rows NFRA_OPLGTW-Z-W136-S1..S3 appended; the commit-time surprise-row gate passed (3 new of 1057 checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass (one marker write, in the right place, writing the sha; the rest of the script unchanged).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_db3.py test_ogdb3_ac01 test_ogdb3_ac02 test_ogdb3_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 named tests of 3 PASSED (test_ogdb3_ac01, test_ogdb3_ac02, test_ogdb3_ac03); 0 failed or errored lines; measured at bfd0ab129b",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~136 '^infra/aws/ec2/opal-gateway/(deploy-to-ec2\\.sh|tests/test_og_db3\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~136: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched by the commits of 0.9.0_WK_NFRA_OPLGTW~136 (2 product: deploy-to-ec2.sh and tests/test_og_db3.py; 1 standing record path: INVESTIGATION_v1.md); 0 outside the allowed set; measured at bfd0ab129b",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~136: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The marker line from deploy-to-ec2.sh run in a scratch folder with REMOTE_DIR='.', FULL_SHA set to a 40-hex sample and SHORT_SHA set to its first 7 characters, with the one token FULL_SHA replaced by SHORT_SHA in the line. The repo script is untouched.",
+      "expected": "the written marker is not the 40-hex sample plus a newline, so the AC02 byte comparison refuses it",
+      "observed": "the marker wrote 8 bytes (a 7-character sha and a newline) where the sample needs 41 bytes; the comparison would fail",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run twice more, in full, at bfd0ab129b; the two runs compared",
+      "observed": "run 1 and run 2 identical: AC1 pytest rc=0, 3 of 3 PASSED, 0 failed lines; AC2 files touched 3, product 2, outside 0; RESULT: PASS and exit=0 in each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploy-to-ec2.sh was not run, and no AWS call, SSM send, S3 upload or host read was made.",
+      "reason": "The order forbids the run; the cell changes the text only and the criteria read the script as text."
+    },
+    {
+      "item": "The live host's /opt/opal-gateway marker file.",
+      "reason": "Not in scope: the marker is written by the next release's deploy, which the batched release carries (its Phase B reads it). No host was read or changed."
+    },
+    {
+      "item": "The AC02 temp folder as an absolute REMOTE_DIR.",
+      "reason": "The Windows temp path holds a space and the marker line expands REMOTE_DIR unquoted; the test runs the unchanged line with cwd = the temp folder and REMOTE_DIR='.' (NFRA_OPLGTW-Z-W136-S1)."
+    },
+    {
+      "item": "The commit-time client-data check on d34f006418.",
+      "reason": "Printed WARN ABSENT on this device; the commit was not refused. Recorded as NFRA_OPLGTW-Z-W136-S3, not read as checked clean."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W136-S1: the order's AC02 premise (a temp folder as REMOTE_DIR) does not hold on Site Z; the temp path holds a space and the marker line expands REMOTE_DIR unquoted, so the test runs the unchanged line from inside the folder with REMOTE_DIR='.'.",
+    "NFRA_OPLGTW-Z-W136-S2: the worktree is a sparse cone; org/surprise_channel/ is tracked at HEAD but not on disk, so the row schema was read with git show HEAD.",
+    "NFRA_OPLGTW-Z-W136-S3: the commit d34f006418 printed WARN client-data-check ABSENT; the commit was not refused and is not read as checked clean."
+  ],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commits d34f006418 (deploy script and test file) and bfd0ab129b (surprise rows) on branch wk-NFRA_OPLGTW-136, and the criterion invocations recorded above.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~136 <0.9.0_WK_NFRA_OPLGTW~136@opal.agent>\" -F .scratch/msg_ogdb3_product.txt -- infra/aws/ec2/opal-gateway/deploy-to-ec2.sh infra/aws/ec2/opal-gateway/tests/test_og_db3.py",
+      "result": "rc 0; commit d34f006418; commit-gate OK (bash -n on deploy-to-ec2.sh); to-pipeline-gate OK; naming-gate PASS; gitlink-publication-check refusals=0; client-data-check WARN ABSENT (NFRA_OPLGTW-Z-W136-S3)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~136 <0.9.0_WK_NFRA_OPLGTW~136@opal.agent>\" -F .scratch/msg_ogdb3_rows.txt -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0; commit bfd0ab129b; surprise-row-gate OK: 3 new rows of 1057 total checked"
+    },
+    {
+      "tool": "pytest (via _named.sh)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_db3.py test_ogdb3_ac01 test_ogdb3_ac02 test_ogdb3_ac03",
+      "result": "pytest rc=0; named tests passed 3 of 3; RESULT: PASS"
+    }
+  ]
+}
