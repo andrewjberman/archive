@@ -1,6 +1,6 @@
 """IRPT_DASHBD round 150 (issuer 2.0.0_SA_COO~D2) -- the APPLY of the signed filled-report switch-on pair (packet NEVER_WIDEN_PACKET_49F_FILLED_REPORT_SWITCH_ON_FIRST_PASS.md, sha256 3248f3c4; COO half a1e2575ac6, CTO half a824aebb24):
-the bundle, a code-only safe-apply (0/1/0) with the OFF no-op probe, ONE safe-apply of the one environment variable (0/1/0), a dry run in seven shards, ONE canary client, the mint leg and S2's V leg, the full pass in
-seven shards, the after-read. WORLD, client-facing documents. The record is the applier's (`0.7.0_AE_CloudOps~IB2`); the checker re-reads the world and VALIDATES a sample of the written documents itself.
+the bundle, a code-only safe-apply (0/1/0) with the OFF no-op probe, ONE safe-apply of the one environment variable (0/1/0), a dry run in 28 shards, ONE canary client, the mint leg and S2's V leg, the full pass in
+28 shards, the after-read. WORLD, client-facing documents. The record is the applier's (`0.7.0_AE_CloudOps~IB2`); the checker re-reads the world and VALIDATES a sample of the written documents itself.
 
   DBC194-1-AC1  the record: both halves signed at the packet's sha256, the ledger, the build hash, the two plans, the OFF no-op, the dry run and the full pass by shard reconciling, the canary, the V leg, no id
   DBC194-2-AC1  FRESH live reads: the function runs the bundle with exactly the one environment variable; the role policy and the three schedules are as in the packet; the schedules' inputs carry no filled_report event
@@ -52,16 +52,16 @@ def count(x, lo=0):
     return is_int(x) and x >= lo
 
 
-def check_shards(shards, label, expect_sum=None):
-    need(isinstance(shards, list) and len(shards) == 7 and [s.get("shard") for s in shards] == list(range(7)), "%s: seven shards 0..6 in order" % label)
+def check_shards(shards, label, expect_sum=None, mem_line=921):
+    need(isinstance(shards, list) and len(shards) == 28 and [s.get("shard") for s in shards] == list(range(28)), "%s: 28 shards 0..27 in order (Addendum 1)" % label)
     for s in shards:
         need(set(s) == {"shard", "clients", "written", "not_available", "refused", "max_memory_mb", "duration_s"} and all(count(s[k]) for k in ("clients", "written", "not_available", "refused", "max_memory_mb"))
-             and isinstance(s["duration_s"], (int, float)) and 0 <= s["duration_s"] <= 240 and s["max_memory_mb"] <= 819, "%s shard %s: counts, at most 819 MB and 240 s" % (label, s.get("shard")))
+             and isinstance(s["duration_s"], (int, float)) and 0 <= s["duration_s"] <= 240 and s["max_memory_mb"] <= mem_line, "%s shard %s: counts, at most %d MB and 240 s (Addendum 1)" % (label, s.get("shard"), mem_line))
         need(s["written"] + s["not_available"] + s["refused"] == s["clients"], "%s shard %s: written + not_available + refused must equal the clients" % (label, s["shard"]))
     tot = {k: sum(s[k] for s in shards) for k in ("clients", "written", "not_available", "refused")}
     need(tot["refused"] * 10 <= tot["clients"], "%s: refused above 10 percent of the clients (Branch D)" % label)
     if expect_sum is not None:
-        need(tot == expect_sum, "%s: the seven shards must reconcile with the dry run: %s vs %s" % (label, tot, expect_sum))
+        need(tot == expect_sum, "%s: the 28 shards must reconcile with the dry run: %s vs %s" % (label, tot, expect_sum))
     return tot
 
 
@@ -99,8 +99,8 @@ def check_head(rec, packet_sha, coo_text, cto_text, ledger_exists):
 def check_run(rec):
     dr = rec["dry_run"]
     need(isinstance(dr, dict) and set(dr) == {"directory_clients", "shards", "objects_before", "objects_after"} and count(dr["directory_clients"], 1) and dr["objects_before"] == dr["objects_after"] and count(dr["objects_before"]), "dry_run keys; the prefix object count must be EQUAL before and after (a dry run writes nothing)")
-    tot = check_shards(dr["shards"], "dry run")
-    need(tot["clients"] == dr["directory_clients"], "dry run: the seven shards' clients must sum to the directory's client count")
+    tot = check_shards(dr["shards"], "dry run", mem_line=900)
+    need(tot["clients"] == dr["directory_clients"], "dry run: the 28 shards' clients must sum to the directory's client count")
     need(tot["written"] >= 1, "dry run: at least one client would be written")
     c = rec["canary"]
     need(isinstance(c, dict) and set(c) == {"client_digest12", "dry_run_written", "clients", "written", "object_exists", "validates", "prefix_gain"}, "canary keys")
@@ -219,7 +219,7 @@ def run(root, cid):
 
 def synthetic():
     sh = lambda i, c, w, na, rf: {"shard": i, "clients": c, "written": w, "not_available": na, "refused": rf, "max_memory_mb": 400, "duration_s": 40.0}  # noqa: E731
-    dry = [sh(0, 600, 590, 8, 2), sh(1, 570, 560, 8, 2), sh(2, 590, 585, 4, 1), sh(3, 560, 550, 8, 2), sh(4, 580, 570, 8, 2), sh(5, 600, 595, 4, 1), sh(6, 512, 500, 10, 2)]
+    dry = [sh(i, 150 + (i % 3), 145 + (i % 3), 4, 1) for i in range(28)]
     full = copy.deepcopy(dry)
     tw = sum(s["written"] for s in dry)
     rec = {"claim": "measured", "gates": {"packet_sha256": "p" * 64, "coo_half_signed": True, "cto_half_signed": True, "one_change_at_a_time": {"worktrees_read": 9, "open_markers_naming_this_surface": 0}, "live_matches_packet": True},
@@ -279,7 +279,9 @@ def selftest():
     mut("off probe", lambda r: r["probe_off"].update(response=dict(OFF, enabled=True)))
     mut("schedule inputs", lambda r: r["schedule_inputs"].update(none_contains_filled_report=False))
     mut("dry shards", lambda r: r["dry_run"]["shards"].pop())
-    mut("dry memory", lambda r: r["dry_run"]["shards"][0].update(max_memory_mb=900))
+    mut("dry memory", lambda r: r["dry_run"]["shards"][0].update(max_memory_mb=901))
+    mut("full memory", lambda r: r["full"]["shards"][0].update(max_memory_mb=922))
+    mut("seven shards", lambda r: (r["dry_run"].update(shards=r["dry_run"]["shards"][:7])))
     mut("dry time", lambda r: r["dry_run"]["shards"][0].update(duration_s=241))
     mut("dry shard sum", lambda r: r["dry_run"]["shards"][1].update(written=1))
     mut("dry refused rate", lambda r: (r["dry_run"]["shards"][0].update(refused=500, written=90), r["full"]["shards"][0].update(refused=500, written=90)))
