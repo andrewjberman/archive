@@ -1,0 +1,31 @@
+HVST-cd-2 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, 2026-10-17 12:2xZ (GO msg 7499). READ ONLY. STOPPED AT STEP 1: the live base is not in dell1's git store. Nothing built, uploaded or deployed; no ledger opened (no act began).
+
+START CONDITIONS
+ (a) HVST-cd-1 merged on box/dell1 at 9784d58e12 (git cat-file -t = commit; ^1 = 46c09f960f29ca4cfed316cf8d55dc7891ab3805): TRUE.
+ (b) COO half 8b5102de2a56e0c4c0874a76ec8a457c0b3de6e81dde2517e4e890b5b833a9d8 and CTO half (SIGNED, C-8 and C-9) read in full: TRUE.
+ (c) deploy ledger: NOT opened. The act has not begun; it opens when the base resolves.
+
+STEP 0 -- LIVE DEPLOYED COMMIT, three planes (they AGREE)
+ EC2_MANIFEST.json services.opal-gateway at HEAD: deployed_commit 9d5b7125571520b977401634a01935924f4c9787, deployed_at 2026-10-17T05:19:28Z, deployed_by 0.7.0_AE_CloudOps~NFRA1; previous_deployed_commit d3ae88be463d88c6f4ea22fb297659bf44f43758; instance_id i-07dccb1615503ac99; mcportal_commit 59e802a4185a62129bf28ebb4df6eda9b70e03ff.
+ Artifact plane: s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-latest.tar.gz git-ref 9d5b7125571520b977401634a01935924f4c9787, LastModified 2026-10-17T05:19:01Z, 897815 B. The keyed tarball opal-gateway-9d5b712557.tar.gz is 897815 B (LastModified 05:18:59Z).
+ INSTANCE (SSM 56c9bea1-e29d-4f20-9468-21123be572c7, 2026-10-17T12:25:02Z, diag/cc7_hostread.py pulled from S3 and run under /opt/opal-gateway/.venv; read only): unit active/running, MainPID 1228521, ActiveEnterTimestamp 2026-10-17 05:19:20 UTC (the 9d5b712557 deploy's restart); /health 200 (port 8080); app tree files=133 digest=1b99e89b698354abacffe3f8591ab751.
+ The host's named files: app/server.py d9901c9da364585223cc581452a61c81; app/harvest_figures.py 610eb6862918d2c6695c10d2de58734f; app/harvest_research.py af2d662f9558e29de89c194f6de84eb0; app/harvest_identity.py 9c8d1fd69ffe0594968b4acd2751fba9; app/config.py b2b19fdcc2fbe60cdf4f84d7ea87a186.
+ C-6 BEFORE: /health = 200; MCP tool-name count = 127; names md5 = 9a593c843feb61c2753d8c08a84eb61d (equal to the count and md5 read at d14445961d and at 4be300110e in round 88).
+ PREVIOUS TARBALL KEY (the rollback target for THIS act is the tarball of the live commit, 9d5b712557, which becomes previous_deployed_commit after the deploy): ec2/opal-gateway/opal-gateway-9d5b712557.tar.gz, 897815 B, ETag "05b4b1039fe502903b124ec604dbfdb9". The manifest's current previous_deployed_commit d3ae88be46 has opal-gateway-d3ae88be46.tar.gz (895333 B, ETag "0280bbd000aa82ab1c8ba3b6a2b2b64e", git-ref d3ae88be463d88c6f4ea22fb297659bf44f43758).
+
+STEP 1 -- THE CUT CANNOT BE MADE (the order's: "cut rel-amgt-harvst-cd2 from the live deployed commit ... a difference means STOP")
+ git cat-file -t 9d5b7125571520b977401634a01935924f4c9787 and d3ae88be463d88c6f4ea22fb297659bf44f43758: both "Not a valid object name" / "could not get object info" in dell1's object store (after git fetch origin, 2026-10-17 12:1xZ).
+ git fetch origin <full hash> for each: "fatal: remote error: upload-pack: not our ref". git ls-remote origin 'refs/heads/rel-*' lists ten rel-* refs, none at either commit (rel-nfra-og-ap-31-live is still 4be300110e). The linked worktrees on dell1 share one object store, so none of them holds either commit.
+ So the deploy that moved the live gateway at 05:19Z (0.7.0_AE_CloudOps~NFRA1) was cut in a tree whose commit is not on origin and not on dell1. This is the AMGT_HARVST-D1-S35 shape again (it resolved when the MQ lane pushed its release ref).
+
+WHAT THE CHECKS I CAN MAKE SAY (they are NOT the order's check)
+ The order's step-1 equality is git show <merge>^1:harvest_research.py against git show <live>:harvest_research.py. The second blob is unreachable. By md5 instead: the host's app/harvest_research.py af2d662f9558e29de89c194f6de84eb0 EQUALS git show 9784d58e12^1:infra/aws/ec2/opal-gateway/app/harvest_research.py (af2d662f9558e29de89c194f6de84eb0) and EQUALS the blob at 319c9413a2 (my round-88 release). So the live gateway still serves exactly the file HVST-cd-1 started from. For contrast: 9784d58e12 (the cd-1 result) is 6d9e0dd38166b82943d6834a0ce482b5 and 4be300110e is f6ff1af51863fd5a4a2f04994a5a6ac5.
+ This proves one file. It does not prove that the other 132 app files of the live tree equal any commit I hold, so a release cut on a different base would not be the signed act (C-1: "the cut is on the live deployed commit, with the two-path diff printed").
+
+CONTROL READ BEFORE (step 0), through the gateway as the Opal principal of this session (mcp opalgateway harvest_get_research, security_key="UNH_US_Equity", 2026-10-17T12:2xZ)
+ as_of 2026-10-11; method_version amgt-corpus-dossier/15; content_sha256 6e4b4245933bb67fe82066eceecc1c148000df6cd0a3e3eec44ae6cb2e2cf653.
+ source_keys (11): amgt/harvest/gold/ai_fill/security_key=UNH_US_Equity/ai_fill.json; .../research-continuation/security_key=UNH_US_Equity/ (and 28404359eb0645c4.json); .../research_dossier/security_key=UNH_US_Equity/as_of=2026-10-11.f5456c3775f432d0.json; silver/research-report/ (parts 2026-09-23 to 2026-09-25, 5 parts); bloomberg/harvest/bronze/exec_officers/security_key=UNH_US_Equity/20261007T113713Z.json.
+ COUNTS: dossier_fields returned 21, omitted_items.dossier_fields 3 (denominator 24); continuation_fields returned 4, omitted_items.continuation_fields 1 (total 5); truncated true. The comparison after the deploy must use returned PLUS omitted_items (24 and 5), because the response is truncated.
+ misfiled_reports_excluded [] (UNH has no listed report); no misfiled_fields_excluded key yet (it arrives with the release). UNH has a dossier and no listed report, so it is a control as the order defines it.
+
+ISSUER MUST DECIDE (a stop, not a failure): see row AMGT_HARVST-D1-S42 and my message to 2.0.0_SA_COO~W1.
