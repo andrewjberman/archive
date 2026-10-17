@@ -1,0 +1,33 @@
+# HVST-cg-1 consumers of the silver research-report `fund` key (read-only; no consumer changed)
+# SEARCHED folders: lib/ (every .py, non-test) and infra/aws/ec2/opal-gateway/app/ (every .py, non-test)
+# SEARCHED tree: C:/dev/wk-harvst-161 (worktree, branch wk-AMGT_HARVST-161, base 2065535803)
+# NOT SEARCHED: portal/ (outside this order's <paths>; not read)
+# METHOD: native Grep tool, pattern ["']fund["'] (every quoted literal `fund` key read or written), then each hit read by hand.
+#         Test files dropped by hand (lib/research/corpus/tests/, app/tests/). Hits that are not a read of a
+#         silver research-report row or a research_reports[] entry are listed under NOT-A-SILVER-READ, not in the consumer list.
+# MEANS_HELD legend: yes = reads fund as held; no = reads fund as a named token only; unclear = cannot tell from the line
+
+CONSUMER lib/research/corpus/typed.py:689  if row["fund"]:  MEANS_HELD=no  the run summary counts rows that name a fund token; it does not read the token as held
+CONSUMER lib/research/corpus/typed.py:690  fund_counts[row["fund"]] = fund_counts.get(row["fund"], 0) + 1  MEANS_HELD=no  the same count, per named token
+CONSUMER lib/research/corpus/fund_form.py:262  items.append((row["report_id"], row.get("fund"), row.get("report_class"), headings, extract_key))  MEANS_HELD=no  the fund form's population is every A-D report that names the fund (a candidate line reads as a member); the form makes no holding claim
+CONSUMER lib/research/corpus/fund_form.py:160  if record_fund == fund and report_class in FUND_CLASSES  MEANS_HELD=no  compares record_fund taken at line 262 with the form's subject token
+CONSUMER lib/research/corpus/fund_form.py:169  if record_fund == fund and r_class == report_class  MEANS_HELD=no  same comparison on the item tuple read at line 262
+CONSUMER lib/research/corpus/fund_form.py:271  if record_fund == fund and report_class in FUND_CLASSES  MEANS_HELD=no  same comparison on the item tuple read at line 262
+CONSUMER infra/aws/ec2/opal-gateway/app/harvest_research.py:60  REPORT_FIELDS = ("report_id", "report_class", "class_evidence", "fund", "fund_evidence", "fund_absent_reason",  MEANS_HELD=no  names the key the gateway copies into research_reports[]; the copy is unchanged, so a served fund is a named token; fund_relation is NOT yet in REPORT_FIELDS (a later seat order adds it)
+CONSUMER infra/aws/ec2/opal-gateway/app/harvest_research.py:288  rec = {f: row.get(f) for f in REPORT_FIELDS}  MEANS_HELD=no  the copy of the fund key into the latest-row branch of _research_reports; no interpretation
+CONSUMER infra/aws/ec2/opal-gateway/app/harvest_research.py:292  rec = {f: row.get(f) for f in REPORT_FIELDS}  MEANS_HELD=no  the same copy into the attached-row branch of _research_reports; no interpretation
+
+# NOT-A-SILVER-READ (matched the pattern; not a read of a silver row or research_reports[] entry; not counted above)
+NOT-A-SILVER-READ lib/research/corpus/typed.py:466  "fund": fund,  producer: writes the key into the silver row, does not read a row
+NOT-A-SILVER-READ lib/research/corpus/continuation.py:489  "fund": fund_m.group(1) if fund_m else None,  writes the position value's fund from the content line, not from a silver row
+NOT-A-SILVER-READ lib/research/corpus/continuation.py:496  value["fund"] = None  writes the position value (a non-holding stance), not a silver row
+NOT-A-SILVER-READ lib/research/corpus/continuation.py:1165  fund = value.get("fund")  reads the last_stated_position value (gold position field), not a silver research-report row
+NOT-A-SILVER-READ lib/research/corpus/fund_form.py:221  "subject": {"fund": fund},  writes the gold fund-form document's subject
+NOT-A-SILVER-READ lib/research/corpus/fund_form.py:333  if document.get("subject", {}).get("fund") == fund and ...  reads a gold fund-form document's subject, not a silver row
+NOT-A-SILVER-READ lib/research/corpus/fund_form.py:344  return sorted({doc.get("subject", {}).get("fund") for doc in docs.values() ...})  reads gold document subjects, not a silver row
+NOT-A-SILVER-READ infra/aws/ec2/opal-gateway/app/etfs_rivals_flow.py:668  out.append((str(v.get("fund") or v.get("ticker") or ""), v))  a rivals-flow record, not a research report
+NOT-A-SILVER-READ infra/aws/ec2/opal-gateway/app/etfs_rivals_flow.py:740  funds.append({"fund": t, ...})  a rivals-flow record, not a research report
+NOT-A-SILVER-READ infra/aws/ec2/opal-gateway/app/rivalfunds_view.py:240  fund = request.path_params.get("fund") or ""  a route parameter, not a research report
+NOT-A-SILVER-READ infra/aws/ec2/opal-gateway/app/audit.py:119  "rivalfunds_view": {"day", "route", "fund"},  an audit field list, not a research report
+
+# CONSUMERS 9 lines in 2 lib files and 1 gateway file; MEANS_HELD=yes 0, no 9, unclear 0
