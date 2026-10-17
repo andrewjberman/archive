@@ -201,7 +201,7 @@ def main(stage, record_path, want_tar=None):
             if marker not in open(xnew + "/" + member, encoding="utf-8").read():
                 fail("the shipped %s does not carry %r" % (member, marker))
         # 9b. THE IMPORT SMOKE, re-run here (not read from the record): every module the static walk marks LIVE imports under the service's own sys.path, python -I
-        smoke = subprocess.run([sys.executable, "-I", "org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r34/smoke_imports_r34.py", xnew,
+        smoke = subprocess.run([sys.executable, "-I", "-B", "org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r34/smoke_imports_r34.py", xnew,
                                 "org/tier1_exec/2.0.0_SA_COO~G2/deliverables/r32/r32_reachability.py"], capture_output=True, text=True)
         smoke_head = [ln for ln in smoke.stdout.splitlines() if ln.startswith("SMOKE live=")]
         if smoke.returncode != 0 or not smoke_head or " fail=0 " not in smoke_head[0] + " ":
