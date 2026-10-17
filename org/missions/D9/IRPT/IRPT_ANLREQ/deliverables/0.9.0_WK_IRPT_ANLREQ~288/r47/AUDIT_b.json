@@ -1,0 +1,249 @@
+[
+{
+  "id": "IRPT_ANLREQ-D2-W128-S3",
+  "verdict": "CLOSED",
+  "hazard": "FIRM_ADVISOR owned-input analysis refused at CompositionAdmission step 2 because the request owner carries home_firm_id.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py:138", "says": "prospect_owner pops home_firm_id for every non-OPAL_GLOBAL owner (writer fix 5be427ba76); line 137 is the class test"},
+    {"kind": "code", "ref": "docs/contracts/investor-reporting/v1/RequestComposition.schema.json:602", "says": "owner else-branch: home_firm_id is not-required for non-OPAL_GLOBAL, i.e. forbidden; the writer now meets this contract"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T0207Z_irpt-ycg-r33-20261016_deploy_completion.md", "says": "CLOSED 20261016T024904Z; deploys irpt-ycharts-generate from pin 927337a741 (descends from 5be427ba76; line 138 pop present there); function-map packages interactive_access.py"},
+    {"kind": "commit", "ref": "5be427ba76", "says": "remedy: writer fix for TO-AR-y-319 (W129), 2026-10-14 10:41 -0400, before the r33 pin"},
+    {"kind": "commit", "ref": "927337a741", "says": "r33 build pin; contains 5be427ba76 and carries the line 138 pop"}
+  ],
+  "deployed": "yes",
+  "reason": "CLOSED on the tree (interactive_access.py:138 drops home_firm_id from ordinary owners) and on a CLOSED deploy record: irpt-ycharts-generate was deployed 2026-10-16 from pin 927337a741, which descends from the remedy and carries line 138. Verdict rests on the bytes, not the row text."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W129-S1",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Premise that legacy retained owners carry home_firm_id and need a reader is unverified against stored data.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/_scope/interactive_access.py:138", "says": "writer half closed in tree: ordinary-viewer owners carry no home_firm_id; no legacy reader exists in the tree"},
+    {"kind": "commit", "ref": "5be427ba76", "says": "commit message records legacy-owner reader not built, premise not held"}
+  ],
+  "deployed": "unread",
+  "reason": "The writer half is closed in the tree (interactive_access.py:138), but the row premise is a DATA fact: whether owners stored before 5be427ba76 carry home_firm_id. No committed record holds stored owner rows. NEEDS-LIVE-READ: a read-only scan of irpt-requests owner attributes for home_firm_id on ordinary-viewer inputs, not performed."
+},
+{
+  "id": "IRPT_ANLREQ-D2-S100",
+  "verdict": "CLOSED",
+  "hazard": "opal-ticket-api-role lacks kms:Decrypt on the irpt-requests key, so every CLIENT SUBMIT owner read answers 503.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/terraform/ticket-center/main.tf:186", "says": "Sid IrptRequestsInputOwnerRead: dynamodb:GetItem on irpt-requests, the four owner attributes (statement G)"},
+    {"kind": "code", "ref": "infra/aws/terraform/ticket-center/main.tf:201", "says": "Sid IrptRequestsDecryptViaDynamoOnly: kms:Decrypt only, on the table key, with kms:ViaService dynamodb and tableName context (addendum)"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261014T1538Z_irpt-ticket-r29b-kms-20261014_deploy_completion.md", "says": "line 3 CLOSED 20261014T155027Z; line 24 leg A applied 15:50Z; line 25 leg S reads back Action exactly [kms:Decrypt] on the key ARN"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261014T1459Z_irpt-ticket-r29b-20261014_deploy_completion.md", "says": "line 3 CLOSED 20261014T151638Z; leg G applied the GetItem statement IrptRequestsInputOwnerRead to the ticket role policy"},
+    {"kind": "commit", "ref": "8220c590a0", "says": "adds IrptRequestsDecryptViaDynamoOnly at 15:44Z, before the 15:50Z apply that reads it back"},
+    {"kind": "commit", "ref": "12955c10a6", "says": "adds IrptRequestsInputOwnerRead (the G statement), before the 15:04Z apply"}
+  ],
+  "deployed": "yes",
+  "reason": "CLOSED on the tree (main.tf:186 GetItem, :201 kms:Decrypt) and on two CLOSED apply records; the kms:Decrypt apply (15:50Z) is later than its remedy commit 8220c590a0 (15:44Z) and reads back the statement. Verdict rests on the bytes and the apply read-back."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W133-S1",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "AR-y-325 staff-filer change turns three TicketCenter portal tests red; AC1 cannot print PORTAL-TESTS-OK.",
+  "evidence": [
+    {"kind": "commit", "ref": "40534c9381", "says": "portal is a gitlink (160000 d1f9ca29675b) at HEAD: the TicketCenter tests and the AR-y-325 change are in the submodule, not in this tree"}
+  ],
+  "deployed": "unread",
+  "reason": "The three cited tests and the AR-y-325 change are portal bytes outside this tree; the grant reads HEAD only, so no verdict is reachable here. NEEDS-LIVE-READ: the portal cand branch carrying AR-y-325, its three named test assertions (staff sentence), read by git -C portal at the named ref."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W133-S4",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Staff CREATE refuses a firm outside the principal's allowed firms after the upload door was already called for that firm.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:392", "says": "_create_firm_allowed is _firm_allowed AND _in_profile_scope: the CREATE refusal rule, still present"},
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1427", "says": "CREATE returns 400 requester_firm outside the principal's allowed firms when _create_firm_allowed is false"},
+    {"kind": "commit", "ref": "40534c9381", "says": "door-before-CREATE ordering (analysisRequest.ts upload calls) lives in the portal gitlink d1f9ca29, not in this tree"}
+  ],
+  "deployed": "unread",
+  "reason": "The refusal half stands in the tree (lambda_function.py:392, :1427). Whether the upload door is called before CREATE for a refused firm is decided by portal analysisRequest.ts outside this tree. NEEDS-LIVE-READ: the portal call order and the door's own firm check at the ref the issuer names."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W136-S2",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Resident bindings writer omits the opal_map member, so a listed principal's Opal job is refused OPAL_MAP_BINDING_REQUIRED.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:115", "says": "bindings dict now carries opal_map with path and sha256; opal_map_comparison (116) and opal_map_multicomp (117) follow"},
+    {"kind": "commit", "ref": "53f683857c", "says": "the commit whose diff adds the opal_map member to the bindings builder (pickaxe on the opal_map path string)"}
+  ],
+  "deployed": "unread",
+  "reason": "The writer omission does not hold in the tree: build_resident_package.py:115 writes opal_map (added 53f683857c). Whether the bindings installed on the resident host carry the key is deployed state; no committed record names a build containing 53f683857c. NEEDS-LIVE-READ: the installed bindings document opal_map key on the resident host."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W141-S1",
+  "verdict": "CLOSED",
+  "hazard": "Branch-A test asserts the builder omits commentary_ready_queue_url while the builder writes it, so the test is red.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_package_imports.py:107", "says": "branch A strips commentary_ready_queue_url and packager and asserts both absent (AR-y-336 rewrite of the helper)"},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:113", "says": "builder writes commentary_ready_queue_url in the same dict as the packager block (line 114), per 26b34d0449"},
+    {"kind": "commit", "ref": "26b34d0449", "says": "AR-y-336: queue url and packager block land together; the test helper changes in the same commit"}
+  ],
+  "deployed": "n/a",
+  "reason": "CLOSED on the tree: the branch-A strip-and-assert (test:107) matches the builder that now writes both keys together (build_resident_package.py:113-114, 26b34d0449). Consistency read from bytes; the test was not executed. No deployed artifact is involved."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W141-S2",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "load_bindings refuses a commentary key without a packager block, so the bindings the builder writes cannot load.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py:114", "says": "packager block written in the same dict as the queue key (26b34d0449), so HEAD builder output does not trip the refusal"},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:155", "says": "RESIDENT_PACKAGER_REQUIRED raise is still present in the installed loader"},
+    {"kind": "commit", "ref": "26b34d0449", "says": "queue url and packager block landed together"}
+  ],
+  "deployed": "unread",
+  "reason": "HEAD builder output carries both keys, so the refusal is not reached by it, but resident_installed.py:155 still exists. Whether the bindings document installed on the resident host carries both keys is deployed state; no committed record names 26b34d0449. NEEDS-LIVE-READ: the installed bindings document on the host, both keys or neither."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W144-S1",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Release-31 member set omits ycharts/generate/acceptance.py, so the commentary-pdf route refuses COMMENTARY_PDF_NOT_RETAINED.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:36", "says": "irpt-status files[] lists acceptance.py at HEAD (per-function map; the single map was retired at fb20cba7b3)"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:188", "says": "staged repo_path ycharts/generate/acceptance.py, packaged_as acceptance.py, is a member of irpt-status at HEAD"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261015T0503Z_irpt-status-r31-20261015_deploy_completion.md", "says": "line 4: release 31 leg L delta exactly entry.py owned_report.py pdf_link.py status_installed.py; acceptance.py is not in the shipped delta"}
+  ],
+  "deployed": "unread",
+  "reason": "HEAD now lists acceptance.py (irpt-status.json:36, :188), but the recorded release-31 delta omits it and no later irpt-status record names it as shipped. NEEDS-LIVE-READ: the live irpt-status package member list for acceptance.py, or a committed record of a later irpt-status build that includes it."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W145-S1",
+  "verdict": "STANDS",
+  "hazard": "On this box the irpt-status BUILD_ONLY stages drive-relative files: ABS_SOURCE is a bash path handed to node, so staged writes land under C:/c/dev.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:233", "says": "node reads absSource from process.env.ABS_SOURCE with no conversion"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:259", "says": "dest = path.join(absSource, s.packaged_as): a bash-form path is drive-relative to node on Windows"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:432", "says": "ABS_SOURCE is WORKSPACE_ROOT plus the function source, in bash form"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:470", "says": "ABS_SOURCE is passed into the node staging step in the environment; the staging step has no cygpath conversion"}
+  ],
+  "deployed": "n/a",
+  "reason": "STANDS: the bash-form ABS_SOURCE (:432) reaches node unconverted (:470, :233) and is joined by path.join (:259), so staged members land drive-relative on Windows. The defect is in the build tool; no deployed artifact carries it."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W145-S5",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Shared release directory C:/dev/irpt-release-r31 holds other seats' r31 artifacts, so one seat's cleanup can reach them.",
+  "evidence": [
+    {"kind": "commit", "ref": "40534c9381", "says": "no committed tree rule or order at HEAD names a per-seat release directory; the directory is host filesystem state"}
+  ],
+  "deployed": "unread",
+  "reason": "Whether the directory now holds another seat's artifacts, and whether a cleanup can reach them, is host filesystem state, not tree state. NEEDS-LIVE-READ: a listing of C:/dev/irpt-release-r31 on dell2 with owners and timestamps, not performed under the HEAD-only grant."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W145-S6",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Pending hunks in entry.py and owned_report.py could ship in irpt-status release 31 under a pin that a later map edit might drop.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:14", "says": "entry.py is a plain files[] member at HEAD; no staged_from pin naming investor-reporting/ops/entry.py appears in this file's history"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:25", "says": "owned_report.py is a plain files[] member at HEAD, with no staged pin in its history"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261015T0503Z_irpt-status-r31-20261015_deploy_completion.md", "says": "line 4: delta is entry.py owned_report.py pdf_link.py status_installed.py, 24 hunks attributed to AR-y-331, AR-y-71, AR-y-32"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261015T0503Z_irpt-status-r31-20261015_deploy_completion.md", "says": "line 25: Hold released after the issuer's amendment (Addendum 1, CTO msg 8088)"}
+  ],
+  "deployed": "yes",
+  "reason": "The release shipped (R31L CLOSED 2026-10-15, after the row) with hunks attributed to AR-y-331, AR-y-71 and AR-y-32 under CTO msg 8088. The pin the row names is absent at HEAD. Equality of deployed entry.py and owned_report.py to the reviewed hunks is not read. NEEDS-LIVE-READ: git diff 361c44fa9d against the release input for those two members, compared with R31L's attribution."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W145-S8",
+  "verdict": "STANDS",
+  "hazard": "files[] names status_installed.py under ops/ with no such file; the staged row cannot materialize it on this box, so BUILD_ONLY of irpt-status fails with File not found.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:31", "says": "status_installed.py is a member of irpt-status files[] (source_dir ops/)"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/function-map/irpt-status.json:158", "says": "staged repo_path reports/status_installed.py, packaged_as status_installed.py: the only staging that would create ops/status_installed.py"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:259", "says": "staged dest is path.join of the bash-form ABS_SOURCE: drive-relative on Windows (the W145-S1 defect)"},
+    {"kind": "code", "ref": "infra/aws/lambda/ci/build-and-upload.sh:482", "says": "member existence check runs after staging and fails when the staged file is absent"}
+  ],
+  "deployed": "n/a",
+  "reason": "STANDS on this box: the existence check (build-and-upload.sh:482) runs after staging, and staging writes drive-relative (:259), so the staged ops/status_installed.py never lands and the check fails as the row records. The map edit the row names (e008b6216a) sits in the retired single map; this verdict rests on the per-function map at HEAD."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W146-S4",
+  "verdict": "STANDS",
+  "hazard": "A successful FWD-1 CREATE sends an SES message to the firm DL through notify_dl_isolated.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1363", "says": "CREATE 201 path calls notify_dl_isolated(item) (first create route)"},
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1439", "says": "internal/service CREATE 201 path calls notify_dl_isolated(item) (second create route)"},
+    {"kind": "code", "ref": "infra/aws/lambda/ticket_center/lambda_function.py:1051", "says": "notify_dl_isolated reaches notify_dl(item), which calls ses send_raw_email at :1025"}
+  ],
+  "deployed": "unread",
+  "reason": "STANDS: both CREATE 201 paths still call notify_dl_isolated (lambda_function.py:1363, :1439), which reaches send_raw_email (:1025, :1051). The deployed ticket-center bytes were not read; the hazard is the tree's send on CREATE."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W147-S2",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "The commentary drafter Lambda is live with KIMI_STANDING_WORD_REF set and its analysis_ready mapping enabled, though the tf header says NOT APPLIED.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/terraform/transcripts/commentary.tf:2", "says": "header still reads NOT APPLIED -- plan only, while the file declares the drafter"},
+    {"kind": "code", "ref": "infra/aws/terraform/transcripts/commentary.tf:294", "says": "KIMI_STANDING_WORD_REF set to a non-empty value in the drafter environment block"},
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261015T2003Z_irpt-anlreq-t34-commentary-logger-figures-20261015_deploy_completion.md", "says": "line 3 CLOSED -- REFUSED BY GATE, nothing created: the drafter code-only apply did not run in that cell"}
+  ],
+  "deployed": "unread",
+  "reason": "The tree carries the stale NOT APPLIED header (:2) and the KIMI word (:294). The live state (drafter Active, mapping ENABLED, env SET) was measured 2026-10-14 and is not re-read; no later record shows the mapping disabled or the word removed. NEEDS-LIVE-READ: the drafter event-source mapping state and its KIMI env name, read-only."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W148-S1",
+  "verdict": "STANDS",
+  "hazard": "A tracked file named portal-test-login.env sits in git, not ignored, and may hold a live login secret.",
+  "evidence": [
+    {"kind": "commit", "ref": "40534c9381", "says": "ls-tree HEAD lists .claude/skills/frontend-dev/portal-test-login.env as a 100644 blob; git check-ignore reports no ignore rule (rc 1)"}
+  ],
+  "deployed": "n/a",
+  "reason": "STANDS: the file is tracked at HEAD and no ignore rule matches it, so the hazard the row names is present in the tree. Its contents were not read and the verdict does not depend on them; whether it holds a live secret is not decided here."
+},
+{
+  "id": "IRPT_ANLREQ-D2-S118",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "PROD Ticket Center staff form shows no models or firms: the comparison catalogue is refused FIRM_BINDING because the Lambda directory map holds no staff or Global token.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/_authz/loaders.py:31", "says": "DIRECTORY_BUCKET_ENV = IRPT_DIRECTORY_BUCKET_MAP: the firm-to-bucket map is read from this environment value"},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/_authz/served.py:38", "says": "the map is derived by Terraform from data/firm_registry.json; the tree does not hold the live value"}
+  ],
+  "deployed": "unread",
+  "reason": "The map is a live environment value written by Terraform from firm_registry.json, not a tree line carrying a staff token, and the PROD bundle is portal bytes outside this tree. NEEDS-LIVE-READ: the irpt-ycharts-generate IRPT_DIRECTORY_BUCKET_MAP value and the PROD Ticket Center firm-read path, read-only."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W150-S2",
+  "verdict": "STANDS",
+  "hazard": "The Q4 staff-user answer depends on a FWD1_DRIVER_RECORD.json that is absent from HEAD and from every commit.",
+  "evidence": [
+    {"kind": "commit", "ref": "40534c9381", "says": "git cat-file -e HEAD:org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/r41/FWD1_DRIVER_RECORD.json fails (rc 128); git log --all on that path is empty"}
+  ],
+  "deployed": "n/a",
+  "reason": "STANDS: the cited record path resolves at no commit of this repo, so the staff-user attributes the row relies on are not in a committed file. The order text that cites the record is not in this tree and was not re-read."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W150-S3",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "origin/PROD TicketCenter skips the firm read for an internal caller, so staff on PROD see 'still loading' with no failure.",
+  "evidence": [
+    {"kind": "commit", "ref": "40534c9381", "says": "the cited origin/PROD TicketCenter.tsx:306 is portal bytes in the gitlink d1f9ca29, not in this tree"}
+  ],
+  "deployed": "unread",
+  "reason": "The row's line (TicketCenter.tsx:306 at origin/PROD) is portal bytes outside this tree, and the deployed PROD bundle was never read, as the row states. NEEDS-LIVE-READ: git -C portal show origin/PROD:src/pages/TicketCenter/TicketCenter.tsx at line 306, and the deployed PROD bundle's firm-read path."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W155-S2",
+  "verdict": "NEEDS-LIVE-READ",
+  "hazard": "Every commentary_ready message is refused at the draft read: ANALYSIS_COMMENTARY is not a family of the resident ArtifactRepository.",
+  "evidence": [
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:68", "says": "ANALYSIS_COMMENTARY_REVISION = irpt-anlreq-x10-v1 is defined in the resident installer"},
+    {"kind": "code", "ref": "infra/aws/lambda/investor-reporting/reports/resident_installed.py:549", "says": "resident composition opts in additional_policy_revisions including ANALYSIS_COMMENTARY_REVISION"},
+    {"kind": "commit", "ref": "4ac9dd9eb2", "says": "the resident installer registers irpt-anlreq-x10-v1 (TO-AR-g-87), 2026-10-15 19:11Z, after the row"}
+  ],
+  "deployed": "unread",
+  "reason": "The registration the row asks for is in the tree (resident_installed.py:549; commit 4ac9dd9eb2). Whether the resident host runs a build carrying it is deployed state, and no committed record names 4ac9dd9eb2. NEEDS-LIVE-READ: the installed resident's registered artifact families on the host, or a CLOSED release record naming a build that contains 4ac9dd9eb2."
+},
+{
+  "id": "IRPT_ANLREQ-D2-W166-S1",
+  "verdict": "STANDS",
+  "hazard": "The FWD-1 run waits 780 s with zero presses and no diagnosed cause: the prompt read returns no text.",
+  "evidence": [
+    {"kind": "record", "ref": "org/critical_paths/change_management/20261016T2008Z_irpt-fwd1-run4-20261016_deploy_completion.md", "says": "line 17: leg P NOT REACHED, no ticket answer, the driver wait ended at 780 s; run4 opened 20:08Z, after the remedy"},
+    {"kind": "code", "ref": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~149/fwd1_driver/fwd1_driver.mjs:382", "says": "AR-y-372 wait-loop diagnostic (diagShot wait), effective only with outDir; the diagnostic is in the tree"},
+    {"kind": "commit", "ref": "07408086d8", "says": "AR-y-372 remedy: the driver falls through the prompt the door shows and screenshots while it waits (17:39Z)"}
+  ],
+  "deployed": "n/a",
+  "reason": "STANDS: the 780 s wait with no ticket answer recurs in run4 (record line 17), opened after the AR-y-372 remedy 07408086d8, so the stall the row describes is still present. The wait diagnostic is in the tree (fwd1_driver.mjs:382) but has not explained the stall."
+}
+]

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-388",
+  "phase": "INVESTIGATION",
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~288",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "40534c9381",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-388.armed-row-evidence-audit-b.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-388.armed-row-evidence-audit-b.md",
+    "group": "OTHER",
+    "vintage_commit": "40534c9381"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/AUDIT_b.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "21 per-row verdicts (3 CLOSED, 6 STANDS, 12 NEEDS-LIVE-READ) with committed-bytes evidence; no row dispositioned, nothing deployed"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/audit_check.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib checker: completeness, enum, evidence shape, ref resolution at HEAD; --selftest control; nothing deployed"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended (IRPT_ANLREQ-D2-W288-S1, IRPT_ANLREQ-D2-W288-S2), 41 insertions and 0 deletions"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR388-AC1",
+      "criterion_verbatim": "AR388-AC1: the completeness, enum, evidence-shape and ref-resolution check of step 3.",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-288/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/audit_check.py",
+      "output_evidence": "AUDIT-OK 21 rows 3 CLOSED 6 STANDS 12 NEEDS-LIVE-READ (rc 0; the same line on two runs, byte-identical)",
+      "denominator": "21 rows of the 21 ids listed in the order, each once",
+      "status": "PASS",
+      "expect": "^AUDIT-OK "
+    },
+    {
+      "criterion_id": "AR388-AC2",
+      "criterion_verbatim": "AR388-AC2: the control of step 4 (a CLOSED row with a dead reference is rejected).",
+      "method": "command",
+      "invocation": "python C:/dev/wk-irpt-anlreq-288/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/audit_check.py --selftest",
+      "output_evidence": "CONTROL-FIRES IRPT_ANLREQ-D2-W128-S3: IRPT_ANLREQ-D2-W128-S3 evidence[0] code path does not exist at HEAD: org/does/not/exist/dead_reference.py (rc 0)",
+      "denominator": "1 corrupted copy (the first CLOSED row, W128-S3) of 3 CLOSED rows; its code references replaced by a dead path",
+      "status": "PASS",
+      "expect": "CONTROL-FIRES"
+    },
+    {
+      "criterion_id": "AR388-AC3J",
+      "criterion_verbatim": "AR388-AC3J (judgment, graded at L9, never by you): each verdict follows the evidence rule; no CLOSED rests on the row's own text or on a file read from the sparse disk; every NEEDS-LIVE-READ names the read; nothing outside the deliverables folder was edited; and the record says plainly what it did not read.",
+      "method": "manual_read_with_citation",
+      "invocation": "L9 read of r47/AUDIT_b.json reasons and evidence by 3.0.0_SA_CVO; no mechanical invocation exists for this criterion",
+      "output_evidence": "recorded, no verdict: 3 CLOSED rows with code and record evidence at HEAD; 12 NEEDS-LIVE-READ rows each name the read; the reason field of each row states what was not read",
+      "denominator": "21 rows of 21",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO, never by this worker (no PASS or FAIL here). Substitute oracle: the AR388-AC1 and AR388-AC2 output lines above and the per-row evidence in r47/AUDIT_b.json.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the AR388-AC1 checker run on a copy of AUDIT_b.json whose code references for the first CLOSED row (W128-S3) point at a path that does not exist",
+      "expected": "the copy is rejected: an error naming IRPT_ANLREQ-D2-W128-S3 and its dead code path, and the CONTROL-FIRES line printed",
+      "observed": "CONTROL-FIRES IRPT_ANLREQ-D2-W128-S3: IRPT_ANLREQ-D2-W128-S3 evidence[0] code path does not exist at HEAD: org/does/not/exist/dead_reference.py; rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of audit_check.py, outputs compared byte for byte (one line each)",
+      "observed": "run1 and run2 identical (AUDIT-OK 21 rows 3 CLOSED 6 STANDS 12 NEEDS-LIVE-READ); rc 0 both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "live state: the resident host bindings, the drafter Lambda and its mapping, the ticket-center and ycharts-generate environment values, the PROD bundle", "reason": "HEAD-only read grant and no live or AWS call; the 12 NEEDS-LIVE-READ rows each name the read"},
+    {"item": "the portal submodule (gitlink d1f9ca29 at HEAD): AR-y-325 test files, analysisRequest.ts, origin/PROD TicketCenter.tsx", "reason": "outside the HEAD tree; rows W133-S1, W133-S4 and W150-S3 are NEEDS-LIVE-READ"},
+    {"item": "execution of the tests the rows cite (test_resident_package_imports.py and the portal suites)", "reason": "read-only audit: the test files were read as committed bytes, not run"},
+    {"item": "disposition of any surprise row or ARMED row", "reason": "no row dispositioned by the worker; the issuer re-reads the cited bytes before any dismissal"}
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W288-S1: three listed rows (W133-S1, W133-S4, W150-S3) cite portal bytes; portal is a gitlink at HEAD, so the HEAD-only read rule cannot reach them and they are NEEDS-LIVE-READ.",
+    "IRPT_ANLREQ-D2-W288-S2: rows W145-S6 and W145-S8 cite infra/aws/lambda/ci/lambda-source-map.json, which is absent at HEAD (retired by fb20cba7b3 for the per-function folder); verdicts rest on the per-function map and the records."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/AUDIT_b.json",
+  "compiler_tools": [
+    {"tool": "audit_check.py", "invocation": "python C:/dev/wk-irpt-anlreq-288/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/audit_check.py", "result": "AUDIT-OK 21 rows 3 CLOSED 6 STANDS 12 NEEDS-LIVE-READ, rc 0"},
+    {"tool": "audit_check.py --selftest", "invocation": "python C:/dev/wk-irpt-anlreq-288/org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~288/r47/audit_check.py --selftest", "result": "CONTROL-FIRES on the dead-reference copy, rc 0"},
+    {"tool": "git cat-file, git show, git ls-tree (HEAD reads)", "invocation": "git -C C:/dev/wk-irpt-anlreq-288 cat-file -e HEAD:<path>; git show HEAD:<path>", "result": "reads of committed bytes only; no write, no push"}
+  ]
+}
