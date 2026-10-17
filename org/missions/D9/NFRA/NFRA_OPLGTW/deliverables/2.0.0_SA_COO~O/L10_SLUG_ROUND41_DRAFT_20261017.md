@@ -10,7 +10,9 @@
 | `OG-en-22` | the served prefix listed once per call (`Ctx.partition_keys`, `read_rows(..., key=None)`); drained `a866c7c78c` | complete |
 | `OG-db-3` | the deploy writes the release sha to `/opt/opal-gateway/.deployed_commit`; drained `8d2241ef81` (with `OG-db-2`'s preflight) | complete |
 | `OG-ev-5` | read-only trace of the near-empty fees stretch: verdict SOURCE (ratio 0.173; thin July to September, 459 rows in 92 days); `ev5.AC1` PASS (my run), proof VALID | complete |
-| `OG-ap-36` | the fifth batched release carrying the three builds above; Phase A host measurements, never-widen halves, Phase B, 30-minute read-back | PENDING |
+| `OG-en-23` | repair of the `OG-ap-36` Phase A stop (row `Z-S370`): `Ctx.read_account_rows` applies the 49F fence and the account test in arrow and converts only the account's rows; drained `83c8c75f83`; my runs named 3 of 3, eleven-file window set 39 of 39 both orders, proof VALID | complete |
+| `OG-en-24` | `client_core._answer` keeps the adapter's `absent_reason` (rows `Z-S372`, the CVO's `Z-S373`: a refused windowed call and the five `no_partition_at_as_of` refusals were nulled in the live release); worker `~138` | PENDING (building at 13:30Z) |
+| `OG-ap-36` | the fifth batched release carrying the builds above; Phase A re-run PASSED (chain +1.7 MB per page, first page 29.75 s to 1.93 s, `/health` 0.033 s during a page, 6 of 6 pages equal); three halves signed on release `948e8b47cc` then superseded by `OG-en-24`'s release; CT1 repeat, re-sign, Phase B, 30-minute read-back | PENDING |
 
 ## 2. What the round delivered against the endpoint
 
