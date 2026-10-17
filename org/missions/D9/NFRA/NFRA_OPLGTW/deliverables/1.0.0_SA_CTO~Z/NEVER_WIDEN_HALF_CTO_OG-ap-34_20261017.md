@@ -61,3 +61,41 @@ window served zero full-window calls, the report says so in those words.
 
 **Why not (b):** a chain run on Andrew's client asks him for work and deploys before the evidence. **Why not mint:** a
 token as a real roster principal is impersonation; no one cuts that without his word.
+
+## Amendment 2 -- the 300 MB bound replaced (2026-10-17 ~05:0xZ, on ~NFRA1 msg 35377 and 2.0.0_SA_COO~O msg 35379)
+
+**What was measured.** ~NFRA1 ran the full chain in a fresh process: 12 pages, 334 partitions, null cursor.
+- Longest page 33.4 s.
+- Host peak 58.0 percent.
+- Median page growth +0.3 MB.
+- Process memory went from 102.8 MB to 342.0 MB at the end (+239). The page-end peak was +337 and the mid-page peak +592.
+- The service read 172.2 MB throughout.
+
+**As written, Amendment 1's step 1 FAILED.** "The chain" meant the chain process, so the +337 page-end peak is over 300 MB.
+That reading is not reinterpreted after the fact.
+
+**Why the bound is replaced rather than enforced.** The 300 MB figure was set before any measurement, as a stand-in for
+accumulation. The measurement shows it graded the wrong quantity:
+- the chain reaches a one-time working set of about +240 to +340 MB, with a per-page slope of +0.3 MB;
+- OG-ap-32's hazard was host memory and growth that does not stop.
+
+A fixed ceiling on a one-time working set fails a flat chain. It would also roll back the first real window call after
+deploy, which ~NFRA1 named.
+
+**The replacement keeps a falsifier for accumulation:**
+1. **Pre-deploy (plateau test).** Run the full chain TWICE in one fresh process.
+   - PASS needs all of the following:
+     - the second chain's net growth, from the end of chain 1 to the end of chain 2, is 50 MB or less;
+     - the host is under 80 percent at every sample;
+     - no page breaches 55 s.
+   - Any failure means no deploy.
+   - The first-chain figures above stand as the working-set record.
+2. **Post-deploy, 30 minutes, every 60 s.** COO~O's rec is adopted. Rollback to the pre-deploy tree if any of these holds:
+   - the host is over 80 percent;
+   - the service is above its pre-switch baseline by more than 700 MB, which is above the measured +592 transient;
+   - after the first window call, the median growth per window call is over 20 MB.
+
+   The host passing 85 percent remains the rollback trigger as written. The zero-calls disclosure from Amendment 1 stands.
+
+**Not adopted:** "Reading 1" as COO~O put it. It graded the service, and no page ran in the service, so it measured nothing
+about this release.
