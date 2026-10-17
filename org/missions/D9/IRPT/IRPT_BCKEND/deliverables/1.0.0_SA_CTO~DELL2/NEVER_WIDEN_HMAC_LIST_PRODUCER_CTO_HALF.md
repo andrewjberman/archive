@@ -35,3 +35,26 @@ The trust wording is accepted as written: the role buys attribution and one poin
 - **QA is recorded as counts only, PASS or FAIL per check.** No per-firm number appears in any record.
 - **A Branch B delete of the three list keys** follows the NEVER S3-delete confirmation at that moment. Signing this half authorizes no delete.
 - **The IRPT_DASHBD Cottonwood work keeps IB2's priority**, and the filled-report switch-on (signed @a824aebb24) goes first.
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-17 ~06:4xZ)
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/NEVER_WIDEN_HMAC_LIST_PRODUCER_PAIR_ADDENDUM_1_PINS_ORDER_AND_COO_HALF.md` @6611459193.
+- Git blob `cbcf940fbc93deb8a67d9805a6eba5d290f8726f`, equal in the working tree and at that commit.
+- sha256 `ec3908e0847cbd135a9049e6d57ba698f42bb99a9d5b9bd6ed72973d37f58a8c`.
+
+**Read at signing:**
+- `refresh.py` is blob `7689428812a0`, equal to the pin.
+- The only commit touching it since `7f31bbfa4e` is `e44a81ee64` (IB-hm-9), as stated.
+
+**Accepted:**
+- **Bundle first, then the `directory` apply, then the put, then QA.** The live runner's strict parse_args makes the old order break every firm's build.
+- **Zip digest:** abort on anything but `I7T8wRYm...`.
+- **Re-mint members:** five members move. Three of them are inert for the directory build. The 12-of-12 byte check after the mint is the gate.
+- **Branch B is in reverse order.** No `update-function-code` is used.
+- **QA:** one more run is allowed only after the `mdpf-pipeline` leg lands.
+
+**Added condition:** `lib/trading_calendar.py` rides the bundle. The applier records that no date answer changes by running `lib/tests/test_trading_calendar.py` at HEAD before the mint and printing pass/fail.
+
+The blast radius is otherwise unchanged. The CTO half's earlier conditions stand.
