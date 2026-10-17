@@ -50,7 +50,7 @@ def check_record(rec):
         need(p["method"] == "lambda-invoke" and is_int(p["status"]) and 100 <= p["status"] <= 599 and H.UTC.match(str(p["invoked_utc"])) and nes(p["request_id"]), "probe %s: lambda-invoke, a status, a UTC time, a request id" % p["label"])
         need(p["reason_code"] is None or REASON.match(str(p["reason_code"])), "probe %s: reason_code a token or null, never a sentence" % p["label"])
     need(pr[2]["status"] == 200, "the 49F control must answer 200 (the live function works for its own firm)")
-    need(pr[0]["status"] != 200 or pr[0]["reason_code"] is None, "probe 0 is recorded as measured, whatever it answered")
+    need(pr[0]["reason_code"] is not None and pr[1]["reason_code"] is not None, "the two cottonwood probes must carry the refusal reason token (a refusal envelope has no statusCode, so the status alone does not say refused)")
     om = rec["ownership_map"]
     need(isinstance(om, dict) and set(om) == {"bucket", "legacy_key_exists", "canonical_key_exists"} and om["bucket"] == OWN_BUCKET and isinstance(om["legacy_key_exists"], bool) and isinstance(om["canonical_key_exists"], bool), "ownership_map: the bucket and two booleans")
     dr = rec["directory"]

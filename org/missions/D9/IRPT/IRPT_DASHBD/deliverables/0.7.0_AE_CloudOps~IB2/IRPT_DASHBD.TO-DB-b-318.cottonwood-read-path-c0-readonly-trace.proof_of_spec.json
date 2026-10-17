@@ -1,0 +1,81 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_DASHBD.TO-DB-b-318",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-318.cottonwood-read-path-c0-readonly-trace.md",
+  "group": "OTHER",
+  "vintage_commit": "a92de8c4d5"
+ },
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-318.cottonwood-read-path-c0-readonly-trace.md",
+  "vintage_commit": "a92de8c4d5"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~IB2/COT_READ_C0_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the read-only record: three labelled probes of irpt-49f-reporting-read-lambda, the ownership-map and directory existence flags, the authorizer, the function unchanged",
+   "artifact_covered_by": [
+    "DBC184-1-AC1",
+    "DBC184-2-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DBC184-1-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p184_cot_read_c0.py\" . DBC184-1-AC1",
+   "expect": "DBC184-1-AC1 PASS",
+   "output_evidence": "FAIL: probe 0 is recorded as measured, whatever it answered\nDBC184-1-AC1 FAIL\nexit=1",
+   "denominator": "3 probes, 2 existence flags, 1 directory pointer, 1 authorizer, 1 function",
+   "status": "FAIL",
+   "status_reason": "The honest grade: both cottonwood-client-1 probes were answered by the function with a BARE refusal envelope (no statusCode) carrying FIRM_BINDING; the record holds status 200 (API Gateway's payload 2.0 default for such a return, INFERRED) with reason_code FIRM_BINDING, and the issuer's checker clause 'probe 0: status != 200 or reason_code is None' rejects exactly that pair. The checker is the issuer's and was not changed; every other clause of the record passes (the checker stops at the first failure) and the live-read clauses of AC2 were run by hand: both ownership-map flags and the code hash and bucket map equal the record's.",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p184_cot_read_c0.py\" . DBC184-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC184-2-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p184_cot_read_c0.py\" . DBC184-2-AC1",
+   "expect": "DBC184-2-AC1 PASS",
+   "output_evidence": "FAIL: probe 0 is recorded as measured, whatever it answered\nDBC184-2-AC1 FAIL\nexit=1",
+   "denominator": "2 head reads, 1 function configuration",
+   "status": "FAIL",
+   "status_reason": "The honest grade: both cottonwood-client-1 probes were answered by the function with a BARE refusal envelope (no statusCode) carrying FIRM_BINDING; the record holds status 200 (API Gateway's payload 2.0 default for such a return, INFERRED) with reason_code FIRM_BINDING, and the issuer's checker clause 'probe 0: status != 200 or reason_code is None' rejects exactly that pair. The checker is the issuer's and was not changed; every other clause of the record passes (the checker stops at the first failure) and the live-read clauses of AC2 were run by hand: both ownership-map flags and the code hash and bucket map equal the record's.",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r149/p184_cot_read_c0.py\" . DBC184-2-AC1",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (the checker's selftest has a green arm and red arms).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the function's code hash was read before the probes and after the authorizer read; the first run's parser defect was found by the control probe's shape and the probes were re-run",
+   "observed": "code hash equal before and after; control probe 200",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the probes' HTTP status",
+   "reason": "the function returns a bare refusal envelope with no statusCode; 200 is API Gateway's documented default (INFERRED), not read at the API"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~IB2/state318/notes.txt",
+ "compiler_tools": [
+  {
+   "tool": "cotc0_318.py (boto3 reads and three synchronous invokes of the read function by label)",
+   "invocation": "run, compile",
+   "result": "record written; both criteria FAIL on one clause (probe 0)"
+  }
+ ]
+}
