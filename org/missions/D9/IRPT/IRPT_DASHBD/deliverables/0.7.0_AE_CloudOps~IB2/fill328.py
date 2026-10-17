@@ -35,6 +35,7 @@ CODE_BEFORE, VERSION_BEFORE = "s/OKOv98j53aFJCLrBpYP8xh3oUcuWagn0vSHVBjhIM=", "o
 POLICY_HASH16 = "e6a7e585f3021a05"
 SCHEDULES = ["irpt-49f-reporting-gold-daily", "irpt-49f-reporting-publish-daily", "irpt-49f-reporting-publish-summaries-daily"]
 ART_BUCKET, ART_KEY = "opal-313476888478-lambda-artifacts", "investor-reporting/irpt-reporting-publish-lambda.zip"
+SHARDS = 28  # AMENDMENT 1 (Addendum 1): 28 shards for Acts 4 and 7
 OFF = {"enabled": False, "clients": 0, "written": 0, "not_available": [], "refused": []}
 SURFACE = ("irpt-49f-reporting-publish-lambda", "reporting-publish", "irpt/49financial/platinum/reporting")
 CANARY_FILE = Path(os.environ.get("TEMP", "/tmp")) / "f328_canary_id.txt"
@@ -188,7 +189,7 @@ def cmd_sched():
 
 
 def shard_event(kind, k):
-    payload = {"filled_report": True, "shard": k, "shards": 7}
+    payload = {"filled_report": True, "shard": k, "shards": SHARDS}
     if kind == "dry":
         payload["dry_run"] = True
     body, rep, fl = invoke(payload)
@@ -199,8 +200,9 @@ def shard_event(kind, k):
         problems.append("timeout, AccessDenied or function error: %s" % {k2: v for k2, v in fl.items() if k2 in ("timed_out", "access_denied", "function_error")})
     if body.get("enabled") is not True:
         problems.append("enabled is not true")
-    if rep["max_memory_mb"] is None or rep["max_memory_mb"] > 819 or rep["duration_s"] is None or rep["duration_s"] > 240:
-        problems.append("memory above 819 MB or duration above 240 s: %s" % rep)
+    limit = 900  # AMENDMENT 2 (CTO msg 10467): 900 MB on every event of Acts 4 and 7
+    if rep["max_memory_mb"] is None or rep["max_memory_mb"] > limit or rep["duration_s"] is None or rep["duration_s"] > 240:
+        problems.append("memory above %d MB or duration above 240 s: %s" % (limit, rep))
     if row["refused"] * 10 > (row["clients"] or 0):
         problems.append("refused above 10 percent of the clients")
     return row, problems
@@ -219,7 +221,7 @@ def cmd_pass(kind):
         return 3
     before = prefix_total()
     rows = []
-    for k in range(7):
+    for k in range(SHARDS):
         row, problems = shard_event(kind, k)
         rows.append(row)
         print("%s shard %d %s %s" % (kind.upper(), k, json.dumps(row, sort_keys=True), "PROBLEMS: %s" % problems if problems else "ok"), flush=True)
