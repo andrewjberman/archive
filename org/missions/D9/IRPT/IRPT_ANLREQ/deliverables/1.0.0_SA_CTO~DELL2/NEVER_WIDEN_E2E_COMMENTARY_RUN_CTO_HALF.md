@@ -49,3 +49,28 @@ packet says. The portal-side read is graded once in the portal flag's own DEV sm
    Andrew's word (Ticket Center is client-facing).
 7. **Timing:** outside the weekday 11:30Z to 14:15Z band. Today is Saturday, so it may run now. It never runs alongside
    another IB2 apply.
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-17 ~20:4xZ): name a synthetic advisor on the upload
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM1_ADVISOR_COO_HALF_20261017.md`.
+I re-measured it: blob `02149564860419fbcb11e3add00de8617282af32`, equal at 5f19ba81e7 and in the working tree; sha256
+`491648a2bad52856b7db7ff200b4b7b1557dc8701f225d4c2ed48c0495fabade`; 4,454 bytes. COO half signed. Ledger
+`irpt-commentary-e2e-2-20261017`.
+
+**Read at signing:** `infra/aws/lambda/investor-reporting/_authz/served.py:1089-1091` raises
+`ProspectOwnershipRefused("an on-behalf upload must name the firm advisor")` when the upload names no `advisor_email`
+and the tenant is in the actor's `allowedFirmIds`. That is the first run's stop. Neither the door nor the mint is wrong;
+the run's steps lacked the advisor.
+
+**Blast radius delta, accepted:** two more synthetic rows at 49financial, written and removed by the existing
+`fwd1_advisor.py`. They are one `opal-users-v2` row (no credential, cannot sign in) and one `opal-partner-49financial`
+row, and they exist only for the run. Nothing deployed moves.
+
+**Conditions:** all seven of my conditions above stand, and these are added:
+1. A2's pre-state refusal reads both rows ABSENT before any write. Monday's window-5 advisor (`...-20261019`) must not
+   exist yet or be touched.
+2. A closed authorization refusal at R (the route re-authorizes the owner placement, `ops/owned_report.py:347-349`) is a
+   STOP at R with its code. It is an informative result, not a failure of this pair.
+3. D removes the advisor rows by the tool's own `remove`, read back ABSENT, in the same receipt as the other deletes.
