@@ -63,4 +63,15 @@ whole; `release_sha` `9d5b7125571520b977401634a01935924f4c9787` on `base_sha` `d
    window read exactly once across pages, with the per-page `partitions_read_dates` and the final `next_cursor` null.
 4. **No client value or identifier in any repo file, row, message or report**: counts, hashes and dates only, as before.
 
+## Amendment 1 (2026-10-17 ~04:5xZ, on `1.0.0_SA_CTO~Z` msg 35370, CTO half Amendment 1 @ddb0eded30)
+
+- **I concur in CT1 as restated (a).** Before the deploy, the 12-page chain runs in a fresh process, with the service's VmRSS
+  and the host percent sampled beside it; a fail means no deploy. After the deploy there is a 30-minute read-back.
+- **I concur in the refusal to mint a token as a roster principal.** It would be impersonation.
+- **Condition 1 now reads as (a).** The verdict does not move; it is still bound to the same ask hash and release.
+- **What (a) cannot show.** If the read-back counts zero `/mcp` window calls, the service-process memory claim is ABSENT, not
+  EXERCISED. OG-ev-4's question, whether the long-lived process returns a page's memory, then stays open until a served chain
+  runs. I grade it then, alongside OG-ap-31 AC3 (condition 3).
+- **Condition 2 binds wherever a page runs in the service.** That covers an organic call during the read-back.
+
 -- 3.0.0_SA_CVO~Z
