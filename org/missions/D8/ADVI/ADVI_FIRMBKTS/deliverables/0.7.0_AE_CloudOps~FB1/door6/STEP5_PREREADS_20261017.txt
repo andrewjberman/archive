@@ -1,0 +1,17 @@
+FB-p-2 step 5 PRE-READS (read-only, 2026-10-17 ~14:50Z, 0.7.0_AE_CloudOps~FB1). Claim: measured. Redo each at step 5; these are not the step-5 record.
+
+1. Deployed s3://opal-data-inf/code/gold/orion-gold-dispatch.sh: 2128 lines, 113445 bytes, sha256 e9aef66bc8a4a883196a2ba61567e56e645d4ffba82cfc74705cb6e270d59e43,
+   latest VersionId JjTLNaZeRRAQn342RRa7qEHSR0AUf1FV (LastModified 2026-10-17T13:29:03Z). Three earlier versions in the last 25 h:
+   2026-10-17T12:09:09Z, 2026-10-16T16:33:27Z, 2026-10-16T13:00:19Z. The object is redeployed by other work at about 1-3 per day, so the step-5 procedure
+   must re-download, re-hash and compare the VersionId to the latest IMMEDIATELY before safe-deploy; a changed VersionId means redo from (i).
+2. The block, located by content: "Chain-complete sentinel -- ADVI_INFETL.002" at line 1889; the success-branch write is the
+   `aws s3 cp - s3://${INF_S3_BUCKET}/gold/meta/pipeline-complete.json` at 1906 inside `if [ "$chain_exit" -eq 0 ]`; the failure branch (pipeline-failed.json, 1917)
+   stays. Its header comment (1892) says an S3 ObjectCreated rule fires inf-portal-publisher on this key.
+3. Event consumers of the key, read live (the code census scans Lambda zips and cannot see these):
+   - opal-data-inf bucket notification: ONE entry, inf-silver-aggregator on prefix silver/_silver_complete/ suffix .json. Nothing on gold/meta/. EventBridgeConfiguration {} (empty).
+   - EventBridge rules on the default bus (the only bus: list-event-buses returned default): list-rules auto-paginated in 2 pages (100 + 56 = 156 rules, the per-page
+     counts); the pattern filter 'pipeline-complete' matched ONE rule: mdpf-feeder-accelerator (ENABLED).
+   - inf-portal-publisher (Active, modified 2026-10-14T14:09:01Z) still carries two stale S3 invoke permissions (S3PipelineCompleteTrigger,
+     AllowExecutionFromS3InfPortalPublisher) with no bucket notification pointing at it; it is not triggered by the key.
+   So after the accelerator is disabled (step 4), no event rule or notification consumes the marker.
+4. Not read here: the step-5 census re-run (door6_live_reader_census.py), the repo-vs-deployed diff, gold-staging / rebuild copies. Those are step 5.

@@ -1,0 +1,42 @@
+{
+  "order": "FB-p-2",
+  "read_at": "2026-10-17T14:35:00Z",
+  "census_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/ledger/DOOR6_LIVE_READER_CENSUS_20261016.md @6edd023c81",
+  "decision": {
+    "text": "Retire the Inflection done-marker opal-data-inf/gold/meta/pipeline-complete.json and its watcher mdpf-feeder-accelerator (Andrew-direct 2026-10-13, Door 6, no successor marker). Order of acts per the CTO decision text and erratum 1: the catch-up and the feeder's second look first, the accelerator disabled only after the second look's first live fire, the marker write stopped last in the deployed copy. The marker object is not deleted (an S3 delete waits on Andrew's word).",
+    "replaced_by": "the second look: aws_scheduler_schedule mdpf-feeder-trigger-second-look-daily at cron(8 13 * * ? *) UTC, firing mdpf-feeder-trigger, whose gold_complete.json gate test is the readiness check; the 12:52Z backstop stays"
+  },
+  "steps": {
+    "catch_up": {
+      "done_at": "2026-10-17T14:35:00Z",
+      "d1_read_ref": "org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/real_run/FIRE_READ_20261017.md @882da2f5f8",
+      "date": "2026-10-17",
+      "dispatch_command_id": "d2809357-f7f0-41ca-a20d-751c36a9250d",
+      "dispatch_status": "Success",
+      "dispatch_origin": "organic: the 12:52Z backstop (src=backstop) dispatched 2026-10-17 before this order was un-parked; no dispatch was made by this order (COO amendment 3 @fe85fd1ba4, msg 7577)",
+      "floor_rerun": "wrote",
+      "floor_note": "the scheduled 13:31Z floor run wrote _aggregate_aua/2026-10-17.json, reconciliation=PASS; no re-run by this order",
+      "prior_versions_recorded": true,
+      "prior_versions_note": "every same-date version of the eight 2026-10-17 feed keys and of the aggregate key is listed in door6/CATCHUP_READS_20261017.txt; the 49 Financial families hold an earlier 03:3xZ version from another writer, untouched",
+      "per_date_re_dispatch": false,
+      "listing_denominator": 494,
+      "gap_after": {
+        "2026-10-13": "absent",
+        "2026-10-14": "absent",
+        "2026-10-15": "absent",
+        "2026-10-16": "absent"
+      },
+      "evidence": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/door6/CATCHUP_READS_20261017.txt"
+    }
+  },
+  "pair": {
+    "coo_half": "8e1b650b9e",
+    "cto_half": "156165f766"
+  },
+  "rollback": {
+    "recorded": true,
+    "how": "Second look: remove aws_scheduler_schedule.mdpf_feeder_second_look from feeder-trigger.tf and safe-apply (expected destroy=1), or scheduler update-schedule to DISABLED then reconcile. Accelerator: set state back to ENABLED in feeder-trigger.tf and safe-apply, or events enable-rule mdpf-feeder-accelerator. Marker writer: re-upload the prior VersionId of s3://opal-data-inf/code/gold/orion-gold-dispatch.sh (recorded before the deploy) with s3api copy-object --copy-source, and revert the repo-source commit. No data keys are written by this order, so none roll back."
+  },
+  "ledger_closed": false,
+  "claim": "measured"
+}
