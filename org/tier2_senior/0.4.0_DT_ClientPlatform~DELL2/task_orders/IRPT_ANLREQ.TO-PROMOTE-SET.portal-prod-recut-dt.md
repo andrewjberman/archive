@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform~DELL2</issued_to>
     <date>2026-10-17</date>
-    <status>open</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>SERVED</risk>

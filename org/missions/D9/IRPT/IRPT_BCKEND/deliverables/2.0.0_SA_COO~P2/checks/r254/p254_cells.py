@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IBHM5  IB-hm-5  the bundle, the zip, the directory-root apply, the secret put and one QA run, read back
     AC1  the gates: both halves of the packet and of the addendum signed at their blobs, one change at a time, the ledger opened before the first write, both Branch B versions named before any write, outside the fire window
     AC2  the legs: the bundle minted through safe-deploy with 12 of 12 members equal to HEAD, the zip digest equal to the pin, the plan 3 add 1 change 0 destroy at the named addresses, applied through safe-apply, a clean re-plan, the three environment keys present
-    AC3  the after-reads: the simulation arms, the secret put once and never printed, ONE QA run read as PASS or FAIL per check, the counters
+    AC3  the after-reads: the simulation arms, the secret put once and never printed, the QA recorded as deferred to the first scheduled fire (no manual run), the counters
 """
 import json
 import re
@@ -31,7 +31,6 @@ CHANGES = ["module.irpt_directory_refresh.aws_lambda_function.this"]
 ENV_KEYS = ["IRPT_HMAC_LIST_URI_MAP", "IRPT_HMAC_ROLE_ARN", "IRPT_HMAC_SECRET_ID"]
 ALLOWED = ("get_the_one_secret", "put_each_of_the_three_list_keys")
 DENIED = ("get_object_on_a_list_key", "list_bucket_on_the_list_prefix", "delete_object_on_a_list_key", "put_on_a_neighbouring_key", "get_any_other_secret")
-QA = ("list_key_exists_and_fresh", "line_count_equals_the_session_count", "no_plain_sha256_of_a_known_fake_id", "directory_output_byte_unchanged")
 fail, load = P6.fail, P6.load
 
 
@@ -95,21 +94,16 @@ def ac3(r):
     if sec.get("value_put_count") != 1 or sec.get("version_count") != 1 or sec.get("value_printed") is not False:
         fail("secret must read value_put_count 1, version_count 1 and value_printed false")
     q = r.get("qa") or {}
-    if q.get("runs") != 1:
-        fail("qa.runs must be 1")
-    for k in QA:
-        if q.get(k) != "PASS":
-            fail("qa.%s must read PASS" % k)
-    if not isinstance(q.get("assume_succeeded_before_mdpf_leg"), bool):
-        fail("qa.assume_succeeded_before_mdpf_leg must be recorded as a true/false fact")
+    if q.get("runs") != 0 or q.get("deferred_to_scheduled_fire") is not True:
+        fail("qa must read runs 0 and deferred_to_scheduled_fire true (AMENDMENT 1: the function has no one-firm payload, so the QA is the first scheduled fire, read by the issuer)")
     k = r.get("counters") or {}
-    want = {"other_lambda_invokes": 0, "other_iam_changes": 0, "keys_written_outside_the_three": 0, "existing_keys_changed": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0}
+    want = {"lambda_invokes": 0, "other_iam_changes": 0, "keys_written_outside_the_three": 0, "existing_keys_changed": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0}
     for key, v in want.items():
         if k.get(key) != v:
             fail("counters.%s must read %s, read %r" % (key, v, k.get(key)))
     if re.search(r"(?<![0-9a-fA-F-])\d{9,}(?![0-9a-fA-F])", json.dumps(r)):
         fail("the record carries a long digit run")
-    print("OK: simulation arms; secret put once and never printed; one QA run all PASS; counters 0")
+    print("OK: simulation arms; secret put once and never printed; QA deferred to the scheduled fire (no manual run); counters 0")
 
 
 CHECKS = {"IBHM5-AC1": ac1, "IBHM5-AC2": ac2, "IBHM5-AC3": ac3}
