@@ -14,8 +14,12 @@ MEM="${AP36_MEM_OVERRIDE:-$W/MEM_GATE_OG-ap-36.json}"
 ASK="${AP36_ASK_OVERRIDE:-$W/NEVER_WIDEN_ASK_OG-ap-36.md}"
 CT1="${AP36_CT1_OVERRIDE:-$W/CT1_CONCURRENT_OG-ap-36.json}"
 [ -f "$REC" ] && [ -f "$ASK" ] && [ -f "$MEM" ] && [ -f "$CT1" ] || { echo "ap36_release.json, MEM_GATE_OG-ap-36.json, CT1_CONCURRENT_OG-ap-36.json or the ask absent"; echo "RESULT: FAIL"; exit 1; }
-read -r base rel trunk meas <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''),d.get('measured_release_sha',''))" "$(native "$REC")" | tr -d '\r')"
+read -r base rel trunk meas mbase <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''),d.get('measured_release_sha',''),d.get('measured_base_sha',''))" "$(native "$REC")" | tr -d '\r')"
 [ -n "$meas" ] || meas=$rel
+# OG-ap-36 amendment A4: when another seat's release landed on the live ref between the measured release and this one (the CTO's host-order swap, msg 35508),
+# the record names measured_base_sha (the live ref the measured release was cut on); the files that base moved are not this release's delta
+[ -n "$mbase" ] || mbase=$base
+git cat-file -e "${mbase}^{commit}" || { echo "measured_base_sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 git cat-file -e "${meas}^{commit}" || { echo "measured_release_sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "base, release or trunk sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
@@ -39,7 +43,9 @@ done
 # client_core._answer and one test, nothing on the read path); then that release must differ from this one only in those two files and by at most 4 changed lines
 mdelta="memory record measured on this release: yes"; mok=1
 if [ "$meas" != "$rel" ]; then
-  mfiles=$(git diff --name-only "$meas" "$rel" | tr -d '\r'); mout=$(printf '%s\n' "$mfiles" | grep -vE "^$GW/(app/client_core\.py|tests/test_og_en24\.py)$" | grep -c .)
+  mfiles=$(git diff --name-only "$meas" "$rel" | tr -d '\r')
+  if [ "$mbase" != "$base" ]; then mmoved=$(git diff --name-only "$mbase" "$base" | tr -d '\r'); else mmoved=""; fi
+  mout=$(printf '%s\n' "$mfiles" | grep -vE "^$GW/(app/client_core\.py|tests/test_og_en24\.py)$" | grep -vxF -f <(printf '%s\n' "$mmoved" | grep .; echo __none__) | grep -c .)
   mhunks=$(git diff -U0 "$meas" "$rel" -- "$GW/app/client_core.py" | grep -c '^@@'); mlines=$(git diff -U0 "$meas" "$rel" -- "$GW/app/client_core.py" | grep -cE '^[+-][^+-]')
   mdelta="memory record measured on release ${meas:0:10}; this release differs from it in files outside client_core.py and test_og_en24.py: $mout (want 0); client_core.py hunks $mhunks (want 1), changed lines $mlines (want 4 or fewer)"
   [ "$mout" = 0 ] && [ "$mhunks" = 1 ] && [ "$mlines" -le 4 ] || mok=0
