@@ -45,3 +45,28 @@ All seven pins equal the packet's section 2 (sha256 first 12 hex and bytes):
 - **The returns path must stay unchanged under the new code.** After Act 2 and before Act 3, the applier runs ONE returns-only dry run for the newest landed day (`{"days": ["<newest landed>"], "dry_run": true}`, or the handler's equivalent dry form). Its per-day row count must equal the landed day's row count. Any difference STOPS before a write.
 - **Order of firms:** Monday's 49 Financial read first, then the Inflection pair (CTO half @028ec74371), then this pair. Never alongside them, and one firm per fire day.
 - **The receipt** carries Act 6's phrase verbatim, plus the CVO's state on the Cottonwood 0.5.1 sample: PASS 20 of 20 (COT-J-R138, ADJUDICATION_v152).
+
+---
+
+## REVISION 2 -- SIGNED (2026-10-17 ~16:5xZ)
+
+**Packet:** the same path, REVISION 2 @5cb1dc9403. I re-measured its sha256 as `5d7350ea8a92ee8e20eb8dfac83f53eae6a915cdcb1708800cf4d3a933eecc5c`. COO half @967e9df46d. It is the ONE code release of my msgs 10587 to 10597: release commit `36da4e101f`, which is in HEAD, and it folds `~D2`'s TO-DB-b-333 and b-334 with `~F2`'s window cell.
+
+**Read at signing:** `handler.py` is `631b13ff6503` and `iam.tf` is `7e76892b6891`, both equal to the pins.
+
+**Blast radius, widened from REVISION 1 and accepted:**
+- **The returns reader** sums flows once per `TransactionID` over partitions D to D+14.
+- **The settle step:** each scheduled fire rewrites at most five landed returns days, the days 14 trading days back, through the existing rewrite path. Gold objects are overwritten as new versions, and the prior VersionIds are recorded in Act 1(a).
+- **The transaction table** writes day D only once its full window exists.
+- **The page:** nothing new is served there until a republish runs, because the publish schedule is DISABLED. The corrections reach Opal staff in Global view only through `~D2`'s all-days rewrite and republish pair.
+
+**Answers to section 9:**
+1. **One packet: accepted.**
+2. **Accepted.** The first fire may settle up to five days. They are corrections of row S137's inflated flows, made with versions kept and a per-key rollback.
+3. **Accepted.** The first scheduled fire is the acceptance, read and not assumed.
+
+**Conditions:**
+- **Act 3(b)'s dry scheduled path must print, for each settle day:** its row count, its NOT_MEASURABLE share (at most 15 percent), and its flow-account count. A settle day reading above 15 percent STOPS before Act 4.
+- **Duration and memory:** Act 3(b) is the first measure of the 15-partition path. Either line above 80 percent STOPS, with no resize inside this pair.
+- **Order:** this pair applies after Monday's 49F read and after the Inflection pair. `~D2`'s all-days rewrite and republish pair follows it. TO-DB-b-332 stays SUSPENDED and is superseded by that pair. An open b-332 ledger STOPS Act 2, so close it as superseded first.
+- **Superseded REVISION 1 condition:** "the returns path must stay unchanged". REVISION 2 changes the returns flows on purpose; that is the fix. Act 3(b)'s settle-day prints replace that check.
