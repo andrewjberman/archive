@@ -54,6 +54,9 @@ res = collections.Counter()
 fieldchg = collections.Counter()
 scope_flip = collections.Counter()
 overlap_chg = collections.Counter()
+gained_by_date = collections.Counter()
+dropped_by_date = collections.Counter()
+changed_by_date = collections.defaultdict(collections.Counter)
 for raw in sorted(raws):
     rows = rows_by_acct.get(raw)
     if not rows:
@@ -83,6 +86,17 @@ for raw in sorted(raws):
         ov, nv = o.get(fld), new.get(fld)
         if isinstance(ov, list) and isinstance(nv, list) and any(ov[oi[d]] != nv[ni[d]] for d in common):
             overlap_chg[fld] += 1
+    for d in nd:
+        if d not in oi:
+            gained_by_date[d] += 1
+    for d in od:
+        if d not in ni:
+            dropped_by_date[d] += 1
+    for d in common:
+        for fld in ("total_return_daily", "external_flow", "value", "income", "holdings_price_return", "day_quality", "return_basis"):
+            ov, nv = o.get(fld), new.get(fld)
+            if isinstance(ov, list) and isinstance(nv, list) and ov[oi[d]] != nv[ni[d]]:
+                changed_by_date[d][fld] += 1
     if any(d not in oi for d in nd):
         res["new_days_added"] += 1
     if any(d not in ni for d in od):
@@ -91,4 +105,8 @@ print("RESULT total", sum(res.values()), dict(res))
 print("scope flips (old,new):", dict(scope_flip))
 print("fields changed (count of series):", dict(fieldchg))
 print("series with a changed value on a day present in BOTH (by field):", dict(overlap_chg))
+# the date sets the re-land pair's Act 4 reads (counts of series per date; no id)
+print("DATES GAINED (date: series):", dict(sorted(gained_by_date.items())))
+print("DATES DROPPED (date: series):", dict(sorted(dropped_by_date.items())))
+print("COMMON DATES CHANGED (date: {field: series}):", {d: dict(c) for d, c in sorted(changed_by_date.items())})
 print("elapsed", round(time.time() - t0), "s")
