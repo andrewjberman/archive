@@ -1,0 +1,63 @@
+{
+ "claim": "measured",
+ "applier": "0.7.0_AE_CloudOps~IB2",
+ "no_write": true,
+ "probes": [
+  {
+   "content_encoding": null,
+   "invoked_utc": "2026-10-17T01:54:48Z",
+   "label": "cottonwood-client-1-manifest",
+   "method": "lambda-invoke",
+   "reason_code": "FIRM_BINDING",
+   "request_id": "25ee4a6f-8b4b-4b22-9f9e-80e6b0ff51c2",
+   "status": 200
+  },
+  {
+   "content_encoding": null,
+   "invoked_utc": "2026-10-17T01:54:48Z",
+   "label": "cottonwood-client-1-series",
+   "method": "lambda-invoke",
+   "reason_code": "FIRM_BINDING",
+   "request_id": "de53a0c8-fba6-4d1b-951c-182f6c593c8e",
+   "status": 200
+  },
+  {
+   "content_encoding": null,
+   "invoked_utc": "2026-10-17T01:54:48Z",
+   "label": "control-49f-manifest",
+   "method": "lambda-invoke",
+   "reason_code": null,
+   "request_id": "295b0f4e-7f26-4b56-9ae0-47aaeec7f8e1",
+   "status": 200
+  }
+ ],
+ "ownership_map": {
+  "bucket": "opal-data-cottonwood",
+  "canonical_key_exists": false,
+  "legacy_key_exists": false
+ },
+ "directory": {
+  "entry_count": 271,
+  "latest_json_exists": true
+ },
+ "authorizer": {
+  "authorizer_id": "naqxlm",
+  "function_name": "opal-portal-authorizer",
+  "type": "REQUEST",
+  "firm_handling_location": "infra/aws/users/lambda/portal-authorizer/index.mjs (computeAllowedFirms)",
+  "lists_firms": false
+ },
+ "function": {
+  "code_sha256_after": "z634S2QsrfCpY4c3cD2UGwicdmLDo6/Rmng8SrEskCQ=",
+  "code_sha256_before": "z634S2QsrfCpY4c3cD2UGwicdmLDo6/Rmng8SrEskCQ=",
+  "directory_bucket_map": [
+   "49financial"
+  ],
+  "name": "irpt-49f-reporting-read-lambda"
+ },
+ "notes": "Read only. The first run's parser missed the bare refusal envelope, so the three probes ran twice (six invokes of the read function, no write; this record holds the second run). The function answers both cottonwood-client-1 probes with a bare refusal envelope (no statusCode, so HTTP 200 by API Gateway's payload 2.0 default, INFERRED) carrying FIRM_BINDING, and the 49F control with a proxy 200. Why (INFERRED from _authz/served.py handle): the staff caller selects the tenant cottonwood, a firm other than its verified firm opal-capital, and the live IRPT_DIRECTORY_BUCKET_MAP holds only 49financial, so the registry-derived tenant allow-list refuses it before any bucket is read. Both ownership-map keys are absent in opal-data-cottonwood. The directory pointer exists in the registry bucket opal-data-cot (271 entries), a different bucket from the platinum one (opal-data-cottonwood), and the client's first account id maps to a published prefix. The authorizer opal-portal-authorizer computes allowedFirmIds per user (index.mjs computeAllowedFirms) and lists no fixed firms. NOT established: what the browser's own token yields at the API, the API's real status for the bare envelope, and whether the absent ownership map matters to a staff caller.",
+ "reads": {
+  "vendor_calls": 0,
+  "secret_reads": 0
+ }
+}
