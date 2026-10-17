@@ -1,0 +1,74 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "six live reads, once each; the leak regex was run inside the script before each line was kept and again as ARR-AC2",
+   "observed": "7 of 7 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-RESIDENT-PACKAGER.three-live-reads-bindings-and-outcomes-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-RESIDENT-PACKAGER.three-live-reads-bindings-and-outcomes-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "52b49bacb4"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-RESIDENT-PACKAGER.three-live-reads-bindings-and-outcomes-ib2.md",
+  "vintage_commit": "52b49bacb4"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three live read-only reads (the installed bindings file's key names and booleans, the journal counts, the queue metric sums); nothing written, no queue message received",
+   "artifact_covered_by": [
+    "RRP-AC1",
+    "RRP-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RRP-AC1",
+   "invocation": "grep -c -E '^(R1|R2|R3) (keys=|window=|sent=|DENIED |NOT-RUN |ERROR )|^READS-DONE [0-9]+ of 3 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+   "expect": "^4$",
+   "output_evidence": "4\nexit=0",
+   "denominator": "3 read lines + 1 closing line",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1|R2|R3) (keys=|window=|sent=|DENIED |NOT-RUN |ERROR )|^READS-DONE [0-9]+ of 3 answered$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "RRP-AC2",
+   "invocation": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|https://sqs\\.|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit=1 (grep -c prints 0 and exits 1 on no match)",
+   "denominator": "4 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}|https://sqs\\.|arn:aws:s3:::|AKIA[0-9A-Z]{12,}|opal-data-[a-z0-9-]+' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+   "method": "command"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_resident_packager/A_RESIDENT_PACKAGER.txt",
+ "compiler_tools": [
+  {
+   "tool": "ssm_root.py with host_reads.sh (sha256-checked script file), boto3 get_metric_statistics",
+   "invocation": "R1 and R2 on the resident host; R3 from CloudWatch",
+   "result": "RRP-AC1 4, RRP-AC2 0"
+  }
+ ]
+}
