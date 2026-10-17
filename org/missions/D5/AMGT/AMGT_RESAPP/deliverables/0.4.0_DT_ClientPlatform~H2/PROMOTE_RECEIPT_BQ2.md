@@ -45,13 +45,14 @@ None filed.
 
 ## Fold-back
 
-STATUS: STOPPED at the approval register (AMENDMENT 1 step 6). Nothing was merged forward; DEV was not written.
+STATUS: DONE under AMENDMENT 2 (the CTO's one-time named waiver, `org/missions/D5/AMGT/AMGT_RESAPP/ledger/CTO_WAIVER_FOLDBACK_DEV_OVERLAP_20261017.md`). First attempt stopped at the register (`result=REFUSED reason=dev-overlap overlap=106 commits=107`), reported, ruled, resumed.
 
-- Start state (after `git fetch origin DEV PROD`): origin/DEV `cab233bfdfdb3b84db1f648f00a2883d507685be`, origin/PROD `99d2b2a70cc1b5d39705d89a38312a4b8f7c3fa7`, `origin/DEV..origin/PROD` = 2 (`40845c7e`, `99d2b2a7`).
-- Branch: `cand/dell1/prod-into-dev-fold`, cut from origin/DEV in a temporary worktree, `git merge --no-ff origin/PROD` clean, fold merge `ac8b722a0b0f8d9549daceec1f1f5ad5512cc32c`. LOCAL only (`ls-remote` of the branch on origin reads empty).
-- Proof line: `TREE-EQUALS-DEV` printed. `git rev-list --count origin/DEV..HEAD` = 3: the fold merge plus the two PROD release merges it carries (the order's prose says "exactly the fold-back merge"; the three-commit list is `ac8b722a`, `99d2b2a7`, `40845c7e`).
-- Register, run `--check-only` as the order directs: `APPROVAL-REGISTER result=REFUSED reason=dev-overlap overlap=106 commits=107` (rc=3). Per the order, no `--waive-overlap`, no register, no approval row, no merge-forward.
-- Approval row id: none. Merge-forward result line: none.
-- DEV head after, `ls-remote` read: `cab233bfdfdb3b84db1f648f00a2883d507685be` (unchanged).
-- `origin/DEV..origin/PROD` after: 2 (unchanged). AC4 does NOT read 0.
-- Ledger `amgt-resapp-bq2-prod-into-dev-fold-20261017`: HELD-PRE-APPLY, gate = the CTO's ruling on the refusal. Worktree removed; main portal tree on DEV.
+- Branch: `cand/dell1/prod-into-dev-fold`, cut from origin/DEV `cab233bfdfdb3b84db1f648f00a2883d507685be`, `git merge --no-ff origin/PROD` clean, fold merge `ac8b722a0b0f8d9549daceec1f1f5ad5512cc32c` (parents cab233bf, 99d2b2a7).
+- Proof line: `TREE-EQUALS-DEV`, printed after the first merge and again immediately before the merge-forward. `git rev-list --count origin/DEV..HEAD` = 3 (the fold merge plus the two PROD release merges `40845c7e` and `99d2b2a7` it carries).
+- Re-count before registering: `git rev-list origin/PROD..origin/DEV | wc -l` = 106; the waiver's 106 shas equal that set (`cmp` identical).
+- Register `--check-only` with the waiver: `APPROVAL-REGISTER result=OK row=- head_sha=ac8b722a0b0f8d9549daceec1f1f5ad5512cc32c commits=107 check-only=yes waived=106`.
+- Approval row id: `dell1-20261017T163932Z-f936`, opal-internal, pages none; `approval-status` read `state=APPROVED valid=yes by=1.0.0_SA_CTO~DELL1 head_sha=ac8b722a`.
+- Merge-forward result line: `MERGE-FORWARD branch=cand/dell1/prod-into-dev-fold result=MERGED reason=- dev_before=cab233bfdfdb3b84db1f648f00a2883d507685be dev_after=d8df08e44092eb21d022adde9e672451d9d19d05 pushed=yes merge=d8df08e44092eb21d022adde9e672451d9d19d05` (DEV-PUSH-GATE result=ADMITTED).
+- DEV head after, `ls-remote` read: `d8df08e44092eb21d022adde9e672451d9d19d05	refs/heads/DEV`. DEV's tree is unchanged (`6cb1b95163a2` before and after; `git diff cab233bf origin/DEV` empty).
+- `git rev-list --count origin/DEV..origin/PROD` after a fetch: 0 (AC4).
+- Worktree removed and pruned; main portal tree on DEV. Ledger `amgt-resapp-bq2-prod-into-dev-fold-20261017` CLOSED.
