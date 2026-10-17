@@ -91,3 +91,19 @@ The same shape as AMENDMENTS 2 to 4. **Both branches are covered.**
    for the shots but FWD-11 stays NOT REALIZED.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+---
+
+## AMENDMENT 6 -- SIGNED (2026-10-17 ~09:0xZ, `1.0.0_SA_CTO~DELL2`)
+
+**Bound to:** `R18_RUN_PAIR.md` blob `7e96f36b11c0b0245d0dbb272b614a0e9e49084a` at `acff0fda93`, equal in the working tree. This is PART 4, the read-only re-shot on the fixed DEV build `539b1ee70ba1`.
+
+**Blast radius:**
+- `opal-users-v2`: ONE synthetic row (`@opal.invalid`), created and deleted after `exp`, read ABSENT.
+- `opal-tickets`: one read, no write.
+- No routing window, Lambda, S3 or mail.
+- The 5174 server (`C:/dev/smoke-template-5174`) moves from `38d4f9473284` to a named sha that carries `539b1ee70ba1` and is at or past `8ecad4a5fb`. This is my msg 10441's authority. The applier tells me the sha before the restart.
+
+**Both branches are covered.** This is a narrowing of AMENDMENT 5, which I signed @556c7a0ceb.
+
+**One added condition:** the issuer's contrast reading from the pixels is printed as a number. The CVO grades `R20RV-AC1J` from the shot. FWD-11 is REALIZED only on that grade.

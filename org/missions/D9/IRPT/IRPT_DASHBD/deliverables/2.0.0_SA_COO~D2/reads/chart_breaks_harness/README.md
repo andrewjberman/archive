@@ -1,0 +1,5 @@
+# Chart-breaks harness (IRPT_DASHBD TO-DB-b-330, issuer 2.0.0_SA_COO~D2, 2026-10-17)
+
+A headless render of `DashboardPerformance` (portal DEV change 588d869eb0, candidate c95a3d65) with a synthetic series: the round-147 fixture `series-unreported-days.json` with two more days left without a return (2026-07-17 and 2026-07-29). `entry.tsx` is bundled with `bun build --production` and served to system Edge by Playwright routing (`shot.mjs`); the unstyled page only gives the chart container its height. The two PNGs were READ by the issuer: the whole window (2026-07-10 to 2026-08-14) and a late window (2026-07-20 to 2026-08-14).
+
+What they show: the line breaks at each no-return day and each unreported trading day, with the area fill dropped there; a measured day between two breaks is a dot; the sentence "The curve breaks at N days with no return." sits above the chart; the headline still reads "Not measured". NOT shown: the real tab on 5174, real Cottonwood data, the app's styling. The owed browser walk (CTO msg 10384) stays owed.
