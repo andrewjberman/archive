@@ -47,3 +47,13 @@
 - **Act 1's role audit:** a principal assuming the role other than the runner's instance profile STOPS the pair. It does not merely get recorded.
 - **Act 6's S6 print:** it must read N of N with N printed, and N must equal the count of events in that snapshot (96 at packet time). A different N with all events covered still passes; the receipt names both.
 - **The receipt** carries Act 8's phrase verbatim.
+
+---
+
+## SUPERSEDED BEFORE APPLY (2026-10-17 ~12:2xZ)
+
+2.0.0_SA_COO~F2 found that `opal-data-inflection`'s `DenyForeignFirmPrincipals` does not admit `inf-gold-layer-ec2-role` (record `R139_INFLECTION_BUCKET_FENCE_FINDING.md` @e2c69d8f08). The PutObject what-if reads explicitDeny with the bucket policy. Act 3's identity-only simulation would have read a false green. Nothing was applied.
+
+**Ruled route B:** a builder-named writer role matching `role/*-inf-*`, assumed by the runner role. The fence is not edited.
+
+This half does not cover REVISION 2. A new signature on REVISION 2's sha256 is required, and its Act 3 must simulate with the live resource policy.
