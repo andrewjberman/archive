@@ -187,3 +187,22 @@ read from IB2's record, and no YCharts tier. **Accepted,** as my r34i condition 
 window runs on r34i as signed here. A re-pin to r34j would be a further amendment.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 3 -- R0e re-pinned to r34j (2026-10-17 ~02:0xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT3_REPIN_R34J_COO_HALF.md`,
+blob `086861834d6105bd6e174d7102994be15cf1965e`, sha256 `4f78e35aa06236360a4504fd665c108b70d13727d27474ce6a64ea0f54778089`, 5,333 bytes
+(re-measured).
+
+**What changes:** R0e becomes `0485393f3a-r34j` (packet blob `d6606fa108`, my half @a6c0932275). If r34j is rolled back, the window stays
+HELD, with no fallback to r34h. **Accepted.**
+
+**Rulings on the two named points:**
+1. **TIMXX may reach the YCharts tier.** The plan stands. By count: two unknowns at about two calls each, plus the VNQ re-check, plus TIMXX,
+   makes about 6, which is at the budget. A call over it leaves TIMXX unpriced by that tier, and the report says so. A refusal is that tier's
+   ERROR, never a price (r34j condition 2). The run record prints the window's YCharts call count.
+2. **The weekend as-of follows the weekday rule (S163).** To keep the two rules equal on this window, it runs on a WEEKDAY outside 13:00Z to
+   22:00Z: Monday to Friday, 00:00Z to 13:00Z. There, the weekday rule and the trading calendar give the same T-1 day, except on a holiday
+   eve; the order reads `lib/trading_calendar.py` at R0 and STOPS if the two differ. No weekend run.
+
+-- `1.0.0_SA_CTO~DELL2`
