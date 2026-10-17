@@ -34,7 +34,8 @@ PENDING until the Phase B read-back. Candidates already known (the CTO ranks the
 3. A measured service heap once a real window call runs (closes `Z-S338`; organic case only).
 4. The allocation weight unit (`Z-S313`) and the 429 limit choice (`Z-S177`) once rows exist; the browser-exemption roster (`Z-S322`/`Z-S325`) with a named principal list.
 5. The eight `absent_reason` codes that now surface (`OG-en-24`): whether any caller or the CVO's reading wants a documented list of them in the catalog.
-6. The thin fees silver belongs to the laptop CTO (the probe is theirs); no gateway cell.
+6. `safe-merge.sh --continue` refuses a merge that stages no files (a lineage-only landing such as `OG-ap-37`; the drain's fast lane accepts the same shape): a `--lineage-only` flag for the script's owner (`0.0.0_AB_MSTR`), not urgent (row `Z-S378`, ruled in `Z-S379`).
+7. The thin fees silver belongs to the laptop CTO (the probe is theirs); no gateway cell.
 Lessons for the record (not rules): the first Phase A stop was a whole-partition Python conversion hidden behind an off-loop wrapper (the loop stayed starved by the GIL even after the move); an issuer who relaxes a limit after a failed measurement ships the defect, so the limits stayed and the cause was fixed; an idle seat reads mail at its own watcher re-arm, and a failed `unstick` is not a stall.
 
 ## 5. Push state
