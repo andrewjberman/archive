@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bp-3.an-unresolved-segment-column-is-labelled-in-words",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bp-3.an-unresolved-segment-column-is-labelled-in-words.md",
+    "group": "OTHER",
+    "vintage_commit": "46c09f960f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "46c09f960f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bp-3.an-unresolved-segment-column-is-labelled-in-words.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~489",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/segment_served.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the label branch of _serve edited in the worktree; no deploy act; the live function is not invoked"
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_segment_unresolved_label.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new file with U1 to U4 (in-memory inputs, no store call); run before and after the product edit"
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_segment_served.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three existing assertions moved to the new label (tied-table columns 3 and 4; the no-revenue label check); listed in the worker report"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows AMGT_RESAPP-D1-W489-S1 and AMGT_RESAPP-D1-W489-S2 appended as new fenced blocks; no existing row edited"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a line `<N> passed` with N at least 47 (the base's 43 across the first three files plus at least four new tests) and no `failed` or `error`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-489 && timeout 120 python -m pytest lib/research/api/tests/test_segment_served.py lib/research/api/tests/test_segment_period.py lib/research/api/tests/test_segment_table.py lib/research/api/tests/test_segment_unresolved_label.py -q --color=no -p no:cacheprovider 2>&1 | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "47 passed in 0.61s\nexit=0",
+      "denominator": "47 passed of 47 collected in the four named files (the base's 43 plus the 4 new tests U1 to U4)",
+      "status": "PASS",
+      "expect": "(?s)^(?!.*\\b(?:failed|error)\\b).*\\b(?:4[7-9]|[5-9][0-9]|[1-9][0-9]{2,}) passed\\b.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a line `4 passed` (the four named tests U1 to U4; more only if step 1 adds one) and no `failed`; and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-489 && timeout 120 python -m pytest lib/research/api/tests/test_segment_unresolved_label.py -q --color=no -p no:cacheprovider -k \"U1 or U2 or U3 or U4\" 2>&1 | tail -3; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "4 passed in 0.17s\nexit=0",
+      "denominator": "4 passed of 4 named tests (U1, U2, U3, U4); 0 failed",
+      "status": "PASS",
+      "expect": "(?s)^(?!.*\\bfailed\\b).*\\b4 passed\\b.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "product code unchanged with the new test file present: U1, U3 and U4 must fail, U2 must pass",
+      "expected": "U1 and U4 fail on the unchanged code, as the order predicts",
+      "observed": "AC1 before the product edit: 3 failed, 44 passed in 0.96s, exit=1; AC2 before the product edit: 3 failed, 1 passed in 0.40s, exit=1; named failures (diagnostic run, -rf): U1, U3, U4 failed; U2 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: pytest over in-memory inputs and committed fixtures, with no clock, network or store read; the before and after runs differ by the product edit, not by repetition",
+      "observed": "not measured as a repeat run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the <status> flip of AMGT_RESAPP.TO-AMGT-bp-3",
+      "reason": "the order names the flip as the issuer's; the task-orders file is outside this worker's write surface"
+    },
+    {
+      "item": "re-wording of the period_note sentence",
+      "reason": "the order fixes period_note byte-for-byte (item 3); the conflict is filed as AMGT_RESAPP-D1-W489-S1 for its owner"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W489-S1: after the label change the served period_note still says the columns not named by a year keep Bloomberg's period numbers, while an untied figure column reads Year not stated",
+    "AMGT_RESAPP-D1-W489-S2: the worker worktree has no org/surprise_channel directory on disk, so the row schema was read from the HEAD copy"
+  ],
+  "session_log": "AMGT-bp-3 worker run 2026-10-17 (UTC). Step 1: segment_period.py and segment_served.py were read with the RIO LN fixture; the committed fixture holds the served block only, and label_periods already tests every held revenue year against every column at the same tolerance, so no real name was found and none was used. Step 2: the new test file was written first. Step 3: AC1 and AC2 were run once on the unchanged product code and failed as predicted. Step 4: the label line in segment_served.py was edited and three existing assertions were moved to the new label. Step 5: AC1 and AC2 were rerun and passed. Step 6: the commit gate passed on the three .py files.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/test_segment_served.py lib/research/api/tests/test_segment_period.py lib/research/api/tests/test_segment_table.py lib/research/api/tests/test_segment_unresolved_label.py -q --color=no -p no:cacheprovider",
+      "result": "3 failed, 44 passed before the product edit (exit=1); 47 passed after the edit (exit=0)"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh lib/research/api/segment_served.py lib/research/api/tests/test_segment_served.py lib/research/api/tests/test_segment_unresolved_label.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s); rc=0"
+    }
+  ]
+}
