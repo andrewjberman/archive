@@ -50,8 +50,8 @@ NEW_PATHS = {
 }
 NEW_ROUTES = ("request-read", "request-history", "job-status", "narrative", "export-receipt",
               "request-read-no-selection")
-MADE_ORDER = ("ticket-read", "ticket-list", "form-as-filled", "original-upload", "opal-report", "report-pdf",
-              "commentary-pdf") + NEW_ROUTES
+MADE_ORDER = ("ticket-read", "ticket-list", "tickets-metrics", "form-as-filled", "original-upload", "opal-report",
+              "report-pdf", "commentary-pdf") + NEW_ROUTES
 ROW_KEYS = {"route", "method", "status", "verdict", "body_len", "reason", "code"}
 
 
@@ -149,7 +149,8 @@ def drive(tmp_path, base, control=False):
     """One full run (or control) over the default ROUTES. Returns (rc, out directory)."""
     out = str(tmp_path / "out")
     argv = ["--go", GO, "--base", base, "--email", EMAIL, "--ticket", TICKET, "--firm-a", FIRM_A,
-            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--out", out]
+            "--firm-b", FIRM_B, "--request-id", REQ, "--job-id", JOB, "--report-id", REQ, "--export-id", REQ,
+            "--out", out]
     if control:
         argv = ["--control"] + argv
     rc = drv.main(argv, stdin=io.StringIO(json.dumps({"password": PASSWORD})))
@@ -165,26 +166,26 @@ def by_route(rep, name):
     return [c for c in rep["calls"] if c["route"] == name][0]
 
 
-def test_fwd5_routes_run_makes_thirteen_calls_and_writes_fifteen_rows(tmp_path):
+def test_fwd5_routes_run_makes_fourteen_calls_and_writes_sixteen_rows(tmp_path):
     with Fake(table_answer({})) as fake:
         rc, out = drive(tmp_path, fake.base)
     rep = read_report(out)
     assert rc == 0
-    assert len(rep["calls"]) == 15
+    assert len(rep["calls"]) == 16
     made = [c["route"] for c in rep["calls"] if c["verdict"] != "EXCLUDED"]
     assert made == list(MADE_ORDER)
-    assert len(made) == 13
+    assert len(made) == 14
     assert [c["route"] for c in rep["calls"] if c["verdict"] == "EXCLUDED"] == ["commentary-draft", "meeting"]
-    assert rep["counts"]["REFUSED"] == 13
+    assert rep["counts"]["REFUSED"] == 14
     assert rep["counts"]["EXCLUDED"] == 2
-    assert len([m for m, _p in fake.seen if m == "GET"]) == 13
+    assert len([m for m, _p in fake.seen if m == "GET"]) == 14
 
 
 def test_fwd5_routes_six_new_routes_send_the_path_the_record_names(tmp_path):
     with Fake(table_answer({})) as fake:
         drive(tmp_path, fake.base)
     gets = [p for m, p in fake.seen if m == "GET"]
-    assert gets[7:] == [NEW_PATHS[n] for n in NEW_ROUTES]
+    assert gets[8:] == [NEW_PATHS[n] for n in NEW_ROUTES]
     assert NEW_PATHS["request-history"] == SCOPED + "/analysis/requests?selected_tenant=firmbeta"
     assert NEW_PATHS["job-status"] == SCOPED + "/status/JOB-rt0001?selected_tenant=firmbeta"
 

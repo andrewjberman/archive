@@ -9,9 +9,12 @@ under a pair, after 2.0.0_SA_COO~V2's release.
   --plan                      prints the plan and exits 0; no network, no stdin.
   --selftest                  offline checks of the guard and the verdicts; exits 0 when they hold.
   --base URL --email ADDR --ticket ID --firm-a ID --firm-b ID --request-id ID --job-id ID --out DIR
-                              --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
+                              [--report-id ID] [--export-id ID] --go IRPT_ANLREQ.TO-RUN-FWD5.<id>
                               the run. --firm-b, --request-id and --job-id are REQUIRED for a run: a missing one
-                              exits 2 before any request is sent. Without a --go matching
+                              exits 2 before any request is sent. --report-id (the narrative route) and --export-id
+                              (the export-receipt route) are optional at parse time: without one, that route is
+                              UNREACHED and the run exits 2; a supplied one must be an id (checked before sign-in).
+                              Neither is a LEAK marker. Without a --go matching
                               ^IRPT_ANLREQ\\.TO-RUN-FWD5\\.\\S+$ it prints the plan and exits 0 with no request sent.
                               The password is read from stdin as one JSON object {"password": "..."}; it is never
                               printed, logged or written.
@@ -96,10 +99,13 @@ SEG = r"[A-Za-z0-9_-]+"
 
 # The guard: GET only to these path shapes (the ticket routes, the package-file routes the record lists, and the
 # report-side read shapes of AR-tz-74), POST only to the sign-in route. Matched on the path, after the origin is
-# checked. The query is not matched. Not admitted: .../export/<seg>/download and the bare .../status.
+# checked. The query is not matched. Not admitted: .../export/<seg>/download and the bare .../status. The ticket-read
+# shape takes one segment as a ticket id but not the two reserved words claim and metrics; metrics is admitted by its
+# own exact entry (AR-tz-76), and claim is admitted by nothing.
 GET_ALLOWED = (
     re.compile(r"/api/scoped/tickets"),
-    re.compile(r"/api/scoped/tickets/" + SEG),
+    re.compile(r"/api/scoped/tickets/metrics"),
+    re.compile(r"/api/scoped/tickets/(?!(?:claim|metrics)$)" + SEG),
     re.compile(r"/api/scoped/tickets/" + SEG + r"/attachment"),
     re.compile(r"/api/scoped/investor-reporting/analysis/requests/" + SEG + r"/(?:original|pdf|commentary-pdf)"),
     re.compile(r"/api/scoped/investor-reporting/analysis/" + SEG + r"/sections"),
@@ -118,6 +124,9 @@ ROUTES = (
      "needs": ("ticket",), "list": False, "plan": "the ticket read (the whole record if it leaked)"},
     {"name": "ticket-list", "method": "GET", "template": "/api/scoped/tickets",
      "needs": (), "list": True, "plan": "the principal's list: the other firm's ticket must be absent"},
+    {"name": "tickets-metrics", "method": "GET", "template": "/api/scoped/tickets/metrics",
+     "needs": (), "list": False,
+     "plan": "the ticket metrics (a ticket-service route that needs no id; no selected_tenant is sent)"},
     {"name": "form-as-filled", "method": "GET", "template": "/api/scoped/tickets/{ticket}/attachment",
      "needs": ("ticket",), "list": False, "plan": "the trade form as filled (the attachment presign route)"},
     {"name": "original-upload", "method": "GET",
@@ -148,15 +157,15 @@ ROUTES = (
      "template": "/api/scoped/investor-reporting/status/{job_id}?selected_tenant={firm_b}",
      "needs": ("job_id", "firm_b"), "list": False, "plan": "the job status read"},
     {"name": "narrative", "method": "GET",
-     "template": "/api/scoped/investor-reporting/narrative/{request_id}?selected_tenant={firm_b}",
-     "needs": ("request_id", "firm_b"), "list": False,
-     "plan": "the report narrative; the request id stands in for the report id (the firm fence refuses before any "
-             "id is read)"},
+     "template": "/api/scoped/investor-reporting/narrative/{report_id}?selected_tenant={firm_b}",
+     "needs": ("report_id", "firm_b"), "list": False,
+     "plan": "the report narrative; the report id comes from --report-id (the firm fence refuses before any id "
+             "is read)"},
     {"name": "export-receipt", "method": "GET",
-     "template": "/api/scoped/investor-reporting/export/{request_id}?selected_tenant={firm_b}",
-     "needs": ("request_id", "firm_b"), "list": False,
-     "plan": "the export receipt; the request id stands in for the report id (the firm fence refuses before any "
-             "id is read)"},
+     "template": "/api/scoped/investor-reporting/export/{export_id}?selected_tenant={firm_b}",
+     "needs": ("export_id", "firm_b"), "list": False,
+     "plan": "the export receipt; the export id comes from --export-id (the firm fence refuses before any id "
+             "is read)"},
     {"name": "request-read-no-selection", "method": "GET",
      "template": "/api/scoped/investor-reporting/analysis/requests/{request_id}",
      "needs": ("request_id",), "list": False, "no_selection": True,
@@ -545,7 +554,9 @@ def do_run(ns, stdin, routes, control=False):
                                                                     and FIRM_RE.match(ns.firm_b)) else None)
                or ("--firm-a and --firm-b must differ" if ns.firm_a == ns.firm_b else None)
                or ("--request-id is not an id" if not ID_RE.match(ns.request_id) else None)
-               or ("--job-id is not an id" if not ID_RE.match(ns.job_id) else None))
+               or ("--job-id is not an id" if not ID_RE.match(ns.job_id) else None)
+               or ("--report-id is not an id" if ns.report_id and not ID_RE.match(ns.report_id) else None)
+               or ("--export-id is not an id" if ns.export_id and not ID_RE.match(ns.export_id) else None))
     if problem:
         print("ERROR: " + problem)
         return 2
@@ -563,7 +574,8 @@ def do_run(ns, stdin, routes, control=False):
     if token is None:
         rows, refused = _unreached_rows(routes, why), []
     else:
-        ctx = {"ticket": ns.ticket, "firm_b": ns.firm_b, "request_id": ns.request_id, "job_id": ns.job_id}
+        ctx = {"ticket": ns.ticket, "firm_b": ns.firm_b, "request_id": ns.request_id, "job_id": ns.job_id,
+               "report_id": ns.report_id, "export_id": ns.export_id}
         markers = [ns.ticket.lower(), ns.firm_b.lower()]
         rows, refused = run_calls(routes, base, opener, token, ctx, markers, control=control)
     token = None
@@ -702,6 +714,17 @@ def selftest():
         ("guard refuses bare status", admit("GET", base + "/api/scoped/investor-reporting/status", base), False),
         ("guard admits status segment", admit("GET", base + "/api/scoped/investor-reporting/status/JOB-a1b2", base),
          True),
+        ("guard admits tickets metrics", admit("GET", base + "/api/scoped/tickets/metrics", base), True),
+        ("guard refuses tickets metrics anything", admit("GET", base + "/api/scoped/tickets/metrics/anything", base),
+         False),
+        ("guard refuses tickets claim", admit("GET", base + "/api/scoped/tickets/claim", base), False),
+        ("tickets metrics sits after ticket list",
+         [r["name"] for r in ROUTES].index("tickets-metrics") == [r["name"] for r in ROUTES].index("ticket-list") + 1,
+         True),
+        ("narrative needs report_id", "report_id" in ROUTES[[r["name"] for r in ROUTES].index("narrative")]["needs"],
+         True),
+        ("export-receipt needs export_id",
+         "export_id" in ROUTES[[r["name"] for r in ROUTES].index("export-receipt")]["needs"], True),
     ]
     for name, got, want in checks:
         if got != want:
@@ -725,6 +748,12 @@ def main(argv=None, stdin=None, routes=None):
                    help="REQUIRED for a run: the request id, sourced from the ticket the FWD-1 run files")
     p.add_argument("--job-id", dest="job_id",
                    help="REQUIRED for a run: the job id, sourced from the ticket the FWD-1 run files")
+    p.add_argument("--report-id", dest="report_id",
+                   help="the report id for the narrative route (AR-tz-76); optional, a run without it leaves "
+                        "narrative UNREACHED")
+    p.add_argument("--export-id", dest="export_id",
+                   help="the export id for the export-receipt route (AR-tz-76); optional, a run without it leaves "
+                        "export-receipt UNREACHED")
     p.add_argument("--out")
     p.add_argument("--go")
     p.add_argument("--control", action="store_true",
