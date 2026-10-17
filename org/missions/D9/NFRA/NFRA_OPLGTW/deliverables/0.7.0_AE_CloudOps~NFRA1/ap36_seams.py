@@ -12,7 +12,7 @@ import sys
 LIVE, TRUNK, OUT = sys.argv[1:4]
 G = "infra/aws/ec2/opal-gateway/"
 APP = ["tools", "client_core", "client_adapter_bd49f"]
-TESTS = ["test_og_en21", "test_og_en22", "test_og_db3"]
+TESTS = ["test_og_en21", "test_og_en22", "test_og_en23", "test_og_db3"]
 take = {G + "app/%s.py" % m for m in APP}
 tests = {G + "tests/%s.py" % t for t in TESTS}
 
