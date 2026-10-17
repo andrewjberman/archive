@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-ce-6.the-corpus-reads-no-report-on-the-misfiled-list",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-6.the-corpus-reads-no-report-on-the-misfiled-list.md",
+  "group": "OTHER",
+  "vintage_commit": "8005ccbacb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "8005ccbacb",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-6.the-corpus-reads-no-report-on-the-misfiled-list.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~158",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/corpus/typed.py",
+   "kind": "script",
+   "commit_or_etag": "c847c0c723",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "MISFILED_REPORTS constant (two entries, same ids, security_key and reason as the gateway) and one filter in reports_for before ordering. git show --stat c847c0c723: 19 insertions, 1 deletion in this file. No S3 call, no gold writer run.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "lib/research/corpus/tests/test_typed_misfiled_reports.py",
+   "kind": "test",
+   "commit_or_etag": "c847c0c723",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New offline file, five arms: KMB drop, ACME control, three consumers through reports_for, gateway no-drift (read by path), emptied-list mutant. Run at this worktree: 5 passed in 0.56s and 5 passed twice more (determinism).",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "5dd4d6532f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three rows AMGT_HARVST-D1-W158-S1, -S2 and -S3 appended by bytes; git show --numstat 5dd4d6532f reads 62 insertions, 0 deletions.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_typed_misfiled_reports.py -q -p no:cacheprovider --color=no ; expect (?m)^\\d+ passed in",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/corpus/tests/test_typed_misfiled_reports.py -q -p no:cacheprovider --color=no",
+   "output_evidence": "run under timeout 120 (rc 124 not reached). deciding line: '5 passed in 0.56s' (rc=0; the arm-4 gateway no-drift test ran and was not skipped). Repeated twice more: '5 passed in 0.36s' and '5 passed in 0.37s', rc=0 both.",
+   "denominator": "5 of 5 test arms passed; 0 skipped, 0 failed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_typed.py lib/research/corpus/tests/test_library.py lib/research/corpus/tests/test_substrate.py -q -p no:cacheprovider --color=no ; expect (?m)^35 passed in",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/corpus/tests/test_typed.py lib/research/corpus/tests/test_library.py lib/research/corpus/tests/test_substrate.py -q -p no:cacheprovider --color=no",
+   "status_reason": "AC2 expects '35 passed in' and the literal run printed '5 failed, 30 passed in 1.40s' (rc=1). Cause: the KPI census file is absent from this sparse worktree (surprise AMGT_HARVST-D1-W158-S1), not the change under test; the order stays open.",
+   "output_evidence": "run under timeout 120 (rc 124 not reached). deciding line: '5 failed, 30 passed in 1.40s' (rc=1). The five failures are test_substrate.py::test_one_call_returns_all_five_members, test_absent_business_type_is_named_and_never_leaks_another_types_data, test_current_flips_for_exactly_the_artifact_whose_inputs_moved, test_difference_arm_fails_when_continuation_is_not_rederived and test_difference_arm_succeeds_when_continuation_is_rederived; each raises FileNotFoundError on org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_CORPUS_SCAN_20260922/research_docx_kpi_census.json, which the sparse worktree does not hold (HEAD holds it, 53066 bytes). The failing line is the KPI census open in continuation._kpi_lexicon_bytes and sector_template._load_kpi_lexicon, not the reports path. DIAGNOSTIC ONLY, not the verdict: with a plugin pointing those two constants at the HEAD bytes staged in .scratch, the same invocation printed '35 passed in 0.81s' rc=0.",
+   "denominator": "30 of 35 passed; 5 of 35 failed on the absent census file",
+   "status": "FAIL"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The emptied-list mutant is arm (5) of test_typed_misfiled_reports.py: typed.MISFILED_REPORTS monkeypatched to (), arm (1) must raise AssertionError.",
+   "expected": "arm (1) raises AssertionError under the emptied list, so the mutant test passes",
+   "observed": "test_mutant_empty_list_makes_arm_one_fail is among the 5 passed in the AC1 run (rc=0)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 invocation run three times at the worktree root, output compared",
+   "observed": "run 1 '5 passed in 0.56s', run 2 '5 passed in 0.36s', run 3 '5 passed in 0.37s'; all rc=0, same pass count",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Status flip of the task order to complete",
+   "reason": "Not done: AC2 is FAIL, so the order stays open, and the order file is outside this worker's paths; the issuer flips the status."
+  },
+  {
+   "item": "Materialising org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_CORPUS_SCAN_20260922/research_docx_kpi_census.json into the worktree to turn AC2 green",
+   "reason": "Outside the task order's <paths> and a reconstruction of the tree; the census file is recorded as a surprise (S1) instead. The diagnostic in S1 used a copy in .scratch and changed no product file."
+  },
+  {
+   "item": "fund_form.py and sector_template.py exclusion",
+   "reason": "Outside <paths>; recorded as surprise AMGT_HARVST-D1-W158-S2 (ARMED) for the issuer."
+  },
+  {
+   "item": "Any gold writer run, S3 call, or the gateway file change",
+   "reason": "The order forbids them; none was run. The gateway file was read by path only."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-D1-W158-S1: AC2 is red in the sparse worktree: the KPI census file is absent from the checkout, so 5 of 35 fail on FileNotFoundError; the same 35 pass with the HEAD bytes staged (INERT).",
+  "AMGT_HARVST-D1-W158-S2: fund_form.py:249 and sector_template.py:446 read silver through store.silver_latest and not through reports_for, so the exclusion does not reach them; both are outside this order's paths (ARMED, disarm owner 2.0.0_SA_COO~W1).",
+  "AMGT_HARVST-D1-W158-S3: typed.py _run_census and _run_reports_for_first_multi read silver directly and count the listed Mexico rows; they print only and write nothing, so left unchanged as the order said (INERT)."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "proof-of-spec-check.py (this instance)",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~158/AMGT_HARVST.TO-HVST-ce-6.the-corpus-reads-no-report-on-the-misfiled-list.proof_of_spec.json AC1,AC2 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-6.the-corpus-reads-no-report-on-the-misfiled-list.md",
+   "result": "rc=0 VALID (AC1,AC2 at the working tree before this commit; 2 criteria, 3 artifacts resolved at pin, 3 surprises resolved to channel rows). VALID is the instance's shape; the order is NOT met: AC2 status FAIL."
+  },
+  {
+   "tool": "surprise-row-gate.py (via safe-commit on the channel file, commit 5dd4d6532f)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~158 <0.9.0_WK_AMGT_HARVST~158@opal.agent>\" -F .scratch/msg_rows.txt -- org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "OK: 3 new row(s) of 471 total checked (467 pre-existing, NOT re-graded); all new rows carry their fields; the diff is insertion-only (62 insertions, 0 deletions)"
+  }
+ ]
+}
