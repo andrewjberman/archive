@@ -1,0 +1,38 @@
+FB-p-2 step 2 (B1) catch-up: organic run, no dispatch (COO amendment 3 @fe85fd1ba4, msg 7577). Read 2026-10-17 ~14:2xZ by 0.7.0_AE_CloudOps~FB1. Claim: measured.
+
+## 1. The organic dispatch (SSM, runner i-02448edb624a7a7cf)
+6e968ce4-05b9-4ed0-b398-ca87ecc1c9de	mdpf feeder chain 20261012T125209Z date=2026-10-12 src=backstop	Success	2026-10-12T08:52:30.954000-04:00
+d2809357-f7f0-41ca-a20d-751c36a9250d	mdpf feeder chain 20261017T125209Z date=2026-10-17 src=backstop	Success	2026-10-17T08:52:26.809000-04:00
+
+## 2. Trigger log, 2026-10-17 12:00Z-14:30Z (dispatched or NOT-YET lines)
+	OK: feeder chain dispatched {"statusCode": 200, "dispatched": true, "run_date": "2026-10-17", "run_stamp": "20261017T125209Z", "source": "backstop", "wsc_input_present": true, "wse_input_present": false, "runner": "i-02448edb624a7a7cf", "ssm_command_id": "d2809357-f7f0-41ca-a20d-751c36a9250d"}
+
+## 3. Same-date (2026-10-17) feed key versions in opal-data-mdpf (key, LastModified, VersionId, IsLatest); 49F families hold an earlier 03:3xZ version from another writer, left untouched
+mdpf/feeds/model_aua_positions/inflection/2026-10-17.parquet	2026-10-17T12:53:56+00:00	F1zpfod0Osx3h6_vMMtPoJGMAZYyjRhr	True
+mdpf/feeds/model_aua_positions/49financial/2026-10-17.parquet	2026-10-17T12:55:11+00:00	0ZYrNfiGjodGRMjXN9rsnxlHs9TCNFlv	True
+mdpf/feeds/model_aua_positions/49financial/2026-10-17.parquet	2026-10-17T03:31:39+00:00	tt07_ecWeQhAwT17lo_5cDVl8BAzRgCF	False
+mdpf/feeds/model_composition/inflection/2026-10-17.parquet	2026-10-17T12:53:56+00:00	wKu0EP4OIZXeSg5SeU599iHv0BEzz7DY	True
+mdpf/feeds/model_composition/49financial/2026-10-17.parquet	2026-10-17T12:55:11+00:00	74p05t1SOcIqXWFlr9GLUpr3ajzSR9af	True
+mdpf/feeds/model_composition/49financial/2026-10-17.parquet	2026-10-17T03:31:39+00:00	gGjvZfKuIngOmBMvGW.WE1oLWEAkLZQl	False
+mdpf/feeds/non_model_aua/inflection/2026-10-17.parquet	2026-10-17T12:53:56+00:00	TI3rdVXYTu6nHFScFBPrxGRnQePOyWmq	True
+mdpf/feeds/non_model_aua/49financial/2026-10-17.parquet	2026-10-17T12:55:14+00:00	xBjPgCgD79svpu3106JUplYlc7DgMx3y	True
+mdpf/feeds/partner_held_etf/49financial/2026-10-17.parquet	2026-10-17T12:53:56+00:00	_xm2XF9ZwIzIlc19U9uZdqZEsRd3Mffc	True
+mdpf/feeds/partner_held_etf/49financial/2026-10-17.parquet	2026-10-17T03:30:47+00:00	atoOVuWAHXo_n_ygRKEHnjpJQsHgbp7W	False
+mdpf/feeds/etf_net_assets/2026-10-17.parquet	2026-10-17T12:53:55+00:00	diMwJ.26pBZWl6gneSHW11nhuKVR43cm	True
+
+## 4. Aggregate 2026-10-17 versions (opal-data-assets)
+gold/mdpf_revamp/_aggregate_aua/2026-10-17.json	2026-10-17T13:31:36+00:00	GkhiRWeOlMa4Tmhn8hXXWPkWIjsKwbgw	10106
+gold/mdpf_revamp/_aggregate_aua/2026-10-17.json	2026-10-17T12:55:21+00:00	v8N5hKtI.aFnkjE116pj64blJ7V7BY84	10106
+
+## 5. Floor run (mdpf-gold-lambda log 13:31Z)
+[2026-10-17T13:31:34Z] OK: mdpf_aggregate_aua started -- date=2026-10-17 source=s3
+	[2026-10-17T13:31:35Z] OK: opal_aggregate_aua=1,883,711,017.64 (headline 1a+1b+1c+2a; model=1,627,673,052.64 sma=21,178,343.10 non_model=294,695,098.41; audit cohort_2b=59,835,476.51 cohort_0=176,992,924.10) partners=2 reconciliation=PASS
+	[2026-10-17T13:31:35Z] OK: wrote s3://opal-data-assets/gold/mdpf_revamp/_aggregate_aua/2026-10-17.json
+
+## 6. Aggregate listing gap check (list-objects-v2 auto-paginated, counted client-side)
+listing denominator=494 objects
+2026-10-13 objects=0 -> absent
+2026-10-14 objects=0 -> absent
+2026-10-15 objects=0 -> absent
+2026-10-16 objects=0 -> absent
+positive control 2026-10-12 objects=1; 2026-10-17 objects=1

@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~NFRA1</issued_to>
     <date>2026-10-17</date>
-    <status>pending</status>
+    <status>not_met -- CTch1-AC2 failed (the 2026-10-17 13:00Z start ran the uploaded file and the run FAILED at 13:03:55Z in load_function_map on the lazy blob fetch, before the lambda hop read function-map/; log s3://opal-estate-report/logs/2026-10-17T130355Z-i-0584e17d283fa7ef4.log); CTch1-AC1 met (upload, 00:46Z); the proof moves to TO-APPLY-33 (CT-cj-1)</status>
     <project_code>NFRA_CTLPLN</project_code>
   </metadata>
 <risk>WORLD</risk>
