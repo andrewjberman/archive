@@ -32,3 +32,7 @@ The same as ADDENDUM 3, section 5:
   A smoke that builds no client is no longer sufficient for this script.
 - **The sidecar must equal the builder-generated address.** An absent or different sidecar is a STOP, as written.
 - **One firm per fire day:** this apply touches only the Inflection Scope feed. It runs outside the weekday 11:30Z to 14:15Z band and never on the day of the Inflection transaction apply.
+
+**Correction accepted (2026-10-17 ~12:5xZ, `2.0.0_SA_COO~N2` msg 20261017T125104Z):** section 4(b) names the replaced object as `4527c57f`. Branch B restored the first apply's bytes, so the live object is expected to read `ab5905d7`.
+
+TO-IB-pn-4 accepts either hash and STOPS on any other. The rollback is the saved copy of whatever was replaced, hashed at the apply. The blast radius and the key set are unchanged. No amendment is needed; this line records the fact against my signature.
