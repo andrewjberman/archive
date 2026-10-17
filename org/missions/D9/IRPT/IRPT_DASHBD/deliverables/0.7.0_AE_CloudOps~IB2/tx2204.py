@@ -1,6 +1,7 @@
 """IRPT_DASHBD TO-DB-f-2204 (applier 0.7.0_AE_CloudOps~IB2): the reads and the three invokes of the 49 Financial transaction-table apply.
 
-  python tx2204.py gates                  packet bytes, halves, pins, one-change-at-a-time census, live state vs the packet (read only)
+  python tx2204.py gates                  AMENDMENT 2 R0: packet bytes, halves, ADDENDUM 1, re-pin checks, one-change-at-a-time census, live state vs the state after the first apply (read only)
+  python tx2204.py first_apply            the first apply as it was -> state2204_r2/first_apply.json (copied from state2204/)
   python tx2204.py before                 the BEFORE state -> state2204/before.json
   python tx2204.py after_apply <UTC>      the function, policy and schedule after the apply -> state2204/after.json
   python tx2204.py invoke dry|write|range ONE synchronous invoke (never retried here) -> state2204/<name>_invoke.json, with its after-read
@@ -25,7 +26,8 @@ from botocore.config import Config
 
 ROOT = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True, cwd=str(Path(__file__).resolve().parent)).strip())
 HERE = Path(__file__).resolve().parent
-STATE = HERE / "state2204"
+STATE = HERE / "state2204_r2"  # AMENDMENT 2 (the re-stage): a fresh state folder; the first apply and its stopped dry run stay in state2204/
+FIRST = HERE / "state2204"
 CHK_PATH = ROOT / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p136_apply.py"
 spec = importlib.util.spec_from_file_location("p136_for_tx2204", str(CHK_PATH))
 chk = importlib.util.module_from_spec(spec)
@@ -65,6 +67,10 @@ def save(name, obj):
 
 def load(name):
     return json.loads((STATE / name).read_text(encoding="ascii"))
+
+
+def load_first(name):
+    return json.loads((FIRST / name).read_text(encoding="ascii"))
 
 
 def git(*a):
@@ -159,19 +165,26 @@ def cmd_gates():
     scs = schedule()
     wr = write_resources()
     newobj = prefix_objects(TX_PREFIX)
-    live_ok = (cfg["CodeSha256"] == chk.OLD_CODE_B64 and cfg["MemorySize"] == 8192 and cfg["Timeout"] == 900 and conc is None and not (cfg.get("Environment") or {}).get("Variables")
-               and cur == chk.OLD_ARTIFACT_VERSION and scs["state"] == "ENABLED" and sorted(policy_hashes()) == sorted(SIDS) and len(wr) == 6 and NEW_RESOURCE not in wr and newobj == 0)
-    gates = {"packet_blob": blob, "packet_sha256": sha, "coo_half_signed": coo_ok, "cto_half_signed": cto_ok, "pins_ok": all(pins.values()),
+    live_ok = (cfg["CodeSha256"] == chk.FIRST_BUILD_B64 and cfg["MemorySize"] == 8192 and cfg["Timeout"] == 900 and conc is None and not (cfg.get("Environment") or {}).get("Variables")
+               and cur == chk.FIRST_ARTIFACT_VERSION and scs["state"] == "ENABLED" and sorted(policy_hashes()) == sorted(SIDS) and len(wr) == 7 and NEW_RESOURCE in wr and newobj == 0)
+    p137 = str(ROOT / "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/p137_repin.py")
+    repin = {}
+    for cid in ("DBF137-1-AC1", "DBF137-1-AC2"):
+        r = subprocess.run([sys.executable, "-I", p137, str(ROOT), cid], capture_output=True, text=True, cwd=str(ROOT))
+        repin[cid] = (r.returncode == 0 and (cid + " PASS") in r.stdout)
+    cto_a1 = ("ADDENDUM 1" in cto) and ("COUNTERSIGN" in coo.upper() or "COUNTERSIGN" in cto.upper())
+    gates = {"packet_blob": blob, "packet_sha256": sha, "coo_half_signed": coo_ok, "cto_half_signed": cto_ok, "addendum_1_signed": bool(cto_a1), "pins_ok": bool(all(repin.values())),
              "one_change_at_a_time": {"worktrees_read": len(wts), "open_markers_naming_this_surface": len(live)}}
+    print("GATES addendum_1_signed=%s repin_checks=%s original_pins_ok=%s" % (cto_a1, repin, all(pins.values())))
     print("GATES blob=%s sha_ok=%s coo=%s cto=%s" % (blob[:12], sha == chk.PACKET_SHA, coo_ok, cto_ok))
     print("GATES pins %s" % pins)
     print("GATES worktrees_read=%d stale_closed_slugs=%d live_markers_naming_surface=%d %s" % (len(wts), stale, len(live), live[:3]))
     print("GATES live: code_ok=%s mem=%s timeout=%s conc=%s env=%s artifact_current_ok=%s (artifact versions %d) schedule=%s sids_ok=%s write_resources=%d new_prefix_objects=%d -> live_ok=%s" % (
-        cfg["CodeSha256"] == chk.OLD_CODE_B64, cfg["MemorySize"], cfg["Timeout"], conc, bool((cfg.get("Environment") or {}).get("Variables")), cur == chk.OLD_ARTIFACT_VERSION, nvers, scs,
+        cfg["CodeSha256"] == chk.FIRST_BUILD_B64, cfg["MemorySize"], cfg["Timeout"], conc, bool((cfg.get("Environment") or {}).get("Variables")), cur == chk.FIRST_ARTIFACT_VERSION, nvers, scs,
         sorted(policy_hashes()) == sorted(SIDS), len(wr), newobj, live_ok))
     save("gates.json", gates)
     save("gates_live_ok.json", {"live_ok": bool(live_ok), "at": now_utc()})
-    return 0 if (sha == chk.PACKET_SHA and coo_ok and cto_ok and all(pins.values()) and not live and live_ok) else 3
+    return 0 if (sha == chk.PACKET_SHA and coo_ok and cto_ok and gates["addendum_1_signed"] and gates["pins_ok"] and not live and live_ok) else 3
 
 
 def cmd_before():
@@ -179,19 +192,28 @@ def cmd_before():
     cur, _n = artifact_current()
     ot = other_tables()
     reports = last_fire()
-    lf = reports[-1] if reports else None
+    old = load_first("before.json")["last_fire"]  # the last SCHEDULED fire (patched at the first run); my own dry-run invokes are not scheduled fires
     out = {"function_code_sha256": cfg["CodeSha256"], "artifact_version_id": cur, "policy": policy_hashes(), "write_resources": write_resources(), "new_prefix_objects": prefix_objects(TX_PREFIX),
            "schedule": {k: v for k, v in schedule().items() if k != "zone"},
-           "last_fire": {"duration_ms": int(lf[1]) if lf else None, "utc": dt.datetime.fromtimestamp(lf[0] / 1000, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if lf else None},
+           "last_fire": old,
            "other_tables": ot, "newest_returns_day": ot["account_return_daily"]["newest"]}
     save("before.json", out)
     save("before_extra.json", {"report_lines_4d": [{"utc": dt.datetime.fromtimestamp(r[0] / 1000, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "duration_ms": r[1], "max_memory_mb": r[2]} for r in reports]})
     print("BEFORE code=%s artifact_current=%s sids=%d write_resources=%d new_prefix_objects=%d schedule=%s" % (out["function_code_sha256"], cur, len(out["policy"]), len(out["write_resources"]), out["new_prefix_objects"], out["schedule"]))
     print("BEFORE last_fire=%s (REPORT lines in 4 days: %d)" % (out["last_fire"], len(reports)))
     print("BEFORE other_tables=%s newest_returns_day=%s (packet time: 572, 7, 7, 7, 7, 1 partitions)" % ({t: (v["partitions"], v["newest"]) for t, v in ot.items()}, out["newest_returns_day"]))
-    ok = (out["function_code_sha256"] == chk.OLD_CODE_B64 and cur == chk.OLD_ARTIFACT_VERSION and sorted(out["policy"]) == sorted(SIDS) and len(out["write_resources"]) == 6
-          and out["new_prefix_objects"] == 0 and lf is not None)
+    ok = (out["function_code_sha256"] == chk.FIRST_BUILD_B64 and cur == chk.FIRST_ARTIFACT_VERSION and sorted(out["policy"]) == sorted(SIDS) and len(out["write_resources"]) == 7
+          and NEW_RESOURCE in out["write_resources"] and out["new_prefix_objects"] == 0 and old.get("duration_ms") is not None)
     return 0 if ok else 3
+
+
+def cmd_first_apply():
+    plan, fin, bld = load_first("plan.json"), load_first("apply_finished.json"), load_first("build.json")
+    out = {"code_sha256": chk.FIRST_BUILD_B64, "landed_version_id": bld["landed_version_id"], "plan": {"add": plan["add"], "change": plan["change"], "destroy": plan["destroy"]},
+           "policy_added_resources": plan["policy_added_resources"], "apply_finished_utc": fin["apply_finished_utc"]}
+    save("first_apply.json", out)
+    print("FIRST_APPLY %s" % out)
+    return 0 if (out["landed_version_id"] == chk.FIRST_ARTIFACT_VERSION and (plan["add"], plan["change"], plan["destroy"]) == (0, 2, 0)) else 3
 
 
 def cmd_after_apply(utc):
@@ -329,7 +351,7 @@ def cmd_compile():
 
     def ev(x):
         return {k: x[k] for k in ("payload", "invoked_utc", "status_code", "function_error", "returned", "report", "request_id")}
-    rec = {"claim": "measured", "gates": load("gates.json"), "ledger_entry": OWN_SLUG, "applier": chk.APPLIER, "before": load("before.json"), "build": load("build.json"), "plan": load("plan.json"),
+    rec = {"claim": "measured", "gates": load("gates.json"), "ledger_entry": OWN_SLUG, "applier": chk.APPLIER, "first_apply": load("first_apply.json"), "before": load("before.json"), "build": load("build.json"), "plan": load("plan.json"),
            "apply_finished_utc": load("apply_finished.json")["apply_finished_utc"], "after": load("after.json"),
            "dry_run": dict(ev(d), prefix_objects_after=dc["prefix_objects_after"]), "time_trigger": load("time_trigger.json"),
            "first_write": dict(ev(w), partitions_after=wc["partitions_after"], columns=wc["columns"], schema_hash=wc["schema_hash"], claims_ok=wc["claims_ok"], flow_class_ok=wc["flow_class_ok"]),
@@ -342,4 +364,4 @@ def cmd_compile():
 
 if __name__ == "__main__":
     c = sys.argv[1]
-    sys.exit({"gates": cmd_gates, "before": cmd_before, "trigger": cmd_trigger, "compile": cmd_compile}.get(c, lambda: {"after_apply": cmd_after_apply, "invoke": cmd_invoke}[c](sys.argv[2]))())
+    sys.exit({"gates": cmd_gates, "first_apply": cmd_first_apply, "before": cmd_before, "trigger": cmd_trigger, "compile": cmd_compile}.get(c, lambda: {"after_apply": cmd_after_apply, "invoke": cmd_invoke}[c](sys.argv[2]))())
