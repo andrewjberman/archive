@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bs-5.price-currency-rule-promoted-to-prod-then-folded-back",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bs-5.price-currency-rule-promoted-to-prod-then-folded-back.md",
+    "group": "OTHER",
+    "vintage_commit": "a0cbebceb768c3ba229d9c8dcd685d043c4338ed"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8bdbdc8a94ec2329b05bfe2f8830638543713db1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bs-5.price-currency-rule-promoted-to-prod-then-folded-back.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~H2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD @856fb37b785c4b8a10190771410e3dfc9ac8e789",
+      "kind": "frontend_component",
+      "commit_or_etag": "856fb37b785c4b8a10190771410e3dfc9ac8e789",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ls-remote origin refs/heads/PROD read after push = 856fb37b785c4b8a10190771410e3dfc9ac8e789; gh run 39064168223 Deploy to Production completed success on that sha (the only workflow listed for it); tag portal-v2.1.237 peels to it.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_BS5.md",
+      "kind": "doc",
+      "commit_or_etag": "a580659b1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on box/dell1 (LOCAL at the time of writing)",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/FOLDBACK_OVERLAP_SHAS_R112.txt",
+      "kind": "doc",
+      "commit_or_etag": "a580659b1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "116 shas of git rev-list origin/PROD..origin/DEV, measured after the promote; committed with the receipt (LOCAL at the time of writing)",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for h in 937f15a01d123fe711bc5db175590a1c878185ca; do for f in $(git diff --name-only 932cea99 $h); do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse $h:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done; done -- expect: six lines `EQUAL <path>` (none `DIFFERS`)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for h in 937f15a01d123fe711bc5db175590a1c878185ca; do for f in $(git diff --name-only 932cea99 $h); do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse $h:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done; done",
+      "output_evidence": "EQUAL src/pages/SecurityAnalysis/__harness__/peersCurrency.harness.cjs\nEQUAL src/pages/SecurityAnalysis/__harness__/priceCurrencyFixture.base_table_PHP.html\nEQUAL src/pages/SecurityAnalysis/__harness__/priceCurrencyRule.harness.cjs\nEQUAL src/pages/SecurityAnalysis/components/HeaderCards.tsx\nEQUAL src/pages/SecurityAnalysis/priceCurrency.ts\nEQUAL src/pages/SecurityAnalysis/tabs/PeersTab.tsx",
+      "denominator": "6 of 6 paths EQUAL, 0 DIFFERS",
+      "status": "PASS",
+      "status_reason": "all six candidate paths read the same blob on origin/PROD as on the approved head",
+      "expect": "(?s)\\A(EQUAL \\S+\\s*){6}\\Z",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status -- expect: one JSON row, status completed, conclusion success, headSha equal to origin/PROD after a fetch and not beginning 932cea99",
+      "method": "command",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"856fb37b785c4b8a10190771410e3dfc9ac8e789\",\"status\":\"completed\"}]\norigin/PROD after fetch: 856fb37b785c4b8a10190771410e3dfc9ac8e789",
+      "denominator": "1 of 1 row; headSha equals origin/PROD",
+      "status": "PASS",
+      "status_reason": "completed success on 856fb37b, which is origin/PROD and does not begin 932cea99",
+      "expect": "(?s)\"conclusion\":\"success\",\"headSha\":\"(?!932cea99)[0-9a-f]{40}\",\"status\":\"completed\"",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_BS5.md\" -- expect: a count of at least 4 (the route, the class and the CI words each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_BS5.md\"",
+      "output_evidence": "6\nmatching lines (same pattern, grep -n):\n27:| Security Analysis | /security-analysis | Opal-internal |\n29:- Route: /security-analysis\n30:- Class: Opal-internal (staff-only); `PROMOTE-CLIENT-FACING count=0`\n35:Read by headSha ... conclusion success\n37:- Status as read: completed\n38:- Conclusion as read: success",
+      "denominator": "6 matching lines (bar 4)",
+      "status": "PASS",
+      "status_reason": "the receipt carries the route, the class and the CI words on separate lines",
+      "expect": "(?s)\\A\\s*([4-9]|\\d{2,})\\s*\\n",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != 932cea99 ] && git rev-list --count origin/DEV..origin/PROD -- expect: the single number `0` (PROD has moved off `932cea99` AND DEV contains PROD, so the fold-back has landed; at the base the guard fails and nothing prints)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != 932cea99 ] && git rev-list --count origin/DEV..origin/PROD",
+      "output_evidence": "1\n(PROD 856fb37b is off 932cea99, so the guard passes; DEV 9fa63689 lacks the release merge 856fb37b)",
+      "denominator": "1 of 1 count read; NOT MET: step 7 (the fold-back merge-forward) has not run",
+      "status": "FAIL",
+      "status_reason": "AC4 is open by design in this stage: the order records it as not yet met with the count read (1). The fold branch cand/dell1/prod-into-dev-fold-r112 (118ede74, TREE-EQUALS-DEV) is prepared and local; the register and the merge-forward wait for the CTO's named waiver and the issuer's amendment (step 7).",
+      "expect": "(?s)\\A\\s*0\\s*\\n",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run against the pre-promote PROD head 932cea99 in place of origin/PROD: the new files are absent and the changed files differ there, so AC1 must not read six EQUAL lines.",
+      "expected": "not six EQUAL lines",
+      "observed": "6 of 6 lines DIFFERS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice against the same origin/PROD, outputs compared with cmp",
+      "observed": "identical; both runs printed the same six EQUAL lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 and step 7 (the fold-back register and merge-forward)",
+      "reason": "Held by the order: they wait on the CTO's named waiver and the issuer's amendment. The fold branch is prepared; nothing is registered or merged forward."
+    },
+    {
+      "item": "cand/dell1/amgt-sa-pe-footer-census (row 48c7)",
+      "reason": "Not in this release by the order (DEV only, CTO msg 7716); it was not built, promoted or touched."
+    },
+    {
+      "item": "Live render of the header tiles and the Peers table on a staff session",
+      "reason": "Not an order criterion: the page is staff-only behind a login, and the issuer reads it after the promote. Not read here."
+    }
+  ],
+  "surprises": [],
+  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-bs-5 (GO msgs 7717 and 7719, acked; order committed a0cbebceb7). IN-DEV read true for 937f15a0; row 32d8 APPROVED valid. Release release/20261017T194827Z READY (1 feature, 0 unapproved, 0 client-facing); worktree ff-only, parity diff 0 lines, typecheck passed in the pre-push gate; PROD 932cea99 -> 856fb37b pushed and read by ls-remote; CI run 39064168223 completed success; tag portal-v2.1.237 peeled to the PROD head; worktrees removed, main tree on DEV. Fold-back prepared only: cand/dell1/prod-into-dev-fold-r112, fold merge 118ede74, TREE-EQUALS-DEV, rev-list DEV..HEAD 2, 116 overlap shas to FOLDBACK_OVERLAP_SHAS_R112.txt; nothing registered. Receipt a580659b1d LOCAL on box/dell1. Ledger amgt-resapp-bs5-sa-promote-20261017.",
+  "compiler_tools": [
+    {
+      "tool": "open-calls.py approval-status",
+      "invocation": "python .tools/open-calls.py approval-status --branch cand/dell1/amgt-sa-price-currency-rule",
+      "result": "state=APPROVED valid=yes by=1.0.0_SA_CTO~DELL1 row=dell1-20261017T194202Z-32d8"
+    },
+    {
+      "tool": "portal-release-build.sh",
+      "invocation": "bash .tools/portal-release-build.sh --features cand/dell1/amgt-sa-price-currency-rule",
+      "result": "RELEASE result=READY branch=release/20261017T194827Z, PROMOTE-CLIENT-FACING count=0"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open, close-leg L1-L3, close",
+      "result": "3 legs proven (see ledger entry)"
+    }
+  ]
+}
