@@ -70,7 +70,8 @@ def check_diff(root, git_scope=True):
         out, rc = git(root, "diff", "--name-only", base)
         need(rc == 0, "cannot diff against the branch point %s" % base[:10])
         untracked, _ = git(root, "ls-files", "--others", "--exclude-standard")
-        changed = {x for x in (out + untracked).splitlines() if x.strip()}
+        # the portal gitlink of a provisioned worktree is not the worker's edit (the provisioner points it at the portal worktree)
+        changed = {x for x in (out + untracked).splitlines() if x.strip() and x.strip() != "portal"}
         allowed = lambda f: f in (ADAPTER, HANDLER) or f in EXISTING_TESTS or f.startswith(OWN) or (  # noqa: E731
             (f.startswith(TESTS_A) or f.startswith(TESTS_H)) and f.rsplit("/", 1)[-1].startswith(NEW_TEST_PREFIX))
         extra = [f for f in changed if not allowed(f)]
