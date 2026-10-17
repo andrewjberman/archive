@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-ap-36 AC1 (round 41, the fifth batched gateway release, PHASE A): the re-cut carries exactly the code of OG-en-21, OG-en-22, OG-db-2 and OG-db-3, and the host measurements passed.
 #  - W/ap36_release.json {base_sha, release_sha, trunk_sha}; the live ref BEFORE this release is EC2_MANIFEST deployed_commit at HEAD (previous_deployed_commit once this release is the deployed one);
-#  - base..release differs only in the take list: app/tools.py, app/client_core.py, app/client_adapter_bd49f.py, deploy-to-ec2.sh, tests/test_og_en21.py, test_og_en22.py, test_og_db3.py, and (only if the naming gate needs it) infra/logic/registry/*.json;
+#  - base..release differs only in the take list: app/tools.py, app/client_core.py, app/client_adapter_bd49f.py, deploy-to-ec2.sh, tests/test_og_en21.py, test_og_en22.py, test_og_en23.py, test_og_db3.py, and (only if the naming gate needs it) infra/logic/registry/*.json;
 #  - every file in the diff is byte-equal to its blob at trunk_sha, and all four code files ARE in the diff (the take is complete);
 #  - NOT in the diff: destructive_ops.py, the harvest files, the catalog, EC2_MANIFEST.json, Terraform, the data copies;
 #  - W/MEM_GATE_OG-ap-36.json (the candidate code on the host, fresh processes, one windowed call at a time): the four-page chain (median growth <= 20 MB, first page <= 45 s, host peak < 75), the plateau test (two chains in one process,
@@ -18,7 +18,7 @@ git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git c
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
 live=$dep; [ "$dep" = "$rel" ] && live=$prev
 [ -n "$AP36_LIVE_OVERRIDE" ] && live=$AP36_LIVE_OVERRIDE
-ALLOW="^($GW/(app/(tools|client_core|client_adapter_bd49f)\.py|deploy-to-ec2\.sh|tests/test_og_(en21|en22|db3)\.py)|infra/logic/registry/[A-Za-z0-9_]+\.json)$"
+ALLOW="^($GW/(app/(tools|client_core|client_adapter_bd49f)\.py|deploy-to-ec2\.sh|tests/test_og_(en21|en22|en23|db3)\.py)|infra/logic/registry/[A-Za-z0-9_]+\.json)$"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); n=$(printf '%s\n' "$files" | grep -c .)
 outside=$(printf '%s\n' "$files" | grep -vE "$ALLOW" | grep -c .)
 tf=$(printf '%s\n' "$files" | grep -c '\.tf$')
