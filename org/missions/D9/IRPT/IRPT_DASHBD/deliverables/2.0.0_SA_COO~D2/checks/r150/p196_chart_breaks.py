@@ -7,7 +7,7 @@ through .tools/portal-merge-forward.sh on an approved row.
   DBP196-1-AC1  the diff and the source: only DashboardPerformance.tsx (at most 120 changed lines) and test files named dashboard-chart-breaks* changed since the pin, all committed;
                 chartRows is exported, reads the served unreported list, no longer gates on MEASURED, keeps connectNulls false, maps the brush through the rows
   DBP196-1-AC2  the behaviour: the cell's own tests pass, and the issuer's probe (run from the checker, deleted after) passes against the worker's chartRows
-  DBP196-1-AC3  the proof: every irpt-dashbd and dsgn-irptv1 test, the typecheck and the production build pass (the p175 build scan: no preview banner, no fixture)
+  DBP196-1-AC3  the proof: every irpt-dashbd test and every dsgn-irptv1 test but the two that fail at the base (ExportBundle.ts drift), the typecheck and the production build pass (the p175 build scan: no preview banner, no fixture)
 
 Usage: python <this file> <repo_root> <criterion_id>        prints "<id> PASS" or "<id> FAIL" last
        python <this file> --selftest <repo_root_of_reference_with_uncommitted_edit>
@@ -189,11 +189,32 @@ def check_behaviour(root):
     return True
 
 
+BASE_FAILS = 2  # iv-e-26.wire-regen and iv-e-98.generators-drift fail at the pinned DEV head on ExportBundle.ts drift (measured by the issuer, row W258-S1)
+BASE_FAIL_TEXT = "byte-identical to the committed files: ExportBundle"
+
+
+def dsgn_tests_except_base_failures(p):
+    p175 = load_p175()
+    bun = shutil.which("bun")
+    need(bun is not None, "bun is not on the PATH")
+    r = p175.run([bun, "test", IR + "__tests__/dsgn-irptv1"], p, 1500)
+    out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
+    m = re.search(r"^\s*(\d+) pass\s*$", out, re.M)
+    f = re.search(r"^\s*(\d+) fail\s*$", out, re.M)
+    need(m is not None and f is not None and int(m.group(1)) > 300, "the dsgn-irptv1 run printed no pass and fail summary")
+    fails = int(f.group(1))
+    if fails == 0:
+        return True
+    need(fails == BASE_FAILS and out.count(BASE_FAIL_TEXT) >= BASE_FAILS and out.count("error: expect(received)") == BASE_FAILS,
+         "the dsgn-irptv1 tests: %d fail, only the %d base failures (ExportBundle.ts drift) are allowed: %s" % (fails, BASE_FAILS, out[-500:].replace("\n", " | ")))
+    return True
+
+
 def check_proof(root):
     p175 = load_p175()
     p = p175.portal(root)
     need(any(f.name.startswith(TEST_PREFIX) for f in (p / TESTS).glob("*")), "the cell's test file %s* is missing" % TEST_PREFIX)
-    run_tests(p, [IR + "__tests__/dsgn-irptv1"], "the dsgn-irptv1 tests", 1500)
+    dsgn_tests_except_base_failures(p)
     return p175.check_proof(root)
 
 
