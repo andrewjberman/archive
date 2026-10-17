@@ -1,0 +1,20 @@
+{
+  "branch": "wk-IRPT_DASHBD-259",
+  "head": "6d09a01d3f715f69de82a1069d3f181b42145ada",
+  "files_changed": [
+    "data/assets/scripts/gold/irpt_reporting/adapters/cottonwood_bd_account_return_daily.py",
+    "data/assets/scripts/gold/irpt_reporting/tests/test_cottonwood_late_window.py",
+    "infra/aws/lambda/investor-reporting/account-return-daily/handler.py"
+  ],
+  "lines_changed": {
+    "adapter": 77,
+    "handler": 38
+  },
+  "tests_added": "test_cottonwood_late_window.py",
+  "live": {
+    "distinct_flow_ids": 277,
+    "accounts_compared": 880,
+    "raw_sum_inflated_accounts": 30
+  },
+  "words": "The adapter now reads the fact_transactions partitions from the window's first day through the 14th trading day after its last day (LATE_WINDOW_TRADING_DAYS = 14, with shift_trading_days and transaction_partitions) and counts each TransactionID once: the later partition's copy replaces an earlier one, and a row with no id is kept as its own row. presence_hold keeps the own-partition rule and adds that a day with no partition of its own is present when a row dated it exists in the partitions through the late window. The handler adds settle_days (the landed day 14 trading days back, at or after the floor, not itself owed); a scheduled fire rewrites each such day through the existing rewrite path after the owed days and the transaction stage, and a settle failure is recorded under settle_failed and never raises. The live read-only check of 2026-07-24 found 277 distinct TransactionIDs with a flow on the day; the raw sum would have inflated 30 of the 880 accounts compared, and the deduplicated derivation equals the independent deduplicated sum on all 880. Not proven: nothing is deployed or pushed, the gold is not rewritten, the 49 Financial and Inflection derivations are untouched, and checker clause DBC199-1-AC1 still FAILS on the dirty portal submodule of this worktree (surprise row IRPT_DASHBD-D2-W259-S1), so the order stays open. The code commit is fa48b9d8b7."
+}
