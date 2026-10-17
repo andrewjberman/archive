@@ -47,6 +47,7 @@ BUCKET, GOLD_PREFIX, PUB_PREFIX = "opal-data-cottonwood", "irpt/cottonwood/gold/
 BAND = (840, 960)
 PARTIAL_MAX = 500
 REFUSED_MAX = 40
+MAX_NM_PCT = 15
 MOVABLE = ("total_return_daily", "day_quality", "return_basis")
 SCHED = {"account_return_daily": "ENABLED", "publish_daily": "DISABLED"}
 H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("packet_sha256", "account_digest12", "code_sha256", "invoked_utc")
@@ -68,11 +69,17 @@ def packet_days(packet_text):
     return days
 
 
+def alldays(days):
+    """The gold days the pair rewrites: each re-landed day AND its next trading day (that day's rows were derived against the partial day, so they are NOT_MEASURABLE in the gold itself)."""
+    return sorted(set(days) | {NEXT[x] for x in days})
+
+
 def check_record(rec, packet_sha, packet_text, coo_text, cto_text, ledger_exists):
     exp = {"claim", "gates", "ledger_entry", "applier", "days", "before", "dry_run", "rewrite", "prewrite", "publish_dry", "canary", "publish_full", "after", "ledger_closed", "reads", "notes"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["claim"] == "measured", "claim must be measured")
     days = packet_days(packet_text)
+    ad = alldays(days)
     need(rec["days"] == days, "the record's days %s differ from the packet's DAYS %s" % (rec["days"], days))
     g = rec["gates"]
     need(isinstance(g, dict) and set(g) == {"packet_sha256", "coo_half_signed", "cto_half_signed", "one_change_at_a_time", "live_matches_packet"}, "gates keys")
@@ -84,17 +91,18 @@ def check_record(rec, packet_sha, packet_text, coo_text, cto_text, ledger_exists
     need(rec["ledger_entry"] == LEDGER_SLUG and ledger_exists and rec["applier"] == APPLIER, "the ledger %s exists; the applier is %s" % (LEDGER_SLUG, APPLIER))
     b = rec["before"]
     keys = {"day_rows", "day_versions", "full_day_rows", "gold_total_rows", "partitions", "series_prefixes", "series_objects", "series_versions", "gold_code_sha256", "publish_code_sha256", "schedules"}
-    need(isinstance(b, dict) and set(b) == keys and per_day(b["day_rows"], days, lambda n: 1 <= n <= PARTIAL_MAX) and per_day(b["day_versions"], days, lambda n: n >= 1)
+    need(isinstance(b, dict) and set(b) == keys and per_day(b["day_rows"], ad, lambda n: n >= 1) and all(b["day_rows"][x] <= PARTIAL_MAX for x in days) and all(b["day_rows"][x] >= 850 for x in ad if x not in days)
+         and per_day(b["day_versions"], ad, lambda n: n >= 1)
          and b["full_day_rows"] >= 850 and count(b["gold_total_rows"], 1) and count(b["partitions"], 1)
          and b["series_prefixes"] == 939 and count(b["series_objects"], 939) and count(b["series_versions"], 939) and b["gold_code_sha256"] == GOLD_CODE and b["publish_code_sha256"] == PUB_CODE
-         and b["schedules"] == SCHED, "before: each day PARTIAL (at most %d rows), a full neighbour (850 or more), 939 prefixes, the two code hashes, the two schedule states" % PARTIAL_MAX)
+         and b["schedules"] == SCHED, "before: each re-landed day PARTIAL (at most %d rows), each next day full-sized (850 or more rows), a full neighbour, 939 prefixes, the two code hashes, the two schedule states" % PARTIAL_MAX)
     d = rec["dry_run"]
-    need(isinstance(d, dict) and set(d) == {"ok", "days", "held", "rows", "gold_objects_before", "gold_objects_after", "gold_versions_before", "gold_versions_after"} and d["ok"] is True and d["days"] == days and d["held"] == 0
-         and per_day(d["rows"], days, lambda n: BAND[0] <= n <= BAND[1]) and d["gold_objects_before"] == d["gold_objects_after"] and d["gold_versions_before"] == d["gold_versions_after"],
-         "dry run: ok, one event per day, held 0, each day's rows in %s, nothing written" % (BAND,))
+    need(isinstance(d, dict) and set(d) == {"ok", "days", "held", "rows", "gold_objects_before", "gold_objects_after", "gold_versions_before", "gold_versions_after"} and d["ok"] is True and d["days"] == ad and d["held"] == 0
+         and per_day(d["rows"], ad, lambda n: BAND[0] <= n <= BAND[1]) and d["gold_objects_before"] == d["gold_objects_after"] and d["gold_versions_before"] == d["gold_versions_after"],
+         "dry run: ok, one event per gold day (the re-landed days and their next days), held 0, each day's rows in %s, nothing written" % (BAND,))
     w = rec["rewrite"]
     need(isinstance(w, dict) and set(w) == {"rows", "day_versions_after", "prior_versions_kept", "other_partitions_unchanged"} and w["rows"] == d["rows"]
-         and isinstance(w["day_versions_after"], dict) and all(w["day_versions_after"].get(x) == b["day_versions"][x] + 1 for x in days) and sorted(w["day_versions_after"]) == sorted(days)
+         and isinstance(w["day_versions_after"], dict) and all(w["day_versions_after"].get(x) == b["day_versions"][x] + 1 for x in ad) and sorted(w["day_versions_after"]) == sorted(ad)
          and w["prior_versions_kept"] is True and w["other_partitions_unchanged"] is True, "rewrite: each day's dry-run rows, its version count +1, the partial versions kept, every other partition unchanged")
     p = rec["prewrite"]
     nxt = sorted(NEXT[x] for x in days)
@@ -111,11 +119,12 @@ def check_record(rec, packet_sha, packet_text, coo_text, cto_text, ledger_exists
     need(isinstance(f, dict) and set(f) == {"published", "refused", "objects_before", "objects_after", "versions_before", "versions_after"} and f["published"] == 939 and f["refused"] == pd["refused"]
          and f["objects_before"] == f["objects_after"] == b["series_objects"] and f["versions_after"] - f["versions_before"] >= 939 - pd["refused"], "full republish: 939 published, refused as in the dry run, the same objects, new versions")
     a = rec["after"]
-    keys2 = {"gold_day_rows", "gold_total_rows", "partitions", "gold_code_sha256", "publish_code_sha256", "schedules", "series_prefixes", "series_with_day", "sample_ok"}
+    keys2 = {"gold_day_rows", "not_measurable", "gold_total_rows", "partitions", "gold_code_sha256", "publish_code_sha256", "schedules", "series_prefixes", "series_with_day", "sample_ok"}
     need(isinstance(a, dict) and set(a) == keys2 and a["gold_day_rows"] == d["rows"] and a["gold_total_rows"] == b["gold_total_rows"] - sum(b["day_rows"].values()) + sum(d["rows"].values()) and a["partitions"] == b["partitions"]
          and a["gold_code_sha256"] == GOLD_CODE and a["publish_code_sha256"] == PUB_CODE and a["schedules"] == b["schedules"] and a["series_prefixes"] == 939
-         and per_day(a["series_with_day"], days, lambda n: n >= 1) and a["sample_ok"] is True,
-         "after: each day holds the dry run's rows, the gold total moved by exactly (the new rows - the old rows), the partitions, codes and schedules equal, 939 series, a sample ok")
+         and per_day(a["series_with_day"], days, lambda n: n >= 1) and a["sample_ok"] is True
+         and per_day(a["not_measurable"], ad, lambda n: True) and all(a["not_measurable"][x] * 100 <= MAX_NM_PCT * d["rows"][x] for x in ad),
+         "after: each gold day holds the dry run's rows and at most %d percent NOT_MEASURABLE (a normal day holds about 3), the gold total moved by exactly (the new rows - the old rows), the partitions, codes and schedules equal, 939 series, a sample ok" % MAX_NM_PCT)
     need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0} and isinstance(rec["notes"], str) and 30 <= len(rec["notes"]) <= 3000
          and "YTD" in rec["notes"] and "Not measured" in rec["notes"], "the ledger left OPEN for the issuer; the reads block; notes that say the YTD return still reads Not measured while other days are absent")
     return True
@@ -141,10 +150,11 @@ def series_invariant(prev, cur, days):
     return added
 
 
-def check_live_gold(rec, cur_rows, prev_rows, versions, total_rows_after, partitions, gold_cfg, pub_cfg, schedules):
-    days = rec["days"]
+def check_live_gold(rec, cur_rows, prev_rows, versions, nm, total_rows_after, partitions, gold_cfg, pub_cfg, schedules):
+    ad = alldays(rec["days"])
     need(cur_rows == rec["after"]["gold_day_rows"] == rec["rewrite"]["rows"], "the live gold days hold %s rows, the record says %s" % (cur_rows, rec["rewrite"]["rows"]))
-    need(all(prev_rows[x] == rec["before"]["day_rows"][x] for x in days) and versions == rec["rewrite"]["day_versions_after"], "each previous (partial) version must be kept and each version count must equal the record's")
+    need(all(prev_rows[x] == rec["before"]["day_rows"][x] for x in ad) and versions == rec["rewrite"]["day_versions_after"], "each previous version must be kept and each version count must equal the record's")
+    need(all(nm[x] * 100 <= MAX_NM_PCT * cur_rows[x] for x in ad) and nm == rec["after"]["not_measurable"], "a live gold day holds more than %d percent NOT_MEASURABLE rows, or the count differs from the record: %s" % (MAX_NM_PCT, nm))
     need(total_rows_after == rec["after"]["gold_total_rows"] and partitions == rec["after"]["partitions"], "the live gold total or partition count differs from the record")
     need(gold_cfg["CodeSha256"] == GOLD_CODE and pub_cfg["CodeSha256"] == PUB_CODE, "a function's code hash moved")
     need(schedules == SCHED, "a schedule state moved")
@@ -178,17 +188,18 @@ def run(root, cid):
     if cid == "DBC198-2-AC1":
         import pyarrow.parquet as pq
         lam, sch = boto3.client("lambda", region_name="us-east-1"), boto3.client("scheduler", region_name="us-east-1")
-        cur, prev, vcount = {}, {}, {}
-        for x in days:
+        cur, prev, vcount, nm = {}, {}, {}, {}
+        for x in alldays(days):
             objs = [o["Key"] for o in s3.list_objects_v2(Bucket=BUCKET, Prefix=GOLD_PREFIX + "date=%s/" % x).get("Contents", []) if o["Key"].endswith(".parquet")]
             need(len(objs) == 1, "the gold day %s must hold exactly one object" % x)
             vs = sorted([v for v in s3.list_object_versions(Bucket=BUCKET, Prefix=objs[0]).get("Versions", []) if v["Key"] == objs[0]], key=lambda v: v["LastModified"], reverse=True)
 
-            def rows_of(vid, key=objs[0]):
-                body = s3.get_object(Bucket=BUCKET, Key=key, VersionId=vid)["Body"].read()
-                return pq.ParquetFile(io.BytesIO(body)).metadata.num_rows
-            cur[x] = rows_of(vs[0]["VersionId"])
-            prev[x] = rows_of(vs[1]["VersionId"]) if len(vs) > 1 else -1
+            def table_of(vid, key=objs[0]):
+                return pq.read_table(io.BytesIO(s3.get_object(Bucket=BUCKET, Key=key, VersionId=vid)["Body"].read()))
+            now_t = table_of(vs[0]["VersionId"])
+            cur[x] = now_t.num_rows
+            nm[x] = sum(1 for q in now_t.column("day_quality").to_pylist() if q == "NOT_MEASURABLE")
+            prev[x] = table_of(vs[1]["VersionId"]).num_rows if len(vs) > 1 else -1
             vcount[x] = len(vs)
         total, parts, tok = 0, set(), None
         while True:
@@ -201,8 +212,8 @@ def run(root, cid):
             if not tok:
                 break
         sched = {"account_return_daily": sch.get_schedule(Name="irpt-cot-account-return-daily-daily")["State"], "publish_daily": sch.get_schedule(Name="irpt-cot-reporting-publish-daily")["State"]}
-        check_live_gold(rec, cur, prev, vcount, total, len(parts), lam.get_function_configuration(FunctionName=GOLD_FN), lam.get_function_configuration(FunctionName=PUB_FN), sched)
-        print("OK: live: the %d gold days hold the recorded rows, each partial version is kept, the gold total and partition count equal the record's, both functions and both schedules are as before" % len(days))
+        check_live_gold(rec, cur, prev, vcount, nm, total, len(parts), lam.get_function_configuration(FunctionName=GOLD_FN), lam.get_function_configuration(FunctionName=PUB_FN), sched)
+        print("OK: live: the %d gold days hold the recorded rows with few NOT_MEASURABLE, each earlier version is kept, the gold total and partition count equal the record's, both functions and both schedules are as before" % len(alldays(days)))
         return True
     if cid == "DBC198-3-AC1":
         prefixes = []
@@ -250,20 +261,21 @@ PACKET_TEXT = "**Packet.**\n**DAYS:** " + ", ".join(DAYS4) + "\n"
 
 def synthetic(days=None):
     days = days or DAYS4
-    rows = {x: 880 + i for i, x in enumerate(days)}
-    old = {x: 3 + i for i, x in enumerate(days)}
-    ver = {x: 1 for x in days}
+    ad = alldays(days)
+    rows = {x: 880 + i for i, x in enumerate(ad)}
+    old = {x: (3 + i if x in days else 879) for i, x in enumerate(ad)}
+    ver = {x: 1 for x in ad}
     return {"claim": "measured", "gates": {"packet_sha256": "p" * 64, "coo_half_signed": True, "cto_half_signed": True, "one_change_at_a_time": {"worktrees_read": 9, "open_markers_naming_this_surface": 0}, "live_matches_packet": True},
             "ledger_entry": LEDGER_SLUG, "applier": APPLIER, "days": list(days),
             "before": {"day_rows": dict(old), "day_versions": dict(ver), "full_day_rows": 879, "gold_total_rows": 60000, "partitions": 69, "series_prefixes": 939, "series_objects": 1878, "series_versions": 2800,
                        "gold_code_sha256": GOLD_CODE, "publish_code_sha256": PUB_CODE, "schedules": dict(SCHED)},
-            "dry_run": {"ok": True, "days": list(days), "held": 0, "rows": dict(rows), "gold_objects_before": 69, "gold_objects_after": 69, "gold_versions_before": 69, "gold_versions_after": 69},
-            "rewrite": {"rows": dict(rows), "day_versions_after": {x: 2 for x in days}, "prior_versions_kept": True, "other_partitions_unchanged": True},
+            "dry_run": {"ok": True, "days": list(ad), "held": 0, "rows": dict(rows), "gold_objects_before": 69, "gold_objects_after": 69, "gold_versions_before": 69, "gold_versions_after": 69},
+            "rewrite": {"rows": dict(rows), "day_versions_after": {x: 2 for x in ad}, "prior_versions_kept": True, "other_partitions_unchanged": True},
             "prewrite": {"accounts_gaining_by_day": {x: 700 for x in days}, "other_field_changes_on_common_days": 0, "changed_dates": sorted(NEXT[x] for x in days), "days_removed": 0, "refused": 40},
             "publish_dry": {"published": 939, "refused": 40},
             "canary": {"account_digest12": "a" * 12, "dates_gained": list(days), "common_fields_equal": True, "only_next_days_three_fields_differ": True, "manifest_unchanged_but_dates": True},
             "publish_full": {"published": 939, "refused": 40, "objects_before": 1878, "objects_after": 1878, "versions_before": 2800, "versions_after": 3700},
-            "after": {"gold_day_rows": dict(rows), "gold_total_rows": 60000 - sum(old.values()) + sum(rows.values()), "partitions": 69, "gold_code_sha256": GOLD_CODE, "publish_code_sha256": PUB_CODE, "schedules": dict(SCHED),
+            "after": {"gold_day_rows": dict(rows), "not_measurable": {x: 30 for x in ad}, "gold_total_rows": 60000 - sum(old.values()) + sum(rows.values()), "partitions": 69, "gold_code_sha256": GOLD_CODE, "publish_code_sha256": PUB_CODE, "schedules": dict(SCHED),
                       "series_prefixes": 939, "series_with_day": {x: 700 for x in days}, "sample_ok": True},
             "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0},
             "notes": "Counts and statuses only; the three days with no transactions were not touched; the YTD return still reads Not measured while any of those days is in the window."}
@@ -307,6 +319,7 @@ def selftest():
     mut("before not partial", lambda r: r["before"]["day_rows"].update({"2026-07-22": 879}))
     mut("before missing day", lambda r: r["before"]["day_rows"].pop("2026-08-03"))
     mut("before no full neighbour", lambda r: r["before"].update(full_day_rows=100))
+    mut("before a next day partial", lambda r: r["before"]["day_rows"].update({"2026-07-23": 100}))
     mut("before code", lambda r: r["before"].update(gold_code_sha256="x="))
     mut("before schedule", lambda r: r["before"]["schedules"].update(publish_daily="ENABLED"))
     mut("dry band low", lambda r: r["dry_run"]["rows"].update({"2026-07-27": 800}))
@@ -315,6 +328,8 @@ def selftest():
     mut("dry wrote", lambda r: r["dry_run"].update(gold_versions_after=70))
     mut("dry days", lambda r: r["dry_run"].update(days=DAYS4[:3]))
     mut("dry missing row", lambda r: r["dry_run"]["rows"].pop("2026-07-22"))
+    mut("dry missing next day", lambda r: r["dry_run"]["rows"].pop("2026-07-28"))
+    mut("dry only the re-landed days", lambda r: r["dry_run"].update(days=list(DAYS4)))
     mut("rewrite rows", lambda r: r["rewrite"]["rows"].update({"2026-07-22": 881}))
     mut("rewrite version", lambda r: r["rewrite"]["day_versions_after"].update({"2026-07-27": 3}))
     mut("prior not kept", lambda r: r["rewrite"].update(prior_versions_kept=False))
@@ -340,6 +355,8 @@ def selftest():
     mut("after series", lambda r: r["after"].update(series_prefixes=938))
     mut("after series with day zero", lambda r: r["after"]["series_with_day"].update({"2026-07-29": 0}))
     mut("after sample", lambda r: r["after"].update(sample_ok=False))
+    mut("after still not measurable", lambda r: r["after"]["not_measurable"].update({"2026-07-28": 500}))
+    mut("after no not_measurable count", lambda r: r["after"]["not_measurable"].pop("2026-08-04"))
     mut("ledger closed", lambda r: r.update(ledger_closed=True))
     mut("reads", lambda r: r.update(reads={"vendor_calls": 1, "secret_reads": 0}))
     mut("extra key", lambda r: r.update(z=1))
@@ -358,14 +375,17 @@ def selftest():
     cfg, pcfg = {"CodeSha256": GOLD_CODE}, {"CodeSha256": PUB_CODE}
     cur_rows, prev_rows = dict(rec["rewrite"]["rows"]), dict(rec["before"]["day_rows"])
     vers, tot = dict(rec["rewrite"]["day_versions_after"]), rec["after"]["gold_total_rows"]
-    assert check_live_gold(rec, cur_rows, prev_rows, vers, tot, 69, cfg, pcfg, SCHED)
-    red(lambda: check_live_gold(rec, dict(cur_rows, **{"2026-07-22": 879}), prev_rows, vers, tot, 69, cfg, pcfg, SCHED), "live day rows")
-    red(lambda: check_live_gold(rec, cur_rows, dict(prev_rows, **{"2026-07-27": 880}), vers, tot, 69, cfg, pcfg, SCHED), "live prior version lost")
-    red(lambda: check_live_gold(rec, cur_rows, prev_rows, dict(vers, **{"2026-07-29": 3}), tot, 69, cfg, pcfg, SCHED), "live versions")
-    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, 1, 69, cfg, pcfg, SCHED), "live total")
-    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, tot, 70, cfg, pcfg, SCHED), "live partitions")
-    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, tot, 69, {"CodeSha256": "x="}, pcfg, SCHED), "live gold code")
-    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, tot, 69, cfg, pcfg, dict(SCHED, publish_daily="ENABLED")), "live schedule")
+    nm = dict(rec["after"]["not_measurable"])
+    assert check_live_gold(rec, cur_rows, prev_rows, vers, nm, tot, 69, cfg, pcfg, SCHED)
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, dict(nm, **{"2026-07-28": 500}), tot, 69, cfg, pcfg, SCHED), "live a day still mostly not measurable")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, dict(nm, **{"2026-07-28": 31}), tot, 69, cfg, pcfg, SCHED), "live not measurable differs from the record")
+    red(lambda: check_live_gold(rec, dict(cur_rows, **{"2026-07-22": 879}), prev_rows, vers, nm, tot, 69, cfg, pcfg, SCHED), "live day rows")
+    red(lambda: check_live_gold(rec, cur_rows, dict(prev_rows, **{"2026-07-27": 880}), vers, nm, tot, 69, cfg, pcfg, SCHED), "live prior version lost")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, dict(vers, **{"2026-07-29": 3}), nm, tot, 69, cfg, pcfg, SCHED), "live versions")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, nm, 1, 69, cfg, pcfg, SCHED), "live total")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, nm, tot, 70, cfg, pcfg, SCHED), "live partitions")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, nm, tot, 69, {"CodeSha256": "x="}, pcfg, SCHED), "live gold code")
+    red(lambda: check_live_gold(rec, cur_rows, prev_rows, vers, nm, tot, 69, cfg, pcfg, dict(SCHED, publish_daily="ENABLED")), "live schedule")
     wd = dict(rec["after"]["series_with_day"])
     assert check_live_series(rec, 939, wd, [True] * 60)
     red(lambda: check_live_series(rec, 938, wd, [True]), "live prefixes")
