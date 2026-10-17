@@ -53,13 +53,22 @@ chain_ok = (meds_ok and mom <= 20 and mx <= 30 and isn(ch.get("first_run_median_
 un = b.get("unit") or {}
 unit_ok = un.get("cgroup_v2") is True and un.get("memory_controller") is True and un.get("verify_rc") == 0 and un.get("scratch_removed") is True
 runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40}"', '""', raw))
-ok = same and peers_ok and valid_ok and chain_ok and unit_ok and not runs
+# the CTO's CT1 (msg 35566, A3): the 27-tool read, live code against candidate, each in a fresh process under the guard: every tool's answer EQUAL, or a listed refusal where the live code also failed;
+# a tool that answered on the live code and refuses or differs on the candidate is a STOP
+t27 = b.get("tool27") or {}
+names = lambda k: t27.get(k) if isinstance(t27.get(k), list) else None
+eq_n, both, better, bad_ref, bad_diff = t27.get("equal"), names("both_failed"), names("candidate_answered_live_failed"), names("live_answered_candidate_refused"), names("answers_differ")
+t27_ok = (t27.get("tools") == 27 and isn(eq_n) and both is not None and better is not None and bad_ref == [] and bad_diff == []
+          and eq_n + len(both) + len(better) == 27 and t27.get("guard") in GUARDS)
+ok = same and peers_ok and valid_ok and chain_ok and unit_ok and t27_ok and not runs
 print("host runs on release_sha %s, every one under a hard guard (oom_score_adj 1000, and an address-space or cgroup memory limit of 1400 MB)" % ("equal" if same else "NOT equal"))
 print("the call that ran away: candidate %s, peak RSS %s MB (limit 700), %s s (limit 30); the live code under the same guard: %s: %s" % (
     pe.get("candidate_outcome"), pe.get("candidate_peak_rss_mb"), pe.get("candidate_wall_s"), pe.get("live_outcome"), "ok" if peers_ok else "NOT OK"))
 print("a valid period and axis: answered %s, rows matched %s, peak RSS %s MB (limit 700): %s; 49F chain: %d runs of four pages, median of the run medians %s MB (limit 20), highest run median %s MB (limit 30), the first run's median %s MB kept in the record, pages equal the live code's in every run: %s; unit: cgroup v2 %s, memory controller %s, systemd-analyze verify rc %s: %s" % (
     vp.get("answered"), vp.get("rows_matched"), vp.get("peak_rss_mb"), "ok" if valid_ok else "NOT OK", len(runs), None if mom is None else round(mom, 1), mx, ch.get("first_run_median_growth_mb"), "ok" if chain_ok else "NOT OK",
     un.get("cgroup_v2"), un.get("memory_controller"), un.get("verify_rc"), "ok" if unit_ok else "NOT OK"))
+print("the 27-tool read, live code against candidate under the guard: %s of %s equal; the live code also failed on %s (listed); the candidate answered where the live code failed on %s; a tool that answered on live and was refused on the candidate: %s; answers that differ: %s: %s" % (
+    eq_n, t27.get("tools"), None if both is None else len(both), None if better is None else len(better), None if bad_ref is None else len(bad_ref), None if bad_diff is None else len(bad_diff), "ok" if t27_ok else "NOT OK"))
 print("OK" if ok else "NO")
 PYEOF
 )
