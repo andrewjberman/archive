@@ -58,11 +58,14 @@ def check_record(rec):
     need(isinstance(i, dict) and set(i) == {"files_zip_sha256_prefix", "published_raw_lines", "directory_entries", "sheet_rows", "pairs_rows"} and i["files_zip_sha256_prefix"] == "c66bae52"
          and i["published_raw_lines"] == 939 and count(i["directory_entries"], 1) and i["sheet_rows"] == 83 and i["pairs_rows"] == 118, "inputs: the zip prefix, 939 published keys, the directory, 83 sheet rows, 118 pairs")
     c = rec["crm"]
-    need(isinstance(c, dict) and set(c) == {"tables", "household_id_spaces", "advisor_field_found", "advisor_field", "text_sources"}, "crm keys")
+    need(isinstance(c, dict) and set(c) == {"tables", "household_id_spaces", "advisor_field_found", "advisor_field", "advisor_email_field", "text_sources"}, "crm keys")
     need(isinstance(c["tables"], list) and len(c["tables"]) >= 3 and all(isinstance(x, str) and WORD.match(x) for x in c["tables"]), "crm.tables: table kinds as lowercase words, never a client-specific name")
     need(count(c["household_id_spaces"], 1) and isinstance(c["advisor_field_found"], bool), "crm: id spaces (a count) and whether an advisor field exists")
     need((c["advisor_field"] is None) == (not c["advisor_field_found"]) and (c["advisor_field"] is None or (isinstance(c["advisor_field"], dict) and set(c["advisor_field"]) == {"table", "column"} and nes(c["advisor_field"]["table"]) and nes(c["advisor_field"]["column"]))),
          "crm.advisor_field: {table, column} NAMES when found, else null")
+    ef = c["advisor_email_field"]
+    need(ef is None or (isinstance(ef, dict) and set(ef) == {"table", "column"} and nes(ef["table"]) and nes(ef["column"])), "crm.advisor_email_field: {table, column} NAMES where the CRM carries an advisor's email, else null (CTO msg 10304: the map is keyed by login email; no fuzzy name match)")
+    need(ef is None or c["advisor_field_found"], "an advisor email field implies an advisor field")
     need(isinstance(c["text_sources"], list) and all(isinstance(x, str) and WORD.match(x) for x in c["text_sources"]), "crm.text_sources: kinds as lowercase words")
     ms = rec["methods"]
     need(isinstance(ms, list) and len(ms) >= 1, "methods: at least one")
@@ -77,10 +80,11 @@ def check_record(rec):
          and r["high"] + r["medium"] + r["low"] + r["unmatched"] == 939, "result: published 939 = HIGH + MEDIUM + LOW + UNMATCHED; conflicts counted")
     need(r["conflicts"] <= r["published"], "result.conflicts within the published")
     j = rec["join"]
-    need(isinstance(j, dict) and set(j) == {"sheet_high_direct", "sheet_high_via_deterministic_pairs", "extended_high", "grant_ready_total", "left_out", "high_without_advisor"} and all(count(j[k]) for k in j),
+    need(isinstance(j, dict) and set(j) == {"sheet_high_direct", "sheet_high_via_deterministic_pairs", "extended_high", "grant_ready_total", "left_out", "high_without_advisor", "advisors_distinct", "advisors_with_email"} and all(count(j[k]) for k in j),
          "join keys: counts")
     need(j["grant_ready_total"] == j["sheet_high_direct"] + j["sheet_high_via_deterministic_pairs"] + j["extended_high"] and j["grant_ready_total"] + j["left_out"] == 939,
          "join: grant_ready_total = sheet direct + sheet via pairs + extended HIGH, and grant_ready + left_out = 939 (CTO msg 10277: HIGH plus a certain join)")
+    need(j["advisors_with_email"] <= j["advisors_distinct"] and (j["advisors_with_email"] == 0 or c["advisor_email_field"] is not None), "join: advisors with an email within the distinct advisors, and only where an email field exists")
     need(j["extended_high"] <= r["high"] and j["high_without_advisor"] <= j["grant_ready_total"], "join: extended HIGH within HIGH; high_without_advisor within grant_ready")
     o = rec["outputs"]
     need(isinstance(o, dict) and set(o) == {"match_table"} and isinstance(o["match_table"], dict) and set(o["match_table"]) == {"path", "output_sha256", "lines"} and o["match_table"]["path"] == OUT
@@ -127,11 +131,11 @@ def run(root, cid):
 def synthetic():
     return {"claim": CLAIM, "worker": "0.9.0_WK_IRPT_DASHBD~999",
             "inputs": {"files_zip_sha256_prefix": "c66bae52", "published_raw_lines": 939, "directory_entries": 271, "sheet_rows": 83, "pairs_rows": 118},
-            "crm": {"tables": ["contacts", "activities", "crmhouseholds", "manualinsurance", "connections"], "household_id_spaces": 2, "advisor_field_found": True, "advisor_field": {"table": "crmhouseholds", "column": "advisor"}, "text_sources": ["activity notes"]},
+            "crm": {"tables": ["contacts", "activities", "crmhouseholds", "manualinsurance", "connections"], "household_id_spaces": 2, "advisor_field_found": True, "advisor_field": {"table": "crmhouseholds", "column": "advisor"}, "advisor_email_field": {"table": "contacts", "column": "email"}, "text_sources": ["activity notes"]},
             "methods": [{"id": "MA", "rule": "an exact account number cited in activity notes filed under one household at least twice and under no other", "grants_access": True, "accounts_linked": 300},
                         {"id": "MN", "rule": "a name match of the account holder to one contact", "grants_access": False, "accounts_linked": 400}],
             "result": {"published": 939, "high": 330, "medium": 400, "low": 9, "unmatched": 200, "conflicts": 4},
-            "join": {"sheet_high_direct": 25, "sheet_high_via_deterministic_pairs": 3, "extended_high": 300, "grant_ready_total": 328, "left_out": 611, "high_without_advisor": 10},
+            "join": {"sheet_high_direct": 25, "sheet_high_via_deterministic_pairs": 3, "extended_high": 300, "grant_ready_total": 328, "left_out": 611, "high_without_advisor": 10, "advisors_distinct": 12, "advisors_with_email": 9},
             "outputs": {"match_table": {"path": OUT, "output_sha256": "a" * 64, "lines": 940}},
             "script": {"path": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~999/cot_extended_match.py", "script_sha256": "b" * 64, "reproducible": True},
             "notes": "Counts and words only; the extract was read in memory from the zip and nothing was extracted to the repo; the match table is outside the repo.", "reads": {"vendor_calls": 0, "secret_reads": 0, "extracted_to_repo": False}}
@@ -149,6 +153,10 @@ def selftest():
         "advisor found without field": lambda r: r["crm"].update(advisor_field=None),
         "advisor field when not found": lambda r: r["crm"].update(advisor_field_found=False),
         "advisor field keys": lambda r: r["crm"]["advisor_field"].pop("column"),
+        "email field keys": lambda r: r["crm"]["advisor_email_field"].pop("table"),
+        "email without advisor field": lambda r: r["crm"].update(advisor_field_found=False, advisor_field=None),
+        "email count over distinct": lambda r: r["join"].update(advisors_with_email=13),
+        "email count without field": lambda r: (r["crm"].update(advisor_email_field=None), r["join"].update(advisors_with_email=1)),
         "method id": lambda r: r["methods"][0].update(id="alpha"),
         "method duplicate": lambda r: r["methods"][1].update(id="MA"),
         "grant without certainty": lambda r: r["methods"][1].update(grants_access=True),
