@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
   IBHM11  IB-hm-11  one inline-policy change on the host role, read back
     AC1  the gates: both halves signed, the root's other writers counted (every live worktree read, denominator printed, no other ledger open on the root), the plan taken from a HEAD that holds both c5dd8b293a and 2d2c906b87, the ledger opened first
     AC2  the leg: the plan 0 add 1 change 0 destroy at the one address, applied through safe-apply, a clean re-plan, the policy read back with the new statement and the 49F statement unchanged
-    AC3  the after-reads: the assume simulation arms with their controls, the QA re-run decision recorded as a fact (and at most one run), the counters
+    AC3  the after-reads: the assume simulation arms with their controls, no manual QA run (deferred to the scheduled fire), the counters
 """
 import json
 import re
@@ -26,7 +26,6 @@ SID_NEW = "IrptHmacListStageAssumeRole"
 SID_49F = "IrptDirectory49fAssumeSourcePrincipal"
 ALLOWED = ("assume_the_stage_role",)
 DENIED = ("assume_an_unrelated_role", "assume_the_stage_role_with_another_action_than_assume", "any_wildcard_resource_assume")
-QA_FACTS = ("qa_rerun_needed", "qa_runs_after_the_leg")
 fail, load = P6.fail, P6.load
 
 
@@ -80,27 +79,16 @@ def ac3(r):
         if de.get(k) not in ("implicitDeny", "explicitDeny"):
             fail("simulation.denied.%s must read implicitDeny or explicitDeny (an allow is Branch B the same turn)" % k)
     q = r.get("qa") or {}
-    if not isinstance(q.get("qa_rerun_needed"), bool):
-        fail("qa.qa_rerun_needed must be recorded as true or false")
-    n = q.get("qa_runs_after_the_leg")
-    if not isinstance(n, int) or n not in (0, 1):
-        fail("qa.qa_runs_after_the_leg must be 0 or 1 (addendum section 4: exactly one more run, none otherwise)")
-    if q.get("qa_rerun_needed") is False and n != 0:
-        fail("no re-run was needed, so qa_runs_after_the_leg must be 0")
-    if q.get("qa_rerun_needed") is True:
-        if n != 1:
-            fail("a re-run was needed, so qa_runs_after_the_leg must be 1")
-        for k in ("list_key_exists_and_fresh", "line_count_equals_the_session_count", "no_plain_sha256_of_a_known_fake_id", "directory_output_byte_unchanged"):
-            if q.get(k) != "PASS":
-                fail("qa.%s must read PASS" % k)
+    if q.get("runs") != 0 or q.get("deferred_to_scheduled_fire") is not True:
+        fail("qa must read runs 0 and deferred_to_scheduled_fire true (AMENDMENT 1: the refresh function has no one-firm payload, so no manual QA run is made; the next scheduled fire after the leg is read by the issuer)")
     k = r.get("counters") or {}
-    want = {"other_iam_changes": 0, "other_terraform_roots_applied": 0, "lambda_invokes_beyond_the_one_qa_run": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0}
+    want = {"other_iam_changes": 0, "other_terraform_roots_applied": 0, "lambda_invokes": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0}
     for key, v in want.items():
         if k.get(key) != v:
             fail("counters.%s must read %s, read %r" % (key, v, k.get(key)))
     if re.search(r"(?<![0-9a-fA-F-])\d{9,}(?![0-9a-fA-F])", json.dumps(r)):
         fail("the record carries a long digit run")
-    print("OK: the assume arm allowed and the three denied arms denied; the QA re-run decision recorded; counters 0")
+    print("OK: the assume arm allowed and the three denied arms denied; no manual QA run; counters 0")
 
 
 CHECKS = {"IBHM11-AC1": ac1, "IBHM11-AC2": ac2, "IBHM11-AC3": ac3}

@@ -24,8 +24,8 @@ GOOD = {
                   "applied_through": "safe-apply", "replan_no_changes": True, "env_keys_present": list(P.ENV_KEYS)},
     "simulation": {"allowed": {k: "allowed" for k in P.ALLOWED}, "denied": {k: "implicitDeny" for k in P.DENIED}},
     "secret": {"value_put_count": 1, "version_count": 1, "value_printed": False},
-    "qa": dict({k: "PASS" for k in P.QA}, runs=1, assume_succeeded_before_mdpf_leg=False),
-    "counters": {"other_lambda_invokes": 0, "other_iam_changes": 0, "keys_written_outside_the_three": 0, "existing_keys_changed": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0},
+    "qa": {"runs": 0, "deferred_to_scheduled_fire": True},
+    "counters": {"lambda_invokes": 0, "other_iam_changes": 0, "keys_written_outside_the_three": 0, "existing_keys_changed": 0, "secrets_printed": 0, "per_firm_numbers_recorded": 0},
 }
 
 
@@ -66,10 +66,9 @@ NEGS = [
     ("other_secret_allowed", "AC3", mut(["simulation", "denied", "get_any_other_secret"], "allowed")),
     ("secret_put_twice", "AC3", mut(["secret", "value_put_count"], 2)),
     ("secret_printed", "AC3", mut(["secret", "value_printed"], True)),
-    ("two_qa_runs", "AC3", mut(["qa", "runs"], 2)),
-    ("qa_directory_changed", "AC3", mut(["qa", "directory_output_byte_unchanged"], "FAIL")),
-    ("qa_plain_sha256_found", "AC3", mut(["qa", "no_plain_sha256_of_a_known_fake_id"], "FAIL")),
-    ("assume_fact_missing", "AC3", mut(["qa", "assume_succeeded_before_mdpf_leg"], "unknown")),
+    ("one_qa_run", "AC3", mut(["qa", "runs"], 1)),
+    ("qa_not_deferred", "AC3", mut(["qa", "deferred_to_scheduled_fire"], False)),
+    ("a_lambda_invoke", "AC3", mut(["counters", "lambda_invokes"], 1)),
     ("key_written_outside_three", "AC3", mut(["counters", "keys_written_outside_the_three"], 1)),
     ("per_firm_number_recorded", "AC3", mut(["counters", "per_firm_numbers_recorded"], 1)),
     ("long_digit_run", "AC3", mut(["qa", "note"], "count 1234567890123")),
@@ -107,11 +106,6 @@ def expect(label, cid, root, want):
 root = build(GOOD)
 for ac in ("AC1", "AC2", "AC3"):
     expect("clean", "IBHM5-" + ac, root, True)
-shutil.rmtree(root, ignore_errors=True)
-TRUE = copy.deepcopy(GOOD)
-TRUE["qa"]["assume_succeeded_before_mdpf_leg"] = True
-root = build(TRUE)
-expect("assume_fact_true", "IBHM5-AC3", root, True)
 shutil.rmtree(root, ignore_errors=True)
 for label, ac, fn in NEGS:
     root = build(fn(GOOD))
