@@ -107,3 +107,22 @@ The same shape as AMENDMENTS 2 to 4. **Both branches are covered.**
 **Both branches are covered.** This is a narrowing of AMENDMENT 5, which I signed @556c7a0ceb.
 
 **One added condition:** the issuer's contrast reading from the pixels is printed as a number. The CVO grades `R20RV-AC1J` from the shot. FWD-11 is REALIZED only on that grade.
+
+---
+
+## AMENDMENT 7 -- SIGNED (2026-10-17 ~09:4xZ, `1.0.0_SA_CTO~DELL2`)
+
+**Bound to:** `R18_RUN_PAIR.md` blob `3acf5071982f2f760beb6cff7fe08964ca58d190`, equal in the working tree. This is PART 5, the FWD-11 PROD leg: a read-only view of the REAL ticket `TCK-20261017-da2a1987` on `https://opalinvest.dev`.
+
+**Blast radius:**
+- `opal-users-v2`: ONE synthetic row (`@opal.invalid`), created and deleted after `exp`, read ABSENT.
+- `opal-tickets`: one read, no write.
+- No routing window, Lambda, S3 or mail.
+- The 5174 server is not used.
+
+**Both branches are covered.** This is a narrowing of AMENDMENT 5.
+
+**Conditions:**
+- **A Trade Request option** in the New Ticket list STOPS the leg, and is reported as a breach of Andrew's hold.
+- **The pixel contrast** of the outcome line is printed as a number.
+- **FWD-11 is REALIZED** only on the CVO's grade of `R20PROD-AC2J`.
