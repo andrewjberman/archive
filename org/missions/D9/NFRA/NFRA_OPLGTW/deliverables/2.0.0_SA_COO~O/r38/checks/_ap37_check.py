@@ -13,8 +13,11 @@ import sys
 GW = "infra/aws/ec2/opal-gateway/"
 DELL_FILES = (GW + "app/harvest_research.py", GW + "tests/test_cd1_dossier_misfiled.py")
 MANIFEST = "infra/aws/ec2/EC2_MANIFEST.json"
-LIVE_NEW = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
-LIVE_OLD = "9d5b7125571520b977401634a01935924f4c9787"
+# the live ref the manifest names when this order was cut (OG-ap-36 closed at 18:11:52Z): efcc8ae19f, previous 1753c741d9 (dell1's release);
+# the record may name another pair (expected_deployed_commit / expected_previous_commit) if a release lands before the GO
+LIVE_NEW = "efcc8ae19f7eebb04e2f45f45c0def28af037c24"
+LIVE_OLD = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
+DELL_RELEASE = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
 # a path the merge may differ from trunk_base in, beyond the two dell1 files and the manifest: the ledger, its sentinel, and project trees
 OTHER_OK = re.compile(r"^(org/critical_paths/(change_management|\.open_deploys)/|org/missions/|org/tier1_exec/|org/tier2_exec/)")
 
@@ -67,14 +70,16 @@ def main():
         diff = names(base, merge)
         gw_diff = sorted(p for p in diff if p.startswith(GW))
         gw_ok = len(gw_diff) == 0   # trunk already carries dell1's two files byte-equal (the AMGT_HARVST worker lineage landed them); the merge changes no gateway byte
-        dell_eq = all(blob(merge, p) == blob(dell, p) and blob(merge, p) != "" for p in DELL_FILES)
+        # trunk may already be AHEAD of dell1's release on its files (AMGT_HARVST HVST-ce-3 moved harvest_research.py after it): every conflicted gateway path takes TRUNK's side
+        gw_conf = [p for p in conflicted if p.startswith(GW)]
+        conf_trunk = all(blob(merge, p) == blob(base, p) and blob(merge, p) != "" for p in gw_conf)
         tf = [p for p in diff if p.endswith(".tf")]
         outside = [p for p in diff if not (p.startswith(GW) or p == MANIFEST or OTHER_OK.match(p))]
         print("merge parents are exactly trunk_base and the dell1 commit: %s; dell1's release is an ancestor of the merge: %s; conflicted paths (merge-tree, the denominator): %d; conflict markers in %d of %d paths (want 0)" % (
             "yes" if two else "no", "yes" if anc else "no", len(conflicted), marker_paths, len(conflicted)))
-        print("gateway paths differing from trunk_base: %d (want 0, the merge changes no gateway byte); the two dell1 files equal dell1's blobs in the merge: %s; terraform files differing %d (want 0); paths outside the allowed set %d (want 0)" % (
-            len(gw_diff), "yes" if dell_eq else "no", len(tf), len(outside)))
-        ok = two and anc and marker_paths == 0 and gw_ok and dell_eq and not tf and not outside
+        print("gateway paths differing from trunk_base: %d (want 0, the merge changes no gateway byte); the %d conflicted gateway paths equal trunk_base's blobs: %s; terraform files differing %d (want 0); paths outside the allowed set %d (want 0)" % (
+            len(gw_diff), len(gw_conf), "yes" if conf_trunk else "no", len(tf), len(outside)))
+        ok = two and anc and marker_paths == 0 and gw_ok and conf_trunk and not tf and not outside
         print("RESULT: PASS" if ok else "RESULT: FAIL")
         return 0 if ok else 1
     # mode 2: the manifest block
@@ -82,7 +87,8 @@ def main():
     mb = manifest_block(base)
     svc = (mf.get("services") or {}).get("opal-gateway") or {}
     dep, prev = svc.get("deployed_commit"), svc.get("previous_deployed_commit")
-    block_ok = dep == LIVE_NEW and prev == LIVE_OLD
+    want_dep, want_prev = rec.get("expected_deployed_commit") or LIVE_NEW, rec.get("expected_previous_commit") or LIVE_OLD
+    block_ok = dep == want_dep and prev == want_prev
     others_ok = all(((mf.get("services") or {}).get(k) == v) for k, v in (mb.get("services") or {}).items() if k != "opal-gateway")
     top_ok = {k: v for k, v in mf.items() if k != "services"} == {k: v for k, v in mb.items() if k != "services"}
     gw_other = {k: v for k, v in svc.items() if k not in ("deployed_commit", "previous_deployed_commit", "file_checksums", "deployed_at", "deployed_by")}
@@ -98,13 +104,13 @@ def main():
             d = json.load(open(hm, encoding="utf-8"))
             d = d.get("body", d)
             eq, df = d.get("equal"), d.get("differ")
-            src_ok = isinstance(eq, int) and eq >= 100 and df == 0 and d.get("tree_sha") == LIVE_NEW
+            src_ok = isinstance(eq, int) and eq >= 100 and df == 0 and d.get("tree_sha") == want_dep
         except Exception:
             eq, df, src_ok = None, None, False
         src_line = "manifest source: this landing's row, proven by a host md5 walk equal to the 1753c741d9 tree (equal %s, differ %s): %s" % (eq, df, "yes" if src_ok else "no")
     else:
         src_ok, src_line = False, "manifest source not named (want dell1_commit or landing_row)"
-    print("manifest opal-gateway deployed_commit %s previous %s (want 1753c741d9 and 9d5b712557): %s" % ((dep or "none")[:10], (prev or "none")[:10], "yes" if block_ok else "no"))
+    print("manifest opal-gateway deployed_commit %s previous %s (want %s and %s): %s" % ((dep or "none")[:10], (prev or "none")[:10], want_dep[:10], want_prev[:10], "yes" if block_ok else "no"))
     print("other services and the top level unchanged from trunk_base: %s; the gateway block's other keys unchanged: %s" % ("yes" if (others_ok and top_ok) else "no", "yes" if gw_other_ok else "no"))
     print(src_line)
     ok = block_ok and others_ok and top_ok and gw_other_ok and src_ok
