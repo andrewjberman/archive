@@ -1,0 +1,102 @@
+{
+ "schema_version": "1.0",
+ "genre": "BUILD",
+ "to_id": "AMGT_HARVST.TO-HVST-ce-3.the-absent-note-under-a-field-filter-names-only-the-requested-fields",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-3.the-absent-note-under-a-field-filter-names-only-the-requested-fields.md",
+  "group": "OTHER",
+  "vintage_commit": "cf47884994"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "cf47884994",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ce-3.the-absent-note-under-a-field-filter-names-only-the-requested-fields.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~157",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/harvest_research.py",
+   "kind": "script",
+   "commit_or_etag": "d9d65d2184",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Five inserted lines and zero deleted lines in the dossier branch of _research (the new elif for a non-empty fields argument, its comment and its run.miss); the else branch sentence is unchanged. No deploy: the gateway release is not in this order's scope.",
+   "artifact_covered_by": ["AC1", "AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_ce3_parts_absent_wording.py",
+   "kind": "test",
+   "commit_or_etag": "d9d65d2184",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New offline file, 210 lines: five test functions (arms 1 to 5) on the recording S3 fake copied from tests/test_cd1_dossier_misfiled.py. No AWS call. The mutant arm 5 reads the pre-change module from git show 8005ccbacb.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d9d65d2184",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Row AMGT_HARVST-D1-W157-S1 is in commit d9d65d2184 (21 lines added, 0 removed). Row AMGT_HARVST-D1-W157-S2 is appended by bytes in the instance commit, which is the commit that carries this instance; the diff is insertion-only.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_ce3_parts_absent_wording.py -q -p no:cacheprovider --color=no ; expect (?m)^\\d+ passed in",
+   "method": "test_suite",
+   "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_ce3_parts_absent_wording.py -q -p no:cacheprovider --color=no",
+   "output_evidence": "deciding line: `5 passed in 1.10s` (rc 0). Run twice at the committed tree: the first run printed `5 passed in 1.10s` and the second `5 passed in 1.02s`, the per-test dots identical. The expect regex (?m)^\\d+ passed in matches 1 line. Pre-run (order dry-run): `no tests ran`, as the order predicted.",
+   "denominator": "5 of 5 test functions passed: arm 1 (filter names the requested dropped field), arm 2 (two requested fields, in request order), arm 3 (no filter: today's sentence exactly), arm 4 (clean requested field: no dossier absence), arm 5 (mutant)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cd1_dossier_misfiled.py tests/test_cc1_model_basis.py tests/test_cc2_research_misfiled.py tests/test_cc3_ticker_shaped_never_exact_on_name.py tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no ; expect (?m)^38 passed in",
+   "method": "test_suite",
+   "invocation": "bash infra/aws/ec2/opal-gateway/tests/run_release_suites.sh tests/test_cd1_dossier_misfiled.py tests/test_cc1_model_basis.py tests/test_cc2_research_misfiled.py tests/test_cc3_ticker_shaped_never_exact_on_name.py tests/test_og_gt1.py tests/test_og_gt3.py tests/test_og_gt4.py -q -p no:cacheprovider --color=no",
+   "output_evidence": "deciding line: `38 passed in 2.31s` (rc 0) at the committed tree. The order's base dry-run read `38 passed in 2.27s`; the count is the same before and after the change, and the new file is not in this list.",
+   "denominator": "38 of 38 collected tests in 7 files passed (base 38, worktree 38)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Arm 5 loads the pre-change module from git show 8005ccbacb:infra/aws/ec2/opal-gateway/app/harvest_research.py into a temporary module (app.harvest_research_pre_ce3) and runs the arm-1 call. The pre-change module must give the every-dossier-field sentence, and the arm-1 wording check must raise AssertionError on it.",
+   "expected": "the pre-change module fails the arm-1 wording check: AssertionError raised",
+   "observed": "arm 5 passed: the pre-change dossier reason equals the every-dossier-field sentence, and _check_arm1_wording raised AssertionError on it (pytest.raises satisfied)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "the AC1 invocation run twice at the committed tree, outputs compared with diff",
+   "observed": "run 1 and run 2 both rc=0 with `5 passed`; the outputs differ only in the timing (1.10s and 1.02s); the test lines are identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The status flip of the task order to complete",
+   "reason": "The order says do not edit this order file, and the task-order path is not in <paths>. The issuer flips the status. Left as it is for the issuer."
+  },
+  {
+   "item": "Any run against S3, AWS, a box, a browser or the gateway",
+   "reason": "The order is LOCAL: offline tests only, with the recording S3 fake. No deploy and no live read were run."
+  },
+  {
+   "item": "The preflight comp-schedule, comp-iam and comp-adversary runs, and any graph or census lens",
+   "reason": "The order's preflight lines are marked RUN at L5, but the worker rules give a worker the criteria only, with no adversary lens, graph or census. The two offline criteria and the mutant arm are the check made here; the preflight tools were not invoked."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-D1-W157-S1: the order's arm 5 loads the pre-change module from git show HEAD:<path>; once the change is committed HEAD is the post-change file, so the arm pins the base commit 8005ccbacb instead (INERT).",
+  "AMGT_HARVST-D1-W157-S2: the order names the provisioning base as cf47884994; the worktree is at 8005ccbacb, one flip commit later, and the gateway module and the tests are byte-identical at both (INERT)."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "safe-commit.sh (the change commit d9d65d2184)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~157 <0.9.0_WK_AMGT_HARVST~157@opal.agent>\" -F .scratch/ce3_msg1.txt -- infra/aws/ec2/opal-gateway/app/harvest_research.py infra/aws/ec2/opal-gateway/tests/test_ce3_parts_absent_wording.py org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "rc=0; surprise-row-gate OK (1 new row of 469 checked); to-pipeline-gate OK (no task order in the commit); missions-tree-check OK (0 violations); commit 3 files, 236 insertions, 0 deletions"
+  }
+ ]
+}
