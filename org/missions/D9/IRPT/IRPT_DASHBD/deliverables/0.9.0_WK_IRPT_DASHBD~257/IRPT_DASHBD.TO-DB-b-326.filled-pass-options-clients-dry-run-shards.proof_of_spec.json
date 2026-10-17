@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-b-326",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+    "vintage_commit": "8c966d0335",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-326.filled-pass-options-clients-dry-run-shards.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-326.filled-pass-options-clients-dry-run-shards.md",
+    "group": "OTHER",
+    "vintage_commit": "8c966d0335"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~257",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/handler.py",
+      "kind": "script",
+      "commit_or_etag": "4b18c1ef8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FILLED-REPORT-A block only: _filled_options and filled_report_fire gain the optional scoping (clients, dry_run, shard/shards); committed on branch wk-IRPT_DASHBD-257 (LOCAL); nothing uploaded, deployed or applied; the switch stays OFF"
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reporting-publish/tests/test_filled_report_pass_options.py",
+      "kind": "test",
+      "commit_or_etag": "4b18c1ef8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 9 test functions (19 collected cases); committed on branch wk-IRPT_DASHBD-257 (LOCAL); not deployed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DB192-1-AC1",
+      "criterion_verbatim": "DB192-1-AC1 -- the diff: only handler.py (inside the FILLED-REPORT-A block) and the new test file changed; at most 20 lines removed and 80 added; one put_object; nothing printed, logged or deleted. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p192_filled_pass_options.py\" C:/dev/wk-irpt-dashbd-257 DB192-1-AC1",
+      "output_evidence": "OK: only handler.py (inside the FILLED-REPORT-A block) and the new test file changed; one put_object; nothing printed\nDB192-1-AC1 PASS",
+      "denominator": "1 verdict line (rc 0). The diff of the two commit-carried files at 4b18c1ef8e: handler.py 46 insertions and 7 deletions, the new test file 132 lines (2 files changed, 178 insertions, 7 deletions, the checker's line limits are 20 removed and 80 added for handler.py).",
+      "status": "PASS",
+      "expect": "DB192-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DB192-1-AC2",
+      "criterion_verbatim": "DB192-1-AC2 -- the behaviour on the real filled_report_fire: default unchanged, a named subset, a dry run writing nothing, seven shards partitioning exactly once, the intersection, malformed options refused with no read or write, the switch off first. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p192_filled_pass_options.py\" C:/dev/wk-irpt-dashbd-257 DB192-1-AC2",
+      "output_evidence": "OK: default unchanged; a named subset; a dry run writing nothing; seven shards partition once; the intersection; malformed options refused with no read or write; the switch off first\nDB192-1-AC2 PASS",
+      "denominator": "1 verdict line (rc 0). Arms the checker drives on the real filled_report_fire over 25 synthetic clients: the default, one named subset, one dry run, 7 shards, 3 shards intersected with a 10-client subset, one three-option call, 12 malformed-option arms, and the switch-off arm. Run twice on the same HEAD, the same verdict both times.",
+      "status": "PASS",
+      "expect": "DB192-1-AC2 PASS"
+    },
+    {
+      "criterion_id": "DB192-1-AC3",
+      "criterion_verbatim": "DB192-1-AC3 -- the tests: at least six NEW tests carry options in their name and the whole reporting-publish test directory passes. Base: FAIL.",
+      "method": "command",
+      "invocation": "python -I \"C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p192_filled_pass_options.py\" C:/dev/wk-irpt-dashbd-257 DB192-1-AC3",
+      "output_evidence": "OK: six or more new options tests exist and the whole reporting-publish test directory passes\nDB192-1-AC3 PASS",
+      "denominator": "1 verdict line (rc 0). 9 new test functions carry options in their name (of 9 in the new file; 6 required). The reporting-publish tests directory, run directly by the worker on the same HEAD: 188 passed in 2.44s, 0 failed (the new file alone: 19 passed in 0.79s).",
+      "status": "PASS",
+      "expect": "DB192-1-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for DB-b-326; the issuer's single-fault selftest is the issuer's and was not run in the worker tree.",
+      "expected": "N/A",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the same criterion, DB192-1-AC2, run twice on the same worktree HEAD (the first run as the criterion, the second as the determinism control)",
+      "observed": "both runs printed the same OK line and DB192-1-AC2 PASS, rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "upload, deploy and apply of the reporting-publish Lambda, any Terraform for it, and the switch-on run of the filled-report pass",
+      "reason": "WORLD floor: nothing deployed, no Terraform command, no AWS call, no push; the switch stays OFF; the switch-on canary is a later act"
+    },
+    {
+      "item": "the reader against the real gold partition inside the function's memory and time budget",
+      "reason": "not run: the order is offline and names no AWS call; the checker and the tests inject the reader, the directory and the S3 client"
+    },
+    {
+      "item": "the issuer's selftest of the checker (reference tree and single-fault mutants)",
+      "reason": "the selftest rewrites handler.py on the root it is given; the order does not name it for the worker and the worker tree was not mutated"
+    },
+    {
+      "item": "client-data scan by the commit gate",
+      "reason": "the commit gate's hashed account-id list is absent on this box (WARN at the commit); the scan was a manual read of the staged diff: no client figure, only synthetic ids and marker strings"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~257/session_db326.txt",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~257/IRPT_DASHBD.TO-DB-b-326.filled-pass-options-clients-dry-run-shards.proof_of_spec.json DB192-1-AC1,DB192-1-AC2,DB192-1-AC3",
+      "result": "rc=0 VALID: structural=jsonschema violations=0; acceptance rows=3; invocation-alignment 3/3 comparable, 0 diverge; artifact-resolution 2 of 2 resolved at pin; surprises 0; alignment ENFORCE 3/3 criteria carry a cell_ref"
+    }
+  ]
+}
