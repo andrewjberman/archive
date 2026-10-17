@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-17</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -62,7 +62,10 @@ comp-adversary: RUN -- a second mover in G2 (STOP); a live zip that is not the r
 
   <proof_of_spec>
 Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r36s/IRPT_ANLREQ.TO-APPLY-R36S.irpt-status-commentary-ref-ib2.proof_of_spec.json`.
-    <criterion id="R36S-AC1" cell_refs="AR-y-393">The record holds the seven lines, each as written (a FAIL or NOT MADE line does not match).<invocation>grep -c -E '^(R0 role writes on irpt-jobs none|S1 irpt-status live CodeSha256 274dl2bCd2VC3OcX4Uqc4AMbWep65B97F1\+CVNoKfMc=|S2 delta 1 of 49 acceptance\.py|S3 refusal envelope equal|S4 ready report read byte-identical|S5 commentary route 200 with a body|S6 census changed_members 0)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r36s/A_AFTER_R36S.txt</invocation><expect>^7$</expect></criterion>
+    <criterion id="R36S-AC1" cell_refs="AR-y-393">The record holds the seven lines, each as written (a FAIL line does not match; S5 may read NOT MADE with the one reason stated, see AMENDMENT 1).<invocation>grep -c -E '^(R0 role writes on irpt-jobs none|S1 irpt-status live CodeSha256 274dl2bCd2VC3OcX4Uqc4AMbWep65B97F1\+CVNoKfMc=|S2 delta 1 of 49 acceptance\.py|S3 refusal envelope equal|S4 ready report read byte-identical|S5 (commentary route 200 with a body|NOT MADE the commentary PDF artifact is not retained for any request)|S6 census changed_members 0)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_r36s/A_AFTER_R36S.txt</invocation><expect>^7$</expect></criterion>
     <criterion id="R36S-AC2" cell_refs="AR-y-393">The ledger irpt-status-r36s-20261017 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*irpt-status-r36s-20261017_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
   </proof_of_spec>
+  <amendment id="1" date="2026-10-17" by="2.0.0_SA_COO~Y2">
+    AMENDMENT 1 (after IB2's report msg 10620: G1 to G4 and G6 green, G5 read the same NOT_FOUND/UNAVAILABLE envelope before and after). The issuer's own read-only reads: the synthetic request REQ-d47252fe... carries a commentary_ref whose artifact is family ANALYSIS_COMMENTARY (the DRAFT, logical id = the request id); the route resolves the commentary PDF under family YCHARTS_OPAL_REPORT, logical id `<request id>-commentary-<sha256>`, and that artifact item is ABSENT for this request; a query of every ARTIFACT# item whose logical_id contains `-commentary-` found 0 in tenants 49financial (206 items), cottonwood (210) and inflection (33). So no request has a retained commentary PDF, G5 cannot discriminate the release on any existing request, and `NOT_RETAINED` is the correct answer both before and after. RULING: do NOT read a second candidate; do NOT roll back; do NOT create a PDF, request or artifact. Finish step 7 with the line `S5 NOT MADE the commentary PDF artifact is not retained for any request` (the one reason, as written), then step 8 (map record, ledger close) and the single report. The change graded by G1 to G4 and G6 stands within the signed pair. Criterion R36S-AC1 is amended to admit that S5 line. Gate limb that graded the amendment: none stated.
+  </amendment>
 </task_order>
