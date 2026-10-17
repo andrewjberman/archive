@@ -335,6 +335,34 @@ def cmd_invoke(name):
     return 0 if not problems else 3
 
 
+def cmd_returns_dry():
+    """The CTO's ADDENDUM 1 condition 4: ONE no-write dry run of the existing stages (no `stages` key: returns, class, lots) of the live code, one day."""
+    if (STATE / "returns_dry_invoke.json").exists():
+        print("REFUSED: already invoked")
+        return 2
+    d = load("before.json")["newest_returns_day"]
+    payload = {"backfill": {"start": d, "end": d}, "accounts": "population", "dry_run": True}
+    tt = dt.datetime.now(dt.timezone.utc)
+    if tt.weekday() < 5 and dt.time(11, 35) <= tt.time() <= dt.time(12, 0):
+        print("STOP: inside the fire window")
+        return 3
+    t = now_utc()
+    save("returns_dry_invoking.json", {"payload": payload, "invoked_utc": t})
+    lam = boto3.client("lambda", region_name=REGION, config=Config(read_timeout=960, connect_timeout=15, retries={"max_attempts": 0, "mode": "standard"}))
+    resp = lam.invoke(FunctionName=FUNCTION, InvocationType="RequestResponse", LogType="Tail", Payload=json.dumps(payload).encode("ascii"))
+    body = json.loads(resp["Payload"].read().decode("utf-8"))
+    log = base64.b64decode(resp.get("LogResult", "")).decode("utf-8", "replace")
+    m = re.search(r"REPORT RequestId: (\S+)\s+Duration: ([0-9.]+) ms.*?Memory Size: (\d+) MB\s+Max Memory Used: (\d+) MB", log, re.S)
+    objs = prefix_objects(TX_PREFIX)
+    rec = {"payload": payload, "invoked_utc": t, "status_code": resp["StatusCode"], "function_error": resp.get("FunctionError"),
+           "returned_keys": sorted(body) if isinstance(body, dict) else None, "stages": body.get("stages") if isinstance(body, dict) else None, "ok": body.get("ok") if isinstance(body, dict) else None,
+           "report": ({"max_memory_used_mb": int(m.group(4)), "duration_ms": float(m.group(2)), "memory_size_mb": int(m.group(3))} if m else None), "request_id": m.group(1) if m else None,
+           "range_partitions_after": len(day_partitions(TX_PREFIX)), "other_tables_unchanged": all(other_tables()[t] == load("before.json")["other_tables"][t] for t in OTHER), "prefix_objects_after": objs}
+    save("returns_dry_invoke.json", rec)
+    print("RETURNS_DRY status=%s function_error=%s stages=%s ok=%s report=%s other_tables_unchanged=%s" % (rec["status_code"], rec["function_error"], rec["stages"], rec["ok"], rec["report"], rec["other_tables_unchanged"]))
+    return 0 if (rec["status_code"] == 200 and not rec["function_error"] and rec["report"] and rec["other_tables_unchanged"]) else 3
+
+
 def cmd_trigger():
     b = load("before.json")
     dry = load("dry_invoke.json")
@@ -350,7 +378,9 @@ def cmd_compile():
     dc, wc, rc = load("dry_check.json"), load("write_check.json"), load("range_check.json")
 
     def ev(x):
-        return {k: x[k] for k in ("payload", "invoked_utc", "status_code", "function_error", "returned", "report", "request_id")}
+        out = {k: x[k] for k in ("payload", "invoked_utc", "status_code", "function_error", "returned", "report", "request_id")}
+        out["report"] = dict(out["report"], duration_ms=int(out["report"]["duration_ms"]))  # whole milliseconds, as the time trigger (the state files keep the REPORT line's decimals)
+        return out
     rec = {"claim": "measured", "gates": load("gates.json"), "ledger_entry": OWN_SLUG, "applier": chk.APPLIER, "first_apply": load("first_apply.json"), "before": load("before.json"), "build": load("build.json"), "plan": load("plan.json"),
            "apply_finished_utc": load("apply_finished.json")["apply_finished_utc"], "after": load("after.json"),
            "dry_run": dict(ev(d), prefix_objects_after=dc["prefix_objects_after"]), "time_trigger": load("time_trigger.json"),
@@ -364,4 +394,4 @@ def cmd_compile():
 
 if __name__ == "__main__":
     c = sys.argv[1]
-    sys.exit({"gates": cmd_gates, "first_apply": cmd_first_apply, "before": cmd_before, "trigger": cmd_trigger, "compile": cmd_compile}.get(c, lambda: {"after_apply": cmd_after_apply, "invoke": cmd_invoke}[c](sys.argv[2]))())
+    sys.exit({"gates": cmd_gates, "first_apply": cmd_first_apply, "returns_dry": cmd_returns_dry, "before": cmd_before, "trigger": cmd_trigger, "compile": cmd_compile}.get(c, lambda: {"after_apply": cmd_after_apply, "invoke": cmd_invoke}[c](sys.argv[2]))())
