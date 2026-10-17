@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-21",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~134",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5bee627be9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5bee627be9",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-21.windowed-client-tools-off-the-event-loop.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "ade844bf46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "client_get_transactions and client_get_fees are async tools whose body awaits anyio.to_thread.run_sync(functools.partial(_run, ...)); 8 insertions and 4 deletions in app/tools.py (git diff 5bee627be9..ade844bf46). Tool names, signatures, docstrings, registration order, _run arguments and returned values unchanged. Not released: the release is the batched OG-ap-36 under its own never-widen."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en21.py",
+      "kind": "test",
+      "commit_or_etag": "ade844bf46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: test_ogen21_ac01, test_ogen21_ac02, test_ogen21_ac03. 3 of 3 pass on the committed tree; the same 3 fail on the base app/tools.py (negative control, see controls.mutant)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en21.py test_ogen21_ac01 test_ogen21_ac02 test_ogen21_ac03; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0   (run 1 and run 2 on ade844bf46 gave the identical three lines; the pytest session line of the first run: '3 passed in 1.64s')",
+      "denominator": "3 of 3 named tests passed; 0 failed or error lines",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~134 '^infra/aws/ec2/opal-gateway/(app/tools\\.py|tests/test_og_(en21|en20|en19|en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~134: files touched 2; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "2 files touched by this serial's commits, 2 of 2 product files, 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~134: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the ten window test files pass together in both orders with the same count.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh en21set tests/test_og_en4.py tests/test_og_en12.py tests/test_og_cl2.py tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en21.py; echo \"exit=$?\"",
+      "output_evidence": "en21set forward: passed 36; failed 0\nen21set reverse: passed 36; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "36 of 36 tests passed forward, 36 of 36 reverse, across the 10 named test files; 0 failed in either order",
+      "status": "PASS",
+      "expect": "(?s)en21set forward: passed (\\d+); failed 0.*en21set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base app/tools.py (git show 5bee627be9:infra/aws/ec2/opal-gateway/app/tools.py, plain def tools) swapped into the worktree in place of the cell's file; tests/test_og_en21.py run unchanged; then the cell's file restored from a scratch copy and verified byte-identical with cmp.",
+      "expected": "each of test_ogen21_ac01, test_ogen21_ac02 and test_ogen21_ac03 FAILS on the base tools.py",
+      "observed": "3 of 3 FAILED on the base tools.py (pytest -q: '3 failed in 14.15s'). ac01 FAILED: TypeError: An asyncio.Future, a coroutine or an awaitable is required. ac02 FAILED: the same TypeError. ac03 FAILED: TypeError: 'dict' object can't be awaited, at its first await of the tool. The sync base tool returns a dict and cannot run as a background task on the loop. Restored file: cmp OK, and git diff against HEAD is empty.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 named-test invocation run twice on the committed tree (ade844bf46) and the two outputs compared; AC3 forward and reverse counts compared within the same run",
+      "observed": "run 1 and run 2 identical: 'named tests passed 3 of 3; failed/error lines 0', RESULT: PASS, exit=0. AC3 forward 36 = reverse 36.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The release and the host effect: no deploy, no service restart, no IAM change, no env key, no registry change.",
+      "reason": "The order forbids it. The release is the batched OG-ap-36 under its own never-widen; its Phase B measures health during a real page."
+    },
+    {
+      "item": "ac01 and ac03 block or stand in at the core read the tool body calls (tools._cc.client_get_transactions), not at the adapter's get_transactions beneath it.",
+      "reason": "The face says 'the adapter call patched to block'; the core-level read is the single call the tool body makes into the adapter path, and the patch point keeps the registered tool, _run and the request context real. ac02 runs the real Black Diamond get_transactions over an in-memory ctx, so the one-read gate is the real one."
+    },
+    {
+      "item": "/health is measured on the offline app/server.py health handler, not on the served host.",
+      "reason": "Honest limit recorded in the issuer notes: the offline tests prove the loop stays free and the gate contends; the host effect is the release's Phase B."
+    },
+    {
+      "item": "The other sync tools (for example mdpf_* and the other client tools) stay sync.",
+      "reason": "Out of this cell: 'Other sync tools stay as they are in this round.'"
+    },
+    {
+      "item": "No existing test was edited.",
+      "reason": "No test in the ten listed files calls client_get_transactions or client_get_fees as a plain function or pins them as sync (grep of tests/ for both names). AC3 is green on the unchanged files."
+    }
+  ],
+  "surprises": [],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commit ade844bf46 on branch wk-NFRA_OPLGTW-134, and the criterion invocations recorded above.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~134 <0.9.0_WK_NFRA_OPLGTW~134@opal.agent>\" -F .scratch/msg_en21_code.txt -- infra/aws/ec2/opal-gateway/app/tools.py infra/aws/ec2/opal-gateway/tests/test_og_en21.py",
+      "result": "first attempt refused by the commit-gate ruff check (unused import pytest in the new test file); import removed; second attempt rc 0, committed ade844bf46 (msg-verify OK). The commit-gate WARN on 7 pre-existing non-ASCII lines of app/tools.py is WARN-only."
+    }
+  ]
+}
