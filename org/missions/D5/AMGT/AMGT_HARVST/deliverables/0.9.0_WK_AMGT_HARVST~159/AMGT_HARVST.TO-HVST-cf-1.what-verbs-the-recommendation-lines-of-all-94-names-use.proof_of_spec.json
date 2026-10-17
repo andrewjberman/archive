@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-cf-1.what-verbs-the-recommendation-lines-of-all-94-names-use",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cf-1.what-verbs-the-recommendation-lines-of-all-94-names-use.md",
+  "group": "OTHER",
+  "vintage_commit": "ff381860ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "ff381860ad",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cf-1.what-verbs-the-recommendation-lines-of-all-94-names-use.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~159",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.py",
+   "kind": "script",
+   "commit_or_etag": "b5238574f8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only census over ALL 94 silver securities (355 silver rows). Candidates from continuation._recommendation_candidates_ex at worktree HEAD (code holds HVST-ce-2 and HVST-ce-6); MISFILED_REPORTS applied as typed.reports_for does (typed.py:596-599). Reads: silver parts once via store.silver_latest; each extraction v2-else-v1 via continuation._read_reports_with_bytes; the 31 gold continuation objects (newest by LastModified) under amgt/harvest/gold/research-continuation/security_key=<KEY>/. All S3 calls through .tools/aws (s3api list-objects-v2 and get-object). No put, copy, delete or sync; no gold writer run; no deploy. RECON: the census re-runs _resolve_fund_and_position and matches the code's fund and position on all 94.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.out",
+   "kind": "doc",
+   "commit_or_etag": "b5238574f8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Counted run (run 2, after the MISFILED_REPORTS correction). Line 197 PHRASES distinct=22. Line 198 CENSUS-C-S61 securities=94 with_fund=69 with_position=76 rebuilt_in_ce4=30 gets=389 bytes=100842396. Sections: PHRASE (22 lines, sorted count descending then phrase ascending, with via=old|line|both and up to three example keys and the raw 120 characters), VARIANT (every distinct raw under a phrase), NAME (69 securities with a fund_of_record, with phrase, fund, via, rebuilt_in_ce4, report_id, served_matches_code and the raw), POSITION (7 securities whose position candidate differs from the fund candidate), NOFUND (7), NOCAND (18), SERVED (the 31 rebuilt names: served fund against code fund). RECON mismatches 0; UNREADABLE 0. Served vs code for the 30 rebuilt names with a code fund: 30 yes, 0 no; KMB_US_Equity has no code fund and no served fund.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "37cb805f43",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows AMGT_HARVST-D1-W159-S1 and -S2 at f17ac0edfe, AMGT_HARVST-D1-W159-S3 at 37cb805f43; each appended by bytes (insertion only: 44 then 21 insertions, 0 deletions per commit). The fenced JSON block parses with 480 rows.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.out ; expect (?m)^PHRASES distinct=\\d+$",
+   "method": "command",
+   "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.out",
+   "output_evidence": "deciding line 197: 'PHRASES distinct=22' (run under timeout 120: cat rc=0; grep -nP rc=0)",
+   "denominator": "1 of 1 PHRASES lines; the census covers 94 of 94 securities (line 2: DENOMINATOR silver_rows=355 distinct_securities=94)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.out ; expect (?m)^CENSUS-C-S61 securities=94 with_fund=\\d+ with_position=\\d+ rebuilt_in_ce4=\\d+ gets=\\d+ bytes=\\d+$",
+   "method": "command",
+   "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/cf1_census.out",
+   "output_evidence": "deciding line 198: 'CENSUS-C-S61 securities=94 with_fund=69 with_position=76 rebuilt_in_ce4=30 gets=389 bytes=100842396' (cat rc=0; grep -nP rc=0)",
+   "denominator": "securities=94 of 94; with_fund 69 of 94; with_position 76 of 94; rebuilt_in_ce4 30 of 31 names in round90/ce4_securities.txt (KMB_US_Equity has no fund in code)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The first census (commit 6a2e2a49cd) overrode typed.reports_for without the MISFILED_REPORTS filter. Under that mutant KMB_US_Equity showed code fund IDVZ (report fbd50086c4065785) against served null, a mismatch that the RECON check did not catch because RECON compares the census mirror with the code's own derivation.",
+   "expected": "A census without the exclusion shows KMB as a served-versus-code mismatch; the corrected census must not.",
+   "observed": "Run 1 at 6a2e2a49cd: NAME KMB_US_Equity served_matches_code=no. Run 2 at b5238574f8: no NAME line for KMB, SERVED KMB code_fund=None served_fund=None; '# EXCLUSION' line present.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Not re-run: the census is a single read of a fixed silver snapshot and the stored gold objects.",
+   "observed": "N/A: one counted run (run 2); run 1 was superseded for a method error, not for instability.",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Classification of any phrase as a holding or a non-holding",
+   "reason": "The cell prints what the lines say; the CTO and the issuer classify (cell section 0). The NAME and SERVED lines name the phrase and the served fund; no verdict is written."
+  },
+  {
+   "item": "The status flip of the task order to complete",
+   "reason": "The order says the issuer flips its status (Do not edit this order file). The order file is outside this worker's write grant (<paths>). Left for the issuer."
+  },
+  {
+   "item": "Gold writer, continuation or dossier rebuild, deploy, Secrets Manager, browser, S3 write",
+   "reason": "Forbidden by the order's preflight. Every S3 call was a list-objects-v2 or get-object through .tools/aws."
+  },
+  {
+   "item": "Budget in aggregate across both census runs",
+   "reason": "The counted run (cf1_census.out) reads 421 requests and 100842396 bytes, inside the 800 and 500 MiB caps. The superseded run 1 (commit 6a2e2a49cd) read 423 requests and 100909091 bytes. Summed: 844 requests, above the 800 cap if the preflight counts every run; recorded as surprise AMGT_HARVST-D1-W159-S3 for the issuer."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-D1-W159-S1: OBSERVATION, ARMED (disarm 2.0.0_SA_COO~W1). ML_FP_Equity's first candidate is the bracketed template line '[BUY IN IDVZ TO X%]' (report 615fde6598a49c72); the derivation takes IDVZ from it as fund_of_record, and ML is not among the 31 rebuilt names.",
+  "AMGT_HARVST-D1-W159-S2: OBSERVATION, INERT. ce2_census.py (commit 73777baeec) replaced typed.reports_for without the MISFILED_REPORTS filter, so a census built from it put the two KMB Mexico reports into KMB's items; the corrected census (b5238574f8) applies the filter.",
+  "AMGT_HARVST-D1-W159-S3: OBSERVATION, INERT. The two census runs read 844 requests in all, above the order's 800 cap when summed; the counted run reads 421."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "proof-of-spec-check.py (this instance)",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~159/AMGT_HARVST.TO-HVST-cf-1.what-verbs-the-recommendation-lines-of-all-94-names-use.proof_of_spec.json AC1,AC2 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cf-1.what-verbs-the-recommendation-lines-of-all-94-names-use.md",
+   "result": "VALID (rc=0) for AC1,AC2 at the working tree before this commit (2 criteria, 2 surprises resolved to channel rows)"
+  }
+ ]
+}
