@@ -1,0 +1,26 @@
+TO IRPT_DASHBD.TO-DB-b-334 -- session log of 0.9.0_WK_IRPT_DASHBD~260
+Worktree C:/dev/wk-irpt-dashbd-260 ; branch wk-IRPT_DASHBD-260 ; base HEAD 9526541360 (LOCAL only; nothing pushed)
+
+1. First act: rev-parse --abbrev-ref HEAD printed wk-IRPT_DASHBD-260; org and .tools present (TREE-OK).
+2. Premise re-ground: the entry carries 20 staged_from members. Hash probe at HEAD (python -I over the 20 members):
+   15 fresh, 5 stale. All 20 pins are ancestors of HEAD.
+3. Stale members (5): the Cottonwood adapter, lib/opal_naming.py, infra/logic/registry/systems.json,
+   infra/logic/registry/exemptions.json, infra/logic/registry/legacy_addresses.json.
+4. Edit: the JSON was round-tripped first (json.dumps indent=2, ensure_ascii=False, trailing LF) and matched the file bytes.
+   For each stale member: pin = git log -1 --format=%H -- <path>; sha256 = sha256 of the file at HEAD; the pin blob
+   (git show pin:path) hashed equal to the HEAD file; the new pin differed from the old. 5 re-pinned, 15 unchanged.
+   The diff is 10 insertions and 10 deletions in one file.
+5. Re-probe just before the commit: members=20 fresh=20 stale=0 (no other seat changed a pinned file meanwhile).
+6. Commit baf645b35b on the worktree branch (safe-commit.sh, one file). Gate output read in full:
+   risk-reflex NOT-DECIDABLE (danger map stale; linked worktree refused; scanned 0 of 1 file) -- row S2;
+   commit-gate checked 0 of 1 file (the JSON suffix is outside its graded set);
+   client-data-check WARN (hashed list absent; not checked) -- row S3;
+   to-pipeline-gate, surprise-row-gate, naming-gate OK or not applicable.
+7. Criteria, run from the worktree root after the commit:
+   DBR200-1-AC1 -> last line "DBR200-1-AC1 PASS" (rc 0; 5 moved, 1 file changed, all in the grant)
+   DBR200-2-AC1 -> last line "DBR200-2-AC1 PASS" (rc 0; background run, bound 1500 s; deciding line "OK: DBF139-6-AC3 PASS on the worker's tree")
+   DBR200-3-AC1 -> last line "DBR200-3-AC1 PASS" (rc 0)
+8. Rows: IRPT_DASHBD-D2-W260-S1 (the entry note says 15 members; the list holds 20), S2 (risk reflex NOT-DECIDABLE on baf645b35b),
+   S3 (client-data WARN on baf645b35b). Appended as bytes; committed at 78373ed253. All OBSERVATION, INERT.
+9. Not run: no push, no deploy, no build for upload, no Terraform, no AWS write, no invoke. The portal gitlink (modified in the
+   worktree from the start) was not staged or committed.
