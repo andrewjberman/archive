@@ -1,0 +1,10 @@
+# The deployed estate report runner's function-map loader, exercised locally against a clone of origin/CLOUD (issuer 2.0.0_SA_COO~C, 2026-10-17 ~03:5xZ)
+
+THIS IS NOT THE DISARM READ. It is a local exercise of the deployed bytes' loader, taken while the real proof (the 13:00Z scheduled start, `TO-APPLY-32` leg DISARM, owner `0.7.0_AE_CloudOps~NFRA1`) is hours away. It claims the code path, not the instance.
+
+- **Bytes under test:** the live S3 object `s3://opal-estate-report/code/estate_report_runner.py` downloaded by the issuer (VersionId `HIrQD8nolfYS_30vrMXBXCZJ0_EnqqPz`, 184027 bytes, sha256 `5e693559daa70406bd41d8d8290fc7add93fafaadba2d10500c260b7bf4a227d`, equal to `git show bfbdc20d40:infra/aws/ec2/estate-report-runner/estate_report_runner.py`).
+- **Tree under test:** a no-checkout clone (scratch, not tracked) with `refs/remotes/origin/CLOUD` of this repository fetched into it as branch `CLOUD2` (tip `bac4d3b80c`, 2026-10-16 23:47 -0400): `infra/aws/lambda/ci/function-map/` holds 241 files (240 functions + README), the retired map is absent.
+- **Act:** import the live bytes with dummy values for the six required environment keys (`ESTATE_GITHUB_SECRET_ID`, `ESTATE_KIMI_MODEL`, `ESTATE_KIMI_SECRET_ID`, `ESTATE_KIMI_URL`, `ESTATE_REPORT_BUCKET`, `ESTATE_REPO_URL`) and `ESTATE_REPO_BRANCH=CLOUD2`, then call the runner's own `load_function_map(<clone>)`.
+- **Result (measured):** `FUNCTION-MAP loaded dict 240` (first keys `access-anomaly-scanner`, `advi-49f-gold-dispatch`). No raise, no WARN path.
+- **Negative control (measured):** the same call with `ESTATE_REPO_BRANCH=CLOUD` (the local branch `CLOUD`, tip `ae02d7548f` of 2026-10-08, which has no function folder) RAISES `CalledProcessError` from the git checkout of the folder: the loader fails loud, as the order's stop list assumes.
+- **What this does not show:** the instance's boot, the clone it makes with its token from the real remote, the rest of the run, the lambda hop's output in the run log. Those are the DISARM read.
