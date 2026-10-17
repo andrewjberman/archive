@@ -1,17 +1,19 @@
 {
  "gates": {
-  "packet_sha256_prefix": "7daa29f0fe10",
   "addendum_1_blob": "9462b5ad35af646c96ede013f03d4449e8815033",
   "addendum_2_blob": "b5c303ea69ffa4195ec441d455d9f1978c327678",
+  "addendum_3_blob": "87a46d9cf370c293dae46a413cba213db721b5ef",
   "all_halves_signed": true,
-  "hop2_ledger_closed": true,
-  "one_change_at_a_time": true,
-  "open_deploys_worktrees_read": 99,
   "before": {
    "read_function_sha256": "WjnDxvu2biEPXcwuF8oXJWRUqFaeUY550xnRxa2daa0=",
    "export_function_sha256": "5/9LZBbTEWOfrnNZufc6Mqz5pbDxTxYAxpWcZVURGs4=",
    "report_route_absent": true
-  }
+  },
+  "export_bundle_with_sha256_refusal_live_and_read_back": true,
+  "hop2_ledger_closed": true,
+  "one_change_at_a_time": true,
+  "open_deploys_worktrees_read": 99,
+  "packet_sha256_prefix": "7daa29f0fe10"
  },
  "h3": {
   "function": "irpt-49f-reporting-read-lambda",
@@ -58,16 +60,37 @@
  },
  "h4b": {
   "fence_row": {
-   "second_row_present": false,
-   "regenerated_and_read_back": false
+   "second_row_present": true,
+   "regenerated_and_read_back": true
   },
-  "role_statement_before": "NOT-READ (step 6 not released by the GO)",
-  "plan": null,
-  "statements_added": 0,
+  "role_statement_before": "absent",
+  "plan": {
+   "add": 0,
+   "change": 1,
+   "destroy": 0,
+   "resources": [
+    "aws_iam_role_policy.export_render_submit (update in place: one statement added)"
+   ]
+  },
+  "statements_added": 1,
   "statements_removed": 0,
-  "statement": null,
-  "replan_changes": null,
-  "note": "Step 6 has not run: no second GO. AC3 is owed."
+  "statement": {
+   "effect": "Allow",
+   "actions": [
+    "s3:GetObject"
+   ],
+   "resource": "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/client=*/filled_report.json"
+  },
+  "replan_changes": 0,
+  "note": "Step 6 ran under the second GO (msg 10273) after TO-IB-pr-618 (export bundle VerVs2a1.. live), the fence regeneration (live bucket policy names the reporting prefix in the Allow and the NotResource, read 04:25Z by the issuer and again here) and ADDENDUM 4 (CTO signed; blob 461a9f9252): ONE fence row at HEAD (the row is the CRO's, widened to the reporting prefix), so second_row_present reads true for that row. The statement is defence in depth and claims no bound. Pre-edit blob of b1_submit.tf for the rollback: 1f4475980566a9bb26fc2e65c657cfeaf4fa86be; edit commit b2a92d6b49. Simulations on the role: GetObject on a filled_report.json allowed; GetObjectVersion, PutObject, GetObject outside the prefix, GetObject on the ownership-map key (the IAM policy alone; that read rides the bucket policy) and GetObject on another firm's bucket all implicitDeny.",
+  "simulations": {
+   "get_object_filled": "allowed",
+   "get_object_version_filled": "implicitDeny",
+   "put_object_filled": "implicitDeny",
+   "get_object_outside_prefix": "implicitDeny",
+   "get_object_ownership_map_key_iam_only": "implicitDeny",
+   "get_object_other_firm_bucket": "implicitDeny"
+  }
  },
  "counters": {
   "rollback_performed": false,
