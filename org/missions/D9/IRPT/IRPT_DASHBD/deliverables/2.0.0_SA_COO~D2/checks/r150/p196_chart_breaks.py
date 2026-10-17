@@ -199,10 +199,11 @@ def dsgn_tests_except_base_failures(p):
     need(bun is not None, "bun is not on the PATH")
     r = p175.run([bun, "test", IR + "__tests__/dsgn-irptv1"], p, 1500)
     out = re.sub(r"\x1b\[[0-9;]*m", "", r.stdout + r.stderr)
-    m = re.search(r"^\s*(\d+) pass\s*$", out, re.M)
-    f = re.search(r"^\s*(\d+) fail\s*$", out, re.M)
-    need(m is not None and f is not None and int(m.group(1)) > 300, "the dsgn-irptv1 run printed no pass and fail summary")
-    fails = int(f.group(1))
+    # nested bun runs print their own summaries: the run's own is the LAST pair
+    m = re.findall(r"^[ ]*(\d+) pass[ ]*$", out, re.M)
+    f = re.findall(r"^[ ]*(\d+) fail[ ]*$", out, re.M)
+    need(m and f and int(m[-1]) > 300, "the dsgn-irptv1 run printed no pass and fail summary")
+    fails = int(f[-1])
     if fails == 0:
         return True
     need(fails == BASE_FAILS and out.count(BASE_FAIL_TEXT) >= BASE_FAILS and out.count("error: expect(received)") == BASE_FAILS,
