@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2602",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2602.inflection-launcher-bounded-default-window.md",
+    "group": "OTHER",
+    "vintage_commit": "8adcf0b94e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R138_F.md",
+    "vintage_commit": "8adcf0b94e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2602.inflection-launcher-bounded-default-window.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2602",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2602 from base 8adcf0b94e. The first act printed the branch and TREE-OK. The order's worker face was read whole, with the checker p138_bounded.py, the launcher, the launcher test file and producer lines 316 to 351. The baseline was run at base: pytest 2 failed, 49 passed, 7 errors (the nine bundle ids, listed in the facts record), and the three checker criteria FAIL. The launcher was edited (DEFAULT_CAP, newest_written_day, window_days, target_location, run, emit, main) and ten offline tests were added; the checker passes, and the failing id set after the edit equals the baseline. The code commit is 2b17f1111c; the record (facts, surprise row, this instance) is the second commit. No AWS call, no Terraform command, no push. The order status is not flipped. Worker tool calls are not recorded here.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/scripts/gold/INF_G_01.account_transaction_gold.py",
+      "kind": "script",
+      "commit_or_etag": "2b17f1111c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Launcher edit only: the bounded default window (DEFAULT_CAP 25, newest_written_day over the target's manifest.json partitions, window_days, summary window field, main() window= token). Nothing deployed; the bundle manifest and EXPECTED_BUNDLE_SHA256 are unchanged (the launcher is not a bundle member).",
+      "artifact_covered_by": ["DBF138-2-AC1", "DBF138-2-AC2", "DBF138-2-AC3"]
+    },
+    {
+      "path_or_key": "data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py",
+      "kind": "test",
+      "commit_or_etag": "2b17f1111c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ten window tests added (offline, FakeS3). Failing ids after equal the baseline's nine bundle ids; 59 passed, 49 before.",
+      "artifact_covered_by": ["DBF138-2-AC1", "DBF138-2-AC2", "DBF138-2-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2602/RD_BOUNDED_DEFAULT_FACTS_R138.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Measured facts: claim measured, tests_added 10, failing_before and failing_after (nine ids each, equal), files_touched 2, checker before and after, aws_calls 0.",
+      "artifact_covered_by": ["DBF138-2-AC1", "DBF138-2-AC2", "DBF138-2-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_DASHBD-D2-W2602-S1 appended as bytes (prefix preserved, LF file); the row's json block parses with class OBSERVATION and hazard_standing INERT.",
+      "artifact_covered_by": ["DBF138-2-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF138-2-AC1",
+      "criterion_verbatim": "`DBF138-2-AC1` -- an EMPTY target, no `--since`: `run()` and `main()` write exactly the 25 newest business days and nothing earlier. Base: FAIL (it writes every day).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_bounded.py\" . DBF138-2-AC1",
+      "output_evidence": "At base 8adcf0b94e from the worktree root: reason: run(): an empty target wrote 43 day(s) from ['2026-01-05'] to ['2026-03-06']; expected the 25 newest; DBF138-2-AC1 FAIL, rc 1. At commit 2b17f1111c from the worktree root, the last line of the output: DBF138-2-AC1 PASS, rc 0 (the main() summary line in the same run: days=25 of the 43 plan days, window cap 25 days_pending 43 newest_written null).",
+      "denominator": "25 of 43 plan business days written by run() and by main() on an empty target (the checker's 45-weekday snapshot).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF138-2-AC2",
+      "criterion_verbatim": "`DBF138-2-AC2` -- a target with a newest written day W: only the days after W are written, the 25 newest when more are pending, nothing when W is the newest day. Base: FAIL (an up-to-date target is written again).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_bounded.py\" . DBF138-2-AC2",
+      "output_evidence": "At base 8adcf0b94e: reason: an up-to-date target was written to again (86 new put calls); DBF138-2-AC2 FAIL, rc 1. At commit 2b17f1111c from the worktree root: DBF138-2-AC2 PASS, rc 0.",
+      "denominator": "three scenarios of the checker: W mid-history (days after W written), an up-to-date target (zero new put calls), more than 25 pending (25 newest written).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF138-2-AC3",
+      "criterion_verbatim": "`DBF138-2-AC3` -- an explicit `--since` still writes every business day from it with no cap, and a dry run with no `--since` makes no `put_object` call yet reports the same bounded days. Base: FAIL (a dry run reports every day).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_bounded.py\" . DBF138-2-AC3",
+      "output_evidence": "At base 8adcf0b94e: reason: a dry run with no --since reports 43 day(s), expected the 25 newest; DBF138-2-AC3 FAIL, rc 1. At commit 2b17f1111c from the worktree root: DBF138-2-AC3 PASS, rc 0.",
+      "denominator": "two arms of the checker: an explicit --since writes every day from it (no cap, more than 25), and a dry run with no --since makes zero put_object calls and reports the 25 newest days.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base control: the three checker criteria run on the unedited base 8adcf0b94e before the edit, and the launcher test file's baseline run (2 failed, 49 passed, 7 errors) recorded before any edit.",
+      "expected": "DBF138-2-AC1, AC2 and AC3 FAIL at base; the nine bundle ids are the baseline failing set.",
+      "observed": "AC1 FAIL (writes 43 days), AC2 FAIL (86 new put calls on an up-to-date target), AC3 FAIL (dry run reports 43 days); pytest 2 failed, 49 passed, 7 errors, the nine baseline ids.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three checker criteria, the selftest, and the launcher test file re-run on the committed bytes at 2b17f1111c from the worktree root",
+      "observed": "AC1, AC2, AC3 PASS rc 0; selftest PASS (7 arms); pytest 2 failed, 59 passed, 7 errors, with the failing and erroring id set equal to the baseline.",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "p138_bounded.py",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_bounded.py\" . DBF138-2-AC1 / AC2 / AC3",
+      "result": "PASS rc 0 for all three at commit 2b17f1111c (FAIL rc 1 at base 8adcf0b94e)."
+    },
+    {
+      "tool": "p138_bounded.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_bounded.py\" --selftest",
+      "result": "selftest PASS (7 arms)."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py -q -p no:cacheprovider --color=no -rfE",
+      "result": "before 2 failed, 49 passed, 7 errors; after 2 failed, 59 passed, 7 errors; the failing and erroring id sets are equal (nine bundle ids, not touched)."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/inf/scripts/gold/INF_G_01.account_transaction_gold.py data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py",
+      "result": "pre-commit gate clean for 2 of 2 file(s)."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, listing, or read of any kind, and any terraform command.",
+      "reason": "The order states no AWS access and no Terraform in this cell; none was run. The real gold prefix was not listed."
+    },
+    {
+      "item": "The IAM grant for s3:ListBucket on the gold prefix, which the default window now needs.",
+      "reason": "The order puts this to the CTO as a separate ask and a later cell; no IAM object is changed here."
+    },
+    {
+      "item": "The two bundle drifts (infra/logic/registry/exemptions.json and lib/opal_naming.py) and the nine bundle test ids they cause.",
+      "reason": "Not this cell's grant; the order says they are neither fixed nor worsened. The failing id set after the edit equals the baseline."
+    },
+    {
+      "item": "Order status is not flipped.",
+      "reason": "The order states the issuer flips the status."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W2602-S1: an explicit --since run reports the window fields as null, where the order names the default path only; the worker chose nulls so that a since run lists nothing at the target. Class OBSERVATION, INERT; the issuer or the CTO may rule the fields otherwise."
+  ]
+}
