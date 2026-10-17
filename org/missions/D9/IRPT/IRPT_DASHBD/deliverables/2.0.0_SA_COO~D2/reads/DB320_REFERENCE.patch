@@ -1,0 +1,423 @@
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read-iso/iam.tf b/infra/aws/terraform/investor-reporting/reporting-read-iso/iam.tf
+new file mode 100644
+index 0000000000..c77f315902
+--- /dev/null
++++ b/infra/aws/terraform/investor-reporting/reporting-read-iso/iam.tf
+@@ -0,0 +1,148 @@
++# IRPT_DASHBD DB-b-320 -- the Cottonwood reporting-read Lambda's OWN execution role. A NEW role: nothing existing is widened or touched.
++#
++#   * READS (and lists) ONLY the platinum reporting prefix of the firm's custody bucket (locals.tf irpt_rri_platinum_*).
++#   * READS the two scope dependencies the shared boundary re-reads on every request, object-scoped and in the firm registry's
++#     bucket: the directory pointer + artifact and the ownership map (the 49 Financial read function's exact grants). An absent
++#     ownership map is an EMPTY map (loaders.py load_ownership), also under the S3 masking shape of a missing key without ListBucket.
++#   * Own log stream only. No write, no delete, no other bucket, table or tier. No render grant: this function installs no render
++#     ports (IRPT_EVIDENCE_BUCKET is not set).
++#
++# THE ROLE NAME CARRIES THE FIRM'S SCOPE TOKEN: the firm bucket's "DenyForeignFirmPrincipals" statement denies s3:* to any principal
++# whose ARN does not match `role/*-cot-*`, an explicit Deny that overrides an IAM Allow. opal_name's `scope` argument is the
++# builder's mechanism for that token, so the name is builder-derived.
++
++data "aws_iam_policy_document" "irpt_reporting_read_iso_assume" {
++  statement {
++    effect  = "Allow"
++    actions = ["sts:AssumeRole"]
++    principals {
++      type        = "Service"
++      identifiers = ["lambda.amazonaws.com"]
++    }
++  }
++}
++
++module "irpt_reporting_read_iso_role_name" {
++  source   = "../../modules/opal_name"
++  system   = "irpt"
++  scope    = local.irpt_rri_firm
++  function = "reporting-read"
++  kind     = "role"
++}
++
++module "irpt_reporting_read_iso_policy_name" {
++  source   = "../../modules/opal_name"
++  system   = "irpt"
++  scope    = local.irpt_rri_firm
++  function = "reporting-read"
++  kind     = "policy"
++}
++
++module "irpt_reporting_read_iso_service_profile_policy_name" {
++  source    = "../../modules/opal_name"
++  system    = "irpt"
++  scope     = local.irpt_rri_firm
++  function  = "reporting-read"
++  qualifier = "service-profile"
++  kind      = "policy"
++}
++
++resource "aws_iam_role" "irpt_reporting_read_iso" {
++  name               = module.irpt_reporting_read_iso_role_name.name
++  description        = "IRPT_DASHBD cell DB-b-320: the Cottonwood reporting-read function. Reads and lists ONLY the platinum reporting prefix plus the directory and ownership-map scope dependencies the shared boundary reads."
++  assume_role_policy = data.aws_iam_policy_document.irpt_reporting_read_iso_assume.json
++}
++
++data "aws_iam_policy_document" "irpt_reporting_read_iso" {
++  # The function lists the `account=` prefixes once to match an issued opaque account id to its platinum key, so ListBucket is
++  # scoped to exactly the platinum reporting prefix (StringLike), never the whole bucket.
++  statement {
++    sid       = "ListExactlyThePlatinumReportingPrefix"
++    effect    = "Allow"
++    actions   = ["s3:ListBucket"]
++    resources = [local.irpt_rri_bucket_arn]
++    condition {
++      test     = "StringLike"
++      variable = "s3:prefix"
++      values   = local.irpt_rri_platinum_list_pattern
++    }
++  }
++
++  statement {
++    sid       = "ReadThePlatinumReportingPrefixOnly"
++    effect    = "Allow"
++    actions   = ["s3:GetObject", "s3:GetObjectVersion"]
++    resources = local.irpt_rri_platinum_read_arns
++  }
++
++  statement {
++    sid       = "ReadCurrentScopeDependencies"
++    effect    = "Allow"
++    actions   = ["s3:GetObject"]
++    resources = local.irpt_rri_scope_dependency_arns
++  }
++
++  statement {
++    sid       = "OwnLogStreamOnly"
++    effect    = "Allow"
++    actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
++    resources = ["arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${module.irpt_reporting_read_iso_lambda_name.name}:*"]
++  }
++}
++
++resource "aws_iam_role_policy" "irpt_reporting_read_iso" {
++  name   = module.irpt_reporting_read_iso_policy_name.name
++  role   = aws_iam_role.irpt_reporting_read_iso.id
++  policy = data.aws_iam_policy_document.irpt_reporting_read_iso.json
++}
++
++# The SERVICE-PRINCIPAL PROFILE READ, the 49 Financial read function's three statements (reporting-read/iam.tf): the shared boundary
++# refuses a SERVICE subject's selected firm outside the allowedFirmIds of its profile row, reading that row through the canonical
++# profile protocol. This function runs the same guard on the forwarded event, so it needs the same read. No Scan, no wildcard, no
++# write; the key ARN is READ from the table, never typed.
++data "aws_dynamodb_table" "service_profile_users" {
++  name = "opal-users-v2"
++}
++
++resource "aws_iam_role_policy" "irpt_reporting_read_iso_service_profile" {
++  name = module.irpt_reporting_read_iso_service_profile_policy_name.name
++  role = aws_iam_role.irpt_reporting_read_iso.id
++
++  policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [
++      {
++        Sid      = "ReadServiceProfileByEmailIndex"
++        Effect   = "Allow"
++        Action   = ["dynamodb:Query"]
++        Resource = ["${data.aws_dynamodb_table.service_profile_users.arn}/index/email-index"]
++      },
++      {
++        Sid      = "ReadServiceProfileRow"
++        Effect   = "Allow"
++        Action   = ["dynamodb:GetItem"]
++        Resource = [data.aws_dynamodb_table.service_profile_users.arn]
++      },
++      {
++        Sid      = "DecryptUsersTableViaDynamoOnly"
++        Effect   = "Allow"
++        Action   = ["kms:Decrypt"]
++        Resource = [data.aws_dynamodb_table.service_profile_users.server_side_encryption[0].kms_key_arn]
++        Condition = { StringEquals = {
++          "kms:ViaService"                               = "dynamodb.${split(":", data.aws_dynamodb_table.service_profile_users.arn)[3]}.amazonaws.com"
++          "kms:EncryptionContext:aws:dynamodb:tableName" = "opal-users-v2"
++        } }
++      },
++    ]
++  })
++}
++
++output "irpt_reporting_read_iso_role_arn" {
++  value       = aws_iam_role.irpt_reporting_read_iso.arn
++  description = "the builder-derived execution role"
++}
++
++output "irpt_reporting_read_iso_platinum_read_arns" {
++  value       = local.irpt_rri_platinum_read_arns
++  description = "The ONLY product objects this role may read -- the platinum reporting prefix"
++}
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read-iso/lambda.tf b/infra/aws/terraform/investor-reporting/reporting-read-iso/lambda.tf
+new file mode 100644
+index 0000000000..dce4e1a472
+--- /dev/null
++++ b/infra/aws/terraform/investor-reporting/reporting-read-iso/lambda.tf
+@@ -0,0 +1,68 @@
++# IRPT_DASHBD DB-b-320 -- the Cottonwood reporting-read Lambda. The SAME source directory as the 49 Financial read function
++# (infra/aws/lambda/investor-reporting/reporting/, entry.lambda_handler, the guarded boundary), packaged through its OWN function-map
++# entry (infra/aws/lambda/ci/function-map/<function name>.json); the artifact is built and uploaded by build-and-upload.sh, never by this root.
++# The firm this function serves is decided by its ENVIRONMENT, not its code: IRPT_DIRECTORY_BUCKET_MAP carries exactly one firm.
++#
++# IT NEVER FORWARDS: the forward variable (IRPT_FORWARD_COTTONWOOD_FUNCTION) is set ONLY on the 49 Financial function
++# (reporting-read/lambda.tf). The environment below must not carry it, so a request this function receives is answered here, by
++# its own full guard, and cannot be handed on again.
++#
++# NAMES ARE BUILDER OUTPUT (rule 30): the function is name("irpt", <firm>, "reporting-read", "lambda") with the firm derived
++# (locals.tf), never typed.
++#
++# NO SCHEDULE, NO EVENT SOURCE, NO ALARM, NO SNS, NO SES, NO API WIRING: invoke-only, from the 49 Financial read function.
++
++module "irpt_reporting_read_iso_lambda_name" {
++  source   = "../../modules/opal_name"
++  system   = "irpt"
++  scope    = local.irpt_rri_firm
++  function = "reporting-read"
++  kind     = "lambda"
++}
++
++module "irpt_reporting_read_iso" {
++  source = "../../modules/yang-lambda"
++
++  function_name = module.irpt_reporting_read_iso_lambda_name.name
++  artifact_key  = local.irpt_rri_artifact_key
++  role_arn      = aws_iam_role.irpt_reporting_read_iso.arn
++
++  # entry.lambda_handler is the guarded one: it puts the shared boundary (contract version, the firm from the VERIFIED principal,
++  # the operation from the function's own route table, then _authz.guard()) in front of the compute.
++  handler = "entry.lambda_handler"
++  runtime = "python3.12"
++  # The 49 Financial read function's sizing: two small S3 reads, a directory read and an ownership-map read per request.
++  timeout     = 29
++  memory_size = 512
++
++  log_retention_days = 14
++  system_tag         = "InvestorReporting"
++
++  environment_variables = {
++    # The ONE firm this function serves and the bucket its scope dependencies sit in (derived, locals.tf).
++    IRPT_DIRECTORY_BUCKET_MAP = jsonencode(local.irpt_rri_directory_bucket_map)
++
++    # The pinned registry the id normalizer reads, packaged in the zip.
++    IRPT_FIRM_REGISTRY = "/var/task/firm_registry.json"
++  }
++
++  tags = {
++    Cell    = "DB-b-320"
++    Project = "IRPT_DASHBD"
++  }
++
++  depends_on = [
++    aws_iam_role_policy.irpt_reporting_read_iso,
++    aws_iam_role_policy.irpt_reporting_read_iso_service_profile,
++  ]
++}
++
++output "irpt_reporting_read_iso_function_name" {
++  value       = module.irpt_reporting_read_iso.function_name
++  description = "the builder-derived function name (the 49 Financial read function's forward target)"
++}
++
++output "irpt_reporting_read_iso_function_arn" {
++  value       = module.irpt_reporting_read_iso.function_arn
++  description = "the function the 49 Financial read function invokes"
++}
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read-iso/locals.tf b/infra/aws/terraform/investor-reporting/reporting-read-iso/locals.tf
+new file mode 100644
+index 0000000000..f246f7453a
+--- /dev/null
++++ b/infra/aws/terraform/investor-reporting/reporting-read-iso/locals.tf
+@@ -0,0 +1,62 @@
++# IRPT_DASHBD DB-b-320 -- EVERY FIRM-SCOPED VALUE BELOW IS DERIVED, NEVER TYPED (CLAUDE.md rule 30). The derivation is the
++# `reporting-publish-iso` root's (round 147, DB-b-281), read the same way, plus the `reporting-read` root's two-bucket reading:
++#
++# SOURCE OF THE FIRM: data/assets/scripts/gold/irpt_holdings_performance/sources.json, the declaration entry whose registry_key
++# names the vendor's firm-instance MASTER row; that row's `firm` in infra/logic/registry/scopes.json is the scope.
++#
++# TWO BUCKETS, NOT ONE (as in reporting-read/locals.tf). The platinum reporting objects sit in the FIRM row's bucket of scopes.json
++# (the custody bucket). The scope dependencies the shared boundary reads on EVERY request (the directory pointer and artifact, the
++# ownership map) sit in the FIRM REGISTRY's bucket (data/firm_registry.json). They are read from their own files.
++#
++# THE KEY SEGMENTS ("irpt" as the naming SOURCE, "platinum" / "reporting" as tier and table) are the publisher's and the read
++# function's committed constants (reporting-publish/handler.py TIER_PLATINUM, TABLE_PLATINUM; reporting/entry.py).
++#
++# THE ARTIFACT KEY: the Lambda function map (infra/aws/lambda/ci/function-map/), the entry keyed by the function name the opal_name
++# module derives (never a typed name); its artifact_s3_key is the key the yang-lambda module reads.
++
++locals {
++  irpt_rri_sources = jsondecode(
++    file("${path.module}/../../../../../data/assets/scripts/gold/irpt_holdings_performance/sources.json")
++  )
++
++  irpt_rri_source_key = "blackdiamond_z09"
++
++  irpt_rri_registry_scope_map = {
++    for s in jsondecode(file("${path.module}/../../../../../infra/logic/registry/scopes.json")).scopes : s.key => s
++  }
++
++  # The firm long form: registry_key -> MASTER row -> firm.
++  irpt_rri_firm = local.irpt_rri_registry_scope_map[local.irpt_rri_sources[local.irpt_rri_source_key].registry_key].firm
++
++  # The custody bucket: the FIRM row's bucket (the platinum reporting root sits in it).
++  irpt_rri_bucket     = local.irpt_rri_registry_scope_map[local.irpt_rri_firm].bucket
++  irpt_rri_bucket_arn = "arn:aws:s3:::${local.irpt_rri_bucket}"
++
++  # READ grant: ONLY the platinum reporting prefix; LIST is scoped to the same prefix (the function lists `account=` prefixes to match
++  # an issued opaque account id to its platinum key).
++  irpt_rri_platinum_prefix       = "irpt/${local.irpt_rri_firm}/platinum/reporting/"
++  irpt_rri_platinum_read_arns    = ["${local.irpt_rri_bucket_arn}/${local.irpt_rri_platinum_prefix}*"]
++  irpt_rri_platinum_list_pattern = ["${local.irpt_rri_platinum_prefix}*"]
++
++  # The firm's registry row (id, bucket) for the scope dependencies the boundary reads. `one()` fails the plan if it is not exactly one row.
++  irpt_rri_registry_firm = one([
++    for f in jsondecode(file("${path.module}/../../../../../data/firm_registry.json")).firms : f
++    if f.firm_id == local.irpt_rri_firm && f.kind == "client" && f.enabled
++  ])
++
++  # The firm -> bucket map the shared loaders read (IRPT_DIRECTORY_BUCKET_MAP): ONE firm. Any other firm's request is refused as
++  # unmapped, never defaulted.
++  irpt_rri_directory_bucket_map = { (local.irpt_rri_registry_firm.firm_id) = local.irpt_rri_registry_firm.bucket }
++
++  irpt_rri_scope_dependency_arns = [
++    "arn:aws:s3:::${local.irpt_rri_registry_firm.bucket}/investor-reporting/directory/*",
++    "arn:aws:s3:::${local.irpt_rri_registry_firm.bucket}/platinum/${local.irpt_rri_registry_firm.firm_id}/ownership_map.json",
++  ]
++
++  # The artifact: the function-map entry the function name keys (one JSON file per function under infra/aws/lambda/ci/function-map/).
++  irpt_rri_function_map = {
++    for f in fileset("${path.module}/../../../lambda/ci/function-map", "*.json") :
++    trimsuffix(f, ".json") => jsondecode(file("${path.module}/../../../lambda/ci/function-map/${f}"))
++  }
++  irpt_rri_artifact_key = local.irpt_rri_function_map[module.irpt_reporting_read_iso_lambda_name.name].artifact_s3_key
++}
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read-iso/main.tf b/infra/aws/terraform/investor-reporting/reporting-read-iso/main.tf
+new file mode 100644
+index 0000000000..16e3455e12
+--- /dev/null
++++ b/infra/aws/terraform/investor-reporting/reporting-read-iso/main.tf
+@@ -0,0 +1,49 @@
++# Investor Reporting -- Terraform root `reporting-read-iso`. IRPT_DASHBD cell DB-b-320 (round 150, workstream COTTF): the
++# Cottonwood Performance READ function (CTO ruling A, msg 10134). A firm-isolated twin of the `reporting-read` root, as
++# `reporting-publish-iso` is the twin of `reporting-publish`.
++#
++# Holds: the Cottonwood reporting-read Lambda and its execution role. NEW RESOURCES ONLY. NO API wiring: the three Performance
++# routes keep their ONE integration to the 49 Financial read function (reporting-read/api.tf), which forwards a Cottonwood request
++# to this function (infra/aws/lambda/investor-reporting/_authz/served.py, DB-b-319). This function is invoke-only; nothing here
++# edits the api root, a shared route table or another function.
++#
++# THE FENCE: the Cottonwood bucket policy denies s3:* to every principal that is not a role matching `role/*-cot-*`. The role
++# name carries the firm's scope token because opal_name's `scope` argument writes it (iam.tf); no S3 policy anywhere is widened.
++#
++# STATE KEY: s3://opal-313476888478-terraform-state/investor-reporting/reporting-read-iso/tfstate
++# One root per boundary, one state key per root, one execution role per root. Every apply is `.tools/safe-apply.sh` (NEVER a
++# bare `terraform apply`, NEVER `aws lambda update-function-code`) under a change-management ledger entry. THIS CELL PLANS AND
++# DOES NOT APPLY: a new served function is the issuer's act under both never-widen halves.
++
++terraform {
++  required_version = ">= 1.5.0"
++
++  required_providers {
++    aws = {
++      source  = "hashicorp/aws"
++      version = "~> 5.0"
++    }
++  }
++
++  backend "s3" {
++    bucket = "opal-313476888478-terraform-state"
++    key    = "investor-reporting/reporting-read-iso/tfstate"
++    region = "us-east-1"
++  }
++}
++
++provider "aws" {
++  region = "us-east-1"
++
++  default_tags {
++    tags = {
++      Project   = "OpalPortal"
++      ManagedBy = "Terraform"
++      System    = "InvestorReporting"
++    }
++  }
++}
++
++data "aws_caller_identity" "current" {}
++
++data "aws_region" "current" {}
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read/forward.tf b/infra/aws/terraform/investor-reporting/reporting-read/forward.tf
+new file mode 100644
+index 0000000000..ac87e3750d
+--- /dev/null
++++ b/infra/aws/terraform/investor-reporting/reporting-read/forward.tf
+@@ -0,0 +1,51 @@
++# IRPT_DASHBD DB-b-320 (round 150, workstream COTTF) -- the FORWARD of a Cottonwood Performance read (CTO ruling A, msg 10134).
++# The 49 Financial read function hands a Cottonwood request, after its own guard, to the Cottonwood read function
++# (reporting-read-iso/, served.py FORWARD_FUNCTION_ENV, DB-b-319). This file gives it exactly two things:
++#
++#   * the target's NAME, as an environment variable (lambda.tf: IRPT_FORWARD_COTTONWOOD_FUNCTION). The name is builder output
++#     (rule 30) for the firm derived below, the same derivation as reporting-read-iso/locals.tf, never typed;
++#   * ONE IAM statement: lambda:InvokeFunction on that ONE function's ARN. No S3 grant is added to this function's role, so the
++#     Cottonwood bucket fence is untouched, and no route, integration or permission changes.
++
++locals {
++  irpt_rr_fwd_sources = jsondecode(
++    file("${path.module}/../../../../../data/assets/scripts/gold/irpt_holdings_performance/sources.json")
++  )
++
++  # The forward target's firm long form: registry_key -> MASTER row -> firm (the scope map is locals.tf's).
++  irpt_rr_fwd_firm = local.irpt_rr_registry_scope_map[local.irpt_rr_fwd_sources["blackdiamond_z09"].registry_key].firm
++}
++
++module "irpt_reporting_read_forward_target_name" {
++  source   = "../../modules/opal_name"
++  system   = "irpt"
++  scope    = local.irpt_rr_fwd_firm
++  function = "reporting-read"
++  kind     = "lambda"
++}
++
++module "irpt_reporting_read_forward_policy_name" {
++  source    = "../../modules/opal_name"
++  system    = "irpt"
++  scope     = local.irpt_rr_firm
++  function  = "reporting-read"
++  qualifier = "forward"
++  kind      = "policy"
++}
++
++resource "aws_iam_role_policy" "irpt_reporting_read_forward" {
++  name = module.irpt_reporting_read_forward_policy_name.name
++  role = aws_iam_role.irpt_reporting_read.id
++
++  policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [
++      {
++        Sid      = "InvokeTheCottonwoodReadFunctionOnly"
++        Effect   = "Allow"
++        Action   = ["lambda:InvokeFunction"]
++        Resource = ["arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${module.irpt_reporting_read_forward_target_name.name}"]
++      },
++    ]
++  })
++}
+diff --git a/infra/aws/terraform/investor-reporting/reporting-read/lambda.tf b/infra/aws/terraform/investor-reporting/reporting-read/lambda.tf
+index 382842e102..948283bae3 100644
+--- a/infra/aws/terraform/investor-reporting/reporting-read/lambda.tf
++++ b/infra/aws/terraform/investor-reporting/reporting-read/lambda.tf
+@@ -54,6 +54,10 @@ module "irpt_reporting_read" {
+     # IB-pr-304 (rows IRPT_BCKEND-W105-S1, S2): the render-grant ports install when this is set (served.render_ports_from_env),
+     # so a PATH B export's RENDER_DELEGATE read of the series is served; core's output, never typed (iam.tf reads the grant).
+     IRPT_EVIDENCE_BUCKET = data.terraform_remote_state.core.outputs.evidence_bucket
++
++    # DB-b-320 (CTO ruling A, msg 10134): the Cottonwood read function this function forwards a Cottonwood request to, builder output
++    # (forward.tf). Set ONLY here: the Cottonwood function's own environment never carries it, so only this function forwards.
++    IRPT_FORWARD_COTTONWOOD_FUNCTION = module.irpt_reporting_read_forward_target_name.name
+   }
+ 
+   tags = {
