@@ -18,6 +18,8 @@
 - **C11 NEW: the 27-tool served read must pass 27 of 27 UNDER THE GUARD;** a 26 reopens `Z-S375` and fails `ap38.AC2` (no named exception this time).
 - C12 the marker is read from the host and PRINTED (`e10`); on any rollback its value is read and printed. C13 the CLOSED time and the final live sha go to `1.0.0_SA_CTO~Z` when the ledger closes. **C14 NEW: `Z-S375` is disarmed only on the evidence** of the guarded 27 of 27, the bounded call on the installed code, and the live unit limits, by the CVO's disarm clock on this seat's word.
 
+- **C15 NEW (the CTO's CT1, msg 35566, `ap38.AC1` A3): the 27-tool read, live code against candidate, each tool in a fresh guarded process, BEFORE the deploy;** each tool equal, or a listed refusal where the live code also failed; a tool that answered on live and is refused or differs on the candidate is a STOP and no GO. **C16 NEW (the CVO's condition, msg 35569, `ap38.AC2` A3): `etfs_compare_peers` answers THROUGH THE SERVICE in `CODE7_SERVED` (`peers_through_service.basis` service, peak 700 MB or less);** a fresh-process basis grades OK but WITHHOLDS the `Z-S375` disarm. **C17 NEW: `NRestarts` is 0 through the whole read-back** (`nrestarts_during_readback`). ONE release, each widening stated in the ask; no second deploy.
+
 ## Not covered
 
 `Z-S338`, `Z-S177`, `Z-W94-S2`, `Z-S313`, `Z-S322`/`Z-S325`; other whole-table readers beyond the new central cap; a stricter per-tool memory bound if the cap proves too loose; the CTO and CVO halves.
