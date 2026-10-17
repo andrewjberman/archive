@@ -21,6 +21,7 @@ A3_COO = D + "2.0.0_SA_COO~S2/NEVER_WIDEN_IB_pr_551_ADDENDUM_3_GETOBJECT_ONLY_SH
 PAIR_CTO = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_IB_pr_551_SERVE_PATH_HOPS_2_4_CTO_HALF.md"
 A3_COO_BLOB = "87a46d9cf370c293dae46a413cba213db721b5ef"
 EXPORT_BEFORE = "5bIgn/MLNgtNtDnRpmE3OejAMw2IpoJBmzzRfHvFLXI="
+READ_LIVE = "z634S2QsrfCpY4c3cD2UGwicdmLDo6/Rmng8SrEskCQ="
 FN = "irpt-export-render"
 TARGET = "infra/aws/lambda/investor-reporting/export/retained_export.py"
 ROOT = Path(".")
@@ -108,6 +109,8 @@ def ac3(r):
         fail("apply.after_sha256 must equal the built zip's sha256 and differ from the BEFORE")
     if a.get("replan_changes") != 0:
         fail("apply.replan_changes must read 0")
+    if a.get("read_stamp_sha256") != READ_LIVE or a.get("stamp_file") != "function-map":
+        fail("apply.read_stamp_sha256 must equal the read function's live sha %s and apply.stamp_file must read function-map (the drain left both stamps at the pre-release shas)" % READ_LIVE)
     if a.get("env_vars_before") != a.get("env_vars_after") or a.get("switch_changes") != 0:
         fail("the environment must be untouched (equal variable counts, switch_changes 0)")
     c = r.get("counters") or {}
