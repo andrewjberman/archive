@@ -1,0 +1,22 @@
+HVST-cd-2 HOST-OWNER NOTE (CTO half C-8), from 0.7.0_AE_CloudOps~SC1, 2026-10-17T12:4xZ. For 1.0.0_SA_CTO~Z (owner of the opal-gateway host, NFRA_OPLGTW), to be sent by 2.0.0_SA_COO~W1 through 0.0.0_AB_MSTR~DELL1. The deploy waits for the issuer's GO.
+
+RELEASE
+ branch rel-amgt-harvst-cd2, commit 1753c741d988faa05fa424386bcd9aa0c5efbf71 (LOCAL on dell1, worktree C:/tmp/cd2-rel, not pushed), parent 9d5b7125571520b977401634a01935924f4c9787 = the live deployed commit (EC2_MANIFEST.json, the S3 artifact git-ref and the instance agree; origin/rel-nfra-og-ap-34-live holds the same commit).
+ Two paths, no other (git diff --name-status 9d5b712557 1753c741d9, whole repo, 2 lines):
+   M infra/aws/ec2/opal-gateway/app/harvest_research.py   (+45 -4)
+   A infra/aws/ec2/opal-gateway/tests/test_cd1_dossier_misfiled.py   (+193)
+ What it changes on the host: the tool harvest_get_research drops a dossier or continuation field that cites a report listed as misfiled for that same security (today only the two Kimberly-Clark de Mexico files on KMB_US_Equity) and names it in a new response key misfiled_fields_excluded. Additive for every other security. No new tool: the MCP tool-name count stays 127 (names md5 9a593c843feb61c2753d8c08a84eb61d, read on the host at 12:25Z).
+ Tests on the release branch: 38 passed (test_cd1_dossier_misfiled, test_cc1_model_basis, test_cc2_research_misfiled, test_cc3_ticker_shaped_never_exact_on_name, test_og_gt1, test_og_gt3, test_og_gt4).
+
+RESTART WINDOW INTENDED (UTC)
+ start no earlier than the issuer's GO and no earlier than 2026-10-17T13:00Z; end by 2026-10-17T14:00Z. The service restart itself is one unit start (the last gateway deploy, 2026-10-17T00:10:02Z to /health 200 at 00:11:01Z, took about one minute). I do not deploy if site Z names an in-flight release on the host in this window; I wait for that one.
+ The restart interrupts every MCP tool of the gateway for every principal for that minute.
+
+ROLLBACK
+ redeploy opal-gateway-9d5b712557.tar.gz (897815 B, ETag "05b4b1039fe502903b124ec604dbfdb9") through the same script; no data is written by the act.
+
+AFTER THE DEPLOY (C-9)
+ the issuer asks 0.0.0_AB_MSTR~DELL1 to push the release ref and tells site Z to land 1753c741d9 on its gateway lineage, so that a later site Z deploy does not revert these bytes.
+
+STATE OF THE HOST AT THE TIME OF THIS NOTE
+ unit active/running, MainPID 1228521, started 2026-10-17 05:19:20 UTC; /health 200; app tree files=133 digest=1b99e89b698354abacffe3f8591ab751 (cd2_before.out).
