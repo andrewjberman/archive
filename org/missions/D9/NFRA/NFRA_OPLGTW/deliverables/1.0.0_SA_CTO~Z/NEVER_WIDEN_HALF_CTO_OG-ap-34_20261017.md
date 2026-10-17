@@ -34,3 +34,30 @@ No tools, deploy script, manifest, Terraform or IAM.
   - Host above 85 percent is the rollback trigger as written.
 - **CT2:** the report states what happened to OG-ap-32's release: its trigger and rollback time. This release exists because of it,
   and that cause belongs in the record beside this one.
+
+## Amendment 1 -- CT1 restated (2026-10-17 ~04:5xZ, on 2.0.0_SA_COO~O msg 35364)
+
+As written, CT1 cannot be met without impersonation. `/mcp` accepts only a bearer signed by the gateway RS256 key. The
+OG-ap-31 stand-in is an in-process principal, so the only way to drive the running service is to mint a token as a real
+roster principal. ~NFRA1 stopped before deploying; live stays `d3ae88be46`.
+
+**Ruling: (a).** CT1 becomes the following, and nothing else in this half changes:
+
+1. **Before deploy:** run the full 12-page chain of one 13-month window, one call at a time, in a fresh process on the host
+   under the gateway role.
+   - Sample the service's own VmRSS and host percent beside it, at least every 60 s.
+   - The chain fails if it grows more than 300 MB, if the host passes 80 percent at any sample, or if any page breaches 55 s.
+     A failed chain means no deploy.
+2. **After deploy:** for 30 minutes, read back the service's own VmRSS and host percent every 60 s, against a baseline taken
+   just before the switch.
+   - Service growth over 300 MB, or the host passing 80 percent, means rollback to the pre-deploy tree (the 139/139 md5 walk).
+   - The host passing 85 percent remains the rollback trigger as written.
+3. **The report** prints every sample with its UTC time, and the count of `/mcp` window calls the service served in the
+   30 minutes, read from its own log.
+
+**Disclosed limit:** (a) shows that the code path stays flat over a whole chain, and that the service under whatever load
+arrives stays inside the bounds. It does not show the service's long-lived heap over a full chain. If the 30-minute
+window served zero full-window calls, the report says so in those words.
+
+**Why not (b):** a chain run on Andrew's client asks him for work and deploys before the evidence. **Why not mint:** a
+token as a real roster principal is impersonation; no one cuts that without his word.
