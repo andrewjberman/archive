@@ -98,6 +98,7 @@ def main(argv):
                                                                                                   max(i["duration_s"] for i in invocations), max(i["max_memory_mb"] for i in invocations)))
     print("  stage lines: transaction rows= %d, TRANSACTION_SKIPPED %d, timeouts %d, other error-class lines %d" % (counts.get("transaction_rows", 0), counts.get("transaction_skipped", 0), counts.get("timeout", 0), counts.get("error", 0)))
     print("  pre-existing, NOT the transaction stage (row IRPT_DASHBD-D2-S135): FILLED_CATCHUP_LIST_FAILED lines %d" % counts.get("filled_catchup_denied", 0))
+    print("  (the CTO's live read, msg 10537: the role's ListExactlyTheSixGoldPrefixes grants the filled prefix since after the 2026-10-16 fire: 0 lines disarms S135; a recurrence is a NEW finding for the CTO)")
     print("VERDICT: " + verdict(invocations, counts))
     return 0
 

@@ -1,0 +1,90 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "to_id": "IRPT_DASHBD.TO-DB-b-331",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-331.vleg-pair-mint-for-the-filled-report-route.md",
+  "group": "OTHER",
+  "vintage_commit": "9801d62edd"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP.md",
+  "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-b-331.vleg-pair-mint-for-the-filled-report-route.md",
+  "vintage_commit": "9801d62edd"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "aws:dynamodb opal-users-v2 two synthetic users rows (minted once each, removed once, both read ABSENT on the email index and a consistent get)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "MINT-OK READBACK-OK for both, index counts [1, 1], sessions handed to S2 by broker, removal after the issuer word, three ABSENT reads per row",
+   "artifact_covered_by": [
+    "DBC197-1-AC1",
+    "DBC197-2-AC1"
+   ],
+   "commit_or_etag": "rows removed; nothing deployed"
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.7.0_AE_CloudOps~IB2/VLEG_PAIR_MINT_RECORD.json",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the record read by checker p197",
+   "artifact_covered_by": [
+    "DBC197-1-AC1",
+    "DBC197-2-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DBC197-1-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p197_vleg_pair_mint.py\" . DBC197-1-AC1",
+   "expect": "DBC197-1-AC1 PASS",
+   "output_evidence": "OK: both principals' classes and digests, the read-backs, the two sessions handed to S2 by broker, the removal after the issuer's word, two ABSENT reads each, no address\nDBC197-1-AC1 PASS\nexit=0",
+   "denominator": "1 record; 2 principals",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p197_vleg_pair_mint.py\" . DBC197-1-AC1",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DBC197-2-AC1",
+   "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p197_vleg_pair_mint.py\" . DBC197-2-AC1",
+   "expect": "DBC197-2-AC1 PASS",
+   "output_evidence": "OK: live: both synthetic rows are ABSENT on a consistent get and on the email index\nDBC197-2-AC1 PASS\nexit=0",
+   "denominator": "2 rows read live",
+   "status": "PASS",
+   "criterion_verbatim": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/checks/r150/p197_vleg_pair_mint.py\" . DBC197-2-AC1",
+   "method": "command"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant (the issuer's checker selftest is red on 27 single-fault mutants).",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "each apply re-planned to No changes; the dry run's object count was read before and after; the full pass reconciled shard by shard with the dry run; the checker re-reads the world",
+   "observed": "all equal; three criteria PASS",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "V-leg step (3), one export as COVERING",
+   "reason": "not run in the 15-minute token window (S2 could not compose the export bundle); owed under a new order, no re-mint without one (issuer msg 10524)"
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261017T1137Z_irpt-dashbd-vleg-pair-20261017_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "vleg_pair_mint.py, deploy_ledger.py",
+   "invocation": "state, pair, remove",
+   "result": "DBC197-1-AC1 and DBC197-2-AC1 PASS"
+  }
+ ]
+}
