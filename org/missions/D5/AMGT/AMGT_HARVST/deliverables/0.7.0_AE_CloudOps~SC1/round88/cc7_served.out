@@ -1,0 +1,33 @@
+HVST-cc-7 SERVED reads, 0.7.0_AE_CloudOps~SC1, 2026-10-17 ~00:15Z, after the deploy of rel-amgt-harvst-cc7b @319c9413a2 (instance restarted 00:10:26Z, /health 200 at 00:11:01Z, 127 tools).
+Each read is a call of the gateway tool through the opalgateway MCP as the signed-in Opal principal (this seat's MCP session). C-5: a read answered from a cache is not a read. The three
+responses below carry keys the old code could not emit (PG answers status candidates; every model figure carries basis and figure_claim; the KMB response carries misfiled_reports_excluded),
+and the host app tree read at 00:11:01Z holds the three new files (cc7_after.out), so these are served by the new bytes. as_of and source_keys of each response are printed.
+
+--- READ 1: harvest_resolve_security("PG") ---
+as_of 2026-10-09 ; source_keys ["crosswalk/v1/2026-10-09.json","universe/v1/2026-10-06.json"] ; denominator 243
+status "candidates" ; security_key null ; candidates [{"security_key":"PCG_US_Equity","display_ticker":"PCG US","name":"PG&E Corp","cik":"1004980","matched_on":"name"}] ; candidate_total 1
+matched_on "name" ; reason "no ticker matches 'PG'; these companies have a name that starts with it" ; query "PG"
+--- READ 1b: harvest_resolve_security("PCG") ---
+as_of 2026-10-09 ; source_keys ["bloomberg/harvest/bronze/identity/","crosswalk/v1/2026-10-09.json","universe/v1/2026-10-06.json"] ; denominator 243
+status "exact" ; security_key "PCG_US_Equity" ; display_ticker "PCG US" ; name "PG&E Corp" ; matched_on "ticker" ; query "PCG"
+
+--- READ 2: harvest_get_fundamentals(security_key="UNH_US_Equity", kind="model", mnemonics=["IS_DIL_EPS_CONT_OPS","IS_EPS"]) ---
+as_of 2026-10-16T13:12:11Z ; source_keys ["derived/model_block/UNH_US_Equity/20261016T131211Z/model_block.json"] ; denominator 873 ; 20 figures (IS_EPS and IS_DIL_EPS_CONT_OPS, FY2016 to FY2025)
+Every one of the 20 figures carries the key "basis" (an object with mnemonic and definition). The 10 IS_EPS figures carry figure_claim null. The 10 IS_DIL_EPS_CONT_OPS figures each carry, verbatim:
+  figure_claim "Bloomberg's diluted EPS from continuing operations, as the vendor computes it. It is NOT the reported (GAAP) diluted EPS and can differ from it by a large factor (UNH FY2024 33.38 against reported 15.51); never quote it as diluted EPS."
+IS_DIL_EPS_CONT_OPS values: 2016 7.1385, 2017 9.45, 2018 12.19, 2019 14.33, 2020 16.03, 2021 18.08, 2022 21.18, 2023 23.86, 2024 33.3807, 2025 15.5194 ; IS_EPS values: 2016 7.37, 2017 10.95, 2018 12.45, 2019 14.55, 2020 16.23, 2021 18.33, 2022 21.47, 2023 24.12, 2024 15.64, 2025 13.28.
+Count check: figures with key basis = 20 of 20 ; IS_DIL_EPS_CONT_OPS figures whose figure_claim contains "NOT the reported" = 10 of 10.
+
+--- READ 3: harvest_get_research(security_key="KMB_US_Equity") ---
+as_of 2026-10-12 ; denominator 24 ; dossier_key amgt/harvest/gold/research_dossier/security_key=KMB_US_Equity/as_of=2026-10-12.abd82596c92db453.json ; method_version amgt-corpus-dossier/15 ; truncated true (omitted_items dossier_fields 3, continuation_fields 1, ai_fill_blocks 1)
+source_keys: ["amgt/harvest/gold/ai_fill/security_key=KMB_US_Equity/ai_fill.json","amgt/harvest/gold/research-continuation/security_key=KMB_US_Equity/","amgt/harvest/gold/research-continuation/security_key=KMB_US_Equity/35e59b4ba50129dc.json","amgt/harvest/gold/research_dossier/security_key=KMB_US_Equity/as_of=2026-10-12.abd82596c92db453.json","amgt/harvest/silver/research-report/","amgt/harvest/silver/research-report/date=2026-09-23/part-20260923T044515Z.parquet","amgt/harvest/silver/research-report/date=2026-09-24/part-20260924T121349Z.parquet","amgt/harvest/silver/research-report/date=2026-09-24/part-20260924T214637Z.parquet","amgt/harvest/silver/research-report/date=2026-09-25/part-20260925T050517Z.parquet","amgt/harvest/silver/research-report/date=2026-09-25/part-20260926T004147Z.parquet","bloomberg/harvest/bronze/exec_officers/security_key=KMB_US_Equity/20261007T113632Z.json","management/v1/KMB_US_Equity/2026-09-18.json"]
+research_reports (3): report_id 1ad7aeda5f72cf41, 4e764c250cca98a2, a7875630a03f9cda. fbd50086c4065785 is ABSENT from research_reports (and so is 1a3b56044db679a5).
+misfiled_reports_excluded, verbatim:
+  [{"report_id":"fbd50086c4065785","reason":"Kimberly-Clark de Mexico SAB (KIMBERA MM) update filed in the 'Kimberly Clark KMB' library folder; KIMBERA MM is not in the harvest universe","correct_security_key":null},
+   {"report_id":"1a3b56044db679a5","reason":"Kimberly-Clark de Mexico SAB (KIMBERA MM) update filed in the 'Kimberly Clark KMB' library folder; KIMBERA MM is not in the harvest universe","correct_security_key":null}]
+denominator_note: "dossier fields read 24; research_dossier objects listed 14, distinct as_of 6, duplicates dropped 8; 2 misfiled report(s) excluded from KMB_US_Equity (see misfiled_reports_excluded)"
+NOT IN THE ORDER'S THREE CRITERIA, RECORDED AS FOUND (row AMGT_HARVST-D1-S38): the same response's gold-dossier fields still cite the misfiled report: dossier_fields fund_of_record = "IDVZ" and last_stated_position = {"fund":"IDVZ","size_pct":"2.25","text":"MAINTAIN 2.25% POSITION IN IDVZ"} carry citation report_key .../research-report/security_key=KMB_US_Equity/fbd50086c4065785/Kimberly Clark Mexico Q2 2026 Earnings Update.docx, and pack_shape's basis names .../1a3b56044db679a5/Kimberly Clark Mexico Q2 2026 Earnings Update.pdf. The research_reports list is filtered; the dossier built from those objects is not (the order's "Not covered" names the silver/gold rebuild).
+
+SERVED_RESOLVE_PG=PASS
+SERVED_EPS_CLAIM=PASS
+SERVED_KMB_RESEARCH=PASS
