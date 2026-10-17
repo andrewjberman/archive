@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-un-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6784006a1f0f0270c387009490a286c811b0403d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-un-1.memory-cap-on-the-gateway-unit.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "6784006a1f0f0270c387009490a286c811b0403d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~140",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy/opal-gateway.service",
+      "kind": "config_data",
+      "commit_or_etag": "2bfe3f7c89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not deployed: the unit reaches the gateway host only through the next gateway release (deploy-to-ec2.sh copies it to /etc/systemd/system/, runs daemon-reload, then restart). This order runs no deploy."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_un1.py",
+      "kind": "test",
+      "commit_or_etag": "2bfe3f7c89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file, not shipped: the release artifact carries app, deploy, requirements.txt and identity_tool_allowlist.txt only."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the unit carries the three directives in range and nothing else changed; the deploy still installs and restarts it.",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_un1.py test_ogun1_ac01 test_ogun1_ac02; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 named tests of 2 (test_ogun1_ac01, test_ogun1_ac02); 0 failed/error lines",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 2 of 2; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the commits of this serial touch only the two files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~140 '^infra/aws/ec2/opal-gateway/(deploy/opal-gateway\\.service|tests/test_og_un1\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~140: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched: 2 product files and 1 standing record path (surprise-channel); 0 outside the allowed set (want 0)",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~140: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order; the two named tests grade the file text directly.",
+      "expected": "N/A: the spec names no mutant",
+      "observed": "not run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Static file reads with no nondeterministic input; the tests compare file text to an embedded literal and parse fixed lines.",
+      "observed": "not run twice",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live deploy of the unit to the gateway host",
+      "reason": "Not in this order; it reaches the host only through the next gateway release."
+    },
+    {
+      "item": "deploy-to-ec2.sh, infra/aws/ec2/EC2_MANIFEST.json and all app files",
+      "reason": "Outside the order's <paths>; not touched. deploy-to-ec2.sh already copies the unit and runs daemon-reload and restart, which the test checks by text."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W140-S1: the commit gate printed WARN client-data-check, the hashed account-id list absent on this device, so commit 2bfe3f7c89 was not checked for client account ids.",
+    "NFRA_OPLGTW-Z-W140-S2: the pre-commit risk reflex read its danger map as STALE and returned PARTIAL_OR_BLIND, scanning 0 of 2 files, for commit 2bfe3f7c89."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~140/NFRA_OPLGTW.TO-OG-un-1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "_named.sh (r38 checks)",
+      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_un1.py test_ogun1_ac01 test_ogun1_ac02",
+      "result": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0; RESULT: PASS"
+    },
+    {
+      "tool": "_wkbound.sh (r38 checks)",
+      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~140 '^infra/aws/ec2/opal-gateway/(deploy/opal-gateway\\.service|tests/test_og_un1\\.py)$'",
+      "result": "files touched 3; product files 2; outside the allowed set 0 (want 0); RESULT: PASS"
+    }
+  ]
+}
