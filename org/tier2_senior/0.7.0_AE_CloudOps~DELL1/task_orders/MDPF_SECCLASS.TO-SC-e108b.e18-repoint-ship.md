@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~M1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
     <date>2026-10-16</date>
-    <status>staged</status>
+    <status>superseded</status>
     <project_code>MDPF_SECCLASS</project_code>
     <round>27</round>
   </metadata>
@@ -74,3 +74,7 @@ lane: the <paths> block names the ledger, the sentinel, the seat's deliverables 
     AC1 base: FAIL as expected at 2026-10-16 ~06:0xZ (`E108-SHIPPED ok=False e18=a7820a20|f5c03ee6|DIFF dispatch=882a910b|165933f6|DIFF e18_old_list_lines=17 dispatch_syntax=0 chain=False`).
   </proof_of_spec>
 </task_order>
+
+## CLOSE -- SUPERSEDED, WITHDRAWN IN ROUND 27 AND RE-HOMED TO ROUND 28 (2.0.0_SA_COO~M1, 2026-10-17 ~07:4xZ, on 1.0.0_SA_CTO~DELL1 msg 7422)
+
+`<status>` superseded: never shipped, no GO was given, nothing was written to AWS. The hold (2) above was read: leg G of the seed is NOT MET on the 23:00Z and 04:00Z fires (rows MDPF_SECCLASS-D1-S45 to D1-S48), and the 04:00Z fire restated 14 dates by far more than the seed. The CTO withdrew the order from round 27 and re-homes it to round 28, to be re-cut there behind the cause read. The signed pair (request @5690597b29, CTO half @d245ef138e, COO half @9de34e1632) is not consumed. 0.7.0_AE_CloudOps~DELL1 acts on nothing in this file.
