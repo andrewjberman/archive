@@ -1,0 +1,208 @@
+diff --git a/src/pages/InvestorReporting/__tests__/irpt-dashbd/dashboard-chart-breaks.test.ts b/src/pages/InvestorReporting/__tests__/irpt-dashbd/dashboard-chart-breaks.test.ts
+new file mode 100644
+index 00000000..a0058232
+--- /dev/null
++++ b/src/pages/InvestorReporting/__tests__/irpt-dashbd/dashboard-chart-breaks.test.ts
+@@ -0,0 +1,85 @@
++/**
++ * IRPT_DASHBD round 150, workstream CHARTGAP, cell DB-b-330 (TO IRPT_DASHBD.TO-DB-b-330; CTO msg 10331 (a)) -- the Performance
++ * chart draws every measured segment of a window, with a break at each day that has no return and at each trading day the source
++ * did not report. It was BLANK for any window holding such a day (the curve waited on a MEASURED window). Made-up values only
++ * (the fixture of the round-147 cell, with one extra day left without a return); no network, no server.
++ */
++
++import { describe, expect, test } from 'bun:test'
++import { readFileSync } from 'node:fs'
++import { fileURLToPath } from 'node:url'
++import { chartRows, performanceView, type WindowSelection } from '../../dashboard/DashboardPerformance'
++import { readSeries, type SeriesDocument } from '../../dashboard/seriesContract'
++
++const FIXTURES = fileURLToPath(new URL('./fixtures/', import.meta.url))
++const WHOLE: WindowSelection = { kind: 'custom', start: '2026-07-10', end: '2026-08-14' }
++const LATE: WindowSelection = { kind: 'custom', start: '2026-07-20', end: '2026-08-14' }
++
++function served(name: string, nullDay?: string): SeriesDocument {
++  const raw = JSON.parse(readFileSync(`${FIXTURES}${name}`, 'utf8')) as Record<string, unknown[]>
++  if (nullDay !== undefined) {
++    const i = (raw.date as string[]).indexOf(nullDay)
++    if (i < 0) throw new Error(`no such day ${nullDay}`)
++    raw.total_return_daily[i] = null
++    raw.day_quality[i] = 'NOT_MEASURABLE'
++  }
++  const read = readSeries(raw)
++  if (!read.ok) throw new Error(`${name} was refused: ${JSON.stringify(read.refusal)}`)
++  return read.document
++}
++
++describe('the chart rows of a window (DB-b-330)', () => {
++  test('a window with a no-return day is BREAK and still draws its measured days', () => {
++    const series = served('series-unreported-days.json', '2026-07-29')
++    const view = performanceView(series, LATE)
++    expect(view.status).toBe('BREAK')
++    const rows = chartRows(series, view)
++    const drawn = rows.filter((row) => row.cumulative !== null)
++    expect(drawn.length).toBeGreaterThan(5)
++    expect(rows.find((row) => row.date === '2026-07-29')?.cumulative).toBeNull()
++  })
++
++  test('the drawn values are the linked path of the window, day for day', () => {
++    const series = served('series-unreported-days.json', '2026-07-29')
++    const view = performanceView(series, LATE)
++    const rows = chartRows(series, view)
++    for (const point of view.path) expect(rows.find((row) => row.date === point.date)?.cumulative).toBe(point.cumulative)
++  })
++
++  test('a trading day the source did not report is a row with no value, in date order', () => {
++    const series = served('series-unreported-days.json')
++    const rows = chartRows(series, performanceView(series, WHOLE))
++    const gaps = rows.filter((row) => row.gap)
++    expect(gaps.map((row) => row.date)).toEqual(['2026-07-14', '2026-07-15', '2026-08-05'])
++    for (const gap of gaps) expect(gap.cumulative).toBeNull()
++    expect(rows.length).toBe(series.date.length + 3)
++    for (let i = 1; i < rows.length; i++) expect(rows[i].date > rows[i - 1].date).toBe(true)
++  })
++
++  test('a series with no statement of unreported days adds no row', () => {
++    const series = served('series-no-statement.json')
++    expect(chartRows(series, performanceView(series, WHOLE)).length).toBe(series.date.length)
++  })
++
++  test('a MEASURED window draws as before: every served day of it has a value', () => {
++    const series = served('series-unreported-empty.json')
++    const view = performanceView(series, LATE)
++    expect(view.status).toBe('MEASURED')
++    const inWindow = chartRows(series, view).filter((row) => row.date >= LATE.start && row.date <= LATE.end)
++    expect(inWindow.every((row) => row.cumulative !== null)).toBe(true)
++  })
++
++  test('a measured day between two breaks is marked isolated; a day beside a measured day is not', () => {
++    const series = served('series-unreported-days.json', '2026-07-17')
++    const rows = chartRows(series, performanceView(series, WHOLE))
++    const byDate = new Map(rows.map((row) => [row.date, row]))
++    expect(byDate.get('2026-07-16')?.isolated).toBe(true)
++    expect(byDate.get('2026-07-20')?.isolated).toBe(false)
++  })
++
++  test('a day outside the window has no value', () => {
++    const series = served('series-unreported-days.json', '2026-07-29')
++    const rows = chartRows(series, performanceView(series, LATE))
++    expect(rows.filter((row) => row.date < LATE.start).every((row) => row.cumulative === null)).toBe(true)
++  })
++})
+diff --git a/src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx b/src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx
+index 08ab846a..e1c4ee4c 100644
+--- a/src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx
++++ b/src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx
+@@ -169,16 +169,55 @@ export function performanceView(series: SeriesDocument, selection: WindowSelecti
+   return { window, status, result, path, notes, label, measuredFrom }
+ }
+ 
++/** One chart row: a served day, or a trading day the source did not report (`gap`). `isolated`: a measured day between two breaks. */
++export interface ChartRow {
++  readonly date: string
++  readonly cumulative: number | null
++  readonly quality: string
++  readonly gap: boolean
++  readonly isolated: boolean
++}
++
++/**
++ * IRPT_DASHBD DB-b-330 (CTO msg 10331 (a)): the chart draws every measured segment of the window, whatever the window's
++ * headline status. A day with no return, and a trading day the source did not report, are rows with no value, so the line
++ * breaks there and never joins across them. The headline figure keeps its own rule (BREAK shows "Not measured").
++ */
++export function chartRows(series: SeriesDocument, view: PerformanceView): ChartRow[] {
++  const byDate = new Map(view.path.map((point) => [point.date, point.cumulative]))
++  const served = new Set(series.date)
++  const first = series.date[0]
++  const last = series.date[series.date.length - 1]
++  const rows: { date: string; cumulative: number | null; quality: string; gap: boolean }[] = series.date.map((date, i) => ({
++    date, cumulative: byDate.get(date) ?? null, quality: series.day_quality[i], gap: false,
++  }))
++  for (const day of series.unreported_trading_days ?? []) {
++    if (!served.has(day) && day > first && day < last) rows.push({ date: day, cumulative: null, quality: '', gap: true })
++  }
++  rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
++  return rows.map((row, i) => ({
++    ...row,
++    isolated: row.cumulative !== null && (i === 0 || rows[i - 1].cumulative === null) && (i === rows.length - 1 || rows[i + 1].cumulative === null),
++  }))
++}
++
++/** A measured day with no measured neighbour draws no line, so it is drawn as a dot. */
++function IsolatedDot({ cx, cy, payload }: { cx?: number; cy?: number; payload?: ChartRow }) {
++  if (!payload?.isolated || typeof cx !== 'number' || typeof cy !== 'number') return null
++  return <circle cx={cx} cy={cy} r={3} fill={COLORS.opalNavy} />
++}
++
+ function QualityTooltip({ active, payload, label }: {
+   active?: boolean
+-  payload?: readonly { value?: number | null; payload?: { quality?: string } }[]
++  payload?: readonly { value?: number | null; payload?: { quality?: string; gap?: boolean } }[]
+   label?: string
+ }) {
+   if (!active || !payload || payload.length === 0) return null
+   const value = payload[0]?.value
+   const quality = payload[0]?.payload?.quality
+   const rows = [{ label: 'Total return in this window', value: typeof value === 'number' ? percent(value) : 'No return for this day' }]
+-  if (quality !== undefined && quality !== 'MEASURED') rows.push({ label: 'Data note', value: coverageSentence('day_quality', quality) })
++  if (payload[0]?.payload?.gap === true) rows.push({ label: 'Data note', value: 'The source did not report this trading day.' })
++  else if (quality !== undefined && quality !== 'MEASURED') rows.push({ label: 'Data note', value: coverageSentence('day_quality', quality) })
+   return (
+     <div data-slot="dashboard-performance-tooltip">
+       <DataTooltip header={typeof label === 'string' ? dateWords(label) : 'not supplied'} rows={rows} />
+@@ -227,13 +266,13 @@ export function DashboardPerformance({ read, initialSelection, onWindowChange }:
+   const series = read.document
+   const view = performanceView(series, selection)
+   const { result } = view
+-  // A window that is not measured draws no curve: the brush stays, so the reader can move to a window that is.
+-  const cumulativeByDate = new Map(view.status === 'MEASURED' ? view.path.map((point) => [point.date, point.cumulative]) : [])
+-  // The brush runs over the WHOLE history; the curve has a value only inside the window, where the brush stands.
+-  const rows = series.date.map((date, i) => ({ date, cumulative: cumulativeByDate.get(date) ?? null, quality: series.day_quality[i] }))
+-  const startIndex = result.answered.start === null ? -1 : series.date.indexOf(result.answered.start)
+-  const endIndex = result.answered.end === null ? -1 : series.date.indexOf(result.answered.end)
++  // The brush runs over the WHOLE history; the curve has a value only inside the window, where the brush stands. A window with
++  // a day that has no return still draws its measured segments, broken at that day (DB-b-330).
++  const rows = chartRows(series, view)
++  const startIndex = result.answered.start === null ? -1 : rows.findIndex((row) => row.date === result.answered.start)
++  const endIndex = result.answered.end === null ? -1 : rows.findIndex((row) => row.date === result.answered.end)
+   const hasDays = startIndex >= 0 && endIndex >= startIndex
++  const breakDays = rows.filter((row) => row.cumulative === null && result.answered.start !== null && result.answered.end !== null && row.date >= result.answered.start && row.date <= result.answered.end).length
+ 
+   return (
+     <Panel variant="nested" className="mt-4" data-slot="dashboard-performance">
+@@ -338,6 +377,12 @@ export function DashboardPerformance({ read, initialSelection, onWindowChange }:
+               </ul>
+             ) : null}
+ 
++            {breakDays > 0 ? (
++              <p className="mt-2 text-xs text-[hsl(var(--palette-navy))]" data-slot="dashboard-chart-breaks">
++                {`The curve breaks at ${breakDays} ${plural(breakDays, 'day', 'days')} with no return.`}
++              </p>
++            ) : null}
++
+             <div className="mt-3 h-[300px] w-full" data-slot="dashboard-performance-chart" data-days={view.path.length}>
+               <ResponsiveContainer>
+                 <AreaChart data={rows} margin={{ top: 5, right: 32, left: 0, bottom: 5 }}>
+@@ -358,6 +403,7 @@ export function DashboardPerformance({ read, initialSelection, onWindowChange }:
+                     strokeWidth={2}
+                     fill="url(#dashboard-performance-gradient)"
+                     connectNulls={false}
++                    dot={<IsolatedDot />}
+                     isAnimationActive={false}
+                   />
+                   <Brush
+@@ -367,8 +413,11 @@ export function DashboardPerformance({ read, initialSelection, onWindowChange }:
+                     startIndex={startIndex}
+                     endIndex={endIndex}
+                     onChange={(range) => {
+-                      const start = typeof range.startIndex === 'number' ? series.date[range.startIndex] : undefined
+-                      const end = typeof range.endIndex === 'number' ? series.date[range.endIndex] : undefined
++                      // A row the source did not report is no served day: the window starts at the next served day and ends at the last.
++                      const startRow = typeof range.startIndex === 'number' ? rows.slice(range.startIndex).find((row) => !row.gap) : undefined
++                      const endRow = typeof range.endIndex === 'number' ? rows.slice(0, range.endIndex + 1).reverse().find((row) => !row.gap) : undefined
++                      const start = startRow?.date
++                      const end = endRow?.date
+                       if (start !== undefined && end !== undefined && (start !== result.answered.start || end !== result.answered.end)) {
+                         setSelection({ kind: 'custom', start, end })
+                       }
