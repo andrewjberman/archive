@@ -1,10 +1,10 @@
-# L10 SLUG -- NFRA_OPLGTW round 40 -- DRAFT (2.0.0_SA_COO~O, 2026-10-17 ~07:0xZ)
+# L10 SLUG -- NFRA_OPLGTW round 40 (2.0.0_SA_COO~O, 2026-10-17 ~09:2xZ) -- SENT to 1.0.0_SA_CTO~Z
 
-**Status: DRAFT, NOT SENT.** The slug goes to `1.0.0_SA_CTO~Z` only after every task order of the round is terminal and every BLOCKING or ARMED row is dispositioned (CLAUDE.md rule 27, L10). Open: `OG-db-2` (worker `~133`), the `Z-S336` and `Z-S356` clocks (the CVO writes them once `OG-ap-33` and `OG-db-2` are terminal; CTO 35448), the `Z-S312` disarm clock. **Closed since the first draft:** the CVO graded `OG-ap-34` AC3 MET and re-graded `OG-ap-31` AC3 MET on the git-excluded chain (sha256 `7a92985d`), `ADJUDICATION_v40.Z.md` @`99411654a5` (relayed by the CTO, msg 35432); both chains page to a null cursor, newest first; this supersedes `Z-C-S84`'s PARTIAL. Numbers below are read from the tree at this commit; the sections marked OPEN are filled at the send.
+**Status: SENT.** Every task order of the round is terminal: 11 orders, 10 complete, 1 superseded. `python .tools/round-close-check.py --project NFRA_OPLGTW --round 40` reads `verdict=MAY-CLOSE` (proofs complete=10 proof_ok=10; judgment 1, graded 1, not_met 0, ungraded 0). The CVO graded `OG-ap-34` AC3 MET and re-graded `OG-ap-31` AC3 MET (`ADJUDICATION_v40.Z.md` @`99411654a5`). Every BLOCKING or ARMED row has an issuer ruling row or a CVO disposition; the ones still ARMED are listed in section 3 with what releases each.
 
 ## 1. The round, by order (read from the order files)
 
-Round 40 holds 11 task orders: 9 complete (with `OG-ap-33`), 1 superseded, 1 in flight (`OG-db-2`, committed `83eb42b2ad`, checks PASS in this seat's early runs).
+Round 40 holds 11 task orders: 10 complete, 1 superseded.
 
 | order | what | state |
 |---|---|---|
@@ -18,7 +18,7 @@ Round 40 holds 11 task orders: 9 complete (with `OG-ap-33`), 1 superseded, 1 in 
 | `OG-ap-34` | the fourth batched release: LIVE `9d5b7125571520b977401634a01935924f4c9787` since 05:19:28Z, ledger `nfra-oplgtw-gateway-release-batch5` CLOSED, `ap34.AC1` and `ap34.AC2` PASS (this seat's runs), md5 139 of 139, plateau test second chain +24.9 MB, 30-minute read-back 31 probes with 0 triggers; AC3 is the CVO's judgment (OPEN) | complete (AC3 judgment MET, CVO v40) |
 | `OG-ap-35` | narrow Alyssa's live grant by `download_filtered` (CTO ruling on call bd68, Andrew's 2026-10-08 word): usage 0 calls; `ag1.AC2` PASS; read-back refuses her download and answers list, describe, query; ledger CLOSED | complete |
 | `OG-ap-33` | land the `AMGT_HARVST` line (`319c9413a2`) on trunk under Amendment A2 (CTO decisions 35436 and 35438): merge `60412142ac`, drained into `box/sitez` as `033ca1ee2c`, on origin @`9b2f5f27d1` (this seat's ls-remote read); `ap33.AC1-3` PASS (my runs), py_compile ok, window tests 33 of 33 both orders | complete |
-| `OG-db-2` | re-land `OG-db-1`'s 17-line preflight on the live deploy script (the live blob was landed whole by `OG-ap-33`); `db2.AC1/AC2` PASS in this seat's early runs; worker `~133` writing its proof | in flight (OPEN) |
+| `OG-db-2` | re-land `OG-db-1`'s 17-line preflight on the live deploy script (the live blob was landed whole by `OG-ap-33`); drained `02aabf0e2b`; `db2.AC1`, `db2.AC2` and the write-set bound PASS (this seat's runs in the main tree), proof VALID | complete |
 
 ## 2. What the round delivered against the endpoint (FWD-21, FWD-22 and the window)
 
@@ -43,6 +43,9 @@ Round 40 holds 11 task orders: 9 complete (with `OG-ap-33`), 1 superseded, 1 in 
 6. A measured service heap over a full window call, once a real window call runs (closes `Z-S338`).
 7. The near-empty fees source stretch (`Z-S355`): ask whether the source or the account is the cause before any tool change.
 
-## 5. Open at the send
+## 5. What is left to the CVO and others (none blocks the slug)
 
-`OG-db-2` terminal; the `Z-S336`, `Z-S356` and `Z-S312` clocks; the `OG-ap-33` merge carried to origin by `0.0.0_AB_MSTR~Z`; `python .tools/round-close-check.py --project NFRA_OPLGTW --round 40` reading not REFUSED.
+- The CVO writes the `Z-S336` clock and the `Z-S356` disposition now that `OG-ap-33` and `OG-db-2` are terminal (CTO 35448), and the `Z-S312` clock (Andrew's three routes: "they are all clear + go").
+- Rows still ARMED and mine, with what releases each: `Z-S338` (a real window call under the live release with memory flat; the service served zero window calls in its read-back), `Z-S177` (a real 429), `Z-W94-S2` (the hashed account-id list: MSTR will not mint it; the CTO is asked who produces it).
+- `Z-S358` (a round-tag mislabel) is the CVO's.
+- Push state: box/sitez on origin @`9b2f5f27d1` (ls-remote read) for the HVST landing; `OG-db-2`'s drain `02aabf0e2b` and the later records are LOCAL (not yet carried).
