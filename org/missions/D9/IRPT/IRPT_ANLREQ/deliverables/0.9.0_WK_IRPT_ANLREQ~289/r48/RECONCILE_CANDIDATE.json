@@ -1,0 +1,117 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-389",
+  "worker": "0.9.0_WK_IRPT_ANLREQ~289",
+  "branch": "cand/dell2/prod-into-dev-reconcile",
+  "base_sha": "539b1ee70ba1b2a9b0c562a9169d9fcca1b7c18e",
+  "prod_sha": "15bc21b304d4b0a150a9cdd0c1b75251f0b8c2a8",
+  "merge_base": "fa21a303d87271a1e2d60c514d13501d71f9f020",
+  "head": "e5682ec51cbffd1bff95525e0dabb6f4508bc9cc",
+  "head_tree": "d445d9c8b79367ca0f864f4edc9c43b3e1d3b92f",
+  "dev_tree": "d445d9c8b79367ca0f864f4edc9c43b3e1d3b92f",
+  "pushed": false,
+  "ref_movement": "origin/DEV and origin/PROD read at the order's values (no move)",
+  "trial_merge_tree": {
+    "command": "git merge-tree --write-tree --name-only origin/DEV origin/PROD",
+    "conflicted_files": ["src/api/endpoints/tickets.ts", "src/pages/TicketCenter/TicketCenter.tsx"],
+    "auto_merged": ["src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx"],
+    "commits_prod_only": 23,
+    "commits_dev_only": 102
+  },
+  "conflicted_files": [
+    {
+      "path": "src/api/endpoints/tickets.ts",
+      "conflict_hunks": 3,
+      "resolution": "DEV side kept in every hunk; the PROD side is the older text or nothing; the common recordMeetingOutcome block appears once",
+      "hunks": [
+        {
+          "id": "H1",
+          "location": "Ticket interface, attachment member",
+          "dev_side": "attachment?: TicketAttachment | TradeFormAttachment | null",
+          "prod_side": "attachment?: TicketAttachment | null",
+          "rule": "DEV side is a superset; PROD side is the pre-trade text",
+          "dev_commit": "c05e3dda",
+          "prod_commit": "f7fa7fb1",
+          "kept": "dev_side"
+        },
+        {
+          "id": "H2",
+          "location": "CreateTicketInput answers and attachment",
+          "dev_side": "answers?: AnalysisRequestAnswers | MeetingRequestAnswers | TradeRequestAnswers; attachment?: TicketAttachment | TradeFormAttachment",
+          "prod_side": "answers?: AnalysisRequestAnswers | MeetingRequestAnswers; attachment?: TicketAttachment",
+          "rule": "DEV side is a superset",
+          "dev_commit": "c05e3dda",
+          "prod_commit": "pre-trade text (PROD carries no trade member)",
+          "kept": "dev_side"
+        },
+        {
+          "id": "H3",
+          "location": "between recordCommentarySent and recordMeetingOutcome",
+          "dev_side": "requestAttachmentUpload and getTicketAttachmentUrl with their doc comments",
+          "prod_side": "nothing at this point (recordMeetingOutcome follows directly, identical on DEV)",
+          "rule": "DEV-only change; PROD has no such functions",
+          "dev_commit": "c05e3dda",
+          "prod_commit": "none",
+          "kept": "dev_side"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/TicketCenter/TicketCenter.tsx",
+      "conflict_hunks": 1,
+      "resolution": "DEV side kept; TradeFormOpen stays imported and used",
+      "hunks": [
+        {
+          "id": "H4",
+          "location": "lines 90-94, TradeRequestParts import",
+          "dev_side": "import { TradeRequestForm, TradeFormOpen } from './TradeRequestParts'",
+          "prod_side": "import { TradeRequestForm } from './TradeRequestParts'",
+          "rule": "DEV side is a superset",
+          "dev_commit": "c05e3dda",
+          "prod_commit": "b8fc4628",
+          "kept": "dev_side"
+        }
+      ]
+    }
+  ],
+  "auto_merged_files_checked": [
+    {
+      "path": "src/pages/InvestorReporting/dashboard/DashboardPerformance.tsx",
+      "result_blob": "288b3bb6e02ab7d186575c7aa1f00646acd0b8dc",
+      "equals_dev_blob": true,
+      "prod_only_change": "037b9af3 (DB-c-24) already on DEV, carried by 9e0bcb60"
+    }
+  ],
+  "provenance_of_merge_into_dev": {
+    "git_diff_origin_dev_branch": "empty (no file, no hunk)",
+    "prod_only_hunks": 0,
+    "git_cherry_plus_commits": ["037b9af3", "b4c219c8", "c7a63531", "2cf8ec35", "8623c829"],
+    "dev_carriers": {
+      "037b9af3": "9e0bcb60",
+      "b4c219c8": "a8d5dafc / a020da0b (DB-c-26 on DEV; b4c219c8 is an empty commit)",
+      "c7a63531": "8e4f0885",
+      "2cf8ec35": "c748b8fe",
+      "8623c829": "7d5f953c"
+    }
+  },
+  "trade_request": {
+    "paths_matching_trade_differing_from_dev": [],
+    "ticket_center_trade_lines_branch": 10,
+    "ticket_center_trade_lines_dev": 10,
+    "set_equal": true,
+    "added_moved_or_removed": false
+  },
+  "tests": {
+    "typecheck": "0 errors (branch); rc 0 (DEV, same tree)",
+    "eslint_two_files": "0 errors, 2 warnings on both branch and DEV",
+    "bun_test": "branch 1411 pass, 70 fail, 27 errors, 25 skip; DEV at same path identical; failing lines 55 and 55, multiset equal; new load errors 0",
+    "see": "r48/GATES.json"
+  },
+  "claim": "The candidate branch adds no content to origin/DEV: its tree equals origin/DEV's tree. The PROD side of each conflicted hunk is a subset of or identical to the DEV side, so each change appears once in DEV's surroundings. No Trade Request line changed. Nothing pushed.",
+  "not_read": [
+    "the rendered pages",
+    "the vite build",
+    "any server or live endpoint",
+    "bun test outside src/pages/TicketCenter and src/pages/InvestorReporting",
+    "eslint outside the two conflicted files (the merge touches no other file)"
+  ]
+}
