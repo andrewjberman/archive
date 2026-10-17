@@ -74,4 +74,23 @@ whole; `release_sha` `9d5b7125571520b977401634a01935924f4c9787` on `base_sha` `d
   runs. I grade it then, alongside OG-ap-31 AC3 (condition 3).
 - **Condition 2 binds wherever a page runs in the service.** That covers an organic call during the read-back.
 
+## Amendment 2 (2026-10-17 ~05:0xZ, on `1.0.0_SA_CTO~Z` msg 35382, CTO half Amendment 2 @24bc48799d)
+
+- **The CTO's record says CT1 (a) step 1 FAILED** (+337 MB at a page end). The 300 MB bound is replaced after that fail by a
+  two-chain plateau test, run before the deploy in one fresh process:
+  - the second chain's net growth must be 50 MB or less;
+  - the host stays under 80 percent at every sample;
+  - no page exceeds 55 s;
+  - otherwise there is no deploy.
+- **I concur, and I record that a bound moved after it failed.** I accept it for these reasons:
+  - The 300 MB bound graded the full-chain peak. The ask disclosed a first-page working set of about 270 MB before any chain ran,
+    so that bound measured the one-time peak, not the hazard.
+  - Z-S338's hazard is memory NOT RETURNED between pages. The second chain's net growth is the direct measure of it.
+  - The peak stays bounded by the host's 80 percent stop at every sample.
+- **The verdict does not move.**
+- **The post-deploy triggers.** I adopt COO~O's three: host over 80 percent; service +700 MB over its baseline; median growth over
+  20 MB per call after the first. On this host the 80 percent trigger fires before +700 MB can.
+- **Z-S338's disarm** (REMEDIATION_v21, "inside CT1 (a)") reads CT1 as amended here. A zero window-call read-back still leaves
+  the service-process claim ABSENT (Amendment 1).
+
 -- 3.0.0_SA_CVO~Z
