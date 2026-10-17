@@ -1,0 +1,40 @@
+NFRA_OPLGTW.TO-OG-en-24 -- session log -- serial 0.9.0_WK_NFRA_OPLGTW~138 -- 2026-10-17
+Worktree C:/tmp/wk-oplgtw-138, branch wk-NFRA_OPLGTW-138. Code commit cde84ef947 (LOCAL).
+
+PRODUCT CHANGE
+app/client_core.py _answer: "absent_reason" = meta["_absent_reason"] when that is not None, else the body's own
+absent_reason (out.get("absent_reason")). Nothing else in _answer changed.
+
+ENUMERATION OF CODES THAT NOW SURFACE (read in code; counts and code names only)
+client_adapter_bd49f.py -- _absent( call sites: 6 (the def at 445 excluded)
+  window_read_busy: _window_busy (line 382), called from get_transactions (571) and get_fees (713). 2 call sites.
+  no_partition_at_as_of: _absent at lines 477 (resolve_account), 516 (get_holdings), 583 (get_transactions),
+    645 (get_allocation), 726 (get_fees). 5 call sites, 5 tools.
+client_adapter_bd49f.py -- plain absent_reason set in a body that reaches _answer (non-underscore):
+  no_candidate_for_last4: resolve_account (line 501), when there is no candidate.
+  account_not_in_partition: get_holdings (552) and get_transactions (618), when the answer is empty.
+  no_model_assignment_49f: get_allocation (696), always (FIRM_SHORT is 49f).
+  no_fee_rows_in_window: get_fees (764), when there is no fee row.
+client_adapter_bdcottonwood.py -- plain absent_reason set in get_allocation, reaching _answer:
+  no_model_assignment: line 451 (out at 454), when there is no model assignment.
+  model_not_in_roster: line 478 (out at 481), when the model is not in the roster.
+Unchanged: orion, eclipse, smartx and schwab set _absent_reason (underscore) only; commonwealth sets no absent_reason;
+  bdcottonwood lines 254, 306, 375, 397 and 502 set absent_reason None, so those answers still read None.
+Distinct codes now surfacing: 8 -- window_read_busy, no_partition_at_as_of, no_candidate_for_last4,
+  account_not_in_partition, no_model_assignment_49f, no_fee_rows_in_window, no_model_assignment, model_not_in_roster.
+An answer whose body carries None still answers None. Refusals raised as exceptions take the _failure path, unchanged.
+
+EXISTING TESTS
+No existing test was updated: the twelve window files pass 42 of 42 forward and 42 of 42 reverse.
+Wider run of every file that imports client_core or a client adapter (21 files): 96 passed, 1 failed.
+The failure is tests/test_og_ch1.py::test_ogch1_ac04, raised by its roster path walk ("the repo roster file is not
+on this tree"): data/mdpf/config/partner_roster.json is absent on this worktree. Logged as NFRA_OPLGTW-Z-W138-S1.
+The file was not copied into the worktree.
+
+NEGATIVE CONTROL
+With the line reverted to the plain meta["_absent_reason"] read, tests/test_og_en24.py: 3 failed (ac01 "assert None ==
+window_read_busy"; ac02 "assert None == account_not_in_partition"; ac03 client_resolve_account None). Line restored
+before commit cde84ef947.
+
+NOT DONE (bounds)
+No release, deploy, IAM, env key or registry change. No edit to app/tools.py, app/typed_scope.py or the 49F adapter.

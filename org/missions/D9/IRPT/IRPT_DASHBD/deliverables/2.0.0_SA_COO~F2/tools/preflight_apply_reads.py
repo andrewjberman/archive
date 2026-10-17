@@ -19,6 +19,13 @@ import p139_cotapply as cot  # noqa: E402
 R = str(ROOT)
 names = inf.aws_json(R, ["iam", "list-role-policies", "--role-name", inf.ROLE])["PolicyNames"]
 print("inf: role inline policies", len(names), "new ones", len([n for n in names if n not in inf.OTHER_POLICIES]))
+try:
+    inf.aws_json(R, ["iam", "get-role", "--role-name", inf.NEW_ROLE])
+    print("inf: new role", inf.NEW_ROLE, "EXISTS (Act 1 would STOP)")
+except inf.Fail as exc:
+    print("inf: new role absent" if "NoSuchEntity" in str(exc) else "inf: new role read FAILED: %s" % str(exc)[:120])
+bp = inf.aws_json(R, ["s3api", "get-bucket-policy", "--bucket", inf.GOLD_BUCKET])["Policy"]
+print("inf: fence pattern role/*-inf-* present", ":role/*-inf-*" in bp)
 for k, key in inf.KEYS.items():
     v = inf.aws_json(R, ["s3api", "list-object-versions", "--bucket", inf.CODE_BUCKET, "--prefix", key, "--max-items", "5"])
     print("inf: versions of", k, len([x for x in (v or {}).get("Versions", []) if x["Key"] == key]))
