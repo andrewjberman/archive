@@ -1,0 +1,30 @@
+HVST-cd-2 SERVED READS, 0.7.0_AE_CloudOps~SC1, 2026-10-17 15:0xZ to 15:1xZ, after the deploy of 1753c741d9 (restart 15:01:19 UTC). Each call: mcp opalgateway harvest_get_research through the live gateway as this session's Opal principal (not a cache: the response carries keys the pre-deploy code does not emit, misfiled_fields_excluded). The responses are large (the tool truncates them); the load-bearing parts are copied below, the rest is not.
+
+=== READ 1: KMB_US_Equity (security_key="KMB_US_Equity", no fields argument) ===
+as_of 2026-10-12; method_version amgt-corpus-dossier/15; content_sha256 a29d35c6997b3f56270f669fa21249629c8c025e8856d721104ffeb50122fdbb
+source_keys (12): amgt/harvest/gold/ai_fill/security_key=KMB_US_Equity/ai_fill.json; amgt/harvest/gold/research-continuation/security_key=KMB_US_Equity/ and .../35e59b4ba50129dc.json; amgt/harvest/gold/research_dossier/security_key=KMB_US_Equity/as_of=2026-10-12.abd82596c92db453.json; amgt/harvest/silver/research-report/ and its five parts (date=2026-09-23 .. 2026-09-25); bloomberg/harvest/bronze/exec_officers/security_key=KMB_US_Equity/20261007T113632Z.json; management/v1/KMB_US_Equity/2026-09-18.json
+dossier_fields returned (18): thesis_pillars, thesis_summary, negatives, ownership, positives, management, why_we_own, special_items, comparison_set, recommendation, growth_algorithm, company_description, investment_thesis_summary, risks, fund_form_ref, typecast_ref, sector_template_ref, cases. omitted_items.dossier_fields = 2 (the tool's size budget).
+continuation_fields returned (2): thesis_pillars, thesis_summary (no continuation field omitted).
+NO item named fund_of_record or last_stated_position in either list. NO string in the returned items contains fbd50086c4065785 or 1a3b56044db679a5 (checked by reading the response and, for the dossier, by scanning the source object per field, below).
+misfiled_fields_excluded (7, verbatim): {fund_of_record, dossier, fbd50086c4065785}; {kpi_set, dossier, fbd50086c4065785}; {last_stated_position, dossier, fbd50086c4065785}; {pack_shape, dossier, 1a3b56044db679a5}; {fund_of_record, continuation, fbd50086c4065785}; {kpi_set, continuation, fbd50086c4065785}; {last_stated_position, continuation, fbd50086c4065785}
+misfiled_reports_excluded (verbatim ids): fbd50086c4065785 and 1a3b56044db679a5, each "Kimberly-Clark de Mexico SAB (KIMBERA MM) update filed in the 'Kimberly Clark KMB' library folder; KIMBERA MM is not in the harvest universe".
+denominator_note: "... 2 misfiled report(s) excluded from KMB_US_Equity (see misfiled_reports_excluded); 4 dossier field(s) and 3 continuation field(s) citing a misfiled report excluded from KMB_US_Equity (see misfiled_fields_excluded)".
+
+=== READ 2: KMB_US_Equity, fields=["model_rows","team_sheet","fund_of_record","last_stated_position","kpi_set","pack_shape"] (the two omitted fields, asked for by name) ===
+Served: model_rows (a list of model rows; no string in it contains either report id). The four dropped names returned NO entry (not served). team_sheet: omitted again (omitted_items.dossier_fields 1). READ 3 asked for team_sheet alone: dossier_fields [], omitted_items.dossier_fields 1 -- the tool does not return team_sheet within its size budget (the source field is 74,089 bytes), before or after this deploy.
+THE ONE FIELD NOT SEEN ON THE SERVED TOOL: team_sheet. I read its SOURCE object instead (s3 .../research_dossier/security_key=KMB_US_Equity/as_of=2026-10-12.abd82596c92db453.json, a read-only helper, NOT the served tool): per-field scan of all 24 fields for the two report ids: only fund_of_record (fbd5...), kpi_set (fbd5... and 1a3b...), last_stated_position (fbd5...) and pack_shape (1a3b...) cite them; those are exactly the four the tool names in misfiled_fields_excluded; the other 20 fields, team_sheet and model_rows included, cite neither. So the served tool serves no field that cites either id, and the one served field I could not see is clean at its source.
+
+=== READ 4: CONTROL UNH_US_Equity (no fields argument), after the deploy ===
+as_of 2026-10-11; content_sha256 6e4b4245933bb67fe82066eceecc1c148000df6cd0a3e3eec44ae6cb2e2cf653 (EQUAL to both reads before the deploy); source_keys = the same 11 keys as before.
+COUNTS: dossier_fields returned 21 + omitted_items.dossier_fields 3 (denominator 24) = BEFORE 21 + 3; continuation_fields returned 4 + omitted 1 = BEFORE 4 + 1; the 21 returned dossier field names and the 4 continuation names are the same lists, in the same order, as before.
+misfiled_fields_excluded: [] (the key is present, empty); misfiled_reports_excluded: [].
+denominator_note unchanged: "dossier fields read 24; research_dossier objects listed 14, distinct as_of 5, duplicates dropped 9" (no sentence added).
+
+=== TOOLS AND HEALTH (C-6), host read by SSM c91911b9-5d01-4e99-8dd5-3c5eb8dd3b5a at 2026-10-17T15:02:22Z, read only ===
+unit active/running, MainPID 1248729, ActiveEnterTimestamp 2026-10-17 15:01:19 UTC; /health status=200.
+MCP tool-name count 127, names md5 9a593c843feb61c2753d8c08a84eb61d; BEFORE (14:51:30Z) 127 and the same md5; the TOOLNAMES lines are byte-identical before and after.
+Host app tree: files=133 before and after; the per-file md5 lists differ in exactly one row: app/harvest_research.py af2d662f9558e29de89c194f6de84eb0 -> 6d9e0dd38166b82943d6834a0ce482b5 (the blob at 9784d58e12 and at 1753c741d9). Digest 1b99e89b698354abacffe3f8591ab751 -> d9cea1865bba56f6b400bf0095e53cde.
+
+SERVED_KMB_DOSSIER=PASS
+SERVED_CONTROL=PASS
+TOOLS_AND_HEALTH_EQUAL=PASS
