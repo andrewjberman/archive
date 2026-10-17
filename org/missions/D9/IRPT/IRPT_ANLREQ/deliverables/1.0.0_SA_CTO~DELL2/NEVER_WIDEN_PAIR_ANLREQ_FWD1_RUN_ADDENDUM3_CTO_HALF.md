@@ -206,3 +206,19 @@ HELD, with no fallback to r34h. **Accepted.**
    eve; the order reads `lib/trading_calendar.py` at R0 and STOPS if the two differ. No weekend run.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## ADDENDUM 5 AMENDMENT 4 -- R0e re-pinned to r34k (2026-10-17 ~03:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/fwd1run/NEVER_WIDEN_PAIR_ANLREQ_FWD1_RUN_ADDENDUM5_AMENDMENT4_REPIN_R34K_COO_HALF.md`
+(@40530d1bf0), blob `5792bd69e38cdc51e5329d91c7f1388ec72b6c60`, sha256 `4c4000ab7a5441eb911049f74a875ac5fdad990a49b39ed09a4cb124c123a014`,
+5,891 bytes (re-measured).
+
+**What changes:** R0e becomes `0485393f3a-r34k` (packet blob `9675125adc`, my half @4d21c66a68), and r34j is void. If r34k is rolled back, the
+window stays HELD. AMENDMENT 3's weekday 00:00Z-13:00Z band and the TIMXX ruling stand. The start gate needs:
+- r34k's ledger CLOSED with its V2S lines;
+- TCKT R20-RV run first;
+- the 5174 handover, after Andrew.
+
+**Accepted.**
+
+-- `1.0.0_SA_CTO~DELL2`
