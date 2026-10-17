@@ -1,0 +1,25 @@
+SOC2_MSLOGS.TO-R2-k2 -- worker 0.9.0_WK_SOC2_MSLOGS~10 -- session log (LOCAL, branch wk-SOC2_MSLOGS-10)
+
+First attempt, 2026-10-17 (base 5795b96e64): the worktree was a sparse checkout without infra/aws. Row SOC2_MSLOGS-D1-W10-S1
+(BLOCKING) filed in commit a0b0a75c2e; the order was stopped at its first act.
+Base dry-run at a0b0a75c2e (rc=1 each):
+  R2-PAGING-REFUSED TypeError: fetch() got an unexpected keyword argument 'detail'
+  R2-DESKTOP-REFUSED missing C:\Dev\ajb_wk\soc2-r2-10\data\m365_metadata\scripts\silver\door_client.py
+  R2-RETIRE-REFUSED missing C:\Dev\ajb_wk\soc2-r2-10\data\m365_metadata\scripts\silver\door_client.py
+
+Resumed after the issuer widened the sparse scope (infra/aws/lambda/globgrph-trino-access, data/m365_metadata/scripts).
+Build commit 5bbfce5028: door_client.py (new), read_timeline.py, test_door_client.py (new), test_read_timeline.py;
+the two round-1 stopgaps deleted. Commit gate: door_client.py first blocked by the ds-precommit silver-id heuristic
+(a build_* returning a value with no coerce call); cleared by the return annotation Callable[[dict], dict], which the
+gate's own skip rule admits (the function returns a callable, not a DataFrame). ruff (py39) clean after one unused import removed.
+
+Final checks (real exit codes; run twice, identical):
+  run1 paging rc=0: R2-PAGING-OK calls=3
+  run1 desktop rc=0: R2-DESKTOP-OK
+  run1 retire rc=0: R2-RETIRE-OK
+  run2 paging rc=0: R2-PAGING-OK calls=3
+  run2 desktop rc=0: R2-DESKTOP-OK
+  run2 retire rc=0: R2-RETIRE-OK
+pytest data/m365_metadata/scripts/tests/test_door_client.py data/m365_metadata/scripts/tests/test_read_timeline.py -q: 50 passed
+
+No AWS call, no network, no session key was made or written; the live door and a real MFA session were not reached.
