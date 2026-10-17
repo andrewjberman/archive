@@ -16,7 +16,7 @@ import sys
 
 LIVE, TRUNK, OUT = sys.argv[1:4]
 G = "infra/aws/ec2/opal-gateway/"
-NAMED = re.compile(r"OG-en-(17|15|13)\b")
+NAMED = re.compile(r"OG-en-(18|17|15|13)\b")
 FILES = [G + "app/client_adapter_bd49f.py"]
 
 
