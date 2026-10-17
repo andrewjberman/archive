@@ -7,6 +7,7 @@
   addendum --file F                         FB-p-5: S60 entered into the Cottonwood plan as a retire candidate, the delete marked Andrew's.
   key23 --file F                            FB-p-6: the 23rd named key on the floor day that drew no new version, named with why.
   triage --file F --ids IDS_FILE            FB-p-7, FB-p-8, FB-p-9: a verdict and its evidence for each of a fixed list of OPEN rows.
+  fence49 --file F                          FB-q-1: the opal-data-49financial fence regeneration (one policy, two statements, one apply), read back.
 Plain ASCII; exit 0 on a pass. Proves SHAPE and read-only discipline, never that a finding is true.
 """
 import argparse
@@ -312,10 +313,66 @@ def triage(a):
     return _finish("TRIAGE", p, "TRIAGE: OK rows=%d met=%d re_own=%d dismiss=%d carry=%d" % (len(got), cnt["MET"], cnt["RE_OWN"], cnt["DISMISS"], cnt["CARRY"]))
 
 
+F49_BUCKET = "opal-data-49financial"
+F49_SIDS = ["AllowScopedExemption3Objects", "DenyScopedExemption3ObjectsOutsidePrefix"]
+F49_RESOURCE = "arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/reporting/*"
+
+
+def fence49(a):
+    """FB-q-1: the opal-data-49financial fence regeneration for the export role's reporting prefix, one scoped apply, read back."""
+    raw, d = _load(a.file, "FENCE49")
+    if d is None:
+        return 1
+    p = _common(raw, d, ("order", "read_at", "preconditions", "plan", "applied", "after", "pair", "rollback", "ledger_closed", "claim"))
+    if p and p[-1].startswith("missing"):
+        print("FENCE49: FAIL " + "; ".join(p))
+        return 1
+    pc = d["preconditions"]
+    if not isinstance(pc, dict):
+        p.append("preconditions must be an object")
+    else:
+        row = pc.get("row_at_head")
+        if not isinstance(row, dict) or row.get("principal") != "irpt-export-render-role" or row.get("prefixes") != 2 \
+                or row.get("actions") != ["s3:GetObject"] or row.get("rows_for_principal") != 1 or row.get("has_arn") is not True:
+            p.append("row_at_head needs the one irpt-export-render-role row with 2 prefixes, actions [s3:GetObject] and an arn")
+        if pc.get("registry_refusals") != 0 or pc.get("role_exists") is not True:
+            p.append("preconditions needs registry_refusals 0 and role_exists true")
+        if pc.get("baseline_part1") != "No changes":
+            p.append("baseline_part1 must read exactly 'No changes'")
+        if pc.get("prior_policy_saved") is not True:
+            p.append("the prior policy JSON must be saved")
+        if pc.get("open_apply_on_bucket") is not False or not isinstance(pc.get("open_deploys_trees"), int) or isinstance(pc.get("open_deploys_trees"), bool) or pc["open_deploys_trees"] < 1:
+            p.append("open_apply_on_bucket must be false with open_deploys_trees (the union's denominator) at 1 or more")
+        n = pc.get("reporting_prefix_object_count")
+        if not isinstance(n, int) or isinstance(n, bool) or n < 0:
+            p.append("reporting_prefix_object_count must be a count (never a key)")
+    pl = d["plan"]
+    if not isinstance(pl, dict) or (pl.get("add"), pl.get("change"), pl.get("destroy"), pl.get("statements_added"), pl.get("statements_removed")) != (0, 1, 0, 0, 0):
+        p.append("plan must read add 0, change 1, destroy 0, statements_added 0, statements_removed 0")
+    elif sorted(pl.get("statements_changed", [])) != F49_SIDS or pl.get("entries_added_per_statement") != 1 or pl.get("added_resource") != F49_RESOURCE:
+        p.append("plan must change exactly the two statements %s by one entry, %s" % (",".join(F49_SIDS), F49_RESOURCE))
+    ap_ = d["applied"]
+    if not isinstance(ap_, dict) or ap_.get("apply_count") != 1 or ap_.get("targets") != 1 or not _s(ap_.get("tree_commit")):
+        p.append("applied needs apply_count 1, targets 1 and the tree commit")
+    af = d["after"]
+    if not isinstance(af, dict) or af.get("policy_read_back") is not True or af.get("other_statements_byte_unchanged") is not True \
+            or sorted(af.get("changed_statements", [])) != F49_SIDS or af.get("allow_resource_includes_prefix") is not True:
+        p.append("after needs policy_read_back, other_statements_byte_unchanged, the two changed statements and allow_resource_includes_prefix, all true")
+    pair = d["pair"]
+    if not isinstance(pair, dict) or not _s(pair.get("coo_half")) or not _s(pair.get("cto_half")) or not _s(pair.get("reach_ruling")):
+        p.append("pair needs coo_half, cto_half and reach_ruling (the ruling on the Allow's reach)")
+    rb = d["rollback"]
+    if not isinstance(rb, dict) or rb.get("recorded") is not True or not _s(rb.get("how")):
+        p.append("rollback needs recorded true and how")
+    if d["ledger_closed"] is not True:
+        p.append("the ledger entry is not closed")
+    return _finish("FENCE49", p, "FENCE49: OK bucket=%s applies=1" % F49_BUCKET)
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for nm in ("door6census", "addendum", "key23"):
+    for nm in ("door6census", "addendum", "key23", "fence49"):
         sub.add_parser(nm).add_argument("--file", required=True)
     r = sub.add_parser("door6retire")
     r.add_argument("--file", required=True)
@@ -329,7 +386,7 @@ def main():
     t.add_argument("--file", required=True)
     t.add_argument("--ids", required=True)
     a = ap.parse_args()
-    return {"door6census": door6census, "door6retire": door6retire, "planq": planq, "addendum": addendum, "key23": key23, "triage": triage}[a.cmd](a)
+    return {"door6census": door6census, "door6retire": door6retire, "planq": planq, "addendum": addendum, "key23": key23, "triage": triage, "fence49": fence49}[a.cmd](a)
 
 
 if __name__ == "__main__":
