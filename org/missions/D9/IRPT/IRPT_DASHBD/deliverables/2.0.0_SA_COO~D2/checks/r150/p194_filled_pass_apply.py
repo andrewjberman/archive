@@ -172,7 +172,8 @@ def run(root, cid):
     cto = (root / CTO_HALF_REL).read_text(encoding="utf-8") if (root / CTO_HALF_REL).is_file() else ""
     ledger_exists = bool(list((root / "org/critical_paths/.open_deploys").glob(LEDGER_SLUG + "*.json"))) or bool(list((root / "org/critical_paths/change_management").glob("*" + LEDGER_SLUG + "*")))
     check_record(rec, packet_sha, coo, cto, ledger_exists)
-    scrub = dict(rec, notes=re.sub(r"[a-z][a-z0-9-]*-\d{8}", "ledger", str(rec["notes"])))
+    scrub = dict(rec, notes=re.sub(r"[a-z][a-z0-9-]*-\d{8}", "ledger", str(rec["notes"])),
+                 v_leg=dict(rec["v_leg"], principals=["zero" if x == "0" * 12 else x for x in rec["v_leg"]["principals"]]))  # the order's zero digest is a placeholder, not an id
     need(not H.digit_runs(scrub), "a run of 8 or more digits outside the exempt fields: %s" % H.digit_runs(scrub)[:2])
     if cid == "DBC194-1-AC1":
         print("OK: both halves signed at the packet's sha256, the ledger, the build hash, the two plans, the exact OFF no-op, the dry run and the full pass reconciling by shard, the canary, the V leg, no id")
