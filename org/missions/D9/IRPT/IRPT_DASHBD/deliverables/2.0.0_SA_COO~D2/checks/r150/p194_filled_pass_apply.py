@@ -52,6 +52,9 @@ def count(x, lo=0):
     return is_int(x) and x >= lo
 
 
+ZERO2 = ["000000000000", "000000000000"]
+
+
 def check_shards(shards, label, expect_sum=None, mem_line=921):
     need(isinstance(shards, list) and len(shards) == 28 and [s.get("shard") for s in shards] == list(range(28)), "%s: 28 shards 0..27 in order (Addendum 1)" % label)
     for s in shards:
@@ -108,13 +111,15 @@ def check_run(rec):
          "canary: one client by digest, dry-run written 1, then written 1, the object exists, it validates, the prefix gained exactly 1")
     v = rec["v_leg"]
     need(isinstance(v, dict) and set(v) == {"principals", "signins_ok", "s2_step1", "s2_step2", "s2_step3", "leak", "removed", "absent_reads"}, "v_leg keys")
-    need(isinstance(v["principals"], list) and len(v["principals"]) == 2 and all(re.fullmatch(r"[0-9a-f]{12}", str(x)) for x in v["principals"]) and v["signins_ok"] is True, "v_leg: two principals by digest, both signed in")
-    need(v["s2_step1"] == "PASS" and v["s2_step2"] in ("PASS", "OWED") and v["s2_step3"] == "PASS" and v["leak"] is False, "v_leg: S2's steps (1) and (3) PASS, step (2) PASS or OWED with a reason, no leak")
+    need(isinstance(v["principals"], list) and len(v["principals"]) == 2 and all(re.fullmatch(r"[0-9a-f]{12}", str(x)) for x in v["principals"]) and v["signins_ok"] is (v["principals"] != ZERO2), "v_leg: two principals by digest, both signed in; or two zero digests and nothing signed in (nothing minted)")
+    need(v["s2_step1"] == "PASS" and v["s2_step2"] in ("PASS", "OWED") and v["leak"] is False
+         and (v["s2_step3"] == "PASS") == (v["principals"] != ZERO2) and (v["principals"] != ZERO2 or (v["s2_step2"] == "OWED" and v["s2_step3"] == "OWED")),
+         "v_leg: step (1) PASS, no leak; minted: step (3) PASS; nothing minted: steps (2) and (3) both OWED (CTO msg 10467)")
     need(v["removed"] is True and isinstance(v["absent_reads"], list) and len(v["absent_reads"]) == 2 and all(isinstance(x, dict) and set(x) == {"gsi", "consistent"} and x["gsi"] == "ABSENT" and x["consistent"] == "ABSENT" for x in v["absent_reads"]),
          "v_leg: both rows removed and read ABSENT twice")
     f = rec["full"]
     need(isinstance(f, dict) and set(f) == {"shards", "written_total", "objects_before", "objects_after"}, "full keys")
-    ft = check_shards(f["shards"], "full pass", expect_sum=tot)
+    ft = check_shards(f["shards"], "full pass", expect_sum=tot, mem_line=900)
     need(f["written_total"] == ft["written"] and f["objects_after"] - f["objects_before"] == tot["written"] - 1, "full: written_total = the shards' sum; the prefix gained exactly (would-be total - 1), the canary already existed")
     return tot, ft
 
@@ -132,6 +137,7 @@ def check_after(rec, ft):
     need(a["filled_objects"] == ft["written"], "after: the filled objects equal the full pass's written total")
     need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "the ledger left OPEN for the issuer; the reads block")
     need(isinstance(rec["notes"], str) and 30 <= len(rec["notes"]) <= 3000, "notes: words")
+    need(rec["v_leg"]["principals"] != ZERO2 or "no viewer session pair" in rec["notes"], "notes: when nothing was minted they say V-leg steps 2 and 3 are OWED: no viewer session pair (CTO msg 10467)")
     return True
 
 
@@ -230,11 +236,11 @@ def synthetic():
            "probe_off": {"response": OFF, "payload_shape": "clients+shard+shards"}, "schedule_inputs": {"checked": 3, "none_contains_filled_report": True},
            "dry_run": {"directory_clients": sum(s["clients"] for s in dry), "shards": dry, "objects_before": 5010, "objects_after": 5010},
            "canary": {"client_digest12": "a" * 12, "dry_run_written": 1, "clients": 1, "written": 1, "object_exists": True, "validates": True, "prefix_gain": 1},
-           "v_leg": {"principals": ["b" * 12, "c" * 12], "signins_ok": True, "s2_step1": "PASS", "s2_step2": "OWED", "s2_step3": "PASS", "leak": False, "removed": True, "absent_reads": [{"gsi": "ABSENT", "consistent": "ABSENT"}] * 2},
+           "v_leg": {"principals": list(ZERO2), "signins_ok": False, "s2_step1": "PASS", "s2_step2": "OWED", "s2_step3": "OWED", "leak": False, "removed": True, "absent_reads": [{"gsi": "ABSENT", "consistent": "ABSENT"}] * 2},
            "full": {"shards": full, "written_total": tw, "objects_before": 5011, "objects_after": 5011 + tw - 1},
            "after": {"function": {"code_sha256": BUILD_B64, "memory_mb": 1024, "timeout_s": 300, "env_keys": ["FILLED_REPORT_PASS"], "layer": "irpt-performance-native-layer:1", "reserved_concurrency": None},
                      "role_policy_hash16": POLICY_HASH16, "schedules": SCHEDULES, "series_prefixes": 3000, "summary_objects": 2000, "filled_objects": tw, "other_objects": 10},
-           "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts, digests and statuses only; the page has not been looked at; written documents stay on a rollback."}
+           "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts, digests and statuses only; the page has not been looked at; V-leg steps 2 and 3 OWED: no viewer session pair; written documents stay on a rollback."}
     return rec
 
 
@@ -291,10 +297,12 @@ def selftest():
     mut("canary validates", lambda r: r["canary"].update(validates=False))
     mut("canary digest", lambda r: r["canary"].update(client_digest12="cli_S01"))
     mut("canary gain", lambda r: r["canary"].update(prefix_gain=2))
-    mut("v signin", lambda r: r["v_leg"].update(signins_ok=False))
     mut("v leak", lambda r: r["v_leg"].update(leak=True))
     mut("v step1", lambda r: r["v_leg"].update(s2_step1="FAIL"))
-    mut("v step3", lambda r: r["v_leg"].update(s2_step3="OWED"))
+    mut("v step3 PASS with nothing minted", lambda r: r["v_leg"].update(s2_step3="PASS"))
+    mut("v step2 PASS with nothing minted", lambda r: r["v_leg"].update(s2_step2="PASS"))
+    mut("v signin with nothing minted", lambda r: r["v_leg"].update(signins_ok=True))
+    mut("notes without the reason", lambda r: r.update(notes="Counts, digests and statuses only; the page has not been looked at; written documents stay."))
     mut("v removal", lambda r: r["v_leg"].update(removed=False))
     mut("v present", lambda r: r["v_leg"]["absent_reads"][1].update(consistent="PRESENT"))
     mut("v one read", lambda r: r["v_leg"]["absent_reads"].pop())
