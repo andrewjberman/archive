@@ -1,0 +1,25 @@
+NFRA_OPLGTW.TO-OG-en-25 -- session log of 0.9.0_WK_NFRA_OPLGTW~139 (worktree C:/tmp/wk-oplgtw-139, branch wk-NFRA_OPLGTW-139, cut at 6784006a1f)
+
+1. First act: branch wk-NFRA_OPLGTW-139; TREE-OK (org and .tools present). Premises re-grounded: the order's
+   check scripts exist under r38/checks and the trnspt helper; test_og_en24.py exists for AC3; the test file
+   tests/test_og_en25.py was absent (expected).
+2. Baseline before any edit: test_og_rv2, gt6, cl2, en22, en23, en24 -> 26 passed.
+3. Product edits: app/typed_scope.py (TYPED_MAX_TABLE_BYTES, the in-memory cap before to_pylist, distinct_values);
+   app/etfs_rivals_flow.py (_peer_section reads the newest part with the three filters in Arrow, and takes the
+   available values from distinct_values). No change to app/tools.py, the catalog or any deploy file.
+4. Tests: tests/test_og_en25.py, three tests (test_ogen25_ac01, test_ogen25_ac02, test_ogen25_ac03).
+   AC3 holds two parts: the conversion spy on a 200 000-row part, and a fresh python -I child on a 1 000 000-row part.
+   No existing test was edited.
+5. Measurements (scratch, .scratch/en25_control.py and .scratch/en25_split.py, not committed):
+   - fixed path, fresh process, the call that ran away: empty section, peak Python heap 91770532 bytes (test run);
+     split: filtered read peak 48944747 bytes, projected distinct read peak 39915346 bytes.
+   - negative control, the base code's whole-part read (in-memory cap lifted for the control only): 1000000 rows
+     converted, peak Python heap 851491942 bytes.
+   - the unfiltered whole part is 92738628 bytes of Arrow, over the new 64 MB cap, so the cap refuses it as designed.
+6. Wider gateway run (26 test files that import the typed readers, 156 tests): 150 passed, 6 failed. The four files
+   test_schwab_host_inputs, test_portal_index, test_og_gt8, test_og_ch1 also fail at HEAD product bytes
+   (7 failed, 27 passed in each state); see surprise row NFRA_OPLGTW-Z-W139-S2.
+7. Commit 1d35311a70 (product, test, surprise rows); commit-gate clean for 3 of 3 files; surprise-row gate
+   OK on 2 new rows; the client-data check printed WARN (account-id hash list absent on this box).
+8. Criteria: AC1 named check 3 of 3 PASS (run three times); AC2 write-set 4 files, 0 outside the set; AC3 both orders
+   29 passed, 0 failed.
