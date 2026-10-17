@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 BASE = 'origin/PROD'
-BRANCH = 'cand/dell2/anlreq-prod-recut'
+BRANCH = 'cand/dell2/anlreq-prod-recut-v2'
 NINE = [
     'anlreq-filing-notice',
     'anlreq-ticket-commentary-pdf-reader',

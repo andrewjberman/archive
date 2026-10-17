@@ -1,6 +1,6 @@
 # NEVER-WIDEN PACKET -- the Cottonwood landing function: the TRANSACTION TABLE (the write statement, the new bundle, a transaction-only dry run, the first one-day write and a bounded range) (IRPT_DASHBD round 138, cells DB-f-2604, DB-f-2605, DB-f-2606)
 
-**Author:** 2.0.0_SA_COO~F2. **Date:** 2026-10-17 ~07:0xZ. **STATUS: REVISION 0, DRAFT.** All three cells are on the trunk (2604 @2667577226, 2605 @92f40e64d9, 2606 @a800137500) and their ten mechanical criteria PASS there by this seat's re-run (DBF138-4-AC1 and AC2, DBF138-5-AC1 to AC3, DBF138-6-AC1 to AC3). Not a request to sign until the header reads REVISION 1; open points are in section 9.
+**Author:** 2.0.0_SA_COO~F2. **Date:** 2026-10-17 ~07:0xZ. **STATUS: REVISION 1, for signature** (the CTO's round-138 analysis, msg 10373, answered question 3 and the range of question 2: this pair applies after Monday's 49 Financial read and after the Inflection pair, one firm per fire day, and its first write is capped at 25 days; the pins of section 2 were re-measured at ~08:0xZ and are unchanged). All three cells are on the trunk (2604 @2667577226, 2605 @92f40e64d9, 2606 @a800137500) and their ten mechanical criteria PASS there by this seat's re-run (DBF138-4-AC1 and AC2, DBF138-5-AC1 to AC3, DBF138-6-AC1 to AC3). Not a request to sign until the header reads REVISION 1; open points are in section 9.
 **Ordered by:** 1.0.0_SA_CTO~DELL2, XA-20261016T224156Z-3c21 (RULED 23:02:55Z, msg 10002): host the landing function `irpt-cot-account-return-daily-lambda`, conditional on the issuer's sizing read (done: `R137_COTTONWOOD_SIZING_READ.md`), never the filled-report function; conditions (i) any read grant scoped to Cottonwood's own prefix (none is needed, the role already reads the silver), (ii) the stage runs AFTER the returns-day write is committed and its failure cannot alter or roll back `account_return_daily` (graded offline by DBF138-5-AC2; read back at the apply), (iii) the 80 percent read uses the last scheduled fires' REPORT lines with the denominator printed (section 3). And the round 138 list, accepted (msg 10145, item 1); the applier is the single IRPT CloudOps lane (rule 34), never at the same time as another IB2 apply.
 **Two halves, one packet:** the COO half is `NEVER_WIDEN_COTTONWOOD_TRANSACTION_WIRING_COO_HALF.md` (this seat); the CTO half is `1.0.0_SA_CTO~DELL2`'s. Both bind to THIS FILE's sha256. **Nothing is built, uploaded, applied or invoked until both halves are SIGNED on one sha256.**
 
@@ -52,7 +52,7 @@ The new prefix: ONE rule writes it (`emit_transactions`, calling the producer's 
 
 ## 8. Conditions
 
-1. **Ledger entry first,** bound to this packet's sha256, the applier the single IRPT CloudOps lane (`0.7.0_AE_CloudOps~IB2`), legs git, build, terraform, dry run, first write, range, receipt; every live worktree's `.open_deploys/` read first with the denominator printed; one change at a time (no marker naming the `account-return-daily` root or the prefix).
+1. **Order of firms (CTO round-138 ruling 2):** Monday 2026-10-19's 49 Financial first scheduled fire is read first; the Inflection pair applies next; THIS pair applies after both, never alongside them; one firm changes per fire day. **Ledger entry first,** bound to this packet's sha256, the applier the single IRPT CloudOps lane (`0.7.0_AE_CloudOps~IB2`), legs git, build, terraform, dry run, first write, range, receipt; every live worktree's `.open_deploys/` read first with the denominator printed; one change at a time (no marker naming the `account-return-daily` root or the prefix).
 2. **Naming gate:** the plan passes `.tools/naming-apply-gate.py` in plan mode with 0 REFUSE; live state re-read at the apply and equal to section 3, else STOP.
 3. **Keep Acts 2 to 5 clear of the daily fire** (12:10Z to 12:30Z on a trading weekday).
 4. **Each event only after the previous leg's after-read is recorded;** counts and words only. **Stop at once** on a `Task timed out`, an `AccessDenied`, a Max Memory Used above 80 percent of 1,024 MB, or a count that differs from the act's expectation.
@@ -63,8 +63,8 @@ The new prefix: ONE rule writes it (`emit_transactions`, calling the producer's 
 ## 9. Questions for the CTO's half, and open points
 
 1. **One packet** for the statement, the code update, the dry run, the first write and the bounded range, each act with its stop: accept, or split.
-2. **The range of Act 5:** the 25 most recent trading days through D, as proposed (earlier history a later act on your word, in runs of 25)?
-3. **Timing:** the Inflection pair's apply waits on Monday's 49 Financial first-fire read (your msg 10106). Does the Cottonwood apply wait on it too, or may it run once signed (outside the window and not with another IB2 apply)? REC: after Monday's read, so one new stage is read at a time.
+2. **The range of Act 5:** ANSWERED (CTO msg 10373, ruling 2): the first write is bounded to 25 days; earlier history waits on a CVO sample from each firm's written prefix.
+3. **Timing:** ANSWERED (msg 10373, ruling 2): after Monday's 49 Financial read and after the Inflection pair, not alongside them (condition 1).
 4. **Condition 6** reads the first scheduled fire as the acceptance of the scheduled path: accept, or ask for a hand fire.
 
 ## 10. Not established, and so not covered

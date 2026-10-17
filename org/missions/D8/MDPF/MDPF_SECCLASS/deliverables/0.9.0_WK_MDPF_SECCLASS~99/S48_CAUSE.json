@@ -1,0 +1,33 @@
+{
+  "writer": "B_00.canonical_holdings.py",
+  "moved_key": {
+    "bucket": "opal-data-bd",
+    "key": "gold/canonical/holdings/2026-10-02.parquet",
+    "date": "2026-10-02",
+    "before_version_id": "wtAhSnBVfcTlrV.Y6Ml3Jh.ggcyBgQkf",
+    "after_version_id": "aMEdNa9yQApdT4HVnPu3NLMqQ3WB1AV0"
+  },
+  "delta_total": 407720.32,
+  "upstream": [
+    {
+      "bucket": "opal-data-bd",
+      "key": "gold/timeseries/positions_cube/2026-10-02.parquet",
+      "version_before": "ClYoOVoiPNnN4D30SnyOzjJInoBmAVv.",
+      "version_after": "L4LeNIHpzJiTGvX8Sj2V.loH565E2dFd"
+    },
+    {
+      "bucket": "opal-data-bd",
+      "key": "silver/prices/canonical_prices.parquet",
+      "version_before": "dKIYKo8Io6di9_EWkocIx.Gvb3BzgmER",
+      "version_after": "uihR.VYehFa3hVghZyxIb.FL3yVtdSuZ"
+    },
+    {
+      "bucket": "opal-data-bd",
+      "key": "gold/dimensions/accounts_dimension_latest.parquet",
+      "version_before": "L9i.AIJ7uyGUEk3Y_wIm4sUsph3unml.",
+      "version_after": "2PZ.7DWFWqp5HGuZ6CBMZgkcnkbGiBQt"
+    }
+  ],
+  "why": "B_00 reads the BD positions cube for each date (rebuilt by A_03 in the 04:00Z fire from silver/transactions and silver/realized), the canonical price file (rebuilt at 04:03Z by build_canonical_prices_v2.py) and the accounts dimension (rebuilt at 04:03Z by A_00). The 2026-10-02 cube version changed from 23:14:07Z to 04:14:41Z: it gained 332 account-asset keys, lost 35, and two open accounts (z0817205211, z0822659431, both alive in silver/allocations for 2026-10-02) that had no cube rows before. Their positions come from the 49F bronze pull landed 00:02-00:08Z on 2026-10-17 (realized lots for sales dated 2026-10-15 whose open dates precede 10-02). B_00 keeps them as source bd. On 2026-10-02 the rise decomposes as added rows +378,049.08, removed rows -4,915.31, units change on common rows +59,508.86 and re-priced interpolated assets (78 rows) -24,922.31, which sums to +407,720.32. The two new accounts alone add about +169,675 and the same amount recurs on every date 10-01 to 10-14. No duplicate keys appear in the cube or the holdings, no object outside the nightly chain changed, and the 10-14 transaction partition rewrite removed 2,921 rows that all survive in other partitions. The rise is the producers' normal output computed by B_00's own rules.",
+  "verdict": "RIGHT"
+}

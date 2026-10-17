@@ -1,0 +1,53 @@
+TO IRPT_DASHBD.TO-DB-b-330 -- worker 0.9.0_WK_IRPT_DASHBD~258 -- session log (measured outputs, verbatim lines)
+
+Portal branch: cand/dell2/irpt-performance-chart-breaks
+Portal commit: 077be90cacf8e02602c43997ce7b1c65860bc7b2 (one commit on base 38d4f9473284a585bc217981213b9516e29d3a87)
+Pushed: ls-remote read of refs/heads/cand/dell2/irpt-performance-chart-breaks returned 077be90cacf8e02602c43997ce7b1c65860bc7b2
+
+1. Diff size (git -C portal diff --numstat base HEAD): DashboardPerformance.tsx 68 insertions, 11 deletions (79 lines, cap 120); the new test file is 2 files changed in total.
+   Line endings: 445 CR bytes for 445 lines in DashboardPerformance.tsx (CRLF kept).
+
+2. Checker, criterion AC1:
+   OK: only DashboardPerformance.tsx (within the line cap) and the cell's test file changed since the pinned DEV head, committed; ...
+   DBP196-1-AC1 PASS
+   rc=0
+
+3. Checker, criterion AC2:
+   OK: the cell's tests and the issuer's probe pass against the worker's chartRows (...)
+   DBP196-1-AC2 PASS
+   rc=0
+
+4. Cell's own test file, direct run (bun test .../dashboard-chart-breaks.test.ts), twice:
+   run 1: 8 pass, 0 fail, Ran 8 tests across 1 file
+   run 2: 8 pass, 0 fail, Ran 8 tests across 1 file
+
+5. Checker, criterion AC3:
+   FAIL: the dsgn-irptv1 tests failed: ... 385 pass | 2 fail | 1751 expect() calls | Ran 387 tests across 239 files. [84.92s]
+   DBP196-1-AC3 FAIL
+   rc=1
+   The two failing tests (direct run of the dsgn-irptv1 directory, rc=1, 385 pass, 2 fail, Ran 387 tests across 239 files):
+     - __tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts: gen-wire.ts regeneration is not byte-identical to the committed files (ExportBundle wire file)
+     - __tests__/fe-s-13/content-pins.test.ts (run as a subprocess by the wire-regen test): the two generators emit a file count other than documents + responses + index + consumed
+   The wire-regen test states it assumes core.autocrlf=true; git -C portal config --get core.autocrlf reads true.
+   The checker stops at its first failing step, so the steps below were run by hand at the same head.
+
+6. Run by hand at the same head (not a verdict):
+   bun test __tests__/irpt-dashbd: 185 pass, 0 fail, Ran 185 tests across 24 files, rc=0
+   bun run typecheck: "tsc -b --noEmit", rc=0
+   bun run build: "built in 14.13s", rc=0; the build log holds no SYNTHETIC PREVIEW words. The dist folder was not scanned by hand.
+
+7. Issuer's mutant selftest (checker --selftest on the worker's worktree; the file is restored in its finally):
+   reference: AC1 and AC2 PASS
+   selftest: 15 mutants, 3 not killed [('gate-on-measured-again', 'ANCHOR'), ('gap-has-value', 'ANCHOR'), ('outside-window-zero', 'ANCHOR')]
+   The three ANCHOR rows mean the reference's anchor text is absent from this implementation (the code is equivalent in shape, not in text). The other 12 mutants were killed.
+   SELFTEST FAIL (rc=1), as printed by the selftest.
+
+8. Manual mutants for the three ANCHOR rows (the measured-gate, the gap-with-value and the outside-window-zero faults written into this implementation's own text, one at a time, cell test file run after each, bytes restored, git status clean after):
+   gate-on-measured: rc=1, 5 pass
+   gap-has-value: rc=1, 5 pass
+   outside-window-zero: rc=1, 4 pass
+   each of the three fails the cell's tests (8 pass on the unmutated file).
+
+9. Surprise rows appended to org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md: IRPT_DASHBD-D2-W258-S1 (BLOCKING, AC3) and IRPT_DASHBD-D2-W258-S2 (OBSERVATION, the break-note condition).
+
+10. The order file was not flipped: AC3 is FAIL as written, so the order stays pending.
