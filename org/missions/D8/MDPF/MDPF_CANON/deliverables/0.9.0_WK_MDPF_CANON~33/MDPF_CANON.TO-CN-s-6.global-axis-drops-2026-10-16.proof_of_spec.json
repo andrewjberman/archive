@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_CANON.TO-CN-s-6",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/prd/MDPF_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1fb9ac96ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_CANON/decompositions/MDPF_CANON_DECOMP.md",
+    "vintage_commit": "a7ae0a1fde",
+    "to_ref": "org/missions/D8/MDPF/MDPF_CANON/task-orders/MDPF_CANON.TO-CN-s-6.global-axis-drops-2026-10-16.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_CANON~33",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "128fce3524a820c3c912a5f1e28ab149a68c5024",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "introduces": ["GLOBAL_AXIS_DROP_DATES = frozenset({\"2026-10-16\"})", "dates = sorted((set(a49[\"dates\"]) | set(ainf[\"dates\"]) | set(acot[\"dates\"]))"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit 128fce3524 on wk-MDPF_CANON-33 (LOCAL, not pushed). Source only; the worker wrote no AWS. The deploy is the 2026-10-18 13:30Z fire's one gold change, by a CloudOps ADHOC order after a never-widen pair."
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/gold/tests/test_global_fold_flag2.py",
+      "kind": "test",
+      "commit_or_etag": "128fce3524a820c3c912a5f1e28ab149a68c5024",
+      "artifact_covered_by": ["AC2"],
+      "introduces": ["def test_s6_axis_drops_only_the_enumerated_date():"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Commit 128fce3524 on wk-MDPF_CANON-33 (LOCAL, not pushed). Test source only; the 16 existing passing cases are unedited and the 3 pre-existing failing cases are untouched."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_6.py\" real 2>&1 | grep -E \"^  S|REAL\"; echo \"exit=${PIPESTATUS[0]}\" -- EXPECT: five lines S0 to S4 each reading PASS, then ROUND 11 CN-S-6 REAL: 5 of 5 arms -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_6.py\" real 2>&1 | grep -E \"^  S|REAL\"; echo \"exit=${PIPESTATUS[0]}\"",
+      "output_evidence": "(shell toplevel: /c/dev/wk-canon-s6-33)\n  S0  PASS drop=['2026-10-16'] exempt=20 holds_drop_date=False\n  S1  PASS dates=498 last=2026-10-15 as_of_last=2026-10-15 has_drop_date=False\n  S2  PASS last-row headline present=True core None cells since 2026-07-21=0\n  S3  PASS cot=499..2026-10-16 49f=489..2026-10-15 inf=489..2026-10-15\n  S4  PASS relabelled date -> REFUSED (v)\nROUND 11 CN-S-6 REAL: 5 of 5 arms\nexit=0",
+      "denominator": "5 arms (S0 to S4) of 5; 5 PASS",
+      "status": "PASS",
+      "expect": "ROUND 11 CN-S-6 REAL: 5 of 5 arms.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python -m pytest data/mdpf/scripts/gold/tests/test_global_fold_flag2.py -q --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_within_window_carries_and_labels --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_beyond_window_absent_for_real --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_source_is_measured_never_interpolated; echo \"exit=$?\" -- EXPECT: no failure, at least 17 passed -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python -m pytest data/mdpf/scripts/gold/tests/test_global_fold_flag2.py -q --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_within_window_carries_and_labels --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_beyond_window_absent_for_real --deselect data/mdpf/scripts/gold/tests/test_global_fold_flag2.py::test_carry_source_is_measured_never_interpolated; echo \"exit=$?\"",
+      "output_evidence": "17 passed, 3 deselected in 0.94s\nexit=0",
+      "denominator": "17 passed of 17 run (19 collected; 3 pre-existing failing cases deselected by node id; 0 failed): the 16 base cases plus test_s6_axis_drops_only_the_enumerated_date",
+      "status": "PASS",
+      "expect": "17 passed.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base-tree control: the same AC1 invocation and the AC2 pytest run in the primary checkout, which lacks GLOBAL_AXIS_DROP_DATES (the pre-cell tree). Run by mistake before the worktree runs; recorded as the base reading, not as a worker criterion.",
+      "expected": "AC1 2 of 5 (S0, S1, S2 red; S3, S4 green), as the order predicts",
+      "observed": "AC1 2 of 5, exit=1: S0 FAIL drop=None; S1 FAIL REFUSED (v) presence disagreement 5 across 1 date(s); S2 FAIL no artifact; S3 PASS; S4 PASS. AC2 in the same tree: 16 passed, 3 deselected, exit=0 (the added test absent).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 run in the worktree twice: once before the code commit and once after it, with the literal invocations",
+      "observed": "AC1 5 of 5 on both runs with identical S0 to S4 lines; AC2 17 passed, 3 deselected, exit 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The gold package deploy, the 2026-10-18 fire, and the read of the served Global object after the fire (D4 dry run)",
+      "reason": "Out of this cell by the order (BOUNDS 1): no AWS contact. CloudOps's ADHOC deploy after a never-widen pair; the issuer reads the served objects."
+    },
+    {
+      "item": "The never-widen pair (COO half and CTO half)",
+      "reason": "Owned by the COO and CTO halves, not by the worker."
+    },
+    {
+      "item": "GLOBAL_CROSS_AXIS_EXEMPT_DATES, _assert_cross_axis_coherence, _assert_global_composition, the Cottonwood leg and every per-firm artifact",
+      "reason": "Not in the cell (section 1 step 3 and BOUNDS 2). The date is NOT added to the exempt list; the set is the only rule."
+    },
+    {
+      "item": "The three staged leg files at C:/dev/_deploy_artifacts/canon_s6/",
+      "reason": "Read only through the issuer's check (BOUNDS 1). The worker printed no figure, account id or firm level from them."
+    },
+    {
+      "item": "A push of the branch",
+      "reason": "Order section 5 says no push. Commits are LOCAL on wk-MDPF_CANON-33."
+    },
+    {
+      "item": "The commit gate's client-data check and risk reflex on code commit 128fce3524",
+      "reason": "Not run to clear on this box: the hashed account-id list is absent and the risk reflex answered PARTIAL_OR_BLIND. Recorded as surprise rows S2 and S3; the diff adds only synthetic constants and test numbers."
+    }
+  ],
+  "surprises": [
+    "MDPF_CANON-D1-W33-S1: the order's proof invocation cd to $(git rev-parse --show-toplevel) resolves to the primary workspace when the shell cwd has reset, so AC1 and AC2 as written measure the base tree (AC1 2 of 5; AC2 16 passed).",
+    "MDPF_CANON-D1-W33-S2: the commit gate could not run its client account-id check on this box (hashed account-id list absent), so commit 128fce3524 was not checked for client account ids.",
+    "MDPF_CANON-D1-W33-S3: the pre-commit risk reflex answered PARTIAL_OR_BLIND on commit 128fce3524 (danger map 42.9h stale; linked-worktree build-guard limb), scanning 0 of 2 files."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_CANON/deliverables/0.9.0_WK_MDPF_CANON~33/MDPF_CANON.TO-CN-s-6.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "r11_cn_s_6.py real (issuer's check, read-only, run at its own path in the worktree)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python \"org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/checks/r11_cn_s_6.py\" real 2>&1 | grep -E \"^  S|REAL\"; echo \"exit=${PIPESTATUS[0]}\"",
+      "result": "5 of 5 arms, exit=0 (base: 2 of 5, exit=1, measured in the primary checkout)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 300 python -m pytest data/mdpf/scripts/gold/tests/test_global_fold_flag2.py -q --deselect ... (3 node ids); echo \"exit=$?\"",
+      "result": "17 passed, 3 deselected, exit=0 (base in the primary checkout: 16 passed, 3 deselected)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (commit gate: py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_CANON~33 <0.9.0_WK_MDPF_CANON~33@opal.agent>\" -F .scratch/msg_code_cn_s_6.txt -- data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py data/mdpf/scripts/gold/tests/test_global_fold_flag2.py",
+      "result": "rc=0: committed 128fce3524, 2 files, 32 insertions(+), 1 deletion(-); commit-gate All checks passed; WARN client-data-check absent (S2); risk-reflex PARTIAL_OR_BLIND (S3)"
+    }
+  ]
+}
