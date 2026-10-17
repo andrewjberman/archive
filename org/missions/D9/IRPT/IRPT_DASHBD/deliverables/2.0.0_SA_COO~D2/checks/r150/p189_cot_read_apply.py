@@ -135,7 +135,7 @@ def check_after(rec, c3_hash):
     b = rec["before"]
     need(a["bucket_policy_sha256"] == b["bucket_policy_sha256"], "the Cottonwood bucket policy changed")
     need(a["prefixes"] == b["prefixes"] and a["objects"] == b["objects"] and a["versions"] == b["versions"], "the 939 series prefix counts differ before and after: this pair writes nothing")
-    need(rec["ledger_closed"] is True and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "the ledger closed and the reads block")
+    need(rec["ledger_closed"] is False and rec["reads"] == {"vendor_calls": 0, "secret_reads": 0}, "the ledger left OPEN for the issuer (the order: the issuer closes it after verification) and the reads block")
     need(isinstance(rec["notes"], str) and 20 <= len(rec["notes"]) <= 2400, "notes: words")
     return True
 
@@ -193,7 +193,8 @@ def run(root, cid):
     c3 = H.load(root, C3_RECORD_REL)["build_only_sha256"]
     ledger_exists = bool(list((root / "org/critical_paths/.open_deploys").glob(LEDGER_SLUG + "*.json"))) or bool(list((root / "org/critical_paths/change_management").glob("*" + LEDGER_SLUG + "*")))
     check_record(rec, packet_sha, coo, cto, ledger_exists, c3)
-    need(not H.digit_runs(rec), "a run of 8 or more digits outside the exempt fields: %s" % H.digit_runs(rec)[:2])
+    scrub = dict(rec, notes=re.sub(r"[a-z][a-z0-9-]*-\d{8}", "ledger", str(rec["notes"])))  # a ledger slug ends in a date; any other 8-digit run is a leak
+    need(not H.digit_runs(scrub), "a run of 8 or more digits outside the exempt fields: %s" % H.digit_runs(scrub)[:2])
     if cid == "DBC189-1-AC1":
         print("OK: both halves read SIGNED at the packet's sha256, the ledger exists, both entries built the C3 hash, the plans read 5/0/0 and 1/1/0 with clean re-plans, eight probes by label, the forward returned the reply untouched, the simulations, the counts equal before and after, no id")
         return True
@@ -243,7 +244,7 @@ def synthetic():
            "probes": probes, "probe_identity_class": "OPAL_GLOBAL", "simulate": {"invoke_new_function": "allowed", "invoke_other_function": "implicitDeny", "s3_get_cottonwood_platinum": "implicitDeny"},
            "after": {"cot_function": {"code_sha256": h, "memory_mb": 512, "timeout_s": 29, "env_keys": COT_ENV, "role": COT_ROLE}, "read_function": {"code_sha256": h, "env_keys": READ_ENV_AFTER, "forward_value": COT_FN},
                      "read_role_policies": pol, "bucket_policy_sha256": "b" * 64, "prefixes": PREFIXES, "objects": 1900, "versions": 1950},
-           "ledger_closed": True, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts, hashes and statuses only; no body, id or name was written."}
+           "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0}, "notes": "Counts, hashes and statuses only; no body, id or name was written."}
     return rec, h
 
 
@@ -301,7 +302,7 @@ def selftest():
     mut("policies", lambda r: r["after"].update(read_role_policies=sorted(OLD_POLICIES)))
     mut("bucket policy moved", lambda r: r["after"].update(bucket_policy_sha256="c" * 64))
     mut("objects moved", lambda r: r["after"].update(objects=1901))
-    mut("ledger open", lambda r: r.update(ledger_closed=False))
+    mut("ledger closed by the applier", lambda r: r.update(ledger_closed=True))
     mut("reads", lambda r: r.update(reads={"vendor_calls": 1, "secret_reads": 0}))
     mut("extra key", lambda r: r.update(z=1))
     cot_cfg = {"CodeSha256": h, "MemorySize": 512, "Timeout": 29, "Handler": "entry.lambda_handler", "Role": "arn:aws:iam::1:role/" + COT_ROLE, "Environment": {"Variables": {k: "x" for k in COT_ENV}}}
