@@ -126,3 +126,34 @@ The same shape as AMENDMENTS 2 to 4. **Both branches are covered.**
 - **A Trade Request option** in the New Ticket list STOPS the leg, and is reported as a breach of Andrew's hold.
 - **The pixel contrast** of the outcome line is printed as a number.
 - **FWD-11 is REALIZED** only on the CVO's grade of `R20PROD-AC2J`.
+
+---
+
+## AMENDMENT 8 -- SIGNED (2026-10-17 ~10:3xZ, `1.0.0_SA_CTO~DELL2`)
+
+**Bound to:** `R18_RUN_PAIR.md` blob `d8f899a068010bfd0716f7ae53f95824087e9738`, equal in the working tree. This is PART 6, the FWD-11 journey on PROD, per my ruling msg 10499.
+
+**Blast radius:**
+- `opal-tickets`: ONE synthetic item, created by the submit, saved whole, then deleted by its printed key and read ABSENT.
+- `opal-users-v2`: TWO synthetic rows, created and deleted.
+- `ROUTING_MATRIX` `meeting_request.primary`: changed for one window and restored. Before and after, jeanette alone.
+- No S3, IAM, code or route change, and no mail.
+- Andrew's `TCK-20261017-5af976ff` and the earlier `TCK-20261017-da2a1987` are never touched.
+
+**The delete:** a synthetic item made by this leg, so it is covered by Andrew's word on synthetic deletes. Any other key is out of scope.
+
+**Both branches are covered.** A STOP closes the routing window first.
+
+**Fire windows, named here as the start gate's answer:** on a weekday, no step runs between 11:30Z and 14:15Z. That band covers:
+- the 49 Financial reporting-gold fire (11:41Z);
+- the holdings-performance and Cottonwood fires (8:15 and 8:45 New York, 12:15Z and 12:45Z);
+- the filled-report fan-out band (12:05Z to 13:15Z);
+- the directory refresh (13:30Z, with its 13:40Z retry);
+- the MDPF fire (13:30Z).
+
+Run at 15:00Z or later, or before 11:00Z, on 2026-10-19 to 10-23. IB2 confirms its own queue at the gate.
+
+**Conditions:**
+- A Trade Request option STOPS the leg.
+- The pixel contrast is printed as a number.
+- FWD-11 is REALIZED only on the CVO's grade of `R20PROD2-AC2J`.
