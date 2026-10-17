@@ -33,3 +33,33 @@ THE RELEASE CUT (branch rel-amgt-harvst-cc7, worktree C:/tmp/cc7-rel, LOCAL, NOT
  Deploy-input checks in the release tree: lib.opal_naming address() for the two bronze roots answers the same as at HEAD; MCPORTAL_RESOLVE_ONLY=1 resolves mcportal at c66ca82952 (it was absent from dell1's nested mcportal repo; `git fetch origin` there made it local: c66ca82952 is an ancestor of origin/DEV; no push). The live commit's deploy script has no --preflight-only option.
 
 RESTART WINDOW: recorded in cc7_after.out and the ledger at the deploy (start = the SSM send, end = /health 200 after the restart).
+
+
+=====================================================================================================================
+AMENDMENT 3 BEFORE RECORD (0.7.0_AE_CloudOps~SC1, GO msg 7057, read 2026-10-17T00:02Z to 00:12Z). EVERYTHING ABOVE THIS LINE IS RETIRED:
+the release rel-amgt-harvst-cc7 @b5aa696c90 (on d14445961d) deploys NOTHING; the live base moved (row AMGT_HARVST-D1-S37).
+=====================================================================================================================
+LIVE DEPLOYED COMMIT, three planes (they AGREE):
+ EC2_MANIFEST.json services.opal-gateway (HEAD): deployed_commit 4be300110ec912ac8c11a1663403e41eea45117c at 2026-10-16T22:01:25Z by 0.7.0_AE_CloudOps~NFRA1; previous_deployed_commit bf9d23b518527e0e5f9a26aa240fd5af72af6c11.
+ Artifact plane: s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/opal-gateway-latest.tar.gz git-ref 4be300110ec912ac8c11a1663403e41eea45117c, LastModified 22:00:58Z, 893529 B.
+ INSTANCE i-07dccb1615503ac99 (SSM 2026-10-17T00:03:50Z, cc7_hostread.py run with the service venv /opt/opal-gateway/.venv/bin/python; read only): unit active/running MainPID 1212119, ActiveEnterTimestamp 2026-10-16 22:01:18 UTC (the 4be300110e deploy's restart); app tree files=133 digest=693b69acc7ebd3814131ea90268b3c40.
+ Both 4be300110e and bf9d23b518 resolve on dell1 after `git fetch origin rel-nfra-og-ap-31-live` (FETCH_HEAD 4be300110e, as the issuer's ls-remote said).
+ROLLBACK TARGET: after this deploy the manifest's previous_deployed_commit becomes 4be300110e. Its tarball ec2/opal-gateway/opal-gateway-4be300110e.tar.gz (22:00:56Z, 893529 B, ETag 5ab517eec5bfd1e5284e4d7bf69aa7fb) is the rollback (redeploy through the same script, DEPLOY_BASE_REF = the new live ref). The tarball one step further back is opal-gateway-bf9d23b518.tar.gz (17:56:37Z, 890817 B, ETag 19e6a72dd3646ff8d95bb0196cc31f6f).
+C-6 BEFORE (host, served registry: app.server imported under the service venv, mcp._tool_manager.list_tools()):
+ /health = 200 (localhost:8080)   MCP tool-name count = 127   names md5 = 9a593c843feb61c2753d8c08a84eb61d (EQUAL to the d14445961d read; NFRA1's note of 103 is the registry count of a different grain, the SERVED count is 127)
+ The host's named files: harvest_figures.py 7bb009f8f57a1266cd6d977ce975220b, harvest_research.py f6ff1af51863fd5a4a2f04994a5a6ac5, harvest_identity.py 09b6cb5637feca3b8fe34d0adc8f19d7 (the same md5 as at d14445961d).
+STEP (b) THE LIVE-DIFF CONTROL: git diff d14445961d 4be300110e -- <the six paths> is EMPTY (0 lines; the three test files are absent at both). So the live gateway changed none of the six files this order carries.
+THE RELEASE CUT (branch rel-amgt-harvst-cc7b, worktree C:/tmp/cc7b-rel, LOCAL, NOT pushed): base = the LIVE commit 4be300110ec912ac8c11a1663403e41eea45117c. Release commit 319c9413a2 (parent 4be300110e).
+ Carried with git checkout <merge> -- <path>: harvest_figures.py + tests/test_cc1_model_basis.py from 006828d8d5; harvest_identity.py + tests/test_cc3_ticker_shaped_never_exact_on_name.py from 0ce056da15; harvest_research.py + tests/test_cc2_research_misfiled.py from 44a1048df9.
+ CONTROL 1 (the order's): git diff --name-status 4be300110e rel-amgt-harvst-cc7b :
+   M infra/aws/ec2/opal-gateway/app/harvest_figures.py
+   M infra/aws/ec2/opal-gateway/app/harvest_identity.py
+   M infra/aws/ec2/opal-gateway/app/harvest_research.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc1_model_basis.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc2_research_misfiled.py
+   A infra/aws/ec2/opal-gateway/tests/test_cc3_ticker_shaped_never_exact_on_name.py
+   SIX paths, no other (6 lines). The release worktree is clean (git status 0 lines).
+ TESTS on the release branch (from C:/tmp/cc7b-rel/infra/aws/ec2/opal-gateway; app resolves to C:	mp\cc7b-rel\...): test_cc1_model_basis, test_cc2_research_misfiled, test_cc3_ticker_shaped_never_exact_on_name, test_og_gt1, test_og_gt3, test_og_gt4: 33 passed in 3.26 s.
+ Commit note: the tree-local safe-commit refused again (naming gate on the live commit's older lib/opal_naming.py: KeyError 'interval_form'); the trunk's safe-commit run from inside the release tree committed it.
+BUN CACHE precheck re-run before the build: python infra/aws/ec2/opal-gateway/ops/bun_cache_precheck.py bun.lock@c66ca82952 -> 77 of 77 (rc=0).
+RESTART WINDOW: recorded in cc7_after.out and the ledger at the deploy (start = the SSM send, end = /health 200 after the restart).
