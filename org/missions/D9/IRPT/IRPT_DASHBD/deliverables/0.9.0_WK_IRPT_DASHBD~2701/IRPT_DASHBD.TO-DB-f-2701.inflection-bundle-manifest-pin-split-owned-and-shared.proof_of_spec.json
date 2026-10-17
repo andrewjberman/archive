@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2701",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2701.inflection-bundle-manifest-pin-split-owned-and-shared.md",
+    "group": "OTHER",
+    "vintage_commit": "5ce405f9fb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R139_F.md",
+    "vintage_commit": "5ce405f9fb",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2701.inflection-bundle-manifest-pin-split-owned-and-shared.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2701",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2701 from base 5ce405f9fb. The first act printed the branch and TREE-OK. The order's worker face was read whole, with the checker p139_split.py, the launcher, the manifest and the test file. Premises re-grounded: the checker's OWNED (5) and SHARED (14) lists match the manifest's member list; the base reproduced as the order states (pytest 59 passed, 2 failed, 7 errors; AC2 and AC3 FAIL). The manifest was split (14 shared members carry shared:true and no sha256; the 5 owned keep theirs). The launcher: build_bundle takes receipt=None and compares a shared member only with a receipt pin; make_receipt added; EXPECTED_BUNDLE_SHA256 removed; bootstrap reads bundle_sha256 from INF_G_01.bundle.receipt.json beside the zip. The test file: the built_zip fixture writes the receipt; the pin-constant test is replaced by new-rule tests; the bootstrap bad-member test writes a receipt in place of the monkeypatched constant; two sha assertions over the manifest now apply to the owned members only (or to the extracted bytes against the source). The three files were committed in one commit at 7232cba67a; the record and the proof are the second commit. No surprise row was filed: nothing in the cell departed from the order. No AWS call, no Terraform command, no push. The order status is not flipped.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/inf/scripts/gold/INF_G_01.bundle.json",
+      "kind": "config_data",
+      "commit_or_etag": "7232cba67a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 shared members flagged shared:true with no sha256; the 5 owned members keep their sha256; the member list, order and other keys unchanged.",
+      "artifact_covered_by": ["DBF139-1-AC2", "DBF139-1-AC3"]
+    },
+    {
+      "path_or_key": "data/inf/scripts/gold/INF_G_01.account_transaction_gold.py",
+      "kind": "script",
+      "commit_or_etag": "7232cba67a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_bundle(root, out_path, receipt=None); make_receipt(root, zip_path) added; EXPECTED_BUNDLE_SHA256 removed; RECEIPT_NAME added; bootstrap refuses a missing receipt, a receipt without bundle_sha256, and a zip differing from it.",
+      "artifact_covered_by": ["DBF139-1-AC1", "DBF139-1-AC2", "DBF139-1-AC3"]
+    },
+    {
+      "path_or_key": "data/inf/scripts/gold/tests/test_INF_G_01_account_transaction_gold.py",
+      "kind": "test",
+      "commit_or_etag": "7232cba67a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pytest 77 passed, 0 failed, 0 errors (base 59 passed, 2 failed, 7 errors); 10 tests added, 1 replaced.",
+      "artifact_covered_by": ["DBF139-1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2701/RD_BUNDLE_SPLIT_FACTS_R139.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "claim measured; owned 5; shared 14; tests_before 59/2/7; tests_after 77/0/0; tests_added 10; files_touched 3; the three checker results; the not_proven list.",
+      "artifact_covered_by": ["DBF139-1-AC1", "DBF139-1-AC2", "DBF139-1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF139-1-AC1",
+      "criterion_verbatim": "`DBF139-1-AC1` -- the launcher test file reads green at HEAD: no failed and no erroring test (the nine that are red on the trunk read green). Base: FAIL (2 failed, 7 errors).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_split.py\" . DBF139-1-AC1",
+      "output_evidence": "DBF139-1-AC1 PASS, rc 0, run from the worktree root at commit 7232cba67a.",
+      "denominator": "the launcher test file: 77 tests, 77 passed, 0 failed, 0 errors (base 68 tests: 59 passed, 2 failed, 7 errors).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF139-1-AC2",
+      "criterion_verbatim": "`DBF139-1-AC2` -- the manifest is split exactly (5 owned with a sha256, 14 shared flagged with none), the unedited tree builds, and a planted edit to an OWNED member still refuses naming it. Base: FAIL (the manifest is not split).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_split.py\" . DBF139-1-AC2",
+      "output_evidence": "DBF139-1-AC2 PASS, rc 0, run from the worktree root at commit 7232cba67a.",
+      "denominator": "manifest members 19 of 19: 5 owned with a 64-hex sha256 and no shared flag, 14 shared with shared:true and no sha256; the unedited tree builds (1 build); a planted edit to the owned member refuses naming it (1 of 1).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF139-1-AC3",
+      "criterion_verbatim": "`DBF139-1-AC3` -- a planted edit to a SHARED member does not refuse while no receipt pin exists; against a receipt pin it differs from the build refuses naming the member; against a pin equal to the edited file it builds. Base: FAIL (the tree refuses on the already-drifted members).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_split.py\" . DBF139-1-AC3",
+      "output_evidence": "DBF139-1-AC3 PASS, rc 0, run from the worktree root at commit 7232cba67a.",
+      "denominator": "3 arms on lib/opal_naming.py in a scratch repo: no receipt builds (1 of 3); a receipt pin differing from the edited file refuses naming the member (2 of 3); a receipt pin equal to the edited file builds (3 of 3).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's selftest arms over the pure helpers: the split's members count, no overlap, the green manifest, a shared member carrying a sha256, an owned member without one, an extra member and a missing member each go red.",
+      "expected": "selftest PASS with all arms",
+      "observed": "selftest PASS (8 arms) rc 0 at commit 7232cba67a.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the launcher test file re-run after the commit on the committed bytes, from the worktree root",
+      "observed": "77 passed, 0 failed, 0 errors (pytest rc 0) at 7232cba67a; the bundle determinism test (two builds equal) is among them.",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "p139_split.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r139/p139_split.py\" --selftest",
+      "result": "selftest PASS (8 arms) rc 0."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, any Terraform command, any upload.",
+      "reason": "The order states no AWS access, no Terraform and no upload; none was run."
+    },
+    {
+      "item": "The release-day receipt file INF_G_01.bundle.receipt.json is not written.",
+      "reason": "The order makes the receipt the applier's release-day act; the cell proves the mechanism through make_receipt and the scratch repo."
+    },
+    {
+      "item": "Order status is not flipped.",
+      "reason": "The order's worker face says the issuer flips status."
+    }
+  ],
+  "surprises": []
+}
