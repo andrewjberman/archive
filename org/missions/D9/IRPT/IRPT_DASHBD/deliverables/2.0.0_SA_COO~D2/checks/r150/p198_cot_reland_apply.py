@@ -113,8 +113,8 @@ def check_record(rec, packet_sha, packet_text, coo_text, cto_text, ledger_exists
     need(isinstance(pd, dict) and set(pd) == {"published", "refused"} and pd["published"] == 939 and count(pd["refused"]) and pd["refused"] <= REFUSED_MAX, "publish dry run: 939 published, refused at most %d" % REFUSED_MAX)
     c = rec["canary"]
     need(isinstance(c, dict) and set(c) == {"account_digest12", "dates_gained", "common_fields_equal", "only_next_days_three_fields_differ", "manifest_unchanged_but_dates"} and re.fullmatch(r"[0-9a-f]{12}", str(c["account_digest12"]))
-         and isinstance(c["dates_gained"], list) and c["dates_gained"] and set(c["dates_gained"]) <= set(days) and c["common_fields_equal"] is True and c["only_next_days_three_fields_differ"] is True
-         and c["manifest_unchanged_but_dates"] is True, "canary: one account by digest; the dates gained are a non-empty subset of the days; common fields equal the previous version except each next day's three fields; the manifest keeps publisher version, scope and claim")
+         and isinstance(c["dates_gained"], list) and c["dates_gained"] and set(c["dates_gained"]) <= set(ad) and c["common_fields_equal"] is True and c["only_next_days_three_fields_differ"] is True
+         and c["manifest_unchanged_but_dates"] is True, "canary: one account by digest; the dates gained are a non-empty subset of the days and their next days; common fields equal the previous version except each next day's three fields; the manifest keeps publisher version, scope and claim")
     f = rec["publish_full"]
     need(isinstance(f, dict) and set(f) == {"published", "refused", "objects_before", "objects_after", "versions_before", "versions_after"} and f["published"] == 939 and f["refused"] == pd["refused"]
          and f["objects_before"] == f["objects_after"] == b["series_objects"] and f["versions_after"] - f["versions_before"] >= 939 - pd["refused"], "full republish: 939 published, refused as in the dry run, the same objects, new versions")
@@ -139,7 +139,7 @@ def series_invariant(prev, cur, days):
     ci = {x: i for i, x in enumerate(cur["date"])}
     need(set(pi) <= set(ci), "a day was REMOVED from the series")
     added = sorted(set(ci) - set(pi))
-    need(set(added) <= set(days), "the dates gained must be a subset of %s, read %s" % (days, added))
+    need(set(added) <= set(days) | movable_days, "the dates gained must be a subset of %s or of the next days %s (CTO half), read %s" % (days, sorted(movable_days), added))
     need(cur["date"] == sorted(cur["date"]), "the dates are not ascending")
     for x, i in pi.items():
         j = ci[x]
@@ -341,6 +341,7 @@ def selftest():
     mut("prewrite refused", lambda r: r["prewrite"].update(refused=41))
     mut("publish dry refused", lambda r: r["publish_dry"].update(refused=300))
     mut("canary dates", lambda r: r["canary"].update(dates_gained=["2026-08-19"]))
+    mut("canary a day neither re-landed nor next", lambda r: r["canary"].update(dates_gained=["2026-07-22", "2026-07-24"]))
     mut("canary empty", lambda r: r["canary"].update(dates_gained=[]))
     mut("canary common", lambda r: r["canary"].update(common_fields_equal=False))
     mut("canary digest", lambda r: r["canary"].update(account_digest12="short"))
@@ -370,6 +371,9 @@ def selftest():
     red(lambda: series_invariant(prev, {k: (v[1:] if isinstance(v, list) else v) for k, v in cur.items()}, days), "a day removed")
     red(lambda: series_invariant(prev, dict(cur, date=["2026-07-24", "2026-07-25", "2026-07-28", "2026-07-29"]), days), "another day added")
     red(lambda: series_invariant(prev, cur, ["2026-07-22", "2026-08-03"]), "a day added that is not a re-landed day")
+    nxt_added = dict(cur, date=["2026-07-24", "2026-07-28", "2026-07-29", "2026-07-30"], value=[1.0, 2.0, 3.0, 3.1], total_return_daily=[0.1, None, 0.2, 0.01], day_quality=["MEASURED", "NOT_MEASURABLE", "MEASURED", "MEASURED"], return_basis=["TWR", "NOT_MEASURABLE", "TWR", "TWR"])
+    assert series_invariant(prev, nxt_added, days) == ["2026-07-30"]
+    red(lambda: series_invariant(prev, nxt_added, ["2026-07-22", "2026-08-03"]), "a next day added that no re-landed day owns")
     red(lambda: series_invariant(prev, dict(cur, external_flow=[0, 0, 0, 0]), days), "a column appeared")
     red(lambda: series_invariant(prev, dict(cur, date=["2026-07-24", "2026-07-28", "2026-07-27", "2026-07-29"]), days), "dates not ascending")
     cfg, pcfg = {"CodeSha256": GOLD_CODE}, {"CodeSha256": PUB_CODE}
