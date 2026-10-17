@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-R2-c2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/prd/SOC2_MSLOGS_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5795b96e64"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP_R2.md",
+    "vintage_commit": "5795b96e64",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-c2.collector-retry.md"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/trino/collector.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6b279f0fd1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-SOC2_MSLOGS-11, LOCAL only, at 6b279f0fd1. Adds aws_lambda_function_event_invoke_config.collector with maximum_retry_attempts = 0 and no qualifier. Not applied: no terraform apply, no plan against the account, no AWS call (order BOUNDS). Release is SM-r-2.",
+      "artifact_covered_by": [
+        "R2-c2-AC1",
+        "R2-c2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2-c2-AC1",
+      "criterion_verbatim": "`collector.tf` carries an event invoke config for the collector with `maximum_retry_attempts = 0` and no qualifier.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py retry",
+      "output_evidence": "R2-RETRY-OK\nrc=0",
+      "denominator": "1 verdict line of 1 (R2-RETRY-OK); run from the worktree root under timeout 120. Before the edit the same check printed R2-RETRY-REFUSED rc=1 (expected FAIL).",
+      "status": "PASS",
+      "expect": "R2-RETRY-OK"
+    },
+    {
+      "criterion_id": "R2-c2-AC2",
+      "criterion_verbatim": "`terraform validate` succeeds on a scratch copy of the trino root (the round-1 dependency cycle between the door and the collector came through an unvalidated Terraform cell). This check PASSES at the base and must still pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py tfvalidate",
+      "output_evidence": "R2-TFVALIDATE-OK\nrc=0",
+      "denominator": "1 verdict line of 1 (R2-TFVALIDATE-OK); terraform init -backend=false and validate on a scratch copy of the trino root, run from the worktree root under timeout 120. No apply, plan or AWS call.",
+      "status": "PASS",
+      "expect": "R2-TFVALIDATE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of collector.tf in the worktree scratch folder with maximum_retry_attempts = 2 in place of 0 (sed on the one line), the retry criterion re-run from the copy's root (.scratch/mutant), the check's own path. The copy was removed after the run.",
+      "expected": "R2-RETRY-REFUSED: the retry attempts must be 0 for the collector's event invoke config.",
+      "observed": "R2-RETRY-REFUSED collector.tf has no aws_lambda_function_event_invoke_config for the collector with maximum_retry_attempts = 0; rc=1. The real file on the same check printed R2-RETRY-OK rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the retry criterion on the committed file.",
+      "observed": "Both runs printed R2-RETRY-OK rc=0. The tfvalidate criterion printed R2-TFVALIDATE-OK rc=0 once; terraform fmt -check on collector.tf rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform apply, terraform plan against the account, and any live AWS call",
+      "reason": "WORLD by the gate's path floor; the order's BOUNDS forbid any apply, plan or AWS call. The release SM-r-2 applies the setting and reads it back."
+    },
+    {
+      "item": "A second mutant on the tfvalidate criterion",
+      "reason": "Not run: tfvalidate is a pass-at-base control (the order states it PASSES at the base and must still pass); its discriminating arm is the base run recorded in the order's dry-run, not a mutant."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~11/SOC2_MSLOGS.TO-R2-c2.session.log",
+  "compiler_tools": [
+    {
+      "tool": "s1_check_r2.py retry (baseline, before the edit)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py retry",
+      "result": "R2-RETRY-REFUSED collector.tf has no aws_lambda_function_event_invoke_config for the collector with maximum_retry_attempts = 0; rc=1"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check infra/aws/terraform/trino/collector.tf",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit gates",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_SOC2_MSLOGS~11 <0.9.0_WK_SOC2_MSLOGS~11@opal.agent>\" -F <msgfile> -- infra/aws/terraform/trino/collector.tf",
+      "result": "commit at 6b279f0fd1: commit-gate OK; surprise-row-gate OK (no rows); to-pipeline-gate OK; a NAMING ERROR line (function-map folder missing) and a client-data-check WARN (hashed account-id list absent) printed; the commit was not refused"
+    }
+  ]
+}
