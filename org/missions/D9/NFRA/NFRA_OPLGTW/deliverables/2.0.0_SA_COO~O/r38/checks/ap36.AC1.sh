@@ -12,7 +12,8 @@ W=org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1
 REC="${AP36_REC_OVERRIDE:-$W/ap36_release.json}"
 MEM="${AP36_MEM_OVERRIDE:-$W/MEM_GATE_OG-ap-36.json}"
 ASK="${AP36_ASK_OVERRIDE:-$W/NEVER_WIDEN_ASK_OG-ap-36.md}"
-[ -f "$REC" ] && [ -f "$ASK" ] && [ -f "$MEM" ] || { echo "ap36_release.json, MEM_GATE_OG-ap-36.json or the ask absent"; echo "RESULT: FAIL"; exit 1; }
+CT1="${AP36_CT1_OVERRIDE:-$W/CT1_CONCURRENT_OG-ap-36.json}"
+[ -f "$REC" ] && [ -f "$ASK" ] && [ -f "$MEM" ] && [ -f "$CT1" ] || { echo "ap36_release.json, MEM_GATE_OG-ap-36.json, CT1_CONCURRENT_OG-ap-36.json or the ask absent"; echo "RESULT: FAIL"; exit 1; }
 read -r base rel trunk <<<"$(python -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''))" "$(native "$REC")" | tr -d '\r')"
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "base, release or trunk sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 read -r dep prev <<<"$(git show HEAD:infra/aws/ec2/EC2_MANIFEST.json | python -c "import json,sys;s=json.loads(sys.stdin.buffer.read().decode('utf-8'))['services']['opal-gateway'];print(s.get('deployed_commit','NONE'),s.get('previous_deployed_commit','NONE'))" | tr -d '\r')"
@@ -67,6 +68,32 @@ print("OK" if ok else "NO")
 PYEOF
 )
 rec=$(printf '%s' "$rec" | tr -d '\r')
+ct1=$(python - "$(native "$CT1")" "$rel" <<'CTEOF'
+import json, re, sys
+raw = open(sys.argv[1], encoding="utf-8").read()
+d = json.loads(raw)
+b = d.get("body", d)
+isn = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)
+same = b.get("release_sha") == sys.argv[2]
+first = b.get("first_equals_solo") is True
+real = b.get("second_real_gate")
+short = b.get("second_short_gate")
+real_ok = real in ("waited_then_equal_solo", "window_read_busy")
+short_ok = short == "window_read_busy"
+hl = b.get("health") or {}
+hl_ok = isn(hl.get("probes")) and hl["probes"] >= 3 and isn(hl.get("max_probe_s")) and hl["max_probe_s"] < 1.0
+cn = b.get("counts") or {}
+cn_ok = isn(cn.get("pages_compared")) and cn["pages_compared"] >= 6 and cn.get("pages_equal") == cn["pages_compared"]
+runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40}"', '""', raw))
+ok = same and first and real_ok and short_ok and hl_ok and cn_ok and not runs
+print("CT1 two concurrent windowed calls: release_sha equal %s; first equals its solo rows %s; second under the real gate wait: %s; second under a 0.5 s gate wait: %s; health during the pair: %s probes, longest %s s (limit 1): %s" % (
+    "yes" if same else "no", "yes" if first else "no", real, short, hl.get("probes"), hl.get("max_probe_s"), "ok" if (same and first and real_ok and short_ok and hl_ok) else "NOT OK"))
+print("partition_rows and fence_excluded per page, candidate against the live code: %s of %s pages equal (want all of 6 or more): %s" % (
+    cn.get("pages_equal"), cn.get("pages_compared"), "ok" if cn_ok else "NOT OK"))
+print("OK" if ok else "NO")
+CTEOF
+)
+ct1=$(printf '%s' "$ct1" | tr -d '\r')
 halves=$(python - "$(native "$ASK")" <<'PYEOF'
 import re, sys
 t = open(sys.argv[1], encoding="utf-8").read()
@@ -78,6 +105,7 @@ echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$liv
 echo "files differing $n; outside the take list $outside (want 0); take-list code files missing $missing (want 0); not byte-equal to trunk's $neq (want 0)"
 echo "terraform files differing $tf (want 0); destructive_ops, harvest, catalog or manifest files in the diff $barred (want 0)"
 printf '%s\n' "$rec" | sed '$d'
+printf '%s\n' "$ct1" | sed '$d'
 echo "ask has the three halves $halves"
-[ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$tf" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$tf" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$ct1" | tail -1)" = OK ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
