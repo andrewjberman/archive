@@ -5,7 +5,7 @@ Usage: python <this file> <repo_root> <criterion_id>; prints "<id> PASS" or "<id
 
   IB249-1  IB-pr-619  the four stale statements are replaced by true ones, in comments and one docstring only
     AC1  the bound: the three export filled-report test files still pass (31 passed)
-    AC2  the seam: the module's syntax tree with docstrings removed equals the one at the build commit 302d7fc367 (no code token changed), and no other source file differs from it
+    AC2  the seam: the module's syntax tree with docstrings removed equals the one at the build commit 302d7fc367 (no code token changed), and no other source file differs from the worker's merged branch head (so trunk files merged in are not counted)
     AC3  the build: the four stale statements are gone and each site now says the CURRENT object is re-read and refused on a sha256 or size mismatch
 """
 import ast
@@ -17,6 +17,7 @@ EXPORT = "infra/aws/lambda/investor-reporting/export"
 TARGET = EXPORT + "/retained_export.py"
 TESTS = [EXPORT + "/tests/test_filled_report_server_pin.py", EXPORT + "/tests/test_filled_report_freeze_scope.py", EXPORT + "/tests/test_filled_report_source.py"]
 BUILD = "302d7fc367da57bf4c1563934e79e65f3163860c"
+MERGED = "e2d1530c3d72d12a07e0f80941a8576f5c48acc7"  # the worker's branch after the trunk was merged in: its own edits are the difference from here
 STALE = (
     "The freeze reads that VersionId through the injected reader",
     "The pinned read that follows reads back exactly that VersionId",
@@ -61,7 +62,7 @@ def ac2(_):
     now = (ROOT / TARGET).read_text(encoding="utf-8")
     if stripped_dump(now) != stripped_dump(built.stdout):
         fail("retained_export.py differs from the build commit in code (docstrings and comments are the only allowed change)")
-    changed = [f for f in sh(["git", "diff", "--name-only", BUILD]).stdout.split() if f.startswith(("infra/", "lib/", ".tools/", "data/"))]
+    changed = [f for f in sh(["git", "diff", "--name-only", MERGED]).stdout.split() if f.startswith(("infra/", "lib/", ".tools/", "data/"))]
     others = [f for f in changed if f != TARGET]
     if others:
         fail("only %s may differ from the build commit among source files; also differing: %s" % (TARGET, others[:5]))
