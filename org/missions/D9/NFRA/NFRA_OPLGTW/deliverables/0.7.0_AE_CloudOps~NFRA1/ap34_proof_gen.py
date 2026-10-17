@@ -36,7 +36,7 @@ GIT = "COMMITTED-NOT-DEPLOY-SCOPE"
 
 
 def art(path, kind, deployed, ev, cov):
-    return {"path_or_key": path, "kind": kind, "commit_or_etag": pin(path) if not path.startswith("ec2:") else "9d5b7125571520b977401634a01935924f4c9787",
+    return {"path_or_key": path, "kind": kind, "commit_or_etag": pin(path) if not path.startswith("aws:") else "9d5b7125571520b977401634a01935924f4c9787",
             "deployed_state": deployed, "deploy_evidence": ev, "artifact_covered_by": cov}
 
 
@@ -45,7 +45,7 @@ inst = {
     "spec_ref": {"doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md", "group": "OTHER", "vintage_commit": "53cac446ff"},
     "decomp_ref": {"doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md", "vintage_commit": "53cac446ff", "to_ref": TO},
     "artifacts_produced": [
-        art("ec2:i-07dccb1615503ac99:/opt/opal-gateway (opal-gateway service, round-40 fourth batched release)", "ec2_deploy", "DEPLOYED-VERIFIED",
+        art("aws:ec2/i-07dccb1615503ac99/opt/opal-gateway (opal-gateway service, round-40 fourth batched release)", "aws_resource", "DEPLOYED-VERIFIED",
             "ONE deploy of release 9d5b7125571520b977401634a01935924f4c9787 at 2026-10-17T05:19:28Z through safe-ec2-deploy.sh, DEPLOY_BASE_REF=d3ae88be46, guard equal, no HALT_OVERRIDE. "
             "Host md5 139 of 139 equal to the release blobs, 65 env keys, no MUSE_CLIENT_ID, tools/list 103 before and after, 27 of 27 tools, health 200. 30-minute service read-back: "
             "31 probes, service RSS 113.5 to 132.2 MB, host max 52.1 percent, 0 triggers; the service served ZERO window calls in it. Rollback: the pre-deploy content held by "
@@ -62,7 +62,15 @@ inst = {
         {"criterion_id": cid, "criterion_verbatim": re.search(r"`%s`: (.*?)(?=\n- `AC\d`|\n\n)" % cid, order, re.S).group(1).replace("\n", " ")[:500], "method": "command",
          "invocation": 'bash %s%s; echo "exit=$?"' % (CK, "ap34.%s.sh" % cid), "expect": ac[cid][1], "output_evidence": ac[cid][0][0],
          "denominator": ("9 files in the diff; 4 memory-gate pages; 3 halves" if cid == "AC1" else "27 tools; 139 host files; 5 arms; 31 read-back probes; 1 ledger of 3 legs"),
-         "status": "PASS"} for cid in ("AC1", "AC2")],
+         "status": "PASS"} for cid in ("AC1", "AC2")] + [{
+        "criterion_id": "AC3",
+        "criterion_verbatim": "AC3 (judgment, 3.0.0_SA_CVO~Z): the 13-month transactions and fees read as an analyst would want (the whole window reachable by paging, newest first within a page, the window state stated). Graded on bodies the issuer relays (a page chain); never simulated here.",
+        "method": "manual_read_with_citation",
+        "invocation": "NOT RUN BY THIS SEAT. The criterion carries judgment=\"true\" and names 3.0.0_SA_CVO~Z as its grader; a judgment criterion is graded at L9 and never self-graded.",
+        "output_evidence": "What this seat can say, and no more: through the installed code in a new process, a 13-month window on one account paged back in 12 transactions pages (334 of 334 partitions, each once, final next_cursor null) and 14 fees pages (394 of 394, each once, final next_cursor null), rows within a page non-increasing by date, every page stating window_partial true until the last. The per-page partitions_read_dates are in CODE5_SERVED.json. Whether that reads well to an analyst is the CVO's to grade.",
+        "denominator": "0 of 3 named judgment specifics (the whole window reachable by paging, newest first within a page, the window state stated) graded by this seat. Grader: 3.0.0_SA_CVO~Z.",
+        "status": "N/A-BY-CONSTRUCTION",
+        "status_reason": "A JUDGMENT criterion, graded at L9 and never self-graded (CLAUDE.md section 1, L9); not unverifiable and not PASS, simply not this seat's to compute."}],
     "controls": {
         "determinism": {"method": "AC1 and AC2 were each run twice against the same records, back to back.", "observed": "outputs identical" if stable else "outputs differ",
                         "status": "STABLE" if stable else "UNSTABLE (deliverable INVALID)"},
@@ -71,7 +79,7 @@ inst = {
     "declared_exclusions": [
         {"item": "AC3 (judgment, 3.0.0_SA_CVO~Z): the 13-month transactions and fees read as an analyst would want", "reason": "A judgment criterion is graded by the CVO on the bodies the issuer relays; it is never self-graded here."},
         {"item": "a page chain run in the SERVICE process", "reason": "/mcp takes only a bearer signed by the gateway key; minting one as a roster principal is impersonation (CTO Amendment 1 ruled a fresh-process chain). The service served zero window calls in the 30-minute read-back."}],
-    "surprises": ["NFRA_OPLGTW-Z-S350: OBSERVATION (CVO) -- window_read_busy cannot occur in the service (sync tools run on the event loop); not graded as a served outcome."],
+    "surprises": [],
     "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1 (GOs msgs 35362, 35371, 35383; CTO Amendments 1 and 2). C2 re-reads equal; stand-in cannot reach the service (stopped and reported); the plateau test; ledger opened and merged; one deploy; host md5, tools/list, 27-tool harness, arms, 30-minute read-back, window-call count; manifest and runbook on box/sitez; ledger closed; AC1 and AC2 run.",
     "compiler_tools": [{"tool": "boto3 / ssm / s3", "invocation": "ap34_fullchain.py, ap34_arms.py, ap34_monitor.py, ap34_wincalls.py (Rule 12, S3 to SSM)", "result": "PASS", "note": "Counts, MB, percentages, dates and UTC times only."}],
 }
