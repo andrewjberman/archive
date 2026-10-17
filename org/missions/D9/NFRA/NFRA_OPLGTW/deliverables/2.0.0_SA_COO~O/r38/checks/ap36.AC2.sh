@@ -26,7 +26,7 @@ if isinstance(d.get("body"), dict):
     d = d["body"]
 arms = d.get("arms") or {}
 need = ["e1_cursor_first_page", "e1_cursor_pages_to_window_start", "e1_within_page_newest_first", "e1_cursor_by_partition", "e8_memory_flat_and_returned",
-        "e9_health_answers_during_a_page", "e10_marker_equals_release_sha", "e11_pages_equal_live_code_row_for_row"]
+        "e9_health_answers_during_a_page", "e10_marker_equals_release_sha", "e11_pages_equal_live_code_row_for_row", "e12_refusal_word_reaches_the_caller"]
 armed = [k for k in need if arms.get(k) is True]
 md5 = d.get("host_md5") or {}
 rb = d.get("readback") or {}
