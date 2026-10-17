@@ -1,18 +1,16 @@
 SESSION LOG -- 0.9.0_WK_SOC2_MSLOGS~13 on SOC2_MSLOGS.TO-R2-e2 (round 2, cell SM-e-2)
-worktree: C:/Dev/ajb_wk/soc2-r2-13   branch: wk-SOC2_MSLOGS-13   base HEAD: 5795b96e64
+worktree: C:/Dev/ajb_wk/soc2-r2-13b   branch: wk-SOC2_MSLOGS-13   base HEAD: 9759d54598
 
-Run 1 (e8d54b7c3c): the worktree sparse checkout omitted data/ and infra/aws/. Both checks refused (R2-EXPOSURE_DOOR-REFUSED, R2-EXPOSURE_CLIENT-REFUSED, rc=1). Surprise SOC2_MSLOGS-D1-W13-S1 (BLOCKING) was filed.
+Runs 1 and 2 (earlier worktree): run 1 was BLOCKED on the sparse checkout (surprise S1, resolved by the issuer); run 2 built exposure.py and read_exposure.py and passed AC1 and AC2 (commits f633086f3f and 80c3947694). Both are merged.
 
-Coordinator message: the issuer widened the sparse scope to infra/aws/lambda/globgrph-trino-access and data/m365_metadata/scripts. Re-read WORKER FACE and rebuilt.
-
-Run 2 (this instance):
-1. Sparse scope printed: .tools, data/m365_metadata/scripts, infra/aws/lambda/globgrph-trino-access, infra/logic/registry, lib, org/devices, org/missions/D12/SOC2/SOC2_MSLOGS, org/modules/graph, org/ref, org/standards, org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS.
-2. Built: infra/aws/lambda/globgrph-trino-access/exposure.py (door, stdlib); data/m365_metadata/scripts/silver/read_exposure.py (client, stdlib; door_client imported lazily in main only).
-3. Tests: infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py and data/m365_metadata/scripts/tests/test_read_exposure.py (synthetic; the desktop test stubs door_client in sys.modules, the real module is never imported).
-4. R2-e2-AC1: timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door -> R2-EXPOSURE-OK opened=5 left=4, rc=0. PASS.
-5. R2-e2-AC2: timeout 120 python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client -> R2-EXPCLIENT-OK, rc=0. PASS.
-6. Mutant (exposure.py forward-rule domain filter removed, in place, then restored from .scratch/exposure.good.py and cmp-verified): exposure_door -> R2-EXPOSURE-REFUSED, rc=1 (FIRED-AS-EXPECTED). Restored; the check passed again.
-7. Determinism: exposure_door and exposure_client each run twice on the same tree: identical OK lines, rc=0 both times.
-8. pytest: timeout 120 python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py data/m365_metadata/scripts/tests/test_read_exposure.py -q -> 31 passed in 0.09s, rc=0.
-9. Surprise SOC2_MSLOGS-D1-W13-S2 (OBSERVATION): two contract readings resolved by the build (anonymous_link always included; NOT RECORDED lines carry no timestamp).
+AMENDMENT 1 (this run):
+1. Premise: the new worktree carries infra/aws/lambda/globgrph-trino-access, data/m365_metadata/scripts and the decomp deliverables folder in its sparse scope. Branch head 9759d54598.
+2. timeout 120 git apply --check org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/hookup_exposure.patch -> rc=0 (clean).
+3. timeout 120 git apply <same patch> -> rc=0. Diff: handler.py 33 lines changed, tests/test_handler.py 55 lines changed.
+4. timeout 120 python -m pytest infra/aws/lambda/globgrph-trino-access/tests -q -> 258 passed in 1.12s, rc=0.
+5. timeout 120 python -m ruff check --target-version py39 infra/aws/lambda/globgrph-trino-access -> All checks passed!, rc=0.
+6. exposure_door: R2-EXPOSURE-OK opened=5 left=4, rc=0. PASS.
+7. exposure_client: R2-EXPCLIENT-OK, rc=0. PASS.
+8. hookup: R2-HOOKUP-OK, rc=0. PASS. Rerun: R2-HOOKUP-OK, rc=0 (deterministic).
+9. Mutant (exposure dropped from ALIAS_OPS["member"], in place, then restored from .scratch/handler.good.py and cmp-verified): hookup -> R2-HOOKUP-REFUSED ... log line ['op=exposure outcome=refused'], rc=1. FIRED-AS-EXPECTED. After restore, hookup -> R2-HOOKUP-OK rc=0.
 10. Nothing called live: no AWS call, no network.
