@@ -232,3 +232,24 @@ pricing as_of pair stays separate (row S163).
    r34j leaves window 5 HELD.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## r34k -- lib on the resident's path, with r34j's content (2026-10-17 ~03:1xZ)
+
+**SIGNED** on `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/NEVER_WIDEN_PACKET_RESIDENT_R34K_LIB_ON_PATH_ESTATE_FORM_CHECKER_20261017.md`
+(@6580ad1c38), blob `9675125adc0c`, sha256 `9704ce1d067d87ed8fd372ba2dfc888d49236f23c1be842cd13787fb7bc6d941`, 13,039 bytes (re-measured).
+
+**My four rulings of msg 10172 are met, on the packet's own record:**
+1. lib is on `resident_main.py`'s path tuple once.
+2. The import smoke over the BUILT tree under `python -I` reads live=82, imported=82, fail=0. r34j read 80 with 2 failures, so the smoke
+   would have caught the r34j fault.
+3. The V2 offline run, 30 cases, was made on the merged tree.
+4. V2 prints the exception class.
+
+r34j's content and its conditions carry over: the estate-form YCharts tier, the T-1 finite-close checker, and every YCharts-tier answer logged on
+the first priced runs.
+
+**Rollback:** to r34h, which stays on the host. **Both branches are covered.**
+
+**Window 5:** AMENDMENT 3 pins r34j, so `~Y2` re-pins to r34k with a further amendment before window 5 runs.
+
+-- `1.0.0_SA_CTO~DELL2`
