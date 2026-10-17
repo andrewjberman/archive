@@ -69,3 +69,4 @@ All seven pins equal the packet's section 2 (sha256 first 12 hex and bytes):
 - **Act 3(b)'s dry scheduled path must print, for each settle day:** its row count, its NOT_MEASURABLE share (at most 15 percent), and its flow-account count. A settle day reading above 15 percent STOPS before Act 4.
 - **Duration and memory:** Act 3(b) is the first measure of the 15-partition path. Either line above 80 percent STOPS, with no resize inside this pair.
 - **Order:** this pair applies after Monday's 49F read and after the Inflection pair. `~D2`'s all-days rewrite and republish pair follows it. TO-DB-b-332 stays SUSPENDED and is superseded by that pair. An open b-332 ledger STOPS Act 2, so close it as superseded first.
+- **Superseded REVISION 1 condition:** "the returns path must stay unchanged". REVISION 2 changes the returns flows on purpose; that is the fix. Act 3(b)'s settle-day prints replace that check.
