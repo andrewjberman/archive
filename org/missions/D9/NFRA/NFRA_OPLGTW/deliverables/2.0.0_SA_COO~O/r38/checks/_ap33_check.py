@@ -4,7 +4,11 @@ Usage: python _ap33_check.py <record.json> 1|2|3
 Record keys: trunk_base_sha, hvst_sha, release_sha, merge_sha[, stop_row].
   mode 1: the merge commit has exactly the parents trunk_base_sha and hvst_sha; hvst_sha is an ancestor; no conflict marker in any conflicted path.
   mode 2: gateway live bytes: each conflicted path under the gateway app/, deploy script, lib or dashboard equals its blob at release_sha (or trunk_base's when
-          release_sha does not carry it); each conflicted gateway test equals trunk_base's; the EC2_MANIFEST opal-gateway block equals trunk_base's.
+          release_sha does not carry it), EXCEPT the two three-way paths (CTO decisions 35436 and 35438: app/tools.py, app/destructive_ops.py), which keep BOTH
+          sides in trunk's order: no live line lost and no trunk line lost (line multisets), every line merged adds over live exists in trunk_base and every line
+          it adds over trunk_base exists in release_sha, and harvest_get_published_analysis is imported (tools.py), registered (tools.py) and allowlisted
+          (destructive_ops.py) EXACTLY once each; each conflicted gateway test equals trunk_base's; the registry file legacy_addresses.json equals trunk_base's;
+          the EC2_MANIFEST opal-gateway block equals trunk_base's. deploy-to-ec2.sh is a live-blob path (OG-db-1's preflight is re-landed by OG-db-2).
   mode 3: both sides kept: each conflicted mcportal change_management entry carries every non-blank line of both sides; the billing IAM Terraform file carries every
           line either side added to the merge base, or the record names a stop row and no merge exists.
 Counts and booleans only; prints RESULT: PASS or RESULT: FAIL as its last line.
@@ -18,6 +22,8 @@ MANIFEST = "infra/aws/ec2/EC2_MANIFEST.json"
 TF = "infra/aws/terraform/opal-gateway/advi_billing_gateway_iam.tf"
 LIVE_PREFIXES = (GW + "/app/", GW + "/lib/", GW + "/dashboard/", GW + "/deploy-to-ec2.sh")
 CM = "org/critical_paths/change_management/"
+REG = "infra/logic/registry/legacy_addresses.json"
+MERGE3 = (GW + "/app/tools.py", GW + "/app/destructive_ops.py")
 MARKERS = (b"<<<<<<< ", b"\n=======\n", b">>>>>>> ")
 
 
@@ -42,6 +48,22 @@ def conflicts(base, hvst):
             break
         out.append(ln.strip())
     return out
+
+
+def keeps_both(live, trunk, merged):
+    """CTO 35436/35438: no live line lost, no trunk line lost (line multisets); what merged adds over live exists in trunk, what it adds over trunk exists in live."""
+    import collections
+    lc, tc, mc = (collections.Counter((x or b"").decode("utf-8", "replace").splitlines()) for x in (live, trunk, merged))
+    if (lc - mc) or (tc - mc):
+        return False
+    return all(k in tc for k in (mc - lc)) and all(k in lc for k in (mc - tc))
+
+
+def once_each(path, merged):
+    s = (merged or b"").decode("utf-8", "replace")
+    if path.endswith("/tools.py"):
+        return s.count("harvest_published as _hvpub") == 1 and s.count("def harvest_get_published_analysis(") == 1
+    return s.count('"harvest_get_published_analysis"') == 1
 
 
 def lineset(b):
@@ -73,10 +95,13 @@ def main():
               % ("yes" if pok else "no", "yes" if anc else "no", len(marked), len(confl)))
         ok = pok and anc and not marked and len(confl) > 0
     elif mode == "2":
-        live = [p for p in confl if p.startswith(LIVE_PREFIXES)]
+        live = [p for p in confl if p.startswith(LIVE_PREFIXES) and p not in MERGE3]
+        tw = [p for p in confl if p in MERGE3]
         tests = [p for p in confl if p.startswith(GW + "/tests/")]
         live_ok = sum(1 for p in live if blob(merge, p) == (blob(rel, p) if blob(rel, p) is not None else blob(base, p)))
         tests_ok = sum(1 for p in tests if blob(merge, p) == blob(base, p))
+        tw_ok = sum(1 for p in tw if keeps_both(blob(rel, p), blob(base, p), blob(merge, p)) and once_each(p, blob(merge, p)))
+        reg_ok = (REG not in confl) or blob(merge, REG) == blob(base, REG)
         man_ok = False
         try:
             a = json.loads(blob(merge, MANIFEST))["services"]["opal-gateway"]
@@ -86,7 +111,8 @@ def main():
             man_ok = False
         print("gateway live-byte paths %d of %d equal the release blobs; gateway test paths %d of %d equal trunk's; manifest opal-gateway block equals trunk's: %s"
               % (live_ok, len(live), tests_ok, len(tests), "yes" if man_ok else "no"))
-        ok = live_ok == len(live) and tests_ok == len(tests) and man_ok
+        print("three-way paths %d of %d keep both sides once each; registry file equals trunk's: %s" % (tw_ok, len(tw), "yes" if reg_ok else "no"))
+        ok = live_ok == len(live) and tests_ok == len(tests) and man_ok and tw_ok == len(tw) and reg_ok
     elif mode == "3":
         cms = [p for p in confl if p.startswith(CM)]
         cm_ok = 0
