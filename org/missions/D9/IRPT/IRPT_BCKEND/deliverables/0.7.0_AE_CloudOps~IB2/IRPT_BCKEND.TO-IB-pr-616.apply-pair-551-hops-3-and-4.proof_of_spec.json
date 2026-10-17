@@ -45,6 +45,16 @@
     "IB247-1-AC3"
    ],
    "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "iam:irpt-export-render-role inline policy irpt-export-render-submit-policy (one statement ReadTheFilledReportOnly, via Terraform export root)",
+   "kind": "aws_resource",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "plan 0/1/0, one statement added none removed; ONE safe-apply; replan No changes; simulations: GetObject on the filled object allowed, GetObjectVersion, PutObject, outside-prefix, ownership-map key (IAM only) and another firm's bucket implicitDeny",
+   "artifact_covered_by": [
+    "IB247-1-AC3"
+   ],
+   "commit_or_etag": "edit commit b2a92d6b49; Apply complete 0 added 1 changed 0 destroyed"
   }
  ],
  "acceptance": [
@@ -72,12 +82,11 @@
    "criterion_id": "IB247-1-AC3",
    "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~S2/checks/r247/p247_cells.py\" . IB247-1-AC3",
    "expect": "IB247-1-AC3 PASS",
-   "output_evidence": "IB247-1-AC3 FAIL: h4b.fence_row must read second_row_present true and regenerated_and_read_back true BEFORE the IAM statement (ADDENDUM 2, CTO msg 9576). OWED: step 6 was not released by the GO.\nexit=1",
-   "denominator": "1 record; h4b not run",
-   "status": "FAIL",
+   "output_evidence": "OK: the fence row read back first, exactly one statement added on the export role, the counters, no rollback\nIB247-1-AC3 PASS\nexit=0",
+   "denominator": "1 record; h4b run under the second GO",
+   "status": "PASS",
    "criterion_verbatim": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~S2/checks/r247/p247_cells.py\" . IB247-1-AC3",
-   "method": "command",
-   "status_reason": "OWED, not failed in the world: the issuer's GO released steps 1 to 5 only; step 6 (hop 4b, the IAM statement) waits on the second GO and the fence row's regeneration read back. The record's h4b says so."
+   "method": "command"
   }
  ],
  "controls": {
@@ -95,12 +104,8 @@
  },
  "declared_exclusions": [
   {
-   "item": "AC3 (hop 4b, the IAM statement)",
-   "reason": "the GO released steps 1 to 5 only; step 6 waits on the second GO and the fence row"
-  },
-  {
    "item": "the ledger close",
-   "reason": "the order forbids it: the issuer closes"
+   "reason": "the order forbids it: the issuer closes it after reading the record"
   }
  ],
  "surprises": [],
@@ -109,7 +114,7 @@
   {
    "tool": "build-and-upload.sh (BUILD_ONLY then upload), terraform 1.15.8 via safe-apply, naming-apply-gate",
    "invocation": "per function: BUILD_ONLY, upload, plan, apply, replan",
-   "result": "AC1 and AC2 PASS; AC3 owed"
+   "result": "AC1 to AC3 PASS (step 6 ran under the second GO)"
   }
  ]
 }

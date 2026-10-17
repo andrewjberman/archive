@@ -48,7 +48,7 @@ def count(x, lo=0):
 
 
 def check_record(rec):
-    exp = {"claim", "applier", "no_write_to_aws", "published", "directory", "sheet", "users", "authorizer", "local_files", "notes", "reads"}
+    exp = {"claim", "applier", "no_write_to_aws", "published", "directory", "sheet", "bridge", "users", "authorizer", "local_files", "notes", "reads"}
     need(isinstance(rec, dict) and set(rec) == exp, "record keys differ: %s" % (sorted(set(rec) ^ exp) if isinstance(rec, dict) else "?"))
     need(rec["claim"] == "measured" and rec["applier"] == APPLIER and rec["no_write_to_aws"] is True, "claim measured, the applier named and no_write_to_aws true")
     p = rec["published"]
@@ -70,6 +70,15 @@ def check_record(rec):
          and count(s["medium_in_published_raw"]) and s["medium_in_published_raw"] <= s["medium"] and count(s["high_in_directory"]) and s["high_in_directory"] <= s["high"], "sheet: overlap counts within their populations")
     hb = s["high_by_advisor_code"]
     need(isinstance(hb, dict) and len(hb) == SHEET_CODES and all(count(v) for v in hb.values()) and sum(hb.values()) == s["high"] and all(SHAPE.match(str(k).lower()) for k in hb), "sheet.high_by_advisor_code: a count per code, summing to HIGH (codes as given by the sheet; no name)")
+    br = rec["bridge"]
+    bkeys = {"pairs", "deterministic", "to_confirm", "distinct_old", "distinct_new", "sheet_accounts_in_old", "sheet_high_in_old", "sheet_medium_in_old", "new_in_published_raw", "deterministic_new_in_published_raw", "high_direct", "high_via_deterministic_pairs", "high_left_out", "grant_ready", "answers_filled"}
+    need(isinstance(br, dict) and set(br) == bkeys and all(count(br[k]) for k in bkeys), "bridge keys: counts for the 118-pair list (old custodian account to current Black Diamond account)")
+    need((br["pairs"], br["deterministic"], br["to_confirm"]) == (118, 11, 107) and br["deterministic"] + br["to_confirm"] == br["pairs"], "bridge: 118 pairs = 11 deterministic + 107 to confirm")
+    need(br["sheet_high_in_old"] + br["sheet_medium_in_old"] <= br["sheet_accounts_in_old"] <= s["rows"] and br["sheet_high_in_old"] <= s["high"] and br["sheet_medium_in_old"] <= s["medium"], "bridge: the sheet's overlap with the old accounts within its populations")
+    need(br["deterministic_new_in_published_raw"] <= br["new_in_published_raw"] <= br["distinct_new"] and br["high_via_deterministic_pairs"] <= br["deterministic"] * s["high"], "bridge: overlap counts within their populations")
+    need(br["high_direct"] == s["high_in_published_raw"] and br["high_direct"] + br["high_via_deterministic_pairs"] + br["high_left_out"] == s["high"] and br["grant_ready"] == br["high_direct"] + br["high_via_deterministic_pairs"],
+         "bridge: (a) HIGH accounts joining directly = sheet.high_in_published_raw, (b) HIGH accounts joining via the 11 deterministic pairs, (c) HIGH left out; a + b + c = the HIGH rows; grant_ready = a + b (CTO msg 10277)")
+    need(br["answers_filled"] <= br["to_confirm"], "bridge: answers filled in the review sheet cannot exceed the rows to confirm (the count of non-blank 'Your answer' cells; 0 expected)")
     u = rec["users"]
     need(isinstance(u, dict) and set(u) == {"table", "firm_attribute", "advisor_attribute", "cottonwood_users", "cottonwood_users_with_advisor_id", "advisor_id_shapes", "sheet_codes_found_as_advisor_id", "high_rows_under_a_found_code", "second_source_available"},
          "users keys")
@@ -132,8 +141,10 @@ def synthetic():
     return {"claim": "measured", "applier": APPLIER, "no_write_to_aws": True,
             "published": {"prefixes": 939, "mintable": 939, "unmintable": 0},
             "directory": {"entries": 271, "entries_with_client_id": 271, "entries_with_relationship_id": 200, "entries_with_accounts": 271, "distinct_accounts": 900, "firm_id_opaque_present": True, "accounts_in_published": 880, "published_in_directory": 880},
-            "sheet": {"pair": "newer", "rows": 83, "high": 40, "medium": 36, "low": 2, "unmatched": 5, "all_in_published_raw": 80, "high_in_published_raw": 40, "medium_in_published_raw": 34, "high_in_directory": 39, "advisor_codes": 3,
+            "sheet": {"pair": "newer", "rows": 83, "high": 40, "medium": 36, "low": 2, "unmatched": 5, "all_in_published_raw": 80, "high_in_published_raw": 25, "medium_in_published_raw": 34, "high_in_directory": 39, "advisor_codes": 3,
                       "high_by_advisor_code": {"code-a": 2, "code-b": 30, "code-c": 8}},
+            "bridge": {"pairs": 118, "deterministic": 11, "to_confirm": 107, "distinct_old": 115, "distinct_new": 96, "sheet_accounts_in_old": 18, "sheet_high_in_old": 12, "sheet_medium_in_old": 6, "new_in_published_raw": 90,
+                       "deterministic_new_in_published_raw": 11, "high_direct": 25, "high_via_deterministic_pairs": 3, "high_left_out": 12, "grant_ready": 28, "answers_filled": 0},
             "users": {"table": "opal-users-v2", "firm_attribute": "firmId", "advisor_attribute": "advisorId", "cottonwood_users": 12, "cottonwood_users_with_advisor_id": 5, "advisor_id_shapes": ["three-letter-code"],
                       "sheet_codes_found_as_advisor_id": 2, "high_rows_under_a_found_code": 32, "second_source_available": True},
             "authorizer": {"header_source_path": "infra/aws/users/lambda/portal-authorizer/index.mjs", "advisor_header_origin": "the advisorId claim of the signed token, set at login from the user record"},
@@ -154,6 +165,16 @@ def selftest():
         "dir overlap": lambda r: r["directory"].update(accounts_in_published=901),
         "published overlap": lambda r: r["directory"].update(published_in_directory=940),
         "sheet pair": lambda r: r["sheet"].update(pair="older"),
+        "bridge pairs": lambda r: r["bridge"].update(pairs=117),
+        "bridge split": lambda r: r["bridge"].update(deterministic=12),
+        "bridge sheet overlap": lambda r: r["bridge"].update(sheet_high_in_old=40),
+        "bridge new overlap": lambda r: r["bridge"].update(deterministic_new_in_published_raw=91),
+        "bridge answers": lambda r: r["bridge"].update(answers_filled=108),
+        "bridge key lost": lambda r: r["bridge"].pop("answers_filled"),
+        "bridge reach": lambda r: r["bridge"].update(high_via_deterministic_pairs=4),
+        "bridge grant ready": lambda r: r["bridge"].update(grant_ready=29),
+        "bridge direct differs": lambda r: r["bridge"].update(high_direct=24, high_left_out=13),
+        "bridge left out": lambda r: r["bridge"].update(high_left_out=11),
         "sheet high": lambda r: r["sheet"].update(high=41),
         "sheet codes": lambda r: r["sheet"].update(advisor_codes=4),
         "high in published": lambda r: r["sheet"].update(high_in_published_raw=41),
