@@ -123,10 +123,12 @@ def main(stage, record_path, want_tar=None):
         if sorted(k for k in bnew if k in bold and bnew[k] != bold[k]) != ["provenance"]:
             fail("binding keys changed: %s" % sorted(k for k in bnew if k in bold and bnew[k] != bold[k]))
         prov = sorted(k for k in set(bnew["provenance"]) | set(bold["provenance"]) if bnew["provenance"].get(k) != bold["provenance"].get(k))
-        if prov != ["files_from_count", "files_from_sha256", "package_pin"] or bnew["provenance"]["package_pin"] != pin:
+        if prov != ["files_from_count", "files_from_sha256", "members_added", "package_pin"] or bnew["provenance"]["package_pin"] != pin:
             fail("provenance differs beyond package_pin and the files-from list's count and sha256 (or package_pin is not the record pin): %s" % prov)
         if bnew["provenance"]["files_from_count"] != bold["provenance"]["files_from_count"] + 1:
             fail("the files-from list should have grown by exactly one line (price_form_ycharts.py)")
+        if bnew["provenance"]["members_added"] != bold["provenance"]["members_added"] + [{"packaged": "ycharts/research/ycharts_client.py", "repo_path": ESTATE_CLIENT, "sha256": wnew["ycharts/research/ycharts_client.py"]}]:
+            fail("members_added is not the r34h list plus exactly the estate client at its pinned blob")
         for key, member in (("opal_map", "overview_map.json"), ("opal_map_comparison", "comparison_map.json"), ("opal_map_multicomp", "multi_map.json"),
                             ("opal_swap_pool", "swap_pool.json")):
             want = {"path": "../ycharts/research/" + member, "sha256": wnew["ycharts/research/" + member]}
