@@ -40,18 +40,30 @@ def live(key):
 
 
 def local(key):
-    with contextlib.redirect_stdout(io.StringIO()):
-        r = m.handler(event(key))
+    r = m.handler(event(key))  # the handler prints; main() silences stdout ONCE around the whole pool (redirect_stdout per thread is not thread-safe)
     return r.get("statusCode"), json.loads(r.get("body") or "{}")
+
+
+def same(a, b):
+    """Equal, with floating-point summation noise (a relative 1e-9) not counted: the Lambda runtime and this checkout add the same figures in a different order."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= 1e-9 * max(1.0, abs(a), abs(b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return set(a) == set(b) and all(same(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(same(x, y) for x, y in zip(a, b))
+    return a == b
 
 
 def classify(base, cand):
     """Return (class, relabelled columns [(period, old, new)]) for two segment_table blocks."""
-    if base == cand:
+    if same(base, cand):
         return "EQUAL", []
     if not isinstance(base, dict) or not isinstance(cand, dict):
         return "OTHER", []
-    other = [k for k in set(base) | set(cand) if k not in ("periods", "period_note") and base.get(k) != cand.get(k)]
+    other = [k for k in set(base) | set(cand) if k not in ("periods", "period_note") and not same(base.get(k), cand.get(k))]
     if other:
         return "OTHER", []
     relabelled, ok = [], True
@@ -59,7 +71,7 @@ def classify(base, cand):
     if len(bp) != len(cp):
         return "OTHER", []
     for b, c in zip(bp, cp):
-        extra = [k for k in set(b) | set(c) if k not in ("label", "note") and b.get(k) != c.get(k)]
+        extra = [k for k in set(b) | set(c) if k not in ("label", "note") and not same(b.get(k), c.get(k))]
         if extra:
             ok = False
         if b.get("label") != c.get("label"):
@@ -85,9 +97,10 @@ def main():
     if "--limit" in sys.argv:
         keys = keys[: int(sys.argv[sys.argv.index("--limit") + 1])]
     res = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        for r in pool.map(one, keys):
-            res.append(r)
+    with contextlib.redirect_stdout(io.StringIO()):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            for r in pool.map(one, keys):
+                res.append(r)
     json.dump(res, open(sys.argv[1], "w", encoding="utf-8"), default=str)
     count = {c: sum(1 for r in res if r["class"] == c) for c in ("EQUAL", "LABEL_NOTE", "OTHER", "ERROR")}
     cols = sum(len(r.get("relabelled", [])) for r in res)
