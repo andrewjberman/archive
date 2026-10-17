@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "ADVI_FIRMBKTS.TO-FB-q-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/decompositions/ADVI_FIRMBKTS_DECOMP_FENCE49.md",
+    "vintage_commit": "a87439feea",
+    "to_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-q-1.irpt-export-fence-regenerate.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/ADVI/ADVI_FIRMBKTS/task-orders/ADVI_FIRMBKTS.TO-FB-q-1.irpt-export-fence-regenerate.md",
+    "group": "OTHER",
+    "vintage_commit": "20c3a0d136"
+  },
+  "assignee": "0.7.0_AE_CloudOps~ADVI1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3-49financial.tf",
+      "kind": "script",
+      "commit_or_etag": "c45b4f09c2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "resource aws_s3_bucket_policy.opal_data_49financial (live bucket policy of opal-data-49financial, rendered from the registry row at ee2d1bcfa3): safe-apply rc 0, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; get-bucket-policy read back: 37 statements before and after, DenyScopedExemption3ObjectsOutsidePrefix NotResource +1 and AllowScopedExemption3Objects Resource +1 (the reporting prefix), 35 others byte-equal to the saved prior JSON; post-apply scoped plan: No changes",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~ADVI1/FENCE49_RECORD.json",
+      "kind": "config_data",
+      "commit_or_etag": "cb5ee5e9c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the record the grader reads; AC1 prints FENCE49: OK bucket=opal-data-49financial applies=1",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261017T0357Z_fb-q-1-fence49-reporting-prefix-20261017_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ledger opened before the first write and closed with 4 of 4 legs proven; the .open_deploys sentinel removed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && timeout 30 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py fence49 --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~ADVI1/FENCE49_RECORD.json -- expect ^FENCE49: OK bucket=opal-data-49financial applies=1$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 30 python -I org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/2.0.0_SA_COO~B1/round9/checks/r9_checks.py fence49 --file org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~ADVI1/FENCE49_RECORD.json",
+      "expect": "^FENCE49: OK bucket=opal-data-49financial applies=1$",
+      "output_evidence": "FENCE49: OK bucket=opal-data-49financial applies=1",
+      "denominator": "1 bucket, 1 apply; the record read at cb5ee5e9c5",
+      "status": "PASS",
+      "status_reason": "expected pattern matches on the first run"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "not run by the executor: the grader's own self-test (22 arms) is the issuer's control; baseline control was the scoped plan on a scratch tree with the second prefix removed, which read No changes, and the plan on HEAD then showed exactly the two entries",
+      "expected": "baseline No changes, then plan 0/1/0 with two added entries",
+      "observed": "baseline No changes; plan 0 add 1 change 0 destroy, exactly two added lines",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "plan saved once and applied as the saved plan; post-apply plan re-run",
+      "observed": "post-apply scoped plan exit 0, No changes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the IAM statement for irpt-export-render-role",
+      "reason": "outside this order: IRPT_BCKEND IB-pr-551 ADDENDUM 3/4 is the separate, later act"
+    },
+    {
+      "item": "a read of the reporting prefix by the role",
+      "reason": "bounds: no object read; counts only (18257 objects)"
+    },
+    {
+      "item": "the task order status flip",
+      "reason": "set to complete in the commit that carries this instance, only because AC1 passes"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/critical_paths/change_management/20261017T0357Z_fb-q-1-fence49-reporting-prefix-20261017_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (read), safe-apply.sh, deploy_ledger.py, safe-commit.sh",
+      "invocation": "scoped plans with -target=aws_s3_bucket_policy.opal_data_49financial on a scratch baseline tree and the HEAD apply tree, saved plan applied through .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply <planfile>; ledger open, close-leg x4, close",
+      "result": "baseline No changes; plan 0 add 1 change 0 destroy; Apply complete 0 added, 1 changed, 0 destroyed; post-apply plan No changes; tagauthz PASSED; tombstone CLEAN; ledger CLOSED"
+    },
+    {
+      "tool": "aws (.tools/aws, read verbs only)",
+      "invocation": "iam get-role, s3api get-bucket-policy, list-objects-v2 (length only)",
+      "result": "role exists; prior policy saved (37 statements); reporting prefix 18257 objects; policy read back after the apply"
+    }
+  ]
+}
