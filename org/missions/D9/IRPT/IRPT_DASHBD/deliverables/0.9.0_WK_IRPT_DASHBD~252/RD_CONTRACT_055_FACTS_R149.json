@@ -1,0 +1,29 @@
+{
+  "contract_version": "0.5.5",
+  "changed_contract_paths": [
+    "contract_version",
+    "document.filled_report.account_entry_fields#len",
+    "document.filled_report.account_entry_fields[1]",
+    "document.filled_report.account_entry_fields[2]",
+    "document.filled_report.account_entry_fields[3]",
+    "document.filled_report.account_entry_fields[4]",
+    "document.filled_report.account_id_form_rule",
+    "document.filled_report.per_row_member_form",
+    "document.row_dimensions.account.order",
+    "document.row_dimensions.account.sources.account_id",
+    "document.shape",
+    "lineage#len",
+    "lineage[11].contract_version",
+    "lineage[11].reason",
+    "lineage[11].sha256"
+  ],
+  "reader": "_filled_mint sets account_id_form to the text minted on every account entry, after the raw custodian id is replaced by its minted opaque id, and sorts the household accounts ascending by the minted account_id.",
+  "validator": "validate_filled_report refuses an account entry with no account_id_form, an account_id_form other than minted, an account_id that is not acc_ plus 24 lowercase hex, and an accounts list not ascending by account_id.",
+  "tests_added": [
+    "test_form_every_account_entry_carries_minted",
+    "test_ascending_accounts_are_ordered_by_the_minted_id",
+    "test_form_validator_refuses_a_missing_or_other_form",
+    "test_ascending_validator_refuses_a_raw_looking_id_and_an_out_of_order_list"
+  ],
+  "words": "Contract 0.5.5 makes the minted opaque account id the form of account_id in the filled report, as the CTO ruled on packet 5: minting is the policy and the contract catches up in one drain with its producer. The reader (_filled_mint) now sets account_id_form to minted on every account entry and sorts the accounts ascending by the minted id, so each entry keeps its own last4. The validator (validate_filled_report) refuses an entry with no account_id_form or another form, an account_id that is not minted-shaped, and an accounts list not ascending by account_id, so a consumer can reject a raw id by field. The contract records the 0.5.4 bytes in lineage as the version-bump convention requires. NOT PROVEN: nothing was deployed (no Terraform, no AWS call, no push); the portal mirror waits for Andrew's smoke; the first filled pass is a later signed pair; and whether the function's own run of the new validator over every real household is unknown, since the checks ran over synthetic ids only."
+}

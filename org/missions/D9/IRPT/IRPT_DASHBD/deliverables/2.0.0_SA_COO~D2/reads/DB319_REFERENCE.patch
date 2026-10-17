@@ -1,0 +1,212 @@
+diff --git a/infra/aws/lambda/investor-reporting/_authz/served.py b/infra/aws/lambda/investor-reporting/_authz/served.py
+index d1bf60c9f9..d775b90334 100644
+--- a/infra/aws/lambda/investor-reporting/_authz/served.py
++++ b/infra/aws/lambda/investor-reporting/_authz/served.py
+@@ -208,6 +208,12 @@ def business_date_required(state):
+     return state not in NO_ANSWER_STATES
+ 
+ 
++# THE FORWARD MAP (DB-b-319, CTO ruling A msg 10134): a LITERAL one-entry map, firm token -> the environment variable that names the
++# function to forward to. Only the 49F read function sets that variable, so only it forwards, and only for this one firm; the
++# firm's own function never sets it. Nothing here is read from a request.
++FORWARD_FUNCTION_ENV = {"cottonwood": "IRPT_FORWARD_COTTONWOOD_FUNCTION"}
++
++
+ class EntryError(ValueError):
+     """A MALFORMED WIRING -- never an unauthorized request."""
+ 
+@@ -697,8 +703,12 @@ class Entry(object):
+                  reasons=None, routes=None, prospect_modes=None, load_prospect_owner=None,
+                  owner_read_modes=None, record_id_parameters=None,
+                  load_record_owner=None, authorize_record_owner=None, global_context=None,
+-                 render_ports=None, load_service_profile=None, load_partner_profile=None):
++                 render_ports=None, load_service_profile=None, load_partner_profile=None, forward_invoke=None):
+         self.function_name = function_name
++        # DB-b-319: `(function_name, event) -> the proxy response dict`; unset, a synchronous boto3 Lambda invoke. A test injects it.
++        if forward_invoke is not None and not callable(forward_invoke):
++            raise EntryError("forward_invoke must be a (function_name, event) -> response callable")
++        self.forward_invoke = forward_invoke
+         # IB-pr-271 (row S238): `email -> profile row dict | None` (may raise). Unset, a SERVICE subject's
+         # allowedFirmIds is read from the maintained profile row (`_service_allowed_firms`).
+         if load_service_profile is not None and not callable(load_service_profile):
+@@ -1192,6 +1202,21 @@ class Entry(object):
+             raise ValueError("allowedFirmIds holds ALL")
+         return items
+ 
++    def _forward(self, event, function_name, operation):
++        """Hand the ORIGINAL event to the named function and return its proxy response untouched. The target runs its own full guard
++        on the event (its signed headers are the proof); nothing is added to the event and no field of it is trusted here. Neither
++        the event nor the response body is logged. Any failure is NOT_READY, never a body."""
++        try:
++            if self.forward_invoke is not None:
++                return self.forward_invoke(function_name, event)
++            import boto3
++            reply = boto3.client("lambda").invoke(FunctionName=function_name, InvocationType="RequestResponse", Payload=json.dumps(event).encode("utf-8"))
++            if reply.get("FunctionError"):
++                return refuse(operation or self.function_name, None, "NOT_READY")
++            return json.loads(reply["Payload"].read())
++        except Exception:  # noqa: BLE001 -- no class, message or body leaves this function
++            return refuse(operation or self.function_name, None, "NOT_READY")
++
+     def handle(self, event, context=None):
+         headers = event_headers(event)
+         operation = self.operation_of(event, headers) or ""
+@@ -1235,10 +1260,16 @@ class Entry(object):
+             if not internal:
+                 return refuse(operation or self.function_name, None, "FIRM_BINDING")
+             from loaders import bucket_for
++            forward_to = None
+             try:
+                 bucket_for(selected)  # Terraform's registry-derived tenant allow-list.
+             except ValueError:
+-                return refuse(operation or self.function_name, None, "FIRM_BINDING")
++                # DB-b-319: a firm this function cannot map is forwarded ONLY when the literal map names it AND this function's
++                # environment names the target; the caller was admitted as INTERNAL above and is narrowed below, as for any firm.
++                env_name = FORWARD_FUNCTION_ENV.get(selected)
++                forward_to = os.environ.get(env_name) if env_name else None
++                if not forward_to:
++                    return refuse(operation or self.function_name, None, "FIRM_BINDING")
+             # A SERVICE principal's reach is its row's allowedFirmIds ("ALL" = unrestricted; an absent attribute is
+             # refused), read from the maintained profile row, never from a header.
+             if trusted.get("x-user-type", "").strip().lower() == "service":
+@@ -1259,6 +1290,8 @@ class Entry(object):
+                 if caller_refused:
+                     return refuse(operation or self.function_name, None, "FIRM_BINDING")
+             verified = selected
++            if forward_to:
++                return self._forward(event, forward_to, operation)
+         try:
+             matches = firm_claims_match(event, verified)
+         except (ValueError, TypeError):
+diff --git a/infra/aws/lambda/investor-reporting/_authz/tests/test_forward_cottonwood.py b/infra/aws/lambda/investor-reporting/_authz/tests/test_forward_cottonwood.py
+new file mode 100644
+index 0000000000..996b76ece5
+--- /dev/null
++++ b/infra/aws/lambda/investor-reporting/_authz/tests/test_forward_cottonwood.py
+@@ -0,0 +1,126 @@
++"""DB-b-319 (CTO ruling A msg 10134, conditions 1 and 2): the 49F read function FORWARDS a Cottonwood request to the Cottonwood function.
++
++Drives the real `served.Entry.handle` with `forward_invoke` injected. Offline: no AWS, no network.
++  forward: a literal one-entry map, admitted by the 49F guard first (internal caller, allowed-firm narrowing), the original event handed over
++  untouched, the response returned untouched, no body logged; the 49F path unchanged; every other firm refused; the target runs its own full guard.
++"""
++from __future__ import annotations
++
++import json
++import os
++import sys
++
++_HERE = os.path.dirname(os.path.abspath(__file__))
++_AUTHZ = os.path.dirname(_HERE)
++_PKG = os.path.dirname(_AUTHZ)
++for _p in (_AUTHZ, _HERE, os.path.join(_PKG, "_scope"), os.path.join(_PKG, "_keys"), os.path.join(_PKG, "_ids")):
++    if _p not in sys.path:
++        sys.path.insert(0, _p)
++import pytest  # noqa: E402
++import served  # noqa: E402
++
++ROUTE = "GET /api/scoped/investor-reporting/directory/search"
++EMAIL = "ops@opalinvest.com"
++MARK = "BODY-MARKER-0Q7"
++ACTIVE = {"status": "active", "allowedFirmIds": ["cottonwood", "49financial", "inflection"]}
++SEEN = []
++CALLS = []
++
++
++def _deps(tenant, *a, **k):
++    SEEN.append(tenant)
++    raise RuntimeError("stop after admission")
++
++
++@pytest.fixture(autouse=True)
++def _env(monkeypatch):
++    monkeypatch.setenv("IRPT_DIRECTORY_BUCKET_MAP", json.dumps({"49financial": "b-49f"}))
++    monkeypatch.setenv("IRPT_FORWARD_COTTONWOOD_FUNCTION", "irpt-cot-reporting-read-lambda")
++    del SEEN[:], CALLS[:]
++
++
++def _entry(row=ACTIVE, invoke=None):
++    def forward(name, event):
++        CALLS.append((name, event))
++        return invoke(name, event) if invoke else {"statusCode": 200, "isBase64Encoded": True, "headers": {"content-encoding": "gzip"}, "body": MARK}
++    return served.Entry(function_name="irpt-49f-reporting-read-lambda", operations={"directory_search": lambda *a: {}}, deps=_deps,
++                        opaque_firm_for=lambda *a, **k: None, routes={ROUTE: "directory_search"}, load_service_profile=lambda email: row, forward_invoke=forward)
++
++
++def _event(selected="cottonwood", user_type="user", **more):
++    headers = {"X-Contract-Version": served.CONTRACT_VERSION, "X-Firm-Id": "opal-capital", "x-origin-verify": "cloudfront",
++               "x-user-email": EMAIL, "x-user-role": "user", "x-user-type": user_type}
++    headers.update(more)
++    return {"headers": headers, "routeKey": ROUTE, "queryStringParameters": {"selected_tenant": selected}}
++
++
++def test_forward_cottonwood_is_handed_over_once_with_the_original_event_and_the_reply_untouched():
++    event = _event()
++    before = json.dumps(event, sort_keys=True)
++    out = _entry().handle(event)
++    assert [c[0] for c in CALLS] == ["irpt-cot-reporting-read-lambda"] and CALLS[0][1] is event
++    assert json.dumps(event, sort_keys=True) == before          # nothing was added to the event
++    assert out == {"statusCode": 200, "isBase64Encoded": True, "headers": {"content-encoding": "gzip"}, "body": MARK}
++    assert SEEN == []                                           # the 49F function reached no bucket of its own
++
++
++def test_forward_49f_path_is_unchanged_and_never_forwards():
++    out = _entry().handle(_event(selected="49financial"))
++    assert "49financial" in SEEN and CALLS == []
++
++
++@pytest.mark.parametrize("selected", ["inflection", "global-x", "opal-capital2"])
++def test_forward_other_firms_are_refused_and_never_forwarded(selected):
++    out = _entry().handle(_event(selected=selected))
++    assert "FIRM_BINDING" in json.dumps(out, default=str) and CALLS == []
++
++
++def test_forward_without_the_environment_name_is_refused():
++    os.environ.pop("IRPT_FORWARD_COTTONWOOD_FUNCTION")
++    out = _entry().handle(_event())
++    assert "FIRM_BINDING" in json.dumps(out, default=str) and CALLS == []
++
++
++def test_forward_a_non_internal_caller_is_refused_before_the_forward():
++    out = _entry().handle(_event(**{"x-origin-verify": "forged"}))
++    assert CALLS == [] and "FIRM_BINDING" in json.dumps(out, default=str)
++
++
++def test_forward_the_allowed_firm_narrowing_applies_first():
++    out = _entry(row={"status": "active", "allowedFirmIds": ["49financial"]}).handle(_event())
++    assert CALLS == [] and "FIRM_BINDING" in json.dumps(out, default=str)
++    out = _entry(row={"status": "active", "allowedFirmIds": ["cottonwood"]}).handle(_event())
++    assert len(CALLS) == 1
++
++
++def test_forward_a_failure_is_not_ready_and_leaks_nothing():
++    def boom(name, event):
++        raise RuntimeError("secret detail " + MARK)
++    out = _entry(invoke=boom).handle(_event())
++    text = json.dumps(out, default=str)
++    assert "NOT_READY" in text and MARK not in text and "secret detail" not in text
++
++
++def test_forward_never_logs_the_event_or_the_body(capsys, caplog):
++    caplog.set_level("DEBUG")
++    _entry().handle(_event(**{"x-marker": MARK}))
++    captured = capsys.readouterr()
++    assert MARK not in captured.out + captured.err and MARK not in caplog.text
++
++
++def test_forward_a_forged_forwarder_field_changes_nothing_for_the_target():
++    """The target (no forward environment, map holding cottonwood) runs its OWN guard: fields claiming a forward admit nothing."""
++    os.environ.pop("IRPT_FORWARD_COTTONWOOD_FUNCTION")
++    os.environ["IRPT_DIRECTORY_BUCKET_MAP"] = json.dumps({"cottonwood": "b-cot"})
++    forged = _event(**{"x-origin-verify": "forged"})
++    forged["forwarded_by"] = "irpt-49f-reporting-read-lambda"
++    forged["requestContext"] = {"forwarded": True, "internal": True}
++    out = _entry().handle(forged)
++    assert SEEN == [] and CALLS == [] and "FIRM_BINDING" in json.dumps(out, default=str)
++    genuine = _event()
++    with_field = dict(genuine, forwarded_by="irpt-49f-reporting-read-lambda")
++    _entry().handle(genuine)
++    first = list(SEEN)
++    del SEEN[:]
++    _entry().handle(with_field)
++    assert SEEN == first and first == ["cottonwood"]           # the field changes nothing: admitted by the headers alone

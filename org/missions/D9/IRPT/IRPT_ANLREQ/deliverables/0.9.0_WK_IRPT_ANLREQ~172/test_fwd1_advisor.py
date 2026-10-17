@@ -141,6 +141,14 @@ def case_partner_readback():
     assert not fa.partner_readback_ok(dict(row, advisorRole={"S": "admin"}), ADDR, DATE)
 
 
+def case_display_name_of_both_rows_reads_synthetic_test_advisor():
+    """the display name of both rows reads SYNTHETIC TEST ADVISOR (users name and partner advisorName)."""
+    users = fa.user_item(ADDR, NOW)
+    partner = fa.partner_item(ADDR, DATE, NOW)
+    assert users["name"] == {"S": "SYNTHETIC TEST ADVISOR"}, users["name"]
+    assert partner["advisorName"] == {"S": "SYNTHETIC TEST ADVISOR"}, partner["advisorName"]
+
+
 def case_mint_writes_users_then_partner_with_conditions():
     ddb = StubDDB()
     rc, lines = fa.mint(ddb, DATE, NOW)
@@ -227,6 +235,7 @@ def case_module_import_touches_no_aws():
 
 CASES = (case_address_from_date, case_bad_date_refused, case_user_item_shape, case_partner_item_shape,
          case_no_credential_in_items, case_user_readback_accepts_written_and_refuses_wider, case_partner_readback,
+         case_display_name_of_both_rows_reads_synthetic_test_advisor,
          case_mint_writes_users_then_partner_with_conditions, case_mint_prestate_users_present_writes_nothing,
          case_mint_prestate_index_present_writes_nothing, case_mint_prestate_partner_present_writes_nothing,
          case_mint_prereads_are_consistent, case_mint_readback_mismatch_stops_before_partner,

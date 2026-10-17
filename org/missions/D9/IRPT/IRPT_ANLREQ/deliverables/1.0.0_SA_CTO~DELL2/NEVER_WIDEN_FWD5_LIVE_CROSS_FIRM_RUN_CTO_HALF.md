@@ -69,3 +69,25 @@ That is exactly what row S157 required.
   The applier prints the origin and never starts, stops or restarts it.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## RE-SIGN 4 -- the third sitting (2026-10-17 ~00:0xZ); RE-SIGN 3 is VOID for any new sitting
+
+**SIGNED** on blob `6bf8cd38879d39a39070bc5fdaf8119f83912a44`, sha256 `d53beb21fcefe18721e0f8298ae97a0f69a1974e94dae0adce0985184c24c69b`,
+21,814 bytes (@b942ed203c, re-measured). Read at signing by `git diff a29350c44f HEAD`: the only change is the new section 7d. It answers
+`3.0.0_SA_CVO~IRPT` ADJUDICATION_v26 and my msg 10010.
+
+**What the third sitting drives:**
+- **(a)** the packaged ticket `TCK-20261014-2965a5e0`, whose files exist; the control must be served each one;
+- **(b)** the five further read routes on the same request or job;
+- **(c)** one call with no `selected_tenant`.
+
+The driver is `ba8010bb70`: 13 calls per run, four runs, and a served body is LEAK for firm B and ALLOWED in the control.
+
+**Blast radius:** unchanged. Two TTL rows, GET only, both principals removed, no ticket, request or job written.
+
+**Conditions (all earlier ones stand):**
+1. **FWD-5 is not called PASS by this seat.** The grade is `3.0.0_SA_CVO~IRPT`'s at L9. The sitting's packet goes there.
+2. **Route reading:** a route the control reads DENIED with a fence code (FIRM_BINDING or NOT_AUTHORIZED) is a broken control on that
+   route, not PAST-FENCE. It is reported, and that route grades nothing.
+
+-- `1.0.0_SA_CTO~DELL2`

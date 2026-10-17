@@ -25,7 +25,10 @@ PACKET_REL = D + "2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_49F_TRANSACTION_WIRING.md"
 COO_REL = D + "2.0.0_SA_COO~F2/NEVER_WIDEN_49F_TRANSACTION_WIRING_COO_HALF.md"
 CTO_REL = D + "1.0.0_SA_CTO~DELL2/NEVER_WIDEN_49F_TRANSACTION_WIRING_CTO_HALF.md"
 PACKET_SHA = "b67bd4ad57f23b13b6e89361a551a0e6e026a831ecc495cdfb66e13ac5e7313c"
-BUILD_B64 = "SCt7IgN3A+SXxfn8cv0QHVnhjVMmHXePihA6MnPm2nQ="
+BUILD_B64 = "JgSV12TzBm0nHmWKKvtk35PWQvFePk3NHQzGWeACYes="  # the RE-STAGED bundle (CTO ADDENDUM 1); the first build was SCt7IgN3...
+FIRST_BUILD_B64 = "SCt7IgN3A+SXxfn8cv0QHVnhjVMmHXePihA6MnPm2nQ="
+FIRST_ARTIFACT_VERSION = "NeB6JJ_0Qy72SG3LgV7nWjOs0keBl0oy"
+FUNCTION_ADDRESS = "module.irpt_reporting_gold.aws_lambda_function.this"
 OLD_CODE_B64 = "JNTOivgNaJ8spRxoXSkXAYWhf1cLqXr350sTpH5ADg4="
 OLD_ARTIFACT_VERSION = "00dm6f4.vFnWIiIuxVafNVtxIh0zAEeh"
 FUNCTION = "irpt-49f-reporting-gold-lambda"
@@ -70,35 +73,44 @@ def statement_hash(st):
 # ---------------------------------------------------------------- the record's clauses (pure)
 def head_problems(rec, new_resource):
     pr = []
-    keys = ["claim", "gates", "ledger_entry", "applier", "before", "build", "plan", "apply_finished_utc", "after", "dry_run", "time_trigger", "first_write", "range",
-            "ledger_closed", "reads"]
+    keys = ["claim", "gates", "ledger_entry", "applier", "first_apply", "before", "build", "plan", "apply_finished_utc", "after", "dry_run", "time_trigger", "first_write",
+            "range", "ledger_closed", "reads"]
     if not isinstance(rec, dict) or any(k not in rec for k in keys):
         return ["the record must carry %s" % keys]
     if rec["claim"] != "measured" or rec["applier"] != APPLIER:
         pr.append("claim must be measured and applier %s" % APPLIER)
     g = rec["gates"]
     if not (isinstance(g, dict) and g.get("packet_sha256") == PACKET_SHA and g.get("coo_half_signed") is True and g.get("cto_half_signed") is True
-            and g.get("pins_ok") is True and isinstance(g.get("one_change_at_a_time"), dict)
+            and g.get("addendum_1_signed") is True and g.get("pins_ok") is True and isinstance(g.get("one_change_at_a_time"), dict)
             and is_int(g["one_change_at_a_time"].get("worktrees_read")) and g["one_change_at_a_time"]["worktrees_read"] > 0
             and g["one_change_at_a_time"].get("open_markers_naming_this_surface") == 0):
-        pr.append("gates must record the packet sha256, both halves signed, the pins, and the worktree denominator with 0 open markers naming this surface")
+        pr.append("gates must record the packet sha256, both halves and the CTO's ADDENDUM 1 signed and countersigned, the pins, and the worktree denominator with 0 open markers naming this surface")
     if not (isinstance(rec["ledger_entry"], str) and rec["ledger_entry"].strip()):
         pr.append("ledger_entry must name the ledger")
+    fa = rec["first_apply"]
+    try:
+        fa_in_window = in_fire_window(parse_utc(fa.get("apply_finished_utc")))
+    except (ValueError, TypeError, AttributeError):
+        fa_in_window = True
+    if not (isinstance(fa, dict) and fa.get("code_sha256") == FIRST_BUILD_B64 and fa.get("landed_version_id") == FIRST_ARTIFACT_VERSION
+            and isinstance(fa.get("plan"), dict) and (fa["plan"].get("add"), fa["plan"].get("change"), fa["plan"].get("destroy")) == (0, 2, 0)
+            and fa.get("policy_added_resources") == [new_resource] and not fa_in_window):
+        pr.append("first_apply must record the first apply as it was: build SCt7IgN3, version NeB6JJ_0Qy72, plan 0/2/0, the one new write resource, finished outside the fire window")
     b = rec["before"]
-    if not (isinstance(b, dict) and b.get("function_code_sha256") == OLD_CODE_B64 and b.get("artifact_version_id") == OLD_ARTIFACT_VERSION
-            and isinstance(b.get("policy"), dict) and sorted(b["policy"]) == sorted(SIDS) and isinstance(b.get("write_resources"), list) and len(b["write_resources"]) == 6
-            and b.get("new_prefix_objects") == 0 and isinstance(b.get("schedule"), dict) and b["schedule"].get("state") == "ENABLED"
+    if not (isinstance(b, dict) and b.get("function_code_sha256") == FIRST_BUILD_B64 and b.get("artifact_version_id") == FIRST_ARTIFACT_VERSION
+            and isinstance(b.get("policy"), dict) and sorted(b["policy"]) == sorted(SIDS) and isinstance(b.get("write_resources"), list) and len(b["write_resources"]) == 7
+            and new_resource in b["write_resources"] and b.get("new_prefix_objects") == 0 and isinstance(b.get("schedule"), dict) and b["schedule"].get("state") == "ENABLED"
             and is_int((b.get("last_fire") or {}).get("duration_ms")) and isinstance(b.get("other_tables"), dict) and sorted(b["other_tables"]) == sorted(OTHER_TABLES)):
-        pr.append("before must be the packet's section 3: the old code hash and artifact version, eleven statements, six write resources, an empty new prefix, an ENABLED schedule, the last fire's duration, the six other tables' counts")
+        pr.append("before must be the state after the FIRST apply: build SCt7IgN3 and version NeB6JJ_0Qy72 live, eleven statements, seven write resources, an empty new prefix, an ENABLED schedule, the last fire's duration, the six other tables' counts")
     bd = rec["build"]
-    if not (isinstance(bd, dict) and bd.get("zip_sha256_b64") == BUILD_B64 and bd.get("import_smoke_rc") == 0 and isinstance(bd.get("landed_version_id"), str)
-            and bd["landed_version_id"] and bd["landed_version_id"] != OLD_ARTIFACT_VERSION and bd.get("built_equals_landed") is True):
-        pr.append("build must equal the packet's base64 sha256, import smoke rc 0, a NEW landed version, built equals landed")
+    if not (isinstance(bd, dict) and bd.get("zip_sha256_b64") == BUILD_B64 and bd.get("import_smoke_rc") == 0 and bd.get("at49_import_error") is None
+            and isinstance(bd.get("landed_version_id"), str) and bd["landed_version_id"] and bd["landed_version_id"] not in (OLD_ARTIFACT_VERSION, FIRST_ARTIFACT_VERSION)
+            and bd.get("built_equals_landed") is True):
+        pr.append("build must equal the re-staged base64 sha256 JgSV12Tz, import smoke rc 0 with AT49_IMPORT_ERROR None, a NEW landed version, built equals landed")
     pl = rec["plan"]
-    if not (isinstance(pl, dict) and pl.get("add") == 0 and pl.get("change") == 2 and pl.get("destroy") == 0
-            and sorted(pl.get("change_addresses") or []) == ["aws_iam_role_policy.irpt_reporting_gold", "module.irpt_reporting_gold.aws_lambda_function.this"]
-            and pl.get("policy_added_resources") == [new_resource] and pl.get("policy_other_changes") == 0 and pl.get("replan_no_changes") is True):
-        pr.append("plan must read exactly 0/2/0 on the two addresses, the policy change the ONE new write resource and nothing else, and a re-plan with no changes")
+    if not (isinstance(pl, dict) and pl.get("add") == 0 and pl.get("change") == 1 and pl.get("destroy") == 0 and pl.get("change_addresses") == [FUNCTION_ADDRESS]
+            and pl.get("policy_changes") == 0 and pl.get("replan_no_changes") is True):
+        pr.append("plan must read exactly 0 add / 1 change / 0 destroy on the function alone (code attributes), NO policy line, and a re-plan with no changes")
     fin = rec["apply_finished_utc"]
     try:
         if in_fire_window(parse_utc(fin)):
@@ -107,11 +119,10 @@ def head_problems(rec, new_resource):
         pr.append("apply_finished_utc must be a UTC time")
     a = rec["after"]
     if not (isinstance(a, dict) and isinstance(a.get("function"), dict) and a["function"].get("memory") == 8192 and a["function"].get("timeout") == 900
-            and a["function"].get("code_sha256") == BUILD_B64 and isinstance(a.get("write_resources"), list) and len(a["write_resources"]) == 7
-            and sorted(a["write_resources"]) == sorted(list(b.get("write_resources")) + [new_resource])
-            and isinstance(a.get("policy"), dict) and sorted(a["policy"]) == sorted(SIDS)
-            and all(a["policy"][s] == b["policy"][s] for s in SIDS if s != WRITE_SID) and a["policy"][WRITE_SID] != b["policy"][WRITE_SID]):
-        pr.append("after must show the new code hash, memory 8192, timeout 900, seven write resources (the six and the new one, as a SET: IAM stores the list in its own order), every statement but the write statement byte-identical")
+            and a["function"].get("code_sha256") == BUILD_B64 and isinstance(a.get("write_resources"), list)
+            and sorted(a["write_resources"]) == sorted(b.get("write_resources") or [])
+            and isinstance(a.get("policy"), dict) and a["policy"] == b.get("policy")):
+        pr.append("after must show the re-staged code hash, memory 8192, timeout 900, the SAME seven write resources and every statement byte-identical to the before-state")
     return pr
 
 
@@ -218,15 +229,12 @@ def live_problems(rec, reads, new_resource):
     else:
         for sid in SIDS:
             h = statement_hash(st[sid])
-            want = rec["after"]["policy"][sid]
-            if h != want:
-                pr.append("statement %s differs from the record's after-state" % sid)
-            if sid != WRITE_SID and h != rec["before"]["policy"][sid]:
-                pr.append("statement %s changed from the before-state (only the write statement may)" % sid)
+            if h != rec["after"]["policy"][sid] or h != rec["before"]["policy"][sid]:
+                pr.append("statement %s differs from the record's before or after state (the second apply changes NO policy line)" % sid)
         res = st[WRITE_SID].get("Resource")
         res = [res] if isinstance(res, str) else list(res or [])
-        if sorted(res) != sorted(rec["before"]["write_resources"] + [new_resource]) or st[WRITE_SID].get("Action") not in ("s3:PutObject", ["s3:PutObject"]):
-            pr.append("the write statement must be s3:PutObject over the six old resources plus exactly the new one")
+        if sorted(res) != sorted(rec["before"]["write_resources"]) or new_resource not in res or st[WRITE_SID].get("Action") not in ("s3:PutObject", ["s3:PutObject"]):
+            pr.append("the write statement must be s3:PutObject over the seven resources the first apply left, the new one among them")
     sc = reads.schedule()
     if sc != rec["before"]["schedule"] or sc["state"] != "ENABLED":
         pr.append("the schedule must be ENABLED and untouched: %r" % (sc,))
@@ -304,18 +312,19 @@ def selftest():
 
     new = "arn:aws:s3:::b/irpt/x/gold/account_transaction/*"
     old6 = ["r%d" % i for i in range(6)]
+    seven = old6 + [new]
     pol = {s: "h_" + s for s in SIDS}
-    pol_after = dict(pol, **{WRITE_SID: "h_new"})
     rec = {"claim": "measured", "applier": APPLIER, "ledger_entry": "irpt-dashbd-49f-transaction-wiring-20261016", "ledger_closed": False, "reads": {"vendor_calls": 0, "secret_reads": 0},
-           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True,
+           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "addendum_1_signed": True, "pins_ok": True,
                      "one_change_at_a_time": {"worktrees_read": 91, "open_markers_naming_this_surface": 0}},
-           "before": {"function_code_sha256": OLD_CODE_B64, "artifact_version_id": OLD_ARTIFACT_VERSION, "policy": pol, "write_resources": old6, "new_prefix_objects": 0,
+           "first_apply": {"code_sha256": FIRST_BUILD_B64, "landed_version_id": FIRST_ARTIFACT_VERSION, "plan": {"add": 0, "change": 2, "destroy": 0},
+                           "policy_added_resources": [new], "apply_finished_utc": "2026-10-16T22:55:00Z"},
+           "before": {"function_code_sha256": FIRST_BUILD_B64, "artifact_version_id": FIRST_ARTIFACT_VERSION, "policy": pol, "write_resources": seven, "new_prefix_objects": 0,
                       "schedule": {"state": "ENABLED", "cron": "c"}, "last_fire": {"duration_ms": 300000}, "other_tables": {t: {"partitions": 7} for t in OTHER_TABLES}},
-           "build": {"zip_sha256_b64": BUILD_B64, "import_smoke_rc": 0, "landed_version_id": "NEWV", "built_equals_landed": True},
-           "plan": {"add": 0, "change": 2, "destroy": 0, "change_addresses": ["aws_iam_role_policy.irpt_reporting_gold", "module.irpt_reporting_gold.aws_lambda_function.this"],
-                    "policy_added_resources": [new], "policy_other_changes": 0, "replan_no_changes": True},
+           "build": {"zip_sha256_b64": BUILD_B64, "import_smoke_rc": 0, "at49_import_error": None, "landed_version_id": "NEWV", "built_equals_landed": True},
+           "plan": {"add": 0, "change": 1, "destroy": 0, "change_addresses": [FUNCTION_ADDRESS], "policy_changes": 0, "replan_no_changes": True},
            "apply_finished_utc": "2026-10-16T23:10:00Z",
-           "after": {"function": {"memory": 8192, "timeout": 900, "code_sha256": BUILD_B64}, "write_resources": old6 + [new], "policy": pol_after},
+           "after": {"function": {"memory": 8192, "timeout": 900, "code_sha256": BUILD_B64}, "write_resources": list(seven), "policy": dict(pol)},
            "dry_run": {"status_code": 200, "function_error": None, "payload": {"stages": ["transaction"], "dry_run": True},
                        "returned": {"stages": ["transaction"], "transaction_failed": {}, "transaction_rows": {"2026-10-15": 100}}, "prefix_objects_after": 0,
                        "report": {"duration_ms": 90000, "max_memory_used_mb": 900}},
@@ -329,20 +338,29 @@ def selftest():
     arm("head-green", head_problems(rec, new), [])
     arm("events-green", events_problems(rec, "p/"), [])
     r2 = copy.deepcopy(rec)
-    r2["plan"]["change"] = 3
+    r2["plan"]["change"] = 2
     arm("plan-red", len(head_problems(r2, new)), 1)
     r3 = copy.deepcopy(rec)
     r3["apply_finished_utc"] = "2026-10-19T11:50:00Z"
     arm("window-red", len(head_problems(r3, new)), 1)
     r4 = copy.deepcopy(rec)
     r4["after"]["policy"]["OwnLogStreamOnly"] = "x"
-    arm("other-statement-changed-red", len(head_problems(r4, new)), 1)
+    arm("any-statement-changed-red", len(head_problems(r4, new)), 1)
     r4b = copy.deepcopy(rec)
-    r4b["after"]["write_resources"] = [old6[0], new] + old6[1:]
+    r4b["after"]["write_resources"] = [seven[0], seven[6]] + seven[1:6]
     arm("write-resources-are-a-set-green", head_problems(r4b, new), [])
     r4c = copy.deepcopy(rec)
     r4c["after"]["write_resources"] = old6 + ["arn:aws:s3:::b/other/*"]
     arm("write-resources-wrong-member-red", len(head_problems(r4c, new)), 1)
+    r4d = copy.deepcopy(rec)
+    r4d["plan"].update({"change": 2, "change_addresses": [FUNCTION_ADDRESS, "aws_iam_role_policy.irpt_reporting_gold"], "policy_changes": 1})
+    arm("a-policy-line-in-the-second-plan-red", len(head_problems(r4d, new)), 1)
+    r4e = copy.deepcopy(rec)
+    r4e["build"]["zip_sha256_b64"] = FIRST_BUILD_B64
+    arm("first-build-hash-red", len(head_problems(r4e, new)), 1)
+    r4f = copy.deepcopy(rec)
+    r4f["first_apply"]["plan"]["change"] = 1
+    arm("first-apply-misrecorded-red", len(head_problems(r4f, new)), 1)
     r5 = copy.deepcopy(rec)
     r5["time_trigger"].update({"sum_ms": 800000, "act3_stage_duration_ms": 500000, "over_720s": True})
     arm("trigger-without-rollback-red", len(events_problems(r5, "p/")), 1)

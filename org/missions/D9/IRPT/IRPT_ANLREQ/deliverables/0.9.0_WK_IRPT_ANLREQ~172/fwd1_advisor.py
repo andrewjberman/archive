@@ -48,8 +48,8 @@ TIER = "advisor"
 ROLE = "user"
 ADVISOR_ROLE = "viewer"
 FIRM_ROLE = "user"
-# Display name: the order cell. Release-33 used "IRPT_ANLREQ R33 synthetic advisor A" (sitting_r33.py:283), same shape.
-NAME = "IRPT_ANLREQ FWD-1 synthetic advisor"
+# Display name: the CTO's condition (msg 10001, addendum 5 item 2): both rows read exactly this, so no partner-facing list can mistake the synthetic advisor for a real one. Release-33 used "IRPT_ANLREQ R33 synthetic advisor A" (sitting_r33.py:283).
+NAME = "SYNTHETIC TEST ADVISOR"
 # Provenance stamp: the order cell says 0.7.0_AE_CloudOps~IB2. Release-33 wrote 0.7.0_AE_CloudOps~AQ2 (sitting_r33.py:286, 302);
 # the order's value is used and the difference is filed as a surprise row.
 CREATED_BY = "0.7.0_AE_CloudOps~IB2"
