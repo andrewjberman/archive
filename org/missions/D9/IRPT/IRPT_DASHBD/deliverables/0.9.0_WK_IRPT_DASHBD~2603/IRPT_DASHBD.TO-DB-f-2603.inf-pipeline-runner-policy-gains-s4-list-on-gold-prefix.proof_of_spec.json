@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-f-2603",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2603.inf-pipeline-runner-policy-gains-s4-list-on-gold-prefix.md",
+    "group": "OTHER",
+    "vintage_commit": "77ee7383da"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_R138_F.md",
+    "vintage_commit": "77ee7383da",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-f-2603.inf-pipeline-runner-policy-gains-s4-list-on-gold-prefix.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~2603",
+  "session_log": "Worker drive on branch wk-IRPT_DASHBD-2603 from base 77ee7383da. The first act printed the branch and TREE-OK. The order's worker face was read whole. The checker p138_inf_s4.py was read whole; iam.tf at HEAD was cmp-equal to the pinned base checks/r138/inf_iam_r138_base.tf.txt, so no STOP. iam.tf received one pure insertion of 11 ASCII LF lines: two gold locals after txn_gold_object_arns and statement S4ListInflectionAccountTransactionGoldOnly between S2 and S3. The four checks were run and PASS (rc 0) at 79cb9b96a6, and the checker selftest PASS (10 arms). The facts record RD_RUNNER_POLICY_S4_FACTS_R138.json was written and committed with iam.tf in 79cb9b96a6. No surprise row was filed: nothing in the cell departed from the order. No AWS call, no Terraform command, no push. The order status is not flipped. A safe-commit WARN recorded that the hashed account-id list is absent at the operator path, so the client-data check did not grade the commit; the commit carries no account identifiers (Terraform text and bucket prefix names only).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/inf-pipeline/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "79cb9b96a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure insertion of 11 ASCII LF lines (git show --numstat: 11 insertions, 0 deletions): two gold locals txn_gold_bucket_arn and txn_gold_list_prefixes, and statement S4ListInflectionAccountTransactionGoldOnly (Allow, s3:ListBucket, Resource local.txn_gold_bucket_arn, StringLike on s3:prefix = local.txn_gold_list_prefixes) between S2 and S3. No plan was run and nothing was applied.",
+      "artifact_covered_by": ["DBF138-3-AC1", "DBF138-3-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~2603/RD_RUNNER_POLICY_S4_FACTS_R138.json",
+      "kind": "config_data",
+      "commit_or_etag": "79cb9b96a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "claim measured; lines_added 11; statements the four sids; registry_files_touched 0; other_files_touched 0; the four check results; the not_proven list.",
+      "artifact_covered_by": ["DBF138-3-AC1", "DBF138-3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBF138-3-AC1",
+      "criterion_verbatim": "`DBF138-3-AC1` -- the root's 46 other files are byte-identical to the base and `iam.tf` is a pure insertion of ASCII lines against the pinned base (LF endings kept). Base: FAIL (iam.tf unchanged).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_inf_s4.py\" . DBF138-3-AC1",
+      "output_evidence": "DBF138-3-AC1 PASS (rc 0), run from the worktree root at commit 79cb9b96a6.",
+      "denominator": "47 checks: 46 other files of the root byte-identical by sha256 (46 of 46), and iam.tf a pure insertion against the pinned base (11 lines added, 0 removed, ASCII, LF kept).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "DBF138-3-AC2",
+      "criterion_verbatim": "`DBF138-3-AC2` -- the policy carries S1 to S4, S1 to S3 unchanged, S4 Allow `s3:ListBucket` on the gold bucket conditioned by StringLike on `s3:prefix` over the gold key and its children, no gold GetObject, nothing typed, no wildcard. Base: FAIL (S4 absent).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_inf_s4.py\" . DBF138-3-AC2",
+      "output_evidence": "DBF138-3-AC2 PASS (rc 0), run from the worktree root at commit 79cb9b96a6.",
+      "denominator": "semantic clauses of the checker: S1, S2 and S3 each byte-for-byte unchanged (3 of 3); S4 present exactly once; Allow; Action exactly s3:ListBucket; no GetObject or PutObject in S4; Resource on the gold bucket local and not silver; StringLike on s3:prefix over a txn_gold local; no typed bucket name; no wildcard; actions of the policy exactly GetObject, ListBucket, PutObject; the inserted text uses txn_gold locals.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's selftest arms: the reference insertion (from _reference) passes both criteria; mutants (S4 with GetObject, S4 on the silver bucket, S4 without the condition, a typed bucket name, an S3 change, a second S4, a removed insertion marker) each go red.",
+      "expected": "selftest PASS with all arms",
+      "observed": "selftest PASS (10 arms) rc 0 at commit 79cb9b96a6.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the round-137 criteria of the same root re-run on the committed bytes at 79cb9b96a6 from the worktree root, after the S4 edit",
+      "observed": "DBF137-5-AC1 PASS rc 0; DBF137-5-AC2 PASS rc 0 (python -I checks/r136/p137_inf_tf.py . <id>).",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "p138_inf_s4.py (--selftest)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r138/p138_inf_s4.py\" --selftest .",
+      "result": "selftest PASS (10 arms) rc 0."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any AWS call, and any terraform command (plan, validate, fmt, apply).",
+      "reason": "The order states no AWS access and no Terraform command in this cell; none was run, so the HCL is not proven to plan and S4 is not simulated."
+    },
+    {
+      "item": "Order status is not flipped.",
+      "reason": "The order's worker face says the issuer flips status."
+    }
+  ],
+  "surprises": []
+}

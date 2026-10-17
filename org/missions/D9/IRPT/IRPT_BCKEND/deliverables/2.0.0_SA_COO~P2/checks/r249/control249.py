@@ -20,7 +20,7 @@ import p249_cells as P  # noqa: E402
 STUB = '''def address(source, scope, tier, table, partition, object=None):
     if source == "refuse":
         raise ValueError("REFUSED: missing row")
-    return "s3://opal-313476888478-globgrph/%s/%s/%s/%s" % (scope, tier, table, partition)
+    return "s3://opal-data-assets/globgrph/%s/%s/%s/%s" % (scope, tier, table, partition)
 
 
 def name(system, scope, function, kind, qualifier=None, fifo=False):
@@ -36,7 +36,7 @@ def calls_good():
     out = []
     for f in ("alpha", "bravo", "charlie"):
         out.append({"label": "key " + f, "fn": "address", "args": ["globgrph", "acctlist", "product", "hmac", f], "kwargs": {},
-                    "result": "s3://opal-313476888478-globgrph/acctlist/product/hmac/%s" % f})
+                    "result": "s3://opal-data-assets/globgrph/acctlist/product/hmac/%s" % f})
     out.append({"label": "role", "fn": "name", "args": ["irpt", "acct", "hmac-list-stage", "role"], "kwargs": {}, "result": "irpt-acct-hmac-list-stage-role"})
     out.append({"label": "policy", "fn": "name", "args": ["irpt", "acct", "hmac-list-stage", "policy"], "kwargs": {}, "result": "irpt-acct-hmac-list-stage-policy"})
     return out
@@ -115,9 +115,9 @@ for ac in ("AC1", "AC2", "AC3"):
 shutil.rmtree(root, ignore_errors=True)
 
 CASES = [
-    ("result_differs_from_rerun", "AC1", dict(rec=mut(["calls", 0, "result"], "s3://opal-313476888478-globgrph/other")(GOOD))),
+    ("result_differs_from_rerun", "AC1", dict(rec=mut(["calls", 0, "result"], "s3://opal-data-assets/globgrph/other")(GOOD))),
     ("a_call_refuses", "AC1", dict(rec=mut(["calls", 1, "args"], ["refuse", "acctlist", "product", "hmac", "bravo"])(GOOD))),
-    ("address_outside_the_bucket", "AC1", dict(stub=STUB.replace("s3://opal-313476888478-globgrph/", "s3://other-bucket/"))),
+    ("address_outside_the_bucket", "AC1", dict(stub=STUB.replace("s3://opal-data-assets/globgrph/", "s3://other-bucket/"))),
     ("only_four_calls", "AC1", dict(rec=mut(["calls"], calls_good()[:4])(GOOD))),
     ("two_firms_one_address", "AC1", dict(rec=mut(["firms"], ["alpha", "alpha", "charlie"])(GOOD))),
     ("firm_not_in_an_address", "AC1", dict(rec=mut(["firms"], ["alpha", "bravo", "delta"])(GOOD))),

@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-161",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-161.pricing-as-of-calendar-frontier.md",
+    "group": "OTHER",
+    "vintage_commit": "c05c5de81a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R56_G.md",
+    "vintage_commit": "c05c5de81a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-161.pricing-as-of-calendar-frontier.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~282",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "79eae4afed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_t_minus_1(epoch) returns lib/trading_calendar.py prev_trading_day(expected_last_trading_day(day)) as an ISO string; no weekday rule; name, one argument and the _pricing_extras call unchanged; nothing deployed (rides the next resident release that touches this module)",
+      "artifact_covered_by": [
+        "AR161-g-AC1",
+        "AR161-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_opal_pricing_binding.py",
+      "kind": "test",
+      "commit_or_etag": "79eae4afed",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "lib on sys.path from parents[6]; test_t_minus_1_skips_weekends replaced by test_t_minus_1_is_the_calendar_frontier (five pairs); 19 passed",
+      "artifact_covered_by": [
+        "AR161-g-AC1",
+        "AR161-g-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7afcb14a5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row IRPT_ANLREQ-D2-W282-S1 appended (OBSERVATION, INERT): the order's parents[5] names infra/, the root is parents[6]",
+      "artifact_covered_by": [
+        "AR161-g-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR161-g-AC1",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py build",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py build",
+      "output_evidence": "AR-G161-OK build: all arms | rc=0 under timeout 120 at HEAD 7afcb14a5d (WARN line is the calendar's hardcoded-fallback notice, expected: pandas_market_calendars absent)",
+      "denominator": "5 of 5 pinned calendar pairs (01-16, 01-17, 01-18, 01-19, 01-20); 2 of 2 structural arms (no weekday()>=5 rule; trading_calendar named); 5 of 5 test-file pins; 0 failed. Base FAIL is the issuer's dry-run record, not re-measured by this worker",
+      "expect": "^AR-G161-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR161-g-AC2",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py guard",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py guard",
+      "output_evidence": "AR-G161-OK guard: all arms | rc=0 under timeout 120 at HEAD 7afcb14a5d",
+      "denominator": "3 of 3 guard arms (one argument epoch; result matches YYYY-MM-DD for 2027-01-20; _pricing_extras sets as_of from _t_minus_1(clock())); 0 failed",
+      "expect": "^AR-G161-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR161-g-AC3",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py regress",
+      "method": "test_suite",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py regress",
+      "output_evidence": "AR-G161-REGRESS-OK  (empty failure list) | rc=0 under timeout 120 at HEAD 7afcb14a5d; per-file: test_opal_pricing_binding.py 19 passed, test_ycharts_price_tier.py 22 passed, test_resident_installed.py 20 passed (run on their own, rc=0 each); scope check inside regress passed",
+      "denominator": "3 of 3 test files pass on their own (19 + 22 + 20 = 61 tests); scope: 0 files outside the write set against merge-base with box/dell2",
+      "expect": "^AR-G161-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the issuer dry-ran three mutants (weekday rule, last trading day without the day before, date object) in its own pre-flight, not in this worker's run.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- pure date arithmetic over fixed epochs in the checks; no clock read",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live service calendar behaviour (the resident's runtime import of lib/trading_calendar.py under the deployed package)",
+      "reason": "Nothing deployed by this cell; the next resident release that touches resident_installed.py carries it and verifies it. Not measured here."
+    },
+    {
+      "item": "Base-commit FAIL of AR161-g-AC1 re-measured by this worker",
+      "reason": "The order records base FAIL as the issuer's dry-run result; this worker measured the criteria at HEAD only."
+    },
+    {
+      "item": "Change to the reports path parents index in the order (parents[5] is infra/, not the root)",
+      "reason": "Written as surprise row IRPT_ANLREQ-D2-W282-S1 (OBSERVATION, INERT); the test uses parents[6], the repository root, which holds lib/trading_calendar.py."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W282-S1: the order's Path(__file__).parents[5] is infra/, not the repository root; the test puts lib on sys.path from parents[6], where lib/trading_calendar.py is. No action beyond the row."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g161_checks.py build | guard | regress",
+      "result": "AR-G161-OK build: all arms; AR-G161-OK guard: all arms; AR-G161-REGRESS-OK (19 + 22 + 20 passed)"
+    }
+  ]
+}
