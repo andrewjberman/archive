@@ -42,7 +42,7 @@ OUT = LOCAL + "cot_extended_match.csv"
 CLAIM = "inferred from the CRM extract Files.zip (sha256 c66bae52) and the dell1 match sheet 20261016T0225Z (1)"
 CONF = ("HIGH", "MEDIUM", "LOW", "UNMATCHED")
 WORD = re.compile(r"^[a-z][a-z0-9_ -]{1,60}$")
-H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("sha256", "output_sha256", "script_sha256")
+H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("sha256", "output_sha256", "script_sha256", "claim")  # the claim label is the CTO's fixed words and carries the sheet's date stamp
 
 
 def count(x, lo=0):
