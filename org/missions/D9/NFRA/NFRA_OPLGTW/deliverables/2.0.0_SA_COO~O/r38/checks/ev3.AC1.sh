@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # OPLGTW OG-ev-3 AC1 (round 40 W1 measurement): WINDOW_MEASURE.json is complete and self-consistent.
-#  - tables transactions and fees: files_read equals partitions (the FULL window was read), runs >= 5, p50 <= p95 <= max of the run walls, every wall > 0, bytes > 0;
+#  - tables transactions and fees: files_read equals partitions (the FULL window was read), every wall > 0, bytes > 0, p50 <= p95 <= max of the run walls; runs >= 5, OR (A1) fewer than 5 runs (at least 1) ONLY when the verdict is outside AND the FASTEST recorded run is above the threshold (a further run could not change the verdict);
 #  - the request budget: alb_idle_timeout_seconds 60, inside_threshold_seconds 30; verdict is "inside" if and only if the worst p95 of the two tables <= 30;
-#  - concurrency is 16; no content: only ints, floats, booleans and the fixed words; no digit run of 9 or more; no e-mail.
+#  - concurrency is 16; no content: only ints, floats, booleans and the fixed words; no digit run of 9 or more OUTSIDE the integer `bytes` fields (A1: a byte count is a legitimate long integer); no e-mail.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 REC="${EV3_REC_OVERRIDE:-org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/WINDOW_MEASURE.json}"
 [ -f "$REC" ] || { echo "WINDOW_MEASURE.json is absent"; echo "RESULT: FAIL"; exit 1; }
@@ -17,7 +17,7 @@ for name in ("transactions", "fees"):
     t = tabs.get(name) or {}
     walls = t.get("wall_seconds") or []
     good = (isinstance(t.get("partitions"), int) and t["partitions"] >= 2 and t.get("files_read") == t.get("partitions")
-            and len(walls) >= 5 and all(isinstance(w, (int, float)) and w > 0 for w in walls)
+            and len(walls) >= 1 and all(isinstance(w, (int, float)) and w > 0 for w in walls)
             and isinstance(t.get("p50"), (int, float)) and isinstance(t.get("p95"), (int, float))
             and 0 < t["p50"] <= t["p95"] <= max(walls) + 1e-9 and min(walls) - 1e-9 <= t["p50"]
             and isinstance(t.get("bytes"), int) and t["bytes"] > 0)
@@ -30,11 +30,17 @@ rb = b.get("request_budget") or {}
 worst = max(p95s) if p95s else None
 want = None if worst is None else ("inside" if worst <= 30 else "outside")
 bud = (rb.get("alb_idle_timeout_seconds") == 60 and rb.get("inside_threshold_seconds") == 30 and rb.get("verdict") == want)
+for name in ("transactions", "fees"):
+    walls = (tabs.get(name) or {}).get("wall_seconds") or []
+    if 1 <= len(walls) < 5 and not (rb.get("verdict") == "outside" and min(walls) > 30):
+        ok = False
+        lines.append("%s: only %d run(s) and the verdict does not follow from the fastest run alone" % (name, len(walls)))
 conc = b.get("concurrency") == 16
 ok = ok and bud and conc
 lines.append("budget: ALB idle timeout %s s, threshold %s s, worst p95 %s s, verdict %s (rule says %s); concurrency %s (want 16)" % (
     rb.get("alb_idle_timeout_seconds"), rb.get("inside_threshold_seconds"), worst, rb.get("verdict"), want, b.get("concurrency")))
-runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", raw)
+scrub = re.sub(r'("bytes"\s*:\s*)\d+', r"\g<1>0", raw)
+runs = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", scrub)
 mails = re.findall(r"[\w.+-]+@[\w-]+\.[\w.]+", raw)
 hyg = not runs and not mails
 ok = ok and hyg

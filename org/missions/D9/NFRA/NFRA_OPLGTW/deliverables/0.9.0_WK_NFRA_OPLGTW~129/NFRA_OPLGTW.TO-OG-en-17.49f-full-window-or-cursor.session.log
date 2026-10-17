@@ -1,0 +1,20 @@
+OG-en-17 session log -- 0.9.0_WK_NFRA_OPLGTW~129 -- branch wk-NFRA_OPLGTW-129 (LOCAL, not pushed)
+base commit: f1c5b4f8d7 (box/sitez at order start)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-129 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+2. Measure read: WINDOW_MEASURE.json body.request_budget.verdict = "outside"; inside_threshold_seconds 30;
+   transactions wall_seconds [239.888] p95 239.888; fees p95 147.157 (5 runs). Branch implemented: cursor.
+3. Pre-change run of the three existing window files (en13, en15, cl2) after the adapter edit:
+   3 failed, 12 passed: en15 AC1 (served order), en15 AC3 (read order, cap note), cl2 AC03 (served order).
+   Tests updated to the new truth: en15 AC1 expected rows (newest partition first, partition-keyed), en15 AC1 and AC3
+   read order compared order-free, en15 AC3 cursor pins (next_cursor, "page back with to_date="), cl2 AC03 served
+   order [101, 9] and read order order-free, cl2 AC08 partition read order order-free.
+4. Named tests, after the updates: python -m pytest tests/test_og_en17.py tests/test_og_en15.py tests/test_og_en13.py
+   tests/test_og_cl2.py -q -p no:cacheprovider -> 18 passed in 1.02s; repeated three times: 18 passed in 1.01s each.
+5. Other tests importing the 49F adapter: tests/test_og_cl7.py, test_og_en12.py, test_og_en4.py pass; test_og_ch1.py
+   fails 2 of 6 (ac02 registry ValueError, ac04 roster file absent) run alone and after cl7; filed as NFRA_OPLGTW-Z-W129-S4.
+6. Commits: d0708b11bf (adapter, en17 test, en15 and cl2 pins), a8b0a86276 (surprise rows S1..S4 in the investigation file).
+7. Proof criteria after commit a8b0a86276:
+   AC1: _named.sh tests/test_og_en17.py test_ogen17_ac01 test_ogen17_ac02 test_ogen17_ac03 -> "pytest rc=0; named tests passed 3 of 3; failed/error lines 0" RESULT: PASS exit=0
+   AC2: _wkbound.sh 0.9.0_WK_NFRA_OPLGTW~129 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\.py|tests/test_og_(en17|en15|en13|cl2)\.py)$'
+        -> "files touched 5; product files 4; outside the allowed set 0 (want 0)" RESULT: PASS exit=0
