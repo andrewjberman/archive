@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "SOC2_MSLOGS.TO-R2-e2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/decompositions/SOC2_MSLOGS_DECOMP_R2.md",
+    "vintage_commit": "42bcc54d21",
+    "to_ref": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-e2.exposure.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D12/SOC2/SOC2_MSLOGS/task-orders/SOC2_MSLOGS.TO-R2-e2.exposure.md",
+    "group": "OTHER",
+    "vintage_commit": "5795b96e64"
+  },
+  "assignee": "0.9.0_WK_SOC2_MSLOGS~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/exposure.py",
+      "kind": "script",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL cell: committed on wk-SOC2_MSLOGS-13 at f633086f3f. Not deployed to the Lambda; handler.py wiring is the issuer's at the merge; no AWS call."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py",
+      "kind": "test",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: synthetic records only, committed on wk-SOC2_MSLOGS-13 at f633086f3f."
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/silver/read_exposure.py",
+      "kind": "script",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: committed on wk-SOC2_MSLOGS-13 at f633086f3f. The real door_client invoker is not run here (no network, no AWS call).",
+      "artifact_covered_by": ["R2-e2-AC2"]
+    },
+    {
+      "path_or_key": "data/m365_metadata/scripts/tests/test_read_exposure.py",
+      "kind": "test",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: injected invoker and a stubbed door_client module; no network."
+    },
+    {
+      "path_or_key": "org/missions/D12/SOC2/SOC2_MSLOGS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f633086f3f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: surprise rows SOC2_MSLOGS-D1-W13-S1 (BLOCKING, resolved by the issuer) and SOC2_MSLOGS-D1-W13-S2 (OBSERVATION) committed at f633086f3f."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R2-e2-AC1",
+      "criterion_verbatim": "`R2-e2-AC1` -- from detail rows the door module lists what was opened and what left to an outside recipient, says plainly what the feed does not record, and carries no raw record.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door",
+      "output_evidence": "R2-EXPOSURE-OK opened=5 left=4 (rc=0; run under timeout 120). The check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0 with an empty refusal list; the mutant run of the same check was refused, 1 of 1, rc=1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "R2-e2-AC2",
+      "criterion_verbatim": "`R2-e2-AC2` -- the client asks for exactly the `exposure` payload, refuses a bad account before any call, and prints the three sections in Eastern time.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client",
+      "output_evidence": "R2-EXPCLIENT-OK (rc=0; run under timeout 120). The check prints the OK token only when its refusal list is empty.",
+      "denominator": "1 of 1 check invocation exits 0 with an empty refusal list",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "exposure.py forward-rule domain filter removed in place (the same-domain boss@opalinvest.com was then listed as left); exposure_door must refuse.",
+      "expected": "R2-EXPOSURE-REFUSED naming the left list, rc=1",
+      "observed": "R2-EXPOSURE-REFUSED left is [... ('e1', 'forward_rule', 'boss@opalinvest.com') ...], wanted [... without it ...] rc=1. File restored from .scratch/exposure.good.py and cmp-verified; the check passed again (R2-EXPOSURE-OK opened=5 left=4).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "exposure_door and exposure_client each run twice on the same committed tree, outputs compared",
+      "observed": "R2-EXPOSURE-OK opened=5 left=4 rc=0 on both runs; R2-EXPCLIENT-OK rc=0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "handler.py wiring of the exposure op",
+      "reason": "another queue's file; the issuer wires the op into handler.py at the merge."
+    },
+    {
+      "item": "real door_client invoker and write_desktop run",
+      "reason": "door_client.py is another cell's and is not in this worktree; tests inject the invoker and stub the desktop writer, and main is never run against the real door."
+    },
+    {
+      "item": "deploy of exposure.py to the globgrph-trino-access Lambda",
+      "reason": "LOCAL cell; the order calls nothing live (no AWS call, no network, no Terraform)."
+    }
+  ],
+  "surprises": [
+    "SOC2_MSLOGS-D1-W13-S1: the worktree sparse checkout omitted data/ and infra/aws/, so run 1 refused both checks; the issuer widened the scope (row stays as filed, BLOCKING, INERT).",
+    "SOC2_MSLOGS-D1-W13-S2: the EXPOSURE contract's two open readings (anonymous_link with invalid raw_json; NOT RECORDED lines with no time) were resolved as stated in the build (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D12/SOC2/SOC2_MSLOGS/deliverables/0.9.0_WK_SOC2_MSLOGS~13/SOC2_MSLOGS.TO-R2-e2.exposure.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python s1_check_r2.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_door ; python org/tier1_exec/2.0.0_SA_COO~S1/deliverables/SOC2_MSLOGS_R2_CHECKS/s1_check_r2.py exposure_client",
+      "result": "R2-EXPOSURE-OK opened=5 left=4 rc=0; R2-EXPCLIENT-OK rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/globgrph-trino-access/tests/test_exposure.py data/m365_metadata/scripts/tests/test_read_exposure.py -q",
+      "result": "31 passed in 0.09s, rc=0"
+    }
+  ]
+}
