@@ -1,6 +1,6 @@
 # L10 SLUG -- NFRA_OPLGTW round 41 -- DRAFT, NOT SENT (2.0.0_SA_COO~O, 2026-10-17 ~10:4xZ)
 
-**Status: DRAFT.** Sent to `1.0.0_SA_CTO~Z` only after every task order of round 41 is terminal (`OG-ap-36` is staged: Phase A GO sent 10:34Z, nothing reported yet) and `python .tools/round-close-check.py --project NFRA_OPLGTW --round 41` reads `MAY-CLOSE`. Everything below marked PENDING is filled from the order files and the served records at that time, never from this draft.
+**Status: DRAFT.** Sent to `1.0.0_SA_CTO~Z` only after every task order of round 41 is terminal (`OG-ap-36`: Phase B running since 16:57Z; `OG-ap-37`, the lineage landing of dell1's release commit, is cut and staged) and `python .tools/round-close-check.py --project NFRA_OPLGTW --round 41` reads `MAY-CLOSE`. Everything below marked PENDING is filled from the order files and the served records at that time, never from this draft.
 
 ## 1. The round, by order (read from the order files at the send)
 
@@ -11,12 +11,12 @@
 | `OG-db-3` | the deploy writes the release sha to `/opt/opal-gateway/.deployed_commit`; drained `8d2241ef81` (with `OG-db-2`'s preflight) | complete |
 | `OG-ev-5` | read-only trace of the near-empty fees stretch: verdict SOURCE (ratio 0.173; thin July to September, 459 rows in 92 days); `ev5.AC1` PASS (my run), proof VALID | complete |
 | `OG-en-23` | repair of the `OG-ap-36` Phase A stop (row `Z-S370`): `Ctx.read_account_rows` applies the 49F fence and the account test in arrow and converts only the account's rows; drained `83c8c75f83`; my runs named 3 of 3, eleven-file window set 39 of 39 both orders, proof VALID | complete |
-| `OG-en-24` | `client_core._answer` keeps the adapter's `absent_reason` (rows `Z-S372`, the CVO's `Z-S373`: a refused windowed call and the five `no_partition_at_as_of` refusals were nulled in the live release); worker `~138` | PENDING (building at 13:30Z) |
-| `OG-ap-36` | the fifth batched release carrying the builds above; Phase A re-run PASSED (chain +1.7 MB per page, first page 29.75 s to 1.93 s, `/health` 0.033 s during a page, 6 of 6 pages equal); three halves signed on release `948e8b47cc` then superseded by `OG-en-24`'s release; CT1 repeat, re-sign, Phase B, 30-minute read-back | PENDING |
+| `OG-en-24` | `client_core._answer` keeps the adapter's `absent_reason` (rows `Z-S372`, the CVO's `Z-S373`: a refused windowed call and the five `no_partition_at_as_of` refusals were nulled in the live release); built by worker `~138`, drained `ec8e21a6d0`; my runs named 3 of 3, twelve-file window set 42 of 42 both orders, proof VALID; eight codes now surface (ruling row `Z-S374`) | complete |
+| `OG-ap-36` | the fifth batched release (the windowed tools off the loop, the arrow-side account filter, the prefix listed once per page, the host marker, the reason words no longer nulled): Phase A re-run PASSED on release `efcc8ae19f` on dell1's live ref `1753c741d9` (chain +1.7 MB per page, first page 29.75 s to 1.93 s, `/health` 0.033 s during a page, 6 of 6 pages equal, CT1 repeated); three halves signed on ask `20815be2b2` (COO `23e5a7b07e`, CTO `f02ad0309a`, CVO `1df8f8a2df`); Phase B GO sent 16:23Z, ledger `nfra-oplgtw-gateway-release-batch6` OPEN 16:57Z | PENDING (Phase B running) |
 
 ## 2. What the round delivered against the endpoint
 
-PENDING: filled from `CODE6_SERVED.json` (eight arms, the marker read from the host, the read-back with its window-call count) and `MEM_GATE_OG-ap-36.json` (the first-page wall before and after item 2; pages equal row for row; `/health` during a page).
+PENDING: filled from `CODE6_SERVED.json` (nine arms, the harvest_research.py host md5 equal to its 1753c741d9 blob, the marker read from the host, the read-back with its window-call count) and `MEM_GATE_OG-ap-36.json` (the first-page wall before and after item 2; pages equal row for row; `/health` during a page).
 
 ## 3. Rows (dispositions)
 
