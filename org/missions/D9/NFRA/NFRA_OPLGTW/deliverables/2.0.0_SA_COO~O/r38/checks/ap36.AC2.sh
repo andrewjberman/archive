@@ -31,18 +31,22 @@ armed = [k for k in need if arms.get(k) is True]
 md5 = d.get("host_md5") or {}
 rb = d.get("readback") or {}
 marker = bool(sys.argv[2]) and d.get("marker_sha") == sys.argv[2]
+# CTO decision 35541 (Z-S375): the served read may grade 26 of 27 ONLY with the one named exception and its row open
+exc = d.get("per_tool_exception") or []
+tool_ok = d.get("per_tool_good") == 27 or (d.get("per_tool_good") == 26 and exc == ["etfs_compare_peers"] and d.get("exception_row") == "NFRA_OPLGTW-Z-S375")
+tool_txt = "27 of 27" if d.get("per_tool_good") == 27 else ("26 of 27 (exception etfs_compare_peers, row Z-S375, CTO 35541)" if tool_ok else "%s of 27 (NOT an accepted shape)" % d.get("per_tool_good"))
 hr = d.get("harvest_research_md5") or {}
 hex32 = lambda v: isinstance(v, str) and len(v) == 32 and all(c in "0123456789abcdef" for c in v)
 hr_ok = hex32(hr.get("host")) and hr.get("host") == hr.get("expected") and hr.get("equal") is True   # the CTO's CT4: a peer's live change is never reverted
 rb_ok = isinstance(rb.get("minutes"), (int, float)) and rb["minutes"] >= 30 and rb.get("triggers_fired") == 0 and isinstance(rb.get("service_window_calls"), int)
 ok = (d.get("health_status") == 200 and d.get("reader_env_keys_present") == 7 and d.get("registry_count") == 103
-      and d.get("per_tool_good") == 27 and md5.get("differ") == 0 and len(armed) == len(need) and marker and rb_ok
+      and tool_ok and md5.get("differ") == 0 and len(armed) == len(need) and marker and rb_ok
       and d.get("tools_list_before") is not None and d.get("tools_list_before") == d.get("tools_list_after")
       and d.get("muse_env_present") is False and hr_ok)
 print("tools/list before %s after %s (want equal); MUSE_CLIENT_ID present %s (want False); host marker equals the release sha %s" % (
       d.get("tools_list_before"), d.get("tools_list_after"), d.get("muse_env_present"), "yes" if marker else "no"))
-print("served: health %s; reader env keys %s of 7; registry %s (want 103); per-tool %s of 27; host md5 differ %s (want 0); arms true %d of %d" % (
-      d.get("health_status"), d.get("reader_env_keys_present"), d.get("registry_count"), d.get("per_tool_good"), md5.get("differ"), len(armed), len(need)))
+print("served: health %s; reader env keys %s of 7; registry %s (want 103); per-tool %s; host md5 differ %s (want 0); arms true %d of %d" % (
+      d.get("health_status"), d.get("reader_env_keys_present"), d.get("registry_count"), tool_txt, md5.get("differ"), len(armed), len(need)))
 print("harvest_research.py host md5 %s, its 1753c741d9 blob md5 %s; host md5 equals its 1753c741d9 blob: %s" % (hr.get("host"), hr.get("expected"), "yes" if hr_ok else "no"))
 print("read-back: %s minutes, triggers fired %s (want 0), /mcp window calls served by the service %s" % (rb.get("minutes"), rb.get("triggers_fired"), rb.get("service_window_calls")))
 print("OK" if ok else "NO")
