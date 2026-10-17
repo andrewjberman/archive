@@ -1,0 +1,20 @@
+# AMGT_RESAPP round 110 -- the PROD read that grades FWD-40 (d), `2.0.0_SA_COO~R1`, 2026-10-17 ~15:0xZ
+
+**Asked by** the CTO (msg 7592): after the chosen-set promote, read RIO LN's Model tab on PROD with the walker; that read grades FWD-40 (d). **What PROD is, as read:** `origin/PROD` `99d2b2a70c` (the promote by `0.4.0_DT_ClientPlatform~H2`, receipt `deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_BQ2.md` @509558f20c; CI run 39042189942 completed/success, tag `portal-v2.1.235`). `AMGT-bq-2` AC1, read by the issuer: 16 of 16 paths of the two candidate heads (`bc0a5cd9`, `aba098da`) are EQUAL to `origin/PROD`.
+
+## The read
+
+The walker refuses a non-localhost base, so the page under walk is a local build of the exact PROD head (`git worktree` at `99d2b2a7`, `bun run dev:live --port 5174`, reaching the live services), not the CloudFront site: it runs the code PROD serves against the live data. One walk, three names, the All-figures grid opened first (`prod_read_walk.txt`, same folder; the shots are outside the repository at `C:/dev/ui-walk-evidence/prod-read/20261017T145445Z/`):
+- `OPEN-FIRST "All figures": opened` for **RIO LN (145 rows), ICT PM (143) and GOOGL US (146)**: 3 of 3; `OK: DISARMED`, post-disarm login HTTP 401 REFUSED, `SUMMARY: 14 unique finding(s) ... walk void: no`; build torn down, walker `armed=no`, port 5174 free.
+- **RIO LN's Model tab renders** (round 108's walk D read the page error screen at this step, `TypeError: value.trim is not a function`). The issuer read `shots/013-RIO-LN-Model-expanded.png` with the Read tool and a crop of its top: Key Figures 2025, 2026E, 2027E, What Changed `0 added`, `26 changed`, earlier `October 16th, 2026, 9:09a ET` and later `October 17th, 2026, 9:08a ET`, the grid below.
+- The three `raw-code` findings of the candidate walk (the earnings-date list printed as raw JSON, row `W491-S2`) are ABSENT from this walk: the walker's `raw-code` findings are only the two P/E lines below.
+
+**FWD-40 (d): the grade is the CVO's and the CTO's; the issuer's reading is that the crash is gone on the PROD head.**
+
+## Findings for the next round (each read, none graded by the issuer)
+
+1. **A raw mnemonic in a visible sentence.** RIO LN's and ICT PM's Key Figures footer reads `P/E not shown: price / reported EPS (IS_EPS), FY2025, is not shown: the price is in GBp and reported EPS in USD, and a ratio of different currencies is not shown; ...` (walker findings `UIW-20261017T145445Z-007` and `-012`): `IS_EPS` is a vendor mnemonic inside the served historical reason. The line is the round-108 `bo-1` feature's by the issuer's reading of that order (its step 3 builds the line from the served `fiscal_unresolved` `PE_RATIO` reason for a historical year); the issuer did not read the served reason string itself, only the text the walker observed. It is not new in this promote.
+2. **One page, two money notations.** `UIW-...-011` (`format:money`): on ICT PM the Peers tab writes money as `USD 1,234` and `$1,234` on one page. `AMGT-bp-4` applies the currency-code rule to the header tiles (`HeaderCards.tsx`) and `bq-1` to What Changed; `PeersTab.tsx` was outside bp-4's grant and passes no price currency (read in the order's bounds, not in the Peers shot), so the issuer's reading is that it still prints a bare `$` for a USD figure on a PHP-priced name; the walker's finding states only the two notations on one page. The CTO's item 3 ("every figure on a page carries one stated currency") is met on two surfaces, not on the Peers table.
+3. Not new this round and not read here: `format:dates` (two date formats on one page, RIO LN), `layout:clipped` (151 and 149 elements), the withheld AI-fill sentences on RIO LN's Exec Management.
+
+**Not verified by the issuer:** the What Changed earnings-date row's expandable detail on the PROD build (the walker does not expand it; the harness checks L10 to L12 on the candidate did); ICT PM's header tile text on PROD (read through the harness on the candidate, not by shot in this walk).
