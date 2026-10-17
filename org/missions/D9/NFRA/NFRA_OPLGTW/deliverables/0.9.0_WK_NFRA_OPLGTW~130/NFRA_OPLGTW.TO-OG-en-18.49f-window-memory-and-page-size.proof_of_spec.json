@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-18",
+  "firm": "49F",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "887e203b8c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-18.49f-window-memory-and-page-size.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "887e203b8c"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~130",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py",
+      "kind": "script",
+      "commit_or_etag": "8ec557f953",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-130 (not pushed). Each pool task reads one partition, fences it and keeps only the account's rows; PAGE_PARTITIONS 30; WINDOW_READ_GATE (BoundedSemaphore(1)) and WINDOW_GATE_WAIT_SECONDS 15 around get_transactions and get_fees; window_read_busy answer with no partition read. No tool signature changed; app/tools.py and app/client_core.py untouched. No deploy, no IAM.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en18.py",
+      "kind": "test",
+      "commit_or_etag": "8ec557f953",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-130 (not pushed). The three named tests: ac01 (one page of 396 partitions, account rows only, at most 16 full partition row lists alive), ac02 (pages of 30 walk every partition once, transactions and fees), ac03 (busy answer with zero partition reads, release after a finished or a failed call). Offline fake ctx.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en17.py",
+      "kind": "test",
+      "commit_or_etag": "8ec557f953",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-130 (not pushed). Pinned truth moved to PAGE_PARTITIONS 30: page arithmetic (P+1 and P partitions, 14 pages of the 396 walk, 366 in the second page's window). No assertion weakened.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_en15.py",
+      "kind": "test",
+      "commit_or_etag": "8ec557f953",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-130 (not pushed). ac03 cap assertion moved to the page size (page = PAGE_PARTITIONS, cursor = the day before the oldest partition of the newest page). No assertion weakened.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3b5e872d05",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row by this worker, NFRA_OPLGTW-Z-W130-S1 (OBSERVATION, INERT, UNDER_INVESTIGATION): the commit-gate client-data check did not run on this box. Appended in a fenced json block. Existing rows not edited."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~130/NFRA_OPLGTW.TO-OG-en-18.49f-window-memory-and-page-size.session.log",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log of the measured runs: premises, the baseline, the 4 pinned-test failures after the adapter change and their update, the mutant run, the wider-set check, the commit, and the three criteria."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three named tests pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_en18.py test_ogen18_ac01 test_ogen18_ac02 test_ogen18_ac03; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "named tests passed 3 of 3 (test_ogen18_ac01, test_ogen18_ac02, test_ogen18_ac03)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the commits of this serial touch only the listed files.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~130 '^infra/aws/ec2/opal-gateway/(app/client_adapter_bd49f\\.py|tests/test_og_(en18|en17|en15|en13|cl2)\\.py)$'; echo \"exit=$?\"",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~130: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~130: files touched 4; product files 4; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "files touched 4 of the serial's commits (outside the allowed set 0 of 4)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the window test files pass together in both orders with the same count (a test must not depend on what ran before it).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/en18.AC3.sh; echo \"exit=$?\"",
+      "expect": "(?s)en4, en12, cl2, en13, en15, en17, en18 forward: passed (\\d+); failed 0.*reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "en4, en12, cl2, en13, en15, en17, en18 forward: passed 29; failed 0\nen18, en17, en15, en13, cl2, en12, en4 reverse: passed 29; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "passed 29 of 29 in the forward order and 29 of 29 in the reverse order (failed 0 in both)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the worker keeps the full partition row list instead of the account's rows (scratch copy only, removed after the run)",
+      "expected": "test_ogen18_ac01 fails on the live-list bound",
+      "observed": "FAILED test_ogen18_ac01: ('alive at once', 'transactions', 30) against the bound READ_WORKERS 16",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "three same-input runs of tests/test_og_en18.py compared (python -m pytest -q, from the gateway root)",
+      "observed": "3 passed, 3 passed, 3 passed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the commit-gate client-data check on commit 8ec557f953",
+      "reason": "safe-commit printed WARN: the hashed account-id list is absent on this box, so the check did not run; filed as NFRA_OPLGTW-Z-W130-S1. The four files carry only the synthetic fixture ids z08A1001, z08B2002 and z09X7001, the ids test_og_en17.py already carries at HEAD."
+    },
+    {
+      "item": "tests/test_og_ch1.py, 2 of 6 failing (ac02 registry ValueError, ac04 roster file absent)",
+      "reason": "reproduced on a HEAD extract of the gateway before any change in this order; not in the order's paths; carried as NFRA_OPLGTW-Z-S334. Not touched."
+    },
+    {
+      "item": "release and deploy of the page-30 adapter",
+      "reason": "out of the cell: the order names no deploy, no release and no IAM; the release is a later applier order (OG-ap-32)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W130-S1: safe-commit printed WARN client-data-check, the hashed account-id list is absent on this box, so commit 8ec557f953 was not checked for client account ids"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~130/NFRA_OPLGTW.TO-OG-en-18.49f-window-memory-and-page-size.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest (python 3.14.8)",
+      "invocation": "python -m pytest -v -p no:cacheprovider tests/test_og_en18.py",
+      "result": "3 passed (test_ogen18_ac01, test_ogen18_ac02, test_ogen18_ac03)"
+    },
+    {
+      "tool": "pytest window suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider tests/test_og_en17.py tests/test_og_en15.py tests/test_og_en13.py tests/test_og_cl2.py tests/test_og_en12.py tests/test_og_en4.py tests/test_og_en18.py",
+      "result": "all passed, both orders, count 29 (en18.AC3.sh)"
+    }
+  ]
+}
