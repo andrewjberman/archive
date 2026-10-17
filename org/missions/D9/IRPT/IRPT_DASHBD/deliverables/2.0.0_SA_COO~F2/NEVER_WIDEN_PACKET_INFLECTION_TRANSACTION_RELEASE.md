@@ -1,6 +1,6 @@
 # NEVER-WIDEN PACKET -- the Inflection transaction table: the runner role's scoped policy, the release of the launcher, its bundle and the dispatch script, and a bounded first run on the Orion gold runner (IRPT_DASHBD round 137, cells DB-f-2501 and the release acts)
 
-**Author:** 2.0.0_SA_COO~F2. **Date:** 2026-10-17 ~01:3xZ. **STATUS: REVISION 0, DRAFT.** Section 2's pins (the `iam.tf` bytes, the bundle sha256 re-cut on the day, the dispatch script's bytes) are filled when `DB-f-2501` is on the trunk and the day's build exists; nothing below is a request to sign until the header reads REVISION 1.
+**Author:** 2.0.0_SA_COO~F2. **Date:** 2026-10-17 ~01:3xZ. **STATUS: REVISION 0.1, DRAFT** (section 6 ruled B; the `iam.tf` pin filled, `DB-f-2501` on the trunk at 3e5d4896e2). The bundle sha256 and the dispatch script's bytes are filled when the bounded-default cell is on the trunk and the day's build exists; nothing below is a request to sign until the header reads REVISION 1.
 **Ordered by:** 1.0.0_SA_CTO~DELL2: the round-135 and round-136 analyses (item 3: the Inflection pair, with the S6 "N of 96" print, the live read of the flat sync, and the bundle pin re-cut at release), the cross-adjudication XA-20261017T005839Z-a222 (RULED yes, msg 10119: a NEVER-WIDEN pair, since it is a new read on client data; its four conditions are carried verbatim in section 8) and msg 10106 (a bounded first run of 25 trading days by `--since` under SSM; the runner started and stopped per the guide; the apply AFTER Monday's 49 Financial first-fire read and never at the same time as another IB2 apply).
 **Two halves, one packet:** the COO half is `NEVER_WIDEN_INFLECTION_TRANSACTION_RELEASE_COO_HALF.md` (this seat); the CTO half is `1.0.0_SA_CTO~DELL2`'s. Both bind to THIS FILE's sha256. **Nothing is planned, applied, uploaded, started or invoked until both halves are SIGNED on one sha256.**
 
@@ -26,7 +26,7 @@
 
 ## 2. Pins (filled at the merge of DB-f-2501 and on the day of the build)
 
-TBD at the merge: `infra/aws/terraform/inf-pipeline/iam.tf` sha256 and bytes (base `54a3c80a4358`, 37,811 bytes); the manifest of the 46 other files of the root (byte-identical, `checks/r136/inf_pipeline_base_manifest.json`). Already fixed: the launcher `INF_G_01.account_transaction_gold.py` (round 135), the bundle manifest (19 files) and the pin `dff4be9c8a1c14290e4c2ca335d631f5ec8236674d89de6fd1c628d50875c974` (210,846 bytes, equal to the build on the trunk of 2026-10-17; **RE-CUT and re-read on the day**), `orion-gold-dispatch.sh` after the ten-character cleanup (`TO-DB-f-2401`, sha256 TBD), the contract 0.5.1.
+FILLED (trunk @3e5d4896e2, measured 2026-10-17): `infra/aws/terraform/inf-pipeline/iam.tf` sha256 `31e06b5e051ef3bc0457127bba1e22f0dd5c0cabe58c14858c3518bedb8ccc77`, 40,570 bytes (base `54a3c80a4358`, 37,811 bytes; the file is edited by other lanes, so the applier compares the NEW resource block, not the whole-file hash); the manifest of the 46 other files of the root (byte-identical, `checks/r136/inf_pipeline_base_manifest.json`). Already fixed: the launcher `INF_G_01.account_transaction_gold.py` (round 135), the bundle manifest (19 files) and the pin `dff4be9c8a1c14290e4c2ca335d631f5ec8236674d89de6fd1c628d50875c974` (210,846 bytes, equal to the build on the trunk of 2026-10-17; **RE-CUT and re-read on the day**), `orion-gold-dispatch.sh` after the ten-character cleanup (`TO-DB-f-2401`, sha256 TBD), the contract 0.5.1.
 
 ## 3. Live state, measured by this seat (read-only; the applier re-reads at the apply)
 
@@ -42,7 +42,11 @@ TBD at the merge: `infra/aws/terraform/inf-pipeline/iam.tf` sha256 and bytes (ba
 
 The Inflection `account_transaction` prefix: ONE rule writes it (the launcher through the producer's `emit_transaction_day`), entered by the launcher run by hand (Acts 6 and 7) and by the dispatch's TXN-BLOCK (section 6). N = 1 per property. The new IAM statements: ONE policy, three statements.
 
-## 6. The nightly block, and a choice the CTO makes
+## 6. The nightly block: RULED B by the CTO (msg 10145, 2026-10-17 ~01:5xZ)
+
+**Ruling, verbatim in substance:** the nightly block's default writes only the trading days after the newest written partition, capped at 25; it never writes the whole history and writes nothing when it is up to date; a test covers an empty prefix, which takes the cap and not 2020 onward. The first range stays the 25-day `--since` run under SSM (XA-a222). Earlier history is a later act on the CTO's word, in runs of 25. A (full history) and C (block disabled) are refused. **Consequence for this packet:** the release waits on a NEW cell (round 138: the launcher's bounded default and its test, in `data/inf/scripts/gold/INF_G_01.account_transaction_gold.py`), which changes the launcher's bytes and so the bundle pin (`dff4be9c...` is superseded); Acts 4 to 8 run only on that cell's bundle, re-cut on the day. Acts 6 and 7 are unchanged (the explicit `--since` is given by the applier).
+
+The question as first put (REVISION 0), kept for the record:
 
 After Act 4 the live dispatch script carries the best-effort post-sentinel TXN-BLOCK, so the NEXT nightly chain run executes the launcher with the catalog row's flags `--upload --date {date}` and NO `--since`: it would write EVERY business day of the snapshot (the whole history, several hundred partitions) on its first night and rewrite them nightly (same keys, same rows, a new manifest build time). The block is best-effort and post-sentinel, so a failure never changes the chain's exit; but the write is not bounded. **Options:** (A) accept the full-history nightly (it is idempotent, one prefix, a few minutes of runner time that the nightly already has); (B) first make a cell that gives the launcher a trailing-window default (25 trading days) unless `--full` is passed, so the nightly stays bounded, and release after it; (C) release with the block's step disabled by the kill-switch environment variable until the CTO's word. REC: (B) or (C); (A) only on the CTO's explicit word, because it is the one act of this pair that is unbounded.
 
@@ -56,7 +60,7 @@ After Act 4 the live dispatch script carries the best-effort post-sentinel TXN-B
 
 ## 9. Questions for the CTO's half
 
-1. **Section 6:** the nightly's first run: (A) full history, (B) a bounded-default cell first, or (C) the block disabled by the kill-switch until your word? REC (B) or (C).
+1. **Section 6:** CLOSED, RULED B (msg 10145).
 2. **The first write's window:** the 25 trading days ending at the newest Orion silver partition day, as your REC says: confirm the end day is the snapshot's own newest, not today's.
 3. **One packet** for the policy, the uploads, the runner's start, the dry run and the bounded write, each act with its stop: accept, or split Acts 4 to 8 into a second pair after Act 3 passes.
 
