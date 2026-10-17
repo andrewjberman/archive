@@ -14,13 +14,17 @@ Usage: python <this file> <repo_root> <criterion_id>      prints "<id> PASS" or 
 """
 import ast
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
 from pathlib import Path
 
-SOURCE_MAP = "infra/aws/lambda/ci/lambda-source-map.json"
-BASE = "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/sourcemap_entry_r137_base.json"
+# NFRA_CTLPLN round 30 (TO-CT-cg-1): the function map is one JSON file per function; the entry is read through
+# lib/opal_lambda_map.py (load_entry raises, naming the file, when it is absent).
+FOLDER_REL = "infra/aws/lambda/ci/function-map"
+LIB_REL = "lib/opal_lambda_map.py"
+BASE ="org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/checks/r136/sourcemap_entry_r137_base.json"
 ENTRY = "irpt-49f-reporting-gold-lambda"
 CONSUMERS = ("infra/aws/lambda/investor-reporting/reporting-gold/handler.py", "data/assets/scripts/gold/irpt_reporting/account_transaction.py")
 
@@ -96,11 +100,18 @@ def wanted_attributes(source, member_modules):
     return {m: v for m, v in out.items() if v}
 
 
+def map_lib(root):
+    """lib/opal_lambda_map.py of the checked-out repository at root: the one reader of the function-map folder."""
+    need(Path(root, LIB_REL).is_file(), "missing " + LIB_REL)
+    spec = importlib.util.spec_from_file_location("opal_lambda_map_p137", str(Path(root, LIB_REL)))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
 def load(root):
-    sm = Path(root, SOURCE_MAP)
-    need(sm.is_file(), "missing " + SOURCE_MAP)
-    entry = json.loads(sm.read_text(encoding="utf-8"))["functions"].get(ENTRY)
-    need(isinstance(entry, dict), "no entry " + ENTRY)
+    entry = map_lib(root).load_entry(ENTRY, root=str(root))   # raises FileNotFoundError naming the path when absent
+    need(isinstance(entry, dict), "no entry " + ENTRY + " in " + FOLDER_REL)
     bp = Path(root, BASE)
     need(bp.is_file(), "missing the cut's base shape " + BASE)
     return entry, json.loads(bp.read_text(encoding="utf-8"))
