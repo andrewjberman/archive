@@ -164,16 +164,87 @@ def replay(argv) -> int:
     return 0
 
 
+def readers(argv) -> int:
+    """CTO half condition 1 (@98d4271685): the two G4 readers act 2 did not measure, through the same overlays A (live) and B
+    (live + layer). dramatic_move: `detect` only (no web lookup, no write) over the window; every candidate in B that A lacks is
+    printed, and one on a date the layer holds is a STOP. price_series: `series` over every G4 security of the window, then per
+    fund (the securities its G1 reports hold in the window): points by source (market, implied, none) and big-move gaps, A -> B."""
+    from rivalfunds import dramatic_move as dm
+    from rivalfunds import price_series as ps
+
+    layer, out = pathlib.Path(argv[0]), pathlib.Path(argv[1])
+    out.mkdir(parents=True, exist_ok=True)
+    day = argv[argv.index("--day") + 1] if "--day" in argv else _hc_day(sinks.S3Sink())
+    hi = dt.date.fromisoformat(day)
+    lo = hi - dt.timedelta(days=int(argv[argv.index("--window") + 1]) if "--window" in argv else 366)
+    layer_dates = sorted({u.split("date=", 1)[1][:10] for u in sinks.LocalSink(str(layer)).list(G4)
+                          if u.endswith(".parquet")}) if layer.exists() else []
+    empty = out / "empty_layer"
+    empty.mkdir(parents=True, exist_ok=True)
+    arms = {"A": OverlaySink(empty), "B": OverlaySink(layer)}
+    g1 = hc._read(arms["A"], hc._newest_by_date(arms["A"], homes.canonical_shape(""), lo.isoformat(), hi.isoformat()), hc.G1_COLUMNS)
+    fund_col = "fund_ticker" if "fund_ticker" in g1.columns else "fund_id"
+    held = g1.groupby(fund_col)["security_id"].agg(lambda x: sorted({str(v) for v in x if not hc._blank(v)})).to_dict()
+    cand, curves = {}, {}
+    for k, s in arms.items():
+        g4, _ = hc.g4_window(s, lo.isoformat(), hi.isoformat(), dm._G4_COLUMNS)
+        acts = ps._actions(s, lo.isoformat(), hi.isoformat())
+        cand[k] = {(str(c["security_id"]), str(c["date"])[:10]) for c in dm.detect(g4, acts)}
+        g4p, _ = hc.g4_window(s, lo.isoformat(), hi.isoformat(), ps._G4_COLUMNS)
+        keys = sorted({str(v) for v in g4p["security_id"] if not hc._blank(v)} | {k2 for v in held.values() for k2 in v})
+        curves[k] = ps.series(g4p, g1, keys, lo, hi, actions=acts)
+    new = sorted(cand["B"] - cand["A"])
+    gone = sorted(cand["A"] - cand["B"])
+    stop = [c for c in new if c[1] in set(layer_dates)]
+    print(f"day {day} | window {lo}..{hi} | layer dates {len(layer_dates)} | dramatic_move candidates A {len(cand['A'])} "
+          f"B {len(cand['B'])} | new in B {len(new)} | gone in B {len(gone)} | NEW ON A LAYER DATE (STOP) {len(stop)}")
+    for c in stop[:40]:
+        print(f"  STOP candidate {c[0]} {c[1]}")
+
+    def tally(cv, keys):
+        t = {"market": 0, "implied": 0, "none": 0, "big_move_gaps": 0}
+        for k in keys:
+            r = cv.get(k)
+            if not r:
+                continue
+            for _, _, code in r["points"]:
+                t["market" if code == ps.SRC_MARKET else "implied" if code == ps.SRC_IMPLIED else "none"] += 1
+            t["big_move_gaps"] += sum(1 for g in r["gaps"] if g["reason"] == ps.GAP_REASON_BIG_MOVE)
+        return t
+
+    rec = {"day": day, "window": [lo.isoformat(), hi.isoformat()], "layer_dates": len(layer_dates),
+           "dramatic_move": {"A": len(cand["A"]), "B": len(cand["B"]), "new": [list(c) for c in new],
+                             "gone": [list(c) for c in gone], "stop": [list(c) for c in stop]}, "price_series": {}}
+    print(f"{'fund':<6} {'secs':>5} {'market A->B':>17} {'implied A->B':>17} {'none A->B':>17} {'bigmove A->B':>13}")
+    for f in sorted(held):
+        a, b = tally(curves["A"], held[f]), tally(curves["B"], held[f])
+        rec["price_series"][str(f)] = {"securities": len(held[f]), "A": a, "B": b}
+        print(f"{str(f):<6} {len(held[f]):>5} {a['market']:>8}->{b['market']:<8} {a['implied']:>8}->{b['implied']:<8} "
+              f"{a['none']:>8}->{b['none']:<8} {a['big_move_gaps']:>5}->{b['big_move_gaps']:<6}")
+    (out / f"heldtr_readers_{day}.json").write_text(json.dumps(rec, indent=2, default=str), encoding="utf-8")
+    print("VERDICT:", "STOP -- a new dramatic_move candidate on a held-tr date" if stop else "no new dramatic_move candidate on a held-tr date")
+    return 3 if stop else 0
+
+
 def publish(argv) -> int:
     layer = pathlib.Path(argv[0])
     apply = "--apply" in argv
     loc, live = sinks.LocalSink(str(layer)), sinks.S3Sink()
     objs = [u for u in loc.list(G4) if u.endswith(".parquet") and "/market-" in u]
+    present = [u for u in objs if live.exists(u)]
+    differ = [u for u in present if live.get(u) != loc.get(u)]
+    for u in differ:
+        print(f"DIFF: present and different {u}")
+    print(f"objects in layer {len(objs)} | new {len(objs) - len(present)} | present-and-equal {len(present) - len(differ)} | "
+          f"present-and-different {len(differ)}")
+    if differ:
+        print("REFUSED: a present object differs from the layer's; nothing is written")
+        return 2
     wrote = skipped = 0
     for u in objs:
-        if live.exists(u):
+        if u in present:
             skipped += 1
-            print(f"SKIP: exists {u}")
+            print(f"SKIP: exists (equal) {u}")
             continue
         if apply:
             live.put(u, loc.get(u), "application/octet-stream")
@@ -184,4 +255,4 @@ def publish(argv) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit({"pull": pull, "replay": replay, "publish": publish}[ACT](sys.argv[3:]))
+    sys.exit({"pull": pull, "replay": replay, "readers": readers, "publish": publish}[ACT](sys.argv[3:]))
