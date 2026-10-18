@@ -1,0 +1,26 @@
+HVST-cn-3 SERVED RECORD, 0.7.0_AE_CloudOps~SC1 on dell1, written 2026-10-18T22:26Z. GO msg 8209 (18:33:54Z); window 90 min from my start 18:44:16Z, extended by W1 to 21:30Z (msg 8220) and to 23:30Z (msg 8230); pair: COO half f4bff167da62e20e9f8a22a1aaee2268cb828b3e989053a13db2175fd0b285e8 (184cfe4b73), CTO half @98c304e18f; site Z CLEAR to 2026-10-19 12:30Z (msg 8208). Ledger harvst-cn3-dossier-refresh-deliberate-run opened 18:44:16Z.
+TIMES (UTC): canary written 18:52:34Z to 18:56:05Z (UNH_US_Equity, 211 s); step 2 started 18:59:27Z and ended 22:22:34Z, rc 0, ONE process over the other 92 names, not sliced.
+
+WHAT WAS DONE (each in its file in this folder):
+  cn3_before.out : worktree C:/tmp/cn3-build (sparse) at 56bacbc853, lib/research diff empty; list sha256 ebf416da.. and c0612d22.. (93 lines each); counts 1558 / 446; newest blocks UNH 20261018T131025Z, BP 20261018T170620Z; scheduled tasks and processes read with controls; the gateway BEFORE reads of UNH, BP, BP-SLASH; the canary dry run (WOULD_WRITE after one sparse-set fix, deviation 1).
+  cn3_canary_run.out, cn3_manifest_canary.txt, cn3_canary_readback.out, cn3_canary.out : UNH_US_Equity written and read back with A-1 (also against a fresh in-memory rebuild), A-2, A-3; the gateway read: only the pointers and model_rows moved, dossier_key new.
+  cn3_step2.out, cn3_manifest_main.txt : REFRESH-CENSUS names=92 written=92 would_write=0 unchanged=0 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=0 errors=0 mode=write; the manifest holds 92 lines, all status=WRITTEN.
+  cn3_after.out, cn3_readback_all.out, cn3_gateway_bp.out : research_dossier objects 1558 -> 1651 (= 1558 + 93), research-continuation 446 -> 446; branch_a_ok=93 of 93 (A-1, A-2, A-3, content sha, object name, partition); pick_equals_manifest=93 of 93 (denominator all 93, BP and KMB included); both BP spellings name the NEW dossier_key and only the pointers and model_rows moved; 0 objects under the raw slash spelling.
+
+PLAIN STATEMENTS (the order asks for these in the close):
+  - No continuation was written (446 before and after). No object sits under the raw spelling (0 and 0). NG/_LN_Equity (partition still 16 objects) and PBR_US_Equity (16) and every other name outside the list were not touched: the table total rose by exactly the 93 written.
+  - The 93 keys written are the 93 REFRESH lines of cn3_manifest_canary.txt (1) and cn3_manifest_main.txt (92); the keys are under security_key=<name>/ (BP under security_key=BP-SLASH-_LN_Equity/).
+  - Requests and bytes: UNMEASURED (the driver prints them only if it stops with REFRESH-STOPPED budget-exceeded; it did not stop).
+  - STEP2_WALL_SECONDS=12187 (3 h 23 min), far over the 600 s line of the CTO's host ruling; it includes the dell1 box-to-S3 path (the CTO's condition 4) and some light concurrent reads of mine (the hourly sa read three times, three gateway reads); per name about 1.5 to 2.5 minutes. The ruling is the CTO's, not mine.
+LIMITS AND DEVIATIONS, PLAINLY:
+  1. A-1 for the 92 names of step 2 is checked against the PREVIOUS served dossier's fields (the driver's allowed-moves rule had already established build == served outside model_rows); only the canary also had a fresh independent rebuild. A second build per name would have cost about a minute each.
+  2. The UNH gateway reads (before and after) were inline tool results and are compared with the transcription by reading; the BP reads were compared by script.
+  3. The first canary dry run read SKIPPED_ALLOWED team_sheet because my sparse worktree lacked integrations/bloomberg/research (field_map.json) and org/standards; nothing was written; fixed and re-run (cn3_before.out deviation 1). The order's sparse line should name both.
+  4. The tool caps a foreground command at 10 minutes, so step 2 ran as a detached background command of the one process (python -u, output to cn3_step2.out); W1 extended the window twice (messages 8220 and 8230) and told me not to kill it.
+  5. The BP dossier is now level with the 17:06:20Z model block (cn-3 replaced the 15:51Z one that was one block behind). All 93 dossiers fall one day behind the daily 13:0xZ model blocks again tomorrow (the schedule, cn-4 and cn-5, keeps them level).
+  6. Rollback was not needed or taken: ADD-ONLY; removing the 93 manifest keys is an S3 delete, not mine.
+DOSSIERS_WRITTEN_AND_READ_BACK=PASS
+CANARY_GATEWAY_MOVES_AS_NAMED=PASS
+PICK_NAMES_MANIFEST_KEYS=PASS
+COUNTS_AS_EXPECTED=PASS
+STEP2_WALL_SECONDS=12187
