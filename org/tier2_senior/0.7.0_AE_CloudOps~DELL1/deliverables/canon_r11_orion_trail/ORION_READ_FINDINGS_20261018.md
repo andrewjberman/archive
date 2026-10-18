@@ -22,5 +22,7 @@ Claim words: `measured` = read this session by `orion_logread.py` with `ORION_ST
 ## Verdict
 **The reader of the 2026-10-16 burst is still NOT NAMED**, and no requester is inferred. The one daily recurring reader of `orion/` in the logs is the gold lambda role at its scheduled fire (489 GETs, about 0.53 GB per fire).
 
-## Open
-Default under the issuer's msg 7670: remove the logging by 2026-10-19T18:39Z. A third window (10-19 06Z..16Z, readable after 16:30Z on 10-19) still fits before that deadline; proposed to the issuer.
+## Open (confirmed by the issuer, msg 8142)
+1. After 16:30Z on 2026-10-19 read the 10-19 06Z..16Z window: `ORION_START=2026-10-18T16:00:00+00:00 python -I orion_logread.py read <out>`.
+2. Then remove, before 2026-10-19T18:39Z (apply + 72 h; this seat's step): (a) opal-assets root, targeted plan with exactly one destroy of `aws_s3_bucket_logging.monolith_orion_reader`, one `safe-apply`, read back `get-bucket-logging` empty; (b) opsec root, `aws_s3_bucket_policy.access_logs` SourceArn list drops `arn:aws:s3:::opal-data-assets` (plan: 1 change), one `safe-apply`, read back. The issuer's msg 8142 names "the logging (and the policy ARN)".
+3. Close ledger legs L4 and L5, commit, report to `2.0.0_SA_COO~D1` and `0.0.0_AB_MSTR~DELL1`. No alert or monitor is built; the CloudTrail patch stays unapplied.
