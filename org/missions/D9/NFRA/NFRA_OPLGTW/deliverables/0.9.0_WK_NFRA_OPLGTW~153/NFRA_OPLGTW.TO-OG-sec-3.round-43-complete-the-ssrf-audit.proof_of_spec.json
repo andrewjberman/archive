@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-sec-3",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~153",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "581ee61977",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sec-3.round-43-complete-the-ssrf-audit.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~153/SSRF_AUDIT_R43.json",
+   "kind": "doc",
+   "commit_or_etag": "3cd66a6c54",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only audit record: 21 rows, one per pattern-matched line in the six gateway modules (identity.py 3, graph.py 3, token_broker.py 1, ycharts/client.py 1, globgrph/integration.py 1, opal_portal/integration.py 12), controllable_yes 0, verdict CLEAN. Committed @3cd66a6c54 (LOCAL on wk-NFRA_OPLGTW-153). No product file, no deploy.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "3cd66a6c54",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two appended rows, NFRA_OPLGTW-Z-W153-S1 and NFRA_OPLGTW-Z-W153-S2 (OBSERVATION, INERT). The surprise-row gate passed at commit: 2 new rows checked, OK. Diff is 2 files, 73 insertions in the commit (record and channel).",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: every outbound call line the pattern finds is a row of the audit, each row is complete, and the verdict follows from the rows (a `yes` anywhere means `STOP`). Either verdict PASSES `AC1`: a STOP is a finding, not a failure of the audit.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/sec3.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "call sites matched by the pattern in the six modules: 21 (round 42 counted 18 in five; the JWKS fetches add identity.py x2 and token_broker.py x1); listed in the record: 21; matched lines missing from the record: 0 (want 0); malformed rows: 0 (want 0)\ncontrollable yes: 0; the record says 0 and verdict CLEAN: consistent\nRESULT: PASS\nexit=0",
+   "denominator": "21 pattern-matched lines in the six modules (identity.py 3, graph.py 3, token_broker.py 1, ycharts/client.py 1, globgrph/integration.py 1, opal_portal/integration.py 12); 21 of 21 listed; 0 missing; 0 malformed; controllable yes 0",
+   "status": "PASS",
+   "expect": "(?s)call sites matched by the pattern in the six modules: (\\d+) \\(round 42 counted 18 in five.*listed in the record: \\1; matched lines missing from the record: 0 \\(want 0\\); malformed rows: 0 \\(want 0\\).*controllable yes: \\d+; the record says \\d+ and verdict (CLEAN|STOP): consistent.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch no file outside the project tree (no product file).",
+   "method": "command",
+   "invocation": "git log --author='0.9.0_WK_NFRA_OPLGTW~153 <' --name-only --format= | grep -v '^org/missions/D9/NFRA/NFRA_OPLGTW/' | grep -c . ; echo \"exit=$?\"",
+   "output_evidence": "0\nexit=1",
+   "denominator": "0 files outside org/missions/D9/NFRA/NFRA_OPLGTW/ across every commit by 0.9.0_WK_NFRA_OPLGTW~153 (grep -c counts 0; exit 1 is grep's no-match code, not a failure)",
+   "status": "PASS",
+   "expect": "(?s)^0\\s*exit=[01]\\s*$",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two planted record mutants run through SEC3_REC_OVERRIDE (copies in .scratch, the deliverable untouched): (a) the graph.py:63 row dropped; (b) the graph.py:63 row flipped to controllable yes with the verdict left CLEAN.",
+   "expected": "(a) FAIL with one matched line missing from the record; (b) FAIL as INCONSISTENT.",
+   "observed": "(a) 'listed in the record: 20; matched lines missing from the record: 1 (want 0)' then RESULT: FAIL, exit=1. (b) 'controllable yes: 1; the record says 0 and verdict CLEAN: INCONSISTENT' then RESULT: FAIL, exit=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of sec3.AC1.sh on the committed record, outputs compared byte for byte with cmp",
+   "observed": "both runs exit 0; cmp reports IDENTICAL-OUTPUT",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any product file, test, release or deploy in the six gateway modules or elsewhere.",
+   "reason": "The task order is read-only (section 2): the only writes are the audit record and the channel rows."
+  },
+  {
+   "item": "Graph calls made from modules outside the six-module denominator (graph.call( and graph_call( in tools.py, asker_scope.py and six other modules, 63 lines).",
+   "reason": "The pattern does not match graph.call( (the order's denominator is fixed). Their path arguments were traced through the one sink, graph.py:63, which is in the record (row 4, controllable no). The gap is recorded as surprise row NFRA_OPLGTW-Z-W153-S1, not as record rows."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W153-S1: the OG-sec-3 pattern does not match the gateway's Graph egress (graph.call( and graph_call(, 63 lines in 10 modules outside the six-module count); the Graph path arguments were traced through graph.py:63 instead (OBSERVATION, INERT).",
+  "NFRA_OPLGTW-Z-W153-S2: two paging loops (tools.py:1161 and asker_scope.py:279) follow an @odata.nextLink with graph.call and no GRAPH_BASE check that the sibling loops apply; the link comes from a Graph reply, so controllable no (OBSERVATION, INERT)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~153 on worktree wk-NFRA_OPLGTW-153 (HEAD 581ee61977 at start). Verified the branch and the tree paths, then the order's premises: the check script and the W145 record exist; the pattern over the six modules gives 21 lines (identity 44, 77, 115; graph 63, 94, 103; token_broker 307; ycharts 98; globgrph 85; opal_portal 196, 217, 242, 247, 262, 337, 342, 362, 372, 418, 422, 428). Re-read each site this round: identity.py URL build and both JWKS fetches with their config sources (config.py:184-193); token_broker.py tid traced through tenant_authorized and canonical_guid to the configured tenant GUID; graph.py path and uploadUrl; the callers of graph.call (path arguments: literal slash prefixes, Graph replies, or base-checked links); ycharts BASE and urlencode; globgrph literal paths; opal_portal constants, validated execution ids and Graph ids. Wrote SSRF_AUDIT_R43.json (21 rows, 0 yes, CLEAN) and ran AC1 under timeout 120 (PASS). Ran two planted mutant controls (both FAIL as expected) and a repeat run (identical). Appended rows NFRA_OPLGTW-Z-W153-S1 and -S2 to INVESTIGATION_v1.md. Committed record and rows @3cd66a6c54 via safe-commit (surprise-row gate OK, 2 new rows). Ran AC2 (0, exit 1: PASS).",
+ "compiler_tools": [
+  {
+   "tool": "sec3.AC1.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/sec3.AC1.sh; echo exit=$?",
+   "result": "RESULT: PASS, exit=0; 21 matched, 21 listed, 0 missing, 0 malformed; controllable yes 0; verdict CLEAN consistent"
+  },
+  {
+   "tool": "Native Grep and Read over the six modules and their callers, path-bound to the worktree",
+   "invocation": "Grep with path C:/tmp/wk-oplgtw-153/infra/aws/ec2/opal-gateway/app (graph.call( and graph_call( count: 63 occurrences in 10 files)",
+   "result": "tools.py 50, asker_scope.py 4, site_to_s3.py 2, one each in graph_scope_map, mail_route, ms_ingest, taxsma_workbook, otp, transcript_route, teams_route"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (record and channel rows)",
+   "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPLGTW~153 <0.9.0_WK_NFRA_OPLGTW~153@opal.agent>' -F .scratch/msg_r43_audit.txt -- <SSRF_AUDIT_R43.json> <INVESTIGATION_v1.md>",
+   "result": "committed 3cd66a6c54; surprise-row gate OK (2 new rows of 1108 checked); gitlink check 0 refusals; WARN client-data-check, list absent, not checked"
+  }
+ ]
+}
