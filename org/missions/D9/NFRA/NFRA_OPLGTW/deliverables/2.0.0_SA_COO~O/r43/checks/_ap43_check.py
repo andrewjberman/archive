@@ -21,7 +21,7 @@ LIVE_NEW = "efcc8ae19f7eebb04e2f45f45c0def28af037c24"
 LIVE_OLD = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
 DELL_RELEASE = "1753c741d988faa05fa424386bcd9aa0c5efbf71"
 # a path the merge may differ from trunk_base in, beyond the two dell1 files and the manifest: the ledger, its sentinel, and project trees
-DELL_OWN = re.compile(r"^" + re.escape(GW) + r"(app/harvest_[a-z_]+\.py|tests/.+)$")
+DELL_OWN = re.compile(r"^" + re.escape(GW) + r"(app/harvest_[a-z_]+\.py|tests/fixtures/c[a-z][0-9]+_.+|tests/test_c[a-z][0-9]+_.+)$")   # dell1's harvest files and its c?N-named tests and fixtures (3b94a83e05..922ee425fe: four app files, three tests, one fixture); trunk-own tests such as test_og_pr1.py are NOT dell1-own
 OTHER_OK = re.compile(r"^(org/critical_paths/(change_management|\.open_deploys)/|org/missions/|org/tier1_exec/|org/tier2_exec/)")
 
 
