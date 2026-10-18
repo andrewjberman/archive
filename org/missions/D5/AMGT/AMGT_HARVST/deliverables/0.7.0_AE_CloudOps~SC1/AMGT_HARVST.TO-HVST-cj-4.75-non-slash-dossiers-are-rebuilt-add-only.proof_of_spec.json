@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cj-4.75-non-slash-dossiers-are-rebuilt-add-only",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cj-4.75-non-slash-dossiers-are-rebuilt-add-only.md",
+    "group": "OTHER",
+    "vintage_commit": "aecf3f0243"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "f7223c61e6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cj-4.75-non-slash-dossiers-are-rebuilt-add-only.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~SC1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_before.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Step 0: worktree AT 8f329a10b9 with an empty lib/research diff; both list sha256; dossier objects 1479, continuation objects 446; scheduled-task read with its control; how a row with a value is counted; the UNH and CPA gateway before reads; the driver plan for both canary names.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_written.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The write manifest and rollback list: 75 WROTE lines (name, key, VersionId, bytes, sha256, put_performed, moved fields, rows with a value served and new; seconds and requests from the memo driver on), 07:49:11Z to 09:26:25Z, no failure line.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "amgt/harvest/gold/research_dossier/ (75 new objects, one per non-slash name of cj4_names.txt, method amgt-corpus-dossier/15, as_of=2026-10-18.<inputs_sha16>.json)",
+      "kind": "s3_object",
+      "commit_or_etag": "VersionIds in cj4_written.out",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "75 add-only objects in s3://opal-data-harvest; cj4_after.py head_object read: every VersionId equals the manifest's and the gateway's dossier pick over a fresh listing names the manifest key for 75 of 75; dossier objects 1479 -> 1554.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_served.out",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The served record; ends with DOSSIERS_WRITTEN_AND_READ_BACK=PASS, CANARY_GATEWAY_MOVES_AS_NAMED=PASS, PICK_NAMES_MANIFEST_KEYS=PASS, COUNTS_AS_EXPECTED=PASS.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cj4_served.out carries DOSSIERS_WRITTEN_AND_READ_BACK=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_served.out",
+      "expect": "(?m)^DOSSIERS_WRITTEN_AND_READ_BACK=PASS$",
+      "output_evidence": "DOSSIERS_WRITTEN_AND_READ_BACK=PASS",
+      "denominator": "cj4_written.out: 75 WROTE lines, 75 distinct names equal to cj4_names.txt, put_performed 1 existed 0 on each, 0 failure lines; cj4_run.log: 75 READBACK lines equal=PASS (subject.security_key, method_version amgt-corpus-dossier/15, every field but model_rows equal to the pre-write build, model_rows equal between the two builds on 75 of 75, inputs equal, recomputed content_sha256, object name as_of=<as_of>.<_inputs_sha16(inputs)>.json), 75 COUNT lines plus_one=PASS, 0 STOP lines, 75 model-block guard PASS (0 FAIL), moved set equal to cj4_expected_moves.txt on 75 of 75; foreground python -u commands inside the window (GO_UTC 07:45:00Z, end 12:15:00Z by AMENDMENT 3), written 07:49:11Z to 09:26:25Z; the bx-5 interval 08:41:34Z to 08:56:41Z is noted in cj4_run.log.",
+      "status": "PASS",
+      "status_reason": "Every name is in the manifest and every read-back passed."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cj4_served.out carries CANARY_GATEWAY_MOVES_AS_NAMED=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_served.out",
+      "expect": "(?m)^CANARY_GATEWAY_MOVES_AS_NAMED=PASS$",
+      "output_evidence": "CANARY_GATEWAY_MOVES_AS_NAMED=PASS",
+      "denominator": "cj4_canary.out: UNH_US_Equity and CPA_US_Equity read through the gateway before (07:34Z to 07:36Z) and after (07:54Z) with fields fund_form_ref, fund_of_record, last_stated_position, model_rows. UNH: fund_form_ref moved (pfoe/827a2c87.. to pfoe/57cee6de..) and nothing else of the dossier fields; CPA: fund_form_ref moved (idvz/668b09d8.. to idvz/65a5baab..), model_rows omitted by the response-size cap in both reads (omitted_items.dossier_fields 1) and seen at S3 level by the driver (block stamp 20261011T130357Z to 20261017T130327Z, rows with a value 89 to 89). dossier_key, as_of, content_sha256, the dossier entry of source_keys, duplicates_dropped and denominator_note differ (expected); continuation entries, research_reports, ai_fill and management_roster equal. etfs_compare_peers was not called. The comparison is the seat's reading of the tool results; the machine records are the driver's COMPARE and GUARD lines.",
+      "status": "PASS",
+      "status_reason": "Only the moves the COO half names."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cj4_served.out carries PICK_NAMES_MANIFEST_KEYS=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_served.out",
+      "expect": "(?m)^PICK_NAMES_MANIFEST_KEYS=PASS$",
+      "output_evidence": "PICK_NAMES_MANIFEST_KEYS=PASS",
+      "denominator": "cj4_after_counts.out: for each of the 75 manifest names the gateway's dossier pick rule (_pick_dossier, copied) over a fresh listing of its partition names the manifest key: pick_equals_manifest=75 of 75; every VersionId equals a head_object read (version_equal=75).",
+      "status": "PASS",
+      "status_reason": "75 of 75."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cj4_served.out carries COUNTS_AS_EXPECTED=PASS",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_served.out",
+      "expect": "(?m)^COUNTS_AS_EXPECTED=PASS$",
+      "output_evidence": "COUNTS_AS_EXPECTED=PASS",
+      "denominator": "cj4_counts_before.out (07:34Z) and cj4_after_counts.out (09:27Z): research_dossier objects 1479 over 95 partitions before and 1554 over 95 after (+75 = the manifest lines); research-continuation 446 before and 446 after (no continuation written); continuation.write_one was never called.",
+      "status": "PASS",
+      "status_reason": "Dossier count +75, continuation count equal."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "dossier.write_one (via the guarded driver cj4_run.py)",
+      "invocation": "from a detached worktree AT 8f329a10b9 (empty lib/research diff), foreground python -u, --go-utc 2026-10-18T07:45:00Z, no loop, no retry, at most 5 names per command; never continuation.write_one, never a module --write",
+      "result": "75 puts, put_performed 1 existed 0 on each; no GoldImmutableError, no put error, no throttle; no write_one printed unchanged"
+    },
+    {
+      "tool": "MemoClient (AMENDMENT 2)",
+      "invocation": "a per-process memo of get_object reads of immutable keys (gold, silver, bronze, derived/model_block by full key); never a listing, head, the pick, a key this process wrote, or a read after the first write of that name",
+      "result": "from 08:56Z the cost fell from about 200 s to about 20 s a name (seconds, requests and memo_hits per name in the manifest lines)"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open (legs S0 C1 R1 V1 Z1) at 07:31Z; close-leg; close with this commit",
+      "result": "ledger harvst-cj4-dossiers-nonslash"
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run; the seat read the scheduled-task list with Get-ScheduledTask (207 tasks, positive control OPAL_autolaunch found)",
+      "result": "no task action names fund_form, continuation, dossier, research.corpus, research-fund-form or typed"
+    },
+    {
+      "tool": "comp-iam",
+      "invocation": "not run",
+      "result": "NOT RUN: the write principal is the one the harvest tooling already holds; no grant requested (C-4)."
+    },
+    {
+      "tool": "comp-adversary",
+      "invocation": "not run by this seat",
+      "result": "RUN at the cut by the issuer; this seat answered its adversaries by measured reads: the worktree AT the pin with an empty lib/research diff, both list sha256 checks inside the driver, a per-name build-versus-served comparison (moved fields within {fund_form_ref, model_rows}, input kinds within {continuation, fund_form, model_block}), the CTO's model-block guard, a plan mode, a +1 count per name, a canary read through the gateway before the 73, foreground commands with a flushed manifest line per name."
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The machine comparison of the gateway reads of UNH and CPA before and after.",
+      "reason": "The gateway tool result cannot be piped to a file; the seat compared the two tool results and transcribed the pointers into cj4_before.out and cj4_canary.out. CPA model_rows is cut by the response-size cap (row D1-S50) in both reads and was checked at S3 level."
+    },
+    {
+      "item": "The rollback.",
+      "reason": "Removing the 75 new keys is an S3 delete, Andrew's act; not taken. cj4_written.out is the key and VersionId list."
+    },
+    {
+      "item": "Names not in this act.",
+      "reason": "The two slash-key dossiers (BP/_LN_Equity, NG/_LN_Equity), KMB_US_Equity and the 17 other unchanged names were not rebuilt; no continuation was written."
+    },
+    {
+      "item": "The gateway read of every name other than UNH and CPA.",
+      "reason": "The order grades the canary pair by gateway read; the other 73 are graded by the driver's pre-write comparison, the read-back, the count and the pick check."
+    }
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.7.0_AE_CloudOps~SC1/round95/cj4_before.out",
+  "controls": {
+    "mutant": {
+      "description": "The discriminating control is the pre-act resolution: before the act the gateway served for each of the 75 names a dossier whose fund_form_ref and/or model_rows differed from today's build (census HVST-ci-3: 77 moved, 18 unchanged), and the model-block guard stands against the hazard the CTO named (a READ_FAILED or ABSENT block that would serve emptier rows): the guard refuses a name whose record is not SERVED, whose block stamp is not later than the stored one, or whose rows with a value would drop.",
+      "expected": "Landed: for each name the gateway pick names the new as_of=2026-10-18 object, the dossier count is +75 and the continuation count is unchanged. Not landed (the pre-act state): the pick names the older object and the counts are 1479 and 446.",
+      "observed": "Before (07:34Z): dossiers 1479, continuations 446, UNH served as_of 2026-10-17 and CPA 2026-10-12. After (09:27Z): dossiers 1554, continuations 446, UNH and CPA served as_of 2026-10-18 with the new keys, pick_equals_manifest 75 of 75; the guard read PASS on 75 of 75 with rows with a value equal between served and new on every name.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each name's pre-write build, the build inside write_one and the stored object were compared (model_rows between the two builds, all other fields against the pre-write build, inputs, recomputed content_sha256).",
+      "observed": "model_rows equal between the two builds on 75 of 75; no other field differed; the object name equals as_of=<as_of>.<_inputs_sha16(inputs)> on 75 of 75.",
+      "status": "STABLE"
+    }
+  }
+}
