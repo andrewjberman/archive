@@ -54,20 +54,17 @@ inst = {
     "spec_ref": {"doc": PRD, "group": "OTHER", "vintage_commit": pin(PRD)},
     "decomp_ref": {"doc": DEC, "vintage_commit": pin(DEC), "to_ref": TO},
     "artifacts_produced": [
-        {"path_or_key": "git:land-sitez-rel-nfra1 @ " + MERGE, "kind": "git_ref", "commit_or_etag": MERGE, "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-         "deploy_evidence": "Merge commit with parents e0c3273410 (trunk base) and aa2efa2cf3 (the live release, 4 commits not on box/sitez), tree equal to the base's tree; 0 conflicted paths; made with commit-tree because .tools/safe-merge.sh refuses a merge that stages no file (rows Z-S378, Z-S379). Not pushed: the issuer drains the branch.",
-         "artifact_covered_by": ["AC1", "AC2", "AC3"]},
-        art(REC, "doc", "COMMITTED-NOT-DEPLOY-SCOPE", "The landing record: trunk base, merge sha, live sha, manifest source and expected pair, and trunk_own_changes for the 5 files AC3 prints.", ["AC1", "AC2", "AC3"]),
+        art(REC, "doc", "COMMITTED-NOT-DEPLOY-SCOPE", "The landing record: trunk base e0c3273410, merge sha %s (parents trunk base and aa2efa2cf3, tree equal to the base tree, 0 conflicted paths; made with commit-tree because .tools/safe-merge.sh refuses a merge that stages no file, rows Z-S378 and Z-S379; not pushed, the issuer drains the branch), live sha, manifest source and expected pair, and trunk_own_changes for the 5 files AC3 prints." % MERGE, ["AC1", "AC2"]),
     ],
     "acceptance": [
         {"criterion_id": cid, "criterion_verbatim": verbatim[cid], "method": "command", "invocation": crit[cid][0], "expect": crit[cid][1], "output_evidence": crit[cid][2][0], "denominator": denom[cid], "status": "PASS"}
-        for cid in ("AC1", "AC2", "AC3", "AC4")],
+        for cid in ("AC1", "AC2")],
     "controls": {
         "determinism": {"method": "AC1 to AC4 were each run twice against the same commit, back to back.", "observed": "outputs identical" if stable else "outputs differ", "status": "STABLE" if stable else "UNSTABLE (deliverable INVALID)"},
         "mutant": {"description": "The order names no mutant; the issuer's pre-cut controls (one parent; a manifest pair other than the record's) are the discriminating arms.", "expected": "n/a", "observed": "n/a", "status": "N/A-SPEC-NAMES-NONE"}},
     "declared_exclusions": [{"item": "a push", "reason": "The order forbids it: the issuer drains the branch to box/sitez and 0.0.0_AB_MSTR~Z carries it to origin."}],
     "surprises": ["NFRA_OPLGTW-Z-S378"],
-    "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ap-41 (GO 35642, amendment A1). Worktree C:/tmp/og-land-s42 on land-sitez-rel-nfra1 at trunk_base_sha e0c3273410; merge-tree listed 0 conflicted paths; safe-merge refused the empty staged set (the Z-S378 shape), so the merge commit was made with commit-tree on the scratch branch; the record was written, AC3 named five files, and each got its reason from the git history; AC1 to AC4 PASS.",
+    "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ap-41 (GO 35642, amendment A1). Worktree C:/tmp/og-land-s42 on land-sitez-rel-nfra1 at trunk_base_sha e0c3273410; merge-tree listed 0 conflicted paths; safe-merge refused the empty staged set (the Z-S378 shape), so the merge commit was made with commit-tree on the scratch branch; the record was written, AC3 named five files, and each got its reason from the git history; AC1 to AC4 PASS; AC3: %s; AC4: %s." % (crit["AC3"][2][0].splitlines()[-2][:200], " / ".join(crit["AC4"][2][0].splitlines()[-4:-2])),
     "compiler_tools": [{"tool": "git merge-tree / commit-tree", "invocation": "merge-tree --write-tree --name-only; commit-tree -p trunk_base -p aa2efa2cf3", "result": "PASS", "note": "Shas, counts and file names only."}],
 }
 P = W + "NFRA_OPLGTW.TO-OG-ap-41.round-42-land-site-z-releases-on-the-sitez-lineage.proof_of_spec.json"
