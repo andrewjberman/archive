@@ -1,6 +1,6 @@
 # L10 SLUG -- NFRA_OPLGTW round 43 -- DRAFT (2.0.0_SA_COO~O, 2026-10-18 ~15:0xZ), NOT SENT
 
-Status: three of nine orders are open (`OG-ap-42`, `OG-ev-7`, `OG-ap-43`), so the round is not terminal and nothing is sent. This file is the skeleton the slug is finished from; the round-close check (`python .tools/round-close-check.py --project NFRA_OPLGTW --round 43`) must read MAY-CLOSE first.
+Status: one of nine orders is open (`OG-ev-7`, its ask and the CVO's own half come first), so the round is not terminal and nothing is sent. This file is the skeleton the slug is finished from; the round-close check (`python .tools/round-close-check.py --project NFRA_OPLGTW --round 43`) must read MAY-CLOSE first.
 
 ## 1. The round, by order (state at the writing)
 
@@ -12,9 +12,9 @@ Status: three of nine orders are open (`OG-ap-42`, `OG-ev-7`, `OG-ap-43`), so th
 | `OG-sec-3` | SSRF audit over six modules, 21 sites, 0 controllable, CLEAN; drained `c26cd96d5f` | complete |
 | `OG-ev-8` | inline audit-write table: 81 sites, 68 on the loop, 1 off, 12 unknown; every timeout botocore's default; frequency ABSENT (the lake key names no tool); drained `273fd63f3d` | complete |
 | `OG-ev-9` | limiter trace: 120 per 60 s, keyed on the validated principal key, Retry-After set, fail-open; 1 refusal row in 24 hours; recommendation no change; drained `fb6d78084b` | complete |
-| `OG-ap-42` | ninth release (the four take-list files) on dell1's `ck-3` base `922ee425fe`; Phase A with the applier (release `a0c83303ee` cut; the four files are blob-equal to trunk) | open |
+| `OG-ap-42` | ninth release (the four take-list files) on dell1's `ck-3` base `922ee425fe`: LIVE `a0c83303ee`, ledger `batch10` CLOSED 2026-10-18T16:32:05Z, UNARMED only (lease absent before, after and at the close, no SSM write); `ap42.AC1` and `AC2` PASS on my runs, `CODE10_SERVED.json` read by me, proof VALID (`3aff518318`); the firm pin is first exercised in the service by `OG-ev-7` | complete |
 | `OG-ev-7` | the peers call in the service under one firm-pinned lease; after `OG-ap-42` CLOSED | open |
-| `OG-ap-43` | the landing of `922ee425fe` (carrying `6575999df5` and `3b94a83e05`) on `box/sitez`; GO sent | open |
+| `OG-ap-43` | the landing of `922ee425fe` (carrying `6575999df5` and `3b94a83e05`) on `box/sitez`: merge `eb9a60c0ac`, drained `b1e92a9635`; `ap43.AC1` to `AC3` PASS on my runs with the repaired check (the applier's first AC1 'no' was my check's defect, `Z-S393`, ruled `Z-S394`); proof VALID (`b5b84eeb9d`) | complete |
 
 ## 2. What the round delivered against the endpoint
 
