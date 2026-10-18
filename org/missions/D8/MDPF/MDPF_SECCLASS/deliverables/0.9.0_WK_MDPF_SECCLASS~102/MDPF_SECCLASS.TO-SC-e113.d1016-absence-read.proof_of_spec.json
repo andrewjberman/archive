@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e113",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e113.d1016-absence-read.md",
+    "group": "OTHER",
+    "vintage_commit": "964be4af93"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R29.md",
+    "vintage_commit": "964be4af93",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e113.d1016-absence-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~102",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~102/D1016_ABSENCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only analysis record naming the served version, tail date, missing date, calendar frontier and producer step; no deploy; graded by check_r29_reads.py calendar (R29-calendar ok=True rc=0)"
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~102/D1016_EVIDENCE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "measured listings, version ids, timestamps and the code lines behind the verdict; read-only AWS reads, no write"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC29-e113-AC1",
+      "criterion_verbatim": "invocation: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py calendar; expect: R29-calendar ok=True. The tail date, the absence of 2026-10-16 and the calendar frontier are recomputed from the served version and the repo, and the producer step is a real gold script with a reason.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py calendar",
+      "expect": "R29-calendar ok=True",
+      "output_evidence": "R29-calendar ok=True problems=[]  (rc=0; second run identical)",
+      "denominator": "0 of 6 problem checks failing (tail_date recomputed as 2026-10-15; missing_date 2026-10-16 absent from served version 0IrqqSvyNAbXY34LxfRcAx0DtjM9PODv; frontier_date 2026-10-16 equals trading_calendar at the version write time; missing_date not after frontier; producer_step A_03.positions_cube.py is a file under gold scripts; reason is 40+ characters); 1 of 1 criterion",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Selftest of the checker that grades D1016_ABSENCE.json: a green arm and the calendar negative arms (missing date present, wrong frontier, producer not a gold script) graded against the same grader",
+      "expected": "green arm reports no problems; every negative arm reports a problem",
+      "observed": "R29-calendar-SELFTEST green: True []; negatives missing date present True, wrong frontier True, not a gold script True; R29-SELFTEST ok=True (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_r29_reads.py calendar run twice on the same committed file; the served version id is immutable",
+      "observed": "run 1 R29-calendar ok=True problems=[]; run 2 R29-calendar ok=True problems=[]",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS write, delete, copy, put, tag, invoke, start, stop or deploy",
+      "reason": "read-only order; nothing was changed"
+    },
+    {
+      "item": "CloudWatch logs of the 23:00Z and 00:00Z fires",
+      "reason": "the step timings are read from object LastModified, which is enough to order the writes; the log lines are not needed for the named step"
+    },
+    {
+      "item": "Per-account content of the 2026-10-16 silver partition",
+      "reason": "the verdict needs only the trade_date maximum per silver partition, which was read; account-level content is outside the cell"
+    },
+    {
+      "item": "Other silver/transactions and positions_cube partitions before 2026-10-10",
+      "reason": "bounded reads by prefix; the cell asks about the 2026-10-16 absence, and the tail dates of the served versions were read in full"
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W102-S1: the order lists the chain as B_00, A_03, B_01, C_06, but gold_dispatch.sh runs A_03 in the dimensions phase before B_00; A_03 is the first step lacking 2026-10-16.",
+    "MDPF_SECCLASS-D1-W102-S2: the order's positive control gold/holdings_lots/<date>.parquet is not a daily object; no 2026-10-15 lots object exists, and the control was taken at 2026-10-09 because the lots writer keys on the latest silver/allocations partition."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~102/D1016_EVIDENCE.json",
+  "compiler_tools": [
+    {
+      "tool": "check_r29_reads.py (R29_CHECKS, read-only; run at its own path in the worktree)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py calendar",
+      "result": "R29-calendar ok=True problems=[] rc=0"
+    },
+    {
+      "tool": "lib/trading_calendar.expected_last_trading_day (via the checker's frontier read)",
+      "invocation": "python -c with dt 2026-10-18T00:24:42 and 2026-10-17T05:24:08 at the worktree root",
+      "result": "2026-10-16 for both write times"
+    }
+  ]
+}
