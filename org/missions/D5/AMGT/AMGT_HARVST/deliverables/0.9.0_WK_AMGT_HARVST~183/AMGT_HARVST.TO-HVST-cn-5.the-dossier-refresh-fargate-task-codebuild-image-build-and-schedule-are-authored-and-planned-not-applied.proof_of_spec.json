@@ -17,65 +17,65 @@
   {
    "path_or_key": "infra/aws/terraform/harvest/dossier-refresh.tf",
    "kind": "config_data",
-   "commit_or_etag": "fc90547a26",
+   "commit_or_etag": "d8f3448b9b",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "New file in the harvest root (no existing .tf edited). Amendment 3 (fc90547a26): the schedule's state is dossier_refresh_schedule_state (string, default DISABLED, validated DISABLED or ENABLED); the file never enables the schedule by itself. Amendment 2 (b67e2eec2f): two flags, both default false. dossier_refresh_build_enabled gives the BUILD half count 0 by default (ECR repository, build log group, build role, build policy, CodeBuild project: 5 resources). dossier_refresh_run_enabled gives the RUN half count 0 by default (cluster, security group, task log group, task role and policy, execution role and attachment, task definition, scheduler role and policy, schedule: 11 resources). The task definition names its image from the account, the region, the repository name variable and the digest, not from the ECR resource; the cluster carries a precondition that the build flag is on; the task definition carries a precondition that the digest is non-empty. The schedule is state DISABLED. Names are literals equal to name() output (see cn5_names.out). Nothing applied."
+   "deploy_evidence": "New file in the harvest root (no existing .tf edited). Amendment 4 (d8f3448b9b): the ECR repository name is a literal in the first locals block (name() output: amgt-dossier-refresh-repo); the variable dossier_refresh_ecr_repository_name is removed with its references. Amendments 1 to 3: two flags (dossier_refresh_build_enabled, dossier_refresh_run_enabled) default false, 5 build-half and 11 run-half resources; the image string is built from the account, region, repository name and digest; the cluster carries the build-flag precondition and the task definition the digest precondition; the schedule state is dossier_refresh_schedule_state (default DISABLED, validated). Names are literals equal to name() output (see cn5_names.out). Nothing applied."
   },
   {
    "path_or_key": "infra/aws/harvest/dossier-refresh/buildspec.yml",
    "kind": "config_data",
-   "commit_or_etag": "232ff2b9bf",
+   "commit_or_etag": "d8f3448b9b",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "CodeBuild buildspec, POSIX sh: test the source commit, docker build of the HVST-cn-6 Dockerfile, smoke run of python -m lib.research.corpus.dossier_refresh --help with --entrypoint python, push of git-<12>, digest read back with aws ecr describe-images, prints IMAGE_DIGEST and IMAGE_SIZE_BYTES. Not run."
   },
   {
    "path_or_key": "infra/aws/harvest/dossier-refresh/build-image.sh",
    "kind": "script",
-   "commit_or_etag": "a7c02aac7a",
+   "commit_or_etag": "d8f3448b9b",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
    "deploy_evidence": "Source-zip builder. Zip file set derived from the Dockerfile COPY lines (directories expanded, __pycache__ and .pyc left out) plus the Dockerfile and the buildspec. DRY-RUN by default (cn5_build_dry.out); --go uploads and starts the build and is not run by this cell. The project name is read from name(); the ECR repository name is a PROVISIONAL literal pinned by the Terraform validation."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_names.py",
    "kind": "script",
-   "commit_or_etag": "833d9c1492",
+   "commit_or_etag": "235a30f51e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Calls lib/opal_naming.py name() for the eleven listed names plus the scheduler policy (twelve in all); the ECR repository kind is refused and printed NOT-BUILT. Compares each literal in the first locals block of dossier-refresh.tf with its builder name and runs a planted-mismatch control. Writes cn5_names.out itself with newline LF."
+   "deploy_evidence": "Calls lib/opal_naming.py name() for the twelve listed names and the ECR repository (kind repo, thirteen in all). No refusal is caught: a builder refusal writes the transcript so far with NAMES-ABORTED and exits 1. Compares each literal in the first locals block of dossier-refresh.tf with its builder name and runs a planted-mismatch control. Writes cn5_names.out itself with newline LF."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_names.out",
    "kind": "doc",
-   "commit_or_etag": "833d9c1492",
+   "commit_or_etag": "235a30f51e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Program output of python -u cn5_names.py, re-run at fc90547a26 after amendment 3 (the bytes are unchanged from 833d9c1492): NAMES-CONTROL planted_mismatch_detected=yes, then NAMES-CHECK terraform_literals=12 builder_match=12 mismatches=0 as the last line."
+   "deploy_evidence": "Program output of python -u cn5_names.py at 235a30f51e (the worktree's lib/opal_naming.py refuses kind repo: branch lacks NAMING_SCHEMA v1.18). The transcript ends NAMES-ABORTED builder name() refused: ValueError: kind 'repo' is neither a NAMING_SCHEMA.json kind nor a cadence; no NAMES-CHECK line. Exit 1."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_validate.out",
    "kind": "doc",
    "commit_or_etag": "833d9c1492",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "terraform init -input=false (rc 0, last line the init advice) then terraform validate (rc 0): Success! The configuration is valid. Re-run at fc90547a26 after amendment 3 with unchanged bytes. CR characters removed from the Terraform console output."
+   "deploy_evidence": "terraform init -input=false (rc 0, last line the init advice) then terraform validate (rc 0): Success! The configuration is valid. Re-run at d8f3448b9b after amendment 4 (bytes unchanged) with unchanged bytes. CR characters removed from the Terraform console output."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_plan.out",
    "kind": "doc",
-   "commit_or_etag": "c26221c61b",
+   "commit_or_etag": "235a30f51e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Six labelled targeted terraform plans -lock=false -input=false (the same 16 -target flags), read-only, no -out, no apply. DEFAULT-PLAN (no -var): No changes. (rc 0). BUILD-PLAN (-var dossier_refresh_build_enabled=true): Plan: 5 to add, 0 to change, 0 to destroy (rc 0). BOTH-PLAN (both flags and the digest placeholder, first line PROVISIONAL): Plan: 16 to add, 0 to change, 0 to destroy (rc 0), schedule state DISABLED. RUN-ONLY-REFUSED (run flag, build flag false): rc 1, Error: Resource precondition failed on the cluster, after a Plan: 9 to add summary (surprise S7). ENABLED-SCHEDULE-PLAN (both flags, digest placeholder, schedule_state=ENABLED): Plan: 16 to add, 0 to change, 0 to destroy (rc 0), schedule state ENABLED. BAD-STATE-REFUSED (schedule_state=ON): rc 1, Error: Invalid value for variable on dossier-refresh.tf line 97, after a Plan: 15 to add summary (surprise S8). The schedule is DISABLED in every plan except ENABLED-SCHEDULE-PLAN."
+   "deploy_evidence": "Six labelled targeted terraform plans -lock=false -input=false (the same 16 -target flags), read-only, no -out, no apply, no -var for the ECR name. DEFAULT-PLAN (no -var): No changes. (rc 0). BUILD-PLAN (-var dossier_refresh_build_enabled=true): Plan: 5 to add, 0 to change, 0 to destroy (rc 0). BOTH-PLAN (both flags and the digest placeholder, labelled DIGEST PLACEHOLDER): Plan: 16 to add, 0 to change, 0 to destroy (rc 0), schedule state DISABLED. RUN-ONLY-REFUSED: rc 1, Error: Resource precondition failed on the cluster, after a Plan: 9 to add summary (surprise S7). ENABLED-SCHEDULE-PLAN (schedule_state=ENABLED): Plan: 16 to add, 0 to change, 0 to destroy (rc 0), schedule state ENABLED. BAD-STATE-REFUSED (schedule_state=ON): rc 1, Error: Invalid value for variable on dossier-refresh.tf line 97, after a Plan: 15 to add summary (surprise S8)."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_build_dry.out",
    "kind": "doc",
-   "commit_or_etag": "c26221c61b",
+   "commit_or_etag": "235a30f51e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Output of bash infra/aws/harvest/dossier-refresh/build-image.sh --dry-run at fc90547a26 (rc 0): 19 COPY lines, 767 zip entries, the zip set equals HEAD, the dry run names the --go actions. No cloud call."
+   "deploy_evidence": "Output of bash infra/aws/harvest/dossier-refresh/build-image.sh --dry-run at 235a30f51e (rc 1): the script stops at its ECR name() line with ValueError kind 'repo' refused, because the branch lacks NAMING_SCHEMA v1.18 (surprise S9). No zip is built and no cloud call is made."
   },
   {
    "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
    "kind": "doc",
-   "commit_or_etag": "c26221c61b",
+   "commit_or_etag": "235a30f51e",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "Rows AMGT_HARVST-D1-W183-S1 to S6 appended by byte insertion in 833d9c1492 (126 insertions, 0 deletions); row S7 in 60dd7b4c35 (21 insertions, 0 deletions); row S8 in c26221c61b (21 insertions, 0 deletions); the row gate graded each set OK, with no override."
+   "deploy_evidence": "Rows AMGT_HARVST-D1-W183-S1 to S6 appended by byte insertion in 833d9c1492 (126 insertions, 0 deletions); row S7 in 60dd7b4c35 (21 insertions); row S8 in c26221c61b (21 insertions); row S9 (BLOCKING) in 235a30f51e (22 insertions); the row gate graded each set OK, with no override."
   }
  ],
  "acceptance": [
@@ -84,18 +84,19 @@
    "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_names.out expect (?s)NAMES-CONTROL planted_mismatch_detected=yes.*NAMES-CHECK terraform_literals=1\\d builder_match=1\\d mismatches=0",
    "method": "command",
    "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_names.out",
-   "output_evidence": "NAMES-CONTROL planted_mismatch_detected=yes\nNAMES-CHECK terraform_literals=12 builder_match=12 mismatches=0\nCommentary (not the matched lines): the file is the program's own output (python -u cn5_names.py, run from the worktree root, exit 0 after amendment 3 at fc90547a26). The count is 12, not 11: the scheduler's inline policy was given builder output as well (kind policy, qualifier scheduler), after the naming gate raised the typed suffix; the order's list did not name it and it is recorded as AMGT_HARVST-D1-W183-S1. The ECR repository line reads NOT-BUILT, as the order predicts. The names check was not edited to match; the planted control detected the wrong literal.",
-   "denominator": "2 of 2 anchors matched in order (NAMES-CONTROL then NAMES-CHECK) in the 27-line output file; 12 of 12 literals equal their builder names (exit code 0)",
-   "status": "PASS",
+   "output_evidence": "NAMES-ABORTED builder name() refused: ValueError: kind 'repo' is neither a NAMING_SCHEMA.json kind nor a cadence\nCommentary (not the matched lines): the file is the program's own output, from python -u cn5_names.py at 235a30f51e. It lists the twelve builder names, then stops at the ECR repository line, which amendment 4 requires name() to build. The expectation needs NAMES-CHECK terraform_literals=13 builder_match=13 mismatches=0 and the planted control; neither is printed. The cause is the branch, not the file: NAMING_SCHEMA v1.18 (3224040862) is on box/dell1 and not on wk-AMGT_HARVST-183, so this worktree's lib/opal_naming.py refuses kind repo. Recorded as surprise S9 (BLOCKING). The expectation was not edited and no refusal was caught.",
+   "denominator": "0 of 2 anchors matched (NAMES-CONTROL and NAMES-CHECK are absent: the transcript ends at NAMES-ABORTED, exit code 1); 12 of 13 builder names printed before the refusal",
+   "status": "FAIL",
    "expect": "(?s)NAMES-CONTROL planted_mismatch_detected=yes.*NAMES-CHECK terraform_literals=1\\d builder_match=1\\d mismatches=0",
-   "judgment": false
+   "judgment": false,
+   "status_reason": "The names check cannot run to its verdict in this worktree: name('amgt', None, 'dossier-refresh', 'repo') is refused because NAMING_SCHEMA v1.18 is not on wk-AMGT_HARVST-183 (surprise S9, BLOCKING). The expectation was not edited."
   },
   {
    "criterion_id": "AC2",
    "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_validate.out expect (?m)^Success! The configuration is valid\\.$",
    "method": "command",
    "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_validate.out",
-   "output_evidence": "Success! The configuration is valid.\nCommentary (not the matched line): the file holds terraform init -input=false (rc 0, last line 'commands will detect it and remind you to do so if necessary.') and terraform validate (rc 0), run in infra/aws/terraform/harvest at fc90547a26 after amendment 3. The init made no lock-file change that is tracked.",
+   "output_evidence": "Success! The configuration is valid.\nCommentary (not the matched line): the file holds terraform init -input=false (rc 0, last line 'commands will detect it and remind you to do so if necessary.') and terraform validate (rc 0), run in infra/aws/terraform/harvest at d8f3448b9b after amendment 4 (bytes unchanged). The init made no lock-file change that is tracked.",
    "denominator": "1 of 1 anchor matched in the 5-line output file (validate exit code 0)",
    "status": "PASS",
    "expect": "(?m)^Success! The configuration is valid\\.$",
@@ -106,7 +107,7 @@
    "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_plan.out expect (?s)DEFAULT-PLAN.*No changes\\..*BUILD-PLAN.*Plan: 5 to add, 0 to change, 0 to destroy\\..*BOTH-PLAN.*Plan: 16 to add, 0 to change, 0 to destroy\\.",
    "method": "command",
    "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~183/cn5_plan.out",
-   "output_evidence": "DEFAULT-PLAN (no -var: the file must plan nothing)\nNo changes. Your infrastructure matches the configuration.\nBUILD-PLAN (-var dossier_refresh_build_enabled=true: the first apply)\nPlan: 5 to add, 0 to change, 0 to destroy.\nBOTH-PLAN (both flags true plus the digest placeholder: the second apply)\nPlan: 16 to add, 0 to change, 0 to destroy.\nCommentary (not the matched lines): the file has six labelled sections, in order DEFAULT, BUILD, BOTH, RUN-ONLY-REFUSED, ENABLED-SCHEDULE-PLAN and BAD-STATE-REFUSED; the matched lines are the three sections the expectation names. DEFAULT is the same -target command with no -var and plans nothing. BUILD plans the five build-half resources (ECR repository, build log group, build role, build policy, CodeBuild project). BOTH plans all 16 targeted resources, with the PROVISIONAL placeholder on its header line; state DISABLED, cron(0 10 ? * MON-FRI *) America/New_York. The 'Resource targeting is in effect' warning is the expected consequence of -target and is not an error. The plans propose no change or destroy to an existing resource. RUN-ONLY-REFUSED is the refusal the amendment asks to be shown: rc 1 with 'Error: Resource precondition failed' on the cluster, which names the build flag. Terraform prints a partial summary (Plan: 9 to add) before that error; recorded as surprise S7. ENABLED-SCHEDULE-PLAN (both flags, digest placeholder, schedule_state=ENABLED) plans 16 pure additions and its schedule reads state = \"ENABLED\"; it is a plan only, and nothing is applied. BAD-STATE-REFUSED (schedule_state=ON) is refused by the validation rule (Error: Invalid value for variable, line 97) after a Plan: 15 to add summary (surprise S8). Negative control of the digest rule (run at cde78adc94 under amendment 1, not kept in this file): a malformed digest fails validation (Invalid value for variable).",
+   "output_evidence": "DEFAULT-PLAN (no -var: the file must plan nothing)\nNo changes. Your infrastructure matches the configuration.\nBUILD-PLAN (-var dossier_refresh_build_enabled=true: the first apply)\nPlan: 5 to add, 0 to change, 0 to destroy.\nBOTH-PLAN (both flags true plus the digest placeholder: the second apply)\nPlan: 16 to add, 0 to change, 0 to destroy.\nCommentary (not the matched lines): the file has six labelled sections (re-run at d8f3448b9b with no -var for the ECR name), in order DEFAULT, BUILD, BOTH, RUN-ONLY-REFUSED, ENABLED-SCHEDULE-PLAN and BAD-STATE-REFUSED; the matched lines are the three sections the expectation names. DEFAULT is the same -target command with no -var and plans nothing. BUILD plans the five build-half resources (ECR repository, build log group, build role, build policy, CodeBuild project). BOTH plans all 16 targeted resources, with the PROVISIONAL placeholder on its header line; state DISABLED, cron(0 10 ? * MON-FRI *) America/New_York. The 'Resource targeting is in effect' warning is the expected consequence of -target and is not an error. The plans propose no change or destroy to an existing resource. RUN-ONLY-REFUSED is the refusal the amendment asks to be shown: rc 1 with 'Error: Resource precondition failed' on the cluster, which names the build flag. Terraform prints a partial summary (Plan: 9 to add) before that error; recorded as surprise S7. ENABLED-SCHEDULE-PLAN (both flags, digest placeholder, schedule_state=ENABLED) plans 16 pure additions and its schedule reads state = \"ENABLED\"; it is a plan only, and nothing is applied. BAD-STATE-REFUSED (schedule_state=ON) is refused by the validation rule (Error: Invalid value for variable, line 97) after a Plan: 15 to add summary (surprise S8). Negative control of the digest rule (run at cde78adc94 under amendment 1, not kept in this file): a malformed digest fails validation (Invalid value for variable).",
    "denominator": "3 of 3 sections matched in order (DEFAULT, BUILD, BOTH) in the 2205-line output file, plus the RUN-ONLY-REFUSED, ENABLED-SCHEDULE-PLAN and BAD-STATE-REFUSED sections: default plan No changes. (0 resources); build plan 5 of 5 build-half resources to add; both plan 16 of 16 targeted resources to add with schedule DISABLED; schedule-enabled plan 16 of 16 with schedule ENABLED (plan exit codes 0); the two refused plans exit 1",
    "status": "PASS",
    "expect": "(?s)DEFAULT-PLAN.*No changes\\..*BUILD-PLAN.*Plan: 5 to add, 0 to change, 0 to destroy\\..*BOTH-PLAN.*Plan: 16 to add, 0 to change, 0 to destroy\\.",
@@ -117,8 +118,8 @@
   "mutant": {
    "description": "Planted-mismatch control in cn5_names.py: one literal (cluster_name) is replaced in memory by a wrong string and the comparison must report exactly that key.",
    "expected": "NAMES-CONTROL planted_mismatch_detected=yes",
-   "observed": "NAMES-CONTROL planted_mismatch_detected=yes (line 26 of the 27-line cn5_names.out)",
-   "status": "FIRED-AS-EXPECTED"
+   "observed": "The control did not fire at amendment 4: the names check stops at the ECR line (AC1 FAIL, surprise S9) before the planted control runs, so cn5_names.out has no NAMES-CONTROL line. The last firing was at amendment 3 (NAMES-CONTROL planted_mismatch_detected=yes, names check of that date).",
+   "status": "DID-NOT-FIRE (deliverable INVALID)"
   },
   "determinism": {
    "method": "N/A-WITH-REASON: the plan reads the live harvest state and the build dry run reads the working tree, so a repeat is not a function of the code alone. The names check was not repeated for equality; its deliverable is the single run after the policy-name commit.",
@@ -164,7 +165,8 @@
   "AMGT_HARVST-D1-W183-S5: the s3.tf header says the store is declared at opal-data-research; the resource and the plan say opal-data-harvest, so the header is stale. Seen while reading; not acted on.",
   "AMGT_HARVST-D1-W183-S6: this worktree is sparse (org/surprise_channel is skip-worktree), so the channel schema was readable only from the CLOUD ref.",
   "AMGT_HARVST-D1-W183-S7: a refused plan (run flag on, build flag off) prints 'Plan: 9 to add, 0 to change, 0 to destroy.' before the precondition error, so the first Plan: line of a refused plan reads as adds; nothing is applied.",
-  "AMGT_HARVST-D1-W183-S8: a refused plan on an input variable (schedule_state=ON, a validation failure) also prints a partial 'Plan: 15 to add' summary before its error; with S7, neither refusal's Plan: line is the verdict. Nothing is applied."
+  "AMGT_HARVST-D1-W183-S8: a refused plan on an input variable (schedule_state=ON, a validation failure) also prints a partial 'Plan: 15 to add' summary before its error; with S7, neither refusal's Plan: line is the verdict. Nothing is applied.",
+  "AMGT_HARVST-D1-W183-S9 (BLOCKING): NAMING_SCHEMA v1.18 (3224040862) is on box/dell1 and not on wk-AMGT_HARVST-183; name(amgt, None, dossier-refresh, repo) is refused in this worktree, so cn5_names.py stops at the ECR line (AC1 FAIL) and build-image.sh stops at its ECR name() line. The Terraform side is unaffected. Needs v1.18 on this branch by an integrator's merge or box sync; not merged by this worker."
  ],
  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
  "compiler_tools": [
@@ -192,6 +194,11 @@
    "tool": "python .tools/proof-of-spec-check.py",
    "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-5.the-dossier-refresh-fargate-task-codebuild-image-build-and-schedule-are-authored-and-planned-not-applied.md",
    "result": "run at the commit of this instance; the last line is in the worker report"
+  },
+  {
+   "tool": "build-image.sh --dry-run",
+   "invocation": "bash infra/aws/harvest/dossier-refresh/build-image.sh --dry-run",
+   "result": "rc 1 at the ECR name() line: kind 'repo' refused (v1.18 not on this branch)"
   }
  ]
 }
