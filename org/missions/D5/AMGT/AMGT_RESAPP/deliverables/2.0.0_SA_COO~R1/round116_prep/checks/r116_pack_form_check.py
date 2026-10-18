@@ -17,7 +17,7 @@ import re
 import sys
 
 NAMES = ["RIO_LN_Equity", "ICT_PM_Equity", "GOOGL_US_Equity", "ICICIBC_IN_Equity", "HD_US_Equity", "BA_US_Equity", "KMB_US_Equity", "TSM_US_Equity"]
-HEADINGS = ["Summary", "Risks and considerations", "Company description", "Management", "Positioning", "Peers", "What changed", "Appendix: model figures"]
+HEADINGS = ["Summary", "Thesis pillars", "Risks and considerations", "Company description", "Management", "Positioning", "Peers", "What changed", "Appendix: model figures"]
 MONEY = re.compile(r"million|per share|currency not stated|currency-adjusted|Bloomberg does not confirm", re.I)
 OLD_NARRATIVE = ("Recommendation", "Investment thesis", "Company description", "Risks and considerations", "Management/Board")
 NOT_WRITTEN = "No chief executive or board biography has been written for this company yet."
@@ -76,6 +76,13 @@ def _check(key, before_dir, after_dir):
             notes.append("MGMT: only the not-written sentence")
     else:
         problems.append("ORDER: no Management heading")
+    leak = [ln for ln in aj if re.search(r"s3://|\bAMGT-[A-Za-z]|NoSuchKey|\.json\b", ln)]  # round 117: no storage path, order id or vendor error in reader-facing text
+    if leak:
+        problems.append("LEAK: %d line(s) name a path, an order id or an error, e.g. %r" % (len(leak), leak[0][:120]))
+    labels = [ln for ln in aj if ln.lower().startswith("machine-drafted, cleared")]
+    notes.append("LABELS: %d 'machine-drafted, cleared <date>' line(s)" % len(labels))
+    if "Summary" in pos and "No recommendation has been written for this company yet." in aj[pos["Summary"]: pos["Summary"] + 6]:
+        notes.append("SUMMARY: prints the no-recommendation sentence (read the served last_stated_position before accepting)")
     fb = _figure_lines(_read(before_dir, key))
     fa = _figure_lines(a)
     from collections import Counter
