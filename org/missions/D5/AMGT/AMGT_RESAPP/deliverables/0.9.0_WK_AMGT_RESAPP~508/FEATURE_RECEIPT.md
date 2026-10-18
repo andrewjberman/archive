@@ -3,7 +3,7 @@
 ## What the branch carries
 
 - Branch: `cand/dell1/amgt-sa-remaining-date-bypasses` (portal repository, nested worktree `C:/dev/wk-resapp-508/portal`)
-- Head commit: `4ba684ebeca8fda385ddb60599e0fcf99aa03817` (LOCAL, not pushed)
+- Head commit: `aa20718421e537acf43fc58628d37dcbe545f984` (LOCAL, not pushed); the chain since the base: `4ba684ebeca8fda385ddb60599e0fcf99aa03817` (the four sites, first worker), `e68e03303de8ccf1d169f6c023970c674333479f` (D8 in the harness), `aa20718421e537acf43fc58628d37dcbe545f984` (amendment 1: the five further ModelTab sites and the fixture)
 - Base: `26d998f7` (PROD)
 - Every path changed since `26d998f7` (`git diff --name-only 26d998f7 HEAD`):
   - `src/pages/SecurityAnalysis/__harness__/basisAndReasons.harness.cjs`
@@ -94,6 +94,11 @@ Sites read at the new head (the four AMGT-bv-1 sites):
 | C-20 | tabs/ModelTab.tsx:973 | gap reason, served prose | `daysInWords` |
 | C-33 | tabs/PeersTab.tsx:407 | `data.reason` (absent-peers reason), served prose | `daysInWords` |
 | C-34 | tabs/PeersTab.tsx:235 | `column.reason` in the HelperTip, through `guardedReason` | `daysInWords(guardedReason(...))` |
+| C-103 | tabs/ModelTab.tsx:697 | served gap reason (withheld P/E reason, else cellReasons) in the summary dash | `daysInWords` (amendment 1) |
+| C-104 | tabs/ModelTab.tsx:710 | "P/E not shown" sentence (`plainPeReason` output) | `daysInWords` around the sentence (amendment 1) |
+| C-105 | tabs/ModelTab.tsx:932 | served gap reason (cellReasons) in the grid dash | `daysInWords` (amendment 1) |
+| C-106 | tabs/ModelTab.tsx:832 | team-sheet reason paragraph | `daysInWords` (amendment 1) |
+| C-107 | tabs/ModelTab.tsx:155 | check reason passed to `displayValue` ("[REFUSED: ...]") | `daysInWords` before `displayValue` (amendment 1); see surprise row S8 |
 
 Re-search of the two files for `_date`, `as_of`, `vintage`, `period_end`, `slice(0, 10)`, `toISOString`, `toLocaleDateString`, `Date(` and `reason`, with each hit read in context: 59 hit lines in ModelTab.tsx and 28 in PeersTab.tsx (87 hit lines read).
 
@@ -101,19 +106,18 @@ Classification of the visible prints:
 
 - ModelTab.tsx, routed: 199 (C-18), 622 (C-19, already routed), 973 (C-20), 1065 (C-21, etDay).
 - ModelTab.tsx, data attribute only (not visible text): 421-422 (`data-model-line-reason`, `data-model-line-refusal`), 477 (`data-team-case-reason`), 1037 (C-23). The visible team-case and refusal text are fixed words (425, 468-490).
-- ModelTab.tsx, served reason printed raw, NOT routed (the grant names two ModelTab sites). Each is a census entry deferred to AMGT-bu-4 (the ModelTab cell of the round-114 census), with the surprise row as the reason:
-  - 155 displayValue, `[REFUSED: <reason>]` in the figure cell: C-107, row S3.
-  - 697 summary dash, `withheld ?? row.cellReasons[at]`: C-103, row S1.
-  - 710 "P/E not shown", through `plainPeReason` (vendor tokens only): C-104, row S2.
-  - 832 team-sheet reason, `{teamSheetReason}`: C-106, row S2.
-  - 932 grid dash, `row.cellReasons[index]`: C-105, row S1.
+- ModelTab.tsx, served reason printed raw in the first worker's run, ROUTED by amendment 1 through `daysInWords` (display only, no sentence reworded): 155 (`[REFUSED: <reason>]`, C-107), 697 (summary dash, C-103), 710 ("P/E not shown", C-104), 832 (team-sheet reason, C-106), 932 (grid dash, C-105). No served reason in the two files is printed raw any more.
 - PeersTab.tsx, routed: 202-203 (C-28, C-29, longDate), 215 (C-30, longStamp), 217 (C-31, longStamp), 235 (C-34), 278 (C-32, longDate), 407 (C-33).
 - PeersTab.tsx, data attribute only: 214 (C-35), 355-356 (`data-absent-column-reason`, `data-absent-reason-class`), 398 (`data-peers-absent-reason`).
 - PeersTab.tsx, fixed words or comments: 55-58 (`absentReasonClass` clause, a fixed sentence), 13-16, 36, 51, and the comment lines.
 
-Sites still bypassing in these two files after the edits: 0 unrecorded; 5 recorded and deferred to AMGT-bu-4 (C-103 to C-107, one row each: S1 covers C-103 and C-105, S2 covers C-104 and C-106, S3 covers C-107).
+AMENDMENT 1 (round 115, head `aa207184`): the five sites above are routed in place, so the count still bypassing in these two files is 0 (ModelTab.tsx 0, PeersTab.tsx 0). The earlier deferral to AMGT-bu-4 is superseded. Re-search on aa207184 with the same pattern: ModelTab.tsx 59 hit lines, PeersTab.tsx 28 hit lines (the line numbers are unchanged by the amendment, which edits five lines in place); the five changed lines were read in context at the new head.
 
-NEW denominator: 107 sites (was 102), `files_with_hits` 37, `files_read` 37, bypass entries 35 (fixed_here 30, deferred 5). `denominator.sites` equals the entry count (107).
+Harness at head `aa207184`: `DATE BYPASS HARNESS: YES (23 of 23 checks)` (D1 to D4, D5a to D5c, D6a, D6b, D7 x4, D8a to D8e and their no-date controls); the run on the unedited head before the edits (`4ba684eb` plus the D8 harness) read `NO (16 of 23 checks)`, failing D5a, D5c and D8a to D8e.
+
+NEW denominator: 107 sites (was 102), `files_with_hits` 37, `files_read` 37. Bypass entries 35, all `fixed_here` after amendment 1 (before it: fixed_here 30, deferred 5). Entries reading `bypass: true` with a disposition other than `fixed_here`: 0 (in ModelTab or PeersTab: 0). `denominator.sites` equals the entry count (107).
+
+Surprise row for the census item (c): `AMGT_RESAPP-D1-W508-S8` OBSERVATION, INERT. The REFUSED branch at ModelTab.tsx:155 is reached by no page render (rowRefusal collapses a refused row before any ModelCell is built; a team cell is routed to TeamModelCell, which reads no verdict). It is routed as ordered; D8e grades it on the component itself through a test-only export appended to the transpiled ModelTab.
 
 ## Harness and fixture changes beyond the four sites
 
