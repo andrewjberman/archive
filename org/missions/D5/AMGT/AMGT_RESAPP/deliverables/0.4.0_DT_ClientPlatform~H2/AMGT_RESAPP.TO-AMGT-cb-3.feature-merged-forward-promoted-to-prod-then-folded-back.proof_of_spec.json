@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-cb-3.feature-merged-forward-promoted-to-prod-then-folded-back",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cb-3.feature-merged-forward-promoted-to-prod-then-folded-back.md",
+    "group": "OTHER",
+    "vintage_commit": "eec0e7b329d32e4aa2a86be19bfae000d32a7352"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a8aca1e9f1b80e1d980c2a56c58902cf71c238ab",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-cb-3.feature-merged-forward-promoted-to-prod-then-folded-back.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~H2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal PROD @d729ee6d84565bfa4ce508ddf199d40ac0851482",
+      "kind": "frontend_component",
+      "commit_or_etag": "d729ee6d84565bfa4ce508ddf199d40ac0851482",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ls-remote origin refs/heads/PROD read after push = d729ee6d84565bfa4ce508ddf199d40ac0851482; gh run 39149629746 Deploy to Production completed success on that sha (the only workflow listed for it); tag portal-v2.1.241 peels to it.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal DEV @522985eff2d65234f89181c3f2c986f4731d04b6",
+      "kind": "frontend_component",
+      "commit_or_etag": "522985eff2d65234f89181c3f2c986f4731d04b6",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MERGE-FORWARD result=MERGED dev_before=3a7791c1 dev_after=522985eff2d65234f89181c3f2c986f4731d04b6 pushed=yes (the order's step 3, the one approved route); IN-DEV read for 43762e0d999d3b67a7a955dc16ac638bbfcdea88; ls-remote DEV read 522985eff2d65234f89181c3f2c986f4731d04b6.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_CB3.md",
+      "kind": "doc",
+      "commit_or_etag": "51cffedd1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on box/dell1 (LOCAL at the time of writing)",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/FOLDBACK_OVERLAP_SHAS_R121.txt",
+      "kind": "doc",
+      "commit_or_etag": "51cffedd1e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "132 shas of git rev-list origin/PROD..origin/DEV, measured after the promote; committed with the receipt (LOCAL at the time of writing)",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in $(git diff --name-only ff611566 43762e0d999d3b67a7a955dc16ac638bbfcdea88); do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse 43762e0d999d3b67a7a955dc16ac638bbfcdea88:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done -- expect: seven lines `EQUAL <path>`, none `DIFFERS`",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin PROD -q && for f in $(git diff --name-only ff611566 43762e0d999d3b67a7a955dc16ac638bbfcdea88); do a=$(git rev-parse origin/PROD:$f); b=$(git rev-parse 43762e0d999d3b67a7a955dc16ac638bbfcdea88:$f); [ \"$a\" = \"$b\" ] && echo \"EQUAL $f\" || echo \"DIFFERS $f\"; done",
+      "output_evidence": "EQUAL src/pages/SecurityAnalysis/__harness__/cb_served_management_HD_US_Equity.json\nEQUAL src/pages/SecurityAnalysis/__harness__/cb_served_management_RIO_LN_Equity.json\nEQUAL src/pages/SecurityAnalysis/__harness__/cb_served_management_TSM_US_Equity.json\nEQUAL src/pages/SecurityAnalysis/__harness__/ceoConsumerCensus.json\nEQUAL src/pages/SecurityAnalysis/__harness__/threeStateCeoProfile.harness.cjs\nEQUAL src/pages/SecurityAnalysis/tabs/ExecManagementTab.tsx\nEQUAL src/pages/SecurityAnalysis/types.ts",
+      "denominator": "7 of 7 paths EQUAL, 0 DIFFERS",
+      "status": "PASS",
+      "status_reason": "all seven candidate paths read the same blob on origin/PROD as on the approved head",
+      "expect": "(?s)\\A(EQUAL \\S+\\s*){7}\\Z",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status -- expect: one JSON row, status completed, conclusion success, headSha equal to origin/PROD after a fetch and not beginning ff611566",
+      "method": "command",
+      "invocation": "gh run list --repo Opal-Capital/portal --branch PROD --limit 1 --json conclusion,headSha,status",
+      "output_evidence": "[{\"conclusion\":\"success\",\"headSha\":\"d729ee6d84565bfa4ce508ddf199d40ac0851482\",\"status\":\"completed\"}]\norigin/PROD after fetch: d729ee6d84565bfa4ce508ddf199d40ac0851482",
+      "denominator": "1 of 1 row; headSha equals origin/PROD",
+      "status": "PASS",
+      "status_reason": "completed success on d729ee6d, which is origin/PROD and does not begin ff611566",
+      "expect": "(?s)\"conclusion\":\"success\",\"headSha\":\"(?!ff611566)[0-9a-f]{40}\",\"status\":\"completed\"",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_CB3.md\" -- expect: a count of at least 4 (the route, the class and the CI words each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"security-analysis|Opal-internal|completed|success\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/PROMOTE_RECEIPT_CB3.md\"",
+      "output_evidence": "6\nmatching lines (same pattern, grep -n):\n34:| Security Analysis | /security-analysis | Opal-internal |\n36:- Route: /security-analysis\n37:- Class: Opal-internal (staff-only); `PROMOTE-CLIENT-FACING count=0`\n42:Read by headSha ... conclusion success\n44:- Status as read: completed\n45:- Conclusion as read: success",
+      "denominator": "6 matching lines (bar 4)",
+      "status": "PASS",
+      "status_reason": "the receipt carries the route, the class and the CI words on separate lines",
+      "expect": "(?s)\\A\\s*([4-9]|\\d{2,})\\s*\\n",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != ff611566 ] && git rev-list --count origin/DEV..origin/PROD -- expect: the single number `0` (PROD has moved off `ff611566` AND DEV contains PROD, so the fold-back has landed; at the base the guard fails and nothing prints)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != ff611566 ] && git rev-list --count origin/DEV..origin/PROD",
+      "output_evidence": "1\n(PROD d729ee6d is off ff611566, so the guard passes; DEV 522985ef lacks the release merge d729ee6d)",
+      "denominator": "1 of 1 count read; NOT MET: step 9 (the fold-back merge-forward) has not run",
+      "status": "FAIL",
+      "status_reason": "AC4 is open by design in this stage: the order records it as not yet met with the count read (1). The fold branch cand/dell1/prod-into-dev-fold-r121 (d8473c5b, TREE-EQUALS-DEV) is prepared and local; the register and the merge-forward wait for the CTO's named waiver and the issuer's amendment (step 9).",
+      "expect": "(?s)\\A\\s*0\\s*\\n",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run against the pre-promote PROD head ff611566 in place of origin/PROD: the new files are absent and the changed files differ there, so AC1 must not read seven EQUAL lines.",
+      "expected": "not seven EQUAL lines",
+      "observed": "7 of 7 lines DIFFERS",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice against the same origin/PROD, outputs compared with cmp",
+      "observed": "identical; both runs printed the same seven EQUAL lines",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 and step 9 (the fold-back register and merge-forward)",
+      "reason": "Held by the order: they wait on the CTO's named waiver and the issuer's amendment. The fold branch is prepared; nothing is registered or merged forward for it."
+    },
+    {
+      "item": "Live render of the three-state Exec Management sentences on a staff session, and the byte tie",
+      "reason": "Not an order criterion: the page is staff-only behind a login, and the issuer grades it on the running page (AMGT-cb-2) after the landing. Not read here."
+    }
+  ],
+  "surprises": [],
+  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-cb-3 (GO msg 8171, acked; order issued eec0e7b329). Approval row a713 APPROVED valid at head 43762e0d; local branch head read 43762e0d. Feature branch pushed from its own worktree after the push hook denied two compound/main-tree forms (no override used; the same push run alone was admitted); ls-remote 43762e0d. portal-merge-forward.sh MERGED DEV 3a7791c1 -> 522985ef, IN-DEV read. Release release/20261018T172512Z READY (1 feature, 0 unapproved, 0 client-facing); worktree ff-only, parity diff 0 lines, typecheck passed in the pre-push gate; PROD ff611566 -> d729ee6d pushed and read by ls-remote; CI run 39149629746 completed success; tag portal-v2.1.241 peeled to the PROD head; worktrees removed, main tree on DEV. Fold-back prepared only: cand/dell1/prod-into-dev-fold-r121, fold merge d8473c5b, TREE-EQUALS-DEV, rev-list DEV..HEAD 2, 132 overlap shas to FOLDBACK_OVERLAP_SHAS_R121.txt; nothing registered. Receipt 51cffedd1e LOCAL on box/dell1. Ledger amgt-resapp-cb3-sa-promote-20261018.",
+  "compiler_tools": [
+    {
+      "tool": "open-calls.py approval-status",
+      "invocation": "python .tools/open-calls.py approval-status --branch cand/dell1/amgt-sa-ceo-three-states",
+      "result": "state=APPROVED valid=yes by=1.0.0_SA_CTO~DELL1 row=dell1-20261018T171501Z-a713 head_sha=43762e0d"
+    },
+    {
+      "tool": "portal-merge-forward.sh",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/dell1/amgt-sa-ceo-three-states --push",
+      "result": "MERGE-FORWARD result=MERGED dev_after=522985eff2d65234f89181c3f2c986f4731d04b6 pushed=yes"
+    },
+    {
+      "tool": "portal-release-build.sh",
+      "invocation": "bash .tools/portal-release-build.sh --features cand/dell1/amgt-sa-ceo-three-states",
+      "result": "RELEASE result=READY branch=release/20261018T172512Z, PROMOTE-CLIENT-FACING count=0"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open, close-leg L1-L4, close",
+      "result": "4 legs proven (see ledger entry)"
+    }
+  ]
+}
