@@ -1,0 +1,22 @@
+# ch7_canary.out -- HVST-ch-7 step 2 / COO half C-7: gateway reads of UNH_US_Equity and CPA_US_Equity, fields ["fund_of_record","last_stated_position"]
+BEFORE read 05:07Z (ch7_before.out step 0 iv); AFTER read 05:11Z, after both canary objects were written and read back (ch7_written.out lines 1-2, 05:09:19Z and 05:09:42Z).
+The AFTER results were compared with the BEFORE results by the seat, entry by entry (transcription; the machine comparison is the driver's served_fields_digest = built_fields_digest = read-back fields_digest per name):
+UNH_US_Equity
+  as_of                       2026-10-17 | 2026-10-17                      EQUAL
+  content_sha256              6bd7cea7...e0f1 | 6bd7cea7...e0f1            EQUAL
+  dossier_key                 as_of=2026-10-17.f73f295a3671b8da.json | same EQUAL
+  dossier_fields (2)          fund_of_record PFOE; last_stated_position {PFOE, line_only, null, text}  EQUAL
+  continuation_fields (3 returned, 1 omitted)  thesis_pillars absent; thesis_summary absent; fund_of_record PFOE; last_stated_position  EQUAL (digest e9a95e9517b3519e before, built, and read back)
+  research_reports (1)        48d81f053e5076e8 class B PFOE holding, same part pointer  EQUAL
+  continuation_key            .../4d837586380648bd.json  ->  .../b89177eb99c0dc00.json   DIFFERS (EXPECTED: names the new /5 object)
+  source_keys (13)            the same 13 except 4d837586380648bd.json -> b89177eb99c0dc00.json   DIFFERS ONLY in that pointer (EXPECTED)
+CPA_US_Equity
+  as_of                       2026-10-12 | 2026-10-12                      EQUAL
+  content_sha256              61b9977a...0f6d | 61b9977a...0f6d            EQUAL
+  dossier_key                 as_of=2026-10-12.2bd09162c4f47b3b.json | same EQUAL
+  dossier_fields (2)          fund_of_record IDVZ; last_stated_position {IDVZ, size 2, text}  EQUAL
+  continuation_fields (4 returned, 1 omitted)  thesis_summary absent+""; fund_of_record IDVZ; last_stated_position; thesis_pillars (5 entries)  EQUAL (digest a603510b3f91be56 before, built, and read back)
+  research_reports (9 returned, 28 omitted)  the same 9 entries, same part pointers  EQUAL
+  continuation_key            .../dc143a9f2ecaad5e.json  ->  .../96cd31de9852d563.json   DIFFERS (EXPECTED)
+  source_keys (13)            the same 13 except dc143a9f2ecaad5e.json -> 96cd31de9852d563.json   DIFFERS ONLY in that pointer (EXPECTED)
+CANARY: nothing differs but continuation_key and source_keys (both name the new /5 object). Not a STOP.
