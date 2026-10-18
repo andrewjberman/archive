@@ -1,0 +1,2467 @@
+"""model_block_pull.py -- AMGT-s-1: the covered-name model block, Bloomberg DAPI on this box.
+
+TWO STAGES, EACH PERSISTING ITS OWN OUTPUT, EACH RE-RUNNABLE ALONE (C-STAGE-PERSISTS):
+
+  STAGE `pull`   -- calls the estate's raw client (integrations/bloomberg/mcp/blp_client.py):
+                    one ReferenceDataRequest (header scalars) and one HistoricalDataRequest
+                    (fiscal-year line items) per security. Lands the FULL response exactly as
+                    the client returns it, untouched, at (AMGT-rk-90 M1: the harvest bronze
+                    grammar, one table per request kind)
+                        bloomberg/harvest/bronze/refdata/security_key=<safe>/<stamp>.json
+                        bloomberg/harvest/bronze/histdata/security_key=<safe>/<stamp>.json
+                    BEFORE anything derives from it (C-RAW-BEFORE-DERIVED).
+
+  STAGE `derive` -- reads the raw bytes BACK from S3 (never the pull's in-memory result -- that
+                    is what makes this stage independently re-runnable against whatever raw
+                    landing already exists), joins the historical rows on FISCAL YEAR
+                    (C-FISCAL-YEAR-JOIN, never the date string), and lands
+                        derived/model_block/<security_key>/<stamp>/model_block.json
+                    Every figure in that file carries {value, unit, sign, basis, vintage,
+                    source} -- C-BLOOMBERG-BASIS. Bloomberg's own field definitions are adopted
+                    as-is; no other vendor's per-share earnings adjustment is reconstructed here.
+
+Each stage mints its OWN fresh <security_key>/<stamp> prefix and never writes to a key that
+already exists (STORE_CONTRACT.md section 4, rule 1); bucket versioning is the safety net, not
+the mechanism a correct writer relies on.
+
+Run under `python` (blpapi + boto3 + pyarrow importable; see integrations/bloomberg/READ_HERE.md
+section 3, the PY_AWS interpreter). At most THREE securities per invocation (F2/G-24 cap) --
+`--securities` is REQUIRED for every stage but `admit` (no population default; a caller names
+exactly what it wants) -- `pull_log.json` records every security requested.
+
+AMGT-rk-35 -- THE WINDOW ROLLS (C-MODEL-WINDOW-AND-ROWS clause (1)): `HIST_END` is retired as a
+fixed constant. `stage_pull` requests `[HIST_START, <today's UTC date>]`, computed fresh at call
+time -- never a date typed into this file. `stage_derive` then names the latest CLOSED fiscal
+year and EXCLUDES what is not closed: a fiscal-year group is CLOSED only when it carries at
+least one REPORTED statement field (`SALES_REV_TURN` or `IS_EPS` non-null in the merged group);
+a group Bloomberg returned ahead of the filing (price/ratio fields only) is recorded under
+`unresolved` and never emitted as a served fiscal year. `stage_derive` also builds the unit-map
+entries for a NEW security THROUGH `build_unit_map.py` (AMGT-rk-34's builder) when the map has
+no entry for it yet -- never by hand, never inferred, and never overwriting a MEASURED entry.
+
+AMGT-rk-36 -- FORECASTS FY1-FY3 (C-MODEL-FORECASTS): `stage_pull` sends THREE additional
+`ReferenceDataRequest`s, one per fiscal period, each with an EXPLICIT
+`BEST_FPERIOD_OVERRIDE` (`1FY`/`2FY`/`3FY`) -- without it a `BEST_` field silently returns the
+next QUARTER, which reads as a plausible annual value (measured, Model brief s.7). The three
+responses land UNTOUCHED, in the SAME raw stamp, at
+    bloomberg/harvest/bronze/bestdata/security_key=<safe>/<stamp>.json
+`stage_derive` reads it back and, per (period, field) cell, writes a `scope: "forecast"` figure
+sourced `BBG`, or -- for a cell Bloomberg left empty -- calls the Seeking Alpha fallback
+(`sa_forecast_fallback.py`, beside this producer) and writes `source: "SA_FALLBACK"` when it
+fills, else an `unresolved` record naming why. Column headers come from `BEST_PERIOD_END_DATE`,
+never a counted offset; a period whose three dates are not properly annually spaced (the same
+quarter-trap failure mode) REFUSES the whole forecast set for that raw stamp rather than serve a
+number that looks right and is not.
+
+CRPS-t-1 -- STAGE `admit` (`python integrations/bloomberg/research/model_block_pull.py admit
+[--dry-run]`, no --securities): the population is every security the live research library resolves
+through the served crosswalk; the names WITHOUT a `derived/model_block/<security_key>/` object are
+pulled then derived, in batches of at most THREE. The first line printed is `admit population
+registered <N> without_block <K>`; an unreachable DAPI prints REFUSED and returns rc 4.
+
+CRPS-aj-1 -- STAGE `refresh` (`python integrations/bloomberg/research/model_block_pull.py refresh
+[--dry-run]`, no --securities): the registered names that HAVE a model block are re-pulled then
+re-derived (batches of at most THREE), carrying the 49 V3 fields, the long name and the earnings
+dates; a name whose latest derived stamp is today's UTC date is skipped (`REFRESH SKIP`). First line
+`refresh population registered <N> with_block <K>`; a dry run opens no Bloomberg session.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as _dt
+import importlib.util
+import json
+import os
+import re
+import sys
+from pathlib import Path
+from typing import Any
+
+import boto3
+import botocore
+
+from lib.research.api import case_rule as _case_rule
+from lib.research.harvest import bloomberg as hbloom
+from lib.research.harvest import store as hstore
+from lib.research.identity import crosswalk
+
+BUCKET = os.environ.get("HARVEST_BUCKET", "opal-data-harvest")
+VENDOR = "bloomberg"
+ENGINE = "model_block"
+_NEW_BRONZE_ROOT = "bloomberg/harvest/bronze/"  # AMGT-rk-90 (M1) -- error text only
+
+# AMGT-rk-35: the population is never a module constant. The s-1 pilots (SAP GY Equity,
+# BA US Equity, BABA US Equity) are documented here for provenance only -- `--securities` is
+# REQUIRED on every invocation (F2/G-24: at most THREE, all named explicitly by the caller).
+
+# ~15 header scalars (of the CRO's ~16; FISCAL_YEAR_END is BAD_FLD/INVALID_FIELD and is not
+# retried as written -- org/tier1_exec/4.0.0_SA_CRO/deliverables/AMGT_RESAPP_BLOOMBERG_FIELD_MAP_20260910.md s.2).
+# AMGT-rk-37, C-DESCRIPTION-LINE: CIE_DES / CIE_DES_BULK join the header list -- the one-line
+# description's route (1). Both measured servable on CAT (2026-09-19 probe): CIE_DES a plain
+# string, CIE_DES_BULK a BULK field (a LIST of one-column row dicts, _el_to_py's ARRAY-of-
+# SEQUENCE shape) -- see _bulk_text_value below, which joins it before it becomes a figure.
+HEADER_FIELDS = [
+    "NAME",
+    "CRNCY",
+    "CNTRY_OF_DOMICILE",
+    "GICS_SECTOR_NAME",
+    "PX_LAST",
+    "CUR_MKT_CAP",
+    "NET_DEBT",
+    "CURR_ENTP_VAL",
+    "VOLUME_AVG_30D",
+    "EQY_SH_OUT_REAL",
+    "EQY_FREE_FLOAT_PCT",
+    "EQY_BETA",
+    "EQY_DVD_YLD_IND",
+    "SHORT_INT_RATIO",
+    "SI_PERCENT_EQUITY_FLOAT",
+    "CIE_DES",
+    "CIE_DES_BULK",
+    # AMGT-rk-112, C-CURRENCY-LABEL: the issuer's financial-statement (reporting) currency --
+    # NEVER requested before this cell. Appended at the END (never re-ordered into the group
+    # above) so every prior HEADER_FIELDS index is unchanged. Label only: nothing is converted.
+    "EQY_FUND_CRNCY",
+    # CRPS-aj-1 -- appended at the END (every prior index unchanged): 4 of the team template's V3
+    # set, the long company name, and the two earnings-date fields. EXPECTED_REPORT_DT is a DATE;
+    # ERN_ANN_DT_AND_PER is a BULK field (a LIST of row dicts) -- see _ern_announcements_value.
+    "SHORT_NAME",
+    "COUNTRY_FULL_NAME",
+    "AVG_DAILY_VALUE_TRADED_3M",
+    "CRNCY_ADJ_MKT_CAP",
+    "LONG_COMP_NAME",
+    "EXPECTED_REPORT_DT",
+    "ERN_ANN_DT_AND_PER",
+]
+
+# AMGT-rk-37: CIE_DES_BULK is a BULK/BDS field -- blp_client's _el_to_py returns it as a LIST of
+# one-column row dicts (measured on CAT: [{"Company Description": "..."}, ...]), never a scalar
+# string. The raw landing (the refdata bronze object) keeps that shape UNTOUCHED;
+# only the DERIVED figure's value is the joined text (rows in order, single spaces -- item 2).
+_BULK_TEXT_HEADER_FIELDS = {"CIE_DES_BULK"}
+
+
+def _bulk_text_value(val: Any) -> Any:
+    """Join a BULK field's row-dict list into ONE string (rows in order, single spaces).
+    A non-list value passes through unchanged, so this is safe to call unconditionally on
+    any header value, not only ones known in advance to be bulk-shaped."""
+    if not isinstance(val, list):
+        return val
+    parts: list[str] = []
+    for row in val:
+        if isinstance(row, dict):
+            for v in row.values():
+                if v not in (None, ""):
+                    parts.append(str(v))
+        elif row not in (None, ""):
+            parts.append(str(row))
+    return " ".join(parts) if parts else None
+
+
+# CRPS-aj-1: ERN_ANN_DT_AND_PER is a BULK field too -- blp_client returns a LIST of row dicts (one per
+# announcement). The raw landing keeps that shape untouched; the DERIVED figure's value is a list of
+# {"announcement_date": "YYYY-MM-DD", "period": <Bloomberg's period text>} objects in Bloomberg's own
+# row order. Column names are read from the row dicts, never typed here.
+_BULK_EARNINGS_HEADER_FIELDS = {"ERN_ANN_DT_AND_PER"}
+
+
+def _iso_date(val: Any) -> str | None:
+    """A value as an ISO YYYY-MM-DD date, or None when it is not unambiguously a date.
+    Accepts a date/datetime object, an ISO string (with or without a time part), YYYYMMDD and YYYY/MM/DD."""
+    if isinstance(val, _dt.datetime):
+        return val.date().isoformat()
+    if isinstance(val, _dt.date):
+        return val.isoformat()
+    if not isinstance(val, str):
+        return None
+    text = val.strip()
+    match = re.fullmatch(r"(\d{4})(\d{2})(\d{2})", text) or re.fullmatch(
+        r"(\d{4})([-/])(\d{2})\2(\d{2})(?:[T ].*)?", text)
+    if not match:
+        return None
+    parts = [g for g in match.groups() if g not in ("-", "/")]
+    try:
+        return _dt.date(int(parts[0]), int(parts[1]), int(parts[2])).isoformat()
+    except ValueError:
+        return None
+
+
+def _ern_announcements_value(val: Any) -> tuple[list[dict] | None, int]:
+    """Turn the bulk earnings field's row-dict list into [{"announcement_date", "period"}...], in
+    Bloomberg's row order. Per row: the DATE column is the first key whose value reads as a date (a key
+    named like 'date' is preferred); the PERIOD is the first other non-empty value, as Bloomberg's text.
+    A row whose date cannot be read is left out and counted. Returns (rows or None, left_out)."""
+    if not isinstance(val, list) or not val:
+        return None, 0
+    out: list[dict] = []
+    left_out = 0
+    for row in val:
+        if not isinstance(row, dict):
+            left_out += 1
+            continue
+        keys = sorted(row, key=lambda k: 0 if "date" in str(k).lower() else 1)  # stable: row order within a class
+        date_key = next((k for k in keys if _iso_date(row[k]) is not None), None)
+        if date_key is None:
+            left_out += 1
+            continue
+        period = next((row[k] for k in row if k != date_key and row[k] not in (None, "")), None)
+        out.append({"announcement_date": _iso_date(row[date_key]), "period": None if period is None else str(period)})
+    return (out or None), left_out
+
+# 19 fiscal-year line items (of the CRO's ~19; the same field map's mapped set, plus IS_EPS --
+# a genuine, servable Bloomberg mnemonic, Bloomberg's OWN earnings-per-share definition, adopted
+# as-is per bound (f): never a reconstruction of any other vendor's per-share adjustment).
+# AMGT-rk-37, C-MODEL-WINDOW-AND-ROWS (2): four of the five missing sheet rows join here as
+# PULLED fields, each ADOPTED from a Bloomberg candidate-probe on CAT US Equity (2026-09-19; see
+# row_mnemonics.json for every candidate tried and its refusal). The fifth (RoTA) had every
+# probed candidate REFUSED (RETURN_ON_TOT_ASSETS, RETURN_ON_TOTAL_ASSETS -- both
+# BAD_FLD/INVALID_FIELD) and joins NEITHER this list nor a row mapping: it stays ABSENT and the
+# page keeps refusing to compute it, per this order's RULED item 1.
+HIST_FIELDS = [
+    "PX_LAST",
+    "SALES_REV_TURN",
+    "IS_OPER_INC",
+    "OPER_MARGIN",
+    "EBITDA",
+    "EBITDA_ADJUSTED",
+    "EBITDA_MARGIN",
+    "IS_EPS",
+    "BOOK_VAL_PER_SH",
+    "IS_SH_FOR_DILUTED_EPS",
+    "CAPITAL_EXPEND",
+    "CF_FREE_CASH_FLOW",
+    "IS_DIV_PER_SHR",
+    "RETURN_ON_ASSET",
+    "RETURN_COM_EQY",
+    "PE_RATIO",
+    "CURRENT_EV_TO_T12M_EBITDA",
+    "PX_TO_BOOK_RATIO",
+    "EQY_DVD_YLD_IND",
+    "REVENUE_PER_SH",
+    "FREE_CASH_FLOW_YIELD",
+    "FREE_CASH_FLOW_MARGIN",
+    "PROF_MARGIN",
+    # CRPS-e-2 -- the 22 added mnemonics the team's own sheets call (research-model-typecast,
+    # 96 workbooks; brief docs/briefs/amgt-corpus-dossier-fold-brief-20260924.md VIII-4). These
+    # 16 join HIST_FIELDS; the remaining 6 (forecast) join FORECAST_FIELDS below. Bloomberg's
+    # own field definitions, adopted as-is (bound (f)).
+    "EQY_SH_OUT_TOT_MULT_SH",
+    "EQY_RAW_BETA",
+    "BS_CASH_NEAR_CASH_ITEM",
+    "BS_TOTAL_LIABILITIES",
+    "IS_ADJUSTED_GROSS_PROFIT",
+    "IS_ADJUSTED_OPERATING_INCOME",
+    "IS_COMP_EPS_ADJUSTED",
+    "NET_INCOME",
+    "EQY_DPS",
+    "IS_DIL_EPS_CONT_OPS",
+    "PX_TO_FREE_CASH_FLOW",
+    "GROSS_MARGIN",
+    "EBITDA_TO_REVENUE",
+    "RETURN_ON_CAP",
+    "RETURN_ON_INV_CAPITAL",
+    "RETURN_ON_TANGIBLE_ASSETS",
+    # CRPS-aj-1 -- the 44 history members of the team template's V3 set (the template's core
+    # mnemonics less the base, measured by `lib.research.corpus.typecast --read-latest`),
+    # appended at the END so every base index is unchanged. Bloomberg's own definitions.
+    "ARD_GOODWLL",
+    "ARD_OTHER_INTANGIBLE_ASSET",
+    "ARD_SHARES_OUTSTANDING",
+    "ARD_TOTAL_CURRENT_LIABILITIES",
+    "ARD_TOT_ASSETS",
+    "AVERAGE_DIVIDEND_YIELD",
+    "AVERAGE_EV_TO_T12M_EBIT",
+    "AVERAGE_EV_TO_T12M_SALES",
+    "AVERAGE_PRICE_EARNINGS_RATIO",
+    "AVERAGE_PRICE_TO_BOOK_RATIO",
+    "AVERAGE_PRICE_TO_FREE_CASH_FLOW",
+    "AVG_EV_TO_T12M_EBITDA",
+    "CAPEX_ABSOLUTE_VALUE",
+    "CASH_AND_MARKETABLE_SECURITIES",
+    "CF_CASH_FROM_OPER",
+    "DIVIDEND_YIELD",
+    "EARN_FOR_COMMON",
+    "EQY_FUND_YEAR",
+    "EV_TO_T12M_EBIT",
+    "EV_TO_T12M_EBITDA",
+    "EV_TO_T12M_SALES",
+    "FCF_MARGIN_AFTER_OPER_LEA_PYMT",
+    "FREE_CASH_FLOW_PER_SH",
+    "HIGH_CLOSING_PRICE_TO_BOOK_RATIO",
+    "HIGH_DIVIDEND_YIELD",
+    "HIGH_EV_TO_T12M_EBIT",
+    "HIGH_EV_TO_T12M_EBITDA",
+    "HIGH_EV_TO_T12M_SALES",
+    "HIGH_PRICE_TO_FREE_CASH_FLOW",
+    "HISTORICAL_MARKET_CAP",
+    "LOW_CLOSING_PRICE_TO_BOOK_RATIO",
+    "LOW_DIVIDEND_YIELD",
+    "LOW_EV_TO_T12M_EBIT",
+    "LOW_EV_TO_T12M_EBITDA",
+    "LOW_EV_TO_T12M_SALES",
+    "LOW_PRICE_TO_FREE_CASH_FLOW",
+    "MINORITY_NONCONTROLLING_INTEREST",
+    "NORMALIZED_ROA",
+    "NORMALIZED_ROE",
+    "PX_ERN_RATIO_WITH_HIGH_CLOS_PX",
+    "PX_ERN_RATIO_WITH_LOW_CLOS_PX",
+    "SHORT_AND_LONG_TERM_DEBT",
+    "TANG_BOOK_VAL_PER_SH",
+    "TOTAL_EQUITY",
+]
+
+HIST_START = "2016-01-01"
+PERIODICITY = "YEARLY"
+
+# CRPS-f-2 -- a live pull on 2026-09-25 returned {} history for every security once HIST_FIELDS
+# grew to 39 (round 3 added 16); blp_client's historical_data dropped the request-level error
+# silently (see blp_client.py, on_response_error). MEASURED: the dropped error. INFERRED, not
+# measured: that 39 fields exceeds the service's per-request field limit (commonly 25) -- the
+# issuer's first live batch after the drain is the measurement, this constant is the guard.
+HIST_FIELDS_PER_REQUEST = 25
+# HIST_END retired (AMGT-rk-35, C-MODEL-WINDOW-AND-ROWS clause (1)): the request's end date is
+# computed fresh at call time by _rolling_end_date(), never a fixed constant -- see stage_pull.
+
+# AMGT-rk-36, C-MODEL-FORECASTS -- the PRD's five, in the PRD's order. BEST_PERIOD_END_DATE is
+# requested ALONGSIDE these on every call but is never itself a figure (it is a DATE, item 4) --
+# it names the column header and the fiscal year of the period it came back under.
+# CRPS-e-2 -- the 6 added forecast mnemonics, requested with the same BEST_FPERIOD_OVERRIDE
+# shape as the five above (join the same request lines, same overrides tuple).
+FORECAST_FIELDS = [
+    "BEST_EPS", "BEST_SALES", "BEST_EBITDA", "BEST_PE_RATIO", "BEST_DPS",
+    "BEST_DIV_YLD", "BEST_EBIT", "BEST_NET_INCOME", "BEST_CAPEX", "BEST_ESTIMATE_FCF", "BEST_BPS",
+    "BEST_CPS",  # CRPS-aj-1 -- appended; rides the same 1FY/2FY/3FY BEST_FPERIOD_OVERRIDE requests
+    # AMENDMENT 1 (CRPS-ap-7, round 40): the FOUR consensus-dispersion fields Bloomberg returns, appended after BEST_CPS.
+    # Ground: org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/evidence/r40_ap10_probe_BA_20261007.txt -- the
+    # spellings BEST_{CPS,EPS}_STANDARD_DEV and BEST_{CPS,EPS}_AVG returned BAD_FLD/INVALID_FIELD on every override, so they are
+    # NOT here; the mean is BEST_CPS / BEST_EPS, already pulled (CTO ruling, no new mean field).
+    # PERIOD TERM: each of the four is asked under the SAME BEST_FPERIOD_OVERRIDE request as BEST_CPS and BEST_EPS -- one
+    # request per override in FORECAST_OVERRIDES ("1FY", "2FY", "3FY"), all of FORECAST_FIELDS riding each request -- so a
+    # standard deviation and its mean are always for the same forecast period. Calls per name stay 8.
+    "BEST_CPS_STDDEV", "BEST_CPS_NUMEST",
+    "BEST_EPS_STDDEV", "BEST_EPS_NUMEST",
+]
+FORECAST_DATE_FIELD = "BEST_PERIOD_END_DATE"
+FORECAST_OVERRIDE_FIELD = "BEST_FPERIOD_OVERRIDE"
+# The override VALUE (Bloomberg's own token) per period label. ORDER IS THE REQUEST ORDER.
+FORECAST_OVERRIDES = ("1FY", "2FY", "3FY")
+FORECAST_OVERRIDE_TO_PERIOD = {"1FY": "FY1", "2FY": "FY2", "3FY": "FY3"}
+FORECAST_PERIOD_TO_OVERRIDE = {v: k for k, v in FORECAST_OVERRIDE_TO_PERIOD.items()}
+# The quarter-trap guard (item 2): three properly-annual period end dates are at least this many
+# days apart in sequence. A call sent WITHOUT the override returns the next QUARTER (~90 days),
+# which this bar discriminates against without ever guessing at Bloomberg's exact calendar.
+FORECAST_MIN_ANNUAL_GAP_DAYS = 300
+FORECAST_NOT_ANNUAL_REASON = "period end dates not annual: BEST_FPERIOD_OVERRIDE not honoured"
+
+# A fiscal-year group is CLOSED only when it carries at least one REPORTED statement field --
+# a period Bloomberg returns ahead of the filing (price/ratio fields only) is not closed.
+_STATEMENT_FIELDS = ("SALES_REV_TURN", "IS_EPS")
+_FY_NOT_CLOSED_REASON = "fiscal year not closed/reported: no statement field in the merged group"
+
+# Basis text per mnemonic -- Bloomberg's own definition, stated beside every number
+# (C-BLOOMBERG-BASIS). Deliberately plain: no other vendor's name or per-share adjustment
+# concept appears in this module (bound (f) / AC6).
+FIELD_BASIS: dict[str, str] = {
+    "NAME": "Bloomberg-maintained legal/short name of the issuer.",
+    "CRNCY": "ISO currency code of the security's trading/reporting currency.",
+    "CNTRY_OF_DOMICILE": "ISO country code of the issuer's domicile.",
+    "GICS_SECTOR_NAME": "GICS sector classification name, Bloomberg's own taxonomy mapping.",
+    "PX_LAST": "Last traded/closing price, in the security's trading currency.",
+    "CUR_MKT_CAP": "Current market capitalization, full currency units (not millions).",
+    "NET_DEBT": "Total debt minus cash and equivalents, millions of the reporting currency; "
+                "can be negative (a net-cash position).",
+    "CURR_ENTP_VAL": "Current enterprise value (market cap + net debt + minority interest - "
+                      "equity affiliates), millions of the reporting currency.",
+    "VOLUME_AVG_30D": "30-trading-day average daily volume, absolute share count.",
+    "EQY_SH_OUT_REAL": "Real-time shares outstanding, absolute share count.",
+    "EQY_FREE_FLOAT_PCT": "Free-float shares as a percent of shares outstanding.",
+    "EQY_BETA": "Bloomberg-computed equity beta, Bloomberg's default calculation window.",
+    "EQY_DVD_YLD_IND": "Indicated dividend yield, percent.",
+    "SHORT_INT_RATIO": "Short interest ratio (days-to-cover).",
+    "SI_PERCENT_EQUITY_FLOAT": "Short interest as a percent of free float.",
+    "SALES_REV_TURN": "Total revenue/turnover, millions of the reporting currency.",
+    "IS_OPER_INC": "Operating income, millions of the reporting currency.",
+    "OPER_MARGIN": "Operating margin, percent.",
+    "EBITDA": "Bloomberg's reported (unadjusted) EBITDA, millions of the reporting currency.",
+    "EBITDA_ADJUSTED": "Bloomberg's adjusted EBITDA (Bloomberg's own methodology for excluding "
+                        "certain one-off items), millions of the reporting currency.",
+    "EBITDA_MARGIN": "EBITDA margin, percent (denominator is Bloomberg's EBITDA definition).",
+    "IS_EPS": "Bloomberg's reported earnings-per-share figure, Bloomberg's own definition.",
+    "BOOK_VAL_PER_SH": "Book value per share.",
+    "IS_SH_FOR_DILUTED_EPS": "Weighted-average diluted shares used for EPS, millions of shares.",
+    "CAPITAL_EXPEND": "Capital expenditure; Bloomberg reports this as a cash outflow "
+                       "(negative sign), millions of the reporting currency.",
+    "CF_FREE_CASH_FLOW": "Free cash flow, millions of the reporting currency.",
+    "IS_DIV_PER_SHR": "Dividend per share.",
+    "RETURN_ON_ASSET": "Return on assets, percent.",
+    "RETURN_COM_EQY": "Return on common equity, percent.",
+    "PE_RATIO": "Price/earnings ratio.",
+    "CURRENT_EV_TO_T12M_EBITDA": "Enterprise value / trailing-twelve-month EBITDA.",
+    "PX_TO_BOOK_RATIO": "Price/book ratio.",
+    # AMGT-rk-36, C-MODEL-FORECASTS -- Bloomberg's consensus (BEST) estimate of the named
+    # quantity for the overridden fiscal period. Consensus, never reported: this is the whole
+    # discriminator between a forecast figure and every HIST_FIELDS figure above.
+    "BEST_EPS": "Bloomberg consensus (BEST) estimate of earnings per share for the overridden fiscal period.",
+    "BEST_SALES": "Bloomberg consensus (BEST) estimate of total revenue/turnover for the overridden fiscal period, millions of the reporting currency.",
+    "BEST_EBITDA": "Bloomberg consensus (BEST) estimate of EBITDA for the overridden fiscal period, millions of the reporting currency.",
+    "BEST_PE_RATIO": "Bloomberg consensus (BEST) estimate of the price/earnings ratio for the overridden fiscal period.",
+    "BEST_DPS": "Bloomberg consensus (BEST) estimate of dividends per share for the overridden fiscal period.",
+    # AMGT-rk-37, C-MODEL-WINDOW-AND-ROWS (2) -- the sheet's five missing rows. Bloomberg's own
+    # field definitions, adopted as-is (the CAT candidate-probe, 2026-09-19, is the record of
+    # which candidate was adopted for each row and which was REFUSED).
+    "REVENUE_PER_SH": "Bloomberg's revenue/turnover per share (Revenue/Sh row).",
+    "FREE_CASH_FLOW_YIELD": "Bloomberg's free cash flow yield, percent (FCF yield row).",
+    "FREE_CASH_FLOW_MARGIN": "Bloomberg's free cash flow margin, percent (FCF margin row).",
+    "PROF_MARGIN": "Bloomberg's net profit margin, percent (Earnings margin row).",
+    # AMGT-rk-37, C-DESCRIPTION-LINE -- the one-line description's route (1). CIE_DES_BULK's
+    # basis names the join rule applied before the figure is written (item 2).
+    "CIE_DES": "Bloomberg's company description (long text).",
+    "CIE_DES_BULK": "Bloomberg's company description (bulk description; rows joined in order, "
+                     "single spaces, before landing as this figure's value -- the raw response "
+                     "keeps its own row-list shape untouched).",
+    # AMGT-rk-112, C-CURRENCY-LABEL.
+    "EQY_FUND_CRNCY": "ISO currency code of the issuer's financial-statement (reporting) currency.",
+    # CRPS-e-2 -- basis text for the 22 added mnemonics (16 history, 6 forecast), Bloomberg's
+    # own field definitions adopted as-is, no other vendor's name (bound (f)).
+    "EQY_SH_OUT_TOT_MULT_SH": "Total shares outstanding across all share classes, absolute "
+                               "share count (multiple listed classes summed).",
+    "EQY_RAW_BETA": "Bloomberg-computed raw (unadjusted) equity beta.",
+    "BS_CASH_NEAR_CASH_ITEM": "Cash and near-cash items from the balance sheet, millions of "
+                               "the reporting currency.",
+    "BS_TOTAL_LIABILITIES": "Total liabilities from the balance sheet, millions of the "
+                             "reporting currency.",
+    "IS_ADJUSTED_GROSS_PROFIT": "Bloomberg's adjusted gross profit (Bloomberg's own "
+                                 "methodology for excluding certain one-off items), millions "
+                                 "of the reporting currency.",
+    "IS_ADJUSTED_OPERATING_INCOME": "Bloomberg's adjusted operating income (Bloomberg's own "
+                                     "methodology for excluding certain one-off items), "
+                                     "millions of the reporting currency.",
+    "IS_COMP_EPS_ADJUSTED": "Bloomberg's adjusted (comparable) earnings-per-share figure, "
+                             "Bloomberg's own definition.",
+    "NET_INCOME": "Net income, millions of the reporting currency.",
+    "EQY_DPS": "Dividend per share, Bloomberg's own dividend-per-share definition.",
+    "IS_DIL_EPS_CONT_OPS": "Diluted earnings per share from continuing operations, "
+                            "Bloomberg's own definition.",
+    "PX_TO_FREE_CASH_FLOW": "Price to free cash flow ratio.",
+    "GROSS_MARGIN": "Gross margin, percent.",
+    "EBITDA_TO_REVENUE": "EBITDA as a percent of revenue (denominator is Bloomberg's EBITDA "
+                          "definition).",
+    "RETURN_ON_CAP": "Return on capital, percent.",
+    "RETURN_ON_INV_CAPITAL": "Return on invested capital, percent.",
+    "RETURN_ON_TANGIBLE_ASSETS": "Return on tangible assets, percent.",
+    "BEST_DIV_YLD": "Bloomberg consensus (BEST) estimate of dividend yield for the overridden "
+                     "fiscal period, percent.",
+    "BEST_EBIT": "Bloomberg consensus (BEST) estimate of EBIT (operating income) for the "
+                  "overridden fiscal period, millions of the reporting currency.",
+    "BEST_NET_INCOME": "Bloomberg consensus (BEST) estimate of net income for the overridden "
+                        "fiscal period, millions of the reporting currency.",
+    "BEST_CAPEX": "Bloomberg consensus (BEST) estimate of capital expenditure for the "
+                   "overridden fiscal period, millions of the reporting currency.",
+    "BEST_ESTIMATE_FCF": "Bloomberg consensus (BEST) estimate of free cash flow for the "
+                          "overridden fiscal period, millions of the reporting currency.",
+    "BEST_BPS": "Bloomberg consensus (BEST) estimate of book value per share for the "
+                "overridden fiscal period.",
+    # CRPS-aj-1 -- basis text for the 52 mnemonics of the daily refresh (1 forecast, 7 header, 44
+    # history). Bloomberg's own field definitions in plain words, adopted as-is; a unit is stated
+    # only where Bloomberg states one; no other vendor's name appears (bound (f)).
+    "BEST_CPS": "Bloomberg consensus (BEST) estimate of cash flow per share for the overridden "
+                "fiscal period.",
+    # AMENDMENT 1 (CRPS-ap-7, round 40): basis text for the four consensus-dispersion mnemonics Bloomberg returns, in plain
+    # words; the per-share statistics are in the reporting currency, the estimate counts are counts.
+    "BEST_CPS_STDDEV": "Bloomberg consensus (BEST) standard deviation of the cash flow per share estimates for "
+                       "the overridden fiscal period, per share in the reporting currency.",
+    "BEST_CPS_NUMEST": "Number of cash flow per share estimates in the Bloomberg consensus (BEST) for the overridden "
+                       "fiscal period (a count of estimates).",
+    "BEST_EPS_STDDEV": "Bloomberg consensus (BEST) standard deviation of the earnings per share estimates for "
+                       "the overridden fiscal period, per share in the reporting currency.",
+    "BEST_EPS_NUMEST": "Number of earnings per share estimates in the Bloomberg consensus (BEST) for the overridden "
+                       "fiscal period (a count of estimates).",
+    "SHORT_NAME": "Bloomberg's short (abbreviated) name of the issuer.",
+    "COUNTRY_FULL_NAME": "Full name of the issuer's country of domicile, as Bloomberg spells it "
+                          "(text, not a code).",
+    "AVG_DAILY_VALUE_TRADED_3M": "Average daily value traded over the last three months, in the "
+                                  "security's trading currency.",
+    "CRNCY_ADJ_MKT_CAP": "Market capitalization adjusted to the requested currency (Bloomberg's "
+                          "currency-adjusted market capitalization), millions of that currency.",
+    "LONG_COMP_NAME": "Bloomberg's long (full legal) company name of the issuer.",
+    "EXPECTED_REPORT_DT": "Date of the issuer's next expected earnings report (a DATE, not a "
+                           "number).",
+    "ERN_ANN_DT_AND_PER": "Earnings announcement dates and the fiscal period each covers (BULK "
+                           "field: Bloomberg returns a list of rows; each row's announcement "
+                           "date is a DATE; rows kept in Bloomberg's own order).",
+    "ARD_GOODWLL": "Goodwill as reported in the annual (as-reported) balance sheet, millions of "
+                   "the reporting currency.",
+    "ARD_OTHER_INTANGIBLE_ASSET": "Other intangible assets (excluding goodwill) as reported in "
+                                   "the annual balance sheet, millions of the reporting currency.",
+    "ARD_SHARES_OUTSTANDING": "Shares outstanding as reported in the annual financial "
+                               "statements, millions of shares.",
+    "ARD_TOTAL_CURRENT_LIABILITIES": "Total current liabilities as reported in the annual "
+                                      "balance sheet, millions of the reporting currency.",
+    "ARD_TOT_ASSETS": "Total assets as reported in the annual balance sheet, millions of the "
+                      "reporting currency.",
+    "AVERAGE_DIVIDEND_YIELD": "Average dividend yield over the fiscal period, percent.",
+    "AVERAGE_EV_TO_T12M_EBIT": "Average of enterprise value / trailing-twelve-month EBIT over "
+                                "the fiscal period.",
+    "AVERAGE_EV_TO_T12M_SALES": "Average of enterprise value / trailing-twelve-month sales over "
+                                 "the fiscal period.",
+    "AVERAGE_PRICE_EARNINGS_RATIO": "Average price/earnings ratio over the fiscal period.",
+    "AVERAGE_PRICE_TO_BOOK_RATIO": "Average price/book ratio over the fiscal period.",
+    "AVERAGE_PRICE_TO_FREE_CASH_FLOW": "Average price / free cash flow ratio over the fiscal "
+                                        "period.",
+    "AVG_EV_TO_T12M_EBITDA": "Average of enterprise value / trailing-twelve-month EBITDA over "
+                              "the fiscal period.",
+    "CAPEX_ABSOLUTE_VALUE": "Capital expenditure stated as an absolute (positive) value, "
+                             "millions of the reporting currency.",
+    "CASH_AND_MARKETABLE_SECURITIES": "Cash and marketable securities, millions of the "
+                                       "reporting currency.",
+    "CF_CASH_FROM_OPER": "Cash flow from operating activities, millions of the reporting "
+                          "currency.",
+    "DIVIDEND_YIELD": "Dividend yield at the fiscal period end, percent.",
+    "EARN_FOR_COMMON": "Earnings available to common shareholders, millions of the reporting "
+                        "currency.",
+    "EQY_FUND_YEAR": "The fiscal year of the fundamentals the row carries (a year number, not a "
+                      "financial amount).",
+    "EV_TO_T12M_EBIT": "Enterprise value / trailing-twelve-month EBIT.",
+    "EV_TO_T12M_EBITDA": "Enterprise value / trailing-twelve-month EBITDA.",
+    "EV_TO_T12M_SALES": "Enterprise value / trailing-twelve-month sales.",
+    "FCF_MARGIN_AFTER_OPER_LEA_PYMT": "Free cash flow margin after operating lease payments, "
+                                       "percent.",
+    "FREE_CASH_FLOW_PER_SH": "Free cash flow per share.",
+    "HIGH_CLOSING_PRICE_TO_BOOK_RATIO": "Highest price/book ratio over the fiscal period, "
+                                         "using closing prices.",
+    "HIGH_DIVIDEND_YIELD": "Highest dividend yield over the fiscal period, percent.",
+    "HIGH_EV_TO_T12M_EBIT": "Highest enterprise value / trailing-twelve-month EBIT over the "
+                             "fiscal period.",
+    "HIGH_EV_TO_T12M_EBITDA": "Highest enterprise value / trailing-twelve-month EBITDA over the "
+                               "fiscal period.",
+    "HIGH_EV_TO_T12M_SALES": "Highest enterprise value / trailing-twelve-month sales over the "
+                              "fiscal period.",
+    "HIGH_PRICE_TO_FREE_CASH_FLOW": "Highest price / free cash flow ratio over the fiscal "
+                                     "period.",
+    "HISTORICAL_MARKET_CAP": "Market capitalization at the fiscal period end, millions of the "
+                              "trading currency.",
+    "LOW_CLOSING_PRICE_TO_BOOK_RATIO": "Lowest price/book ratio over the fiscal period, using "
+                                        "closing prices.",
+    "LOW_DIVIDEND_YIELD": "Lowest dividend yield over the fiscal period, percent.",
+    "LOW_EV_TO_T12M_EBIT": "Lowest enterprise value / trailing-twelve-month EBIT over the "
+                            "fiscal period.",
+    "LOW_EV_TO_T12M_EBITDA": "Lowest enterprise value / trailing-twelve-month EBITDA over the "
+                              "fiscal period.",
+    "LOW_EV_TO_T12M_SALES": "Lowest enterprise value / trailing-twelve-month sales over the "
+                             "fiscal period.",
+    "LOW_PRICE_TO_FREE_CASH_FLOW": "Lowest price / free cash flow ratio over the fiscal "
+                                    "period.",
+    "MINORITY_NONCONTROLLING_INTEREST": "Minority (non-controlling) interest in the balance "
+                                         "sheet, millions of the reporting currency.",
+    "NORMALIZED_ROA": "Normalized return on assets, percent (Bloomberg's own normalization).",
+    "NORMALIZED_ROE": "Normalized return on equity, percent (Bloomberg's own normalization).",
+    "PX_ERN_RATIO_WITH_HIGH_CLOS_PX": "Price/earnings ratio computed with the highest closing "
+                                       "price of the fiscal period.",
+    "PX_ERN_RATIO_WITH_LOW_CLOS_PX": "Price/earnings ratio computed with the lowest closing "
+                                      "price of the fiscal period.",
+    "SHORT_AND_LONG_TERM_DEBT": "Total of short-term and long-term debt, millions of the "
+                                 "reporting currency.",
+    "TANG_BOOK_VAL_PER_SH": "Tangible book value per share.",
+    "TOTAL_EQUITY": "Total equity (including minority interest), millions of the reporting "
+                    "currency.",
+}
+
+
+def _load_blp_client():
+    """Load the estate's raw client by path (never a bare import -- there is no package
+    marker under integrations/bloomberg/mcp/, and this stays correct regardless of cwd)."""
+    mod_path = Path(__file__).resolve().parent.parent / "mcp" / "blp_client.py"
+    spec = importlib.util.spec_from_file_location("blp_client", mod_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load blp_client from {mod_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _load_ledger():
+    """AMGT-s-14 retrofit: load the input ledger by path, same reasoning as
+    _load_blp_client above (a direct script run does not put the repo root on
+    sys.path, so a bare `import lib...` is not reliable here)."""
+    mod_path = Path(__file__).resolve().parent.parent.parent.parent / "lib" / "research" / "ledger" / "ledger.py"
+    spec = importlib.util.spec_from_file_location("ledger", mod_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load ledger from {mod_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _load_sa_forecast_fallback():
+    """Load sa_forecast_fallback.py by path, same reasoning as _load_build_unit_map above --
+    a sibling module in this same directory, loaded by path for consistency with every other
+    cross-module load in this file (there is no package marker here regardless)."""
+    mod_path = Path(__file__).resolve().parent / "sa_forecast_fallback.py"
+    spec = importlib.util.spec_from_file_location("sa_forecast_fallback", mod_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load sa_forecast_fallback from {mod_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _load_fye_join():
+    """AMGT-rk-109: load fye_join.py by path, same reasoning as _load_sa_forecast_fallback
+    above -- a sibling module in this same directory, loaded by path for consistency with
+    every other cross-module load in this file. `stage_derive` uses this ONLY on a
+    non-December fiscal year end; the December path is unchanged and never calls it."""
+    mod_path = Path(__file__).resolve().parent / "fye_join.py"
+    spec = importlib.util.spec_from_file_location("fye_join", mod_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load fye_join from {mod_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _load_build_unit_map():
+    """Load AMGT-rk-34's unit-map builder by path, same reasoning as _load_blp_client above.
+    stage_derive calls this ONLY when the field map has no entry yet for the security being
+    derived -- the whole point of the builder existing beside this producer is that units are
+    never hand-built here."""
+    mod_path = Path(__file__).resolve().parent / "build_unit_map.py"
+    spec = importlib.util.spec_from_file_location("build_unit_map", mod_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"could not load build_unit_map from {mod_path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def security_key(security: str) -> str:
+    return security.replace(" ", "_")
+
+
+def utc_stamp() -> str:
+    return _dt.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+
+
+def _rolling_end_date() -> str:
+    """AMGT-rk-35: the request's end date, computed fresh at call time -- today's UTC date,
+    never a fixed constant (C-MODEL-WINDOW-AND-ROWS clause (1))."""
+    return _dt.datetime.utcnow().strftime("%Y-%m-%d")
+
+
+def _s3():
+    return boto3.client("s3")
+
+
+def s3_put_if_absent(s3, key: str, body: bytes, content_type: str = "application/json") -> None:
+    try:
+        s3.head_object(Bucket=BUCKET, Key=key)
+        exists = True
+    except botocore.exceptions.ClientError as e:
+        code = e.response.get("Error", {}).get("Code", "")
+        if code in ("404", "NoSuchKey", "NotFound"):
+            exists = False
+        else:
+            raise
+    if exists:
+        raise RuntimeError(
+            f"REFUSING TO OVERWRITE existing key (STORE_CONTRACT rule 1): s3://{BUCKET}/{key}"
+        )
+    s3.put_object(Bucket=BUCKET, Key=key, Body=body, ContentType=content_type)
+
+
+def _read_json_from_s3(s3, key: str) -> Any:
+    obj = s3.get_object(Bucket=BUCKET, Key=key)
+    return json.loads(obj["Body"].read())
+
+
+class NoRawStampError(RuntimeError):
+    """AMGT-rk-70: raised by `_latest_stamp` when bronze objects exist for a security but none
+    of the stamps carries both a `refdata` and a `histdata` bronze object -- an object existing
+    for one request kind is not evidence the pair landed (row AMGT_RESAPP-Z-W38-S5, measured
+    2026-09-19). A RuntimeError subclass so every existing `except RuntimeError` still catches
+    it."""
+
+
+def _bronze_prefix(request: str, sec_key: str) -> str:
+    """AMGT-rk-90 (M1): the builder's bronze prefix for one request kind and security --
+    `bloomberg/harvest/bronze/<request>/security_key=<safe>/` -- via `hstore.table_prefix` /
+    `hstore.entity_partition` only, never a bucket or key literal."""
+    return hstore.table_prefix(VENDOR, "bronze", request) + hstore.entity_partition("security_key", sec_key) + "/"
+
+
+def _bronze_key(request: str, sec_key: str, stamp: str) -> str:
+    """The builder's bronze key for one request/security/stamp -- `<prefix><stamp>.json`."""
+    return f"{_bronze_prefix(request, sec_key)}{stamp}.json"
+
+
+def _state_pull_log_prefix(sec_key: str) -> str:
+    """The builder's state prefix for pull logs -- `amgt/harvest/state/pull_log/security_key=<safe>/`."""
+    return hstore.table_prefix("amgt", "state", "pull_log") + hstore.entity_partition("security_key", sec_key) + "/"
+
+
+def _bronze_stamp_set(s3, request: str, sec_key: str) -> set[str]:
+    """Every stamp (object name minus `.json`) landed for this request/security under the new
+    bronze grammar -- a flat listing, never a folder-of-files walk (the old grammar's shape)."""
+    prefix = _bronze_prefix(request, sec_key)
+    resp = s3.list_objects_v2(Bucket=BUCKET, Prefix=prefix)
+    return {
+        key[len(prefix):-len(".json")]
+        for key in (o["Key"] for o in resp.get("Contents", []) or [])
+        if key.endswith(".json")
+    }
+
+
+def _stamps_with_raw_pair(s3, sec_key: str) -> list[str]:
+    """Every stamp, newest first, that ACTUALLY carries both a `refdata` and a `histdata` bronze
+    object for `sec_key` (never inferred from one side alone). Mirrors
+    `build_unit_map._stamps_with_refdata` EXACTLY (see that function's docstring for the measured
+    hazard); duplicated here rather than imported because `build_unit_map.py` already does
+    `import model_block_pull as _mbp`, so the reverse import would be circular.
+    `test_mirror_agrees_with_build_unit_map` is the standing regression that the two copies do
+    not drift (round 16's AMGT-rk-65 exists because exactly that happened to the accession
+    rule)."""
+    ref_stamps = _bronze_stamp_set(s3, "refdata", sec_key)
+    hist_stamps = _bronze_stamp_set(s3, "histdata", sec_key)
+    return sorted(ref_stamps & hist_stamps, reverse=True)
+
+
+def _latest_stamp(s3, sec_key: str) -> str:
+    any_stamps: set[str] = set()
+    for request in hbloom.BRONZE_REQUESTS:
+        any_stamps |= _bronze_stamp_set(s3, request, sec_key)
+    if not any_stamps:
+        raise RuntimeError(f"no bronze stamp found for {sec_key!r} under s3://{BUCKET}/{_NEW_BRONZE_ROOT}")
+    qualifying = _stamps_with_raw_pair(s3, sec_key)
+    if not qualifying:
+        raise NoRawStampError(
+            f"no raw stamp qualifies for {sec_key!r} under s3://{BUCKET}/{_NEW_BRONZE_ROOT}: "
+            f"{len(any_stamps)} stamp(s) rejected (no refdata+histdata pair)"
+        )
+    return qualifying[0]
+
+
+def _end_requested_from_pull_log(s3, sec_key: str, raw_stamp: str) -> str | None:
+    """AMGT-rk-35 item 2(iii): `history_window.end_requested` is READ FROM THE RAW REQUEST
+    RECORD this producer's OWN pull already wrote (pull_log, `:stage_pull`), never recomputed at
+    derive time -- so a derive re-run against an older raw stamp reports the window that stamp
+    was ACTUALLY pulled under, not today's date. Reads STATE (AMGT-rk-90 M1: pull_log moved off
+    the old vendor-partitioned raw prefix)."""
+    key = f"{_state_pull_log_prefix(sec_key)}{raw_stamp}.json"
+    try:
+        pull_log = _read_json_from_s3(s3, key)
+    except botocore.exceptions.ClientError:
+        return None
+    for req in pull_log.get("requests", []):
+        if req.get("type") == "HistoricalDataRequest":
+            return req.get("end_date")
+    return None
+
+
+def _hist_field_chunks(fields: list[str], per_request: int) -> list[list[str]]:
+    """CRPS-f-2: split `fields` into chunks of at most `per_request`, field order preserved
+    (the first `per_request` fields, then the rest) -- never re-sorted, never de-duplicated."""
+    return [fields[i:i + per_request] for i in range(0, len(fields), per_request)]
+
+
+def _merge_historical_by_date(chunk_results: list[dict[str, list[dict]]]) -> dict[str, list[dict]]:
+    """CRPS-f-2: merge N `historical_data()` chunk results (one per HIST_FIELDS_PER_REQUEST-sized
+    field slice, same securities/window/periodicity) into ONE result of today's shape
+    `{security: [{"date": ..., field: value, ...}]}`. A date seen in any chunk appears once,
+    carrying every field any chunk returned for it (later chunks never overwrite an earlier
+    chunk's value for a field it already supplied, since chunks never share a field)."""
+    merged: dict[str, dict[str, dict]] = {}
+    for chunk in chunk_results:
+        for sec, rows in chunk.items():
+            by_date = merged.setdefault(sec, {})
+            for row in rows:
+                date = row.get("date")
+                rec = by_date.setdefault(date, {"date": date})
+                for k, v in row.items():
+                    if k == "date":
+                        continue
+                    rec.setdefault(k, v)
+    return {sec: [by_date[d] for d in sorted(by_date.keys())] for sec, by_date in merged.items()}
+
+
+def stage_pull(blp, s3, security: str) -> dict:
+    """Fetch header + fiscal-year history from Bloomberg DAPI; land the raw response bytes.
+
+    AMGT-rk-90 (M1): lands through the harvest grammar -- `hbloom.bronze_write` for
+    refdata/histdata/bestdata (body `hbloom.client_json(...)`, the ONE deterministic
+    serialisation of what the Terminal client handed this producer, C-BRONZE-AS-RECEIVED) and
+    `hbloom.state_put_pull_log` for the pull log (STATE, never bronze -- `bronze_write` itself
+    refuses `request="pull_log"`). The pull log is the SAME class as the raw landing it records
+    (C-PRODUCTION-HOME): ONE object per pull, beside that landing -- never a cumulative repo
+    file (the input ledger already records every pull, :246).
+
+    AMGT-rk-36 adds THREE ReferenceDataRequests, one per fiscal period, each with an EXPLICIT
+    BEST_FPERIOD_OVERRIDE -- never sent bare (item 1: "a request without it is a violation, not
+    a shortcut"). All three land UNTOUCHED as ONE object, bestdata.json, in the SAME stamp."""
+    sec_key = security_key(security)
+    stamp = utc_stamp()
+    end_date = _rolling_end_date()
+
+    pull_log = {"securities": [security], "requests": []}
+    ref = blp.reference_data([security], HEADER_FIELDS)
+    pull_log["requests"].append(
+        {"type": "ReferenceDataRequest", "security": security, "fields": HEADER_FIELDS, "at": stamp}
+    )
+    # CRPS-f-2: HIST_FIELDS (39) is split into chunks of at most HIST_FIELDS_PER_REQUEST (25)
+    # fields, one HistoricalDataRequest per chunk, same security/window/periodicity -- a live
+    # pull on 2026-09-25 returned {} history for every security when all 39 rode one request.
+    # `on_response_error="raise"` so a rejected request stops this security's pull loudly
+    # instead of landing `{}` (blp_client.py's handle() used to drop a request-level error).
+    hist_field_chunks = _hist_field_chunks(HIST_FIELDS, HIST_FIELDS_PER_REQUEST)
+    n_chunks = len(hist_field_chunks)
+    hist_chunk_results = []
+    for chunk_i, chunk_fields in enumerate(hist_field_chunks, start=1):
+        chunk_result = blp.historical_data(
+            [security], chunk_fields, HIST_START, end_date, periodicity=PERIODICITY,
+            on_response_error="raise",
+        )
+        hist_chunk_results.append(chunk_result)
+        pull_log["requests"].append(
+            {
+                "type": "HistoricalDataRequest",
+                "security": security,
+                "fields": chunk_fields,
+                "chunk": chunk_i,
+                "chunks_total": n_chunks,
+                "start_date": HIST_START,
+                "end_date": end_date,
+                "periodicity": PERIODICITY,
+                "at": stamp,
+            }
+        )
+    hist = _merge_historical_by_date(hist_chunk_results)
+
+    best_fields = FORECAST_FIELDS + [FORECAST_DATE_FIELD]
+    best_doc: dict = {"requests": []}
+    for fp in FORECAST_OVERRIDES:
+        overrides = {FORECAST_OVERRIDE_FIELD: fp}
+        resp = blp.reference_data([security], best_fields, overrides=overrides)
+        best_doc[fp] = resp
+        req_record = {
+            "type": "ReferenceDataRequest",
+            "security": security,
+            "fields": best_fields,
+            "overrides": overrides,
+            "at": stamp,
+        }
+        best_doc["requests"].append(req_record)
+        pull_log["requests"].append(req_record)
+
+    fetched_at = _dt.datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").replace(tzinfo=_dt.timezone.utc)
+    ref_receipt = hbloom.bronze_write("refdata", sec_key, fetched_at, hbloom.client_json(ref), client=s3)
+    hist_receipt = hbloom.bronze_write("histdata", sec_key, fetched_at, hbloom.client_json(hist), client=s3)
+    best_receipt = hbloom.bronze_write("bestdata", sec_key, fetched_at, hbloom.client_json(best_doc), client=s3)
+    pull_log_receipt = hbloom.state_put_pull_log(
+        sec_key, stamp, json.dumps(pull_log, default=str, indent=2).encode("utf-8"), client=s3
+    )
+    ref_key, hist_key, best_key, pull_log_key = (
+        ref_receipt["key"], hist_receipt["key"], best_receipt["key"], pull_log_receipt["key"]
+    )
+    _load_ledger().record_run(sec_key, "market_data", VENDOR, "OK", stamp, f"pull landed at {ref_key}, {hist_key}, {best_key}")
+    return {
+        "security": security,
+        "sec_key": sec_key,
+        "raw_stamp": stamp,
+        "ref_key": ref_key,
+        "hist_key": hist_key,
+        "best_key": best_key,
+        "pull_log_key": pull_log_key,
+    }
+
+
+def merge_by_fiscal_year(hist_rows: list[dict]) -> dict[str, dict]:
+    """C-FISCAL-YEAR-JOIN: group historical rows by the calendar year of `date`. Price and
+    fundamentals can land on different dates within the same fiscal year (F5) -- grouping by
+    year (rather than the exact date string) merges those sub-rows into one fiscal-year record
+    instead of leaving a price-only row and a fundamentals-only row unjoined."""
+    groups: dict[str, dict] = {}
+    for row in hist_rows:
+        date = row.get("date")
+        if not date:
+            continue
+        fy = date[:4]
+        g = groups.setdefault(fy, {"fiscal_year": fy, "_dates": []})
+        g["_dates"].append(date)
+        for k, v in row.items():
+            if k == "date":
+                continue
+            g[k] = v
+    return groups
+
+
+def _sign_label(value) -> str:
+    if isinstance(value, (int, float)):
+        if value > 0:
+            return "POSITIVE"
+        if value < 0:
+            return "NEGATIVE"
+        return "ZERO"
+    return "N/A (non-numeric field)"
+
+
+_FIELD_MAP_PATH = Path(__file__).resolve().parent / "field_map.json"
+_FIELD_MAP_CACHE: dict | None = None
+
+
+def _field_map() -> dict | None:
+    global _FIELD_MAP_CACHE
+    if _FIELD_MAP_CACHE is None:
+        if _FIELD_MAP_PATH.exists():
+            _FIELD_MAP_CACHE = json.loads(_FIELD_MAP_PATH.read_text(encoding="utf-8"))
+        else:
+            _FIELD_MAP_CACHE = {}
+    return _FIELD_MAP_CACHE or None
+
+
+def _scalar_exception(entry: dict, security: str, axis: str) -> str | None:
+    """CRPS-u-1: a SCALAR unit/sign is the field's shared value, but per_security_detail[security] can
+    withdraw it for that one security -- an `exception` carrying a `unit`/`sign` reason (build_unit_map.py),
+    or (older entries) a `<axis>_status` that is not MEASURED. Returns the UNRESOLVED-ON text, else None."""
+    detail = (entry.get("per_security_detail") or {}).get(security)
+    if not isinstance(detail, dict):
+        return None
+    exc = detail.get("exception")
+    reason = exc.get(axis) if isinstance(exc, dict) else None
+    if reason:
+        reason = str(reason)
+        if reason.startswith("UNRESOLVED"):
+            return reason
+        return "UNRESOLVED-ON-%s: %s" % (security, reason)
+    status = detail.get(axis + "_status")
+    if status and status != "MEASURED":
+        status = str(status)
+        if status.startswith("UNRESOLVED"):
+            return status
+        return "UNRESOLVED-ON-%s: %s" % (security, status)
+    return None
+
+
+def _resolved_unit(mnemonic: str, security: str) -> str:
+    """The per-field, per-security MEASURED unit from field_map.json (build_field_map.py --
+    C-UNIT-MAP-MEASURED), read back rather than re-derived, so the two artifacts never disagree
+    silently. Falls back to a pointer if field_map.json has not been built yet (re-runnable
+    standalone: `derive` does not require `build_field_map.py` to have run first)."""
+    fm = _field_map()
+    if fm:
+        for entry in fm.get("fields", []):
+            if entry.get("mnemonic") == mnemonic:
+                unit = entry.get("unit")
+                if isinstance(unit, dict):
+                    u = unit.get(security)
+                    if u:
+                        return u
+                elif unit:
+                    exc = _scalar_exception(entry, security, "unit")
+                    return exc if exc else unit
+    return "SEE field_map.json (per-field, per-security MEASURED unit -- not yet built)"
+
+
+def _resolved_sign(mnemonic: str, security: str, observed_value) -> str:
+    """CRPS-y-5: the sign of THIS figure. (a) a map sign that is UNRESOLVED (the entry's own status or a
+    per-security exception) is kept unchanged; (b) else build_unit_map.classify_sign on THIS value, MEASURED
+    label returned (carries the convention words: NET_DEBT, CAPITAL_EXPEND); (c) else _sign_label. The
+    map's sampled sign is never served on a figure whose own value contradicts it."""
+    fm = _field_map()
+    if fm:
+        for entry in fm.get("fields", []):
+            if entry.get("mnemonic") == mnemonic:
+                sign = entry.get("sign")
+                s = None
+                if isinstance(sign, dict):
+                    s = sign.get(security)
+                elif sign:
+                    s = _scalar_exception(entry, security, "sign") or sign
+                if s and str(s).startswith("UNRESOLVED"):
+                    # CRPS-ad-2: a map sign UNRESOLVED ONLY because the one sampled value was exactly zero
+                    # says nothing about THIS figure -- the sample was a zero year, the sign convention of
+                    # the series is not in doubt (BA's DPS: four positive years, then zeros). Such a figure
+                    # is signed by its own value below (rules b, c), exactly as a resolved-map figure is.
+                    # Every other UNRESOLVED reason (unit unresolved, absent value, ...) is kept unchanged.
+                    try:
+                        zero_reason = _load_build_unit_map().ZERO_SAMPLE_REASON
+                    except Exception:
+                        zero_reason = None
+                    if not (zero_reason and zero_reason in str(s)):
+                        return s
+    try:
+        label, status, _reason = _load_build_unit_map().classify_sign(mnemonic, observed_value, security)
+        if status == "MEASURED" and label:
+            return label
+    except Exception:
+        pass
+    return _sign_label(observed_value)
+
+
+# Financial-statement-scale mnemonics: the ones a reporting-currency mismatch (build_field_map.py's
+# detect_reporting_currency_mismatch, an internal PX_LAST/IS_EPS-vs-Bloomberg's-own-PE_RATIO
+# cross-check) can plausibly affect. PX_LAST itself, dimensionless ratios (PE_RATIO, PX_TO_BOOK_RATIO,
+# CURRENT_EV_TO_T12M_EBITDA, EQY_BETA) and percent fields are NOT in this set -- a ratio/percent is
+# currency-invariant by construction, and PX_LAST is the trading-currency quote the finding compares
+# everything else against, not a thing that could itself be in the "wrong" currency.
+_CURRENCY_SENSITIVE_FIELDS = {
+    "SALES_REV_TURN", "IS_OPER_INC", "EBITDA", "EBITDA_ADJUSTED", "IS_EPS",
+    "BOOK_VAL_PER_SH", "IS_SH_FOR_DILUTED_EPS", "CAPITAL_EXPEND", "CF_FREE_CASH_FLOW",
+    "IS_DIV_PER_SHR", "NET_DEBT", "CURR_ENTP_VAL", "CUR_MKT_CAP",
+}
+
+
+def _currency_caveat(mnemonic: str, security: str) -> str | None:
+    """If build_field_map.py's self-consistent PE cross-check found this SECURITY's
+    financial-statement-scale fields likely denominated in a different currency than the
+    header's CRNCY/PX_LAST trading currency, attach that finding to every currency-sensitive
+    figure on this security -- so the record answers 'as of what currency' without a separate
+    join, per AC8: a figure a reader can defend from the record alone."""
+    if mnemonic not in _CURRENCY_SENSITIVE_FIELDS:
+        return None
+    fm = _field_map()
+    if not fm:
+        return None
+    for cf in fm.get("cross_security_findings", []):
+        if cf.get("security") == security:
+            return cf.get("finding")
+    return None
+
+
+# AMGT-rk-112, C-CURRENCY-LABEL: the reporting currency (EQY_FUND_CRNCY, header) against the
+# quote/trading currency (CRNCY, header), stated on every figure -- CTO ruling msg 24261
+# (2026-09-22): "Label the reporting currency against the quote currency on every figure, and
+# convert NOTHING in the trial." NOTHING here computes an FX rate or rewrites a value; this is
+# a LABEL only.
+_CURRENCY_BASIS_REPORTING = "reporting (EQY_FUND_CRNCY)"
+_CURRENCY_BASIS_QUOTE = "quote (CRNCY)"
+_CURRENCY_BASIS_INVARIANT = "invariant"
+
+
+def _header_currencies(header_vals: dict) -> tuple[str | None, str | None]:
+    """The two header currency scalars this cell reads -- `quote_ccy` (CRNCY) and
+    `reporting_ccy` (EQY_FUND_CRNCY) -- each None when the header carries no value for it
+    (absent OR errored: an errored field never lands in `header_vals` in the first place, the
+    same rule every other header mnemonic in this module already follows -- :1059-1067). Never
+    invented, never defaulted to the other currency."""
+    return (header_vals.get("CRNCY") or None, header_vals.get("EQY_FUND_CRNCY") or None)
+
+
+# AMGT_CORPUS round 25, CRPS-aa-1 (row Z-S69): the DENOMINATION of the three header money figures on
+# the names that list in one currency and report in another. The census, by measurement, is
+# org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DENOMINATION_CENSUS_ROUND25.json
+# (73 figures on 25 securities: CUR_MKT_CAP 12 quote + 5 reporting + 8 UNRESOLVED, NET_DEBT 5 reporting +
+# 20 UNRESOLVED, CURR_ENTP_VAL 10 reporting + 13 UNRESOLVED). NOTHING here is converted and no FX rate is
+# used; each class was decided by a stated same-block read (the census `measurement` field).
+#
+# MNEMONIC-LEVEL CLASS. CURR_ENTP_VAL is `reporting` on EVERY name the census decided (10 of 10); the
+# undecided 13 are held out per security below, never labelled. Measured ground: on each decided name the
+# header enterprise value matches CUR_MKT_CAP/1e6 + NET_DEBT under a reporting-currency reading and misses it
+# by more than 24% under a quote-currency reading (identity residuals in the census).
+_DENOMINATION_REPORTING_MNEMONICS = frozenset({"CURR_ENTP_VAL"})
+
+# PER-SECURITY EXCEPTIONS, keyed by the Bloomberg-form security. CUR_MKT_CAP is `quote` on the 12 names where
+# CUR_MKT_CAP == PX_LAST x EQY_SH_OUT_REAL to 3+ digits (a market value is in the price's currency). On the
+# GBp/GBP names the same read decides the value is GBP, which IS the reporting currency, so the default
+# reporting rule already prints the right currency and no entry is needed. Names absent from both tables keep
+# the reporting rule unchanged: they were not measured, and this table does not extrapolate.
+_DENOMINATION_QUOTE = {
+    "CUR_MKT_CAP": frozenset({
+        "1299 HK Equity",
+        "992 HK Equity",
+        "BABA US Equity",
+        "BZLFY US Equity",
+        "ICT PM Equity",
+        "NOVN SW Equity",
+        "SPOT US Equity",
+        "TSM US Equity",
+        "TTE FP Equity",
+        "UBSG SW Equity",
+        "UNVGY US Equity",
+        "ZURN SW Equity",
+    }),
+}
+
+# AMGT_CORPUS round 26, CRPS-ab-5: the round-25 census EXCLUDED BP/ LN and NG/ LN (Z-S64); their 6 header
+# figures are measured in deliverables/0.9.0_WK_AMGT_CORPUS~5/DENOMINATION_CENSUS_ROUND26.json.
+#   BP/ LN Equity (quote GBp, reporting USD): CUR_MKT_CAP is GBP (value / (PX_LAST/100 x EQY_SH_OUT_REAL)
+#     = 1.00000), neither label states it -> "GBP" below; NET_DEBT is "SIDE" (identity residual 1.9% with the
+#     quote-major unit vs 9.9% with USD, not separated); CURR_ENTP_VAL is reporting USD (1.9% vs 37.1%), so the
+#     mnemonic-level rule already prints USD and no entry is needed.
+#   NG/ LN Equity (quote GBp, reporting GBP): all three are reporting GBP (market cap ratio 1.00000 in the
+#     GBP-major unit == the reporting currency; EV = market cap + NET_DEBT within +0.03%), so the reporting
+#     rule already prints GBP and, as for the other GBp/GBP names, no entry is needed.
+_DENOMINATION_UNRESOLVED = {
+    "CUR_MKT_CAP": {
+        "939 HK Equity": "SHARES",
+        "AZN LN Equity": "GBP",
+        "BP/ LN Equity": "GBP",
+        "HSBA LN Equity": "GBP",
+        "JD US Equity": "SHARES",
+        "PBR US Equity": "SHARES",
+        "RIO LN Equity": "SHARES",
+        "SHOP CN Equity": "SHARES",
+        "ULVR LN Equity": "GBP",
+    },
+    "NET_DEBT": {
+        "1299 HK Equity": "SIDE",
+        "939 HK Equity": "MCUNK",
+        "992 HK Equity": "ISOLATE",
+        "AZN LN Equity": "SIDE",
+        "BABA US Equity": "ISOLATE",
+        "BP/ LN Equity": "SIDE",
+        "BZLFY US Equity": "ISOLATE",
+        "HSBA LN Equity": "NOEV",
+        "ICT PM Equity": "SIDE",
+        "JD US Equity": "MCUNK",
+        "NOVN SW Equity": "SIDE",
+        "PBR US Equity": "MCUNK",
+        "RIO LN Equity": "MCUNK",
+        "SHOP CN Equity": "MCUNK",
+        "SPOT US Equity": "SIDE",
+        "TSM US Equity": "ISOLATE",
+        "TTE FP Equity": "SIDE",
+        "UBSG SW Equity": "SIDE",
+        "ULVR LN Equity": "SIDE",
+        "UNVGY US Equity": "NOREP",
+        "ZURN SW Equity": "SIDE",
+    },
+    "CURR_ENTP_VAL": {
+        "992 HK Equity": "ISOLATE",
+        "BABA US Equity": "ISOLATE",
+        "BZLFY US Equity": "ISOLATE",
+        "JD US Equity": "MCUNK",
+        "PBR US Equity": "MCUNK",
+        "RIO LN Equity": "MCUNK",
+        "SHOP CN Equity": "MCUNK",
+        "SPOT US Equity": "SIDE",
+        "TSM US Equity": "ISOLATE",
+        "TTE FP Equity": "SIDE",
+        "ULVR LN Equity": "SIDE",
+        "UNVGY US Equity": "NOREP",
+        "ZURN SW Equity": "SIDE",
+    },
+}
+# Why each figure is held out (the census `measurement` holds the numbers):
+_DENOMINATION_REASONS = {
+    "GBP": "the value is measured in GBP, which neither the quote label (GBp) nor the reporting currency states",
+    "SHARES": "PX_LAST x EQY_SH_OUT_REAL does not reproduce the market cap, so no read shows its currency",
+    "SIDE": "the identity read does not separate the quote and reporting currencies beyond its tolerance",
+    "MCUNK": "the market-cap currency is not established, so no identity read is computable",
+    "ISOLATE": "no read isolates this figure's own currency",
+    "NOREP": "the all-quote identity holds but no reporting-side read excludes a same-magnitude reporting currency",
+    "NOEV": "the block carries no CURR_ENTP_VAL, so no identity read is computable",
+}
+
+
+# AMGT_CORPUS round 37, CRPS-am-1: EVERY money figure carries its currency. Round 37's census over the 96
+# served blocks found 23,556 of 32,176 money figures null with basis "invariant". The side of each money
+# mnemonic is decided from the producer's FIELD_BASIS definition and checked against the landed values.
+# NOTHING is converted and no FX rate is used.
+#
+# REPORTING side -- a reported value is stated in the issuer's financial-statement currency:
+#   * statement lines: FIELD_BASIS says "millions of the reporting currency" for each (ARD_*, BS_*, IS_*,
+#     CF_*, NET_INCOME, TOTAL_EQUITY, ...).
+#   * per-share statement values (EQY_DPS, FREE_CASH_FLOW_PER_SH, IS_COMP_EPS_ADJUSTED, IS_DIL_EPS_CONT_OPS,
+#     REVENUE_PER_SH, TANG_BOOK_VAL_PER_SH): siblings reconcile with the sensitive per-share members (landed
+#     EQY_DPS == IS_DIV_PER_SHR, TANG_BOOK_VAL_PER_SH ~ BOOK_VAL_PER_SH, IS_DIL_EPS_CONT_OPS ~ IS_EPS).
+#   * the BEST_* consensus of a reported line: on the mixed names the BEST_* value sits on the scale of its
+#     reported sibling in the REPORTING currency (BABA CNY, 1299 HK USD, ICT PM USD, TSM TWD; ratios 0.5-1.8).
+#   * HISTORICAL_MARKET_CAP: FIELD_BASIS says "trading currency", but the landed values disagree on the mixed
+#     names where the two currencies differ by a large factor -- BABA / JD sit 7.9x / 7.8x above CUR_MKT_CAP
+#     (a CNY market value against a USD one), 1299 HK / 992 HK / ICT PM sit far below it (a USD value against
+#     an HKD / PHP one), and ULVR is on the EUR scale. The fiscal-period-end series is returned in the
+#     reporting currency, so it is stated there (Z-W1-S1 records the disagreement with the FIELD_BASIS text).
+# QUOTE side -- a market value from a price is stated in the price's currency:
+#   * AVG_DAILY_VALUE_TRADED_3M: price x volume; on the 11 GBp names it is 0.84-1.24 x PX_LAST x
+#     VOLUME_AVG_30D (GBp), never the 0.01 of GBP, so the quote label is exact.
+# FOLLOWS CUR_MKT_CAP -- CRNCY_ADJ_MKT_CAP is exactly CUR_MKT_CAP / 1e6 on every served block (ratio 1.0 on
+#   96 of 96, GBp names included), so it is classified AS CUR_MKT_CAP is, per security, round-25/26 tables
+#   and held-out figures included.
+_MONEY_REPORTING_FIELDS = frozenset({
+    "ARD_GOODWLL", "ARD_OTHER_INTANGIBLE_ASSET", "ARD_TOTAL_CURRENT_LIABILITIES", "ARD_TOT_ASSETS",
+    "BS_CASH_NEAR_CASH_ITEM", "BS_TOTAL_LIABILITIES", "CAPEX_ABSOLUTE_VALUE", "CASH_AND_MARKETABLE_SECURITIES",
+    "CF_CASH_FROM_OPER", "EARN_FOR_COMMON", "IS_ADJUSTED_GROSS_PROFIT", "IS_ADJUSTED_OPERATING_INCOME",
+    "MINORITY_NONCONTROLLING_INTEREST", "NET_INCOME", "SHORT_AND_LONG_TERM_DEBT", "TOTAL_EQUITY",
+    "EQY_DPS", "FREE_CASH_FLOW_PER_SH", "IS_COMP_EPS_ADJUSTED", "IS_DIL_EPS_CONT_OPS", "REVENUE_PER_SH",
+    "TANG_BOOK_VAL_PER_SH",
+    "BEST_BPS", "BEST_CAPEX", "BEST_CPS", "BEST_DPS", "BEST_EBIT", "BEST_EBITDA", "BEST_EPS",
+    "BEST_ESTIMATE_FCF", "BEST_NET_INCOME", "BEST_SALES",
+    # AMENDMENT 1 (CRPS-ap-7, round 40): the two per-share _STDDEV statistics are money per share in the reporting
+    # currency, like BEST_CPS and BEST_EPS. The two _NUMEST counts are NOT here (see _COUNT_RATIO_NO_CURRENCY_FIELDS).
+    "BEST_CPS_STDDEV", "BEST_EPS_STDDEV",
+    "HISTORICAL_MARKET_CAP",
+})
+_MONEY_QUOTE_FIELDS = frozenset({"AVG_DAILY_VALUE_TRADED_3M"})
+# CRPS-an-1 (round 38): members of the currency sets whose unit family is a COUNT or RATIO/PERCENT
+# (build_unit_map.py: "MILLIONS (share count)"), so they carry no currency. IS_SH_FOR_DILUTED_EPS is the
+# only such member of _CURRENCY_SENSITIVE_FIELDS / _DENOMINATION_REPORTING_MNEMONICS / _MONEY_*_FIELDS.
+# AMENDMENT (CRPS-ap-7, round 40): the two _NUMEST mnemonics are a COUNT of estimates, so they carry no currency.
+_COUNT_RATIO_NO_CURRENCY_FIELDS = frozenset({"IS_SH_FOR_DILUTED_EPS", "BEST_CPS_NUMEST", "BEST_EPS_NUMEST"})
+_MONEY_FOLLOWS_CUR_MKT_CAP = frozenset({"CRNCY_ADJ_MKT_CAP"})
+
+
+def _figure_currency(mnemonic: str, quote_ccy: str | None, reporting_ccy: str | None,
+                     security: str | None = None) -> tuple[str | None, str]:
+    """RULED item 2: classify ONE figure's currency and currency_basis.
+      - a `_CURRENCY_SENSITIVE_FIELDS` member (a statement/per-share money figure) is stated in
+        the REPORTING currency;
+      - `PX_LAST` is stated in the QUOTE currency;
+      - everything else (a ratio, a percent, a share count, a text/classification field, and
+        the two currency-code header fields themselves) is currency-invariant.
+    An UNSTATED needed header field is NEVER silently filled in -- the figure's `currency`
+    stays None and `currency_basis` names why.
+
+    CRPS-aa-1 (round 25): with `security` (Bloomberg form, e.g. "TSM US Equity") the three
+    census figures follow the MEASURED denomination -- a `quote` class is stated in the quote
+    currency (basis "quote (CRNCY)"), a figure the census left UNRESOLVED prints NO currency and
+    a basis beginning "UNMEASURED:". Every other figure, and every call without `security`, is
+    exactly the rule above.
+
+    CRPS-am-1 (round 37): every MONEY figure now carries a currency too -- the members of
+    `_MONEY_REPORTING_FIELDS` the reporting currency, `_MONEY_QUOTE_FIELDS` the quote currency,
+    CRNCY_ADJ_MKT_CAP exactly as CUR_MKT_CAP. A needed header currency that is absent keeps the
+    `UNSTATED:` null. Only ratios, percents, share counts, text, dates and years stay invariant."""
+    if mnemonic in _MONEY_FOLLOWS_CUR_MKT_CAP:
+        mnemonic = "CUR_MKT_CAP"
+    # CRPS-an-1 (round 38, row Z-W1-S35): a count (shares) or ratio/percent carries NO currency.
+    if mnemonic in _COUNT_RATIO_NO_CURRENCY_FIELDS:
+        return None, _CURRENCY_BASIS_INVARIANT
+    if security is not None:
+        held = _DENOMINATION_UNRESOLVED.get(mnemonic, {}).get(security)
+        if held is not None:
+            return None, "UNMEASURED: %s (CRPS-aa-1 round-25 census)" % _DENOMINATION_REASONS[held]
+        if security in _DENOMINATION_QUOTE.get(mnemonic, ()):
+            if quote_ccy is None:
+                return None, "UNSTATED: quote currency (CRNCY) not available"
+            return quote_ccy, _CURRENCY_BASIS_QUOTE
+    if (mnemonic in _CURRENCY_SENSITIVE_FIELDS or mnemonic in _DENOMINATION_REPORTING_MNEMONICS
+            or mnemonic in _MONEY_REPORTING_FIELDS):
+        if reporting_ccy is None:
+            return None, "UNSTATED: reporting currency (EQY_FUND_CRNCY) not available"
+        return reporting_ccy, _CURRENCY_BASIS_REPORTING
+    if mnemonic == "PX_LAST" or mnemonic in _MONEY_QUOTE_FIELDS:
+        if quote_ccy is None:
+            return None, "UNSTATED: quote currency (CRNCY) not available"
+        return quote_ccy, _CURRENCY_BASIS_QUOTE
+    return None, _CURRENCY_BASIS_INVARIANT
+
+
+def _ensure_unit_map(s3, security: str, sec_key: str, header_vals: dict, hist_rows: list, raw_stamp: str) -> None:
+    """AMGT-rk-35 item 6 -- units at instantiation. When the field map carries NO entry yet for
+    `security`, build one THROUGH AMGT-rk-34's builder (build_unit_map.py), merging the result
+    into the map's committed home beside this producer. A security already present is left
+    alone here -- the builder's own additive-merge rule (never overwrite a MEASURED entry) is
+    what governs a re-measure, and this producer never re-measures on its own.
+
+    AMGT-rk-36 item 4: the builder's `sample_value` reads a mnemonic from the HEADER dict
+    first. The five BEST_ mnemonics live in a THIRD raw file (bestdata.json) this builder never
+    reads on its own, so a representative sample (the FY1-override row, when it exists) is
+    merged into a COPY of header_vals before the builder runs -- never the real ref object, and
+    never written back to it. A missing/absent bestdata.json (every covered name predating this
+    cell) leaves the merge a no-op and the builder correctly reports UNRESOLVED for those five."""
+    fm = _field_map() or {}
+    if security in set(fm.get("securities") or []):
+        return
+    bum = _load_build_unit_map()
+    # CRPS-u-2: the CIE_DES_BULK join and the bestdata FY1 merge live in ONE function the
+    # builder's own CLI also uses, so the two entry points build the same map (row Z-W2-S14).
+    header_for_units = bum.prepare_header(s3, security, sec_key, header_vals, raw_stamp)
+    resolved = {sec_key: (security, header_for_units, hist_rows, raw_stamp)}
+    doc, summaries = bum.build_entries(resolved, remeasure=False)
+    # newline="\n": Path.write_text's default text mode CRLF-ifies on this device -- a repo
+    # JSON file must stay LF (CLAUDE.md; the memory bank's own "Python text-mode CRLF-ifies
+    # repo files" entry).
+    with open(bum.FIELD_MAP_PATH, "w", encoding="utf-8", newline="\n") as _fh:
+        _fh.write(json.dumps(doc, indent=2, default=str))
+    global _FIELD_MAP_CACHE
+    _FIELD_MAP_CACHE = None  # invalidate so _resolved_unit/_resolved_sign re-read the fresh file
+    for sk, sec, n_new in summaries:
+        print(f"UNIT MAP: {sec} ({sk}) -- {n_new} field entr{'y' if n_new == 1 else 'ies'} built by build_unit_map.py")
+
+
+def _crosswalk_sa_symbol(s3, security: str) -> str | None:
+    """R14-P1's own field, READ, NEVER REQUIRED (item 5(a)). Looks at the newest
+    crosswalk/v1/*.json for a record naming this security and returns its `sa_symbol` if
+    landed; None on any miss (no crosswalk object yet, no matching record, or the field has
+    not landed) -- an optional lookup, never a hard dependency of this producer."""
+    try:
+        resp = s3.list_objects_v2(Bucket=BUCKET, Prefix="crosswalk/v1/")
+        keys = sorted(o["Key"] for o in resp.get("Contents", []))
+        if not keys:
+            return None
+        doc = _read_json_from_s3(s3, keys[-1])
+        sec_key = security_key(security)
+        for rec in doc.get("records") or []:
+            if rec.get("bloomberg") == security or rec.get("security_key") == sec_key:
+                return rec.get("sa_symbol")
+    except Exception:  # noqa: BLE001 -- an optional lookup never fails this producer's own act
+        return None
+    return None
+
+
+def _forecast_period_end_dates(best: dict, security: str) -> dict:
+    """{"FY1": date_or_None, "FY2": ..., "FY3": ...} read from the bestdata.json doc."""
+    return {
+        FORECAST_OVERRIDE_TO_PERIOD[ov]: ((best.get(ov) or {}).get(security) or {}).get(FORECAST_DATE_FIELD)
+        for ov in FORECAST_OVERRIDES
+    }
+
+
+def _forecast_annual_spacing_ok(period_end_dates: dict, latest_closed_fy: str | None) -> bool:
+    """The quarter-trap guard (item 2): every PRESENT period end date must fall in a year
+    later than the block's latest_closed_fiscal_year, and every pair of PRESENT dates (in
+    FY1/FY2/FY3 order) must be at least FORECAST_MIN_ANNUAL_GAP_DAYS apart. Fewer than two
+    present dates cannot discriminate spacing on their own and this returns True -- the
+    per-cell 'no BEST_PERIOD_END_DATE' rule already accounts for a missing date; an
+    unparseable date is treated as a failure (never silently ignored)."""
+    dates = []
+    for label in ("FY1", "FY2", "FY3"):
+        raw = period_end_dates.get(label)
+        if not raw:
+            continue
+        try:
+            dates.append(_dt.date.fromisoformat(str(raw)[:10]))
+        except ValueError:
+            return False
+    if latest_closed_fy:
+        try:
+            latest_year = int(latest_closed_fy)
+            if any(d.year <= latest_year for d in dates):
+                return False
+        except ValueError:
+            pass
+    for i in range(len(dates) - 1):
+        if (dates[i + 1] - dates[i]).days < FORECAST_MIN_ANNUAL_GAP_DAYS:
+            return False
+    return True
+
+
+def _fiscal_year_from_period_end(period_end_date: str) -> int | None:
+    """Bloomberg names a fiscal year by its END year (item 2): a March 2027 period end is
+    FY2027."""
+    try:
+        return _dt.date.fromisoformat(str(period_end_date)[:10]).year
+    except (ValueError, TypeError):
+        return None
+
+
+def _derive_forecast_figures(
+    s3,
+    security: str,
+    sec_key: str,
+    raw_stamp: str,
+    header_vals: dict,
+    latest_closed_fy: str | None,
+    vintage: str,
+    sa_fallback: bool = True,
+) -> tuple[list[dict], list[dict], dict]:
+    """Section 1 items 2 and 5: the forecast-scope figures, their unresolved cells, and the
+    forecast_fallback record. Reads bestdata.json BACK from S3 for raw_stamp (never an
+    in-memory pull result), matching the re-runnability rule of the rest of this stage."""
+    # AMGT-rk-112, C-CURRENCY-LABEL: same header dict, same classifier as stage_derive's own
+    # header/fiscal-year figures (:1044-1045) -- no BEST_ mnemonic is a _CURRENCY_SENSITIVE_FIELDS
+    # member, so every forecast figure classified invariant under _figure_currency as ruled
+    # item 2 stated it. CRPS-am-1 (round 37): the BEST_* money mnemonics are now members of
+    # _MONEY_REPORTING_FIELDS and carry the reporting currency.
+    quote_ccy, reporting_ccy = _header_currencies(header_vals)
+    # CRPS-y-2: with sa_fallback=False the fallback module is never loaded and no SA request is
+    # made; a gap stays a labelled gap and the record says HELD_OFF.
+    fb = _load_sa_forecast_fallback() if sa_fallback else None
+
+    def _no_gap_record() -> dict:
+        if fb is not None:
+            return fb.no_gap_record()
+        return {
+            "sa_symbol_candidates": [],
+            "sa_symbol": None,
+            "entity_test": None,
+            "classification": None,
+            "gaps_before": 0,
+            "filled_by_sa": 0,
+            "sa_raw_key": None,
+            "reason": "no Bloomberg gap -- nothing to fill",
+            "sa_field_map": {},
+        }
+
+    figures: list[dict] = []
+    unresolved: list[dict] = []
+    best_key = _bronze_key("bestdata", sec_key, raw_stamp)
+    try:
+        best = _read_json_from_s3(s3, best_key)
+    except botocore.exceptions.ClientError:
+        unresolved.append(
+            {
+                "scope": "forecast",
+                "fiscal_period": None,
+                "mnemonic": None,
+                "reason": f"raw stamp {raw_stamp} carries no bestdata.json (pulled before C-MODEL-FORECASTS)",
+                "fallback_status": None,
+            }
+        )
+        return figures, unresolved, _no_gap_record()
+
+    period_end_dates = _forecast_period_end_dates(best, security)
+    if not _forecast_annual_spacing_ok(period_end_dates, latest_closed_fy):
+        unresolved.append(
+            {
+                "scope": "forecast",
+                "fiscal_period": None,
+                "mnemonic": None,
+                "reason": FORECAST_NOT_ANNUAL_REASON,
+                "fallback_status": None,
+            }
+        )
+        return figures, unresolved, _no_gap_record()
+
+    gaps: list[dict] = []
+    for ov in FORECAST_OVERRIDES:
+        label = FORECAST_OVERRIDE_TO_PERIOD[ov]
+        row = (best.get(ov) or {}).get(security) or {}
+        ped = row.get(FORECAST_DATE_FIELD)
+        if not ped:
+            for mnemonic in FORECAST_FIELDS:
+                unresolved.append(
+                    {
+                        "scope": "forecast",
+                        "fiscal_period": label,
+                        "mnemonic": mnemonic,
+                        "reason": "no BEST_PERIOD_END_DATE for this period",
+                        "fallback_status": "ABSENT: no period end date",
+                    }
+                )
+            continue
+        fiscal_year = _fiscal_year_from_period_end(ped)
+        for mnemonic in FORECAST_FIELDS:
+            val = row.get(mnemonic)
+            if val not in (None, ""):
+                f_cur, f_cur_basis = _figure_currency(mnemonic, quote_ccy, reporting_ccy, security=security)
+                figures.append(
+                    {
+                        "scope": "forecast",
+                        "fiscal_period": label,
+                        "override": ov,
+                        "period_end_date": ped,
+                        "fiscal_year": fiscal_year,
+                        "mnemonic": mnemonic,
+                        "value": val,
+                        "unit": _resolved_unit(mnemonic, security),
+                        "sign": _resolved_sign(mnemonic, security, val),
+                        "basis": {"mnemonic": mnemonic, "definition": FIELD_BASIS.get(mnemonic, "Bloomberg DAPI field.")},
+                        "vintage": vintage,
+                        "source": "BBG",
+                        "estimate_basis": "consensus",
+                        "currency": f_cur,
+                        "currency_basis": f_cur_basis,
+                    }
+                )
+            else:
+                gaps.append(
+                    {
+                        "fiscal_period": label,
+                        "mnemonic": mnemonic,
+                        "period_end_date": ped,
+                        "fiscal_year": fiscal_year,
+                        "override": ov,
+                        "fallback_status": None,
+                    }
+                )
+
+    if gaps and not sa_fallback:
+        reason = "HELD_OFF: SA fallback held off by --no-sa-fallback; gap left unfilled"
+        for gap in gaps:
+            gap["fallback_status"] = reason
+        result = {
+            "record": {
+                "sa_symbol_candidates": [],
+                "sa_symbol": None,
+                "entity_test": None,
+                "classification": "HELD_OFF",
+                "gaps_before": len(gaps),
+                "filled_by_sa": 0,
+                "sa_raw_key": None,
+                "reason": reason,
+                "sa_field_map": {},
+            },
+            "fills": [],
+        }
+    elif gaps:
+        cw_symbol = _crosswalk_sa_symbol(s3, security)
+        try:
+            config = fb.load_config()
+            session, _captured = fb.build_session(config)
+        except Exception as e:  # noqa: BLE001 -- a session-build failure is a STOP, never a crash
+            for gap in gaps:
+                gap["fallback_status"] = f"STOPPED: SESSION_ERROR: {e}"
+            result = {
+                "record": {
+                    "sa_symbol_candidates": [],
+                    "sa_symbol": None,
+                    "entity_test": None,
+                    "classification": "SESSION_ERROR",
+                    "gaps_before": len(gaps),
+                    "filled_by_sa": 0,
+                    "sa_raw_key": None,
+                    "reason": f"STOPPED: SESSION_ERROR: {e}",
+                    "sa_field_map": {},
+                },
+                "fills": [],
+            }
+        else:
+            result = fb.run_fallback(
+                security, sec_key, header_vals.get("NAME"), gaps, cw_symbol, s3, session, config
+            )
+    else:
+        result = {"record": _no_gap_record(), "fills": []}
+
+    for fill in result["fills"]:
+        mnemonic = fill["mnemonic"]
+        fill_cur, fill_cur_basis = _figure_currency(mnemonic, quote_ccy, reporting_ccy, security=security)
+        figures.append(
+            {
+                "scope": "forecast",
+                "fiscal_period": fill["fiscal_period"],
+                "override": fill.get("override"),
+                "period_end_date": fill.get("period_end_date"),
+                "fiscal_year": fill.get("fiscal_year"),
+                "mnemonic": mnemonic,
+                "value": fill["value"],
+                "unit": _resolved_unit(mnemonic, security),
+                "sign": _resolved_sign(mnemonic, security, fill["value"]),
+                "basis": {"mnemonic": mnemonic, "definition": FIELD_BASIS.get(mnemonic, "Bloomberg DAPI field.")},
+                "vintage": vintage,
+                "source": "SA_FALLBACK",
+                "estimate_basis": "consensus",
+                "sa_field": fill["sa_field"],
+                "sa_symbol": fill["sa_symbol"],
+                "sa_raw_key": fill["sa_raw_key"],
+                "currency": fill_cur,
+                "currency_basis": fill_cur_basis,
+            }
+        )
+
+    for gap in gaps:
+        if gap.get("fallback_status"):
+            unresolved.append(
+                {
+                    "scope": "forecast",
+                    "fiscal_period": gap["fiscal_period"],
+                    "mnemonic": gap["mnemonic"],
+                    "reason": gap["fallback_status"],
+                    "fallback_status": gap["fallback_status"],
+                }
+            )
+
+    return figures, unresolved, result["record"]
+
+
+# CRPS-g-1, RULED item 3: the Base case's plausibility band -- `base / px_last` outside this
+# window refuses rather than serves (module constants, per the ruling).
+# AMGT-uu-3: the band, its basis, the minor-unit rule and the whole Base-case construction now
+# live in ONE module, `lib/research/api/case_rule.py`, which the served adapter
+# (`scoped_amgt._model_cases`) calls too -- so the producer and the adapter cannot drift. The
+# names below are re-exported unchanged for every existing reader of this module.
+CASE_BAND_LOW = _case_rule.CASE_BAND_LOW
+CASE_BAND_HIGH = _case_rule.CASE_BAND_HIGH
+CASE_BAND_BASIS = _case_rule.CASE_BAND_BASIS
+_MINOR_UNIT_FACTOR = _case_rule.MINOR_UNIT_FACTOR
+_is_minor_unit_quote = _case_rule.is_minor_unit_quote
+
+
+def _compute_cases(
+    figures: list[dict],
+    quote_ccy: str | None = None,
+    reporting_ccy: str | None = None,
+    latest_closed_fiscal_year=None,
+) -> dict:
+    """AMGT-rk-37 / CRPS-g-1, amended by AMGT-uu-3 (Andrew, 2026-09-28): the Base case is ADJUSTED
+    EPS x ADJUSTED P/E. The construction is `lib.research.api.case_rule.compute_cases` (the ONE
+    implementation; see its docstring for the rule, the ordered refusals and the band) -- the
+    producer computes it here on the figures this derive just built, and the served adapter
+    computes it from the stored block's own figures by the SAME function."""
+    return _case_rule.compute_cases(figures, quote_ccy, reporting_ccy, latest_closed_fiscal_year)
+
+
+def _is_december_fye(hist_rows: list[dict]) -> bool:
+    """AMGT-rk-109: True when EVERY row carrying a `fye_join.FUNDAMENTAL_FIELDS` member is dated
+    in month 12, or when no such row exists (vacuously December -- nothing to contradict it).
+    A row that carries no fundamental field (a price-only trading-day snapshot) never counts
+    against this -- only a fundamentals-bearing row is the period-end record fye_join anchors
+    on."""
+    fye_mod = _load_fye_join()
+    for row in hist_rows:
+        if not any(f in row for f in fye_mod.FUNDAMENTAL_FIELDS):
+            continue
+        date = row.get("date")
+        if not date or date[5:7] != "12":
+            return False
+    return True
+
+
+def stage_derive(s3, security: str, raw_stamp: str | None, sa_fallback: bool = True) -> dict:
+    """Read the raw bytes BACK from S3 (never the pull's in-memory result) and compute the
+    derived model_block.json, landed at its own, later stamp -- independently re-runnable."""
+    sec_key = security_key(security)
+    if raw_stamp is None:
+        raw_stamp = _select_stamp_carrying_inputs(s3, security, sec_key)
+    ref = _read_json_from_s3(s3, _bronze_key("refdata", sec_key, raw_stamp))
+    hist = _read_json_from_s3(s3, _bronze_key("histdata", sec_key, raw_stamp))
+
+    header_vals = ref.get(security, {})
+    header_errs = header_vals.get("__field_errors__", {})
+    hist_rows = hist.get(security, [])
+
+    # AMGT-rk-112, C-CURRENCY-LABEL: the two header currency scalars this cell reads once, up
+    # front, and threads to every figure built below (header, fiscal-year and forecast alike).
+    quote_ccy, reporting_ccy = _header_currencies(header_vals)
+
+    # AMGT-rk-109: a 31 March (or any non-December) fiscal year end cannot be joined by
+    # CALENDAR year (merge_by_fiscal_year mispairs the fundamentals with a price ~9 months
+    # off, row W1-S2) -- fiscal_period_join anchors on the fundamentals row's own reported
+    # date instead. The December path is UNCHANGED: same call, same output, byte-identical.
+    is_december = _is_december_fye(hist_rows)
+    non_anchor_only_fields: set[str] = set()
+    fiscal_year_join_info: dict | None = None
+    if is_december:
+        fy_groups = merge_by_fiscal_year(hist_rows)
+    else:
+        fye_mod = _load_fye_join()
+        fy_groups = fye_mod.fiscal_period_join(hist_rows)
+        # (a) each group's PX_LAST is the paired price (never the calendar-year mispairing).
+        for row in fy_groups.values():
+            row["PX_LAST"] = row.get("price")
+        # (b) a HIST_FIELDS member that exists ONLY on a non-anchor (price-only) row is never
+        # merged by fiscal_period_join (it would be mis-dated) -- recorded under `unresolved`
+        # below instead of silently dropped.
+        for row in hist_rows:
+            if any(f in row for f in fye_mod.FUNDAMENTAL_FIELDS):
+                continue
+            for k in row:
+                if k != "date":
+                    non_anchor_only_fields.add(k)
+        # (c) the block gains a top-level fiscal_year_join key -- non-December path ONLY, so
+        # the December block's bytes never change (the key's mere presence would break
+        # byte-identity even with the same value, so it is never written on that path).
+        fiscal_year_join_info = {
+            "method": "fiscal-period (fye_join)",
+            "max_gap_days": fye_mod.max_gap_days(fy_groups),
+        }
+
+    _ensure_unit_map(s3, security, sec_key, header_vals, hist_rows, raw_stamp)
+
+    closed_fys = sorted(
+        fy for fy, row in fy_groups.items()
+        if any(row.get(f) not in (None, "") for f in _STATEMENT_FIELDS)
+    )
+    excluded_fys = sorted(fy for fy in fy_groups if fy not in closed_fys)
+
+    vintage = _dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    figures: list[dict] = []
+    unresolved: list[dict] = []
+
+    for mnemonic in HEADER_FIELDS:
+        val = header_vals.get(mnemonic)
+        # AMGT-rk-37, item 2: CIE_DES_BULK's raw value is a LIST of row dicts (measured on
+        # CAT) -- join it to a single string HERE, at the derive; the raw landing above is
+        # untouched (it was already put to S3 in stage_pull before this function ever runs).
+        if mnemonic in _BULK_TEXT_HEADER_FIELDS:
+            val = _bulk_text_value(val)
+        ern_left_out = None
+        if mnemonic in _BULK_EARNINGS_HEADER_FIELDS:
+            # CRPS-aj-1: the bulk earnings field -> [{announcement_date, period}...]; the raw landing is untouched.
+            val, ern_left_out = _ern_announcements_value(val)
+        if val is None or val == "":
+            reason = header_errs.get(mnemonic, "empty/no value returned")
+            if ern_left_out and mnemonic not in header_errs:
+                reason = "no row carried a readable announcement date (%d row(s) left out)" % ern_left_out
+            unresolved.append(
+                {
+                    "scope": "header",
+                    "mnemonic": mnemonic,
+                    "reason": reason,
+                }
+            )
+            continue
+        cur, cur_basis = _figure_currency(mnemonic, quote_ccy, reporting_ccy, security=security)
+        basis = {"mnemonic": mnemonic, "definition": FIELD_BASIS.get(mnemonic, "Bloomberg DAPI field.")}
+        if ern_left_out is not None:
+            basis["rows_left_out"] = ern_left_out  # rows whose date could not be read (left out of the value)
+        figures.append(
+            {
+                "scope": "header",
+                "fiscal_year": None,
+                "mnemonic": mnemonic,
+                "value": val,
+                "unit": _resolved_unit(mnemonic, security),
+                "sign": _resolved_sign(mnemonic, security, val),
+                "basis": basis,
+                "vintage": vintage,
+                "source": "bloomberg-dapi",
+                "currency_caveat": _currency_caveat(mnemonic, security),
+                "currency": cur,
+                "currency_basis": cur_basis,
+            }
+        )
+
+    for fy in closed_fys:
+        row = fy_groups[fy]
+        for mnemonic in HIST_FIELDS:
+            if mnemonic not in row:
+                # AMGT-rk-109, item 2(b): on the non-December path, a member that lands ONLY on
+                # a non-anchor (price-only) row was never merged by fiscal_period_join (it
+                # would be mis-dated) -- name it here rather than silently dropping it. The
+                # December path is byte-identical: this branch is never taken there.
+                if not is_december and mnemonic in non_anchor_only_fields:
+                    unresolved.append(
+                        {
+                            "scope": "fiscal_year_line_item",
+                            "fiscal_year": fy,
+                            "mnemonic": mnemonic,
+                            "reason": "not dated at the fiscal period end (non-December FYE, fye_join)",
+                        }
+                    )
+                continue
+            val = row[mnemonic]
+            if val is None or val == "":
+                unresolved.append(
+                    {"scope": "fiscal_year_line_item", "fiscal_year": fy, "mnemonic": mnemonic, "reason": "empty/no value returned"}
+                )
+                continue
+            fy_cur, fy_cur_basis = _figure_currency(mnemonic, quote_ccy, reporting_ccy, security=security)
+            fig = {
+                "scope": "fiscal_year_line_item",
+                "fiscal_year": fy,
+                "mnemonic": mnemonic,
+                "value": val,
+                "unit": _resolved_unit(mnemonic, security),
+                "sign": _resolved_sign(mnemonic, security, val),
+                "basis": {"mnemonic": mnemonic, "definition": FIELD_BASIS.get(mnemonic, "Bloomberg DAPI field.")},
+                "vintage": vintage,
+                "source": "bloomberg-dapi",
+                "currency_caveat": _currency_caveat(mnemonic, security),
+                "currency": fy_cur,
+                "currency_basis": fy_cur_basis,
+            }
+            if not is_december and mnemonic == "PX_LAST":
+                # AMGT-rk-109, item 2(a): the paired price's own observation date and elapsed
+                # gap, recorded ON the figure fiscal_period_join built it from.
+                fig["price_date"] = row.get("price_date")
+                fig["gap_days"] = row.get("gap_days")
+            figures.append(fig)
+
+    # AMGT-rk-35 item 2(ii): every EXCLUDED (not-closed) fiscal-year group is recorded under
+    # unresolved -- COUNT IN EQUALS COUNT OUT on the block's own accounting: no fiscal year
+    # simply vanishes, it either lands as closed figures or is named here with its reason.
+    for fy in excluded_fys:
+        unresolved.append(
+            {"scope": "fiscal_year_line_item", "fiscal_year": fy, "mnemonic": None, "reason": _FY_NOT_CLOSED_REASON}
+        )
+
+    end_requested = _end_requested_from_pull_log(s3, sec_key, raw_stamp)
+    history_window = {
+        "start": HIST_START,
+        "end_requested": end_requested,
+        "latest_closed_fiscal_year": max(closed_fys) if closed_fys else None,
+        "rule": _FY_NOT_CLOSED_REASON,
+    }
+
+    # AMGT-rk-36, C-MODEL-FORECASTS: forecast-scope figures, their unresolved cells, and the
+    # forecast_fallback record (item 2, item 5). COUNT IN EQUALS COUNT OUT here too: every one
+    # of the 15 possible (period, field) cells lands as a figure or a named unresolved record.
+    forecast_figures, forecast_unresolved, forecast_fallback = _derive_forecast_figures(
+        s3, security, sec_key, raw_stamp, header_vals, history_window["latest_closed_fiscal_year"], vintage,
+        sa_fallback=sa_fallback,
+    )
+    figures.extend(forecast_figures)
+    unresolved.extend(forecast_unresolved)
+
+    # AMGT-rk-37, C-MODEL-WINDOW-AND-ROWS (5): the Base case, computed ONCE here, on the
+    # figures this SAME derive just built (never re-read from a different stamp).
+    cases = _compute_cases(figures, quote_ccy, reporting_ccy, history_window["latest_closed_fiscal_year"])
+
+    derived = {
+        "security": security,
+        "security_key": sec_key,
+        "raw_stamp_used": raw_stamp,
+        "fiscal_years": closed_fys,
+        "fiscal_year_row_count": len(closed_fys),
+        "orphan_price_rows": 0,  # by construction of merge_by_fiscal_year: every raw row's
+        # fields are merged into its calendar-year group, so nothing is left un-joined; see
+        # check_join.py for the independent, from-S3 re-derivation this claim is graded against.
+        # Meaning now holds over the CLOSED set only (AMGT-rk-35): an excluded (not-closed)
+        # fiscal year is never counted here, and is named under `unresolved` instead.
+        "history_window": history_window,
+        "figures": figures,
+        "unresolved": unresolved,
+        "forecast_fallback": forecast_fallback,
+        "cases": cases,
+        # AMGT-rk-112, C-CURRENCY-LABEL, RULED item 3 -- always present, both December and
+        # non-December: NOTHING is converted (`converted` is always False in this trial cell).
+        "currencies": {
+            "quote": quote_ccy,
+            "reporting": reporting_ccy,
+            "mixed": quote_ccy != reporting_ccy,
+            "converted": False,
+        },
+    }
+    if fiscal_year_join_info is not None:
+        # AMGT-rk-109, item 2(c): non-December path ONLY -- the December block never gains
+        # this key, so its bytes are unchanged (see the comment where fiscal_year_join_info
+        # is built above).
+        derived["fiscal_year_join"] = fiscal_year_join_info
+
+    derived_stamp = utc_stamp()
+    derived_key = f"derived/{ENGINE}/{crosswalk.slash_safe_key(sec_key)}/{derived_stamp}/model_block.json"
+    s3_put_if_absent(s3, derived_key, json.dumps(derived, default=str, indent=2).encode("utf-8"))
+    return {
+        "security": security,
+        "sec_key": sec_key,
+        "derived_stamp": derived_stamp,
+        "derived_key": derived_key,
+        "model_block": derived,
+    }
+
+
+def cmd_pull(securities: list[str], dry_run: bool = False) -> int:
+    if dry_run:
+        end_date = _rolling_end_date()
+        best_fields = FORECAST_FIELDS + [FORECAST_DATE_FIELD]
+        for sec in securities:
+            sec_key = security_key(sec)
+            print(
+                f"DRY-RUN PULL: {sec} -> would send ReferenceDataRequest(security={sec!r}, "
+                f"fields={HEADER_FIELDS})"
+            )
+            # CRPS-f-2: one line per historical chunk -- HIST_FIELDS split at
+            # HIST_FIELDS_PER_REQUEST, order preserved.
+            hist_field_chunks = _hist_field_chunks(HIST_FIELDS, HIST_FIELDS_PER_REQUEST)
+            n_chunks = len(hist_field_chunks)
+            for chunk_i, chunk_fields in enumerate(hist_field_chunks, start=1):
+                print(
+                    f"DRY-RUN PULL: {sec} -> would send HistoricalDataRequest chunk {chunk_i} "
+                    f"of {n_chunks} fields={len(chunk_fields)} (security={sec!r}, "
+                    f"request_fields={chunk_fields}, start_date={HIST_START}, "
+                    f"end_date={end_date}, periodicity={PERIODICITY})"
+                )
+            for fp in FORECAST_OVERRIDES:
+                print(
+                    f"DRY-RUN PULL: {sec} -> would send ReferenceDataRequest(security={sec!r}, "
+                    f"fields={best_fields}, overrides={{{FORECAST_OVERRIDE_FIELD!r}: {fp!r}}})"
+                )
+            print(
+                f"DRY-RUN PULL: {sec} -> would write "
+                f"{_bronze_prefix('refdata', sec_key)}<stamp>.json, "
+                f"{_bronze_prefix('histdata', sec_key)}<stamp>.json, "
+                f"{_bronze_prefix('bestdata', sec_key)}<stamp>.json, "
+                f"{_state_pull_log_prefix(sec_key)}<stamp>.json"
+            )
+        print(f"DRY RUN PULL DONE: {len(securities)} of {len(securities)} securities planned, 0 written")
+        return 0
+    blp = _load_blp_client()
+    s3 = _s3()
+    results = []
+    for sec in securities:
+        r = stage_pull(blp, s3, sec)
+        results.append(r)
+        print(
+            f"PULL: {sec} -> raw stamp {r['raw_stamp']} "
+            f"({r['ref_key']}, {r['hist_key']}, {r['pull_log_key']})"
+        )
+    print(f"PULL DONE: {len(results)} of {len(securities)} securities landed raw")
+    return 0
+
+
+def cmd_derive(securities: list[str], dry_run: bool = False, sa_fallback: bool = True) -> int:
+    if dry_run:
+        for sec in securities:
+            sec_key = security_key(sec)
+            print(
+                f"DRY-RUN DERIVE: {sec} -> would read the latest bronze stamp under "
+                f"{_bronze_prefix('refdata', sec_key)} (paired with histdata) and would write "
+                f"derived/{ENGINE}/{crosswalk.slash_safe_key(sec_key)}/<stamp>/model_block.json"
+                + ("" if sa_fallback else " sa_fallback held_off")
+            )
+        print(f"DRY RUN DERIVE DONE: {len(securities)} of {len(securities)} securities planned, 0 written")
+        return 0
+    s3 = _s3()
+    results = []
+    for sec in securities:
+        r = stage_derive(s3, sec, raw_stamp=None, sa_fallback=sa_fallback)
+        results.append(r)
+        print(
+            f"DERIVE: {sec} -> derived stamp {r['derived_stamp']} "
+            f"({r['model_block']['fiscal_year_row_count']} FY rows, "
+            f"{len(r['model_block']['figures'])} figures, "
+            f"{len(r['model_block']['unresolved'])} unresolved)"
+        )
+    print(f"DERIVE DONE: {len(results)} of {len(securities)} securities derived")
+    return 0
+
+
+def _cases_report_figures(s3, security: str, sec_key: str, raw_stamp: str) -> tuple[list[dict], str | None, str | None]:
+    """CRPS-g-1 -- the read-only reconstruction `cases-report` needs: the THREE figure kinds
+    `_compute_cases` reads (the FY1 BEST_EPS forecast figure, every CLOSED fiscal year's own
+    PE_RATIO figure, and the header PX_LAST figure), plus the block's own quote/reporting
+    currency codes -- rebuilt from the raw bytes already landed at `raw_stamp`, the SAME
+    fiscal-year join and closed-year rule `stage_derive` uses. Writes NOTHING: no
+    `_ensure_unit_map` call (that is the only write inside `stage_derive`'s figure-building
+    path) and no S3 put anywhere.
+
+    FY1 BEST_EPS is read from the landed `bestdata.json` BBG value only -- this function never
+    calls `_derive_forecast_figures`/the Seeking Alpha fallback session, because that is a live
+    vendor call and this route's HARD BOUND is no vendor call, ever. A security whose real
+    `derive` would have filled the gap through SA_FALLBACK reads ABSENT here instead (`base`:
+    "no consensus EPS on the landed block") rather than making that call -- a deliberate
+    divergence from `stage_derive`, never a bug."""
+    ref = _read_json_from_s3(s3, _bronze_key("refdata", sec_key, raw_stamp))
+    hist = _read_json_from_s3(s3, _bronze_key("histdata", sec_key, raw_stamp))
+    header_vals = ref.get(security, {})
+    hist_rows = hist.get(security, [])
+    quote_ccy, reporting_ccy = _header_currencies(header_vals)
+
+    is_december = _is_december_fye(hist_rows)
+    if is_december:
+        fy_groups = merge_by_fiscal_year(hist_rows)
+    else:
+        fye_mod = _load_fye_join()
+        fy_groups = fye_mod.fiscal_period_join(hist_rows)
+        for row in fy_groups.values():
+            row["PX_LAST"] = row.get("price")
+
+    closed_fys = sorted(
+        fy for fy, row in fy_groups.items()
+        if any(row.get(f) not in (None, "") for f in _STATEMENT_FIELDS)
+    )
+
+    figures: list[dict] = []
+
+    px_val = header_vals.get("PX_LAST")
+    if px_val not in (None, ""):
+        figures.append({"scope": "header", "mnemonic": "PX_LAST", "value": px_val, "vintage": None})
+
+    # AMGT-uu-3: the Base case's adjusted P/E reads each closed year's PX_LAST and
+    # IS_COMP_EPS_ADJUSTED (joined on fiscal_year), the same two figures `stage_derive` lands.
+    for fy in closed_fys:
+        for mnemonic in ("PX_LAST", "IS_COMP_EPS_ADJUSTED"):
+            val = fy_groups[fy].get(mnemonic)
+            if isinstance(val, (int, float)):
+                figures.append(
+                    {"scope": "fiscal_year_line_item", "fiscal_year": fy, "mnemonic": mnemonic, "value": val}
+                )
+
+    try:
+        best = _read_json_from_s3(s3, _bronze_key("bestdata", sec_key, raw_stamp))
+    except botocore.exceptions.ClientError:
+        best = None
+    if best:
+        fy1_row = (best.get("1FY") or {}).get(security) or {}
+        eps_val = fy1_row.get("BEST_EPS")
+        if eps_val not in (None, ""):
+            ped = fy1_row.get(FORECAST_DATE_FIELD)
+            figures.append(
+                {
+                    "scope": "forecast",
+                    "mnemonic": "BEST_EPS",
+                    "fiscal_period": "FY1",
+                    "fiscal_year": _fiscal_year_from_period_end(ped) if ped else None,
+                    "period_end_date": ped,
+                    "value": eps_val,
+                    "source": "BBG",
+                    "basis": {"mnemonic": "BEST_EPS", "definition": FIELD_BASIS.get("BEST_EPS", "Bloomberg DAPI field.")},
+                }
+            )
+
+    return figures, quote_ccy, reporting_ccy
+
+
+def _stamp_carries_inputs(s3, security: str, sec_key: str, stamp: str) -> bool:
+    """CRPS-j-3: True when the landed raw at `stamp` carries the INPUTS of the Base-case rule
+    (`lib.research.api.case_rule.compute_cases`) -- i.e. the rule, run over that stamp's figures,
+    does NOT refuse for missing consensus EPS or missing adjusted P/E history. Those two input
+    refusals are exactly the ABSENT results that carry no `cause`; every other result (SERVED, or
+    a refusal with a `cause`: forward EPS not positive, no price, currency mismatch, outside band)
+    was computed FROM the inputs, so a currency refusal is a stamp that carries them. Reads landed
+    raw only, through `_cases_report_figures` (no write, no vendor call)."""
+    figures, quote_ccy, reporting_ccy = _cases_report_figures(s3, security, sec_key, stamp)
+    base = _compute_cases(figures, quote_ccy, reporting_ccy)["base"]
+    return base.get("status") == "SERVED" or bool(base.get("cause"))
+
+
+def _select_stamp_carrying_inputs(s3, security: str, sec_key: str) -> str:
+    """CRPS-j-3: the raw stamp `derive` and `cases-report` read -- the newest qualifying stamp
+    (`_stamps_with_raw_pair`, newest first) that carries the rule's inputs. When no landed stamp
+    carries them, the newest qualifying stamp exactly as `_latest_stamp` returns it, so the
+    refusal and its reason are unchanged; when the newest already carries them, that same newest
+    stamp (no older stamp is read). Sits ON TOP of `_latest_stamp`'s pair rule and its errors."""
+    newest = _latest_stamp(s3, sec_key)
+    if _stamp_carries_inputs(s3, security, sec_key, newest):
+        return newest
+    for stamp in _stamps_with_raw_pair(s3, sec_key):
+        if stamp == newest:
+            continue
+        try:
+            if _stamp_carries_inputs(s3, security, sec_key, stamp):
+                return stamp
+        except botocore.exceptions.ClientError:
+            continue  # an unreadable older stamp does not carry; fall through to the next / newest
+    return newest
+
+
+def cmd_stamp_census(securities: list[str]) -> int:
+    """CRPS-j-3 -- `stamp-census`: READ-ONLY. For each security, over every stamp
+    `_stamps_with_raw_pair` returns (newest first), report whether the newest carries the rule's
+    inputs and which stamp `_select_stamp_carrying_inputs` would read. The three buckets
+    (newest_carries / older_carries / none_carries) partition the keys read. Writes NOTHING."""
+    s3 = _s3()
+    newest_carries = older_carries = none_carries = 0
+    for sec in securities:
+        sec_key = security_key(sec)
+        newest = _latest_stamp(s3, sec_key)
+        newest_yes = _stamp_carries_inputs(s3, sec, sec_key, newest)
+        carrying = newest if newest_yes else _select_stamp_carrying_inputs(s3, sec, sec_key)
+        if newest_yes:
+            newest_carries += 1
+        elif carrying != newest:
+            older_carries += 1
+        else:
+            carrying = None
+            none_carries += 1
+        print(
+            f"stamp {sec_key} newest {newest} newest_carries {'yes' if newest_yes else 'no'} "
+            f"carrying {carrying if carrying else 'none'}"
+        )
+    print(
+        f"stamp_census keys {len(securities)} newest_carries {newest_carries} "
+        f"older_carries {older_carries} none_carries {none_carries} "
+        f"sum {newest_carries + older_carries + none_carries}"
+    )
+    return 0
+
+
+def _cases_report_unresolved(s3, securities: list[str]) -> list[tuple[str, str]]:
+    """CRPS-l-4: (input, bronze prefix) for every security whose landed raw `cases-report`
+    cannot resolve. The landed raw is keyed by the Bloomberg form ("AMD US Equity"); the
+    underscore form maps to the SAME sec_key and so finds stamps, but its own string is no key
+    inside the landed refdata/histdata, so it read as an empty block and a false ABSENT. Read-only."""
+    bad: list[tuple[str, str]] = []
+    for sec in securities:
+        sec_key = security_key(sec)
+        prefix = _bronze_prefix("refdata", sec_key)
+        try:
+            stamp = _latest_stamp(s3, sec_key)
+            figures, _q, _r = _cases_report_figures(s3, sec, sec_key, stamp)
+        except (RuntimeError, KeyError, botocore.exceptions.ClientError):
+            bad.append((sec, prefix))
+            continue
+        if not figures:
+            bad.append((sec, prefix))
+    return bad
+
+
+def cmd_cases_report(securities: list[str]) -> int:
+    """CRPS-g-1 -- `cases-report`: for each security, read the NEWEST landed raw stamp from
+    S3, rebuild the figures and cases in memory exactly as `derive` would (modulo the
+    no-vendor-call divergence `_cases_report_figures` documents), and print one `cases` line
+    plus the summary. Writes NOTHING -- the only S3 touches are GetObject/ListObjectsV2 reads
+    of already-landed raw."""
+    s3 = _s3()
+    unresolved = _cases_report_unresolved(s3, securities)
+    if unresolved:
+        for sec, prefix in unresolved:
+            print(
+                f'REFUSE: {sec} resolves to no landed raw stamp under {prefix} '
+                f'(pass the Bloomberg form, e.g. "AMD US Equity")'
+            )
+        return 2
+    served = 0
+    refused = 0
+    for sec in securities:
+        sec_key = security_key(sec)
+        raw_stamp = _select_stamp_carrying_inputs(s3, sec, sec_key)
+        figures, quote_ccy, reporting_ccy = _cases_report_figures(s3, sec, sec_key, raw_stamp)
+        cases = _compute_cases(figures, quote_ccy, reporting_ccy)
+        base = cases["base"]
+        status = base.get("status")
+        ratio = base.get("ratio_to_px_last")
+        cause = base.get("cause")
+        reason = base.get("reason")
+        line = (
+            f"cases {sec_key} base {status} ratio {ratio if ratio is not None else 'none'} "
+            f"cause {cause if cause else 'none'} reason {reason}"
+        )
+        band_basis = base.get("band_basis")
+        if band_basis:
+            low = band_basis["low"]
+            high = band_basis["high"]
+            line += (
+                f" band_basis low {low['value']} {low['calibration']} "
+                f"high {high['value']} {high['calibration']}"
+            )
+        print(line)
+        if status == "SERVED":
+            served += 1
+        else:
+            refused += 1
+    print(f"cases_report served {served} refused {refused}")
+    return 0
+
+
+ADMIT_BATCH = 3  # the F2/G-24 cap, applied per batch of the admit stage
+ADMIT_REFUSED_LINE = (
+    "REFUSED: Bloomberg DAPI not reachable -- sign in per integrations/bloomberg/READ_HERE.md section 2"
+)
+
+
+def _registered_security_keys() -> list[str]:
+    """CRPS-t-1: every security the live research library resolves through the served
+    crosswalk -- `backlog.build(library_root())` records carrying a `security_key`
+    (<ROOT>_<CC>_Equity, deduplicated, sorted)."""
+    from lib.research.corpus import backlog as _backlog
+    from lib.research.corpus import library as _library
+
+    document = _backlog.build(_library.library_root())
+    return sorted({r["security_key"] for r in document["records"] if r.get("security_key")})
+
+
+def _model_block_keys_in_store(s3) -> set[str]:
+    """The security_key (IDENTITY form, '/' kept) of every object under derived/model_block/
+    in the producer's own bucket. C-SLASH-SAFE-KEY: stage_derive now writes the ENCODED
+    segment (`crosswalk.slash_safe_key`), so a store key maps back to its identity with
+    the crosswalk's exact inverse `security_key_from_slash_safe`; a LEGACY raw-slash
+    partition (live until the round-25 move: `BP/_LN_Equity/<stamp>/<file>`) is already
+    the identity, so it is kept as found -- both forms of one name yield ONE identity.
+    The segment is everything between the prefix and `<stamp>/<file>`.
+    One paginated list, no delimiter (a '/' inside a legacy key would truncate a delimited list)."""
+    # slash-safe: not a per-security path (a PREFIX listing; it DECODES each stored segment with security_key_from_slash_safe and builds no per-security path)
+    prefix = f"derived/{ENGINE}/"
+    found: set[str] = set()
+    token = None
+    while True:
+        kwargs = {"Bucket": BUCKET, "Prefix": prefix}
+        if token:
+            kwargs["ContinuationToken"] = token
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp.get("Contents", []):
+            rest = obj["Key"][len(prefix):]
+            if rest.count("/") >= 2:
+                segment = rest.rsplit("/", 2)[0]
+                if "/" not in segment:
+                    try:
+                        segment = crosswalk.security_key_from_slash_safe(segment)
+                    except crosswalk.SlashSafeKeyError:
+                        pass  # not a slash-safe form (outer whitespace / non-ASCII): keep the segment as found
+                found.add(segment)
+        if resp.get("IsTruncated"):
+            token = resp.get("NextContinuationToken")
+        else:
+            return found
+
+
+def _returned_records(name: str, result) -> int:
+    """AMENDMENT 2 (CRPS-ap-7, round 40): the RETURNED RECORDS one response carries, the budget ledger's own unit.
+    A reference request returns {security: {...}}: one record per security row. A history request returns
+    {security: [dated rows]}: one record per dated row. Counted from the response received, never estimated;
+    any other shape, or a response that cannot be read, counts 0 (bookkeeping never fails a request)."""
+    try:
+        if not isinstance(result, dict):
+            return 0
+        if name == "reference_data":
+            return len(result)
+        if name == "historical_data":
+            return sum(len(rows) for rows in result.values() if isinstance(rows, list))
+    except Exception:  # noqa: BLE001 -- counting must never break a request
+        return 0
+    return 0
+
+
+class _CountingClient:
+    """Delegates to the estate client and counts each Bloomberg request it sends, and (AMENDMENT 2, CRPS-ap-7,
+    round 40) the returned records of each response."""
+
+    def __init__(self, inner) -> None:
+        self._inner = inner
+        self.calls = 0
+        self.records = 0
+
+    def __getattr__(self, name):
+        attr = getattr(self._inner, name)
+        if name in ("reference_data", "historical_data", "intraday_bars") and callable(attr):
+            def _counted(*a, **kw):
+                self.calls += 1
+                result = attr(*a, **kw)
+                self.records += _returned_records(name, result)
+                return result
+            return _counted
+        return attr
+
+
+BUDGET_MODE = "amgt-model-block"
+# The estate's own rule for finding the ledger module (integrations/bloomberg/pipeline/etf_daily_pull.py): a glob under the
+# repository's data/ tree, exactly one hit -- no hand-kept firm name here.
+BUDGET_LEDGER_GLOB = ("data", "*", "scripts", "rivalfunds", "bbg_budget.py")
+
+
+def record_fire_budget(*, calls, security_fields, figures, records, stamp) -> bool:
+    """AMENDMENT 2 (CRPS-ap-7, round 40; CTO rulings msg 31290, 31295, 31310): append ONE line for this fire to the shared
+    Bloomberg budget ledger (`bbg_budget.py` under `data/*/scripts/rivalfunds/`, loaded BY PATH from the repository this file
+    sits in, the way `_load_build_unit_map` loads its sibling). AMENDMENT 3 (CRPS-ap-7, round 40; CTO ruling msg 31815):
+    `rows` = `records` -- the ledger holds ONE unit, RETURNED RECORDS, as its other writers record rows returned; a
+    figures-sized line (about 67,000) would overstate the day's spend about 16-fold and could refuse another product
+    capacity. The batch_id carries all four counts and ends `rows_unit=returned-records`. Returns what `bbg_budget.record` returns. NEVER raises: a missing module, an unreadable path or a failed
+    write returns False -- a fire is never blocked or failed by bookkeeping."""
+    try:
+        repo = Path(__file__).resolve().parent.parent.parent.parent
+        hits = sorted(repo.glob("/".join(BUDGET_LEDGER_GLOB)))
+        if len(hits) != 1:
+            return False
+        mod_path = hits[0]
+        spec = importlib.util.spec_from_file_location("bbg_budget_ledger", mod_path)
+        if spec is None or spec.loader is None:
+            return False
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        batch_id = (
+            f"{BUDGET_MODE}:{stamp}:calls={int(calls)}:security_fields={int(security_fields)}"
+            f":figures={int(figures)}:records={int(records)}:rows_unit=returned-records"
+        )
+        return bool(mod.record(BUDGET_MODE, int(records), batch_id))
+    except Exception:  # noqa: BLE001 -- bookkeeping never fails a fire
+        return False
+
+
+def _figure_count(derived: dict) -> int:
+    """The figures in one derived block (stage_derive's return); 0 when the block carries none."""
+    try:
+        return len(derived["model_block"]["figures"])
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+def _close_fire_budget(counter: "_CountingClient", pulled: int, figures: int) -> None:
+    """AMENDMENT 2 (CRPS-ap-7, round 40): the one budget record at the end of a real fire, and its one printed line.
+    Never raises and never changes the fire's rc."""
+    try:
+        per_name = len(HEADER_FIELDS) + len(HIST_FIELDS) + len(FORECAST_FIELDS) * len(FORECAST_OVERRIDES)
+        security_fields = pulled * per_name
+        written = record_fire_budget(
+            calls=counter.calls, security_fields=security_fields, figures=figures,
+            records=counter.records, stamp=utc_stamp(),
+        )
+        print(
+            f"budget_record {BUDGET_MODE} rows {counter.records} records {counter.records} calls {counter.calls} "
+            f"security_fields {security_fields} written {1 if written else 0}",
+            flush=True,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def cmd_admit(dry_run: bool = False) -> int:
+    """CRPS-t-1: pull + derive every registered name that has no model block yet."""
+    registered = _registered_security_keys()
+    s3 = _s3()
+    present = _model_block_keys_in_store(s3)
+    missing = [k for k in registered if k not in present]
+    n, k_missing = len(registered), len(missing)
+    print(f"admit population registered {n} without_block {k_missing}", flush=True)
+    if dry_run:
+        for key in missing:
+            print(f"DRY-RUN ADMIT: {key} -> would pull then derive")
+        print(f"admit population registered {n} without_block {k_missing} pulled 0 bloomberg_calls 0")
+        return 0
+    if k_missing == 0:
+        print(f"admit population registered {n} without_block 0 pulled 0 bloomberg_calls 0")
+        return 0
+    try:
+        blp = _load_blp_client()
+        status = blp.health()
+        reachable = bool(status.get("ok"))
+    except Exception:  # noqa: BLE001 -- any failure to open a session is the same refusal
+        reachable = False
+    if not reachable:
+        print(ADMIT_REFUSED_LINE)
+        return 4
+    counter = _CountingClient(blp)
+    pulled = 0
+    failed = 0
+    figures_total = 0  # AMENDMENT 2 (CRPS-ap-7, round 40): figures in the blocks this run derived
+    for i in range(0, k_missing, ADMIT_BATCH):
+        batch = missing[i:i + ADMIT_BATCH]
+        for key in batch:
+            security = key.replace("_", " ")
+            try:
+                r = stage_pull(counter, s3, security)
+                pulled += 1
+                d = stage_derive(s3, security, raw_stamp=r["raw_stamp"])
+                figures_total += _figure_count(d)
+                print(f"ADMIT: {security} -> raw {r['raw_stamp']} derived {d['derived_stamp']}")
+            except Exception as exc:  # noqa: BLE001 -- one name failing must not hide the others
+                failed += 1
+                print(f"ADMIT FAILED: {security}: {type(exc).__name__}: {exc}")
+    # AMENDMENT 2 (CRPS-ap-7, round 40): call site 1 of 2 -- ONE ledger line per real admit that pulled a name. Its printed
+    # line comes BEFORE the summary line so the summary stays the last line of output (round 34's tests read lines[-1]).
+    if pulled >= 1:
+        _close_fire_budget(counter, pulled, figures_total)
+    print(
+        f"admit population registered {n} without_block {k_missing} "
+        f"pulled {pulled} bloomberg_calls {counter.calls}"
+    )
+    return 1 if failed else 0
+
+
+def _model_block_latest_stamps(s3) -> dict[str, str]:
+    """CRPS-aj-1: security_key (IDENTITY form) -> the newest `<stamp>` under derived/model_block/<key>/.
+    The same one paginated prefix listing and the same segment decoding as `_model_block_keys_in_store`."""
+    # slash-safe: not a per-security path (a PREFIX listing; it DECODES each stored segment with security_key_from_slash_safe and builds no per-security path)
+    prefix = f"derived/{ENGINE}/"
+    latest: dict[str, str] = {}
+    token = None
+    while True:
+        kwargs = {"Bucket": BUCKET, "Prefix": prefix}
+        if token:
+            kwargs["ContinuationToken"] = token
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp.get("Contents", []):
+            rest = obj["Key"][len(prefix):]
+            if rest.count("/") >= 2:
+                segment, stamp, _file = rest.rsplit("/", 2)
+                if "/" not in segment:
+                    try:
+                        segment = crosswalk.security_key_from_slash_safe(segment)
+                    except crosswalk.SlashSafeKeyError:
+                        pass
+                if stamp > latest.get(segment, ""):
+                    latest[segment] = stamp
+        if resp.get("IsTruncated"):
+            token = resp.get("NextContinuationToken")
+        else:
+            return latest
+
+
+def _pull_log_latest_stamps(s3, keys: list[str]) -> dict[str, str]:
+    """CRPS-ao-1: security_key -> the newest PULL stamp (the pull-log state object a pull lands, same stamp as its
+    bronze objects). ONE paginated listing of the pull_log table prefix for the whole population; each object's
+    folder is matched back to a key through `_state_pull_log_prefix`, so no segment is decoded."""
+    by_prefix = {_state_pull_log_prefix(k): k for k in keys}
+    if not by_prefix:
+        return {}
+    table = hstore.table_prefix("amgt", "state", "pull_log")
+    latest: dict[str, str] = {}
+    token = None
+    while True:
+        kwargs = {"Bucket": BUCKET, "Prefix": table}
+        if token:
+            kwargs["ContinuationToken"] = token
+        resp = s3.list_objects_v2(**kwargs)
+        for obj in resp.get("Contents", []) or []:
+            folder, _, name = obj["Key"].rpartition("/")
+            key = by_prefix.get(folder + "/")
+            if key is not None and name.endswith(".json"):
+                stamp = name[:-len(".json")]
+                if stamp > latest.get(key, ""):
+                    latest[key] = stamp
+        if resp.get("IsTruncated"):
+            token = resp.get("NextContinuationToken")
+        else:
+            return latest
+
+
+def cmd_refresh(dry_run: bool = False) -> int:
+    """CRPS-aj-1: re-pull then re-derive every registered name that HAS a model block, except a name whose
+    last PULL stamp is already today's (UTC) date -- so the same run's `admit` and a same-day re-fire
+    never pull twice. A same-day re-derive does not count as a pull. Same batching, health check and rc contract as `cmd_admit`."""
+    registered = _registered_security_keys()
+    s3 = _s3()
+    present = _model_block_keys_in_store(s3)
+    with_block = [k for k in registered if k in present]
+    n, k_with = len(registered), len(with_block)
+    print(f"refresh population registered {n} with_block {k_with}", flush=True)
+    print(f"refresh fields header {len(HEADER_FIELDS)} hist {len(HIST_FIELDS)} forecast {len(FORECAST_FIELDS)}", flush=True)
+    today = _dt.datetime.utcnow().strftime("%Y%m%d")
+    # AMENDMENT (CRPS-ao-1, round 39): the skip keys on the last PULL stamp, never the derived stamp -- a same-day
+    # re-derive writes a today-dated derived stamp and made the scheduled fire skip every name (row Z-S88).
+    latest = _pull_log_latest_stamps(s3, with_block)
+    todo: list[str] = []
+    current = 0
+    for key in with_block:
+        if latest.get(key, "")[:8] == today:  # pulled today
+            current += 1
+            print(f"REFRESH SKIP: {key} already_current")
+        else:
+            todo.append(key)
+    if dry_run:
+        for key in todo:
+            print(f"DRY-RUN REFRESH: {key} -> would pull then derive")
+        print(f"refresh population registered {n} with_block {k_with} already_current {current} pulled 0 bloomberg_calls 0")
+        return 0
+    if not todo:
+        print(f"refresh population registered {n} with_block {k_with} already_current {current} pulled 0 bloomberg_calls 0")
+        return 0
+    try:
+        blp = _load_blp_client()
+        status = blp.health()
+        reachable = bool(status.get("ok"))
+    except Exception:  # noqa: BLE001 -- any failure to open a session is the same refusal
+        reachable = False
+    if not reachable:
+        print(ADMIT_REFUSED_LINE)
+        return 4
+    counter = _CountingClient(blp)
+    pulled = 0
+    failed = 0
+    figures_total = 0  # AMENDMENT 2 (CRPS-ap-7, round 40): figures in the blocks this run derived
+    for i in range(0, len(todo), ADMIT_BATCH):
+        batch = todo[i:i + ADMIT_BATCH]
+        for key in batch:
+            security = key.replace("_", " ")
+            try:
+                r = stage_pull(counter, s3, security)
+                pulled += 1
+                # Issuer ruling, round 34 (2.0.0_SA_COO~X): the daily refresh is a BLOOMBERG pull (Andrew-direct
+                # 2026-10-03 ~20:3xZ card 3) and never makes the Seeking Alpha fallback call -- an empty BEST cell
+                # reads `unresolved` with its reason. Measured at the ruling: 0 SA_FALLBACK figures in 102 latest
+                # served blocks, so nothing served is lost.
+                d = stage_derive(s3, security, raw_stamp=r["raw_stamp"], sa_fallback=False)
+                figures_total += _figure_count(d)
+                print(f"REFRESH: {security} -> raw {r['raw_stamp']} derived {d['derived_stamp']}")
+            except Exception as exc:  # noqa: BLE001 -- one name failing must not hide the others
+                failed += 1
+                print(f"REFRESH FAILED: {security}: {type(exc).__name__}: {exc}")
+    # AMENDMENT 2 (CRPS-ap-7, round 40): call site 2 of 2 -- ONE ledger line per real refresh that reached Bloomberg
+    # (its printed line sits before the summary line, which stays last: round 34's tests read lines[-1]).
+    _close_fire_budget(counter, pulled, figures_total)
+    print(
+        f"refresh population registered {n} with_block {k_with} already_current {current} "
+        f"pulled {pulled} bloomberg_calls {counter.calls}"
+    )
+    return 1 if failed else 0
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("stage", choices=["pull", "derive", "cases-report", "stamp-census", "admit", "refresh"])
+    ap.add_argument("--securities", nargs="+", default=None)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--no-sa-fallback", action="store_true",
+                    help="derive only: never call the Seeking Alpha forecast fallback (CRPS-y-2)")
+    args = ap.parse_args(argv)
+    if args.stage == "admit":
+        if args.securities:
+            ap.error("admit takes no --securities (its population is the registered library)")
+        return cmd_admit(dry_run=args.dry_run)
+    if args.stage == "refresh":
+        if args.securities:
+            ap.error("refresh takes no --securities (its population is the registered names that have a block)")
+        return cmd_refresh(dry_run=args.dry_run)
+    if not args.securities:
+        ap.error("the following arguments are required: --securities")
+    if args.stage == "stamp-census":
+        return cmd_stamp_census(args.securities)  # read-only: the F2/G-24 cap guards vendor pulls
+    if len(args.securities) > 3:
+        raise SystemExit("REFUSE: more than 3 securities requested (F2/G-24 cap)")
+    if args.stage == "cases-report":
+        return cmd_cases_report(args.securities)
+    if args.stage == "pull":
+        return cmd_pull(args.securities, dry_run=args.dry_run)
+    return cmd_derive(args.securities, dry_run=args.dry_run, sa_fallback=not args.no_sa_fallback)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
