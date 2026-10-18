@@ -1,0 +1,9 @@
+# AMGT_RESAPP round 115 -- the LIVE site tied to PROD `ff611566` by bytes, `2.0.0_SA_COO~R1`, 2026-10-18 ~03:2xZ
+
+Evidence outside the repository: `C:/dev/ui-walk-evidence/r115-tie/{new,old,live}/` and `r115-tie-out.txt`. Method as `round114/LIVE_TIE_26D998F7.md`.
+
+1. **The run.** `gh run view 39092905765 --repo Opal-Capital/portal`: head `ff61156612682ec15c67d79c92f6ce30a1d95a4f`, completed, success (H2's receipt `8d85badf52`: release `release/20261018T031234Z`, tag `portal-v2.1.240`, the one round-115 feature `cand/dell1/amgt-sa-remaining-date-bypasses` @aa207184).
+2. **The live site.** `https://www.opalinvest.dev/index.html` (`Last-Modified: Sun, 18 Oct 2026 03:15:58 GMT`): byte-equal to the artifact's `index.html` (`cmp`); the six entry assets each byte-equal; **all 44 chunks that are new in this artifact (chunk names carry a content hash, and a change in one shared module renames its dependents) each byte-equal on the live site, 0 differing**, among them the Security Analysis chunk `index-tgbGqM2E.js` (250,969 bytes; the previous artifact's `index-Bi-xI0II.js` was 250,923: the bytes differ by the round's wrappers).
+3. **Negative control.** The previous deploy's artifact (run 39080069302, head `26d998f7`): its 44 chunks that this deploy renamed are **no longer what the live site serves** (44 of 44, none still byte-equal), so the comparison discriminates between the two deploys.
+
+**Not verified:** a content-level marker of the round's change in the served chunk (the change is calls to an existing helper in several files; the minified bundle carries no unique string for it: the proof is the byte equality of the chunk that changed); the live page opened with a staff login; the effect on a rendered page (the real-browser walk of the integrated candidate is `round115/` to follow at the close walk).
