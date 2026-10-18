@@ -71,10 +71,10 @@ PYEOF
 halves=$(printf '%s' "$halves" | tr -d '\r')
 echo "base ${base:0:10} is the live ref before this release: $([ "$base" = "$live" ] && echo yes || echo no) (manifest ${dep:0:10}/${prev:0:10}); release ${rel:0:10}; trunk ${trunk:0:10}"
 hrb=$(git rev-parse "$base:$GW/app/harvest_research.py" 2>/dev/null | tr -d ''); hrr=$(git rev-parse "$rel:$GW/app/harvest_research.py" 2>/dev/null | tr -d '')
-echo "harvest_research.py blob carried unchanged from the live ref (CT4): base ${hrb:0:10}, release ${hrr:0:10}: $([ -n "$hrb" ] && [ "$hrb" = "$hrr" ] && echo equal || echo DIFFERENT)"
+echo "harvest_research.py blob carried unchanged from the live ref (CT4): base ${hrb:0:10}, release ${hrr:0:10}: $([ -n "$hrb" ] && [ "$hrb" = "$hrr" ] && echo equal || echo DIFFERENT); the CTO-verified blob of the live ref 4257a2aa42 (msg 35603) is 574959b682: $([ "$hrr" = 574959b682d4a13a0a429c45fa00b77b6caa2ab5 ] && echo carried || echo NOT-CARRIED)"
 echo "files differing $n; outside the take list $outside (want 0); take-list files missing $missing (want 0); not byte-equal to trunk's $neq (want 0); client_core, typed_scope, etfs_rivals_flow, destructive_ops, deploy script, unit, manifest, catalog or Terraform files in the diff $barred (want 0)"
 echo "PAGE_PARTITIONS in the release blob: ${relconst:-NONE}; the sweep chose: ${chosen:-NONE}"
 printf '%s\n' "$rec" | sed '$d'
 echo "ask has the three halves $halves"
-[ -n "$hrb" ] && [ "$hrb" = "$hrr" ] && [ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ -n "$chosen" ] && [ "$relconst" = "$chosen" ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ -n "$hrb" ] && [ "$hrb" = "$hrr" ] && [ "$hrr" = 574959b682d4a13a0a429c45fa00b77b6caa2ab5 ] && [ "$base" = "$live" ] && [ "$n" -ge 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ -n "$chosen" ] && [ "$relconst" = "$chosen" ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
