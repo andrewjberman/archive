@@ -1,0 +1,135 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-pr-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~147",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "eaac07d0e5"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "eaac07d0e5",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-1.round-42-loopback-probe-listener.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+   "kind": "script",
+   "commit_or_etag": "cddfe518f8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Amendment A1 repair: current_lease is async; the SSM read runs through run_in_threadpool; the SSM client is created once with Config(connect_timeout=2, read_timeout=3, retries max_attempts 1); a failed read is cached as unarmed for 5 s; the read is single-flight per event loop; validity is judged at each request's own now. Committed @cddfe518f8 (LOCAL on wk-NFRA_OPLGTW-147). No release, no deploy, no IAM, no SSM parameter.",
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+   "kind": "test",
+   "commit_or_etag": "cddfe518f8",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Six named tests, offline. ac01 to ac04 unchanged in meaning; ac05 (the event loop keeps ticking during a 1.0 s blocking lease read; the read runs on a worker thread) and ac06 (20 concurrent requests make one read; a failed read is cached for 5 s; one more read after 6 s; a cached valid lease is refused once expires_at passes inside the window) are new. Committed @cddfe518f8 (LOCAL).",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "6da9925fe7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One appended row, NFRA_OPLGTW-Z-W147-S1 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O): the probe audit write is inline on the shared event loop. The surprise-row gate passed at commit: 1 new row checked, OK. Committed @6da9925fe7 (LOCAL).",
+   "artifact_covered_by": ["AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the six named tests pass (off by default and arm/call/expire; scope; audit and principal; heap read; the lease read off the loop; a failed read cached and single-flight).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 6 of 6; failed/error lines 0\nRESULT: PASS\nexit=0",
+   "denominator": "6 named tests of tests/test_og_pr1.py; 6 passed; 0 failed or errored",
+   "status": "PASS",
+   "expect": "(?s)pytest rc=0; named tests passed 6 of 6; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch only the module and its test file.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~147 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'; echo \"exit=$?\"",
+   "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~147: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "3 files touched by commits authored by 0.9.0_WK_NFRA_OPLGTW~147: 2 product files (app/probe_listener.py, tests/test_og_pr1.py), 1 standing record file (the investigation channel, allowed by the check's standing-record regex); 0 outside the allowed set",
+   "status": "PASS",
+   "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~147: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the new tests and four existing gateway test files pass together in both orders with the same count.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr1set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py; echo \"exit=$?\"",
+   "output_evidence": "pr1set forward: passed 24; failed 0\npr1set reverse: passed 24; failed 0\nRESULT: PASS\nexit=0",
+   "denominator": "5 test files (6 new named tests in tests/test_og_pr1.py plus the tests of the four existing files); forward 24 passed, reverse 24 passed, 0 failed in either order",
+   "status": "PASS",
+   "expect": "(?s)pr1set forward: passed (\\d+); failed 0.*pr1set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "repeated runs of tests/test_og_pr1.py on the committed code (the AC1 check run before and after the row commit, and two both-orders runs)",
+   "observed": "every run: 6 named tests passed (AC1); both-orders forward and reverse 24 passed, 0 failed (AC3)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Two mutants of app/probe_listener.py, each applied in place to the worktree file, run against one test, then the file restored byte-equal to HEAD (verified): (a) the single-flight lock removed (async with _flight_lock() replaced by if True:) against test_ogpr1_ac06; (b) the threadpool hop removed (await run_in_threadpool(LEASE_READER) replaced by a direct call) against test_ogpr1_ac05.",
+   "expected": "test_ogpr1_ac06 FAIL on the read count (not 1); test_ogpr1_ac05 FAIL on the tick count (not at least 8)",
+   "observed": "(a) FAILED tests\\test_og_pr1.py::test_ogpr1_ac06 - AssertionError: single-flight broken: 20 reads for one expiry; 1 failed. (b) FAILED tests\\test_og_pr1.py::test_ogpr1_ac05 - AssertionError: the event loop was blocked during the lease read (0 ticks); 1 failed.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A release, deploy, IAM change, SSM parameter, env key or Terraform change.",
+   "reason": "Declared out of scope by the task order (section 2); OG-ap-40 carries the release."
+  },
+  {
+   "item": "Verification that the instance role holds ssm:GetParameter on /opal-gateway/probe/lease.",
+   "reason": "Not measured: the role's policy is an IAM read outside the write set. The task order asks the report to state it as not measured."
+  },
+  {
+   "item": "Measurement of the disarm-by-delete latency against a live SSM parameter.",
+   "reason": "No live parameter is created or deleted by this order. The 5-second cache window is stated from the code (LEASE_CACHE_SECONDS) and is covered by the fake clock in ac06, not by a live SSM call."
+  },
+  {
+   "item": "The client-data check of the commits.",
+   "reason": "The hashed account-id list is ABSENT on this device (WARN from the commit gate); the commits carry no client account id, only the ****<last4> form of the test account and the fixed fake principal."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W147-S1: the probe's audit write (audit._emit, a file append and a boto3 S3 put_object) runs inline on the shared event loop; the amendment's repair moves only the lease read off the loop, and the audit write is the same class of blocking call at the gateway-wide audit path (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~147 on worktree wk-NFRA_OPLGTW-147 (inherited HEAD b02e088805). Verified the worktree carries org/ and .tools/; read the task order and amendment A1; confirmed the inherited module and its four tests pass (4 of 4). Repaired app/probe_listener.py (async current_lease, threadpool read, one SSM client with short timeouts and one attempt, failed-read caching, per-loop single-flight lock) and added ac05 and ac06 to tests/test_og_pr1.py; server.py untouched. Ran AC1 (6 of 6), AC2 (3 files touched, 0 outside), AC3 (24 forward, 24 reverse). Committed @cddfe518f8 (code) and @6da9925fe7 (one surprise row).",
+ "compiler_tools": [
+  {
+   "tool": "_named.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06",
+   "result": "pytest rc=0; named tests passed 6 of 6; failed/error lines 0; RESULT: PASS"
+  },
+  {
+   "tool": "_wkbound.sh (the order's own AC2 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~147 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'",
+   "result": "files touched 3; product files 2; outside the allowed set 0; RESULT: PASS"
+  },
+  {
+   "tool": "_bothorders.sh (the order's own AC3 check, unmodified)",
+   "invocation": "timeout 500 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr1set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py",
+   "result": "pr1set forward: passed 24; failed 0; pr1set reverse: passed 24; failed 0; RESULT: PASS"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (code, row)",
+   "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPLGTW~147 <0.9.0_WK_NFRA_OPLGTW~147@opal.agent>' -F .scratch/msg_product.txt -- <two product files>; then -F .scratch/msg_row.txt -- <INVESTIGATION_v1.md>",
+   "result": "committed cddfe518f8 (commit-gate OK for 2 of 2 files) and 6da9925fe7 (surprise-row gate OK, 1 new row checked); client-data-check WARN: hashed account-id list ABSENT"
+  }
+ ]
+}
