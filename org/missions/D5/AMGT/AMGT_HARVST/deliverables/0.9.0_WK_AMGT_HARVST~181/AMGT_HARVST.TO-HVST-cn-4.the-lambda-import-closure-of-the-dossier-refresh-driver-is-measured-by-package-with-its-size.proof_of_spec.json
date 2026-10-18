@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cn-4.the-lambda-import-closure-of-the-dossier-refresh-driver-is-measured-by-package-with-its-size",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "366ba5228d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-4.the-lambda-import-closure-of-the-dossier-refresh-driver-is-measured-by-package-with-its-size.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-4.the-lambda-import-closure-of-the-dossier-refresh-driver-is-measured-by-package-with-its-size.md",
+    "group": "OTHER",
+    "vintage_commit": "366ba5228d"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~181",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.py",
+      "kind": "script",
+      "commit_or_etag": "a34c1a6873",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only measurement script. Runs the real import of lib.research.corpus.dossier_refresh in a clean child process under a builtins.__import__ hook, sizes each third-party distribution from its RECORD file list, names the first lib module that pulls it in, runs a static ast check of lib imports (top level versus inside functions), and runs the positive (lib.research.harvest.store, pyarrow) and negative (json) controls. No source file is edited, no AWS, S3, network or pip call is made."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out",
+      "kind": "doc",
+      "commit_or_etag": "a34c1a6873",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdout of one run of cn4_closure.py from the worktree root: CLOSURE-IMPORTED modules=1043 lib_modules=25 third_party_tops=21; 18 third-party distributions; LAMBDA-CLOSURE total_mb=287.13 against the 250 MB limit, verdict=OVER; both controls as expected."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a34c1a6873",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended by byte insertion (45 insertions, 0 deletions): AMGT_HARVST-D1-W181-S1 (the OVER finding and the three largest packages with their pulling lib modules) and AMGT_HARVST-D1-W181-S2 (the pytz importlib._bootstrap attribution and the corrected json control)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out expect (?m)^LAMBDA-CLOSURE lib_modules=\\d+ third_party_pkgs=\\d+ third_party_mb=\\d+\\.\\d\\d lib_code_mb=\\d+\\.\\d\\d total_mb=\\d+\\.\\d\\d limit_unzipped_mb=250 verdict=(UNDER|OVER) biggest=\\S+ removable_by_lazy=\\S+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out",
+      "output_evidence": "LAMBDA-CLOSURE lib_modules=25 third_party_pkgs=18 third_party_mb=286.40 lib_code_mb=0.73 total_mb=287.13 limit_unzipped_mb=250 verdict=OVER biggest=pyarrow:86.40,pandas:62.31,pymupdf:53.14 removable_by_lazy=none\nCommentary (not the matched line): the verdict is OVER by 37.13 MB and is the finding, not a failure. Run under timeout 120 with rc=0. The three largest packages are pulled in by lib.trading_calendar (pyarrow via pandas.compat.pyarrow, pandas via pandas_market_calendars.market_calendar) and by lib.research.corpus.extract (pymupdf via fitz). removable_by_lazy=none because lib.trading_calendar imports pandas_market_calendars at top level and lib.research.corpus.extract imports fitz, lxml and openpyxl at top level. Sizes are the Windows wheels installed on this box, not a Linux Lambda build.",
+      "denominator": "1 of 1 LAMBDA-CLOSURE lines matched in the 53-line output file (exit code 0)",
+      "status": "PASS",
+      "expect": "(?m)^LAMBDA-CLOSURE lib_modules=\\d+ third_party_pkgs=\\d+ third_party_mb=\\d+\\.\\d\\d lib_code_mb=\\d+\\.\\d\\d total_mb=\\d+\\.\\d\\d limit_unzipped_mb=250 verdict=(UNDER|OVER) biggest=\\S+ removable_by_lazy=\\S+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out expect (?s)CONTROL-POSITIVE target=lib\\.research\\.harvest\\.store pyarrow_in_closure=yes.*CONTROL-NEGATIVE target=json third_party_tops=0",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out",
+      "output_evidence": "CONTROL-POSITIVE target=lib.research.harvest.store pyarrow_in_closure=yes\nNOTE control-negative json newly_loaded=23\nCONTROL-NEGATIVE target=json third_party_tops=0\nCommentary (not the matched lines): the negative control was hollow in the first draft (the child imported json before the hook, so newly_loaded=0); it was corrected before the recorded run and now measures 23 newly loaded stdlib modules with 0 third-party tops. The positive control sees pyarrow in the store closure as the order expects. Run under timeout 120 with rc=0.",
+      "denominator": "2 of 2 control lines matched in order (CONTROL-POSITIVE then CONTROL-NEGATIVE) in the 53-line output file (exit code 0)",
+      "status": "PASS",
+      "expect": "(?s)CONTROL-POSITIVE target=lib\\.research\\.harvest\\.store pyarrow_in_closure=yes.*CONTROL-NEGATIVE target=json third_party_tops=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant arm was planted: the order names the positive (store, pyarrow) and negative (json) controls as its finder checks, so those two arms take the place of a mutant.",
+      "expected": "N/A: the order names controls, not mutants",
+      "observed": "CONTROL-POSITIVE pyarrow_in_closure=yes; CONTROL-NEGATIVE third_party_tops=0 with newly_loaded=23",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the first run and the rerun did not have the same input, because the json control fix changed the script between them; the size lines were compared instead",
+      "observed": "The LAMBDA-CLOSURE line (third_party_mb=286.40, total_mb=287.13, verdict=OVER) and the pyarrow, pandas, numpy and pytz PKG lines were identical across the two runs; the module count moved from 1020 to 1043 because json is now inside the measured closure.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any AWS, S3, Bloomberg or network call, and any pip install",
+      "reason": "The order is read-only and local; the measurement reads installed distributions and source files on this box only."
+    },
+    {
+      "item": "Linux Lambda wheel sizes",
+      "reason": "The order measures the Python environment installed on this box (Windows, Python 3.14.7). A Lambda build for the Linux runtime is a different set of wheels and is not measured here; the verdict applies to these installed sizes."
+    },
+    {
+      "item": "Order status flip to complete",
+      "reason": "The order face says the issuer flips its status; this worker does not edit the order file."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W181-S1: HVST-cn-4 finding: the driver's import closure is 287.13 MB unzipped, verdict OVER the 250 MB limit; pyarrow 86.40, pandas 62.31 and pymupdf 53.14 MB are the three largest, pulled by lib.trading_calendar and lib.research.corpus.extract.",
+    "AMGT_HARVST-D1-W181-S2: HVST-cn-4 instrument caveat: the hook attributes pytz to importlib._bootstrap (first_lib_importer=NONE), and the first draft's json control was hollow until the child stopped importing json before the hook."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -u cn4_closure.py (recorded run, one run of the committed script; a first draft before the json control fix was run once and overwritten)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.py > org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~181/cn4_closure.out",
+      "result": "rc=0; CLOSURE-IMPORTED modules=1043 lib_modules=25 third_party_tops=21; CONTROL-POSITIVE pyarrow_in_closure=yes; CONTROL-NEGATIVE third_party_tops=0 newly_loaded=23; LAMBDA-CLOSURE verdict=OVER total_mb=287.13"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2 --governing-order <to_ref>",
+      "result": "run at the commit of this instance; the last line of the run is in the worker report"
+    }
+  ]
+}
