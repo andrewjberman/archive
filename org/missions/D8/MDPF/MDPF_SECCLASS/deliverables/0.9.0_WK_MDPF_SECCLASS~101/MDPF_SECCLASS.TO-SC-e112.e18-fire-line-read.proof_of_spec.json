@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e112",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e112.e18-fire-line-read.md",
+    "group": "OTHER",
+    "vintage_commit": "964be4af93"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R29.md",
+    "vintage_commit": "964be4af93",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e112.e18-fire-line-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~101",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~101/E18_FIRE_LINE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only pointer file: source s3://opal-data-bd/gold/logs/chain_full_20261017_230043.log version t6i.x4cy3PVBMuoCDf5PVCfdMeAxCmCF (LastModified 2026-10-18T01:19:41Z, 3205145 bytes, md5 2ef0c73185d9d5e663301410d0a931e8 equal to the object ETag), line 'Scheduled-classification candidates:      0', candidates 0, already_resolved 9, written 0, refused 0. No object was written.",
+      "artifact_covered_by": [
+        "SC29-e112-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC29-e112-AC1",
+      "criterion_verbatim": "the quoted line is found in a served source written in the fire's window and its figure equals the `candidates` field.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py e18-line",
+      "output_evidence": "R29-e18-line ok=True problems=[]  (run under timeout 120 from the worktree root, rc=0; the default --file resolves to the worktree copy of E18_FIRE_LINE.json)",
+      "denominator": "1 of 1 quoted summary lines found in its served source; source LastModified 2026-10-18T01:19:41Z inside the 00:04Z to 03:00Z window; candidates field 0 equals figure 0 in the line",
+      "status": "PASS",
+      "expect": "R29-e18-line ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own selftest for the e18-line mode: a green arm plus two negative arms (line not in the source; candidates differ from the figure)",
+      "expected": "green arm True and each negative arm True",
+      "observed": "R29-e18-line-SELFTEST green: True []; negative (line not in the source): True; negative (candidates differ): True; R29-SELFTEST ok=True; rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A with reason: the read is pinned to one S3 object version id (t6i.x4cy3PVBMuoCDf5PVCfdMeAxCmCF) of a completed historical log, so the value cannot drift; the read was run once for the artifact and the source bytes were checked once by md5 against the ETag.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the E_18 telemetry object logs/gold-layer/telemetry/bd-gold-layer-runner/E_18/f98551718369.jsonl (1175 bytes)",
+      "reason": "the order says it holds CPU and memory rows only; it was listed for its run_id (f98551718369, uploaded 2026-10-18T00:05:08Z) and not read as a stdout source."
+    },
+    {
+      "item": "logs/gold-layer/gold_incremental_2026-10-18_20261018_012330.log (694322789 bytes, 2026-10-18T01:23:31Z)",
+      "reason": "a different chain run in the listing; not downloaded, since the fire's own chain log is the served stdout that carries the E_18 run_id."
+    },
+    {
+      "item": "the CloudWatch log groups and the SSM boot-chain output",
+      "reason": "not needed once the served chain log held E_18's stdout with the matching run_id; the describe-log-groups call returned the full account listing and was not worked further."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Verified worktree branch wk-MDPF_SECCLASS-101 and TREE-OK. Read the worker face and the R29 checker header and readers at their own paths (read-only). Positive controls: head-object on gold/.checkpoints/2026-10-17/E_18.done returned LastModified 2026-10-18T00:05:09Z; a listing of logs/gold-layer/ with a LastModified filter returned the E_18 telemetry object (run_id f98551718369, 00:05:09Z), and 592 objects under gold/logs/. Listed gold/logs/ filtered by LastModified since 2026-10-17T22:00Z and found chain_full_20261017_230043.log (chain header 'Mode: full  Started: 2026-10-17T23:03:16Z'). Downloaded that version to .scratch/chain_full_20261017_230043.log (uncommitted), md5 matched the ETag, grepped the E_18 block (run_id f98551718369 printed at 00:05:03Z, telemetry upload at 00:05:08Z, CHECKPOINT E_18 at 00:05:09Z). Wrote E18_FIRE_LINE.json with python -I; ran the checker and selftest at the worktree paths.",
+  "compiler_tools": [
+    {
+      "tool": "check_r29_reads.py e18-line (R29_CHECKS, read-only, run at its own worktree path)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py e18-line",
+      "result": "R29-e18-line ok=True problems=[]; rc=0"
+    },
+    {
+      "tool": "check_r29_reads.py selftest (R29_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py selftest",
+      "result": "R29-SELFTEST ok=True; rc=0"
+    }
+  ]
+}
