@@ -1,0 +1,126 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-pr-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~149",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7ed9ccbb17"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7ed9ccbb17",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-3.round-42-probe-listener-bounded-body-read.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+   "kind": "script",
+   "commit_or_etag": "adf7f1cfd0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "OG-pr-3 repair: probe_call reads the request body through _read_body_bounded. A declared Content-Length over 65536 is answered 413 probe_body_too_large before any byte is read; otherwise the body is streamed and the read stops as soon as the running count passes 65536 (chunked bodies are bounded by the same count). An oversized body is answered 413 before the lease is consulted, labelled probe:unarmed (see surprise row NFRA_OPLGTW-Z-W149-S1). The refusal order after a within-bound read is unchanged. Committed @adf7f1cfd0 (LOCAL on wk-NFRA_OPLGTW-149). No release, no deploy, no IAM, no SSM parameter, no env key, no Terraform, no change to server.py, audit.py, tools.py or any other app file.",
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+   "kind": "test",
+   "commit_or_etag": "adf7f1cfd0",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Ten named tests, offline. ac01 to ac08 unchanged in meaning. ac09 (THE READ IS BOUNDED: a streamed 800 KB body of 50 chunks of 16384 bytes is answered 413 after the server pulls at most 6 chunks; a declared Content-Length 5000000 body is answered 413 after at most 1 chunk is pulled; ASGI harness, armed lease) and ac10 (A BODY AT THE LIMIT IS STILL SERVED: a body of exactly 65536 bytes answers 200 and one of 65537 bytes answers 413, each declared and chunked) are new. Committed @adf7f1cfd0 (LOCAL).",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "a64913c55c",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One appended row: NFRA_OPLGTW-Z-W149-S1 (OBSERVATION, INERT, UNDER_INVESTIGATION): the order's oversized-body 413 is answered before the lease is consulted and audited like every refusal, so it carries the probe:unarmed label rather than the armed probe's order label. Committed @a64913c55c (LOCAL); surprise-row-gate OK (1 new row).",
+   "artifact_covered_by": ["AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the ten named tests pass (the eight inherited and the two new: the read is bounded; a body at the limit is still served and one byte over is refused).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06 test_ogpr1_ac07 test_ogpr1_ac08 test_ogpr1_ac09 test_ogpr1_ac10; echo \"exit=$?\"",
+   "output_evidence": "run 1: pytest rc=0; named tests passed 10 of 10; failed/error lines 0 / RESULT: PASS / exit=0. run 2: pytest rc=0; named tests passed 10 of 10; failed/error lines 0 / RESULT: PASS / exit=0. run 3: pytest rc=0; named tests passed 10 of 10; failed/error lines 0 / RESULT: PASS / exit=0. Recorded in .scratch/ac1_runs.out.",
+   "denominator": "10 named tests of tests/test_og_pr1.py; 10 passed; 0 failed or errored; 3 of 3 runs",
+   "status": "PASS",
+   "expect": "(?s)pytest rc=0; named tests passed 10 of 10; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch only the module and its test file.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~149 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'; echo \"exit=$?\"",
+   "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~149: files touched 2; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "2 files touched by commits authored by 0.9.0_WK_NFRA_OPLGTW~149 (app/probe_listener.py, tests/test_og_pr1.py): 2 product files, 0 outside the allowed set. The channel row commit a64913c55c touches the standing surprise-channel path and is not a product file.",
+   "status": "PASS",
+   "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~149: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the new tests and four existing gateway test files pass together in both orders with the same count.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr3set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py; echo \"exit=$?\"",
+   "output_evidence": "run 1: pr3set forward: passed 28; failed 0 / pr3set reverse: passed 28; failed 0 / RESULT: PASS / exit=0. run 2: pr3set forward: passed 28; failed 0 / pr3set reverse: passed 28; failed 0 / RESULT: PASS / exit=0. run 3: pr3set forward: passed 28; failed 0 / pr3set reverse: passed 28; failed 0 / RESULT: PASS / exit=0. Recorded in .scratch/ac3_run1.out and .scratch/ac3_runs23.out.",
+   "denominator": "28 tests in the five-file set, forward and reverse; forward 28 passed, reverse 28 passed, 0 failed in both orders; 3 of 3 runs",
+   "status": "PASS",
+   "expect": "(?s)pr3set forward: passed (\\d+); failed 0.*pr3set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 run three times and AC3 run three times (both orders each run), on the committed code at adf7f1cfd0",
+   "observed": "every AC1 run: 10 of 10 named tests passed, rc=0; every AC3 run: forward 28 passed, reverse 28 passed, 0 failed",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Mutant B: the streamed read in _read_body_bounded replaced by a whole-body read (whole = await request.body(), then the chunk loop over that one buffer), so the server pulls every chunk before the bound is compared. Applied to the working tree only, by a byte-level edit; the file was restored byte-equal (cmp against a saved copy) before the commit.",
+   "expected": "test_ogpr1_ac09 FAIL on the streamed read (more than 6 chunks pulled); every other named test in tests/test_og_pr1.py still PASS",
+   "observed": "pytest tests/test_og_pr1.py -v: test_ogpr1_ac09 FAILED (AssertionError: the streamed read was not bounded); ac01 to ac08 and ac10 PASSED; 1 failed, 9 passed.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A release, deploy, IAM change, SSM parameter, env key or Terraform change.",
+   "reason": "Declared out of scope by the task order (section 2); OG-ap-40 carries the release."
+  },
+  {
+   "item": "A live oversized-body request against the running gateway, and the memory peak under one.",
+   "reason": "Not measured: the order is offline. ac09 measures the number of chunks the server pulls through an ASGI harness, not the process heap."
+  },
+  {
+   "item": "The connection behaviour of a declared oversized body on a real socket (whether the client reads the 413 before a reset).",
+   "reason": "Not separately measured: test_ogpr1_ac07 sends a 65600-byte declared body over the real loopback socket and passed 2 of 2 loops in each of the runs above; ac09 answers the declared body without reading it, through the ASGI harness only."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W149-S1: the order requires the oversized-body 413 to be audited like every refusal and answered before the lease is consulted, but a refusal decided before the lease read has no lease order to label it with; the cell labels it probe:unarmed (OBSERVATION, INERT, UNDER_INVESTIGATION)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~149 on worktree wk-NFRA_OPLGTW-149 (branch wk-NFRA_OPLGTW-149, carrying the inherited OG-pr-2 repair 7fdca1f628). Verified the worktree carries org/ and .tools/, read the task order in full, read app/probe_listener.py and tests/test_og_pr1.py in full, and ran the baseline (8 passed). Replaced the whole-body read with _read_body_bounded (declared Content-Length over the bound answered before any read; otherwise streamed with a running count that stops at 65536 bytes), kept the rest of probe_call, and added ac09 and ac10. Ran the named tests (10 of 10), the write-set bound (2 of 2 product files) and the both-orders set (28 and 28) three times each where the order asks for three runs; ran the body() mutant (ac09 fails) and restored the file byte-equal. Committed the module and test file @adf7f1cfd0, the channel row @a64913c55c, then this instance and the task-order status flip.",
+ "compiler_tools": [
+  {
+   "tool": "_named.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 ... test_ogpr1_ac10",
+   "result": "pytest rc=0; named tests passed 10 of 10; failed/error lines 0; RESULT: PASS; exit=0 (three runs)"
+  },
+  {
+   "tool": "_wkbound.sh (the order's own AC2 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~149 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'",
+   "result": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~149: files touched 2; product files 2; outside the allowed set 0 (want 0); RESULT: PASS"
+  },
+  {
+   "tool": "_bothorders.sh (the order's own AC3 check, unmodified)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr3set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py",
+   "result": "pr3set forward: passed 28; failed 0; pr3set reverse: passed 28; failed 0; RESULT: PASS (three runs)"
+  }
+ ]
+}
