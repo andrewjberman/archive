@@ -5,7 +5,7 @@
 #  "host_md5": {"equal": n, "differ": 0}, "tools_list_before": n, "tools_list_after": n, "muse_env_present": false, "marker_sha": "<40 hex>",
 #  "unit_limits": {"memory_max_bytes": 1468006400, "memory_high_bytes": 1258291200, "oom_score_adj": 300, "cgroup_memory_max_bytes": 1468006400},
 #  "host_clock": {"leap_status": "Normal", "synchronised": true}, "systemd_failed_units": 0, "clock_read_before_close": true,
-#  "served_notes": {"tools_list_count": 103, "client_tools_with_notes": n (the client_* tools whose served description carries an absent_reason code word), "window_read_busy_in_windowed_tools": true},
+#  "served_notes": {"tools_list_count": 103, "client_tools_with_notes": n (the client_* tools whose served description carries an absent_reason code word), "window_read_busy_in_windowed_tools": true, "client_get_fees_note_source_scoped": true (the installed client_get_fees description carries the reworded fee note: it names the source, does not claim a total, and holds none of "true zero", "report zero", "zero fees")},
 #  "readback": {"minutes": n, "triggers_fired": 0, "service_window_calls": n, "nrestarts_during_readback": 0},
 #  "arms": {"e10_marker_equals_release_sha": bool, "e13_notes_served": bool, "e14_unit_limits_unchanged": bool, "e15_window_pages_equal_phase_a": bool}}}
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
@@ -40,7 +40,7 @@ GUARDS = ("oom_score_adj_1000_rlimit_as_1400mb", "oom_score_adj_1000_cgroup_memm
 tool_ok = d.get("per_tool_good") == 27 and d.get("harness_guard") in GUARDS
 rb_ok = (isinstance(rb.get("minutes"), (int, float)) and rb["minutes"] >= 30 and rb.get("triggers_fired") == 0 and isinstance(rb.get("service_window_calls"), int) and rb.get("nrestarts_during_readback") == 0)
 page_ok = (sn.get("tools_list_count") == 103 and isinstance(sn.get("client_tools_with_notes"), int) and 2 <= sn["client_tools_with_notes"] <= 5
-           and sn.get("window_read_busy_in_windowed_tools") is True)
+           and sn.get("window_read_busy_in_windowed_tools") is True and sn.get("client_get_fees_note_source_scoped") is True)
 ok = (d.get("health_status") == 200 and d.get("reader_env_keys_present") == 7 and d.get("registry_count") == 103 and tool_ok and md5.get("differ") == 0
       and len(armed) == len(need) and marker and rb_ok and limits_ok and clk_ok and page_ok
       and d.get("tools_list_before") is not None and d.get("tools_list_before") == d.get("tools_list_after") and d.get("muse_env_present") is False)
