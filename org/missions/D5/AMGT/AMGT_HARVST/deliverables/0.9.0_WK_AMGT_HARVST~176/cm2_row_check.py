@@ -91,8 +91,8 @@ def main():
     row = load_entry(FN)
     src_dir = row["source_dir"]
     src_rel = src_dir + "/" + row["files"][0]
-    emit("ROW-LOADED file=infra/aws/lambda/ci/function-map/%s.json source_dir=%s pipeline=%s "
-         "last_deployed_commit=%s" % (FN, src_dir, row.get("pipeline"), row.get("last_deployed_commit")))
+    emit("ROW-LOADED file=infra/aws/lambda/ci/function-map/%s.json source_dir=%s "
+         "last_deployed_commit=%s" % (FN, src_dir, row.get("last_deployed_commit")))
 
     # (2) the source file at HEAD: md5 and sha256 of the bytes git holds at HEAD
     r = subprocess.run(["git", "-C", ROOT, "rev-parse", "HEAD"], stdout=subprocess.PIPE,
