@@ -1,0 +1,14 @@
+NFRA_OPLGTW.TO-OG-en-27 -- session log of 0.9.0_WK_NFRA_OPLGTW~142 (worktree C:/tmp/wk-oplgtw-142, branch wk-NFRA_OPLGTW-142)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_OPLGTW-142; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded on the worktree: deploy-to-ec2.sh line 362 is the TAR_LINE, 363 the "# OG-db-3" comment, 364 the deployed_commit marker (Grep on the worktree path).
+3. Pre-cut AC1 (en27.AC1.sh) on the original test file: rc=1, 2 of 3 passed, git token in body -> RESULT: FAIL, exit=1 (the expected base failure).
+4. Edit of infra/aws/ec2/opal-gateway/tests/test_og_db3.py (test file only): removed the difflib import, the SERIAL constant (used only by the removed git walk), the _git helper (no other test used it), and the git-based body of test_ogdb3_ac03; ac03 now asserts the tar line count, marker ordering, the "# OG-db-3" comment above the marker and a non-blank comment. ac01 and ac02 untouched. deploy-to-ec2.sh untouched.
+5. py_compile of the test file: clean.
+6. AC1 post-edit: "copy outside any git repository: in a repo no (want no); pytest rc=0; the three db3 tests passed 3 of 3; git tokens in the body of test_ogdb3_ac03: none (want none)" RESULT: PASS exit=0.
+7. AC3 (_named.sh in the repository): "pytest rc=0; named tests passed 3 of 3; failed/error lines 0" RESULT: PASS exit=0.
+8. Commit c87cd6f391 on wk-NFRA_OPLGTW-142 via .tools/safe-commit.sh (author 0.9.0_WK_NFRA_OPLGTW~142); msg-verify MATCH; 1 file changed, 10 insertions, 26 deletions. Push state: LOCAL, not pushed.
+9. AC2 (_wkbound.sh on the serial): "write-set bound for 0.9.0_WK_NFRA_OPLGTW~142: files touched 1; product files 1; outside the allowed set 0 (want 0)" RESULT: PASS exit=0.
+10. Determinism repeat of AC3 on the committed tree: "pytest rc=0; named tests passed 3 of 3; failed/error lines 0" RESULT: PASS exit=0.
+11. AC1 re-run at HEAD c87cd6f391: same output as step 6, RESULT: PASS exit=0.
+12. Surprise channel: no row filed. The one step beyond the letter (removing the SERIAL constant that existed only for the deleted git walk) is named in the report; no premise failed.
