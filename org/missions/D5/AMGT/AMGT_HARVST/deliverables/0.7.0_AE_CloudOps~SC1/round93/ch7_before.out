@@ -1,0 +1,59 @@
+# ch7_before.out -- HVST-ch-7 step 0 (read only), 0.7.0_AE_CloudOps~SC1, 2026-10-18T05:08:37Z
+GO_UTC 2026-10-18T05:02:00Z, window to 07:02:00Z (msgs 7911, 7914; READ-acked)
+WORKTREE C:/tmp/ch7-build  git rev-parse HEAD = 091ebacda93561d86f4653d3ec8e79ebf7facd24
+LIB-RESEARCH-DIFF 091ebacda9..HEAD: lines=0 (empty = 0); worktree status lines=0
+LIST db965262ed4c02179c43bb8346a5c4d24953cc638b669c6a354dff36fae698ac lines=78 (expected db965262ed4c02179c43bb8346a5c4d24953cc638b669c6a354dff36fae698ac, 78)
+COO-HALF sha256 19d80c8bf6bafa94157d1152cc2bcf9f8a11a58fe0c21dc877c49f0dbf8f213c (CTO half binds 19d80c8bf6bafa94157d1152cc2bcf9f8a11a58fe0c21dc877c49f0dbf8f213c) -- equal
+
+## step 0 (i) ch8_census.py UNCHANGED, run from the pinned worktree (full output in ch7_census_before.out)
+CONTROL-START
+CONTROL-POSITIVE MNST_US_Equity fields_changed=0
+CONTROL-POSITIVE-DETAIL served=67c9b368/5 method_version_is_current=yes list=none
+CONTROL-NEGATIVE fields_changed=1
+CONTROL-NEGATIVE-DETAIL name=UNH_US_Equity planted_field=fund_of_record served=4d837586/4 list=fund_of_record
+CENSUS-CONT-REBUILD partitions=95 at_current=17 names=78 unchanged=78 changed=0 fields_changed=0 inputs_equal=78 name_exists=0 gets=1215 bytes=116081888
+NAME lines: 78; with fields_changed=0: 78
+
+## step 0 (ii) counts (ch7_counts_before.out)
+COUNT research_dossier prefix=amgt/harvest/gold/research_dossier/ objects=1479 partitions=95
+COUNT research-continuation prefix=amgt/harvest/gold/research-continuation/ objects=368 partitions=95
+COUNT research-fund-form prefix=amgt/harvest/gold/research-fund-form/ objects=12 partitions=3
+
+## step 0 (iii) scheduled tasks (Get-ScheduledTask, read 05:06Z)
+tasks listed: 207; positive control OPAL_autolaunch*: 1 found; tasks whose action names fund_form/continuation/dossier/research.corpus/research-fund-form/typed: 0; harvest cycle task state=Running (args: cycle_runner --publishers wsj barrons sa --refresh-once; none names a continuation, dossier or fund-form build)
+
+## driver plan mode (ch7_plan.out), read only, 05:08Z
+=== ch7_run.py plan_only=True start 2026-10-18T05:08:02Z HEAD=091ebacda9 names=2 manifest_lines=0 ===
+NAME UNH_US_Equity partition=security_key=UNH_US_Equity objects_before=4 served=4d837586380648bd.json method=amgt-corpus-continuation/4
+COMPARE name=UNH_US_Equity fields=5 changed=0 list=none inputs_equal=True new_object=b89177eb99c0dc00.json exists=False served_fields_digest=e9a95e9517b3519e built_fields_digest=e9a95e9517b3519e
+PLAN-ONLY UNH_US_Equity; nothing put
+NAME CPA_US_Equity partition=security_key=CPA_US_Equity objects_before=3 served=dc143a9f2ecaad5e.json method=amgt-corpus-continuation/3
+COMPARE name=CPA_US_Equity fields=5 changed=0 list=none inputs_equal=True new_object=96cd31de9852d563.json exists=False served_fields_digest=a603510b3f91be56 built_fields_digest=a603510b3f91be56
+PLAN-ONLY CPA_US_Equity; nothing put
+=== batch done 2026-10-18T05:08:09Z manifest_lines=0 ===
+
+## step 0 (iv) BEFORE gateway reads, harvest_get_research fields ["fund_of_record","last_stated_position"], read 05:07Z
+(transcribed by the seat from the tool result; the served-fields digests below are computed by the driver from the S3 object the
+gateway's pick rule serves, and are the machine comparison; etfs_compare_peers not called)
+UNH_US_Equity: as_of=2026-10-17 content_sha256=6bd7cea7091cb8254e553af1a54e13462406a881224fe6c9c1cd3e185244e0f1
+  method_version=amgt-corpus-dossier/15 denominator=24 truncated=true omitted_items={continuation_fields:1, ai_fill_blocks:1}
+  dossier_key=amgt/harvest/gold/research_dossier/security_key=UNH_US_Equity/as_of=2026-10-17.f73f295a3671b8da.json
+  continuation_key=amgt/harvest/gold/research-continuation/security_key=UNH_US_Equity/4d837586380648bd.json
+  source_keys(13)=ai_fill/ai_fill.json; research-continuation/security_key=UNH_US_Equity/ (prefix); research-continuation/.../4d837586380648bd.json;
+    research_dossier/.../as_of=2026-10-17.f73f295a3671b8da.json; silver/research-report/ (prefix); research-report parts
+    date=2026-09-23/part-20260923T044515Z, date=2026-09-23/part-20261018T010056Z, date=2026-09-24/part-20260924T121349Z,
+    date=2026-09-24/part-20260924T214637Z, date=2026-09-24/part-20261018T010114Z, date=2026-09-25/part-20260925T050517Z,
+    date=2026-09-25/part-20260926T004147Z, date=2026-09-25/part-20261018T010034Z (.parquet); bloomberg exec_officers 20261007T113713Z.json
+  dossier_fields: fund_of_record value PFOE (citation extract 48d81f053e5076e8 locator 0); last_stated_position value {fund PFOE, line_only true, size_pct null, text "Maintain positions in PFOE and DIVZ"}
+  continuation_fields (3 returned of 4): thesis_pillars absent "no class A report for this security"; thesis_summary absent "no class A report for this security";
+    fund_of_record PFOE (same citation); last_stated_position (same value as dossier)
+  research_reports(1): 48d81f053e5076e8 class B fund PFOE fund_relation holding period 2026-Q2 part=date=2026-09-25/part-20261018T010034Z.parquet
+CPA_US_Equity: as_of=2026-10-12 content_sha256=61b9977a5ddfe65a5584d69f87178849da84704161f5563b004942a111510f6d
+  method_version=amgt-corpus-dossier/15 denominator=24 truncated=true omitted_items={continuation_fields:1, research_reports:28}
+  dossier_key=amgt/harvest/gold/research_dossier/security_key=CPA_US_Equity/as_of=2026-10-12.2bd09162c4f47b3b.json
+  continuation_key=amgt/harvest/gold/research-continuation/security_key=CPA_US_Equity/dc143a9f2ecaad5e.json
+  source_keys(13)= same shape as UNH's (ai_fill, continuation prefix + dc143a9f2ecaad5e.json, dossier 2bd09162c4f47b3b, silver prefix + the same 8 parts, bloomberg exec_officers 20261007T113616Z.json)
+  dossier_fields: fund_of_record IDVZ (extract a0995f4b0449639f locator 2); last_stated_position {fund IDVZ, size_pct "2", text "1-2% position in IDVZ Copa owns ..."}
+  continuation_fields (4 returned of 5): thesis_summary absent "standalone heading, no inline summary" value ""; fund_of_record IDVZ; last_stated_position (same as dossier);
+    thesis_pillars = 5 entries: "Structural cost advantage + full-service revenue", "Geographic moat", "Strong balance sheet for an airline", "Growth runway", "Cheap valuation with income" (extract 0c51730281bceb11 locator 1)
+  research_reports(9 returned, 28 omitted): 039303c03e4cdc55, 03a601041d92cac7, 0c51730281bceb11 (class A, fund IDVZ, holding, 2026-07-07), 1bb38eed6adf6f8d, 2007b67d932c7479, 3015dca137d6b1d5, 3a1396b53d1fc25e, 3b28b0938b874763, 404803944814d2d1; all part=date=2026-09-25/part-20261018T010034Z.parquet

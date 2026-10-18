@@ -56,11 +56,16 @@ Paths, with line counts (`git diff --numstat` against `52a137e363`; new files co
   then page break and Appendix: model figures with the Header and Fiscal year listings, lines unchanged). The two currency
   assignments (`trading_cur`, `reporting_cur`) moved up unchanged, since the company description line uses them too.
   `NOT_WRITTEN["bio"]` is printed only when management has no content (reused as it stands; it says why).
-- `lib/research/api/scoped_amgt.py` (Step B, `_print_pack` only): 12 insertions, 1 deletion. The PDF branch was
-  `pdf_path, _ = build_pack(display_form, block, write_text=False)`. It is now `build_pack(display_form, block,
-  write_text=False, write_rich=False, thesis_bundle=read_thesis_bundle(resolved_key, identity=identity),
-  peer_set=read_peer_set(resolved_key), posture=read_posture(resolved_key, identity=identity))`: the same three reads the
-  rich branch makes for the same name, and no store read of its own. No other function of the file was touched.
+- `lib/research/api/scoped_amgt.py` (Step B, `_print_pack` only): AMENDMENT 1 added 12 insertions and 1 deletion (the PDF
+  branch handed `build_pack` the three served reads). AMENDMENT 2 (Part 3) replaced the three inline reads with three guarded
+  reads: 22 insertions and 3 deletions against `9590e6e5a5`. Each read is its own try/except; a raising reader is `None`
+  (absent) and writes one `_LOG.warning` line. No other function of the file was touched. See `## Print route reads`.
+- `lib/research/api/tests/test_bw4_print_pack_degrades.py` (AMENDMENT 2, Part 3, new): 195 lines, six tests (D1 to D6).
+  Run once on the UNGUARDED route: D1, D2, D3, D4 and D5 failed with the reader's `RuntimeError`; D6 passed (5 failed, 1 passed).
+  After the guard: 6 passed.
+- `lib/research/api/tests/test_print_format_rich.py` (AMENDMENT 2, Part 2): one test re-scoped and renamed, 23 insertions, 5 deletions.
+- `lib/research/print/tests/test_bw1_currency_labels.py` (AMENDMENT 2, Part 1): C3, and C7 for ICT_PM and RIO_LN re-scoped to the
+  figure lines as a multiset, 58 insertions, 12 deletions (a `_figure_lines` helper and `EXPECTED_FIGURE_CHANGES` added).
 - `lib/research/print/tests/test_bw2_pack_form.py` (new): 252 lines, ten tests (F1, F2 twice, F3, F4, F5, F6, F7 twice, F8).
 - `lib/research/print/tests/fixtures/bw2_sections.json` (new, Step A inventory): 189 lines.
 - `lib/research/print/tests/fixtures/bw2_base_figure_lines_RIO_LN.txt` (new): 12 lines, the base figure lines recorded from the
@@ -103,18 +108,56 @@ Shared-line order changed as the reorder requires. The subset premise as written
     company yet.`, `No analyst posture is on file for this company yet.`, `No peer set is on file for this company yet.`), each
     bundle-fed section gaining lines; (5) the no-bundle build prints every narrative section with a body, never a bare heading.
   - Run after the re-scope: `test_build_rich_text.py` 22 passed (the renamed test included).
+- RE-SCOPED under AMENDMENT 2 (issuer, the merge repair; slot re-seated; these commits sit after `9590e6e5a5`). The five
+  tests below (four test functions, five parametrized cases) are the ONLY existing tests this amendment changes; no other test is edited.
+  - `test_bw1_currency_labels.py::test_C3_googl_us_control_text_is_unchanged_from_base` (Part 1): OLD `_render("GOOGL_US")`
+    text `== _base("GOOGL_US")` (the whole pre-bw-2 text). NEW: `sorted(figure lines of the new text) ==
+    sorted(figure lines of the base text)`, with the count of figure lines hand-written as 4 (Company name, Currency,
+    Market cap, the no-date note). The base figure lines are derived from the recorded `bw1_pack_text_base_GOOGL_US.txt`
+    (the block after `Model figures` before `Recommendation`); the `bu3_pack_text_base_*.txt` fixtures are untouched.
+  - `test_bw1_currency_labels.py::test_C7_base_and_edited_text_differ_only_on_money_lines[ICT_PM]` and `[RIO_LN]` (Part 1):
+    OLD difflib opcodes over the whole text, every changed line matches `MONEY_LINE`. NEW: a `Counter` multiset difference of
+    the figure lines; every removed or added line matches `MONEY_LINE`, AND the removed and added lists equal
+    `EXPECTED_FIGURE_CHANGES[name]` (hand-written). ICT PM: removed `Market value, currency-adjusted: USD 1,735,465.1 million -
+    Bloomberg`, added none. RIO LN: removed `Market cap: GBp 115,578.9 million - Bloomberg`, `Market value, currency-adjusted:
+    USD 115,578.9 million - Bloomberg`, `Enterprise value: USD 173,616.0 million - Bloomberg`; added `Market cap: 115,578.9
+    million currency not stated - Bloomberg`, `Enterprise value: 173,616.0 million currency not stated - Bloomberg`.
+  - `lib/research/api/tests/test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself` is
+    RENAMED `test_default_and_fmt_pdf_equal_build_pack_with_the_same_served_bundles` (Part 2). OLD: the route's default PDF,
+    its `fmt=pdf` PDF and `build_pack(DISPLAY_FORM, model_block, out_dir=tmp_path)` (NO bundles) have one sha256. NEW: the
+    three readers are monkeypatched to the fixture's served objects; the default PDF, the `fmt=pdf` PDF and `build_pack(...,
+    write_text=False, write_rich=False, thesis_bundle=thesis, peer_set=bundle["peers"], posture=thesis.get("posture"))` have
+    one sha256. Status 200 and headers asserted as before.
+  - Run after the re-scope: the four tests pass (`test_bw1_currency_labels.py` and the renamed route test are in AC3's 52 passed).
+  - Base-fixture note: the bw1 controls use the `bw1_pack_text_base_*.txt` fixtures, which were not re-recorded.
 - `test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words` fails as it does at base
   (the order names it).
 
-## Served PDF route: what the three extra reads do and what a failure prints
+## Print route reads
 
-Read from `lib/research/api/scoped_amgt.py` `_print_pack` (lines 7891-7914; the file is unchanged since `90c47eccd7`), not run live.
+Before and after, in `lib/research/api/scoped_amgt.py` `_print_pack`, PDF branch only (the rich branch is not edited; see the
+row `AMGT_RESAPP-D1-W511-S9`). Read from the source; the failure rows below are also measured by `test_bw4_print_pack_degrades.py`.
+
+- BEFORE (`9590e6e5a5`): `build_pack(display_form, block, write_text=False, write_rich=False,
+  thesis_bundle=read_thesis_bundle(...), peer_set=read_peer_set(...), posture=read_posture(...))`. No guard: a raising reader
+  propagates out of `_print_pack`, the route returns no PDF.
+- AFTER (this amendment): each read sits in its own `try`. On an exception the variable is `None` (absent), one line is written
+  through `_LOG.warning("print pack <thesis bundle | peer set | posture> read failed for %s: %s: %s", ...)` (the module logger
+  `segment_breakdown` uses for a failed read), and the PDF is built. `read_thesis_bundle` still calls `read_posture` internally;
+  that inner call is unchanged.
+- On a failed reader the PDF prints, for the section it feeds: thesis bundle -> `Management` prints `No chief executive or board
+  biography has been written for this company yet.`; peer set -> `Peers` prints `No peer set is on file for this company yet.`;
+  posture -> `Positioning` prints `No analyst posture is on file for this company yet.`. Each is `build_pack`'s existing absence
+  sentence, so no bare heading. The figure appendix is unchanged (the readers feed no figure line).
+- Route tests (`test_bw4_print_pack_degrades.py`): D1 to D3 assert the phrase `<Section> <absence sentence>` in the flattened PDF
+  text; D4 asserts the appendix text equals the all-served build's; D5 asserts exactly one WARNING record naming `thesis bundle`,
+  `RuntimeError` and the key; D6 asserts the all-served PDF equals `build_pack` with the same three objects.
 
 - The PDF branch calls `read_thesis_bundle`, `read_peer_set` and `read_posture` (the same three the rich branch reads), then
   `build_pack` with `write_text=False, write_rich=False`. `read_thesis_bundle` itself also calls `read_drafted_sections`,
   `read_management` and `read_posture` (lines 4288, 4321, 4322), so `read_posture` runs twice on this route.
-- Failure, the reader RAISES: `_print_pack` has no try around the three reads; the exception propagates and the route returns
-  no PDF. The pack does not build.
+- Failure, the reader RAISES: BEFORE this amendment the exception propagated and the route returned no PDF. AFTER this amendment
+  the pack builds with the section's absence sentence and one warning line (see the BEFORE and AFTER bullets above).
 - Failure, the reader RETURNS an absent or failed object (the readers' own statuses): the pack builds. Thesis bundle with
   no management or no passage: Management prints the one sentence `No chief executive or board biography has been written for
   this company yet.` (or the CEO profile line when the roster is served). Drafted sections with a drafting status other than
@@ -137,3 +180,11 @@ Read from `lib/research/api/scoped_amgt.py` `_print_pack` (lines 7891-7914; the 
 - The research-notes sections (S06), the thesis pillars (S07), the charts (S08), the AI fills (S13) are not printed by this cell.
 - The round-115 long-date and verbatim rules were checked on the fixtures only (F7 and the existing bu3/bv2 tests).
 - The Positioning comparable label does not reproduce the page's fallback identity (surprise row `AMGT_RESAPP-D1-W511-S6`).
+- AMENDMENT 2 runs at the start, on `9590e6e5a5`: the four named tests failed (`test_bw1_currency_labels.py` C3, and C7 for ICT_PM
+  and RIO_LN; `test_print_format_rich.py::test_default_and_fmt_pdf_are_byte_identical_to_build_pack_itself`). The print folder
+  read `4 failed, 143 passed`. After Parts 1 to 3: `1 failed, 146 passed` (the one failure is `test_av2`, which fails at base).
+- The api folder is not an acceptance criterion. Five api files that call `_print_pack` or `build_pack` were run: 38 passed and
+  3 failed, the three being `test_fiscal_scope_contract.py` tests on a producer file missing from this sparse worktree and on
+  fiscal counts this amendment does not touch (surprise row `AMGT_RESAPP-D1-W511-S7`). The full api folder is not run here.
+- The nested portal is checked out at `ff61156612`, not the `portal_ref` `3a7791c107` that Part 2 names; the fixture the tests read
+  exists at the checkout (surprise row `AMGT_RESAPP-D1-W511-S8`).
