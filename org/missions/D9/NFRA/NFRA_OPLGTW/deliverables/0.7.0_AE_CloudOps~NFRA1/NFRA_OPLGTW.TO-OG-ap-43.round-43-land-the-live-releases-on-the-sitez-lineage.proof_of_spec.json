@@ -1,0 +1,104 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ap-43",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "581ee61977",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ap-43.round-43-land-the-live-releases-on-the-sitez-lineage.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ap43_landing.json",
+   "kind": "doc",
+   "commit_or_etag": "e31407d225",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The landing record: trunk base 011a4c7bde, merge sha eb9a60c0ac8ca30bb08bc0d9a9d36f2ec0ac8c98 (parents trunk base and 922ee425fe, tree equal to the trunk base's tree, 2 conflicted paths resolved to trunk's blobs; made with commit-tree because .tools/safe-merge.sh refuses a merge that stages no file, rows Z-S378 and Z-S379; not pushed, the issuer drains the branch), dell1's manifest commit 52b93de111, the expected pair, live sha, and trunk_own_changes for the 5 files AC3 prints (all SITE-Z-OWN).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a true merge of the live release on the trunk head, no conflict marker left, no Terraform or non-gateway byte changed; every conflicted gateway path takes trunk's side except dell1's own harvest paths.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ap43.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)merge parents are exactly trunk_base and the dell1 commit: yes; dell1's release is an ancestor of the merge: yes; conflicted paths \\(merge-tree, the denominator\\): (\\d+); conflict markers in 0 of \\1 paths \\(want 0\\).*each dell1-own and holding dell1's blob: yes\\); the \\d+ conflicted gateway paths resolved \\(dell1-own to dell1's blob, any other to trunk's\\): yes; terraform files differing 0 \\(want 0\\); paths outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "merge parents are exactly trunk_base and the dell1 commit: yes; dell1's release is an ancestor of the merge: yes; conflicted paths (merge-tree, the denominator): 2; conflict markers in 0 of 2 paths (want 0)\ngateway paths differing from trunk_base: 0 (each dell1-own and holding dell1's blob: yes); the 2 conflicted gateway paths resolved (dell1-own to dell1's blob, any other to trunk's): yes; terraform files differing 0 (want 0); paths outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "3 commits merged; 2 conflicted paths; 0 gateway paths differing from trunk_base",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the manifest block names the release as live (922ee425fe) with its parent as previous (6575999df5), the pair taken from dell1's own commit, and nothing else in it moved.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ap43.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)manifest opal-gateway deployed_commit [0-9a-f]{10} previous [0-9a-f]{10} \\(want [0-9a-f]{10} and [0-9a-f]{10}\\): yes.*other services and the top level unchanged from trunk_base: yes; the gateway block's other keys unchanged: yes.*manifest source: dell1's own commit [0-9a-f]{10} \\(an ancestor of the merge\\): yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "manifest opal-gateway deployed_commit 922ee425fe previous 6575999df5 (want 922ee425fe and 6575999df5): yes\nother services and the top level unchanged from trunk_base: yes; the gateway block's other keys unchanged: yes\nmanifest source: dell1's own commit 52b93de111 (an ancestor of the merge): yes\nRESULT: PASS\nexit=0",
+   "denominator": "1 manifest block; 3 conditions",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the gateway app/ is code-equal to the LIVE release plus trunk's own changes, each listed with its owner.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ap43.AC3.sh; echo \"exit=$?\"",
+   "expect": "(?s)app/ python files compared live [0-9a-f]{10} against the merge: \\d+; equal \\d+; docstring-only differences \\d+; code-different \\d+; present on one side only \\d+.*unlisted 0 \\(want 0\\); tools\\.py code-equal to live: yes.*RESULT: PASS.*exit=0",
+   "output_evidence": "app/ python files compared live 922ee425fe against the merge: 125; equal 120; docstring-only differences 0; code-different 3; present on one side only 2\ntrunk's own changes listed in the record: 5 of 5 code-different or one-sided files unlisted 0 (want 0); tools.py code-equal to live: yes\nthe files that are code-different or one-sided: admin_people_access.py, destructive_ops.py, family_depth.py, graph.py, probe_listener.py\nRESULT: PASS\nexit=0",
+   "denominator": "125 app/ python files compared; 5 listed (all SITE-Z-OWN)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "the window test files (the sixteen named) pass together in both orders with the same count.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh land43set tests/test_og_en13.py tests/test_og_en15.py tests/test_og_en17.py tests/test_og_en18.py tests/test_og_en19.py tests/test_og_en20.py tests/test_og_en21.py tests/test_og_en22.py tests/test_og_en23.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_rv2.py tests/test_og_db3.py tests/test_og_en9.py tests/test_og_sv2.py tests/test_og_pr1.py; echo \"exit=$?\"",
+   "expect": "(?s)land43set forward: passed (\\d+); failed 0.*land43set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+   "output_evidence": "land43set forward: passed 66; failed 0\nland43set reverse: passed 66; failed 0\nRESULT: PASS\nexit=0",
+   "denominator": "16 test files; 66 tests in each order",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 to AC4 were each run twice against the same commit, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the issuer's pre-cut controls (one parent; a manifest pair other than the record's) are the discriminating arms.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a push",
+   "reason": "The order forbids it: the issuer drains the branch to box/sitez and 0.0.0_AB_MSTR~Z carries it to origin."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S393"
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ap-43 (GOs 35724 and the COO ruling on row Z-S393). Worktree C:/tmp/og-land-s43 on land-sitez-rel-nfra1-43 at trunk_base_sha 011a4c7bde; merge-tree listed 2 conflicted paths (probe_listener.py, test_og_pr1.py), resolved to trunk's blobs; safe-merge refused the empty staged set (the Z-S378 shape), so the merge commit was made with commit-tree on the scratch branch; dell1's 8 own paths hold the same blob on trunk and at dell_sha (the dell1-side clause idle). The first AC1 run read 'no' on one clause because the issuer's _ap43_check.py DELL_OWN class covered all of tests/ (row Z-S393); the issuer narrowed it in a24674dd4d and asked for the fixed script as an UNCOMMITTED OVERLAY: this instance's AC1 to AC4 outputs were produced with that overlay laid (blob b07396bebabd), and the file was restored to the committed blob afterwards. AC1 to AC4 PASS; AC3 names 5 files, all SITE-Z-OWN.",
+ "compiler_tools": [
+  {
+   "tool": "git merge-tree / commit-tree",
+   "invocation": "merge-tree --write-tree --name-only; commit-tree -p trunk_base -p aa2efa2cf3",
+   "result": "PASS",
+   "note": "Shas, counts and file names only."
+  }
+ ]
+}
