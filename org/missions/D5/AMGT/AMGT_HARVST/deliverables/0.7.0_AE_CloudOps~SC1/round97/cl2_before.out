@@ -1,0 +1,39 @@
+HVST-cl-2 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, started 2026-10-18T15:16:20Z (issuer msg 8103, READ-acked 15:10Z). Ledger harvst-cl2-pull-enqueue-canonical-status opened 15:13Z BEFORE any pre-upload read (committed).
+Order sha256 prefix 34aea74ddfc0c285 (equal to the GO). COO half sha256 a72a3823a58f68be971cd4a2cfb81ed5c01a07f4e85448052edf5c5e70ec26f5 (equal to the CTO half's binding); CTO half committed @5e345c92f5, SIGNED, C-7 ruled YES (one real invoke, queue only).
+--- WHAT THIS CHANGES (stated plainly, order section 0)
+A ticker with no slash: nothing changes. A slash ticker: the status key moves from packs/BP/_LN_Equity/status.json to packs/BP-SLASH-_LN_Equity/status.json (the raw key stays in the status body and the SQS message). A ticker the shared rule refuses (non-ASCII or containing -SLASH-): now a 400 with zero writes, where the old code wrote a REQUESTED status, enqueued and returned 202.
+--- L1 THE SOURCE
+349e7ee0da90c91f3377f7134d18079857a3309d
+worktree C:/tmp/cl2-build detached, status_lines=0
+45c83ddf74640e90368e8bebf712b52c *C:/tmp/cl2-build/infra/aws/lambda/research/pull_enqueue/lambda_function.py
+expected md5 45c83ddf74640e90368e8bebf712b52c
+ad395e19c80e801a91042b550299866c2a86301f268846e7cf274f0d347ef2f3 *C:/tmp/cl2-build/infra/aws/lambda/research/pull_enqueue/lambda_function.py
+--- LIVE FUNCTION
+{ "sha": "cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=", "size": 2690, "mod": "2026-10-12T15:38:20.000+0000", "rev": "bab0bc61-e19f-4de1-83f5-758aa6ca36ac", "rt": "python3.11", "h": "lambda_function.lambda_handler", "mem": 256, "to": 30, "state": "Active", "upd": "Successful", "env": [ "RESEARCH_BUCKET", "HARVEST_BUCKET", "QUEUE_URL" ], "role": "arn:aws:iam::313476888478:role/opal-research-pull-enqueue-role", "layers": null, "arch": [ "x86_64" ]}
+--- LIVE ARTIFACT (latest and recent versions)
+pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2	2690	True	2026-10-12T15:36:46+00:00
+kwFo21Dq805CaW24uAodJu5WJY.nbvVx	2829	False	2026-10-12T14:38:58+00:00
+S9217s5ck1gZJvwSC.Ayeg4vFAkV063z	2690	False	2026-10-12T14:20:04+00:00
+bSNW5xyLGyzTAHsP2xN.9BfjDIT2SF79	2437	False	2026-10-12T13:47:20+00:00
+None
+["pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2",2690,"2026-10-12T15:36:46+00:00",{"content-sha256":"cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo="}]
+--- THE ROLLBACK BYTES (previous zip, downloaded by VersionId pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2)
+bytes 2690 sha256 hex 7168ab682dc47ae4d4f560c8a5ce515f3a70ebe453f56c687aa7c7fde6626b1a b64 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=
+EQUAL to live CodeSha256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=: True
+entry lambda_function.py 5981 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484
+(the issuer's last read: one entry lambda_function.py sha256 1778584aa7309505cc3c2252dd863cd21d405f074be6b0f57d25fa96ed33f484, 2690 bytes)
+LIVE CODE IDENTITY: the live entry sha256 1778584aa730.. equals `git show 37e6f3cdea:infra/aws/lambda/research/pull_enqueue/lambda_function.py` (the revert of by-6, the commit before HVST-cl-1 5df3755664, whose source sha256 is ad395e19c80e..); read from `git log` of the file at 349e7ee0da.
+--- QUEUE
+queue https://sqs.us-east-1.amazonaws.com/313476888478/opal-research-pull-requests
+{"ApproximateNumberOfMessages":"0","ApproximateNumberOfMessagesNotVisible":"0","ApproximateNumberOfMessagesDelayed":"0"}
+--- THE PROBE KEY (expected absent)
+0
+0
+(positive control: the same call on packs/BP-SLASH-_LN_Equity/)
+packs/BP-SLASH-_LN_Equity/input_ledger.json	7335
+--- SCHEDULED-TASK READ (Get-ScheduledTask, 2026-10-18T15:2xZ)
+tasks read: 207; control OPAL_autolaunch_agents found: 1 (so the read can see a task); tasks whose action names terraform, safe-apply, build-and-upload or pull-enqueue: 0. No task applies Terraform to infra/aws/terraform/harvest in the window.
+--- THE CL-1 TESTS in the build tree C:/tmp/cl2-build (pytest infra/aws/lambda/research/pull_enqueue): 38 passed (test_bx1_tier_fence, test_by1_refusal_logged, test_cl1_status_key_canonical, whose arm 3 is the equality test over the fixture's 105 keys: CTO condition 2)
+--- DEVIATIONS / NOTES
+No Bloomberg use, no etfs_compare_peers, no Lambda invoke so far. Other open ledgers touching infra/aws/terraform/harvest or the artifact bucket: none (ls of .open_deploys on the shared tree shows no harvst, harvest, amgt or resapp sentinel other than this one; per-worktree sweep follows in cl2_plan.out).
+BEFORE complete 2026-10-18T15:18:17Z
