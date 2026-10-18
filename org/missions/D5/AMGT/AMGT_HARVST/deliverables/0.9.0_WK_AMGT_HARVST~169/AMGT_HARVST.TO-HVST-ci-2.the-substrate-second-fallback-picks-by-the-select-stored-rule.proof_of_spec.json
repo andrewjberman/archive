@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ci-2.the-substrate-second-fallback-picks-by-the-select-stored-rule",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-2.the-substrate-second-fallback-picks-by-the-select-stored-rule.md",
+    "group": "OTHER",
+    "vintage_commit": "1386eb78b9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "1386eb78b9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-2.the-substrate-second-fallback-picks-by-the-select-stored-rule.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~169",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/substrate.py",
+      "kind": "script",
+      "commit_or_etag": "9ebf5ef8c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_pick_stored's fallback (no input-matching object) now builds (key, last_modified, doc) for every listed object and returns continuation._select_stored(every, current_method_version)'s document, uri and False. The matching branch is byte-for-byte unchanged. The docstring sentence names the amended rule. Diff: 8 insertions, 6 deletions.",
+      "introduces": [
+        "every = [(key, last_modified, docs[key]) for key, last_modified in listing]"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_substrate_fallback_pick.py",
+      "kind": "test",
+      "commit_or_etag": "9ebf5ef8c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 offline tests on a fake S3 client: the UNH-shaped difference arm (new picks 4d837586/4, the key-order rule picks f174f709), reassigned names with the highest version last and first in sort order, same-version later-write and exact-tie greater name, /10 beats /9, the matching branch unchanged (current True), empty partition returns (None, None, None), a single non-matching object (current False), and a mutant with the key-order rule that must fail the difference arm. 10 passed in 0.39s.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci2_census_after.py",
+      "kind": "script",
+      "commit_or_etag": "9ebf5ef8c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only post-change census, started from ci1_census.py. Forwards only read operations and refuses every other S3 operation. OLD (sorted(docs)[-1]) and RULE (highest method_version integer, then later LastModified, then greater key) are reimplemented in the file; the changed module is called only for fallback partitions, and CONTROL-DIFFERENCE uses a fake in-memory client. Budget 8000 requests and 1 GiB. One foreground run; a first run stopped in the control helper before any census line (a utc() argument bug), and the rerun is the recorded run.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci2_census_after.out",
+      "kind": "doc",
+      "commit_or_etag": "9ebf5ef8c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output, 11 lines, LF only: PARTITIONS continuation n=95, sector_template n=10, fund_form n=3, typecast n=1; TABLE lines with no_input_match=0 on all four tables; CONTROL-DIFFERENCE module_pick=rule_pick old_pick_differs=yes; CENSUS-FALLBACK-AFTER fallback_partitions=0 module_equals_rule=0 moved_from_old=0 gets=4655 bytes=384039907.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9ebf5ef8c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_HARVST-D1-W169-S2 appended by bytes (22 insertions, 0 deletions), OBSERVATION, INERT: no partition falls to the fallback after the change, so none moves from OLD; the changed branch is exercised only by the control."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 python -m pytest lib/research/corpus/tests/test_substrate_fallback_pick.py -q -p no:cacheprovider --color=no expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_substrate_fallback_pick.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "10 passed in 0.39s\n(rc=0; output file .scratch/ac1_ci2.txt, worktree, uncommitted. The mutant arm, test_mutant_key_order_fallback_fails_the_difference_test, is one of the 10 and passes by asserting the AssertionError.)",
+      "denominator": "10 of 10 tests in test_substrate_fallback_pick.py passed",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no expect (?m)^96 passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "96 passed in 1.18s\n(rc=0; output file .scratch/ac2_ci2.txt. No test file in the set was changed.)",
+      "denominator": "96 of 96 tests in the nine regression files passed (base count 96)",
+      "status": "PASS",
+      "expect": "(?m)^96 passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci2_census_after.out expect (?ms)^CONTROL-DIFFERENCE module_pick=rule_pick old_pick_differs=yes$.*^CENSUS-FALLBACK-AFTER fallback_partitions=(\\d+) module_equals_rule=\\1 moved_from_old=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci2_census_after.out",
+      "output_evidence": "CONTROL-DIFFERENCE module_pick=rule_pick old_pick_differs=yes\nCENSUS-FALLBACK-AFTER fallback_partitions=0 module_equals_rule=0 moved_from_old=0 gets=4655 bytes=384039907\n(ci2_census_after.out lines 9 and 11; the back-reference holds with 0 fallback partitions, so module_equals_rule equals fallback_partitions trivially. CONTROL-DIFFERENCE-DETAIL line 10: module=4d837586/4 rule=4d837586 old=f174f709 current=False. No AFTER line was printed because no partition fell to the fallback.)",
+      "denominator": "1 of 1 CONTROL-DIFFERENCE line; 0 of 0 fallback partitions moved (109 partitions across 4 tables scanned, 0 with no input-matching object)",
+      "status": "PASS",
+      "expect": "(?ms)^CONTROL-DIFFERENCE module_pick=rule_pick old_pick_differs=yes$.*^CENSUS-FALLBACK-AFTER fallback_partitions=(\\d+) module_equals_rule=\\1 moved_from_old=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm 7 of the test file: the shared rule continuation._select_stored is replaced by the key-order rule (max by key, equal to sorted[-1]); the difference arm must raise AssertionError.",
+      "expected": "AssertionError from the difference arm under the key-order rule (pytest.raises)",
+      "observed": "Test PASSED: pytest.raises caught the AssertionError under the key-order rule (10 of 10 passed, including this arm).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "One pytest run of the new file, one foreground census run; no same-input second run was made.",
+      "observed": "Not run.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Edits to continuation.py, gold.py, the matching branch of _pick_stored, any existing test file, any gold or silver writer, any deploy, any file outside paths",
+      "reason": "Out of scope by the order. The census wrapper refuses every write operation; the matching branch and the nine regression files are unchanged."
+    },
+    {
+      "item": "A served move from OLD in the post-change census",
+      "reason": "None occurred: no partition fell to the fallback. Row AMGT_HARVST-D1-W169-S2 records the zero."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W169-S2: OBSERVATION -- after the fallback change no partition falls to the fallback (0 of 109), so none moves from the key-order pick; the changed branch is exercised only by the CONTROL-DIFFERENCE line."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, new offline test file)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_substrate_fallback_pick.py -q -p no:cacheprovider --color=no",
+      "result": "10 passed in 0.39s"
+    },
+    {
+      "tool": "pytest (AC2, regression set of nine files)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no",
+      "result": "96 passed in 1.18s"
+    },
+    {
+      "tool": "ci2_census_after.py (read-only post-change census, one foreground run)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci2_census_after.py (from the worktree root)",
+      "result": "rc=0; CENSUS-FALLBACK-AFTER fallback_partitions=0 module_equals_rule=0 moved_from_old=0 gets=4655 bytes=384039907"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-2.the-substrate-second-fallback-picks-by-the-select-stored-rule.md",
+      "result": "recorded after the run below"
+    }
+  ]
+}
