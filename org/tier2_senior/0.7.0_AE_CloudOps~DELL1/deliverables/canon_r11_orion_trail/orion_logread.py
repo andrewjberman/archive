@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import collections
 import json
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -16,7 +17,7 @@ import boto3
 
 BUCKET = 'opal-data-security-access-logs'
 PREFIX = 'opal-data-assets/'
-START = datetime(2026, 10, 16, 18, 40, tzinfo=timezone.utc)
+START = datetime.fromisoformat(os.environ.get('ORION_START', '2026-10-16T18:40:00+00:00'))
 s3 = boto3.client('s3', region_name='us-east-1')
 
 LINE = re.compile(r'^(\S+) (\S+) \[([^\]]+)\] (\S+) (\S+) (\S+) (\S+) (\S+) "([^"]*)" (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) "([^"]*)" "([^"]*)" (\S+)')
