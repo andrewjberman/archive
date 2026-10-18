@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ch-1.the-stored-object-fallback-picks-the-highest-method-version-never-by-key-order",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ch-1.the-stored-object-fallback-picks-the-highest-method-version-never-by-key-order.md",
+    "group": "OTHER",
+    "vintage_commit": "4fae3115a1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4fae3115a1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ch-1.the-stored-object-fallback-picks-the-highest-method-version-never-by-key-order.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~165",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/continuation.py",
+      "kind": "script",
+      "commit_or_etag": "8d307e36c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_select_stored's final return replaced: with no candidate at the current method version it takes the highest integer method_version (after the last '/'; missing or unparsable = -1), then the last written by _later_candidate. The current-version branch is byte-for-byte unchanged. Docstring carries the AMENDED round 93 sentence. Diff: 14 insertions, 3 deletions (git show 8d307e36c7 --stat: 2 files, 299 insertions, 3 deletions including the test file).",
+      "introduces": ["top = max(rank for rank, _candidate in ranked)"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_select_stored_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "8d307e36c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests: the UNH-shaped difference test (new serves /4, old first-key rule serves /3), the first-sort-key and earliest-written variants, same-version later-write and key tie, /10 beats /9 as integers, missing or unparsable version, current version beats later lower versions, single candidate, read_latest on a fake client, and a mutant that must fail the difference test. 14 passed, run twice.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.py",
+      "kind": "script",
+      "commit_or_etag": "cc7b0ea97d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census: wraps the S3 client so only get_object, list_objects_v2, head_object and get_paginator are forwarded (any other operation raises); counts requests and bytes; aborts before exceeding 1500 requests or 500 MiB. Run once in the foreground: aborted at 1501 requests (see ch1_census.out and rows AMGT_HARVST-D1-W165-S1 and S2 in the investigation file).",
+      "artifact_covered_by": ["AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.out",
+      "kind": "doc",
+      "commit_or_etag": "cc7b0ea97d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census stdout, INCOMPLETE: 67 PICK lines in sorted partition order (last UBER_US_Equity), no UNH_US_Equity line, no CENSUS-PICKER line, no NO-INPUT-MATCH line. Ends at the budget guard (stderr: BUDGET-EXCEEDED requests=1501 bytes=125032896 -- aborted; stderr kept in the uncommitted .scratch/census.err of the worktree). PICK short ids show amgt/har (defect, row S2).",
+      "artifact_covered_by": ["AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cc7b0ea97d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended by bytes (84 insertions, 0 deletions): AMGT_HARVST-D1-W165-S1 (BLOCKING, INERT: census budget exhausted), S2 (OBSERVATION, INERT: key display), S3 (OBSERVATION, INERT: substrate.py:158 key-order fallback, count not measured), S4 (OBSERVATION, INERT: schema path absent)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 python -m pytest lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "14 passed in 0.37s (run 1, rc=0); 14 passed in 0.40s (run 2, rc=0). Output file .scratch/ac1_run1.txt (worktree, uncommitted).",
+      "denominator": "14 of 14 tests in test_select_stored_fallback.py passed",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py -q -p no:cacheprovider --color=no expect (?m)^82 passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "82 passed in 1.31s (rc=0). Matches the base count (82 passed in 1.08s before the edit).",
+      "denominator": "82 of 82 tests across the 8 named files passed",
+      "status": "PASS",
+      "expect": "(?m)^82 passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.out expect (?m)^CENSUS-PICKER securities=\\d+ with_current=\\d+ no_current=\\d+ new_equals_gateway=\\d+ new_differs_from_gateway=\\d+ old_equals_gateway=\\d+ old_differs_from_gateway=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.out",
+      "output_evidence": "No CENSUS-PICKER line: grep -c CENSUS-PICKER ch1_census.out = 0. Last line printed: PICK UBER_US_Equity candidates=3 old=amgt/har/1 new=amgt/har/3 gateway=amgt/har/3 new_equals_gateway=yes. The census guard aborted with BUDGET-EXCEEDED requests=1501 bytes=125032896 -- aborted (rc=1). The budget (1500 requests) was exhausted; no further S3 read was made.",
+      "denominator": "0 of 1 CENSUS-PICKER line; 67 PICK lines printed; 95 partitions listed (PARTITIONS n=95)",
+      "status": "FAIL",
+      "status_reason": "The census could not complete within the preflight budget (BLOCKING row AMGT_HARVST-D1-W165-S1). The order stays open.",
+      "expect": "(?m)^CENSUS-PICKER securities=\\d+ with_current=\\d+ no_current=\\d+ new_equals_gateway=\\d+ new_differs_from_gateway=\\d+ old_equals_gateway=\\d+ old_differs_from_gateway=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "AC4 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.out expect (?m)^PICK UNH_US_Equity candidates=4 old=28404359/3 new=4d837586/4 gateway=4d837586/4 new_equals_gateway=yes$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.out",
+      "output_evidence": "No UNH_US_Equity line: grep -c UNH_US_Equity ch1_census.out = 0. UNH sorts after UBER_US_Equity and the run aborted before reaching it.",
+      "denominator": "0 of 1 UNH_US_Equity PICK line",
+      "status": "FAIL",
+      "status_reason": "The census aborted before the UNH partition (BLOCKING row AMGT_HARVST-D1-W165-S1). The live claim (old /3, new /4, gateway /4) is NOT read; the offline arm (AC1 test 8) shows the rule on the UNH shape only.",
+      "expect": "(?m)^PICK UNH_US_Equity candidates=4 old=28404359/3 new=4d837586/4 gateway=4d837586/4 new_equals_gateway=yes$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_mutant_old_first_key_rule_fails_the_difference_test: continuation._select_stored is monkeypatched to the pre-round-93 rule (min by key); the UNH difference arm must raise AssertionError.",
+      "expected": "AssertionError from the UNH difference arm under the old rule (pytest.raises)",
+      "observed": "Test PASSED: pytest.raises caught the AssertionError under the old rule (14 of 14 in the file passed, including this mutant arm)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invocation run twice; outputs compared (.scratch/ac1_run1.txt, .scratch/ac1_run2.txt)",
+      "observed": "run 1: 14 passed in 0.37s; run 2: 14 passed in 0.40s; same test count, rc=0 both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live UNH pick (AC4) and the census over the remaining partitions (AC3)",
+      "reason": "The read-only census exhausted the 1500-request budget at 1501 requests before UNH_US_Equity. No further S3 read was made, so the live claim is not measured. Recorded as FAIL, BLOCKING row AMGT_HARVST-D1-W165-S1."
+    },
+    {
+      "item": "no_input_match count over the 95 partitions",
+      "reason": "Not printed: the census aborted. The 67 printed PICK lines contain no NOINPUT line. Row AMGT_HARVST-D1-W165-S3."
+    },
+    {
+      "item": "Any write to S3, any gold or silver writer, any deploy, any edit outside paths",
+      "reason": "Out of scope by the order. The census wrapper refuses every write operation. substrate.py (including its line 158 key-order fallback), gold.py and the gateway were not edited."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W165-S1: BLOCKING -- the census exhausted the 1500-request budget (guard aborted at 1501 requests) before UNH_US_Equity and the CENSUS-PICKER line; AC3 and AC4 FAIL.",
+    "AMGT_HARVST-D1-W165-S2: OBSERVATION -- census PICK lines show key[:8] of the full S3 key (amgt/har), not the object-name prefix; defect in ch1_census.py.",
+    "AMGT_HARVST-D1-W165-S3: OBSERVATION -- substrate._pick_stored line 158 keeps the key-order fallback sorted(docs)[-1]; the no_input_match count is NOT MEASURED because the census aborted.",
+    "AMGT_HARVST-D1-W165-S4: OBSERVATION -- org/surprise_channel/schemas/investigation_item.schema.json is absent from the worktree at 4fae3115a1; the row follows the shape of the rows already in the file."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, new offline test file)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_select_stored_fallback.py -q -p no:cacheprovider --color=no",
+      "result": "14 passed in 0.37s; 14 passed in 0.40s (two runs)"
+    },
+    {
+      "tool": "pytest (AC2, regression set of eight files)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py lib/research/corpus/tests/test_continuation_pillar_body.py lib/research/corpus/tests/test_continuation_reader_method.py lib/research/corpus/tests/test_continuation_terms.py lib/research/corpus/tests/test_dossier_method_bump.py lib/research/corpus/tests/test_substrate.py lib/research/corpus/tests/test_continuation_pdf_recommendation_line.py lib/research/corpus/tests/test_continuation_holding_stance.py -q -p no:cacheprovider --color=no",
+      "result": "82 passed in 1.31s, rc=0"
+    },
+    {
+      "tool": "ch1_census.py (read-only picker census, foreground, python -u)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~165/ch1_census.py > .../ch1_census.out 2> .scratch/census.err",
+      "result": "rc=1; BUDGET-EXCEEDED requests=1501 bytes=125032896 -- aborted; 67 PICK lines; no CENSUS-PICKER line"
+    }
+  ]
+}
