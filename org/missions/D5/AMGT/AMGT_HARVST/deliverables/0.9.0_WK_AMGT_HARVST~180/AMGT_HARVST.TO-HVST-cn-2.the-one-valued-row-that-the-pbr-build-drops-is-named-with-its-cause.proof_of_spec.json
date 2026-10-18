@@ -19,21 +19,21 @@
       "kind": "script",
       "commit_or_etag": "93ff7a9c0c",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Read-only finder for PBR_US_Equity: served dossier by a copy of the gateway _pick_dossier, dossier.build in memory, rows matched on source|key|period, causes from the two Model blocks, controls on UNH_US_Equity and a planted deletion. No write call; the Guarded client forwards get, head, list and the list paginator on opal-data-harvest only. Run once in the foreground: it stopped at dossier.build with FileNotFoundError (the KPI census input is absent from this sparse worktree; see the surprise row), so no comparison ran."
+      "deploy_evidence": "Read-only finder for PBR_US_Equity: served dossier by a copy of the gateway _pick_dossier, dossier.build in memory, rows matched on source|key|period, causes from the two Model blocks through dossier._figure_for_row_key, controls on UNH_US_Equity and a planted deletion. No write call; the Guarded client forwards get, head, list and the list paginator on opal-data-harvest only. Unchanged since 93ff7a9c0c; run once in the foreground after the sparse set gained the CRO scan folder."
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
       "kind": "doc",
-      "commit_or_etag": "93ff7a9c0c",
+      "commit_or_etag": "732727efc9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Output of the one foreground run: three header lines, LF endings, no PBR-DROPPED-ROW line and no CONTROL line. The run did not reach the PBR comparison, so the file carries no measured row."
+      "deploy_evidence": "Output of the completed foreground run (RC=0), LF endings, 16 lines: the header, the two block reads with their counts, the REPRODUCE checks (yes, yes), IDENTITY-DUPLICATES none, COUNTS, one ROWMISS with its CAUSE, CONTROL-POSITIVE rows_missed=0, CONTROL-NEGATIVE rows_missed=1 matched_planted=yes, and the PBR-DROPPED-ROW line last."
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "93ff7a9c0c",
+      "commit_or_etag": "dcf549dbde",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One row appended by bytes: AMGT_HARVST-D1-W180-S1 (BLOCKING, INERT, GROUNDED). The diff is 22 insertions and 0 deletions; the row gate passed on the staged bytes; the array parses at 568 rows."
+      "deploy_evidence": "Two rows appended by bytes: AMGT_HARVST-D1-W180-S1 (BLOCKING, INERT; commit 93ff7a9c0c) and AMGT_HARVST-D1-W180-S2 (OBSERVATION, INERT; the missed row and its cause; commit dcf549dbde). Each commit diff is insertions only; the row gate passed on the staged bytes."
     }
   ],
   "acceptance": [
@@ -42,10 +42,9 @@
       "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out expect (?m)^PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=\\d+ cause=\\S+ gets=\\d+ bytes=\\d+$",
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
-      "output_evidence": "exit 0. The file's three lines are: CN2-HEADER HVST-cn-2 (round 99) PBR_US_Equity dropped-row finder; ... / CN2-HEADER bucket=opal-data-harvest budget_requests=2500 budget_bytes=314572800 / IDENTITY-RULE a row's identity is source|mnemonic-or-label|fiscal_year-or-fiscal_period of its figure; ...\nNo PBR-DROPPED-ROW line: grep -c PBR-DROPPED-ROW returned 0 (grep exit 1).\nCommentary: the run stopped at dossier.build(PBR_US_Equity) with FileNotFoundError on org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_CORPUS_SCAN_20260922/research_docx_kpi_census.json, tracked at HEAD but absent from this sparse-checkout worktree. The expected line was never produced, so no row was named. Surprise AMGT_HARVST-D1-W180-S1.",
-      "denominator": "0 of 1 PBR-DROPPED-ROW line matches the expect (the file has 3 lines in all)",
-      "status": "FAIL",
-      "status_reason": "FAIL: the expected PBR-DROPPED-ROW line does not exist because dossier.build(PBR_US_Equity) raised FileNotFoundError in this sparse worktree before any row was built (surprise AMGT_HARVST-D1-W180-S1). The order stays open.",
+      "output_evidence": "PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=0 cause=field_absent_in_new_block gets=774 bytes=138755870\nCommentary: the one missed row is typecast|BEST_DPS|FY1 (stored value 9.546). The CAUSE line reads field_absent_in_new_block, decided from the two blocks: the built block 20261018T130759Z carries no BEST_DPS figure (459 figures against 460) and lists BEST_DPS under unresolved (SA fallback held off by --no-sa-fallback). The stored block 20261017T130744Z carries the FY1 forecast figure. Both dossiers carry 105 entries; the counts are the finding and were not adjusted. Surprise AMGT_HARVST-D1-W180-S2.",
+      "denominator": "1 of 1 PBR-DROPPED-ROW line; 56 stored and 55 built valued model_rows entries, 1 missed, 0 new",
+      "status": "PASS",
       "expect": "(?m)^PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=\\d+ cause=\\S+ gets=\\d+ bytes=\\d+$",
       "judgment": false
     },
@@ -54,10 +53,9 @@
       "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out expect (?s)CONTROL-POSITIVE UNH_US_Equity rows_missed=0.*CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=\\S+",
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
-      "output_evidence": "exit 0. The same three header lines as AC1 and no CONTROL-POSITIVE or CONTROL-NEGATIVE line.\nCommentary: the positive control (UNH_US_Equity) and the planted-row control both sit after the PBR comparison, which never ran, so neither control has a measured output. Surprise AMGT_HARVST-D1-W180-S1.",
-      "denominator": "0 of 2 control lines (CONTROL-POSITIVE, CONTROL-NEGATIVE) present in the file",
-      "status": "FAIL",
-      "status_reason": "FAIL: both control lines sit after the PBR comparison, which never ran (dossier.build FileNotFoundError, surprise AMGT_HARVST-D1-W180-S1); the order stays open.",
+      "output_evidence": "CONTROL-POSITIVE UNH_US_Equity rows_missed=0 rows_new=0 rows_stored=92 rows_built=92 served_object=amgt/harvest/gold/research_dossier/security_key=UNH_US_Equity/as_of=2026-10-18.75715538ce40ba9f.json\nCONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=typecast|ARD_SHARES_OUTSTANDING|2025 matched_planted=yes\nCommentary: the positive control on UNH_US_Equity found no miss, so the finder does not invent misses on an unchanged name. The planted deletion from PBR's stored rows was found and matched its own identity.",
+      "denominator": "2 of 2 control lines present (CONTROL-POSITIVE, CONTROL-NEGATIVE); UNH 92 of 92 built valued rows matched",
+      "status": "PASS",
       "expect": "(?s)CONTROL-POSITIVE UNH_US_Equity rows_missed=0.*CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=\\S+",
       "judgment": false
     }
@@ -66,27 +64,19 @@
     "mutant": {
       "description": "CONTROL-NEGATIVE: one valued row removed from a copy of PBR_US_Equity's stored model_rows and compared with the stored rows by the same finder; the expected line is rows_missed=1 with the planted identity.",
       "expected": "CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=<planted row>",
-      "observed": "NOT REACHED: cn2_pbr.py stopped at dossier.build before run() got to the planted-row control; cn2_pbr.out has no CONTROL-NEGATIVE line. This is not a measured non-fire. The status below is the nearest value in the schema enum (no NOT-REACHED value exists), and it marks the deliverable INVALID for completion.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "observed": "CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=typecast|ARD_SHARES_OUTSTANDING|2025 matched_planted=yes",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A-WITH-REASON: the run stopped before any BUILT row was produced, so there is no comparison to repeat; a second run would only reproduce the FileNotFoundError at the same call.",
-      "observed": "two foreground runs in this worktree: the first raised NameError (a missing import in the script, fixed before the second run); the second raised FileNotFoundError at dossier.build(PBR_US_Equity). The output file was rewritten by each run and holds the header lines only.",
+      "method": "N/A-WITH-REASON: the order names one foreground run, and the S3 listing is live, so a second run would compare two states rather than repeat one. The two earlier runs failed before any comparison (NameError, then FileNotFoundError) and are not comparable.",
+      "observed": "one completed run, RC=0, after the sparse set gained the CRO scan folder; the output file holds the single completed run.",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
-      "item": "The PBR_US_Equity dropped-row finding: the BUILT dossier (dossier.build) was never produced, so the 56-against-55 comparison, the ROWMISS and CAUSE lines, the ROWNEW lines and the PBR-DROPPED-ROW line do not exist.",
-      "reason": "dossier.build reads org/tier1_exec/4.0.0_SA_CRO/deliverables/RESEARCH_CORPUS_SCAN_20260922/research_docx_kpi_census.json through continuation._kpi_lexicon_bytes; that file is tracked at HEAD but not checked out in this sparse worktree. Copying the blob into the worktree or widening the sparse checkout is a tree rebuild the order forbids."
-    },
-    {
-      "item": "The served and built model blocks (derived/model_block/PBR_US_Equity/20261017T130744Z and /20261018T130759Z) were not read as raw objects by this run and not compared.",
-      "reason": "The script stops before the block reads; the order's cause decision is therefore not made here."
-    },
-    {
-      "item": "The positive control on UNH_US_Equity and the negative control on PBR's stored rows.",
-      "reason": "Both sit after the failed build in the same run; no control line exists."
+      "item": "The full text of the built block's unresolved reason for BEST_DPS: the output carries the first 120 characters only (HELD_OFF: SA fallback held off by --no-sa-fallback; gap left unfilled).",
+      "reason": "The cause is decided by the lookup (no figure in the built block), not by the reason text; the tail of the reason is not needed for the cause word and was not re-read by a second S3 call, since the order runs once."
     },
     {
       "item": "Any write to S3, any gold or silver writer, any call to Bloomberg, any model call, any gateway call, any edit of a source file, any edit outside the order's paths.",
@@ -94,14 +84,15 @@
     }
   ],
   "surprises": [
-    "AMGT_HARVST-D1-W180-S1: dossier.build(PBR_US_Equity) cannot run in this sparse worktree: its KPI census input (tracked at HEAD, not checked out here) raises FileNotFoundError, so the one dropped PBR row is not named; BLOCKING, INERT."
+    "AMGT_HARVST-D1-W180-S1: dossier.build(PBR_US_Equity) could not run in the sparse worktree (KPI census input not in the sparse set); BLOCKING. The coordinator added the CRO scan folder to the sparse set; the build then ran.",
+    "AMGT_HARVST-D1-W180-S2: the one valued PBR row the build drops is typecast|BEST_DPS|FY1 (stored 9.546), cause field_absent_in_new_block: the 2026-10-18 Model block carries no BEST_DPS figure and lists it unresolved (SA fallback held off by --no-sa-fallback); OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "cn2_pbr.py (read-only finder for PBR_US_Equity; no write call)",
       "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.py (foreground, from the worktree root)",
-      "result": "stopped at dossier.build(PBR_US_Equity) with FileNotFoundError on the KPI census input absent from the sparse worktree (RC=1); cn2_pbr.out holds the three header lines; no PBR-DROPPED-ROW line."
+      "result": "RC=0; PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=0 cause=field_absent_in_new_block gets=774 bytes=138755870; CONTROL-POSITIVE UNH_US_Equity rows_missed=0; CONTROL-NEGATIVE planted_row_dropped rows_missed=1 matched_planted=yes."
     }
   ]
 }
