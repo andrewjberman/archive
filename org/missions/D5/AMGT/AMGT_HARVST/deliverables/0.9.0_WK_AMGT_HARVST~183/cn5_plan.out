@@ -1,0 +1,553 @@
+DEFAULT-PLAN (no -var: the file must plan nothing)
+aws_s3_bucket.harvest: Refreshing state... [id=opal-data-harvest]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+ENABLED-PLAN (-var dossier_refresh_enabled=true plus the digest placeholder)
+PROVISIONAL: ecr name and image digest are plan placeholders, nothing is applied
+aws_s3_bucket.harvest: Refreshing state... [id=opal-data-harvest]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_log_group.dossier_refresh_build[0] will be created
+  + resource "aws_cloudwatch_log_group" "dossier_refresh_build" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws/codebuild/amgt-dossier-refresh-build"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 30
+      + skip_destroy      = false
+      + tags              = {
+          + "Name" = "/aws/codebuild/amgt-dossier-refresh-build"
+        }
+      + tags_all          = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "/aws/codebuild/amgt-dossier-refresh-build"
+          + "Project"     = "AMGT_RESAPP"
+        }
+    }
+
+  # aws_cloudwatch_log_group.dossier_refresh_task[0] will be created
+  + resource "aws_cloudwatch_log_group" "dossier_refresh_task" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/ecs/amgt-dossier-refresh-task"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 30
+      + skip_destroy      = false
+      + tags              = {
+          + "Name" = "/ecs/amgt-dossier-refresh-task"
+        }
+      + tags_all          = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "/ecs/amgt-dossier-refresh-task"
+          + "Project"     = "AMGT_RESAPP"
+        }
+    }
+
+  # aws_codebuild_project.dossier_refresh_build[0] will be created
+  + resource "aws_codebuild_project" "dossier_refresh_build" {
+      + arn                  = (known after apply)
+      + badge_enabled        = false
+      + badge_url            = (known after apply)
+      + build_timeout        = 60
+      + description          = "AMGT_HARVST HVST-cn-5: builds the dossier-refresh container image (the HVST-cn-6 Dockerfile) into ECR amgt-dossier-refresh-repo, tag git-<12>. Source = S3 zip (repo-root-relative). Planned, NOT applied."
+      + encryption_key       = (known after apply)
+      + id                   = (known after apply)
+      + name                 = "amgt-dossier-refresh-build"
+      + project_visibility   = "PRIVATE"
+      + public_project_alias = (known after apply)
+      + queued_timeout       = 480
+      + service_role         = (known after apply)
+      + tags                 = {
+          + "Name" = "amgt-dossier-refresh-build"
+        }
+      + tags_all             = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-build"
+          + "Project"     = "AMGT_RESAPP"
+        }
+
+      + artifacts {
+          + encryption_disabled    = false
+          + override_artifact_name = false
+          + type                   = "NO_ARTIFACTS"
+        }
+
+      + environment {
+          + compute_type                = "BUILD_GENERAL1_MEDIUM"
+          + image                       = "aws/codebuild/standard:7.0"
+          + image_pull_credentials_type = "CODEBUILD"
+          + privileged_mode             = true
+          + type                        = "LINUX_CONTAINER"
+        }
+
+      + logs_config {
+          + cloudwatch_logs {
+              + group_name = "/aws/codebuild/amgt-dossier-refresh-build"
+              + status     = "ENABLED"
+            }
+        }
+
+      + source {
+          + buildspec = "infra/aws/harvest/dossier-refresh/buildspec.yml"
+          + location  = "opal-313476888478-lambda-artifacts/harvest/build-source/dossier-refresh-source.zip"
+          + type      = "S3"
+        }
+    }
+
+  # aws_ecr_repository.dossier_refresh[0] will be created
+  + resource "aws_ecr_repository" "dossier_refresh" {
+      + arn                  = (known after apply)
+      + id                   = (known after apply)
+      + image_tag_mutability = "IMMUTABLE"
+      + name                 = "amgt-dossier-refresh-repo"
+      + registry_id          = (known after apply)
+      + repository_url       = (known after apply)
+      + tags                 = {
+          + "Name" = "amgt-dossier-refresh-repo"
+        }
+      + tags_all             = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-repo"
+          + "Project"     = "AMGT_RESAPP"
+        }
+
+      + image_scanning_configuration {
+          + scan_on_push = true
+        }
+    }
+
+  # aws_ecs_cluster.dossier_refresh[0] will be created
+  + resource "aws_ecs_cluster" "dossier_refresh" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + name     = "amgt-dossier-refresh-cluster"
+      + tags     = {
+          + "Name" = "amgt-dossier-refresh-cluster"
+        }
+      + tags_all = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-cluster"
+          + "Project"     = "AMGT_RESAPP"
+        }
+
+      + setting (known after apply)
+    }
+
+  # aws_ecs_task_definition.dossier_refresh[0] will be created
+  + resource "aws_ecs_task_definition" "dossier_refresh" {
+      + arn                      = (known after apply)
+      + arn_without_revision     = (known after apply)
+      + container_definitions    = (known after apply)
+      + cpu                      = "1024"
+      + enable_fault_injection   = (known after apply)
+      + execution_role_arn       = (known after apply)
+      + family                   = "amgt-dossier-refresh-task"
+      + id                       = (known after apply)
+      + memory                   = "4096"
+      + network_mode             = "awsvpc"
+      + requires_compatibilities = [
+          + "FARGATE",
+        ]
+      + revision                 = (known after apply)
+      + skip_destroy             = false
+      + tags                     = {
+          + "Name" = "amgt-dossier-refresh-task"
+        }
+      + tags_all                 = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-task"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + task_role_arn            = (known after apply)
+      + track_latest             = false
+
+      + runtime_platform {
+          + cpu_architecture        = "X86_64"
+          + operating_system_family = "LINUX"
+        }
+    }
+
+  # aws_iam_role.dossier_refresh_build[0] will be created
+  + resource "aws_iam_role" "dossier_refresh_build" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "codebuild.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "amgt-dossier-refresh-build-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name" = "amgt-dossier-refresh-build-role"
+        }
+      + tags_all              = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-build-role"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.dossier_refresh_execution[0] will be created
+  + resource "aws_iam_role" "dossier_refresh_execution" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ecs-tasks.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "amgt-dossier-refresh-exec-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name" = "amgt-dossier-refresh-exec-role"
+        }
+      + tags_all              = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-exec-role"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.dossier_refresh_scheduler[0] will be created
+  + resource "aws_iam_role" "dossier_refresh_scheduler" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "scheduler.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "amgt-dossier-refresh-scheduler-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name" = "amgt-dossier-refresh-scheduler-role"
+        }
+      + tags_all              = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-scheduler-role"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.dossier_refresh_task[0] will be created
+  + resource "aws_iam_role" "dossier_refresh_task" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ecs-tasks.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "amgt-dossier-refresh-task-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Name" = "amgt-dossier-refresh-task-role"
+        }
+      + tags_all              = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-task-role"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.dossier_refresh_build[0] will be created
+  + resource "aws_iam_role_policy" "dossier_refresh_build" {
+      + id          = (known after apply)
+      + name        = "amgt-dossier-refresh-build-policy"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.dossier_refresh_scheduler[0] will be created
+  + resource "aws_iam_role_policy" "dossier_refresh_scheduler" {
+      + id          = (known after apply)
+      + name        = "amgt-dossier-refresh-scheduler-policy"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.dossier_refresh_task[0] will be created
+  + resource "aws_iam_role_policy" "dossier_refresh_task" {
+      + id          = (known after apply)
+      + name        = "amgt-dossier-refresh-task-policy"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "s3:ListBucket",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-harvest",
+                        ]
+                      + Sid      = "ListHarvestBucket"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-harvest/*",
+                        ]
+                      + Sid      = "ReadHarvestObjects"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-harvest/amgt/harvest/gold/research_dossier/*",
+                        ]
+                      + Sid      = "WriteDossierGoldPrefixOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy_attachment.dossier_refresh_execution[0] will be created
+  + resource "aws_iam_role_policy_attachment" "dossier_refresh_execution" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      + role       = "amgt-dossier-refresh-exec-role"
+    }
+
+  # aws_scheduler_schedule.dossier_refresh_daily[0] will be created
+  + resource "aws_scheduler_schedule" "dossier_refresh_daily" {
+      + arn                          = (known after apply)
+      + description                  = "AMGT_HARVST HVST-cn-5: the scheduled dossier refresh (ECS Fargate task, by digest). DISABLED until HVST-cn-7 enables it."
+      + group_name                   = (known after apply)
+      + id                           = (known after apply)
+      + name                         = "amgt-dossier-refresh-daily"
+      + name_prefix                  = (known after apply)
+      + schedule_expression          = "cron(0 10 ? * MON-FRI *)"
+      + schedule_expression_timezone = "America/New_York"
+      + state                        = "DISABLED"
+
+      + flexible_time_window {
+          + mode = "OFF"
+        }
+
+      + target {
+          + arn      = (known after apply)
+          + role_arn = (known after apply)
+
+          + ecs_parameters {
+              + launch_type         = "FARGATE"
+              + task_count          = 1
+              + task_definition_arn = (known after apply)
+
+              + network_configuration {
+                  + assign_public_ip = true
+                  + security_groups  = (known after apply)
+                  + subnets          = [
+                      + "subnet-023db8cbfd99ffff2",
+                    ]
+                }
+            }
+
+          + retry_policy {
+              + maximum_event_age_in_seconds = 86400
+              + maximum_retry_attempts       = 0
+            }
+        }
+    }
+
+  # aws_security_group.dossier_refresh[0] will be created
+  + resource "aws_security_group" "dossier_refresh" {
+      + arn                    = (known after apply)
+      + description            = "Dossier-refresh Fargate task: no ingress; all egress (AWS APIs and the public ECR image pull; no NAT)"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "All outbound"
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "amgt-dossier-refresh-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "amgt-dossier-refresh-sg"
+        }
+      + tags_all               = {
+          + "Directive"   = "D5"
+          + "Environment" = "Production"
+          + "Estate"      = "HARVEST"
+          + "Macro"       = "AMGT"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "amgt-dossier-refresh-sg"
+          + "Project"     = "AMGT_RESAPP"
+        }
+      + vpc_id                 = "vpc-0cc0c6a75e54605e3"
+    }
+
+Plan: 16 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + dossier_refresh_ecr_repository_url  = (known after apply)
+  + dossier_refresh_schedule_arn        = (known after apply)
+  + dossier_refresh_task_definition_arn = (known after apply)
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+-----------------------------------------------------------------------------
+
+Note: You didn't use the -out option to save this plan, so Terraform can't
+guarantee to take exactly these actions if you run "terraform apply" now.

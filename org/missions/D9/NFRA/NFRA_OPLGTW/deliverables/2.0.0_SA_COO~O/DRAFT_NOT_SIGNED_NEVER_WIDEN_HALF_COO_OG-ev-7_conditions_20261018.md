@@ -17,3 +17,11 @@ Order: `org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-7.roun
 ## What I do not know yet
 
 Whether the CTO and CVO add conditions (CT3's ceiling is carried above as E5), and whether `OG-ap-42` is the release live at the GO or whether dell1 has deployed another one on top by then.
+
+## Added after reading the applier's Step 1 ask (sha256 `e8e2d7a1a533`, written 17:27Z on the then-live `a0c83303ee`) and before `OG-ap-44` moved the live ref
+
+- **E8 The ask is re-based.** `OG-ap-44` changes the live sha (and the journal's access lines); the ask's live ref, its pre-reads and its sha256 are re-done on the new live sha and the halves are signed on the NEW ask, not on `e8e2d7a1a533`.
+- **E9 The firm is READ, not typed.** The lease's `firm` (the Step 1 ask names `49financial`) comes from the resolve step on the host, in the same fresh guarded process that resolves the test account and the period and axis, and is printed in the record next to the account's `****<last4>` form; if the account's firm differs from what the ask names, STOP.
+- **E10 The lease is 15 minutes** (the order allows 25); the arming, the three calls, the fresh-process call and the delete fit in it or the run is stopped and the lease deleted.
+- **E11 The access-log counts come back.** After `OG-ap-44` the journal's `POST /mcp` lines are real again, and the listener's `/probe/` lines (a line per request, now logged) become a second, independent count of the three calls: the record prints both next to the audit-lake count.
+- **E12 The CVO signs first** (his condition, msg 35740): he reads the lease, the labels and the disarm; no body is persisted.
