@@ -4,8 +4,8 @@
 # Record W/CODE9_SERVED.json = {"body": {the CODE8 fields of ap39.AC2 (health_status, env_key_count 65, reader_env_keys_present 7, registry_count 103, per_tool_good 27, harness_guard, host_md5, tools_list_before/after, muse_env_present, marker_sha,
 #  unit_limits, host_clock, systemd_failed_units, clock_read_before_close, readback with nrestarts_during_readback),
 #  "probe": {"lease_minutes": n, "audit_label": "probe:OG-ap-40",
-#     "peers": {"answered": true, "service_heap_before_mb": x, "service_heap_after_mb": y, "service_pid": same pid before and after},
-#     "window_chain": {"pages": n, "answered": true, "heap_growth_median_mb": g, "service_pid_stable": true},
+#     "peers": {"answered": true, "service_heap_before_mb": x, "service_heap_after_mb": y, "vmrss_after_mb": n (CT3), "service_pid": same pid before and after},
+#     "window_chain": {"pages": n, "answered": true, "heap_growth_median_mb": g, "first_page_wall_s": s (CT4: under 15), "max_vmrss_mb": m (CT3: 1200 or less after each page), "service_pid_stable": true},
 #     "other_tool_refused": true, "other_account_refused": true, "expired_refused": true, "listener_closed_at_rest": true, "nrestarts_after_probes": 0}}}
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/../../r37/checks/_landed.sh"
@@ -34,8 +34,9 @@ clk_ok = ck.get("leap_status") == "Normal" and ck.get("synchronised") is True an
 rb_ok = isn(rb.get("minutes")) and rb["minutes"] >= 30 and rb.get("triggers_fired") == 0 and rb.get("nrestarts_during_readback") == 0
 tool_ok = d.get("per_tool_good") == 27 and d.get("harness_guard") in GUARDS
 peers_ok = (pe.get("answered") is True and isn(pe.get("service_heap_before_mb")) and isn(pe.get("service_heap_after_mb")) and isn(pe.get("service_pid"))
-            and pe["service_heap_after_mb"] - pe["service_heap_before_mb"] <= 700)
-chain_ok = (wc.get("answered") is True and isn(wc.get("pages")) and wc["pages"] >= 2 and isn(wc.get("heap_growth_median_mb")) and wc["heap_growth_median_mb"] <= 20 and wc.get("service_pid_stable") is True)
+            and pe["service_heap_after_mb"] - pe["service_heap_before_mb"] <= 700 and isn(pe.get("vmrss_after_mb")) and pe["vmrss_after_mb"] <= 1200)
+chain_ok = (wc.get("answered") is True and isn(wc.get("pages")) and wc["pages"] >= 2 and isn(wc.get("heap_growth_median_mb")) and wc["heap_growth_median_mb"] <= 20 and wc.get("service_pid_stable") is True
+            and isn(wc.get("first_page_wall_s")) and wc["first_page_wall_s"] < 15 and isn(wc.get("max_vmrss_mb")) and wc["max_vmrss_mb"] <= 1200)
 probe_ok = (peers_ok and chain_ok and isn(pr.get("lease_minutes")) and 0 < pr["lease_minutes"] <= 60 and pr.get("audit_label") == "probe:OG-ap-40"
             and pr.get("other_tool_refused") is True and pr.get("other_account_refused") is True and pr.get("expired_refused") is True
             and pr.get("listener_closed_at_rest") is True and pr.get("nrestarts_after_probes") == 0)
@@ -45,8 +46,8 @@ print("tools/list before %s after %s (want equal); marker equals the release sha
       d.get("tools_list_before"), d.get("tools_list_after"), "yes" if marker else "no", d.get("health_status"), d.get("registry_count"), d.get("per_tool_good"), "yes" if d.get("harness_guard") in GUARDS else "NO", md5.get("differ")))
 print("unit limits live %s; host clock %s synchronised %s, failed units %s, read BEFORE the ledger closed %s: %s; read-back %s minutes, triggers %s, service restarts %s: %s" % (
       "ok" if limits_ok else "NOT OK", ck.get("leap_status"), ck.get("synchronised"), d.get("systemd_failed_units"), d.get("clock_read_before_close"), "ok" if clk_ok else "NOT OK", rb.get("minutes"), rb.get("triggers_fired"), rb.get("nrestarts_during_readback"), "ok" if rb_ok else "NOT OK"))
-print("THROUGH THE LISTENER (lease %s minutes, label %s): etfs_compare_peers answered %s with the service heap %s -> %s MB; window chain %s pages answered %s, median heap growth %s MB (limit 20), pid stable %s; other tool refused %s, other account refused %s, expired lease refused %s, listener closed at rest %s, restarts after the probes %s: %s" % (
-      pr.get("lease_minutes"), pr.get("audit_label"), pe.get("answered"), pe.get("service_heap_before_mb"), pe.get("service_heap_after_mb"), wc.get("pages"), wc.get("answered"), wc.get("heap_growth_median_mb"), wc.get("service_pid_stable"),
+print("THROUGH THE LISTENER (lease %s minutes, label %s): etfs_compare_peers answered %s with the service heap %s -> %s MB; window chain %s pages answered %s, median heap growth %s MB (limit 20), first page %s s (limit 15), highest VmRSS %s MB (limit 1200), pid stable %s; other tool refused %s, other account refused %s, expired lease refused %s, listener closed at rest %s, restarts after the probes %s: %s" % (
+      pr.get("lease_minutes"), pr.get("audit_label"), pe.get("answered"), pe.get("service_heap_before_mb"), pe.get("service_heap_after_mb"), wc.get("pages"), wc.get("answered"), wc.get("heap_growth_median_mb"), wc.get("first_page_wall_s"), wc.get("max_vmrss_mb"), wc.get("service_pid_stable"),
       pr.get("other_tool_refused"), pr.get("other_account_refused"), pr.get("expired_refused"), pr.get("listener_closed_at_rest"), pr.get("nrestarts_after_probes"), "ok" if probe_ok else "NOT OK"))
 print("OK" if ok else "NO")
 PYEOF
