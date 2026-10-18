@@ -1,0 +1,141 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-pr-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~146",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "eaac07d0e5"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "eaac07d0e5",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-1.round-42-loopback-probe-listener.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+   "kind": "script",
+   "commit_or_etag": "8d76ae9045",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New module, 127.0.0.1:8099 listener with the lease gate, two tools, fixed probe principal, audit label probe:<order>, SIGUSR2 heap line. Committed @8d76ae9045 (LOCAL on wk-NFRA_OPLGTW-146). No release, no deploy, no IAM, no SSM parameter.",
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+   "kind": "script",
+   "commit_or_etag": "8d76ae9045",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Hookup only: one import line and the lifespan starts the listener and the heap signal and stops the listener on shutdown. Smoke-tested with a mock gateway: listener open inside the lifespan, 403 probe_not_armed unarmed, closed after shutdown. Committed @8d76ae9045 (LOCAL).",
+   "artifact_covered_by": ["AC2"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+   "kind": "test",
+   "commit_or_etag": "8d76ae9045",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Four named tests, offline (fake clock, fake lease reader, fake tool functions, in-memory audit sink; one loopback socket test on an ephemeral port). Committed @8d76ae9045 (LOCAL).",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "761e6f96f5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three appended rows, NFRA_OPLGTW-Z-W146-S1..S3 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O). The surprise-row gate passed at commit: 3 new rows checked, OK. Committed @761e6f96f5 (LOCAL).",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the four named tests pass (off by default and arm/call/expire; scope; audit and principal; heap read).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04; echo \"exit=$?\"",
+   "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nnote: infra/aws/ec2/opal-gateway/audit.jsonl was dirtied by the run and restored to HEAD (W3-S2)\nRESULT: PASS\nexit=0",
+   "denominator": "4 named tests of tests/test_og_pr1.py; 4 passed; 0 failed or errored",
+   "status": "PASS",
+   "expect": "(?s)pytest rc=0; named tests passed 4 of 4; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch only the three files (app/probe_listener.py, app/server.py, tests/test_og_pr1.py).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~146 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|app/server\\.py|tests/test_og_pr1\\.py)$'; echo \"exit=$?\"",
+   "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~146: files touched 3; product files 3; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "3 product files touched by commits authored by 0.9.0_WK_NFRA_OPLGTW~146 (the surprise rows and this instance travel on the standing record paths); 0 outside the allowed set",
+   "status": "PASS",
+   "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~146: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the new tests and four existing gateway test files pass together in both orders with the same count.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr1set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py; echo \"exit=$?\"",
+   "output_evidence": "pr1set forward: passed 22; failed 0\npr1set reverse: passed 22; failed 0\nRESULT: PASS\nexit=0",
+   "denominator": "5 test files (4 new named tests plus 18 tests of the four existing files); forward 22 passed, reverse 22 passed, 0 failed in either order",
+   "status": "PASS",
+   "expect": "(?s)pr1set forward: passed (\\d+); failed 0.*pr1set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A mutant copy of the module run in .scratch (pl.LEASE_MAX widened from 60 to 90 minutes) against test_ogpr1_ac01; the product file is untouched.",
+   "expected": "test_ogpr1_ac01 FAIL on the 61-minute lease (the call must be refused, not served)",
+   "observed": "FAILED tests\\test_og_pr1.py::test_ogpr1_ac01 - assert (200 == 403); 1 failed",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of pytest tests/test_og_pr1.py -q on the committed code",
+   "observed": "both runs: 4 passed, 1 warning",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A release, deploy, IAM change, SSM parameter, env key or Terraform change.",
+   "reason": "Declared out of scope by the task order (section 2); OG-ap-40 carries the release."
+  },
+  {
+   "item": "A full gateway test-suite run.",
+   "reason": "The task order's criteria are the four named tests and the both-orders set of five files; the wider suite is not in this order's proof."
+  },
+  {
+   "item": "Verification that the instance role holds ssm:GetParameter on /opal-gateway/probe/*.",
+   "reason": "Not measured by this worker: the role's policy is an IAM read outside the write set. Reported as an open item in the worker report, to be verified by the release order."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W146-S1: the probe's restricted profile is not a stored principal_profile (code cannot write one); the two-tool restriction is the PROBE_TOOLS allowlist in app/probe_listener.py (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O).",
+  "NFRA_OPLGTW-Z-W146-S2: the probe calls the functions behind the two MCP tools directly, so the _run guard chain and the per-user Graph token step do not run for probe calls (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O).",
+  "NFRA_OPLGTW-Z-W146-S3: the fixed probe principal carries the Opal-domain display address opal-gateway-probe@opalinvest.com, which the client tools admit on; the address exists only in code (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~146 on worktree wk-NFRA_OPLGTW-146 (HEAD eaac07d0e5 at start). Verified the worktree is sparse but carries org/ and .tools/; read the task order; confirmed the SSRF_AUDIT verdict CLEAN on the worker-145 record; confirmed port 8099 is used nowhere in the gateway tree; mapped server.py lifespan, tools.py _run, client_core, etfs_rivals_flow, data_entitlement, typed_scope and audit. Wrote app/probe_listener.py, the lifespan hookup in app/server.py and tests/test_og_pr1.py. Ran the four named tests (4 of 4 pass), the write-set bound (3 files, 0 outside), and both-orders over five files (22 forward, 22 reverse). Committed @8d76ae9045 (code), @761e6f96f5 (surprise rows). Wrote this instance, validated it, then flipped the task-order status tag in a separate commit.",
+ "compiler_tools": [
+  {
+   "tool": "_named.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04",
+   "result": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0; RESULT: PASS"
+  },
+  {
+   "tool": "_wkbound.sh (the order's own AC2 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~146 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|app/server\\.py|tests/test_og_pr1\\.py)$'",
+   "result": "files touched 3; product files 3; outside the allowed set 0; RESULT: PASS"
+  },
+  {
+   "tool": "_bothorders.sh (the order's own AC3 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr1set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py",
+   "result": "pr1set forward: passed 22; failed 0; pr1set reverse: passed 22; failed 0; RESULT: PASS"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (code, rows)",
+   "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPLGTW~146 <0.9.0_WK_NFRA_OPLGTW~146@opal.agent>' -F .scratch/msg_A.txt -- <three product files>; then -F .scratch/msg_B.txt -- <INVESTIGATION_v1.md>",
+   "result": "committed 8d76ae9045 and 761e6f96f5; commit-gate and surprise-row gate OK; client-data-check WARN: hashed account-id list ABSENT, this commit NOT checked for client account ids"
+  }
+ ]
+}
