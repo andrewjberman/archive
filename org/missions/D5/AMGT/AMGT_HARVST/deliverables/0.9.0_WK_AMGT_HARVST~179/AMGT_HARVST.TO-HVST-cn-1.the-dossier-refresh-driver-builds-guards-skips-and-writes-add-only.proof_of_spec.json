@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cn-1.the-dossier-refresh-driver-builds-guards-skips-and-writes-add-only",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "d4b82a35ec",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-1.the-dossier-refresh-driver-builds-guards-skips-and-writes-add-only.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-1.the-dossier-refresh-driver-builds-guards-skips-and-writes-add-only.md",
+    "group": "OTHER",
+    "vintage_commit": "50bc651c9c"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~179",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier_refresh.py",
+      "kind": "script",
+      "commit_or_etag": "7cb6b9abec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dossier-refresh driver: refresh_one (statuses WRITTEN, WOULD_WRITE, UNCHANGED, SKIPPED_ALLOWED, SKIPPED_GUARD, NO_TODAY_MODEL_BLOCK, NO_NEW_MODEL_BLOCK, ERROR), run_names, main. Amendment 1 adds NO_TODAY_MODEL_BLOCK (09:00 America/New_York boundary from zoneinfo, clock injectable), the no_today_model_block count, and the New York date for --require-trading-day. Default is a dry run. No schedule, no trigger, no S3 write in this cell."
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_refresh.py",
+      "kind": "test",
+      "commit_or_etag": "7cb6b9abec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "25 offline arms with fake deps and an injected clock: the allowed-moves rule, the guard arms, UNCHANGED and NO_NEW, arm 4b (NO_TODAY, the 08:30 and 10:00 Eastern cases, the DST boundary 13:00Z to 14:00Z computed from the zone), ERROR isolation, the flushed manifest, the New York trading-day date, the census line shape, three mutants (always-PASS guard, disabled allowed check, disabled today check), and a source check that no put or delete call exists."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~179/refresh_run_dry.out",
+      "kind": "doc",
+      "commit_or_etag": "3cd6b1f54a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Dry-run output over the 95 names, merged from five 20-name slices of the amended driver. Read-only over the real bucket: every name read, no write_one call. Final census line: names=95 written=0 would_write=93 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=1 errors=0 mode=dry-run."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~179/refresh_merge_dry.py",
+      "kind": "script",
+      "commit_or_etag": "3cd6b1f54a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Merges the five slice outputs into refresh_run_dry.out. Recomputes the census line from the merged REFRESH lines (with no_today_model_block), refuses a duplicate name."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3cd6b1f54a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Seven rows AMGT_HARVST-D1-W179-S1 to S7 appended by bytes (S1 to S5 in 990d52e5ed, 105 insertions; S6 and S7 in 3cd6b1f54a, 42 insertions; 0 deletions). The surprise-row gate read the new rows and passed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 python -m pytest lib/research/corpus/tests/test_dossier_refresh.py -q -p no:cacheprovider --color=no expect (?m)^\\d+ passed in",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_dossier_refresh.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "25 passed in 1.06s\nCommentary (not the matched line): the same file run twice gave 25 passed both times (1.34s, 1.06s; determinism control). Arms 8, 9 and 11 are the three mutants and are part of this criterion.",
+      "denominator": "25 of 25 offline arms passed (3 of them mutant arms that assert the arm expectation fails under the mutant)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~179/refresh_run_dry.out expect (?m)^REFRESH-CENSUS names=95 written=0 would_write=\\d+ unchanged=\\d+ no_new_model_block=\\d+ no_today_model_block=\\d+ skipped_allowed=\\d+ skipped_guard=\\d+ errors=\\d+ mode=dry-run$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~179/refresh_run_dry.out",
+      "output_evidence": "REFRESH-CENSUS names=95 written=0 would_write=93 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=1 errors=0 mode=dry-run\nCommentary (not the matched line): REFRESH PBR_US_Equity status=SKIPPED_GUARD (valued rows built 55 lower than stored 56, matching cm4_census.out); NG_LN UNCHANGED; BP_LN WOULD_WRITE (ruled by the issuer under amendment 1: the 17:06Z block landed after the stored dossier); KMB_US_Equity WOULD_WRITE with inputs continuation,model_block inside the allowed set; no_today_model_block=0 is MEASURED on the Sunday run (every block after 09:00 America/New_York today), not adjusted.",
+      "denominator": "95 names (continuation partitions, sorted); written=0 of 95; would_write=93 + unchanged=1 + skipped_guard=1 = 95; no_today_model_block=0 of 95",
+      "status": "PASS",
+      "expect": "(?m)^REFRESH-CENSUS names=95 written=0 would_write=\\d+ unchanged=\\d+ no_new_model_block=\\d+ no_today_model_block=\\d+ skipped_allowed=\\d+ skipped_guard=\\d+ errors=\\d+ mode=dry-run$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three mutants, each a monkeypatch inside the offline tests. Arm 8 replaces guard_decision with an always-PASS guard; arm 3's READ_FAILED stop must then NOT read SKIPPED_GUARD. Arm 9 replaces allowed_moves with an always-allowed check; arm 2's thesis_summary move must then NOT read SKIPPED_ALLOWED. Arm 11 replaces today_block_missing with an always-False check; arm 4b's old-block case must then NOT read NO_TODAY_MODEL_BLOCK.",
+      "expected": "each mutant arm asserts that the stop, skip or stale-block label does not occur under the mutant (the arm expectation fails under the mutant)",
+      "observed": "arm 8 under always-PASS guard: READ_FAILED case status WRITTEN, write_one called once; arm 9 under disabled allowed check: thesis_summary case status WRITTEN, write_one called once; arm 11 under disabled today check: old-block case status WRITTEN, write_one called once; 25 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the offline test file run twice with the same input, comparing the summary line",
+      "observed": "25 passed in 1.34s and 25 passed in 1.06s; the dry-run output is not compared for determinism because the real bucket is live (the census line is a measurement at a time, not a function of the input)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any --write run, any write_one or gold_put call against the real bucket",
+      "reason": "Out of this cell by the order (HVST-cn-3 is the deliberate run); the dry run is the default mode and wrote 0."
+    },
+    {
+      "item": "Scheduling, triggering or any listener for the refresh, and the 10:00 America/New_York schedule clock",
+      "reason": "Out of this cell (HVST-cn-4 is the schedule); the driver has no loop, watcher or trigger. The driver takes its clock as an input and holds no schedule."
+    },
+    {
+      "item": "Edits to dossier.py, gold.py, the gateway, sector_template.py or any file outside <paths>",
+      "reason": "The order's write grant is the driver, its test, the deliverables folder and the channel; the KPI-census file was supplied to the worktree by the issuer and is not edited."
+    },
+    {
+      "item": "A live gateway call, any Bloomberg or model call",
+      "reason": "Forbidden by the order's preflight; the dry run uses only the bucket's read operations through a read-only client."
+    },
+    {
+      "item": "refresh_merge_dry.py: the merge helper that joins the five slice outputs into refresh_run_dry.out (no criterion of its own)",
+      "reason": "A deterministic joiner, not a criterion-bearing artifact: AC2 reads the joined file it wrote, and the census line it prints is recomputed from the merged REFRESH lines, never copied from a slice."
+    },
+    {
+      "item": "Marking the task order complete",
+      "reason": "The order says the issuer flips its status; this worker did not edit the order file."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W179-S1: HVST-cn-1 premise: the worktree's sparse checkout omitted org/tier1_exec/, so every dossier build raised FileNotFoundError on the KPI-census file (first dry run errors=95); the issuer added the folder and the re-run measured errors=0.",
+    "AMGT_HARVST-D1-W179-S2: HVST-cn-1 status gap: no order status for a name with no stored dossier; the driver reports SKIPPED_ALLOWED with reason no-stored-dossier. No such name in the 95-name run.",
+    "AMGT_HARVST-D1-W179-S3: HVST-cn-1 status precedence: the order does not rank NO_NEW_MODEL_BLOCK against an allowed fund_form move; the driver ranks NO_NEW first. No NO_NEW row in the measured run. Ruled by the issuer: keep.",
+    "AMGT_HARVST-D1-W179-S4: HVST-cn-1 trading-day gate: the order names no zone; --require-trading-day read the UTC date. Ruled by the issuer under amendment 1: the America/New_York date of the run's clock, now implemented with a test.",
+    "AMGT_HARVST-D1-W179-S5: HVST-cn-1 dry-run finding: BP_LN_Equity is WOULD_WRITE (guard PASS, model_rows moved), not NO_NEW_MODEL_BLOCK or UNCHANGED as the order expected. Ruled by the issuer: correct, the order's expectation was wrong.",
+    "AMGT_HARVST-D1-W179-S6: HVST-cn-1 amendment 1 placement: NO_TODAY_MODEL_BLOCK is ranked after the guard (a guard STOP reads SKIPPED_GUARD), which the amendment does not state; both skip and write nothing.",
+    "AMGT_HARVST-D1-W179-S7: HVST-cn-1 amendment 1 gap: a name with no readable model block (guard ABSENT or READ_FAILED) is not NO_TODAY in the driver and is left to the guard; no such name in the measured run."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, offline arms of the dossier-refresh driver",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_dossier_refresh.py -q -p no:cacheprovider --color=no",
+      "result": "25 passed in 1.06s (twice: 1.34s, 1.06s)"
+    },
+    {
+      "tool": "dossier_refresh.py dry run over the real names, read-only",
+      "invocation": "python -u lib/research/corpus/dossier_refresh.py --only <20 names> (five slices, no --write), merged by refresh_merge_dry.py",
+      "result": "REFRESH-CENSUS names=95 written=0 would_write=93 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=1 errors=0 mode=dry-run"
+    },
+    {
+      "tool": "safe-commit.sh with commit-gate, surprise-row-gate and to-pipeline-gate",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "commit-gate, surprise-row-gate and to-pipeline-gate OK on 7cb6b9abec and 3cd6b1f54a"
+    }
+  ]
+}
