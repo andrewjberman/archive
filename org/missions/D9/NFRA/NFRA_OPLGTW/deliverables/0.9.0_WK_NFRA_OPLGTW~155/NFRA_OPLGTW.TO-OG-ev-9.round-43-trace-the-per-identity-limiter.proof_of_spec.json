@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ev-9",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "581ee61977",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-9.round-43-trace-the-per-identity-limiter.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "581ee61977"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~155",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~155/LIMITER_TRACE.json",
+      "kind": "doc",
+      "commit_or_etag": "bcf95ca23c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only trace record; no deploy, no schedule, no product file changed",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "bcf95ca23c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended: NFRA_OPLGTW-Z-W155-S1 and NFRA_OPLGTW-Z-W155-S2 (surprise-row-gate OK at commit)",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 -- the limiter's numbers equal the code's defaults, the identities are counted or ABSENT with a reason, the reconnect answer is given, the recommendation is written, and the record holds no email-shaped string.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ev9.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "limiter: limit 120 per 60 s (config defaults read here: 120.0 per 60.0 s), key validated Entra principal key '<tid>/<oid>' (context.py:47-48, principal.key), not the email; one bucket per principal on /mcp, Retry-After header True, fail mode open, sources 5: ok\nidentities in the last 24 hours: counted from s3://opal-mcp-audit audit/dt=2026-10-17/ and audit/dt=2026-10-18/ (UTC; bucket from infra/aws/ec2/opal-gateway/deploy-to-ec2.sh:512 and infra/aws/terraform/opal-gateway/audit-lake.tf:18); 11301 record objects with record ts in the 24 h window read by boto3 get_object, 0 failed, 1 gw_ratelimit row; client_keys is the COUNT of distinct by_client keys (values withheld); counted 2026-10-18 12:13Z (denominator 1, rows 1, hashes of 8 hex or fewer: yes); reconnect path: max Retry-After 61 s, a client retry inside the window re-hits yes: ok; email-shaped strings in the record 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 gw_ratelimit refusal row counted in the 24 h window (11301 record objects read, 0 failed); limit and window equal config.py defaults 120.0 and 60.0; 0 email-shaped strings",
+      "status": "PASS",
+      "expect": "(?s)limiter: limit \\d+ per \\d+ s \\(config defaults read here: \\d+\\.0 per \\d+\\.0 s\\).*Retry-After header True, fail mode open.*ok.*email-shaped strings in the record 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 -- your commits touch no file outside the project tree (no product file).",
+      "method": "command",
+      "invocation": "git log --author='0.9.0_WK_NFRA_OPLGTW~155 <' --name-only --format= | grep -v '^org/missions/D9/NFRA/NFRA_OPLGTW/' | grep -c . ; echo \"exit=$?\"",
+      "output_evidence": "0\nexit=1",
+      "denominator": "0 lines outside org/missions/D9/NFRA/NFRA_OPLGTW/ across the commits by 0.9.0_WK_NFRA_OPLGTW~155 (1 commit at the time of this run)",
+      "status": "PASS",
+      "expect": "(?s)^0\\s*exit=[01]\\s*$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Lake count run twice in this session (the count run, then the cross-check run, same window logic); the refusal rows were 1 in both runs (2026-10-17T17:21:43.844740+00:00, principal hash 9e7f3e39); object totals moved 11301 to 11293 as the 24 h window rolled.",
+      "observed": "stable on the refusal rows",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The MCP client's retry code",
+      "reason": "Not in this repository, so the reconnect client's retry timing is recorded as unknown; the limiter-side answer (a retry before the oldest slot ages out is refused again) is read from ratelimit.py."
+    },
+    {
+      "item": "Host environment overrides of RL_MCP_IDENTITY_LIMIT and RL_MCP_IDENTITY_WINDOW",
+      "reason": "No override appears in this repository (grep of infra/aws/ec2/opal-gateway); the live host environment was not read, so the record uses the config.py defaults, which the check requires to match."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W155-S1 -- the audit lake holds one gw_ratelimit row in the 24 h window (2026-10-17T17:21:43Z) and none dated 2026-10-18 through 12:13Z, though the cell reports an identity 429 on 2026-10-18 (hazard ARMED, disarm_owner 2.0.0_SA_COO~O)",
+    "NFRA_OPLGTW-Z-W155-S2 -- comp-estate names no audit-lake bucket (audit resolves to m365-mcp and observability only; opal-mcp is SUBJECT_ABSENT); the bucket opal-mcp-audit was read from deploy-to-ec2.sh:512 and audit-lake.tf:18 (hazard INERT)"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "boto3 read-only list and get_object (count only)",
+      "invocation": "python .scratch/ev9_count.py (script in the worktree scratch, not committed)",
+      "result": "rc=0; objects_in_window=11301 read=11301 failed=0; gw_ratelimit_rows=1; distinct_principal_hashes=1"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order <this order>",
+      "result": "run after the final commit; rc recorded in the worker report"
+    }
+  ]
+}
