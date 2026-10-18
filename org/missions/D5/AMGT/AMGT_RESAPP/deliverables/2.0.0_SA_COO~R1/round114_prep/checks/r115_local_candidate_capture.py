@@ -12,6 +12,8 @@ import os
 import sys
 
 os.environ.setdefault("AMGT_AIFILL_ROOT", "/var/empty/aifill-hold")
+if os.environ.get("R117_AIFILL_LIVE") == "1":  # round 117: the live function has no AMGT_AIFILL_ROOT and reads the ai_fill object from S3; a candidate that is to show the machine-written passages must run the same way
+    os.environ.pop("AMGT_AIFILL_ROOT", None)
 sys.path.insert(0, ".")
 import fitz  # noqa: E402
 
@@ -19,6 +21,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 spec = importlib.util.spec_from_file_location("lam", "infra/aws/lambda/research/scoped_amgt_api/lambda_function.py")
 lam = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(lam)
+if os.environ.get("R117_AIFILL_LIVE") == "1":
+    os.environ.pop("AMGT_AIFILL_ROOT", None)
 cmp_spec = importlib.util.spec_from_file_location("cmpmod", os.path.join(HERE, "r114_pack_capture_compare.py"))
 cmpmod = importlib.util.module_from_spec(cmp_spec)
 cmp_spec.loader.exec_module(cmpmod)
