@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ci-1.census-of-substrate-partitions-with-no-input-matching-object",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-1.census-of-substrate-partitions-with-no-input-matching-object.md",
+    "group": "OTHER",
+    "vintage_commit": "1386eb78b9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "1386eb78b9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-1.census-of-substrate-partitions-with-no-input-matching-object.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~169",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.py",
+      "kind": "script",
+      "commit_or_etag": "7c459a7522",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census. Wraps the S3 client so only get_object, head_object, list_objects_v2 (via paginator) are forwarded; every other operation raises. Enumerates partitions by listing gold.table_prefix(<table>) with Delimiter for continuation, sector_template, fund_form; typecast uses its fixed PARTITION. wanted is computed with the same producer call substrate.py makes for that table (lines 214, 248, 268, 281). OLD = sorted(docs)[-1] and RULE = highest method_version integer, then later LastModified, then greater key, both reimplemented in the file; no changed module picker is read. Budget 8000 requests and 1 GiB. Writes its own output with newline LF; no gold or silver writer is called.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out",
+      "kind": "doc",
+      "commit_or_etag": "7c459a7522",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output from one foreground run of ci1_census.py at worktree HEAD 1386eb78b9. 11 lines, LF only. PARTITIONS continuation n=95, sector_template n=10, fund_form n=3, typecast n=1. TABLE lines: continuation partitions=95 objects=446 input_match=95 no_input_match=0; sector_template partitions=10 objects=29 input_match=10 no_input_match=0; fund_form partitions=3 objects=12 input_match=3 no_input_match=0; typecast partitions=1 objects=4 input_match=1 no_input_match=0. No FALLBACK, EMPTY, SKIP, SLUG-MISMATCH or BUDGET-EXCEEDED line was printed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7c459a7522",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended by bytes (22 insertions, 0 deletions): AMGT_HARVST-D1-W169-S1 (BLOCKING, INERT): the TO's AC3 control expects old=28404359/3 but step 1c defines OLD as sorted(docs)[-1], which gives f174f709/2 for the same four synthetic objects."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out expect (?m)^CENSUS-FALLBACK tables=4 partitions=\\d+ no_input_match=\\d+ moves=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out",
+      "output_evidence": "CENSUS-FALLBACK tables=4 partitions=109 no_input_match=0 moves=0 gets=4671 bytes=385231505\n(ci1_census.out line 11; the expectation matched by regex. The four tables are continuation, sector_template, fund_form and typecast. Counts are the finding: no partition fell to the fallback.)",
+      "denominator": "1 of 1 CENSUS-FALLBACK line; 109 partitions across 4 tables; 0 partitions with no input-matching object",
+      "status": "PASS",
+      "expect": "(?m)^CENSUS-FALLBACK tables=4 partitions=\\d+ no_input_match=\\d+ moves=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out expect (?m)^CONTROL-POSITIVE continuation MNST_US_Equity input_match=yes fallback=no$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out",
+      "output_evidence": "CONTROL-POSITIVE continuation MNST_US_Equity input_match=yes fallback=no\n(ci1_census.out line 9; the same partition code path as the table loop, run on security_key=MNST_US_Equity.)",
+      "denominator": "1 of 1 CONTROL-POSITIVE line",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-POSITIVE continuation MNST_US_Equity input_match=yes fallback=no$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out expect (?m)^CONTROL-NEGATIVE synthetic old=28404359/3 rule=4d837586/4 moves=yes$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.out",
+      "output_evidence": "CONTROL-NEGATIVE synthetic old=f174f709/2 rule=4d837586/4 moves=yes\n(ci1_census.out line 10. The expectation was NOT edited. The line differs only in the OLD label: step 1c defines OLD as sorted(docs)[-1], which is f174f709 (method /2) for these four keys; 28404359/3 is the first key, the min-by-key pick of the sister census. Row AMGT_HARVST-D1-W169-S1 filed.)",
+      "denominator": "0 of 1 CONTROL-NEGATIVE line matches the expectation (1 line printed)",
+      "status": "FAIL",
+      "status_reason": "The printed control line does not match the expectation: the OLD label is f174f709/2 (sorted(docs)[-1], as step 1c defines OLD) where the expectation names 28404359/3 (the first key, min-by-key). The RULE label and moves=yes match. The expectation and the code were not edited; row AMGT_HARVST-D1-W169-S1 is filed for the issuer's ruling.",
+      "expect": "(?m)^CONTROL-NEGATIVE synthetic old=28404359/3 rule=4d837586/4 moves=yes$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: four synthetic objects whose key-order pick (OLD) and RULE name different objects; the census comparator must print moves=yes.",
+      "expected": "CONTROL-NEGATIVE synthetic old=28404359/3 rule=4d837586/4 moves=yes (the TO's text)",
+      "observed": "CONTROL-NEGATIVE synthetic old=f174f709/2 rule=4d837586/4 moves=yes. The comparator did see the change (moves=yes, RULE 4d837586/4 as expected), but the OLD label differs from the TO's expectation, so the control as written did not fire as expected.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "The face specifies one foreground run; a second same-input run was not made (each run reads about 4671 requests and 385 MB against the budget).",
+      "observed": "Not run.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to S3, any gold or silver writer, any deploy, any source-file edit, any edit outside the deliverables folder and the investigation channel",
+      "reason": "Out of scope by the order. The census wrapper forwards only read operations and refuses every other S3 operation; no writer was called."
+    },
+    {
+      "item": "Editing AC3's expectation or the census OLD definition to match the printed control line",
+      "reason": "Forbidden by the face (print the actual line, add a row, report). The conflict is recorded in row AMGT_HARVST-D1-W169-S1."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W169-S1: BLOCKING -- the TO's AC3 control expects old=28404359/3 (the min-by-key pick) but step 1c defines OLD as sorted(docs)[-1]; the census printed old=f174f709/2, AC3 is FAIL and the expectation was not edited."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ci1_census.py (read-only census, one foreground run)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~169/ci1_census.py (from the worktree root; stdout to .scratch/ci1_stdout.txt, the script also writes ci1_census.out)",
+      "result": "rc=0; PARTITIONS continuation n=95, sector_template n=10, fund_form n=3, typecast n=1; CENSUS-FALLBACK tables=4 partitions=109 no_input_match=0 moves=0 gets=4671 bytes=385231505"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-1.census-of-substrate-partitions-with-no-input-matching-object.md",
+      "result": "recorded after the run below"
+    }
+  ]
+}
