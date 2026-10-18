@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 
 wts = [ln[9:] for ln in subprocess.run(['git', 'worktree', 'list', '--porcelain'], capture_output=True, text=True).stdout.splitlines() if ln.startswith('worktree ')]
 names: dict = {}
@@ -15,7 +16,7 @@ for w in wts:
     for n in fl:
         names.setdefault(n, w)
 print('worktrees', len(wts), 'per-tree json counts min/max', min(per_tree), max(per_tree), 'union files', len(names))
-pat = re.compile(r'mdpf-gold-lambda|code/scripts/gold|opal-assets-daily-emitter|MDPF_GOLD_COMMIT')
+pat = re.compile(sys.argv[1] if len(sys.argv) > 1 else r'mdpf-gold-lambda|code/scripts/gold|opal-assets-daily-emitter|MDPF_GOLD_COMMIT')
 hits = []
 for n, w in sorted(names.items()):
     b = subprocess.run(['git', '-C', w, 'show', 'HEAD:' + n], capture_output=True).stdout.decode('utf-8', 'replace')
