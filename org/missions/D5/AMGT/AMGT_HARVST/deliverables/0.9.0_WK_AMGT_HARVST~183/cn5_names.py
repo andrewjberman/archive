@@ -1,8 +1,8 @@
 # HVST-cn-5 names check (rule 30). Run from the repo root of the worktree:  python -u cn5_names.py
 #
 # 1. Prints the builder names: lib/opal_naming.py name(amgt, None, dossier-refresh, kind, qualifier) for each
-#    resource the cell declares. The ECR repository has no builder kind yet (NAMING_SCHEMA v1.18 pending): its
-#    refusal is caught and printed as NOT-BUILT, never worked around.
+#    resource the cell declares, the ECR repository (kind repo, NAMING_SCHEMA v1.18) included. A builder refusal
+#    is not caught: the program writes the transcript it has so far, ends it with NAMES-ABORTED, and exits 1.
 # 2. Reads the FIRST locals block of infra/aws/terraform/harvest/dossier-refresh.tf and compares every literal
 #    `key = "value"` against its builder name.
 # 3. NEGATIVE CONTROL: plants one wrong literal in memory and proves the comparison reports it.
@@ -41,6 +41,7 @@ SPEC = [
     ("scheduler_policy_name", "scheduler-policy", "policy", "scheduler"),
     ("schedule_name", "schedule", "daily", None),
     ("sg_name", "security-group", "sg", None),
+    ("ecr_repository_name", "ecr-repository", "repo", None),
 ]
 
 out = []
@@ -52,16 +53,16 @@ def emit(line):
 
 
 expected = {}
-for key, what, kind, qual in SPEC:
-    value = name(SYSTEM, SCOPE, FUNCTION, kind, qual)
-    expected[key] = value
-    emit("NAME %s %s %s %s" % (what, kind, qual if qual is not None else "-", value))
-
 try:
-    name(SYSTEM, SCOPE, FUNCTION, "repo")
-    emit("NAME ecr-repository repo - BUILDER-ACCEPTED-REPO-KIND-NOW-PRESENT")
-except ValueError:
-    emit("NAME ecr-repository repo - NOT-BUILT")
+    for key, what, kind, qual in SPEC:
+        value = name(SYSTEM, SCOPE, FUNCTION, kind, qual)
+        expected[key] = value
+        emit("NAME %s %s %s %s" % (what, kind, qual if qual is not None else "-", value))
+except Exception as exc:
+    emit("NAMES-ABORTED builder name() refused: %s: %s" % (type(exc).__name__, exc))
+    with open(OUT_PATH, "w", encoding="ascii", newline="\n") as fh:
+        fh.write("\n".join(out) + "\n")
+    sys.exit(1)
 
 LIT = re.compile(r'^\s*([a-z][a-z0-9_]*)\s*=\s*"([^"$]*)"\s*(#.*)?$')
 
