@@ -1,7 +1,7 @@
 # AMGT-ca-3 receipt -- the rich export prints the Thesis pillars passage wherever the PDF does
 
 **Serial:** `0.9.0_WK_AMGT_RESAPP~522` (round 120, issued by `2.0.0_SA_COO~R1`). **Branch:** `wk-AMGT_RESAPP-522`.
-**Base:** `129afa54ec`. **Code commit:** `41faa41432` (LOCAL, not pushed). **Sparse worktree:** `C:/dev/wk-resapp-522`.
+**Base:** `129afa54ec`. **Code commit:** `41faa41432` (LOCAL, not pushed). **Amendment 1 commit:** `33edcbdf16` (LOCAL, not pushed; the re-scoped P5 control and surprise row S3). **Sparse worktree:** `C:/dev/wk-resapp-522`.
 
 ## What changed
 
@@ -13,7 +13,8 @@
 | `lib/research/print/tests/fixtures/ca3_base_export_ICT_PM.md` | base rich export of ICT PM, recorded from the unedited renderer | 76 |
 | `lib/research/print/tests/fixtures/ca3_base_export_GOOGL_US.md` | base rich export of GOOGL US, recorded from the unedited renderer | 62 |
 | `lib/research/print/tests/fixtures/ca3_base_export_ICICIBC_IN.md` | base rich export of ICICIBC IN, recorded from the unedited renderer | 68 |
-| `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md` | two rows appended: `AMGT_RESAPP-D1-W522-S1`, `AMGT_RESAPP-D1-W522-S2` | +50 |
+| `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md` | two rows appended: `AMGT_RESAPP-D1-W522-S1`, `AMGT_RESAPP-D1-W522-S2` (code commit); row `AMGT_RESAPP-D1-W522-S3` appended in Amendment 1 (`33edcbdf16`) | +50, then +26 |
+| `lib/research/print/tests/test_ca3_export_thesis_pillars.py` (Amendment 1, `33edcbdf16`) | P5 control: one named constant `CA2_BASE_TO_NOW_SOURCE`, one helper `_base_to_now_source`, one comparison line re-scoped | +12 / -1 |
 
 The PDF is untouched. The diff has no hunk in the PDF region (`_pillars_gap_open` 1065, `_print_thesis_pillars` 1071,
 `_cleared_passage` 993, `_print_passage` 1043 are read only). No existing test was edited.
@@ -53,7 +54,9 @@ base. After the edit the export prints it for exactly those 3, and for 0 of the 
 
 ## Tests re-scoped
 
-none. No existing test was edited. The print folder is run whole for AC2 (below): `1 failed, 342 passed`.
+One assertion, in this order's own P5 control (not a test that existed at base), re-scoped by Amendment 1; see the
+`## Amendment 1` section below for the old and new assertion. No existing test was edited. The print folder is run
+whole for AC2 (below): at the code commit `1 failed, 342 passed`; after Amendment 1 `1 failed, 432 passed`.
 
 ## Not verified
 
@@ -62,3 +65,32 @@ none. No existing test was edited. The print folder is run whole for AC2 (below)
 - The SERVED drafting branch is exercised only by P7, which copies one fixture and adds one drafted risks sentence. No
   served fixture has `drafting_status` SERVED.
 - The export's Summary heading does not exist (row S1); the placement follows the order's stated position.
+
+## Amendment 1
+
+**Why.** The issuer's merged tree (`dda778e2f8`, with the other two round-120 cells `a1eb3b86ce` and `f64668f0e8`) failed
+P5 for ICICIBC IN on the `## Header` section. The base fixture recorded `?` as the source of two figure rows; AMGT-ca-2
+prints `source not stated` for an absent, blank or `?` source, on purpose. P5 compared that section to the base
+text, so another cell's intended change failed this cell's control.
+
+**Counts.** The file at the amended head, before the re-scope: `1 failed, 25 passed` (the failing case
+`test_P5_control_export_outside_the_pillars_section_equals_the_base_export[ICICIBC_IN]`). After the re-scope: `26 passed`.
+The print folder run once after the re-scope: `1 failed, 432 passed in 217.36s` (the one failure is the known
+`test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words`).
+
+**Re-scoped assertion (one; `test_P5_control_export_outside_the_pillars_section_equals_the_base_export`).**
+- Old: `assert now[heading] == was[heading], heading`
+- New: `assert now[heading] == _base_to_now_source(was[heading]), heading`, where `CA2_BASE_TO_NOW_SOURCE = (chr(183) + " ? |", chr(183) + " source not stated |")`
+  is the named constant (comment: AMGT-ca-2 changed it on purpose), and `_base_to_now_source` rewrites only a BASE line that
+  ends in the first element of that pair, to the second. The map is applied to the base side only; every other line is
+  compared exactly. The fixture is not edited; no product file and no other test is touched.
+
+**Surprise row S3 (`AMGT_RESAPP-D1-W522-S3`, OBSERVATION, INERT, disarm_owner `2.0.0_SA_COO~R1`).** The amendment names
+two rows that carry the unstated source (`CURR_ENTP_VAL` and `SHORT_INT_RATIO`). The measured bytes hold one: the base
+fixture's Header has nine figure rows, and only `CURR_ENTP_VAL` (line 17) ends in the `?` source cell. No `SHORT_INT_RATIO`
+row exists in the base fixture or in the current export of ICICIBC IN (rendered in this worktree, 75 lines). The map is
+written generically, so it covers every such row, and no `SHORT_INT_RATIO` line is mapped or invented. The issuer rules
+whether the amendment text is corrected.
+
+**Commits.** Test re-scope and the row: `33edcbdf16` (LOCAL). This receipt and the proof instance: see the commit that
+carries them (LOCAL, the amendment's second commit). Code commit `41faa41432` is unchanged.

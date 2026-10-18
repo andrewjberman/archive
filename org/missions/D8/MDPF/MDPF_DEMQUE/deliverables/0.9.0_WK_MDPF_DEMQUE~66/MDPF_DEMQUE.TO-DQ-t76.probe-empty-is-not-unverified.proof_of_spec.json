@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t76",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t76.probe-empty-is-not-unverified.md",
+    "group": "OTHER",
+    "vintage_commit": "6c71bea6bc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6c71bea6bc",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t76.probe-empty-is-not-unverified.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~66",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "23a099f77a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The /cusip/ identifier-form probe gets a fourth verdict, INCONCLUSIVE, for exactly the two empty causes: the history probe's 'probe response empty' and the reference probe's 'probe value for <field> is empty' (_probe_history, _probe_reference). An INCONCLUSIVE verdict is not cached: the probed security is skipped for this fire (_identifier_form returns SKIP_SECURITY), its probed run is recorded as an empty window by the DQ-t-75 mechanism (_skip_empty_probe, COOLED_NEW, listed and counted toward the more-than-five stop), and the next /cusip/ security probes the form. The third distinct INCONCLUSIVE security caches UNVERIFIED with the reason 'three probes empty' and the request is refused as before. Every other UNVERIFIED cause is unchanged. The history probe asks the PREVIOUS NYSE trading day of the fire day (prev_trading_day(ctx['day']), lib/trading_calendar.py), per the order's amendment (site Z row Z-S9); the reference probe is unchanged. The probe asks the first undrawn run that is not COOLED or STANDING (_probe_run), so a cooled window is never probed. The reference channel skips an INCONCLUSIVE security with no window record. The probe's cells, the room, the budgets, the trading-day gate, the DQ-t-74 outcome rule and the DQ-t-75 cooldown are unchanged. Nothing is deployed: the scheduled drawer reaches site Z only through CLOUD and the site Z checkout.",
+      "artifact_covered_by": [
+        "DQ9-t76-AC1",
+        "DQ9-t76-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_probe_empty.py",
+      "kind": "test",
+      "commit_or_etag": "23a099f77a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the five named tests (the four of the order's first wording and the amendment's fifth, test_the_history_probe_asks_the_previous_trading_day_not_the_first_undrawn_day). Stub history client (per-identifier scripted 'empty', 'named', 'refuse' or rows), tmp_path, a monkeypatched budget directory, a stubbed priority gate, a 400-cell allowance and OPAL_DEMQUE_HOME set to tmp_path, so the real ~/.opal/demque is never written. Fires on 2026-01-17 (Saturday) and 2026-01-18 (Sunday). 5 passed at 23a099f77a, twice.",
+      "artifact_covered_by": [
+        "DQ9-t76-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_drawer_cusip_entries.py",
+      "kind": "test",
+      "commit_or_etag": "23a099f77a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EDITED existing t56 test, because two assertions pinned the old probe day (the first undrawn day, JAN d5 2026-01-05) and the amendment moves the history probe to the previous NYSE trading day of the fire day (2026-10-16 for the fire 2026-10-17): the probe-call assertion in test_a_cusip_entry_resolves_to_a_bloomberg_identifier_and_the_first_draw_of_an_unverified_form_is_a_one_row_probe and the probe start assertion in test_a_dates_entry_draws_only_its_undrawn_trading_days_by_identity_one_request_per_consecutive_run. No other assertion moved. Not in the AC2 difference-control list; in the folder run, where it passes (10 passed with the probe file).",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6510c7ea84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended to the last fenced array: MDPF_DEMQUE-D1-W66-S1 (OBSERVATION, INERT: a reference INCONCLUSIVE security is recorded nowhere, so it is re-probed on later fires), MDPF_DEMQUE-D1-W66-S2 (OBSERVATION, INERT: the probe site used to ask a cooled window, so the probe now picks the first run that is not cooled), MDPF_DEMQUE-D1-W66-S3 (OBSERVATION, INERT: a one-day empty answer cools the whole undrawn run, and the third empty security is also listed). The surprise-row gate passed at commit (3 new rows of 176). No row was added by the amendment.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t76-AC1",
+      "criterion_verbatim": "`DQ9-t76-AC1` -- the five named tests (test_an_empty_probe_security_is_skipped_and_the_next_cusip_security_verifies_the_form, test_three_empty_probes_leave_the_form_unverified_and_refuse_the_request, test_a_probe_that_names_the_wrong_security_or_errors_still_leaves_the_form_unverified, test_the_history_probe_asks_the_previous_trading_day_not_the_first_undrawn_day, test_the_skipped_probe_security_is_listed_in_the_receipt_and_cooled_for_seven_days).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t76_tests.py",
+      "output_evidence": "Run from the worktree root at 23a099f77a, three times: the five PASSED lines, each named as above, and '5 passed in 1.12s', '5 passed in 2.36s' and '5 passed in 1.27s'; then PROBE-OK; rc=0 each time. At the base 6c71bea6bc the same check reads 'PROBE-BAD no file ...test_demque_probe_empty.py' (rc=1).",
+      "denominator": "5 of 5 named tests PASSED by name; the file holds 5 tests, 5 passed, 0 failed",
+      "status": "PASS",
+      "expect": "PROBE-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t76-AC2",
+      "criterion_verbatim": "`DQ9-t76-AC2` -- the DIFFERENCE CONTROL: the drawer's existing tests, the surface-room, DQ-t-74 outcome and DQ-t-75 empty-window tests pass unedited (the check deselects the two date-coupled tests on 2026-10-17 and 2026-10-18 only).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t76_regress.py",
+      "output_evidence": "Run from the worktree root at 23a099f77a: 'note: two date-coupled tests deselected today', '17 passed, 2 deselected in 2.59s' and then PROBE-OK; rc=0. The same check at 23a099f77a again: '17 passed, 2 deselected in 2.81s', PROBE-OK, rc=0. The check's five files are standing_drawer, standing_drawer_close, surface_room, outcome_per_request and empty_window; none of their tests was edited. PROBE-OK at the base as well.",
+      "denominator": "17 of 19 tests in the five control files PASSED; the 2 deselected are the date-coupled tests on 2026-10-18; 0 failed",
+      "status": "PASS",
+      "expect": "PROBE-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base standing_drawer.py (6c71bea6bc) written over the worktree file, the five named tests run, then the committed file restored from a copy and confirmed identical to HEAD (git diff --quiet, status clean). No other file changed.",
+      "expected": "the four tests that need the new rule fail (the empty probe must no longer refuse the request, and the probe must ask the previous trading day), and the old-behaviour test passes, since a named or erroring probe refused the request before this change too",
+      "observed": "4 failed, 1 passed: test_an_empty_probe_security_is_skipped_and_the_next_cusip_security_verifies_the_form, test_three_empty_probes_leave_the_form_unverified_and_refuse_the_request, test_the_history_probe_asks_the_previous_trading_day_not_the_first_undrawn_day and test_the_skipped_probe_security_is_listed_in_the_receipt_and_cooled_for_seven_days failed; test_a_probe_that_names_the_wrong_security_or_errors_still_leaves_the_form_unverified passed, as the control.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times and AC2 run twice at the committed tree 23a099f77a; the whole demque folder run once at the same tree with --continue-on-collection-errors.",
+      "observed": "AC1 PROBE-OK rc=0 three times (5 passed each time); AC2 PROBE-OK rc=0 twice (17 passed, 2 deselected both times). Folder: 6 failed, 230 passed, 8 errors, rc=1. The 4 base failures are test_demque_bbg_backfill.py vendor_limit_warning [field] and [response] and two test_demque_bbg_ledger_upload.py tests (their modules import no drawer code; the paths they name are missing from this worktree). The 2 date-coupled failures on 2026-10-18 are test_demque_standing_drawer.py test_drawer_draws_min_of_allowance_and_remaining_in_rank_order and test_demque_standing_drawer_close.py test_no_zero_cell_drawn_line_after_completion. The 8 errors are the base collection errors (missing integrations/ or commonwealth_signs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the whole-folder no-failure bar of the build step",
+      "reason": "The folder at 23a099f77a reads 6 failed, 230 passed, 8 errors. The 4 bbg_backfill and bbg_ledger_upload failures and the 8 collection errors are the base set (missing integrations/ or commonwealth_signs in this worktree; the 4 failing modules read none of the drawer's probe or window logic). The 2 date-coupled failures are the ones the order names, on 2026-10-18 only. The only existing test edited is test_demque_drawer_cusip_entries.py, for the probe day the amendment moved (see its artifact row); no existing test failed for the new probe rule."
+    },
+    {
+      "item": "the reference-channel path as a named criterion",
+      "reason": "The order names five history tests. The reference INCONCLUSIVE path was exercised by a scratch script (.scratch/ref_probe_check.py, uncommitted, not in the grant): one empty reference probe is skipped, the next /cusip/ probe VERIFIED, two securities drawn, 4 cells, outcome DRAWN. It has no named test here, and it writes no window record (see surprise S1)."
+    },
+    {
+      "item": "deploy and merge",
+      "reason": "Not done. The branch wk-MDPF_DEMQUE-66 is local at 23a099f77a and not merged; the issuer drains. The branch carries a merge of box/dell1 (4971f2ea65), made as the coordinator directed after the order amendment. The change reaches site Z only through CLOUD and the site Z checkout, where the scheduled drawer (mdpf-demque-drawer-daily) runs it."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W66-S1: a reference INCONCLUSIVE probe skips its security for the fire and writes no window record, because the DQ-t-75 record is day-keyed and the reference channel has no days, so the security is re-probed on later fires (OBSERVATION, INERT).",
+    "MDPF_DEMQUE-D1-W66-S2: the order makes the probe the first /cusip/ security, but the pre-existing probe site asked a COOLED window on every fire; the probe now asks the first run that is not cooled, which the no-second-call criterion requires (OBSERVATION, INERT).",
+    "MDPF_DEMQUE-D1-W66-S3: a one-day probe's empty answer cools the whole undrawn run for seven days, and the third INCONCLUSIVE security is recorded as an empty window too; the order states neither reading (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~66/MDPF_DEMQUE.TO-DQ-t76.probe-empty-is-not-unverified.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~66 <0.9.0_WK_MDPF_DEMQUE~66@opal.agent>\" -F .scratch/msg_dq_t76_amend.txt -- data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_probe_empty.py data/mdpf/scripts/demque/test_demque_drawer_cusip_entries.py",
+      "result": "commit 23a099f77a on wk-MDPF_DEMQUE-66 (LOCAL): commit-gate OK, msg-verify MATCH. The earlier build commit 6510c7ea84 and proof commit 6f449f61b1 passed the same gates, the surprise-row gate included (3 new rows of 176)."
+    },
+    {
+      "tool": "git merge box/dell1",
+      "invocation": "git merge --no-edit box/dell1 (from the worktree, as the coordinator directed)",
+      "result": "merge commit 4971f2ea65 (LOCAL on wk-MDPF_DEMQUE-66), rc=0, no conflict; the order file carried status complete from my earlier flip and kept it. The merge brought the issuer's amendment dab2ec8261 and unrelated AMGT and CTO files."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no --continue-on-collection-errors . (from data/mdpf/scripts/demque in the worktree)",
+      "result": "6 failed, 230 passed, 8 errors, rc=1; the failing and erroring ids are the base set and the two 2026-10-18 date-coupled tests, named in declared_exclusions."
+    }
+  ]
+}
