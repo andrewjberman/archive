@@ -10,8 +10,10 @@ the census prints PICK: OLD is the pre-round-93 rule reimplemented HERE
 rule of infra/aws/ec2/opal-gateway/app/harvest_research.py:349 copied here.
 
 The S3 client is wrapped: only get_object, list_objects_v2, head_object and
-get_paginator are forwarded; any other operation raises. Budget: 1500
-requests and 500 MiB; the run aborts before exceeding either.
+get_paginator are forwarded; any other operation raises. Budget (issuer
+ruling for the census step, 2026-10-18): 3500 requests and 600 MiB; the run
+aborts before exceeding either. (The first run, under the earlier 1500 cap,
+aborted at 1501 requests and is kept as history in the proof instance.)
 
 Run from the worktree root:  python -u <this file>
 """
@@ -29,8 +31,8 @@ from lib.research.corpus import gold  # noqa: E402
 from lib.research.harvest import store  # noqa: E402
 from lib.research.identity import crosswalk  # noqa: E402
 
-BUDGET_REQUESTS = 1500
-BUDGET_BYTES = 500 * 1024 * 1024
+BUDGET_REQUESTS = 3500
+BUDGET_BYTES = 600 * 1024 * 1024
 TOTAL_REQUESTS_LIMIT_NOTE = "budget requests=%d bytes=%d" % (BUDGET_REQUESTS, BUDGET_BYTES)
 
 
@@ -93,7 +95,8 @@ def _version_int(document):
 
 
 def _short(key):
-    return key[:8]
+    """The first 8 characters of the object-name prefix: the key's FINAL path segment (round-93 ruling fix of row S2)."""
+    return key.rsplit("/", 1)[-1][:8]
 
 
 def main():
