@@ -1,6 +1,7 @@
 """AMGT_RESAPP round 116 (AMGT-bw-1 / bw-5 grade): every money line of the LIVE printed pack against the page's served figure.
 
-  PYTHONPATH=<repo root> python r116_pack_money_vs_page.py [KEY ...]      (default: ICT_PM_Equity RIO_LN_Equity GOOGL_US_Equity)
+  [R116_LOCAL=1] PYTHONPATH=<repo root> python r116_pack_money_vs_page.py [KEY ...]      (R116_LOCAL=1: the pack comes from this checkout's own Lambda handler, the page from the live function)
+       (default: ICT_PM_Equity RIO_LN_Equity GOOGL_US_Equity)
 
 Read-only (Lambda invokes of GET /thesis and GET /print?format=pdf on opal-amgt-scoped-api). For each name it reads the page's `header_figures`
 (the figures the page shows: value, unit, OWN `currency`) and the pack's text, and for each header figure whose unit is money (MILLIONS,
@@ -34,7 +35,22 @@ LAM = boto3.client("lambda", region_name="us-east-1")
 def _call(key, route, query=None):
     ev = {"rawPath": "/api/scoped/amgt/security/%s/%s" % (key, route), "queryStringParameters": query,
           "requestContext": {"http": {"method": "GET"}}, "headers": {"x-firm-id": "opal"}}
+    if os.environ.get("R116_LOCAL") == "1" and route == "print":  # the CANDIDATE: this checkout's own handler over the live pool (the page side stays live)
+        return _local_handler()(ev, None)
     return json.loads(LAM.invoke(FunctionName=FN, Payload=json.dumps(ev).encode())["Payload"].read())
+
+
+_LOCAL = []
+
+
+def _local_handler():
+    if not _LOCAL:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("lam", "infra/aws/lambda/research/scoped_amgt_api/lambda_function.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _LOCAL.append(mod.lambda_handler)
+    return _LOCAL[0]
 
 
 def _pack_text(key):
