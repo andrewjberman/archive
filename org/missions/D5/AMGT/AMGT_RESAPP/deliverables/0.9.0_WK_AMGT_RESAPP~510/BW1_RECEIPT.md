@@ -167,3 +167,4 @@ in this file. Not edited.
 | `AMGT_RESAPP-D1-W510-S2` | OBSERVATION, INERT | The page's words for a valued amount with no currency are `currency not stated`; `CURRENCY_UNCONFIRMED_WORDS` is the UNMEASURED-only reason. |
 | `AMGT_RESAPP-D1-W510-S3` | OBSERVATION, INERT | The bu3 block fixtures carried no per-figure `currency`; the base codes came from the fallback. `currency` added, values unchanged. |
 | `AMGT_RESAPP-D1-W510-S4` | OBSERVATION, INERT | `test_av2` fails at base on line 175 for a date-stripping reason; its later `local currency` lines encode the removed fallback. Untouched. |
+| `AMGT_RESAPP-D1-W510-S5` | OBSERVATION, INERT | AMENDMENT 1 names RIO LN Net debt as carrying no code; the synthetic fixture carries no Net debt figure, so no test asserts it. |
