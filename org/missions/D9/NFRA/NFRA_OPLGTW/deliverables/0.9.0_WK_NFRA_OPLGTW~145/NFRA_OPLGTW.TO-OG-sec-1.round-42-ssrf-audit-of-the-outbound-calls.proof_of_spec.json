@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-sec-1",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~145",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "2550dab3df",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sec-1.round-42-ssrf-audit-of-the-outbound-calls.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~145/SSRF_AUDIT.json",
+   "kind": "doc",
+   "commit_or_etag": "f2df947622",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only audit record: 18 rows, one per pattern-matched line in the five gateway modules, controllable_yes 0, verdict CLEAN. Committed @f2df947622 (LOCAL on wk-NFRA_OPLGTW-145). No product file, no deploy.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "f2df947622",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Two appended rows, NFRA_OPLGTW-Z-W145-S1 and NFRA_OPLGTW-Z-W145-S2 (OBSERVATION, INERT). The surprise-row gate passed at commit: 2 new rows checked, OK. Diff is 50 insertions, 0 deletions.",
+   "artifact_covered_by": ["AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: every outbound call line the pattern finds is a row of the audit, each row is complete, and the verdict follows from the rows (a `yes` anywhere means `STOP`). Either verdict PASSES `AC1`: a STOP is a finding, not a failure of the audit.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r42/checks/sec1.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "call sites matched by the pattern in the five modules: 18 (the CRO counted 18); listed in the record: 18; matched lines missing from the record: 0 (want 0); malformed rows: 0 (want 0)\ncontrollable yes: 0; the record says 0 and verdict CLEAN: consistent\nRESULT: PASS\nexit=0",
+   "denominator": "18 pattern-matched lines in the five modules (identity.py 1, graph.py 3, ycharts/client.py 1, globgrph/integration.py 1, opal_portal/integration.py 12); 18 of 18 listed; 0 missing; 0 malformed",
+   "status": "PASS",
+   "expect": "(?s)call sites matched by the pattern in the five modules: (\\d+) \\(the CRO counted 18\\); listed in the record: \\1; matched lines missing from the record: 0 \\(want 0\\); malformed rows: 0 \\(want 0\\).*controllable yes: \\d+; the record says \\d+ and verdict (CLEAN|STOP): consistent.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch no file outside the project tree (no product file).",
+   "method": "command",
+   "invocation": "git log --author='0.9.0_WK_NFRA_OPLGTW~145 <' --name-only --format= | grep -v '^org/missions/D9/NFRA/NFRA_OPLGTW/' | grep -c . ; echo \"exit=$?\"",
+   "output_evidence": "0\nexit=1",
+   "denominator": "0 files outside org/missions/D9/NFRA/NFRA_OPLGTW/ across every commit by 0.9.0_WK_NFRA_OPLGTW~145 (grep -c counts 0; exit 1 is grep's no-match code, not a failure)",
+   "status": "PASS",
+   "expect": "(?s)^0\\s*exit=[01]\\s*$",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two planted record mutants run through SEC1_REC_OVERRIDE (copies in .scratch, the deliverable untouched): (a) the graph.py:63 row dropped; (b) the graph.py:63 row flipped to controllable yes with the verdict left CLEAN.",
+   "expected": "(a) FAIL with one matched line missing from the record; (b) FAIL as INCONSISTENT.",
+   "observed": "(a) 'listed in the record: 17; matched lines missing from the record: 1 (want 0)' then RESULT: FAIL, exit=1. (b) 'controllable yes: 1; the record says 0 and verdict CLEAN: INCONSISTENT' then RESULT: FAIL, exit=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of sec1.AC1.sh on the committed record, outputs compared byte for byte with cmp",
+   "observed": "both runs exit 0; cmp reports IDENTICAL-OUTPUT",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any product file, test, release or deploy in the five gateway modules or elsewhere.",
+   "reason": "The task order is read-only (section 2): the only writes are the audit record and the channel rows."
+  },
+  {
+   "item": "Rows for the two PyJWKClient JWKS fetches in identity.py (lines 44 and 115).",
+   "reason": "They are outside the task order's pattern denominator. They are recorded as surprise row NFRA_OPLGTW-Z-W145-S1 with both targets traced to config, not as record rows."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W145-S1: the OG-sec-1 pattern misses the two outbound JWKS fetches made through PyJWKClient in identity.py (lines 44 and 115); both targets are config-sourced, so the CLEAN verdict stands (OBSERVATION, INERT).",
+  "NFRA_OPLGTW-Z-W145-S2: graph.call sends the caller's bearer token to any absolute URL; its no-verdict at graph.py:63 rests on caller discipline, and two callers follow @odata.nextLink with no host check (OBSERVATION, INERT)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~145 on worktree wk-NFRA_OPLGTW-145 (HEAD 2550dab3df at start). Read the task order and verified the five modules and the channel exist. Ran the task-order pattern over the five modules (18 lines). Read each module and traced every site; traced all graph.call callers across app/ by grep and reads. Wrote SSRF_AUDIT.json (18 rows, 0 yes, CLEAN), self-checked each call text against its cited line, ran AC1 under timeout 120 (PASS), ran two mutant controls and a repeat (identical). Appended rows NFRA_OPLGTW-Z-W145-S1 and -S2 to INVESTIGATION_v1.md. Committed the record and rows @f2df947622 via safe-commit (gate OK). Ran AC2 (0, exit 1: PASS). Wrote this instance, validated it, then flipped the task-order status tag in a separate commit.",
+ "compiler_tools": [
+  {
+   "tool": "sec1.AC1.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r42/checks/sec1.AC1.sh",
+   "result": "RESULT: PASS, exit=0; 18 matched, 18 listed, 0 missing, 0 malformed; controllable yes 0; verdict CLEAN consistent"
+  },
+  {
+   "tool": "grep -nE (the task order's section 1 pattern) over the five modules",
+   "invocation": "grep -nE '(requests|httpx|urllib\\.request|aiohttp|http\\.client|session|client|_http|conn)[A-Za-z_.]*\\.(get|post|put|delete|patch|request|head|urlopen)\\(|urlopen\\(|\\.request\\(' on identity.py, graph.py, integrations/ycharts/client.py, integrations/globgrph/integration.py, integrations/opal_portal/integration.py",
+   "result": "18 matching lines: identity 77; graph 63, 94, 103; ycharts 98; globgrph 85; opal_portal 196, 217, 242, 247, 262, 337, 342, 362, 372, 418, 422, 428"
+  },
+  {
+   "tool": "python -I self-check of SSRF_AUDIT.json call texts against the cited source lines",
+   "invocation": "python -I heredoc: for each row, the call text (stripped) must be a substring of the source line at its line number, call length 120 or less",
+   "result": "18 rows, 0 call mismatches, ASCII only, controllable_yes 0, verdict CLEAN"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (record and channel rows)",
+   "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPLGTW~145 <0.9.0_WK_NFRA_OPLGTW~145@opal.agent>' -F .scratch/msg_commit1.txt -- <SSRF_AUDIT.json> <INVESTIGATION_v1.md>",
+   "result": "committed f2df947622; surprise-row gate OK (2 new rows); gitlink check 0 refusals; WARN client-data-check, list absent, not checked"
+  }
+ ]
+}
