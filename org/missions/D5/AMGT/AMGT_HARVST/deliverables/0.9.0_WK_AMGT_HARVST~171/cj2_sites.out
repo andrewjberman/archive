@@ -1,0 +1,53 @@
+CJ2-SITES file=infra/aws/ec2/opal-gateway/app/harvest_research.py lines=662
+CONST line=41 TOOL_RESEARCH = "harvest_get_research"
+CONST line=42 TOOL_FILINGS = "harvest_get_filing_analysis"
+CONST line=43 TOOL_PEERS = "harvest_get_peers_and_scores"
+CONST line=45 P_DOSSIER = "amgt/harvest/gold/research_dossier/security_key=%s/"
+CONST line=46 P_CONTINUATION = "amgt/harvest/gold/research_continuation/security_key=%s/"
+CONST line=47 P_AI_FILL = "amgt/harvest/gold/ai_fill/security_key=%s/"
+CONST line=48 P_REPORT = "amgt/harvest/silver/research_report/"
+CONST line=49 P_MANAGEMENT = "management/v1/%s/"
+CONST line=50 P_EXEC = "bloomberg/harvest/bronze/exec_officers/security_key=%s/"
+CONST line=51 P_FILINGS = "filings/v1/%s/"
+CONST line=52 P_DRAFTING = "drafting/v1/%s.json"
+CONST line=53 P_FILING_SOURCE = "sec/harvest/silver/filing_source/"
+CONST line=54 P_PEERS = "peers/v1/%s/"
+CONST line=55 P_SCORES = "scores/v1/%s.json"
+CONST line=56 P_POSTURE = "posture/v1/%s/"
+TOOL line=438 harvest_get_research
+TOOL line=571 harvest_get_filing_analysis
+TOOL line=651 harvest_get_peers_and_scores
+SITE line=175 fn=_cited_misfiled if e["security_key"] == key and ("security_key=%s/%s/" % (key, e["report_id"])) in text:
+SITE line=263 fn=_research_reports excluded = {e["report_id"] for e in MISFILED_REPORTS if e["security_key"] == key}
+SITE line=264 fn=_research_reports attach = {(e["security_key"], e["report_id"]) for e in MISFILED_REPORTS if e["correct_security_key"] == key}
+SITE line=275 fn=_research_reports if sk == key:
+SITE line=299 fn=_research_reports for e in MISFILED_REPORTS if e["security_key"] == key and e["report_id"] in seen_excluded]
+SITE line=316 fn=_research picked, chosen, dup = _pick_dossier(_list_json(P_DOSSIER % key), as_of)
+SITE line=343 fn=_research cont_prefix, cont_rows = _live_listing(P_CONTINUATION % key, "research_continuation")
+SITE line=363 fn=_research ai = [r for r in ht.list_keys(P_AI_FILL % key) if _base(r["key"]) == "ai_fill.json"]
+SITE line=389 fn=_research mg = _list_json(P_MANAGEMENT % key)
+SITE line=396 fn=_research ex = _list_json(P_EXEC % key)
+SITE line=435 fn=_research return run.finish(TOOL_RESEARCH, P_DOSSIER % key, body, parts, stamp, denominator)
+SITE line=441 fn=harvest_get_research ref = P_DOSSIER % security_key
+SITE line=481 fn=_filings for r in ht.list_keys(P_FILINGS % key):
+SITE line=521 fn=_filings return run.finish(TOOL_FILINGS, P_FILINGS % key, body, parts, stamp, denominator)
+SITE line=523 fn=_filings dkey = P_DRAFTING % key
+SITE line=553 fn=_filings if row.get("security_key") == key and row.get("accession") == acc:
+SITE line=568 fn=_filings return run.finish(TOOL_FILINGS, P_FILINGS % key, body, parts, stamp, denominator)
+SITE line=575 fn=harvest_get_filing_analysis ref = P_FILINGS % security_key
+SITE line=612 fn=_peers_scores pk = _list_json(P_PEERS % key)
+SITE line=627 fn=_peers_scores sc = [r for r in ht.list_keys(P_SCORES % key) if r["key"] == P_SCORES % key]
+SITE line=636 fn=_peers_scores po = _list_json(P_POSTURE % key)
+SITE line=648 fn=_peers_scores return run.finish(TOOL_PEERS, P_PEERS % key, body, parts, stamp, denominator)
+SITE line=655 fn=harvest_get_peers_and_scores ref = P_PEERS % security_key
+DENOMINATOR sites=23 tools=3
+DEPLOY-LIB for _pf_need in org/modules/graph/comp_constants_cli.py org/modules/graph/manifest_check_cli.py lib/opal_naming.py; do
+DEPLOY-LIB if [ ! -f "$WORKSPACE_ROOT/lib/trading_calendar.py" ]; then
+DEPLOY-LIB echo "ERROR: REFUSED (no upload): lib/trading_calendar.py is missing from the repo at ${WORKSPACE_ROOT}/lib -- the artifact would ship without the trading calen
+DEPLOY-LIB mkdir -p "$TMP/bundle/lib"
+DEPLOY-LIB cp "$WORKSPACE_ROOT/lib/trading_calendar.py" "$TMP/bundle/lib"
+DEPLOY-LIB # NFRA_OPLGTW OG-ap-23 (A2): lib/opal_naming.py, the partner roster and the registry copy ship from their repo sources, never as committed data copies.
+DEPLOY-LIB for _stage_src in lib/opal_naming.py data/mdpf/config/partner_roster.json infra/logic/registry/scopes.json; do
+DEPLOY-LIB cp "$WORKSPACE_ROOT/lib/opal_naming.py" "$TMP/bundle/lib"
+DEPLOY-CROSSWALK-SHIPPED no (the artifact lib/ carries trading_calendar.py and opal_naming.py only; tar -C bundle lib, no lib/research)
+DEPLOY-CROSSWALK-IMPORTABLE-ON-HOST no -- the normalizer is a copy in the app (order step b)
