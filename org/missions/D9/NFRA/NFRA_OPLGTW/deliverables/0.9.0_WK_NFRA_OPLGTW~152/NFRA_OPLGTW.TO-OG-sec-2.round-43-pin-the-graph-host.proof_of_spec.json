@@ -29,7 +29,7 @@
       "commit_or_etag": "7820a6b72b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-152 (no push by this worker). New file: test_ogsec2_ac01 (seven forged hosts refused, zero client constructions) and test_ogsec2_ac02 (three legitimate calls reach the stub with the expected URL and Bearer header). httpx.Client stubbed; no socket.",
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
@@ -57,20 +57,19 @@
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~152 '^infra/aws/ec2/opal-gateway/(app/graph\\.py|tests/test_og_sec2\\.py)$'; echo \"exit=$?\"",
       "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~152: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
-      "output_evidence": "Run under timeout 120:\nwrite-set bound for 0.9.0_WK_NFRA_OPLGTW~152: files touched 2; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
-      "denominator": "files touched 2 (graph.py, test_og_sec2.py); product files 2; outside the allowed set 0 of 2.",
+      "output_evidence": "Run under timeout 120:\nwrite-set bound for 0.9.0_WK_NFRA_OPLGTW~152: files touched 4; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "files touched 4: 2 product files (graph.py, test_og_sec2.py) and 2 standing record paths (the surprise channel and this instance); outside the allowed set 0 of 4.",
       "status": "PASS"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "AC3: the new tests and five existing Graph-calling test files (the route modules and the transcript and tax-workbook tools) pass together in both orders with the same count. Run AC3 THREE times and report the three results.",
+      "criterion_verbatim": "AC3 (AMENDED by the issuer, round 43, after surprise row NFRA_OPLGTW-Z-W152-S1): the new tests and four existing test files (the transcript tools, the tax workbook, test_og_en9.py, test_og_cl2.py) pass together in both orders with the same count. The three route test files are out of the set. Run AC3 THREE times.",
       "method": "command",
-      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh sec2set tests/test_og_sec2.py tests/test_transcript_route.py tests/test_teams_route.py tests/test_mail_route.py tests/test_transcript_tools.py tests/test_taxsma_workbook.py; echo \"exit=$?\"",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh sec2set tests/test_og_sec2.py tests/test_transcript_tools.py tests/test_taxsma_workbook.py tests/test_og_en9.py tests/test_og_cl2.py; echo \"exit=$?\"",
       "expect": "(?s)sec2set forward: passed (\\d+); failed 0.*sec2set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
-      "output_evidence": "Run under timeout 120, three runs, identical each time:\nsec2set forward: passed 68; failed 5\nsec2set reverse: passed 68; failed 5\nRESULT: FAIL\nexit=1\nThe five failures (identical at base 581ee61977 and with the pin disabled): test_transcript_route.py::test_bearer_constant_time_own_prefix_only; test_teams_route.py::test_methods_and_unknown_routes; test_teams_route.py::test_new_routes_are_get_only_and_allowlist_still_refuses_neighbours; test_mail_route.py::test_transcript_and_ms_bearers_refused_on_mail_prefix; test_mail_route.py::test_graph_get_only_fails_closed. Each asserts a 405 and receives 404 from the routing layer.",
-      "denominator": "73 collected across the 6 files: forward passed 68, failed 5; reverse passed 68, failed 5; 3 of 3 runs identical. The criterion needs failed 0 in both orders: NOT MET. BLOCKING row NFRA_OPLGTW-Z-W152-S1.",
-      "status": "FAIL",
-      "status_reason": "The expect regex requires failed 0 in both orders; the named five-file set fails 5 cases at the base commit 581ee61977 as well, so the criterion cannot pass as written without fixing defects outside this order's write surface. Refused, not overridden."
+      "output_evidence": "Run under timeout 120, three runs, identical each time:\nsec2set forward: passed 43; failed 0\nsec2set reverse: passed 43; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "43 passed, 0 failed in the forward order and 43 passed, 0 failed in the reverse order, identical across 3 of 3 runs. Same count in both orders.",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -82,18 +81,14 @@
     },
     "determinism": {
       "method": "AC1 and AC3 each run three times on the committed tree 7820a6b72b; outputs compared line for line.",
-      "observed": "AC1: three runs, 2 of 2 each. AC3: three runs, forward 68 passed / 5 failed and reverse 68 / 5 each, identical across runs.",
+      "observed": "AC1: three runs, 2 of 2 each. AC3: three runs, forward 43 passed / 0 failed and reverse 43 / 0 each, identical across runs.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "AC3 PASS (failed 0 in both orders)",
-      "reason": "Five existing route-test cases fail at the base commit 581ee61977 and with the pin disabled. They sit outside this order's <paths>; BLOCKING row NFRA_OPLGTW-Z-W152-S1 carries them. Not fixed here."
-    },
-    {
-      "item": "Status flip of the task order to complete",
-      "reason": "Not performed: AC3 is FAIL, and a FAIL row leaves the order open."
+      "item": "The three route test files (test_transcript_route.py, test_teams_route.py, test_mail_route.py)",
+      "reason": "Out of the AC3 set by the issuer's amendment (commit 755956243c). Five of their cases fail at the base commit 581ee61977 and with the pin disabled, a 404 where 405 is asserted, none reaching graph.call. Carried as surprise row NFRA_OPLGTW-Z-W152-S1; not fixed here."
     },
     {
       "item": "Push, release, deploy, IAM, env, Terraform, tools.py, asker_scope.py and the route modules",
@@ -105,7 +100,7 @@
     }
   ],
   "surprises": [
-    "NFRA_OPLGTW-Z-W152-S1: AC3 cannot read failed 0 as written; five existing route-test cases fail at base 581ee61977 and with the pin disabled. BLOCKING, INERT.",
+    "NFRA_OPLGTW-Z-W152-S1: AC3 as first written could not read failed 0; five route-test cases fail at base 581ee61977 and with the pin disabled. The issuer amended the AC3 set (755956243c). BLOCKING, INERT.",
     "NFRA_OPLGTW-Z-W152-S2: the cell is silent on the case of the line-52 branch; the branch test was made case-insensitive to match the pin. OBSERVATION, INERT."
   ],
   "session_log": "NONE: no session log kept by this worker; the commits and the channel rows are the record.",
@@ -118,7 +113,7 @@
     {
       "tool": "proof-of-spec-check.py",
       "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3 --governing-order <this order>",
-      "result": "Run after the instance commit; see the worker report."
+      "result": "Run after the final commit; see the worker report."
     }
   ]
 }
