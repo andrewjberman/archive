@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-8",
+ "firm": "FABRIC",
+ "phase": "INVESTIGATION",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~154",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "581ee61977",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-8.round-43-measure-the-inline-audit-write-sites.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~154/AUDIT_SITES.json",
+   "kind": "doc",
+   "commit_or_etag": "285ce81e02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "read-only measurement record; the cell's bounds forbid any product file, release, deploy or S3 write",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "285ce81e02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "two surprise rows appended in the channel's own format; the row gate passed at commit (2 new rows, 0 malformed)",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: every inline audit-write line the pattern finds is a row, each row is complete (every column is a value or an ABSENT/unknown/null with its reason), and the record states whether the frequency column was read.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ev8.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "inline audit-write call sites matched by the pattern under app/: 81 (the cut counted 81); listed in the record: 81; matched lines missing from the record: 0 (want 0); malformed rows: 0 (want 0)\nevent loop column unknown on 12 site(s); frequency counted on 0 site(s), ABSENT with a reason on 81; every site ABSENT carries the record-level reason: yes\nRESULT: PASS\nexit=0",
+   "denominator": "81 matched lines under app/; listed 81; missing 0 of 81; malformed 0 of 81; event-loop unknown 12 of 81; calls_7d counted 0 of 81 (ABSENT with reason 81 of 81)",
+   "status": "PASS",
+   "expect": "(?s)inline audit-write call sites matched by the pattern under app/: (\\d+) \\(the cut counted 81\\); listed in the record: \\1; matched lines missing from the record: 0 \\(want 0\\); malformed rows: 0 \\(want 0\\).*every site ABSENT carries the record-level reason: yes.*RESULT: PASS.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch no file outside the project tree (no product file).",
+   "method": "command",
+   "invocation": "git log --author='0.9.0_WK_NFRA_OPLGTW~154 <' --name-only --format= | grep -v '^org/missions/D9/NFRA/NFRA_OPLGTW/' | grep -c . ; echo \"exit=$?\"",
+   "output_evidence": "0\nexit=1",
+   "denominator": "files touched by this serial's commits: 2; outside org/missions/D9/NFRA/NFRA_OPLGTW/: 0 of 2",
+   "status": "PASS",
+   "expect": "(?s)^0\\s*exit=[01]\\s*$"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "Any repair of an inline audit-write site (moving the S3 write off the event loop, or setting a client timeout)",
+   "reason": "the cell is read-only; the repair is a round-44 decision made on this table (round-42 analysis item 7)"
+  },
+  {
+   "item": "Per-site calls_7d counts",
+   "reason": "the audit-lake key is audit/dt=<day>/<ts>-<id>.jsonl and names no tool or event; a per-site split needs object bodies, which the cell forbids; recorded ABSENT with reason on every site"
+  },
+  {
+   "item": "Verdicts for the 12 event-loop-unknown sites",
+   "reason": "they hinge on FastMCP sync-tool dispatch in the pinned mcp SDK (requirements.txt pins mcp==1.28.0), which is outside the gateway source the cell reads; filed as NFRA_OPLGTW-Z-W154-S1"
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W154-S1: sync @mcp.tool bodies dispatch through the pinned mcp SDK, which the gateway source does not show, so 12 sites stay event-loop unknown",
+  "NFRA_OPLGTW-Z-W154-S2: the infra/logic registry carries no row for the audit-lake bucket; its name was read from the terraform declaration"
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). Trail: 285ce81e02.",
+ "compiler_tools": [
+  {
+   "tool": "python -I (AST read of app/*.py, uncommitted scratch analyzer)",
+   "invocation": "python -I .scratch/ev8_analyze.py <worktree>/infra/aws/ec2/opal-gateway/app ; python -I .scratch/ev8_build.py <record>",
+   "result": "81 matched lines; event loop yes 68, no 1, unknown 12 (per-site rule table in the build script)"
+  },
+  {
+   "tool": "aws s3api list-objects-v2 (read-only, keys counted, no body read)",
+   "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-mcp-audit --prefix audit/dt=<day>/ --output text --query 'Contents[].Key' (7 UTC days 2026-10-12..2026-10-18)",
+   "result": "8, 9, 9, 10, 16, 15, 6 keys per day; 73 in total; whole-lake volume only"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The spec names no mutant for a read-only measurement table",
+   "expected": "N/A: the spec names no assertion to mutate",
+   "observed": "N/A-SPEC-NAMES-NONE",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "N/A-WITH-REASON: the site list is a git-grep and AST read at HEAD 581ee61977 and is repeatable, but the lake counts move with time, so no same-input rerun reproduces them",
+   "observed": "site list 81 lines in the record; lake counts read once in this session on 2026-10-18 UTC, before the channel rows were committed",
+   "status": "N/A-WITH-REASON"
+  }
+ }
+}
