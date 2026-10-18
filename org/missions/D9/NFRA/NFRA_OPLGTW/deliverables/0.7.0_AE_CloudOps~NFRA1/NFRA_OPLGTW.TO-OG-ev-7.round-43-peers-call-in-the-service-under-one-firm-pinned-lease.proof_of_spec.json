@@ -1,0 +1,94 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-7",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "5b840e2b4f",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-7.round-43-peers-call-in-the-service-under-one-firm-pinned-lease.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/PEERS_MEASURE.json",
+   "kind": "doc",
+   "commit_or_etag": "2018210f22",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The measurement record: ONE 15-minute arming (placeholder account reference, firm 49financial read on the host), three etfs_compare_peers calls through the listener (walls [3.59, 1.07, 1.09] s, heap signal on/on/off), one fresh guarded process (4.2 s), verdict COLD by the rule fixed before the run, lease deleted 2026-10-18T21:08:37Z, ParameterNotFound read, the listener refused a call after the wait. Counts: journal POST /probe/ 5, lake probe:OG-ev-7 3, probe:unarmed 2.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev7_run_raw.json",
+   "kind": "doc",
+   "commit_or_etag": "2018210f22",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The runner's raw record: the state before and after (marker eff517546e, 65 env keys, one process, NRestarts 0), the unarmed calls, the firm read, the three calls with the heap lines, the fresh call. Counts, MB, seconds and status words only.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev7_run.py",
+   "kind": "doc",
+   "commit_or_etag": "7531e7b4bb",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The runner, committed before the arming (blob 64651cdff73b); it refuses to start unless the uploaded bytes equal the committed blobs. ev7_probe_host.py is the host side.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the peers call measured in the running service, to explain Z-S389: the verdict is computed from the numbers by the rule fixed before the run (COLD, SLOW_IN_SERVICE, SIGNAL_COST or INCONCLUSIVE), under the safety bounds.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/ev7.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)three calls in the order on/on/off with walls .* one PID yes; fresh-process wall .*lease \\d+ minutes \\(25 or fewer\\), armings 1 \\(want 1\\), firm pinned True, ParameterNotFound after the delete True, listener closed at rest True, restarts after 0: ok.*verdict by the rule fixed before the run: (COLD|SLOW_IN_SERVICE|SIGNAL_COST|INCONCLUSIVE); the record says \\1: consistent.*RESULT: PASS.*exit=0",
+   "output_evidence": "three calls in the order on/on/off with walls [3.59, 1.07, 1.09] s, VmRSS [248.4, 248.8, 248.8] MB (at most 1200), one PID yes; fresh-process wall 4.2 s\nlease 15 minutes (25 or fewer), armings 1 (want 1), firm pinned True, ParameterNotFound after the delete True, listener closed at rest True, restarts after 0: ok\nverdict by the rule fixed before the run: COLD; the record says COLD: consistent; digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "3 service calls (57 rows each), 1 fresh-process call, 1 arming, 5 listener requests (journal 5, lake 3 + 2)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the check recomputes the verdict from the numbers, which is the discriminating arm.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "an explanation of the 17.9 s of OG-ap-40",
+   "reason": "The cell grades a verdict, not the 17.9 s. This arming read 3.59 / 1.07 / 1.09 s in service against 4.2 s fresh: the 17.9 s did not recur, and one arming is one occasion."
+  },
+  {
+   "item": "journal POST /mcp lines in the window",
+   "reason": "The window (56 s) held 0 service /mcp lines; the three counts compared are the listener's (journal 5, lake 5 of the 5 requests)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-7 Step 2 (GO 35802, all three halves on ask sha256 34333184f199; CT2 placeholder account ****0000/probe adopted). Scripts ev7_probe_host.py and ev7_run.py committed (7531e7b4bb) before the arming; blobs verified equal to the uploaded bytes. Live ref eff517546e, 65 env keys, one process PID unchanged, NRestarts 0, no other gateway ledger open. Unarmed call 403, firm read on the host 49financial (equal to the ask's), lease written 21:08:14Z for 15 minutes, 7 s wait, three calls, fresh call, lease deleted 21:08:37Z, ParameterNotFound, 7 s wait, refused 403. VmRSS 248 MB throughout, host memory 31 to 33 percent. Verdict COLD by the rule.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 / ssm / s3",
+   "invocation": "ev7_run.py with ev7_probe_host.py (Rule 12, S3 to SSM)",
+   "result": "PASS",
+   "note": "Counts, MB, seconds, status words and UTC times only."
+  }
+ ]
+}
