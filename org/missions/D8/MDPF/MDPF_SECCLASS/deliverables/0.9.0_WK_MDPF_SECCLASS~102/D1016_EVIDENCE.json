@@ -1,0 +1,53 @@
+{
+  "order": "MDPF_SECCLASS.TO-SC-e113.d1016-absence-read",
+  "measured_utc": "2026-10-18T02:10Z to 02:20Z (read-only AWS reads, no writes)",
+  "served": {
+    "bucket": "opal-data-49financial",
+    "key": "advi/49financial/platinum/views/mix_daily_summary.json",
+    "versions": [
+      {"version_id": "0IrqqSvyNAbXY34LxfRcAx0DtjM9PODv", "last_modified": "2026-10-18T00:24:42Z", "is_latest": true, "firm_keys": 2299, "firm_last_date": "2026-10-15", "has_2026_10_16": false},
+      {"version_id": "l2Wqoi6iUJwQwwmTCu3lXWozfW4.Ak_.", "last_modified": "2026-10-17T05:24:08Z", "is_latest": false, "firm_keys": 2299, "firm_last_date": "2026-10-15", "has_2026_10_16": false}
+    ]
+  },
+  "frontier": {
+    "method": "lib/trading_calendar.expected_last_trading_day(LastModified as naive UTC) at /c/Dev/wk_MDPF_SECCLASS_102",
+    "at_2026_10_18T00_24_42Z": "2026-10-16",
+    "at_2026_10_17T05_24_08Z": "2026-10-16"
+  },
+  "chain_order_from_dispatch": "gold_dispatch.sh: PHASE_A1 (A_00, A_02, A_03) before PHASE_B1 (B_00) before B_01 and C_06 (C_06 in PHASE_C5)",
+  "step_listings": [
+    {"step": "A_03.positions_cube.py", "bucket": "opal-data-bd", "prefix": "gold/timeseries/positions_cube/2026-10-16.parquet", "versions": "none", "control_2026_10_15": "2 versions, latest 2026-10-17T23:14:24Z (id DF8BY4K7Tt_bdlIqtC_.v8f2vo5nfUle), prior 2026-10-17T04:14:41Z"},
+    {"step": "B_00.canonical_holdings.py", "bucket": "opal-data-bd", "prefix": "gold/canonical/holdings/2026-10-16.parquet", "versions": "none", "control_2026_10_15": "2 versions, latest 2026-10-17T23:15:48Z (id 6j2qv_aWtDBCInICisaa8t3dl7N3JSKp), prior 2026-10-17T04:16:05Z"},
+    {"step": "B_01.holdings_lots.py", "bucket": "opal-data-bd", "prefix": "gold/holdings_lots/2026-10-16.parquet", "versions": "none", "control_2026_10_15": "none (lots not daily); control_2026_10_09: 3 versions, latest 2026-10-18T00:04:49Z (id 5Z2LofrJ7aWo7j8bEEXD8NRJzEtyFtdl)"},
+    {"step": "C_06.client_mix_timeseries.py", "bucket": "opal-data-49financial", "prefix": "advi/49financial/platinum/views/mix_daily_summary.json", "versions": "tail 2026-10-15 in both served versions (see served)"}
+  ],
+  "silver_transactions_trade_date_max": [
+    {"key": "silver/transactions/2026-10-17.parquet", "last_modified": "2026-10-17T00:11:28Z", "trade_date_max": "2026-10-15"},
+    {"key": "silver/transactions/2026-10-18.parquet", "versions": 1, "first_and_only_version": "2026-10-18T00:17:36Z", "trade_date_max": "2026-10-16", "rows_on_max": 16201},
+    {"key": "silver/transactions/2026-10-16.parquet", "last_modified": "2026-10-16T00:16:02Z", "trade_date_max": "2026-10-14"}
+  ],
+  "silver_allocations_latest": [
+    {"key": "silver/allocations/2026-10-09.parquet", "last_modified": "2026-10-11T00:19:18Z"},
+    {"key": "silver/allocations/2026-10-16.parquet", "last_modified": "2026-10-18T00:18:12Z"}
+  ],
+  "code_reads_at_HEAD_964be4af93": {
+    "A_03.positions_cube.py": "global_end_date = unit_events['trade_date'].max() (lines 1669-1671); _alloc_date and _proposed_end use the same max (lines 1585, 1621); windows end at the newest silver/transactions trade_date, with no calendar frontier",
+    "B_00.canonical_holdings.py": "cube_dates = list_cube_dates(...) (line 1082) lists gold/timeseries/positions_cube/; --force-recent-days anchor = max cube date (lines 1123-1125)",
+    "B_01.holdings_lots.py": "snapshot_date from the latest silver/allocations key (lines 2492-2506; main 3291-3309)",
+    "C_06.client_mix_timeseries.py": "all_keys = _list_positions_cube_keys() which lists CANONICAL_HOLDINGS_PREFIX (line 933-934); rolling window anchored on max of those keys (line 940)"
+  },
+  "timeline": [
+    "2026-10-16 00:16Z silver key 2026-10-16 written (trade max 10-14)",
+    "2026-10-17 00:11Z silver key 2026-10-17 written (trade max 10-15)",
+    "2026-10-17 23:14-23:15Z A_03 and B_00 write partitions 10-10..10-15 (the 23:00Z Saturday fire); no 10-16 object",
+    "2026-10-18 00:04:49Z B_01 writes lots 10-09 (latest allocations partition then 10-09)",
+    "2026-10-18 00:17:36Z silver key 2026-10-18 first written, first silver rows with trade_date 2026-10-16",
+    "2026-10-18 00:18:12Z silver/allocations/2026-10-16 written",
+    "2026-10-18 00:24:42Z mix_daily_summary.json written by C_06 (version 0IrqqSvyNAbXY34LxfRcAx0DtjM9PODv), tail 2026-10-15"
+  ],
+  "verdict": "A_03.positions_cube.py is the first chain step lacking 2026-10-16. Its window ends at the newest silver trade date, which was 2026-10-15 when it ran; the 2026-10-16 trades reached silver after that run. B_00 and C_06 inherit the gap by their own anchors.",
+  "not_read": [
+    "CloudWatch logs of the 23:00Z and 00:00Z fires (timing is taken from object LastModified only)",
+    "Per-account content of the 2026-10-16 silver partition beyond its trade_date max"
+  ]
+}

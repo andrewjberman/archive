@@ -1,0 +1,54 @@
+{
+  "lambda": {
+    "name": "opal-partners-data",
+    "region": "us-east-1",
+    "code_sha256": "c9FXD84szSBD5oSukUi8sCA6szY/LYiHpRYBWXnOBv4="
+  },
+  "repo_paths": [
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classifier.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classification.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/served_seam.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/pseudonymizer.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/platinum_dest_view.py",
+    "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/deploy.sh",
+    "infra/aws/lambda/ci/function-map/opal-partners-data.json"
+  ],
+  "classifier_path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classifier.py",
+  "call_sites": [
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 62,
+      "text": "from etf_classifier import ETFClassifier as _ETFClassifier"
+    },
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 65,
+      "text": "_clf = _ETFClassifier.instance()"
+    },
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 1078,
+      "text": "result = _clf.classify(ticker, asset_name)"
+    },
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 1284,
+      "text": "lambda r: _classify_holding(r.get('ticker'), r.get('asset_name')), axis=1"
+    },
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 1299,
+      "text": "mix_agg = df.groupby('asset_class')['market_value'].sum().sort_values(ascending=False)"
+    },
+    {
+      "path": "infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/lambda_function.py",
+      "line": 1340,
+      "text": "unclassified_mask = df['asset_class'] == 'other'"
+    }
+  ],
+  "class_handling": "Consumer lambda_function.py (composition handler, mix grouped by asset_class at lines 1299-1308) passes the classifier value through with no fold, drop or raise. equity -> mix item label 'Equities'. fixed_income -> label 'Fixed Income'. alternatives -> label 'Alternatives'. cash -> label 'Cash', its own mix class. structured -> no label key (the map key is 'structured_notes', line 1046), so label 'Structured' by title-case fallback, its own mix class. commodities -> no label key, label 'Commodities' by fallback, its own mix class. Empty result '' -> _classify_holding (line 1079) returns 'other', label 'Other', counted in unclassified count and market value (lines 1340-1342). Today this Lambda reads bd-securities, so only the old four-class set reaches it.",
+  "contract": {
+    "returns": ["equity", "fixed_income", "alternatives", "cash", ""]
+  }
+}

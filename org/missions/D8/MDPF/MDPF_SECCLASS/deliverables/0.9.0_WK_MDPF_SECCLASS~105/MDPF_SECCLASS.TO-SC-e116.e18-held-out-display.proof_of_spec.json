@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e116",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e116.e18-held-out-display.md",
+    "group": "OTHER",
+    "vintage_commit": "964be4af93"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R29.md",
+    "vintage_commit": "964be4af93",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e116.e18-held-out-display.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~105",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/E_18.detect_new_securities.py",
+      "kind": "script",
+      "commit_or_etag": "0076897c13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Log-only change: held_by_resolution list, the held-out summary line, up to 50 detail lines and a (+k more) tail after the Already resolved line. Counts, branches, writes and return values unchanged. Not deployed: no AWS call; the ship of E_18 is a later CloudOps order under a signed never-widen pair.",
+      "artifact_covered_by": [
+        "SC29-e116-AC1",
+        "SC29-e116-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/black_diamond/scripts/gold/tests/test_e18_held_out_display_r29.py",
+      "kind": "test",
+      "commit_or_etag": "0076897c13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test, five cases (a) to (e): held-out listing with count 1, existing counts unchanged, difference control with the name removed from the resolution stub, NAME:: pair not listed, 51 pairs giving 50 lines and (+1 more). Stubs only; no network, no AWS.",
+      "artifact_covered_by": [
+        "SC29-e116-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC29-e116-AC1",
+      "criterion_verbatim": "the new test passes, including the difference control (c) and the cap (e).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e18_held_out_display_r29.py -q --tb=short",
+      "output_evidence": "5 passed in 0.78s (rc=0); rerun: 5 passed in 0.83s (rc=0). Verbose run lists test_a through test_e PASSED, including test_c_difference_control_same_pair_without_its_name_is_a_candidate and test_e_fifty_line_cap_with_a_plus_one_more_tail.",
+      "denominator": "5 of 5 cases (a) to (e) pass; 0 failed",
+      "status": "PASS",
+      "expect": "passed"
+    },
+    {
+      "criterion_id": "SC29-e116-AC2",
+      "criterion_verbatim": "the round-27 test still passes unchanged (a control: the display changes no behaviour).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e18_known_set_r27.py -q --tb=short",
+      "output_evidence": "6 passed in 0.83s (rc=0); rerun: 6 passed in 0.76s (rc=0). The round-27 test file is unchanged in this commit.",
+      "denominator": "6 of 6 round-27 tests pass; 0 failed",
+      "status": "PASS",
+      "expect": "6 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the difference control (c) inside the new test: the same real-ticker pair with its name removed from the stub resolution table must NOT be held out (held-out count 0) and must be a candidate; plus case (d), a NAME:: pair hidden by resolution must NOT be listed",
+      "expected": "held-out count 0 and one candidate in (c); no held-out line for the NAME:: pair in (d)",
+      "observed": "test_c and test_d PASSED: the held-out header reads 0, the planner receives [('BBBB', 'Beta Corp')] in (c), and no '-- held out' line names Delta Trust in (d)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "re-run of both invocations in the same worktree",
+      "observed": "AC1 run twice: 5 passed (rc=0) both times; AC2 run twice: 6 passed (rc=0) both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "deploying E_18 to AWS and any AWS call of any kind",
+      "reason": "the order fixes the ship as a later CloudOps order under a signed never-widen pair; nothing deployed."
+    },
+    {
+      "item": "the round-27 test file and every file other than the two named in the write grant",
+      "reason": "the order says do not touch any other file; the round-27 test runs unchanged as the control."
+    },
+    {
+      "item": "the surprise channel INVESTIGATION_v1.md",
+      "reason": "no surprise filed; the file is in the write grant but was not appended to, because no premise failed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Verified worktree branch wk-MDPF_SECCLASS-105 and TREE-OK. Re-grounded E_18 at HEAD: already_resolved branch at lines 218-220, summary print at 256. Read the sibling r27 test for its loader pattern and copied the helpers into the new r29 test. Baseline: r27 test 6 passed. Edited E_18 (three hunks: held_by_resolution init, append in the resolution branch, held-out summary after Already resolved). Wrote test_e18_held_out_display_r29.py with five cases. Ran both criteria, then commit-gate on the two Python files (clean), then safe-commit 0076897c13 for the code. Wrote this instance and ran the checker.",
+  "compiler_tools": [
+    {
+      "tool": "pytest (new held-out display test)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e18_held_out_display_r29.py -q --tb=short",
+      "result": "5 passed; rc=0"
+    },
+    {
+      "tool": "pytest (round-27 control)",
+      "invocation": "python -m pytest data/black_diamond/scripts/gold/tests/test_e18_known_set_r27.py -q --tb=short",
+      "result": "6 passed; rc=0"
+    },
+    {
+      "tool": "commit-gate (py_compile, ruff, drift checks)",
+      "invocation": "timeout 120 bash .tools/commit-gate.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py data/black_diamond/scripts/gold/tests/test_e18_held_out_display_r29.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc=0"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e114",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e114.s48-range-reconcile-read.md",
+    "group": "OTHER",
+    "vintage_commit": "964be4af93"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R29.md",
+    "vintage_commit": "964be4af93",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e114.s48-range-reconcile-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~103",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~103/S48_RANGE_RECON.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only reconciliation file: 14 rows (2026-10-01..2026-10-14) with served_delta from mix_daily_summary.json at pre 87CvfcFpbyM7ZRAb0P6AztqK1X74W6cQ and post l2Wqoi6iUJwQwwmTCu3lXWozfW4.Ak_. and canonical_delta from gold/canonical/holdings/<date>.parquet in opal-data-bd at the 28 pinned before/after version ids; residue = served minus canonical. Positive control: 2026-10-02 served delta 407720.32 and canonical delta 407720.32. No object, table or code was changed.",
+      "artifact_covered_by": [
+        "SC29-e114-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC29-e114-AC1",
+      "criterion_verbatim": "all 14 dates have a row, and each served delta, canonical delta and residue equals the checker's recomputation from the pinned versions.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py s48-range",
+      "output_evidence": "R29-s48-range ok=True problems=[]  (rc=0, under timeout 120)",
+      "denominator": "14 of 14 dates have a row; 14 of 14 served deltas, canonical deltas and residues recomputed within 0.01; 0 problems",
+      "status": "PASS",
+      "expect": "R29-s48-range ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own selftest: the s48-range negative arms (a date with no row, a residue that does not reconcile) must fire",
+      "expected": "R29-SELFTEST ok=True, with both s48-range negative arms True",
+      "observed": "R29-s48-range-SELFTEST green: True []; negative (a date has no row): True; negative (residue wrong): True; R29-SELFTEST ok=True (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A with reason: the recompute reads pinned S3 version ids (served 87Cv... and l2Wq..., 28 canonical before/after ids), so the values are fixed; the read was run in this cell and the criterion invocation was run a second time with the same output.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the cause of the residue on the eight non-zero dates (2026-10-01, 10-05, 10-06, 10-07, 10-08, 10-12, 10-13, 10-14)",
+      "reason": "the order says explain nothing you cannot read; the residue is reported as numbers and its pattern in S48_RANGE_RECON.json summary, not named."
+    },
+    {
+      "item": "the served key 2026-10-15 that the post version adds (2298 firm keys pre, 2299 post)",
+      "reason": "outside the 14 dates of SC-e-114; noted, not graded."
+    },
+    {
+      "item": "any write to S3, the checker, the surprise channel or the portal",
+      "reason": "the order is a read; the write grant is the deliverable file only, and no surprise row was needed because every premise held (the served range 380851.32 to 418987.60 and the canonical range 382473.58 to 450742.86 match the order)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Verified worktree branch wk-MDPF_SECCLASS-103 and TREE-OK. Read the WORKER FACE and check_r29_reads.py (read-only). head-object confirmed both pinned served versions (87Cv 2026-10-17T00:22:27Z, l2Wq 2026-10-17T05:24:08Z). Downloaded both served versions and the 28 pinned canonical holdings versions into .scratch/s48 (uncommitted). Computed per date in pandas (sum of market_value); wrote S48_RANGE_RECON.json with the 14 rows, 28 canonical version pairs and a summary; ran the selftest and the criterion invocation.",
+  "compiler_tools": [
+    {
+      "tool": "check_r29_reads.py (R29_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py s48-range",
+      "result": "R29-s48-range ok=True problems=[]; rc=0"
+    },
+    {
+      "tool": "check_r29_reads.py selftest (mutant arms)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/check_r29_reads.py selftest",
+      "result": "R29-SELFTEST ok=True; rc=0"
+    }
+  ]
+}
