@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-31",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~151",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f2b066d9ad"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "581ee61977",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-31.round-43-test-discriminates-the-body-first-read.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+      "kind": "test",
+      "commit_or_etag": "61f50216c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at 61f50216c5 on wk-NFRA_OPLGTW-151 (LOCAL). Test file only; no product line changed; not deployed (a test-only cell that folds into the release).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the thirteen named tests pass (the twelve inherited and the new discriminating one).",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06 test_ogpr1_ac07 test_ogpr1_ac08 test_ogpr1_ac09 test_ogpr1_ac10 test_ogpr1_ac11 test_ogpr1_ac12 test_ogpr1_ac13; echo \"exit=$?\"",
+      "output_evidence": "run 1:\npytest rc=0; named tests passed 13 of 13; failed/error lines 0\nRESULT: PASS\nexit=0\nrun 2:\npytest rc=0; named tests passed 13 of 13; failed/error lines 0\nRESULT: PASS\nexit=0\nrun 3:\npytest rc=0; named tests passed 13 of 13; failed/error lines 0\nRESULT: PASS\nexit=0\n",
+      "expect": "(?s)pytest rc=0; named tests passed 13 of 13; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "denominator": "13 named tests passed of 13 named (test_ogpr1_ac01 to test_ogpr1_ac13), 3 runs, 0 failed or error lines per run",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: your slot's commits (this order's and OG-pr-4's, which the same slot authored) touch only the module and its test file; in THIS order you commit only the test file.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~151 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~151: files touched 5; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0\n",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~151: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "denominator": "0 of 2 product files outside the allowed set (probe_listener.py and test_og_pr1.py; this order's commit is the test file only)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the discrimination itself: the same test fails against the mutant and passes against the real file.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r43/checks/en31.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "mutant (a refusal before the body read): test_ogpr1_ac13 FAILED (want failed)\nunmutated: test_ogpr1_ac13 PASSED (want passed)\nprobe_listener.py restored byte-equal: yes\nRESULT: PASS\nexit=0\n",
+      "expect": "(?s)mutant \\(a refusal before the body read\\): test_ogpr1_ac13 FAILED \\(want failed\\).*unmutated: test_ogpr1_ac13 PASSED \\(want passed\\).*probe_listener\\.py restored byte-equal: yes.*RESULT: PASS.*exit=0",
+      "denominator": "1 mutant of 1 (an early unarmed refusal before the body read): test_ogpr1_ac13 failed under it and passed unmutated; probe_listener.py restored byte-equal",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discrimination under test is the order of the body read. Mutant (deliverables/2.0.0_SA_COO~O/r43/checks/en31.AC3.sh): an early `_l0 = await current_lease()` and unarmed refusal inserted BEFORE `body_bytes = await _read_body_bounded(request)` in probe_listener.py, for seconds; the file restored byte-equal from a copy, sha256 e00a55af510f2de776919260f9ca89c5e9414db87521c6e12d89dc391fb18e6a before and after.",
+      "expected": "test_ogpr1_ac13 FAILS under the mutant (the unarmed refusal is sent with zero chunks pulled) and PASSES unmutated",
+      "observed": "mutant (a refusal before the body read): test_ogpr1_ac13 FAILED (want failed); unmutated: test_ogpr1_ac13 PASSED (want passed); probe_listener.py restored byte-equal: yes; RESULT: PASS; exit=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run three times on the same committed tree; the three outputs compared line by line (pytest rc, named-test count, RESULT)",
+      "observed": "AC1: 13 of 13 passed in all three runs, rc 0, 0 failed or error lines. No differing line across runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any product line change (app/probe_listener.py, server.py, audit.py, tools.py, adapters)",
+      "reason": "The order writes only tests/test_og_pr1.py; the mutant check restores probe_listener.py byte-equal and it is not in this order's commit."
+    },
+    {
+      "item": "The TCP reset itself (the connection reset on a refused body)",
+      "reason": "The order does not reproduce the reset, which does not reproduce reliably on loopback (row Z-W148-S3); it asserts the deterministic property the reset depends on, at the ASGI boundary."
+    },
+    {
+      "item": "Release, deploy, arming of the probe lease, SSM, IAM, Terraform",
+      "reason": "The order carries no release, no deploy and no IAM or SSM write."
+    }
+  ],
+  "surprises": [],
+  "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the commit 61f50216c5 on wk-NFRA_OPLGTW-151, and the run outputs quoted in output_evidence.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, surprise-row-gate, gitlink-publication-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~151 <0.9.0_WK_NFRA_OPLGTW~151@opal.agent>\" -F .scratch/msg_en31.txt -- infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+      "result": "commit-gate and to-pipeline-gate clean; gitlink-publication-check refusals=0; msg-verify committed 61f50216c5. WARN from client-data-check (hashed account-id list absent on this device), the same condition as surprise row NFRA_OPLGTW-Z-W151-S1."
+    }
+  ]
+}
