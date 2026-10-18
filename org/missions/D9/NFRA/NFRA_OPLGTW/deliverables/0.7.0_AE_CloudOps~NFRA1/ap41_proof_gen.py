@@ -54,11 +54,11 @@ inst = {
     "spec_ref": {"doc": PRD, "group": "OTHER", "vintage_commit": pin(PRD)},
     "decomp_ref": {"doc": DEC, "vintage_commit": pin(DEC), "to_ref": TO},
     "artifacts_produced": [
-        art(REC, "doc", "COMMITTED-NOT-DEPLOY-SCOPE", "The landing record: trunk base e0c3273410, merge sha %s (parents trunk base and aa2efa2cf3, tree equal to the base tree, 0 conflicted paths; made with commit-tree because .tools/safe-merge.sh refuses a merge that stages no file, rows Z-S378 and Z-S379; not pushed, the issuer drains the branch), live sha, manifest source and expected pair, and trunk_own_changes for the 5 files AC3 prints." % MERGE, ["AC1", "AC2"]),
+        art(REC, "doc", "COMMITTED-NOT-DEPLOY-SCOPE", "The landing record: trunk base e0c3273410, merge sha %s (parents trunk base and aa2efa2cf3, tree equal to the base tree, 0 conflicted paths; made with commit-tree because .tools/safe-merge.sh refuses a merge that stages no file, rows Z-S378 and Z-S379; not pushed, the issuer drains the branch), live sha, manifest source and expected pair, and trunk_own_changes for the 5 files AC3 prints." % MERGE, ["AC1", "AC2", "AC3"]),
     ],
     "acceptance": [
         {"criterion_id": cid, "criterion_verbatim": verbatim[cid], "method": "command", "invocation": crit[cid][0], "expect": crit[cid][1], "output_evidence": crit[cid][2][0], "denominator": denom[cid], "status": "PASS"}
-        for cid in ("AC1", "AC2")],
+        for cid in ("AC1", "AC2", "AC3", "AC4")],
     "controls": {
         "determinism": {"method": "AC1 to AC4 were each run twice against the same commit, back to back.", "observed": "outputs identical" if stable else "outputs differ", "status": "STABLE" if stable else "UNSTABLE (deliverable INVALID)"},
         "mutant": {"description": "The order names no mutant; the issuer's pre-cut controls (one parent; a manifest pair other than the record's) are the discriminating arms.", "expected": "n/a", "observed": "n/a", "status": "N/A-SPEC-NAMES-NONE"}},
