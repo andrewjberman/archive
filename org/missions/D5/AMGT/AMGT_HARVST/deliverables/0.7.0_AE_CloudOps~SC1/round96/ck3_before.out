@@ -1,0 +1,50 @@
+# ck3_before.out -- HVST-ck-3 step 0 (read only), 0.7.0_AE_CloudOps~SC1, started 2026-10-18T13:33:42Z. Order msg 8055 READ-acked; the order is STAGED: cut + tests + host note now, DEPLOY WAITS FOR THE ISSUER'S GO.
+STATE PLAINLY (order section 0): for a key with no slash nothing served changes; for the two slash keys a request in either spelling now reaches the whole canonical set (and the newer canonical object where four same-name pairs differ).
+pair: COO half sha256 c00567ca47468fa0424ed5d29ec4d49e1040d28fada6034d7779bf5438c6634f (the CTO half @379693fc5b binds c00567ca47468fa0424ed5d29ec4d49e1040d28fada6034d7779bf5438c6634f); order sha256 2c6badba88a9f188..; CTO half last commit 379693fc5b
+
+## the live commit, read on every plane (must be 6575999df5d22c0123abfc0c88cd1c6f1efe8c96 on all three readings)
+manifest on HEAD: deployed_commit 6575999df5d22c0123abfc0c88cd1c6f1efe8c96 deployed_at 2026-10-18T10:52:49Z previous_deployed_commit 3b94a83e0572f9a14851c2f229ca4aba64c7e670 deployed_by 0.7.0_AE_CloudOps~SC1
+manifest on origin/CLOUD: deployed_commit 6575999df5d22c0123abfc0c88cd1c6f1efe8c96 deployed_at 2026-10-18T10:52:49Z previous_deployed_commit 3b94a83e0572f9a14851c2f229ca4aba64c7e670 deployed_by 0.7.0_AE_CloudOps~SC1
+box/dell1 HEAD 72878109ae
+artifact latest: ["2026-10-18T10:52:21+00:00",910991,{"git-ref":"6575999df5d22c0123abfc0c88cd1c6f1efe8c96"}]
+tarballs under ec2/opal-gateway/ (newest 4):
+2026-10-18 02:21:48     903604 opal-gateway-aa2efa2cf3.tar.gz
+2026-10-18 05:51:45     908816 opal-gateway-3b94a83e05.tar.gz
+2026-10-18 06:52:20     910991 opal-gateway-6575999df5.tar.gz
+2026-10-18 06:52:21     910991 opal-gateway-latest.tar.gz
+previous tarball key (the rollback artifact is the live release's own): ec2/opal-gateway/opal-gateway-6575999df5.tar.gz
+2026-10-18T10:52:20+00:00	910991	kxClqHy5gi.XNNCnG_wZeDKOnN1kEqd4
+
+## instance read by SSM 8b12c6a3-fc6a-4ae5-84f8-002d8c07c90f (INSTANCE i-07dccb1615503ac99)
+HOSTREAD begin 2026-10-18T13:32:50Z
+UNIT MainPID=1293928 | ActiveState=active | SubState=running | ActiveEnterTimestamp=Sun 2026-10-18 10:52:42 UTC
+HEALTH port=8080 status=200
+APPTREE files=135 digest=b2528341a4103bdedb874715892480d6
+MARKER .deployed_commit=6575999df5d22c0123abfc0c88cd1c6f1efe8c96
+NAMED app/server.py 5869d6e90534375b7c90055c03a7553c
+NAMED app/harvest_figures.py ff7ec861c59320c64ba3eac21898d452
+NAMED app/harvest_research.py bae82b93332988673a8f2eeaa0d62ab9
+NAMED app/harvest_identity.py bca2e8d8ee91d5ea862522b8eef3f0fd
+NAMED app/harvest_keys.py 9c9e46822d213fb10517eeb12132c7a4
+NAMED app/config.py b2b19fdcc2fbe60cdf4f84d7ea87a186
+TOOLS count=127 names_md5=9a593c843feb61c2753d8c08a84eb61d
+HOSTREAD end
+
+
+## scheduled tasks (Get-ScheduledTask, 13:34:44Z): 207 listed, positive control OPAL_autolaunch_agents found; 2 hits for the pattern safe-ec2-deploy|deploy-to-ec2|opal-gateway|systemctl|ssm are the Windows system tasks maintenancetasks and WsSwapAssessmentTask (rundll32), unrelated: no task deploys or restarts the gateway.
+## test_og_gt8 once on the live commit (no-change control): 1 failed, 2 passed (test_oggt8_ac03_deploy_stages_lib AssertionError []), row D1-W171-S8; see ck3_cut.out. It is NOT a gate.
+
+## (iv) BEFORE gateway reads of the four slash spellings, 13:50Z to 13:53Z (read inline; transcribed; no etfs_compare_peers call)
+harvest_get_peers_and_scores:
+  BP/_LN_Equity           peers_key peers/v1/BP/_LN_Equity/2026-09-24T2252Z.json  member_count 0 (peers_reason "subject classification not in the landed record", parts_absent peers); scores object_key scores/v1/BP/_LN_Equity.json; posture object_key posture/v1/BP/_LN_Equity/2026-09-16.json; as_of 2026-09-24T2252Z
+  BP-SLASH-_LN_Equity     peers_key peers/v1/BP-SLASH-_LN_Equity/2026-10-11T1125Z.json  member_count 12; scores object_key scores/v1/BP-SLASH-_LN_Equity.json; posture object_key posture/v1/BP-SLASH-_LN_Equity/2026-09-16.json; as_of 2026-10-11T1125Z
+  NG/_LN_Equity           peers_key peers/v1/NG/_LN_Equity/2026-09-24T2252Z.json  member_count 0; scores scores/v1/NG/_LN_Equity.json; posture posture/v1/NG/_LN_Equity/2026-09-16.json; as_of 2026-09-24T2252Z
+  NG-SLASH-_LN_Equity     peers_key peers/v1/NG-SLASH-_LN_Equity/2026-10-11T1125Z.json  member_count 12; scores scores/v1/NG-SLASH-_LN_Equity.json; posture posture/v1/NG-SLASH-_LN_Equity/2026-09-16.json; as_of 2026-10-11T1125Z
+  (the two spellings DIFFER before: the raw reads the 7-object legacy prefix, the encoded the 10-object canonical prefix)
+harvest_security_coverage (objects per dataset; both calls of a key return security_key BP/_LN_Equity or NG/_LN_Equity):
+  BP raw request:     gold ai_fill 1, research_continuation 5, research_dossier 16 (newest as_of=2026-10-18.2d0238f7570cff0e.json), bestdata 16, exec_officers 1, histdata 17, refdata 17, segments 1, research_report_extract 14, research_report 7, filing_attempt 1, pull_log 16, job_record 2, derived/model_block 6 (newest BP/_LN_Equity/20260925T200039Z), filings/v1 1, packs 1 (ledger_entries 4), peers/v1 7 (newest BP/_LN_Equity/2026-09-24T2252Z.json), posture/v1 1, scores/v1 2, raw/bloomberg 2; absent: histdata_daily_px, identity, sa analysis/news/report/symbol, model_block_fye, management/v1, publication-links, drafting, raw/seekingalpha; layers gold 36 bronze 73 derived 6 state 19
+  BP encoded request: same keyed datasets; derived/model_block 25 (newest BP-SLASH-_LN_Equity/20261018T130249Z), filings/v1 1 (newest 2026-09-30T15:14:58Z), packs 1 (ledger_entries 17, 13:02:50Z), peers/v1 10 (newest BP-SLASH-_LN_Equity/2026-10-11T1125Z.json), posture/v1 1, scores/v1 2, raw/bloomberg 2; layers gold 39 bronze 73 derived 25 state 19
+  NG raw request:     research_dossier 15 (newest as_of=2026-10-18.1af6506669c49a8a.json), derived/model_block 6 (newest NG/_LN_Equity/20260925T200133Z), packs ledger_entries 4, peers/v1 7, bestdata/histdata/refdata 16/17/17, research_report_extract 2, research_report 1; layers gold 35 bronze 55 derived 6 state 18
+  NG encoded request: derived/model_block 23 (newest NG-SLASH-_LN_Equity/20261018T130703Z), packs ledger_entries 17, peers/v1 10 (newest 2026-10-11T1125Z); layers gold 38 bronze 55 derived 23 state 18
+  (coverage DIFFERS between the spellings before: the replay's BP 41 and 41 after is the C-8 (ii) expectation; the runner writes the pull_log/bestdata/histdata/refdata/model_block objects of both keys daily, so those counts can move by +1 between the before and the after reads; the grade is equality between the two spellings AFTER)
+harvest_get_research for the four spellings: read at the end of cj-5 (2026-10-18 11:32Z to 11:35Z) and again before the deploy (see below), all five of dossier_key, continuation_key, ai_fill_key, research_reports and management_roster.bloomberg_exec_officers present in each.
