@@ -37,3 +37,8 @@ Round 121 is the CTO's round-120 analysis for the R1 track (`ledger/ROUND_ANALYS
 ## 5. Open and carried
 
 `AMGT-bp-5` Mon 2026-10-19 after the 11:30Z fire; A4 step 1 not before Tue 2026-10-20; the Lusha plan tier (Andrew); row `S57` (the portal manager's); and, if the CTO closes `W518-S2` and no new row graduates, the R1 track's endpoint read.
+
+## 6. CORRECTION (2026-10-18 ~18:0xZ, after the CTO's addendum `ledger/ROUND_ANALYSIS.round120.R1.ADDENDUM_1_W518S2_LIB_CONSUMERS.md` @5912bb01a4, msg 8197)
+
+My reading in section 2, that `render_pack.py` `_ceo_profile_sentence` prints the reader's own searched sentence for `SEARCHED_NOTHING_FOUND` "by another path" and so needs no branch, was WRONG as stated: the line prints the reader's reason only when it is plain words; otherwise (and for `NOT_SEARCHED`, `SEARCHED_LINKS_UNREADABLE`, an unknown word and an absent reading) it prints the fixed words `no public profile is on file yet`, which say what the not-written sentence says, so in the PDF and the export a searched-nothing-found profile with a non-plain reason, or an unknown word, reads as never written while the page now prints a third sentence. I had the fall-through lines in the worker's census row and did not read their fallback. The CTO's rulings: `W523-S2` (`block_mgmt_bio.py`: not a state consumer) closes; `W523-S1` becomes a round-122 cell (a branch for each known state, the page's third sentence worded for the document for an unknown or absent reading, the fixed fallback never words that read as not-written; graded by a per-state builder test with a non-plain reason and the 101-name census, a never-widen pair only if a printed line moves); `W518-S2` stays open until that cell grades.
+
