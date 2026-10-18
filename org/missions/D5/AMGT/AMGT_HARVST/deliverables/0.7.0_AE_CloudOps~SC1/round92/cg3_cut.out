@@ -1,0 +1,64 @@
+=== STEP 1 THE EQUALITY: git show b77e08e198^1:infra/aws/ec2/opal-gateway/app/harvest_research.py against git show d077cef043:infra/aws/ec2/opal-gateway/app/harvest_research.py
+IDENTICAL (diff -q silent)
+md5 b77e08e198^1: 6d9e0dd38166b82943d6834a0ce482b5  md5 d077cef043: 6d9e0dd38166b82943d6834a0ce482b5  (order: 6d9e0dd38166b82943d6834a0ce482b5)
+md5 of git show 290f2e9e6d:infra/aws/ec2/opal-gateway/app/harvest_research.py : 596c299597067fe5a8afb8e3493a0ed9  (order: 596c299597067fe5a8afb8e3493a0ed9)
+=== release branch rel-amgt-harvst-cg3: 4257a2aa42e5366270b3652f21dba90872dbb1e0 parent d077cef04333500595a7a531ebddc2f43e5f8789
+--- git diff --name-status d077cef043 rel-amgt-harvst-cg3 (whole repo):
+M	infra/aws/ec2/opal-gateway/app/harvest_research.py
+A	infra/aws/ec2/opal-gateway/tests/test_ce3_parts_absent_wording.py
+A	infra/aws/ec2/opal-gateway/tests/test_cg4_report_fund_relation.py
+--- count: 3 path(s)
+--- git diff d077cef043 rel-amgt-harvst-cg3 -- infra/aws/ec2/opal-gateway/app/harvest_research.py (hunk headers: 2 hunks):
+diff --git a/infra/aws/ec2/opal-gateway/app/harvest_research.py b/infra/aws/ec2/opal-gateway/app/harvest_research.py
+index 6550449be1..574959b682 100644
+--- a/infra/aws/ec2/opal-gateway/app/harvest_research.py
++++ b/infra/aws/ec2/opal-gateway/app/harvest_research.py
+@@ -58,7 +58,8 @@ P_POSTURE = "posture/v1/%s/"
+ ITEM_CATEGORIES = ("guidance", "segments", "risks", "commentary", "big_bets", "big_challenges")
+ SCORE_KINDS = ("divergence", "peers_v", "robustness")
+ REPORT_FIELDS = ("report_id", "report_class", "class_evidence", "fund", "fund_evidence", "fund_absent_reason",
+-                 "period", "period_source", "period_evidence", "period_absent_reason", "author", "author_absent_reason")
++                 "fund_relation", "period", "period_source", "period_evidence", "period_absent_reason",
++                 "author", "author_absent_reason")
+ FILING_SOURCE_FIELDS = ("status", "family", "form", "filing_date", "url", "primary_document", "document_sha256",
+                         "document_bytes", "verified_site_reason")
+ _AS_OF = re.compile(r"as_of=(\d{4}-\d{2}-\d{2})\.")
+@@ -328,6 +329,11 @@ def _research(key: str, as_of: Optional[str], fields: Any) -> dict:
+         if sel:
+             body.update({"dossier_key": picked["key"], "method_version": obj.get("method_version"),
+                          "content_sha256": obj.get("content_sha256"), "dossier_fields": _as_items(sel, "field")})
++        elif dropped and fields:
++            # HVST-ce-3 (round 90, CTO round-89 analysis item 2): under a field filter only the REQUESTED fields were
++            # considered, so the reason names those the filter dropped, in the order requested.
++            run.miss("dossier", "the requested dossier field(s) %s cite a misfiled report excluded from the security "
++                                "(see misfiled_fields_excluded)" % ", ".join(d["field"] for d in dropped))
+         elif dropped:
+             run.miss("dossier", "every dossier field cites a misfiled report excluded from the security "
+                                 "(see misfiled_fields_excluded)")
+--- md5 of the release harvest_research.py: 596c299597067fe5a8afb8e3493a0ed9 (order 596c299597067fe5a8afb8e3493a0ed9)
+--- worktree status lines: 0
+=== TESTS on rel-amgt-harvst-cg3 4257a2aa42, cwd /c/tmp/cg3-rel/infra/aws/ec2/opal-gateway, 2026-10-18T01:47:40Z
+present test_ce3_parts_absent_wording
+present test_cg4_report_fund_relation
+present test_cd1_dossier_misfiled
+ABSENT at the release branch: test_cc1_model_basis
+ABSENT at the release branch: test_cc2_research_misfiled
+ABSENT at the release branch: test_cc3_ticker_shaped_never_exact_on_name
+present test_og_gt1
+present test_og_gt3
+present test_og_gt4
+test files in tests/: 163
+--- RUN 1: the six test files present on the release branch
+[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m
+[32m[32m[1m31 passed[0m[32m in 2.90s[0m[0m
+rc=0
+app resolves to C:\tmp\cg3-rel\infra\aws\ec2\opal-gateway\app\__init__.py
+--- RUN 2: the three tests the live base lacks (cc1, cc2, cc3), copied in from 319c9413a2 (my round-88 release) for the run ONLY, then removed
+copied test_cc1_model_basis (8443 B)
+copied test_cc2_research_misfiled (10622 B)
+copied test_cc3_ticker_shaped_never_exact_on_name (6291 B)
+[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                         
+[32m[32m[1m17 passed[0m[32m in 1.73s[0m[0m
+rc=0
+release worktree after removal: status lines 0, HEAD 4257a2aa42, diff vs live still 3 path(s)
+--- all nine together would be 31 + the cc files; the count above is per run
