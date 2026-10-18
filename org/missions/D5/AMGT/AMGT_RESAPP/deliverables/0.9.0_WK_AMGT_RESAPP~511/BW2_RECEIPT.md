@@ -70,7 +70,8 @@ Paths, with line counts (`git diff --numstat` against `52a137e363`; new files co
 - `lib/research/print/tests/fixtures/bw2_posture_and_peers.json` (new, SYNTHETIC): 30 lines.
 - `lib/research/print/tests/fixtures/bu3_pack_text_base_ICT_PM.txt`: re-recorded, 35 insertions, 32 deletions (see Tests changed).
 - `lib/research/print/tests/fixtures/bu3_pack_text_base_RIO_LN.txt`: re-recorded, 32 insertions, 28 deletions.
-- `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md`: 130 insertions (five rows, W511-S1 to S5).
+- `lib/research/print/tests/test_build_rich_text.py` (AMENDMENT 1, commit `e0c8b25368`): the one re-scoped test (see Tests changed), 86 insertions, 6 deletions.
+- `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md`: 130 insertions (five rows, W511-S1 to S5), then one row W511-S6 (the amendment commit).
 - `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~511/` (this receipt and the proof instance).
 
 The base-text proof (printed before `--write`, `.scratch/bu3_rerecord_proof.py`): the new lines were de-wrapped and mapped through
@@ -83,18 +84,46 @@ Shared-line order changed as the reorder requires. The subset premise as written
 
 ## Tests changed
 
-- Test files edited: **none**. No existing test file was edited.
+- One existing test edited, under AMENDMENT 1 (issuer ruling, round 116; commit `e0c8b25368`): see the bullet below. No other existing test file was edited.
 - Fixtures re-recorded (data the T6 control compares, not a test): `bu3_pack_text_base_ICT_PM.txt` and
   `bu3_pack_text_base_RIO_LN.txt`, after the proof above. `test_bu3_pack_long_dates.py` T6 passes on them.
 - `test_ax4_brand_form.py::test_no_raw_internal_marker_and_each_unwritten_section_says_so` passes WITHOUT edit: it asserts
   `NOT_WRITTEN["bio"]` appears in the flat text for a bundle-less pack, and it still does, because the no-content branch reuses that
   sentence.
-- `test_build_rich_text.py::test_build_pack_pdf_and_txt_byte_identical_with_and_without_bundles` FAILS and is NOT edited. It pins
-  that the PDF bytes are identical with and without the optional bundles (AMGT-rl-10 AC2). Round-116 Step B/C make the PDF print
-  Management, Positioning and Peers from those bundles, so the bytes differ by design (`assert '95f9...' == 'e10b...'`). This is
-  outside the test set the order permits me to change: BLOCKING row `AMGT_RESAPP-D1-W511-S2`.
+- RE-SCOPED under AMENDMENT 1 (commit `e0c8b25368`, the issuer's ruling; row `AMGT_RESAPP-D1-W511-S2`):
+  `test_build_rich_text.py::test_build_pack_pdf_and_txt_byte_identical_with_and_without_bundles` is renamed
+  `test_build_pack_bundles_add_narrative_only_and_the_md_rule_holds`. The docstring says the PDF half of the AMGT-rl-10 contract
+  is superseded by the CTO's FWD-5 ruling (`ledger/ROUND_ANALYSIS.round115.R1.md` items 2 and 3) and the `.md` half stays.
+  - OLD assertions: `sha256(pdf_neg) == sha256(pdf_pos)` (the PDF bytes identical with and without the bundles), and
+    `sha256(txt_neg) == sha256(txt_pos)`; plus the `.md` rule (no `.md` without a bundle, the `.md` with one).
+  - NEW assertions, hand-written: (1) the `.md` rule unchanged; (2) the `Appendix: model figures` section identical in both
+    builds, carrying `Header` and `Fiscal year 2016`; (3) Summary, Risks and considerations, Company description identical and
+    non-empty; (4) the sections that differ are exactly `Management`, `Positioning`, `Peers`, and the lines the no-bundle build
+    prints alone are exactly the three not-on-file sentences (`No chief executive or board biography has been written for this
+    company yet.`, `No analyst posture is on file for this company yet.`, `No peer set is on file for this company yet.`), each
+    bundle-fed section gaining lines; (5) the no-bundle build prints every narrative section with a body, never a bare heading.
+  - Run after the re-scope: `test_build_rich_text.py` 22 passed (the renamed test included).
 - `test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words` fails as it does at base
   (the order names it).
+
+## Served PDF route: what the three extra reads do and what a failure prints
+
+Read from `lib/research/api/scoped_amgt.py` `_print_pack` (lines 7891-7914; the file is unchanged since `90c47eccd7`), not run live.
+
+- The PDF branch calls `read_thesis_bundle`, `read_peer_set` and `read_posture` (the same three the rich branch reads), then
+  `build_pack` with `write_text=False, write_rich=False`. `read_thesis_bundle` itself also calls `read_drafted_sections`,
+  `read_management` and `read_posture` (lines 4288, 4321, 4322), so `read_posture` runs twice on this route.
+- Failure, the reader RAISES: `_print_pack` has no try around the three reads; the exception propagates and the route returns
+  no PDF. The pack does not build.
+- Failure, the reader RETURNS an absent or failed object (the readers' own statuses): the pack builds. Thesis bundle with
+  no management or no passage: Management prints the one sentence `No chief executive or board biography has been written for
+  this company yet.` (or the CEO profile line when the roster is served). Drafted sections with a drafting status other than
+  SERVED: Summary, Risks and Company description print the page's not-written sentence, or `The drafted text could not be read
+  when this print was made.` when the bundle carries an error. Peer set with basis `absent`: Peers prints its reason; an empty
+  peer set prints `No peer set is on file for this company yet.` Posture ABSENT: `Posture: ABSENT -- <reason>.`; READ_FAILED:
+  `Posture: the read did not complete -- not evidence that no posture exists.` plus the reason; no posture object: `No analyst
+  posture is on file for this company yet.`
+- Latency: NOT MEASURED. The reads are served-store reads; no network or store read is made in this cell (order bounds).
 
 ## Not verified
 
@@ -107,3 +136,4 @@ Shared-line order changed as the reorder requires. The subset premise as written
   is not built (S16).
 - The research-notes sections (S06), the thesis pillars (S07), the charts (S08), the AI fills (S13) are not printed by this cell.
 - The round-115 long-date and verbatim rules were checked on the fixtures only (F7 and the existing bu3/bv2 tests).
+- The Positioning comparable label does not reproduce the page's fallback identity (surprise row `AMGT_RESAPP-D1-W511-S6`).
