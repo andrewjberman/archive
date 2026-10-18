@@ -43,10 +43,14 @@ def build(outdir):
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"TSM_US_Equity/thesis": body}, f)
     print("FIXTURE: %s (live reading before the change: %s; after: UNREADABLE_OBJECT; size %d bytes)" % (path, before, os.path.getsize(path)))
-    print("COMMANDS (from C:/Dev/ajb_workspace/portal, route WITHOUT a leading slash; add --click for the Exec Management tab per the page's own tab name):")
-    print('  node scripts/ui-smoke.mjs security-analysis/TSM_US_Equity %s/tsm_live.png --origin https://opalinvest.dev' % outdir)
-    print('  node scripts/ui-smoke.mjs security-analysis/HD_US_Equity %s/hd_live.png --origin https://opalinvest.dev' % outdir)
-    print('  node scripts/ui-smoke.mjs security-analysis/TSM_US_Equity %s/tsm_corrupt.png --origin https://opalinvest.dev --fixtures %s' % (outdir, path))
+    # MEASURED at the first run (2026-10-18 17:4xZ): with the stubbed auth session the live API answers no data (the page shows `The identity
+    # header could not be loaded` and skeleton rows), so the live JS bundle is fed the SERVED /thesis body of each name through --fixtures instead.
+    for key in ("TSM_US_Equity", "HD_US_Equity"):
+        with open(os.path.join(outdir, "live_%s_thesis_fixture.json" % key), "w", encoding="utf-8") as f:
+            json.dump({"%s/thesis" % key: thesis(key)}, f)
+    print("COMMANDS (from C:/Dev/ajb_workspace/portal, route WITHOUT a leading slash; the live bundle at https://opalinvest.dev, the served /thesis body through --fixtures):")
+    for stem, key, fx in (("tsm_live", "TSM_US_Equity", "live_TSM_US_Equity_thesis_fixture.json"), ("hd_live", "HD_US_Equity", "live_HD_US_Equity_thesis_fixture.json"), ("tsm_corrupt", "TSM_US_Equity", "corrupt_TSM_US_thesis_fixture.json")):
+        print('  node scripts/ui-smoke.mjs security-analysis/%s %s/%s.png --origin https://opalinvest.dev --fixtures %s/%s --click "Exec Management"' % (key, outdir, stem, outdir, fx))
     return 0
 
 
