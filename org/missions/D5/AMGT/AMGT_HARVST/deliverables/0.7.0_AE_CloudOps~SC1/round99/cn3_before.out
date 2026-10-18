@@ -1,0 +1,58 @@
+HVST-cn-3 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, started 2026-10-18T18:44Z (issuer GO msg 8209 sent 18:33:54Z, READ-acked 18:42Z; the cm-1 ledger was closed first). Ledger harvst-cn3-dossier-refresh-deliberate-run opened 18:44:16Z BEFORE any read (committed). My start = 18:44:16Z, so my window (90 minutes) ends 20:14:16Z; it must also end before 04:00Z 2026-10-19 (local midnight, EDT: the driver's NO_TODAY_MODEL_BLOCK test uses the run's local date) and never past 12:30Z 2026-10-19 (the induction task at 13:00Z).
+Order sha256 prefix per GO @2d96335d18. COO half sha256 f4bff167da62e20e9f8a22a1aaee2268cb828b3e989053a13db2175fd0b285e8 (committed 184cfe4b73, equal to the CTO half's binding and to the order); CTO half @98c304e18f SIGNED. Site Z CLEAR to 2026-10-19 12:30Z (msg 8208).
+--- WHAT THIS CHANGES (stated plainly, order section 0)
+The served values that move are model_rows (the gateway RETURNS it for these dossiers, as the cl-4 reads showed) and the pointers (dossier_key, content_sha256, the dossier entry of source_keys, duplicates_dropped and denominator_note counts); every other served value stays equal. 93 gold objects are ADDED; the rollback is an S3 delete of the manifest keys, which is not mine. NG/_LN_Equity (level) and PBR_US_Equity (guard stop, HVST-cn-2) are NOT in the list.
+--- DEVIATION 1: THE SPARSE SET (my provisioning gap, found by the order's own canary dry run)
+The order's sparse line names lib/research, lib/, .tools/ and the CRO scan folder. My first canary dry run (18:46:40Z, cn3_canary_dry.out) read: REFRESH UNH_US_Equity status=SKIPPED_ALLOWED moved=model_rows,team_sheet ... reason=outside the allowed set: team_sheet. NOTHING was written (a dry run calls no write_one). Cause, read and proved: lib/research/corpus/team_sheet.py reads integrations/bloomberg/research/field_map.json (line 131) for the labels' descriptions, and that folder was not in my sparse set; I had also had to add org/standards (lib/opal_naming.py reads org/standards/NAMING_SCHEMA.json) a minute earlier. I added `git sparse-checkout add integrations/bloomberg/research` (git status 0 lines, `git diff 56bacbc853 HEAD -- lib/research` 0 bytes both before and after) and re-ran: WOULD_WRITE moved=model_rows guard=PASS (cn3_canary_dry2.out). The order's STOP clause names a dry run that is not WOULD_WRITE; I stopped at it, found the cause was my tree and not the world, fixed the tree and re-ran before any write. The order's sparse line should also name org/standards and integrations/bloomberg/research.
+A sample dry run of four more names (cn3_sample_dry.out): 1299_HK_Equity, BP/_LN_Equity, ZURN_SW_Equity WOULD_WRITE moved=model_rows inputs_differ=model_block guard=PASS; KMB_US_Equity WOULD_WRITE moved=model_rows inputs_differ=continuation,model_block guard=PASS (expected). census would_write=4 errors=0.
+--- STEP 0 PRINTS (cn3_before.py, 18:45Z to 18:46Z)
+--- PIN
+git rev-parse HEAD = 56bacbc85373175b19adb5a080fb2be023fabffb
+git diff 56bacbc853 HEAD -- lib/research : 0 bytes (empty = 0)
+sparse set includes the CRO scan folder: True
+--- LIST FILES (read from the shared checkout)
+cn3_names.txt sha256 ebf416daab882f81a53352c0bc9a6d58844b06cf07bab3cdfd1135bcfbd6d291 lines 93
+cn3_expected_moves.txt sha256 c0612d22f6b08cf4705521fa621c168b5f017cc2651bcd293c84dd0cfe3f0414 lines 93
+names: first 1299_HK_Equity last ZURN_SW_Equity | includes BP/_LN_Equity: True | NG/_LN_Equity: False | PBR_US_Equity: False | UNH_US_Equity: True | KMB_US_Equity: True | distinct: 93
+--- TABLE COUNTS (paginated list_objects_v2, counted client side)
+research_dossier objects under amgt/harvest/gold/research_dossier/ : 1558 (the table held 1558 after cl-4)
+research-continuation objects under amgt/harvest/gold/research-continuation/ : 446 (446 after cl-4)
+--- NEWEST MODEL-BLOCK STAMPS
+UNH_US_Equity : prefix derived/model_block/UNH_US_Equity/ : 20 blocks, newest 20261018T131025Z, previous 20261017T131006Z
+BP/_LN_Equity : prefix derived/model_block/BP-SLASH-_LN_Equity/ : 26 blocks, newest 20261018T170620Z, previous 20261018T130249Z
+KMB_US_Equity : prefix derived/model_block/KMB_US_Equity/ : 27 blocks, newest 20261018T130541Z, previous 20261017T130530Z
+--- CANARY NAME PARTITION
+UNH_US_Equity partition security_key=UNH_US_Equity objects 16
+--- SCHEDULED TASKS AND PROCESSES (PowerShell 18:45Z; local time 2026-10-18T14:45:56-04:00)
+207 tasks read; control OPAL_autolaunch_agents found: 1. Tasks naming dossier, continuation, fund_form, corpus, induction, model_block or research: 3, all LLM-batch launchers: OpalResearch-ExecManagement (Disabled), OpalResearch-FilingsAnalyzer (Ready, last run 2026-10-18 07:30:01, next 2026-10-19 07:30:00), OpalResearch-Scores (Disabled); none builds a dossier, continuation or fund form and none runs in the window. The induction task amgt-induction-daily is site Z's (13:00Z), not on this box. 587 processes read (control: 21 powershell.exe rows); processes naming dossier, dossier_refresh, continuation, fund_form, cn3, cl4_run or cj*_run: 0.
+--- (v) GATEWAY BEFORE READS, fields [fund_form_ref, fund_of_record, last_stated_position, model_rows]
+[BP/_LN_Equity (raw request)] tool-result bytes 60264
+  dossier_key amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.b8aef145b89bc510.json
+  content_sha256 d0edb77357daaf645b62c01e08943480ff61e36aebf0c59719927b82449a8355 as_of 2026-10-18 method amgt-corpus-dossier/15
+  continuation_key amgt/harvest/gold/research-continuation/security_key=BP-SLASH-_LN_Equity/4ecc7216257f7d08.json
+  source_keys 14 | dossier entry ['as_of=2026-10-18.b8aef145b89bc510.json']
+  dossier_fields [('fund_form_ref', 'present'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('model_rows', 'list[105]')]
+  fund_form_ref {"content_sha256": "3f3d60a3e85ff4ebc6eb77b61216a47789dd37b5d5af92805fdfefdfe6d8ab1c", "uri": "s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/65a5baab3afd06f0.json"}
+  model_rows entries 105 rows_with_value 91 stamps ['20261018T130249Z']
+  research_reports 7 ['2c74cb1648740970', '45e5848c94ac5b9c', '5398813dd2cc9af8', '5dfc4c6fc7894bd3', 'a6fc79de305cb304', 'd583d0e490858627', 'df63e0984e2b1ca8']
+  duplicates_dropped {"research_dossier": {"distinct_as_of": 8, "dropped": 9, "listed": 17}} | denominator_note: dossier fields read 24; research_dossier objects listed 17, distinct as_of 8, duplicates dropped 9
+  truncated True omitted_items {"continuation_fields": 1} stored_spelling {}
+[BP-SLASH-_LN_Equity (encoded request)] tool-result bytes 60264
+  dossier_key amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.b8aef145b89bc510.json
+  content_sha256 d0edb77357daaf645b62c01e08943480ff61e36aebf0c59719927b82449a8355 as_of 2026-10-18 method amgt-corpus-dossier/15
+  continuation_key amgt/harvest/gold/research-continuation/security_key=BP-SLASH-_LN_Equity/4ecc7216257f7d08.json
+  source_keys 14 | dossier entry ['as_of=2026-10-18.b8aef145b89bc510.json']
+  dossier_fields [('fund_form_ref', 'present'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('model_rows', 'list[105]')]
+  fund_form_ref {"content_sha256": "3f3d60a3e85ff4ebc6eb77b61216a47789dd37b5d5af92805fdfefdfe6d8ab1c", "uri": "s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/65a5baab3afd06f0.json"}
+  model_rows entries 105 rows_with_value 91 stamps ['20261018T130249Z']
+  research_reports 7 ['2c74cb1648740970', '45e5848c94ac5b9c', '5398813dd2cc9af8', '5dfc4c6fc7894bd3', 'a6fc79de305cb304', 'd583d0e490858627', 'df63e0984e2b1ca8']
+  duplicates_dropped {"research_dossier": {"distinct_as_of": 8, "dropped": 9, "listed": 17}} | denominator_note: dossier fields read 24; research_dossier objects listed 17, distinct as_of 8, duplicates dropped 9
+  truncated True omitted_items {"continuation_fields": 1} stored_spelling {}
+BP raw request body == encoded request body (parsed JSON equal): True
+--- S3-LEVEL SERVED DOSSIERS (the pick over the partition)
+UNH_US_Equity objects 16 newest as_of=2026-10-18.75715538ce40ba9f.json LastModified 2026-10-18T07:49:11Z model_rows entries 96 rows_with_value 92 model_block inputs ['derived/model_block/UNH_US_Equity/20261017T131006Z/model_block.json']
+BP/_LN_Equity objects 17 newest as_of=2026-10-18.b8aef145b89bc510.json LastModified 2026-10-18T15:51:21Z model_rows entries 105 rows_with_value 91 model_block inputs ['derived/model_block/BP-SLASH-_LN_Equity/20261018T130249Z/model_block.json']
+UNH_US_Equity gateway BEFORE read (inline tool result, not saved to a file; transcribed by reading, stated): dossier_key ...security_key=UNH_US_Equity/as_of=2026-10-18.75715538ce40ba9f.json; content_sha256 5a62649265583d0b808071263fbae7f4a58ed4c2395f4431253fd18b3d7c6891; as_of 2026-10-18; method amgt-corpus-dossier/15; continuation_key ...research-continuation/security_key=UNH_US_Equity/b89177eb99c0dc00.json; source_keys 13 (ai_fill, continuation prefix and key, the dossier key, silver prefix and 8 parts, 1 bronze exec_officers 20261007T113713Z); dossier_fields fund_form_ref present (fund=pfoe/57cee6de8b2cd85e.json, content_sha256 74ad08d784f2..), fund_of_record present (PFOE), last_stated_position present ({fund PFOE, line_only true, text "Maintain positions in PFOE and DIVZ"}), model_rows a list whose figures carry stamp 20261017T131006Z (S3 level: 96 entries, 92 with a value); continuation_fields 4 entries shown (thesis_pillars and thesis_summary ABSENT, fund_of_record and last_stated_position present), 1 omitted; ai_fill_key ...ai_fill.json as_of 2026-10-16 (4 blocks shown, 1 omitted); research_reports 1 (48d81f053e5076e8, part date=2026-09-25/part-20261018T010034Z.parquet); management_roster bloomberg_exec_officers 9 officers (pulled 2026-10-07T11:37:13Z); duplicates_dropped research_dossier listed 16, distinct_as_of 7, dropped 9; denominator_note "dossier fields read 24; research_dossier objects listed 16, distinct as_of 7, duplicates dropped 9"; truncated true; omitted_items {continuation_fields 1, ai_fill_blocks 1}.
+--- DEVIATIONS / NOTES
+No Bloomberg use, no etfs_compare_peers, no continuation write, no module --write other than the order's driver at step 1. Canary and main run use DIFFERENT manifest paths (the driver opens a manifest with mode "w").
+BEFORE complete 2026-10-18T18:52Z.
