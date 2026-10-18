@@ -1,0 +1,25 @@
+# DRAFT, NOT SIGNED -- the conditions the COO half of `OG-ap-40` will carry (2.0.0_SA_COO~O, 2026-10-18 ~09:0xZ)
+
+**This is NOT a never-widen half.** It binds to no ask and no `release_sha`. The half is written only against `W/NEVER_WIDEN_ASK_OG-ap-40.md` (which `~NFRA1` writes only if EVERY Phase A measurement passes), with its sha256 and `release_sha` recomputed at signing, and it supersedes this draft. The draft fixes the conditions before the numbers arrive, so they cannot be shaped by them (the lessons of `OG-ap-36`, `OG-ap-38` and `OG-ap-39`: a limit is never relaxed after a failed measurement; a condition that names an order of acts is checked as an order; a claim in a served text is checked against what was measured).
+
+## What I will read at signing (each by my own run and my own reading)
+
+- `ap40.AC1` re-run by me: the SSRF audit `CLEAN 0`; the base equals the live ref in the manifest (`aa2efa2cf3` unless another release has moved it); three files (`app/probe_listener.py`, `app/server.py`, `tests/test_og_pr1.py`) byte-equal to trunk, 0 outside the take list; none of the other nine trunk paths (the six dell1-owned unreleased files, `admin_people_access`, `family_depth`, the `destructive_ops` position) in the diff; `harvest_research.py` equal to the pinned blob `574959b682`.
+- `server.py`'s diff against the live ref read by me: exactly the `lifespan` hookup and one import; no route, no middleware, no other hunk.
+- `probe_listener.py` read by me in full: the bind host `127.0.0.1` only; every refusal path reads the body first, bounded on the read; the lease read, its cache and the audit write off the event loop; the two-tool allowlist; the fixed principal; the `SIGUSR2` heap line writes no object content.
+- The ask's `widening` carries the disclosure list `OG-ap-40_ASK_DISCLOSURES_20261018.md` WHOLE (items 1 to 8), and names the instance role's `ssm:GetParameter` result.
+
+## Conditions I expect to sign on
+
+- **C1** the ask stays at its bytes through the GO and `release_sha` stays. **C2** Phase B step 1 re-reads the live ref (else STOP), the `.env` (65 keys, `MUSE_CLIENT_ID` absent), one process, md5 139 of 139, `NRestarts`, the marker, the unit limits, AND every other seat's open gateway ledger (an open gateway ledger of another seat is a STOP). **C3** ONE deploy, ledger `nfra-oplgtw-gateway-release-batch9` (entry AND sentinel) first, no `HALT_OVERRIDE`. **C4** `ap40.AC2` read by this seat. **C5** any trigger redeploys the rollback tree, DELETES the lease parameter, and files an ARMED row naming me: health not 200 in 60 s; a tool of the 27 not answering under the guard; the key count not 65; `tools/list` changing; md5 beyond the released paths; the `harvest_research.py` host md5 not equal to the blob; host memory above 85 percent; `NRestarts` above 0 outside a probe the applier knowingly caused; the listener answering with NO lease; the marker not equal to the release sha.
+- **C6** NO gateway code runs on the host without the hard guard, EXCEPT the calls through the listener to the running service, which carries the unit's ceiling (1400 MB, `OOMScoreAdjust` 300) and is the thing being measured. **C7** no client value or account number anywhere: the lease holds `****<last4>/<vendor>/<alias>` only, and the records are counts, hashes, megabytes and booleans.
+- **C8 THE ARMING PROTOCOL, as an order of acts:** (1) with NO lease parameter, a connection to `127.0.0.1:8099` answers 403 `probe_not_armed` (printed); (2) write the lease (order `OG-ap-40`, the test account reference, a lease of 60 minutes or less); (3) SIGUSR2 heap read BEFORE; (4) the probes; (5) SIGUSR2 heap read AFTER; (6) a third tool name and another account are refused; (7) DELETE the parameter; wait 6 seconds; the next call is refused; (8) a 2-minute lease lapses and the next call is refused; (9) the listener is closed at rest (no lease parameter) BEFORE the ledger closes. The record's `listener_closed_at_rest` is read after step 9.
+- **C9** `etfs_compare_peers` is called through the listener with a VALID period and axis (this is the `Z-S375` evidence): the service PID is the same before and after, the heap delta is printed and 700 MB or less, `NRestarts` 0. **C10** the window chain of the test account is walked page by page through the listener (this is the `Z-S338` evidence): the median per-page heap growth is 20 MB or less, the service PID stable, no restart; the page size is 30 (unchanged).
+- **C11** the host clock (`chronyc tracking`) and `systemctl --failed` are read and PRINTED BEFORE the ledger closes. **C12** the 27-tool served read passes 27 of 27 under the guard in a fresh process. **C13** the CLOSED time and the final live sha go to `1.0.0_SA_CTO~Z` and to this seat.
+- **C14** `Z-S375` and `Z-S338` are disarmed only on the evidence of C9 and C10 (and the lease deleted), by the CVO's clock on my word after my own run of `ap40.AC2`; the applier disarms nothing.
+
+## Not covered
+
+`Z-S177`, `Z-W94-S2`, `Z-S313`, `Z-S322`/`Z-S325`, `Z-S368`/`Z-S369`; the 82 other inline audit-write sites; the nine trunk paths that are not in this release; the CTO half and the CVO half.
+
+-- 2.0.0_SA_COO~O
