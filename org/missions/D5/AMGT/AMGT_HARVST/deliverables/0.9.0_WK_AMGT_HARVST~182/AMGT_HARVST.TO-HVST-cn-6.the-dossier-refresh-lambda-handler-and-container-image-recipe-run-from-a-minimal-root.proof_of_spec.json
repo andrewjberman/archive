@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cn-6.the-dossier-refresh-lambda-handler-and-container-image-recipe-run-from-a-minimal-root",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "ac2fc0e108",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-6.the-dossier-refresh-lambda-handler-and-container-image-recipe-run-from-a-minimal-root.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-6.the-dossier-refresh-lambda-handler-and-container-image-recipe-run-from-a-minimal-root.md",
+    "group": "OTHER",
+    "vintage_commit": "ac2fc0e108"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~182",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/research/dossier_refresh/handler.py",
+      "kind": "script",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Handler lambda_handler(event, context): builds the argv for dossier_refresh.main (dry run unless event mode is exactly write), tees stdout, takes the last census line, raises RuntimeError on rc non-zero, no census line, or errors above 0. Not deployed; no Lambda call made."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/dossier_refresh/Dockerfile",
+      "kind": "config_data",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text only; FROM public.ecr.aws/lambda/python:3.12 (pinned tag); build context is the repository root; COPY lines name the handler, lib/trading_calendar.py, lib/opal_naming.py, lib/research/, NAMING_SCHEMA.json, field_map.json, the 11 registry files and one data file the probe found (research_docx_kpi_census.json). Nothing is built; no docker call."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/dossier_refresh/requirements.txt",
+      "kind": "config_data",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "18 name==version lines, one per PKG distribution of cn4_closure.out (cross-checked: 18 PKG distributions and 18 requirements, none missing and none extra); no boto3 or botocore. No pip install was run."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/dossier_refresh/cn6_rootfs_probe.py",
+      "kind": "script",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Minimal-root probe: copies exactly the Dockerfile COPY sources under the image root into a fresh temporary directory, runs the handler in a child Python with cwd and PYTHONPATH set to that directory and PYTHONSAFEPATH=1, two read-only dry-run calls. Prints ROOTFS-ENV first; adds a missing data file to the Dockerfile with a ROOTFS-FIX line and re-runs. Read-only against the harvest bucket."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/dossier_refresh/test_cn6_handler.py",
+      "kind": "test",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline arms 1-11 (18 test cases) with dossier_refresh.main monkeypatched; arm 11 is the mutant whose default is flipped to write and which must fail arm 1. No S3 call."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~182/cn6_rootfs.out",
+      "kind": "doc",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdout of the final probe run: ROOTFS-ENV cwd=<temporary root> repo_on_path=no; one ROOTFS-FIX line; call 1 REFRESH-SKIPPED not_a_trading_day rc=0 (a Sunday); call 2 ROOTFS-DRY rc=0 census names=2 written=0 unchanged=1 skipped_guard=1 errors=0 mode=dry-run."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d8f55a32ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_HARVST-D1-W182-S1 to S4 appended by byte insertion in d8f55a32ac (86 insertions, 0 deletions); row S5 appended by byte insertion in the commit of this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 python -m pytest infra/aws/lambda/research/dossier_refresh/test_cn6_handler.py -q -p no:cacheprovider --color=no expect (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/dossier_refresh/test_cn6_handler.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "18 passed in 0.83s\nCommentary (not the matched line): the run was made under timeout 120 with exit code 0 and was repeated once with the same result (18 passed in 0.84s on the first run). The 18 cases are arms 1 to 11: arm 3 is parametrized over seven non-write mode values; arm 10 has two tests; arm 11 is the mutant, which must make arm 1 raise AssertionError and passes as a test.",
+      "denominator": "1 of 1 summary line matched; 18 of 18 test cases passed (exit code 0)",
+      "status": "PASS",
+      "expect": "(?m)^\\d+ passed in",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~182/cn6_rootfs.out expect (?s)ROOTFS-ENV cwd=\\S+ repo_on_path=no.*ROOTFS-DRY rc=0 census=REFRESH-CENSUS names=2 written=0 .* errors=0 mode=dry-run",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~182/cn6_rootfs.out",
+      "output_evidence": "ROOTFS-ENV cwd=C:\\Users\\Test\\AppData\\Local\\Temp\\cn6_root_3epls4sw repo_on_path=no\nROOTFS-DRY rc=0 census=REFRESH-CENSUS names=2 written=0 would_write=0 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=1 errors=0 mode=dry-run\nCommentary (not the matched lines): the run was the final probe run of the cell (python infra/aws/lambda/research/dossier_refresh/cn6_rootfs_probe.py, timeout 540, exit code 0, iterations 2, fixes 1). The first run had a probe defect (a relative path was resolved against the probe's own cwd); it was fixed and the run repeated. The first failing run is recorded as surprise S1: the refresh opens a working-directory-relative census path, and the fix is the one ROOTFS-FIX COPY line. call 1 was REFRESH-SKIPPED not_a_trading_day because the run day is a Sunday. The PBR_US_Equity row in call 2 is SKIPPED_GUARD (valued rows built 55, stored 56), a guard decision and not an error. The matched lines are the ROOTFS-ENV line and the ROOTFS-DRY line.",
+      "denominator": "2 of 2 anchors matched in order (ROOTFS-ENV with repo_on_path=no, then ROOTFS-DRY rc=0 census names=2 errors=0 mode=dry-run) in the 11-line output file (exit code 0)",
+      "status": "PASS",
+      "expect": "(?s)ROOTFS-ENV cwd=\\S+ repo_on_path=no.*ROOTFS-DRY rc=0 census=REFRESH-CENSUS names=2 written=0 .* errors=0 mode=dry-run",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Arm 11: merged = {'mode': 'write'} before the event is merged in, patched over handler.build_argv; the arm-1 check (an empty event gives a dry run) must raise AssertionError.",
+      "expected": "pytest.raises(AssertionError) around the arm-1 check passes",
+      "observed": "arm 11 passed in the 18-case run: the arm-1 check raised AssertionError under the flipped default",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the pytest arms were run twice and gave 18 passed both times; the probe reads the live harvest bucket, so its census is not a function of the code alone and was not re-run for equality",
+      "observed": "pytest: 18 passed in 0.83s (first run during the build) and 18 passed in 0.83s (repeat for AC1); probe: one recorded passing run after the relative-path fix",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Docker build, image build or push, ECR repository, Lambda function, EventBridge schedule, Terraform, pip install",
+      "reason": "The order's preflight forbids them and this box has no Docker. The image build, the ECR repository, the function and the schedule are later cells under their own pair."
+    },
+    {
+      "item": "Linux wheels and the Python 3.12 interpreter of the image",
+      "reason": "The probe ran the local Python 3.14.7 on Windows, not the 3.12 Linux image; the pins come from the Windows 3.14 install. Recorded as surprise S2; the image build cell must verify it."
+    },
+    {
+      "item": "Lambda working directory of /var/task",
+      "reason": "The probe approximates it with a temporary directory as cwd and PYTHONPATH; the real Lambda runtime is not exercised. Recorded as surprise S1."
+    },
+    {
+      "item": "Narrowing the lib/research/ COPY to the modules the closure imports",
+      "reason": "The order names the lib/research/ tree as one COPY line; the test-file weight is recorded as surprise S3 for the image build cell."
+    },
+    {
+      "item": "Bloomberg, model calls, any S3 write",
+      "reason": "None made. The probe reads the harvest bucket through the refresh's own read-only client, which refuses every write operation and every bucket other than the harvest bucket."
+    },
+    {
+      "item": "Order status flip to complete",
+      "reason": "The order says the issuer flips its status (Do not edit this order file); this worker does not edit the order file."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W182-S1: the refresh opens continuation.KPI_LEXICON_PATH relative to the working directory; the first probe run failed on it (errors=2) and the one COPY line the probe added makes it resolve under the Lambda working directory /var/task.",
+    "AMGT_HARVST-D1-W182-S2: the probe ran the local Python 3.14.7 on Windows, not the Python 3.12 Linux image; the pins were measured on that same install, so the import graph and the COPY set are proven and the image's interpreter and wheels are not.",
+    "AMGT_HARVST-D1-W182-S3: the lib/research/ COPY carries the whole subtree, 483 of 747 tracked files being test files; the order's adversary list asks that the image carry only what the refresh needs.",
+    "AMGT_HARVST-D1-W182-S4: the order's title line names workstream REFRESH-HOST while its front matter and the spawn face name REFRESH-IMAGE; the worker followed the front matter.",
+    "AMGT_HARVST-D1-W182-S5: safe-commit printed a naming-gate ERROR for the missing infra/aws/lambda/ci/function-map/ folder and still committed the Lambda files d8f55a32ac; the gate's verdict on them is not recorded."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (test_cn6_handler.py, offline)",
+      "invocation": "python -m pytest infra/aws/lambda/research/dossier_refresh/test_cn6_handler.py -q -p no:cacheprovider --color=no",
+      "result": "rc 0; 18 passed in 0.83s; includes the arm-11 mutant"
+    },
+    {
+      "tool": "python cn6_rootfs_probe.py (minimal-root probe, read-only dry run against the harvest bucket)",
+      "invocation": "python infra/aws/lambda/research/dossier_refresh/cn6_rootfs_probe.py (run from the worktree root under timeout 540)",
+      "result": "rc 0; ROOTFS-PROBE rc=0 iterations=2 fixes=1; output cn6_rootfs.out; repo_on_path=no"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-6.the-dossier-refresh-lambda-handler-and-container-image-recipe-run-from-a-minimal-root.md",
+      "result": "run at the commit of this instance; the last line is in the worker report"
+    }
+  ]
+}
