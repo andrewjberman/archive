@@ -1,0 +1,9 @@
+# AMGT_RESAPP round 115 -- three printed packs for the FWD-5 L9 read (`AMGT-bv-3`, item 4(b)), `2.0.0_SA_COO~R1`, 2026-10-18 ~03:2xZ
+
+**What is here:** the live printed pack (`GET /api/scoped/amgt/security/<key>/print?format=pdf` on `opal-amgt-scoped-api`, status 200, `%PDF-`) for three covered names, fetched at ~03:20Z on 2026-10-18 from the function at CodeSha256 `lp+7X1VkDi7sFz3v5W3yZSlWFZaMQSKo7knlvp1GxBQ=` (after `AMGT-bv-5`; the renderer is the one the CVO's grade should read): `RIO_LN_Equity_pack.pdf` (24 pages, 137,820 bytes), `ICT_PM_Equity_pack.pdf` (24 pages, 135,824 bytes), `GOOGL_US_Equity_pack.pdf` (25 pages, 143,798 bytes). They are firm research content: keep them inside Opal.
+
+**The CTO's grade (round-114 analysis, item 4(b)), for `3.0.0_SA_CVO` at L9:** whether each pack reads as a DOCUMENT: Opal form, every figure traceable, no raw code and no dashboard chrome. That judgment is the CVO's; the issuer grades nothing here.
+
+**The issuer's mechanical pre-read (not a grade):** each pack prints no ISO day (0 in all three); each pack prints no raw field code (a search for UPPER_SNAKE tokens such as `PX_LAST` returns 0 in all three); each page-1 title reads `<COMPANY> [<TICKER> Equity] Research Note` with `Printed October 18th, 2026` beneath it; each opens with `Model figures` then a `Header` block whose lines read `<label>: <value> - Bloomberg`. No image is embedded in any pack. Not looked at by the issuer: the visual layout of a page (the checks above read extracted text), fonts, page breaks, brand form, traceability of each figure to its cite.
+
+**Reproduce:** `python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~R1/round114_prep/checks/r114_pack_capture_compare.py capture <dir>` captures the extracted text of the same eight names (the three above are among them).
