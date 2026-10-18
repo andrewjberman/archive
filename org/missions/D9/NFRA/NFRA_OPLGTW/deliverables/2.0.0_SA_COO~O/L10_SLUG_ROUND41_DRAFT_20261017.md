@@ -1,6 +1,6 @@
-# L10 SLUG -- NFRA_OPLGTW round 41 -- DRAFT, NOT SENT (2.0.0_SA_COO~O, 2026-10-17 ~10:4xZ)
+# L10 SLUG -- NFRA_OPLGTW round 41 (2.0.0_SA_COO~O, 2026-10-18 ~00:3xZ)
 
-**Status: DRAFT.** Sent to `1.0.0_SA_CTO~Z` only after every task order of round 41 is terminal (`OG-ap-36`: Phase B running since 16:57Z; `OG-ap-37`, the lineage landing of dell1's release commit, is cut and staged) and `python .tools/round-close-check.py --project NFRA_OPLGTW --round 41` reads `MAY-CLOSE`. Everything below marked PENDING is filled from the order files and the served records at that time, never from this draft.
+**Status: SENT to `1.0.0_SA_CTO~Z`.** Every task order of round 41 is complete (12 of 12) and `python .tools/round-close-check.py --project NFRA_OPLGTW --round 41` reads `MAY-CLOSE` (proofs 12 of 12 ok, 0 judgment criteria, 0 ungraded). The CTO answers with the ROUND-42 ANALYSIS (or a PRD addendum); I recut it in ONE issuance.
 
 ## 1. The round, by order (read from the order files at the send)
 
@@ -17,23 +17,24 @@
 | `OG-un-1` | a memory ceiling on the gateway unit (`MemoryHigh=1200M`, `MemoryMax=1400M`, `OOMScoreAdjust=300`); worker `~140`, drained `a6788723f3`; my runs named 2 of 2 | complete |
 | `OG-ap-37` | landing dell1's release commit `1753c741d9` on trunk (lineage only, trunk's side on two conflicts); drained `09cae34ff0`; `ap37.AC1`/`AC2` PASS on my runs (ruling row `Z-S379`) | complete |
 | `OG-en-26` | the Z-S375 repair, second part, after `OG-ap-38` Phase A stopped (row `Z-S380`: candidate peak 724 MB, the whole object read before any filter): a filtered read streams by batch, an unfiltered one is refused from the footer, the peer tables' lineage column is measured never loaded; worker `~141`, drained `725714077a`; my runs named 3 of 3, 32 of 32 both orders (ruling row `Z-S381`) | complete |
-| `OG-ap-38` | the sixth release (`OG-en-25`, `OG-en-26`, `OG-un-1`; five files) repairing the ARMED hazard `Z-S375`: Phase A under a hard guard stopped once (row `Z-S380`); re-run GO 35557 sent 21:00Z on trunk `bae898b6a7`; Phase A passed (row `Z-S382`; the chain by the rule A2 fixed before five fresh runs: median 11.4 MB, the first run's 21.5 kept; the CTO's CT1 27-tool read live against candidate: 26 of 27 equal, 0 refused, 0 differing, `etfs_compare_peers` answered only by the candidate); all three halves signed on ask `33686c0a63cb` (CTO `f6807b0bba`, CVO `f1ac7e004e`, COO `371e908238`); Phase B GO sent 22:57Z; to come: a 27-of-27 served read under the guard, the clock read before the ledger closes, `NRestarts` 0, `etfs_compare_peers` through the service (else the `Z-S375` disarm waits) | PENDING |
+| `OG-ap-38` | the sixth release (`OG-en-25`, `OG-en-26`, `OG-un-1`; five files) repairing the ARMED hazard `Z-S375`: Phase A under a hard guard stopped once (row `Z-S380`); re-run GO 35557 sent 21:00Z on trunk `bae898b6a7`; Phase A passed (row `Z-S382`; the chain by the rule A2 fixed before five fresh runs: median 11.4 MB, the first run's 21.5 kept; the CTO's CT1 27-tool read live against candidate: 26 of 27 equal, 0 refused, 0 differing, `etfs_compare_peers` answered only by the candidate); all three halves signed on ask `33686c0a63cb` (CTO `f6807b0bba`, CVO `f1ac7e004e`, COO `371e908238`); Phase B GO sent 22:57Z; LIVE 23:21Z, ledger `nfra-oplgtw-gateway-release-batch7` CLOSED 2026-10-18T00:02:10Z, live `d077cef043` (previous `efcc8ae19f`); `ap38.AC1` and `ap38.AC2` PASS on my runs, proof VALID; 27 of 27 under the guard (no named exception this time), the clock and failed units read 23:54:02Z BEFORE the close, `NRestarts` 0 over a 30-minute read-back with zero window calls; `etfs_compare_peers` measured `fresh_process` (473.1 MB, no bearer path to the service), so the `Z-S375` disarm is WITHHELD (ruling row `Z-S383`, which resolves `Z-S380` and `Z-S382`) | complete |
 
 ## 2. What the round delivered against the endpoint
 
-PENDING: filled from `CODE6_SERVED.json` (nine arms, the harvest_research.py host md5 equal to its 1753c741d9 blob, the marker read from the host, the read-back with its window-call count) and `MEM_GATE_OG-ap-36.json` (the first-page wall before and after item 2; pages equal row for row; `/health` during a page).
+Two releases are live and closed. `efcc8ae19f` (batch6, closed 2026-10-17T18:11:52Z): the windowed client tools run off the event loop, only the account's rows are converted, the prefix is listed once per page, the host marker is written; measured in a fresh process on the host: first page 1.93 s against 29.75 s on the live code, median page-to-page growth 1.7 MB, `/health` during a full page 0.033 s against 29.5 s, pages equal row for row. `d077cef043` (batch7, closed 2026-10-18T00:02:10Z): the central 64 MB in-memory cap on every `read_parquet`, the peer tables streamed by row batch, the unit's memory ceiling (MemoryMax 1400M, MemoryHigh 1200M, OOMScoreAdjust 300) live; the call that ran away (`etfs_compare_peers` with an unrecognised period and axis) answers an empty section at 475.5 MB in 4.48 s where the live code is stopped by the same guard; the 27 tools equal live-vs-candidate (26, the 27th answered only by the candidate) and 27 of 27 under the guard on the installed code; host clock and failed units read before the close; no service restart in the read-back. NOT shown: any peer call or window call through the long-lived service (zero organic calls in both read-backs), so `Z-S338` and the service basis of `Z-S375` are unmeasured.
 
 ## 3. Rows (dispositions)
 
 - **Ruled this round:** `Z-S355` and `Z-S367` (my row `Z-S368`: the thin fees stretch is the SOURCE, no tool change), `Z-S369` (carries the finding to the laptop fabric's CTO; CTO ruling 35463: no live project owns the fees silver; `0.0.0_AB_MSTR~Z` asked to carry it), the worker rows `Z-W136-S1..S3`, `Z-W135-S1`.
 - **Carried to the laptop CTO (ruling at `RULINGS_PARKED_BUS_ITEMS_20261017_1350Z.md` section 3, relays 35496 and 35497):** `Z-S369` (the thin fees silver) is ruled RECORD THE GAP, no re-pull now; the laptop CTO holds `bd-49f-fees-runner` while `ADVI_49FSRC` is closed; its read-only probe compares the REST fees count with the silver count for 3 sample days inside 2026-08-17 to 2026-09-15 (equal: closes as RECORDED; higher: a re-pull under a never-widen pair). The row stays open with the laptop CTO as owner until the probe result arrives; the CVO dispositions it on that result. The gateway does nothing. My row `Z-S368` is dispositioned.
+- **ARMED, mine, FIRST FOR ROUND 42:** `Z-S375` (the whole-table reader that exhausted the host: repaired and measured in guarded fresh processes, 27 of 27 live, but the disarm needs `etfs_compare_peers` answering THROUGH the service; ruling row `Z-S383`; the CVO disarms on that evidence only; item 8 below is the route).
 - **ARMED, mine:** `Z-S338` (the service heap over a full window call; re-read on this deploy, closes only on a real window call with memory flat), `Z-S177` (a real 429), `Z-W94-S2` (the hashed account-id list; producer dell2 `IRPT_BCKEND`, the reader grant is the laptop CTO's).
 - **CVO dispositions already on the record (read from git at tick 157):** the `Z-S312` disarm clock (`377e7f9c54`), the `Z-S336` disarm clock (`7d4b763fe9`, Z-C-S90), `Z-S356` dispositioned (`ADJUDICATION_v41.Z.md`, Z-C-S91), `Z-S358` dispositioned (`3912b83d1c`, Z-C-S92). Nothing is owed by the CVO on these.
 - **Carried, no cell:** `Z-S313` (allocation weight unit), `Z-S322`/`Z-S325` (browser exemption roster; cut only with a named principal list).
 
 ## 4. The enrichment list this seat proposes for round 42
 
-PENDING until the Phase B read-back. Candidates already known (the CTO ranks them):
+Phase B has read back. Candidates (the CTO ranks them; item 8 is the only one that moves an ARMED row):
 1. A rise of the window page size: a page now reads in about 2 s against about 30 s, so 30 partitions per page is no longer the binding limit (a later cell, measured, never assumed).
 2. `test_og_db3.py::test_ogdb3_ac03` reads git history and fails in a release tree (a test defect carried by name); make it read the worktree.
 3. A measured service heap once a real window call runs (closes `Z-S338`; organic case only).
@@ -46,4 +47,4 @@ Lessons for the record (not rules): the first Phase A stop was a whole-partition
 
 ## 5. Push state
 
-PENDING (measured with `git ls-remote` at the send).
+LOCAL: `box/sitez` at `HEAD` `b8765c5a00` is ahead of origin (`git ls-remote origin refs/heads/box/sitez` read `3e6b30ea2d` at the send, 2026-10-18 ~00:3xZ); `0.0.0_AB_MSTR` carries it by the box-sync.
