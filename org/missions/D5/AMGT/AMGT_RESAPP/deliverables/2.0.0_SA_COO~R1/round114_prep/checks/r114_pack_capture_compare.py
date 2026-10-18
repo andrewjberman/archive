@@ -2,7 +2,7 @@
 
   python r114_pack_capture_compare.py capture <outdir>            # GET /print?format=pdf on opal-amgt-scoped-api for each name, PDF text to <outdir>/<key>.txt
   python r114_pack_capture_compare.py config                       # the live function's CodeSha256, LastModified, RevisionId, memory, timeout, environment keys
-  python r114_pack_capture_compare.py compare <before> <after>    # after = before with each long-form date mapped back to ISO (a hand-written inverse), line-wrapped text de-wrapped
+  python r114_pack_capture_compare.py compare <before> <after>    # after = before with each long-form date mapped back to ISO (a hand-written inverse), whitespace collapsed, and the page-1 'Printed <run date>' day masked (it is the capture day)
 
 Read-only (Lambda invoke of a GET). The compare grades the EXPECTED OUTCOME of the redeploy: the only difference between the
 live pack before and after is dates (long form instead of ISO), and no ISO day remains after. Prints one verdict line.
@@ -48,6 +48,11 @@ def _inverse(text):
     return LONG.sub(lambda m: "%s-%02d-%02d" % (m.group(3), MONTHS.index(m.group(1)) + 1, int(m.group(2))), text)
 
 
+def _run_date_masked(text):
+    # page 1 prints "Printed <the day the pack was built>": it differs between two captures made on different UTC days, by design
+    return re.sub(r"Printed \d{4}-\d{2}-\d{2}", "Printed <RUN DATE>", text)
+
+
 def main(argv):
     if len(argv) >= 3 and argv[1] == "capture":
         out = argv[2]
@@ -73,7 +78,7 @@ def main(argv):
             b = _norm(open("%s/%s.txt" % (before, key), encoding="utf-8").read())
             a = _norm(open("%s/%s.txt" % (after, key), encoding="utf-8").read())
             iso_left = len(ISO.findall(a))
-            same = _norm(_inverse(a)) == b
+            same = _run_date_masked(_norm(_inverse(a))) == _run_date_masked(b)
             print("%s: iso_after=%d long_after=%d equal_after_inverse=%s" % (key, iso_left, len(LONG.findall(a)), same))
             ok += 1 if (same and iso_left == 0) else 0
         print("PACK COMPARE: %s (%d of %d names: no ISO day after and equal to before once the long forms map back)" % ("YES" if ok == len(NAMES) else "NO", ok, len(NAMES)))
