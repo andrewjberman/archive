@@ -1,0 +1,137 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-pr-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~148",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7ed9ccbb17"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "7ed9ccbb17",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-2.round-42-probe-listener-audit-off-loop-and-clean-refusals.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+   "kind": "script",
+   "commit_or_etag": "7fdca1f628",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "OG-pr-2 repair: _refuse is async and every audit write in probe_call (refusals, ok, error) runs through run_in_threadpool; probe_call reads the request body first (await request.body()), answers 413 probe_body_too_large above 65536 bytes (audited, not parsed), then parses the JSON from those bytes; the refusal order after the body read is not armed, tool, body shape, account. Committed @7fdca1f628 (LOCAL on wk-NFRA_OPLGTW-148). No release, no deploy, no IAM, no SSM parameter, no env key.",
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr1.py",
+   "kind": "test",
+   "commit_or_etag": "7fdca1f628",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Eight named tests, offline. ac01 to ac06 unchanged in meaning; ac07 (40 refused calls per loop against the real loopback server, two loops, each refusal with a JSON body of about 2 KB; each returns its status and error code; no connection error) and ac08 (the audit writer sleeps 1.0 s; a concurrent ticker advances at least 8 times during a served, a refused and an unarmed call; one audit record per call) are new. Committed @7fdca1f628 (LOCAL).",
+   "artifact_covered_by": ["AC1", "AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "ac5c4ae47f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three appended rows: NFRA_OPLGTW-Z-W148-S1 (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O: the body read is not bounded, request.body() buffers the whole body before the 65536 check), NFRA_OPLGTW-Z-W148-S2 (OBSERVATION, INERT: the 413 is answered before the not-armed 403), NFRA_OPLGTW-Z-W148-S3 (OBSERVATION, INERT: the refusal-before-body mutant did not fail ac07 on this machine). Committed @ac5c4ae47f (LOCAL).",
+   "artifact_covered_by": ["AC2"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "AC1: the eight named tests pass (the six inherited and the two new: refusals answer cleanly; the audit write is off the loop).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06 test_ogpr1_ac07 test_ogpr1_ac08; echo \"exit=$?\"",
+   "output_evidence": "run 1: pytest rc=0; named tests passed 8 of 8; failed/error lines 0 / RESULT: PASS / exit=0. run 2: identical. run 3: identical.",
+   "denominator": "8 named tests of tests/test_og_pr1.py; 8 passed; 0 failed or errored; 3 of 3 runs",
+   "status": "PASS",
+   "expect": "(?s)pytest rc=0; named tests passed 8 of 8; failed/error lines 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "AC2: your commits touch only the module and its test file.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~148 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'; echo \"exit=$?\"",
+   "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~148: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "3 files touched by commits authored by 0.9.0_WK_NFRA_OPLGTW~148: 2 product files (app/probe_listener.py, tests/test_og_pr1.py), 1 standing record file (the investigation channel); 0 outside the allowed set",
+   "status": "PASS",
+   "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~148: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "AC3: the new tests and four existing gateway test files pass together in both orders with the same count.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr2set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py; echo \"exit=$?\"",
+   "output_evidence": "run 1: pr2set forward: passed 26; failed 0 / pr2set reverse: passed 26; failed 0 / RESULT: PASS / exit=0. run 2: identical (21 s). run 3: identical (21 s).",
+   "denominator": "5 test files (8 tests in tests/test_og_pr1.py plus the tests of the four existing files); forward 26 passed, reverse 26 passed, 0 failed in either order; 3 of 3 runs",
+   "status": "PASS",
+   "expect": "(?s)pr2set forward: passed (\\d+); failed 0.*pr2set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "repeated runs on the committed code: AC1 three times and AC3 three times (both orders each run)",
+   "observed": "every AC1 run: 8 of 8 named tests passed; every AC3 run: forward 26 passed, reverse 26 passed, 0 failed",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "Mutant A: the audit write put back inline on the event loop (each run_in_threadpool(_audit, ...) in app/probe_listener.py replaced by a direct _audit(...) call; 3 sites) applied in place to the worktree file, run against test_ogpr1_ac08, then the file restored byte-equal (cmp) to the committed version.",
+   "expected": "test_ogpr1_ac08 FAIL on the tick count (not at least 8)",
+   "observed": "FAILED tests\\test_og_pr1.py::test_ogpr1_ac08 - AssertionError: the event loop was blocked during a served call (0 ticks); 1 failed. Mutant B, recorded here and not graded by this slot: the refusal answered before the body read (the not-armed and tool refusals moved above await request.body(), restored byte-equal) did NOT fail test_ogpr1_ac07 on this machine in 3 of 3 runs ('1 passed, 7 deselected' each run). The connection reset the order names is timing-dependent and did not reproduce here; see surprise NFRA_OPLGTW-Z-W148-S3.",
+   "status": "FIRED-AS-EXPECTED"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "A release, deploy, IAM change, SSM parameter, env key or Terraform change.",
+   "reason": "Declared out of scope by the task order (section 2); OG-ap-40 carries the release."
+  },
+  {
+   "item": "A live slow or unreachable S3 audit sink, measured against the running gateway.",
+   "reason": "Not measured: the order is offline. ac08 replaces the audit writer with a fake that sleeps 1.0 s; the live effect on /health was not observed."
+  },
+  {
+   "item": "The connection reset the order names (test_ogpr1_ac02 on the issuer's machine, 1 of 3 forward runs).",
+   "reason": "Not reproduced on this machine: 3 of 3 AC3 runs passed, and mutant B (refusal before the body read) did not fail ac07 in 3 of 3 runs. Recorded as surprise NFRA_OPLGTW-Z-W148-S3, not claimed as verified."
+  },
+  {
+   "item": "The memory peak of an oversized body read before the 65536-byte check.",
+   "reason": "Not measured. Recorded as surprise NFRA_OPLGTW-Z-W148-S1; the order's literal invocation (await request.body()) buffers the whole body."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W148-S1: the body-first read is not bounded; request.body() buffers the whole request body before the 65536-byte check (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O).",
+  "NFRA_OPLGTW-Z-W148-S2: the order does not place the 413 against the not-armed 403; this cell answers 413 first for an oversized body to an unarmed probe (OBSERVATION, INERT).",
+  "NFRA_OPLGTW-Z-W148-S3: the refusal-before-body mutant did not fail test_ogpr1_ac07 on this machine in 3 of 3 runs (OBSERVATION, INERT)."
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~148 on worktree wk-NFRA_OPLGTW-148 (HEAD 7ed9ccbb17). Verified the worktree carries org/ and .tools/; read the task order, the inherited probe_listener.py and tests/test_og_pr1.py in full, and the check helpers. Repaired app/probe_listener.py (async _refuse with threadpool audit writes; body read first, 413 above 65536 bytes, JSON parsed from the bytes) and added ac07 and ac08 to tests/test_og_pr1.py; server.py, audit.py and the other app files untouched. Ran mutant A (ac08 FAILED, 0 ticks) and mutant B (ac07 passed 3 of 3, not fired), each restored byte-equal. Ran AC1 3 of 3 (8 of 8), AC2 (3 files touched, 2 product, 0 outside), AC3 3 of 3 (26 and 26). Committed @7fdca1f628 (code) and @ac5c4ae47f (three surprise rows).",
+ "compiler_tools": [
+  {
+   "tool": "_named.sh (the order's own AC1 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr1.py test_ogpr1_ac01 test_ogpr1_ac02 test_ogpr1_ac03 test_ogpr1_ac04 test_ogpr1_ac05 test_ogpr1_ac06 test_ogpr1_ac07 test_ogpr1_ac08",
+   "result": "pytest rc=0; named tests passed 8 of 8; failed/error lines 0; RESULT: PASS (3 of 3 runs)"
+  },
+  {
+   "tool": "_wkbound.sh (the order's own AC2 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~148 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr1\\.py)$'",
+   "result": "files touched 3; product files 2; outside the allowed set 0; RESULT: PASS"
+  },
+  {
+   "tool": "_bothorders.sh (the order's own AC3 check, unmodified)",
+   "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr2set tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_en24.py tests/test_og_cl2.py tests/test_og_en9.py",
+   "result": "pr2set forward: passed 26; failed 0; pr2set reverse: passed 26; failed 0; RESULT: PASS (3 of 3 runs)"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (code, rows)",
+   "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_NFRA_OPLGTW~148 <0.9.0_WK_NFRA_OPLGTW~148@opal.agent>' -F .scratch/msg_code.txt -- <two product files>; then -F .scratch/msg_rows.txt -- <INVESTIGATION_v1.md>",
+   "result": "committed 7fdca1f628 (commit-gate OK for 2 product files) and ac5c4ae47f (surprise-row gate OK; missions-tree-check 0 violations)"
+  }
+ ]
+}
