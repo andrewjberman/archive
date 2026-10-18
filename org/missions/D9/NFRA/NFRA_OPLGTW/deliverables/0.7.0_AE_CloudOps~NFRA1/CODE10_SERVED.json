@@ -1,6 +1,6 @@
 {
  "body": {
-  "read_at": "2026-10-18T16:25:38Z",
+  "read_at": "2026-10-18T17:19:06Z",
   "live_commit": "a0c83303ee48c95c16a61c0d5e8bd186b1083b66",
   "health_status": 200,
   "env_key_count": 65,
@@ -79,17 +79,49 @@
    "service_rss_mb_min": 123.5,
    "service_rss_mb_max": 182.2,
    "host_pct_max": 27.3,
-   "mcp_requests_served": 0,
+   "post_mcp_access_log_lines": 0,
    "audit_records_in_window": 291,
-   "graph_backed_tool_calls": 1,
-   "graph_backed_calls_ok": 1,
+   "access_log_note": "the journal shows 0 POST /mcp lines in this window although the audit lake holds 291 records: the service access log has been silent since the OG-ap-40 deploy (row Z-S395); the counts here come from the audit lake",
+   "graph_backed_tool_calls": 272,
+   "graph_backed_calls_ok": 272,
    "graph_backed_calls_not_ok": 0,
+   "graph_backed_by_outcome": {
+    "read_channel_messages": {
+     "ok": 69
+    },
+    "poll_addressed_teams_messages": {
+     "ok": 69
+    },
+    "hx_teams": {
+     "ok": 103
+    },
+    "hx_msgs": {
+     "ok": 30
+    },
+    "whoami": {
+     "ok": 1
+    }
+   },
+   "graph_count_supersedes": {
+    "first_count": {
+     "graph_backed_calls": 1,
+     "tools": [
+      "whoami"
+     ],
+     "how": "only each tool function's own source was searched for 'graph'"
+    },
+    "why_wrong": "tools that reach Graph through a helper (read_channel_messages, poll_addressed_teams_messages) and the hx route names (hx_teams, hx_msgs) were not counted"
+   },
    "graph_host_refused_journal_lines": 0,
    "graph_host_refused_audit_records": 0,
    "graph_backed_tools_called": [
+    "hx_msgs",
+    "hx_teams",
+    "poll_addressed_teams_messages",
+    "read_channel_messages",
     "whoami"
    ],
-   "graph_count_method": "graph-backed = a tool function in app/tools.py whose source mentions graph or the per-user token step (static reading)"
+   "graph_count_method": "graph-backed = a tools.py function that calls graph.call or (transitively, by name) a function that does, plus the audited route names of the other app modules that import graph (static reading)"
   },
   "probe": {
    "armings": 0,
@@ -135,7 +167,7 @@
   },
   "limits": [
    "The served read was UNARMED ONLY: no lease was written (this seat made no SSM write of any kind) and the listener answered 403 probe_not_armed to all three calls. The firm pin is therefore not exercised in the service; it was exercised in a guarded scratch process in Phase A.",
-   "The Graph pin's allowed branch in the service is whatever organic Graph-backed traffic arrived in the read-back window (1 calls, 0 not ok, 0 GraphHostRefused lines); the counts are a static reading of which tools call Graph.",
+   "The Graph pin's allowed branch in the service is whatever organic Graph-backed traffic arrived in the read-back window (272 calls, 0 not ok, 0 GraphHostRefused lines); the counts are a static reading of which tools call Graph.",
    "The 27-tool read ran in a fresh process under oom_score_adj_1000_rlimit_as_1400mb."
   ]
  }
