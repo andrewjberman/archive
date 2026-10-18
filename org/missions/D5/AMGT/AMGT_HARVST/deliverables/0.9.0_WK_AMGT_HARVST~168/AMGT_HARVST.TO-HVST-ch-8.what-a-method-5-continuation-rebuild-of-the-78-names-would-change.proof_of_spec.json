@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ch-8.what-a-method-5-continuation-rebuild-of-the-78-names-would-change",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ch-8.what-a-method-5-continuation-rebuild-of-the-78-names-would-change.md",
+    "group": "OTHER",
+    "vintage_commit": "ac20d27c69"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "ac20d27c69",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ch-8.what-a-method-5-continuation-rebuild-of-the-78-names-would-change.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~168",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.py",
+      "kind": "script",
+      "commit_or_etag": "c7711c406f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census, 355 lines, created in this commit. Starts from the sister ch1_census.py (0.9.0_WK_AMGT_HARVST~165) and changes: reads only the served object per partition (the gateway's pick), builds continuation.build(security_key, client) in memory (write_one is never referenced), compares built fields with served fields by parsed value after a JSON round trip, adds the MNST positive and UNH negative controls, the underscore-prefix probe and the non-JSON count. The S3 client wrapper forwards only get_object, head_object, list_objects_v2 and get_paginator(list_objects_v2) and raises on any other operation. Budget 5000 requests and 1 GiB. Run once in the foreground: rc=0, gets=1215, bytes=116081888.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out",
+      "kind": "doc",
+      "commit_or_etag": "c7711c406f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census stdout written by the script itself with LF line endings (104 lines, 0 CR, ends LF). PARTITIONS n=95; AT-CURRENT 17; NAME 78 (each fields_changed=0, inputs_equal=yes, name_exists=no); DIFF 0; BUILD-ERROR 0; CONTROL-POSITIVE MNST_US_Equity fields_changed=0; CONTROL-NEGATIVE fields_changed=1; PROBE-UNDERSCORE-PREFIX partitions=0; PROBE-NONJSON-EXCLUDED total=0; CENSUS-CONT-REBUILD line last.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c7711c406f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended by bytes (42 insertions, 0 deletions in the commit): AMGT_HARVST-D1-W168-S1 (OBSERVATION, INERT: the gateway reads the underscored continuation prefix first, which holds no partition, and falls back to the hyphenated prefix) and AMGT_HARVST-D1-W168-S2 (OBSERVATION, INERT: the gateway builds its prefix from the raw security key while the partition of a slash key is slash-safe encoded; BP/_LN_Equity and NG/_LN_Equity). The JSON array parses with 509 rows.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out expect (?m)^CENSUS-CONT-REBUILD partitions=\\d+ at_current=\\d+ names=78 unchanged=\\d+ changed=\\d+ fields_changed=\\d+ inputs_equal=\\d+ name_exists=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out",
+      "output_evidence": "CENSUS-CONT-REBUILD partitions=95 at_current=17 names=78 unchanged=78 changed=0 fields_changed=0 inputs_equal=78 name_exists=0 gets=1215 bytes=116081888\n(ch8_census.out last line; the regex matched 1 line). The counts are the finding and were not adjusted.",
+      "denominator": "1 of 1 CENSUS-CONT-REBUILD line; 95 of 95 partitions = 17 AT-CURRENT + 78 names",
+      "status": "PASS",
+      "expect": "(?m)^CENSUS-CONT-REBUILD partitions=\\d+ at_current=\\d+ names=78 unchanged=\\d+ changed=\\d+ fields_changed=\\d+ inputs_equal=\\d+ name_exists=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out expect (?m)^CONTROL-POSITIVE MNST_US_Equity fields_changed=0$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out",
+      "output_evidence": "CONTROL-POSITIVE MNST_US_Equity fields_changed=0\n(ch8_census.out; the detail line reads served=67c9b368/5 method_version_is_current=yes list=none; the regex matched 1 line).",
+      "denominator": "1 of 1 CONTROL-POSITIVE line; the MNST served object is at the current method version",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-POSITIVE MNST_US_Equity fields_changed=0$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out expect (?m)^CONTROL-NEGATIVE fields_changed=1$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.out",
+      "output_evidence": "CONTROL-NEGATIVE fields_changed=1\n(ch8_census.out; the detail line reads name=UNH_US_Equity planted_field=fund_of_record served=4d837586/4 list=fund_of_record; the regex matched 1 line).",
+      "denominator": "1 of 1 CONTROL-NEGATIVE line; exactly one planted field, and the comparator reported exactly that field",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-NEGATIVE fields_changed=1$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CONTROL-NEGATIVE: the served UNH_US_Equity object is copied in memory, one field (the first sorted key, fund_of_record) is replaced in the copy, and the same field comparator must report exactly one changed field.",
+      "expected": "fields_changed=1",
+      "observed": "CONTROL-NEGATIVE fields_changed=1 (planted_field=fund_of_record, list=fund_of_record)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the order runs the census once in the foreground. Comparator stability is evidenced by the positive control (MNST, fields_changed=0 on a real served object) and the negative control (one planted field, fields_changed=1), not by a second census run.",
+      "observed": "single run, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to S3, any gold or silver writer (continuation.write_one, gold_put, dossier.write_one, --write), any deploy, any edit of a source file, any edit outside <paths>",
+      "reason": "Out of scope by the order. The census wrapper refuses every operation except get, head, list and paginated list. The census calls continuation.build only; it never calls write_one."
+    },
+    {
+      "item": "The task-order file's <status> flip",
+      "reason": "The order states the issuer flips its status; this worker did not edit the order file."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W168-S1: OBSERVATION -- the gateway lists the underscored prefix research_continuation first (harvest_research.py:46, 76-88); it holds no partition, so every served object was read from the hyphenated partition the census assumed (PROBE-UNDERSCORE-PREFIX partitions=0).",
+    "AMGT_HARVST-D1-W168-S2: OBSERVATION -- the gateway builds its continuation prefix from the raw security key (harvest_research.py:343, 438-446), while the partition of a slash key is slash-safe encoded (BP/_LN_Equity -> BP-SLASH-_LN_Equity); the two slash names (BP, NG) are among the 78 and compare fields_changed=0, but which key form callers pass was not measured."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ch8_census.py (read-only census, foreground, python -u, output written by the script with LF endings)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~168/ch8_census.py",
+      "result": "rc=0; PARTITIONS n=95; AT-CURRENT 17; NAME 78; fields_changed=0 for all 78; CONTROL-POSITIVE fields_changed=0; CONTROL-NEGATIVE fields_changed=1; gets=1215; bytes=116081888"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ch-8.what-a-method-5-continuation-rebuild-of-the-78-names-would-change.md",
+      "result": "recorded in the worker report"
+    }
+  ]
+}
