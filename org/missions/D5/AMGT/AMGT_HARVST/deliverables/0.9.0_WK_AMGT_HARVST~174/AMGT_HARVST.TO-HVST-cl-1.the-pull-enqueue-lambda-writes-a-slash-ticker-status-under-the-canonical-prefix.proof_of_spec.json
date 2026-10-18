@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cl-1.the-pull-enqueue-lambda-writes-a-slash-ticker-status-under-the-canonical-prefix",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cl-1.the-pull-enqueue-lambda-writes-a-slash-ticker-status-under-the-canonical-prefix.md",
+    "group": "OTHER",
+    "vintage_commit": "4c7a60cabe"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4c7a60cabe",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cl-1.the-pull-enqueue-lambda-writes-a-slash-ticker-status-under-the-canonical-prefix.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~174",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "5df3755664",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local code only, committed in 5df3755664 on wk-AMGT_HARVST-174. _slash_safe_key is a standard-library copy of crosswalk.slash_safe_key; the status key is packs/<canonical>/status.json; the raw security_key stays in the status body and the SQS body. Not built, uploaded or deployed (deploy is a separate Terraform order).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/research/pull_enqueue/test_cl1_status_key_canonical.py",
+      "kind": "test",
+      "commit_or_etag": "5df3755664",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New offline test file committed in 5df3755664: fake boto3 clients, no network. 16 tests; the mutant arm (identity rule) fails the slash arm as asserted. Existing test files are unchanged.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5df3755664",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended by bytes in 5df3755664 (AMGT_HARVST-D1-W174-S1 and -S2); diff is 43 insertions, 0 deletions. The row gate passed without an override.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 python -m pytest infra/aws/lambda/research/pull_enqueue/test_cl1_status_key_canonical.py -q -p no:cacheprovider --color=no expect (?m)^\\d+ passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_cl1_status_key_canonical.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "16 passed in 0.23s\n(second identical run in the same worktree: 16 passed in 0.21s; the matched line is the first line above)",
+      "denominator": "16 of 16 tests in test_cl1_status_key_canonical.py pass (2 slash-ticker arms, 2 slash-free arms, 1 equality arm over 95 fixture keys plus 2 added keys, 6 refusal arms, 1 refused-ticker arm, 1 non-ASCII slash-free arm, 1 fence arm, 1 mutant arm, 1 import-source arm)",
+      "expect": "(?m)^\\d+ passed in",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py -q -p no:cacheprovider --color=no expect (?m)^22 passed in",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "1 failed, 21 passed in 0.33s\nFAILED infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py::test_e2e_check_payload_carries_internal_context (FileNotFoundError: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/check_e2e.py; the file is tracked at HEAD but absent from this sparse worktree)\n(second identical run: 1 failed, 21 passed in 0.34s; the expected line 22 passed in does not appear, so this criterion is FAIL)",
+      "denominator": "21 of 22 tests pass in the two existing files (base count 22); 1 failed, the test_bx1 e2e arm that loads check_e2e.py",
+      "expect": "(?m)^22 passed in",
+      "status": "FAIL",
+      "status_reason": "The sparse-checkout set of this worktree omits org/missions/D5/AMGT/AMGT_RESAPP, so the pre-existing e2e arm cannot load check_e2e.py. The 21 arms that exercise the fence and the refusal log pass with the HVST-cl-1 change in place. Not fixed: widening the sparse set is outside the <paths> grant, and the expectation, the tests and the code were not edited to match. Recorded as surprise AMGT_HARVST-D1-W174-S1 (BLOCKING).",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_mutant_identity_rule_fails_the_slash_arm: with _slash_safe_key replaced by the identity, the slash arm's canonical-key assertion must raise AssertionError.",
+      "expected": "pytest.raises(AssertionError) around the slash arm with the identity rule: the arm raises, so the mutant is caught",
+      "observed": "test_mutant_identity_rule_fails_the_slash_arm passed in the AC1 run (16 passed), so the identity mutant fails the slash arm as expected",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "second identical run of the AC1 and AC2 commands in the same worktree, no sleeps or network",
+      "observed": "AC1: 16 passed in 0.23s then 16 passed in 0.21s. AC2: 1 failed, 21 passed in 0.33s then 1 failed, 21 passed in 0.34s. The same counts both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The task-order status flip (AMGT_HARVST.TO-HVST-cl-1 <status>)",
+      "reason": "The worker face says the issuer flips the status and the order file is not in <paths>. The order stays open because AC2 is FAIL."
+    },
+    {
+      "item": "Build, upload, Terraform, deploy and every aws call",
+      "reason": "Out of scope by the order: local code and offline tests only, with fake boto3 clients. The zip was not built or uploaded, and no S3, SQS or Lambda call was made."
+    },
+    {
+      "item": "Widening the sparse checkout to materialise org/missions/D5/AMGT/AMGT_RESAPP",
+      "reason": "Not done. The sparse set is outside the <paths> grant, and materialising tracked files is the reconstruction the worker face forbids. AC2's failing arm is recorded, not fixed."
+    },
+    {
+      "item": "build-and-upload.sh, pull_consumer.py, crosswalk.py and every existing test",
+      "reason": "Not edited, as the order requires. The copy of slash_safe_key lives in the Lambda only, and the equality arm imports crosswalk in the test."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W174-S1: AC2 reads 1 failed, 21 passed in this worktree (sparse checkout omits AMGT_RESAPP; check_e2e.py is tracked at HEAD but absent). BLOCKING, INERT. The order stays open on AC2.",
+    "AMGT_HARVST-D1-W174-S2: a slash-free ticker that the copied rule refuses (the token inside the value, or a non-ASCII character) now returns 400 with zero writes, where the unchanged code wrote and sent (202). OBSERVATION, INERT. The face's 'a key without a slash is byte-equal' ruling and its refusal branch disagree on this shape."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (offline, fake boto3 clients)",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_cl1_status_key_canonical.py -q -p no:cacheprovider --color=no",
+      "result": "16 passed in 0.23s (second run 16 passed in 0.21s)"
+    },
+    {
+      "tool": "pytest (existing fence and refusal-log files, unchanged)",
+      "invocation": "python -m pytest infra/aws/lambda/research/pull_enqueue/test_bx1_tier_fence.py infra/aws/lambda/research/pull_enqueue/test_by1_refusal_logged.py -q -p no:cacheprovider --color=no",
+      "result": "1 failed, 21 passed in 0.33s (rc=1; the failing arm is the sparse-checkout gap, recorded as S1)"
+    }
+  ]
+}
