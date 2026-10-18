@@ -1,0 +1,52 @@
+# cj4_before.out -- HVST-cj-4 step 0 (read only), 0.7.0_AE_CloudOps~SC1, 2026-10-18T07:40:04Z
+GO_UTC 2026-10-18T07:45:00Z, window to 10:15:00Z (msgs 7951, 7954; READ-acked); no write before 07:45:00Z
+WORKTREE C:/tmp/cj4-build  git rev-parse HEAD = 8f329a10b9f6772ec6b986852747f8e868ada6e8
+LIB-RESEARCH-DIFF 8f329a10b9..HEAD: lines=0 (empty = 0); worktree status lines=0; field_map blob 3b2829c3aa7ce572bea37a10b9bce8879cf13a96 (the census pin 3b2829c3..)
+PAIR: COO half sha256 35e368f31b784a7d4e285dafd124588e56b87fb8773c272dfda052b7b7972e57 (the CTO half b9e244d5a9 binds 35e368f31b784a7d4e285dafd124588e56b87fb8773c272dfda052b7b7972e57) -- equal
+LIST cj4_names.txt ebcec99e045a59d0871b25532ff9d74b337c00ddefe568a4d5303cf86947567e lines=75 (expected ebcec99e045a59d0871b25532ff9d74b337c00ddefe568a4d5303cf86947567e, 75)
+LIST cj4_expected_moves.txt ba4cd92ef19efc12f84a292de3df35743732ee9ac39291323611e31ab5ad88ff lines=75 (expected ba4cd92ef19efc12f84a292de3df35743732ee9ac39291323611e31ab5ad88ff, 75)
+
+## step 0 (ii) counts (cj4_counts_before.out, 07:34Z)
+COUNT research_dossier prefix=amgt/harvest/gold/research_dossier/ objects=1479 partitions=95
+COUNT research-continuation prefix=amgt/harvest/gold/research-continuation/ objects=446 partitions=95
+
+## step 0 (iii) scheduled tasks (Get-ScheduledTask, read 07:34Z)
+tasks listed: 207; positive control OPAL_autolaunch*: 1 found; tasks whose action names fund_form/continuation/dossier/research.corpus/research-fund-form/typed: 0; harvest cycle task state=Running (args: cycle_runner --publishers wsj barrons sa --refresh-once; none names a dossier, continuation or fund-form build)
+
+## how the model-block guard counts 'a row with a value' (CTO half condition 1)
+dossier fields['model_rows'] is a list of row dicts {mnemonic|label, source, figure}; figure is {value, unit, source, stamp, fiscal_year|fiscal_period} or {value: null, absent: <reason>}. A row has a value when row['figure']['value'] is not None; a model_rows that is not a list (the {value: null, absent: ...} shape) counts 0. The two counts (served, new) are printed per name in the manifest line and in the GUARD line. The record is dossier._model_block_read(name, client) read again by the driver; its object key must equal the model_block input of the build.
+
+## driver plan mode (cj4_plan.out), read only, 07:36Z to 07:39Z (about 90 s per name: one build, one guard read)
+=== cj4_run.py plan_only=True start 2026-10-18T07:36:12Z HEAD=8f329a10b9 names=2 manifest_lines=0 ===
+NAME UNH_US_Equity partition=security_key=UNH_US_Equity objects_before=15 served=as_of=2026-10-17.f73f295a3671b8da.json as_of_served=2026-10-17 method=amgt-corpus-dossier/15 served_model_block_stamp=20261017T131006Z
+COMPARE name=UNH_US_Equity moved=fund_form_ref expected=fund_form_ref match_expected=True input_kinds_differ=continuation,fund_form built_as_of=2026-10-18
+GUARD name=UNH_US_Equity moves_model_rows=False record_status=SERVED new_stamp=20261017T131006Z served_stamp=20261017T131006Z rows_with_value_new=92 rows_with_value_served=92 build_block_key_equals_record=True guard=PASS
+PLAN-ONLY UNH_US_Equity; nothing put
+NAME CPA_US_Equity partition=security_key=CPA_US_Equity objects_before=14 served=as_of=2026-10-12.2bd09162c4f47b3b.json as_of_served=2026-10-12 method=amgt-corpus-dossier/15 served_model_block_stamp=20261011T130357Z
+COMPARE name=CPA_US_Equity moved=fund_form_ref,model_rows expected=fund_form_ref,model_rows match_expected=True input_kinds_differ=continuation,fund_form,model_block built_as_of=2026-10-18
+GUARD name=CPA_US_Equity moves_model_rows=True record_status=SERVED new_stamp=20261017T130327Z served_stamp=20261011T130357Z rows_with_value_new=89 rows_with_value_served=89 build_block_key_equals_record=True guard=PASS
+PLAN-ONLY CPA_US_Equity; nothing put
+=== batch done 2026-10-18T07:39:16Z manifest_lines=0 ===
+
+## step 0 (iv) BEFORE gateway reads, harvest_get_research fields ["fund_form_ref","fund_of_record","last_stated_position","model_rows"], read 07:34Z to 07:36Z
+(transcribed by the seat from the tool results; the machine records are the driver's GUARD/COMPARE lines and the digests; etfs_compare_peers not called)
+UNH_US_Equity: as_of=2026-10-17 content_sha256=6bd7cea7091cb8254e553af1a54e13462406a881224fe6c9c1cd3e185244e0f1 method_version=amgt-corpus-dossier/15
+  denominator=24 truncated=true omitted_items={continuation_fields:1, ai_fill_blocks:1} duplicates_dropped.research_dossier={listed:15,distinct_as_of:6,dropped:9}
+  denominator_note="dossier fields read 24; research_dossier objects listed 15, distinct as_of 6, duplicates dropped 9"
+  dossier_key=amgt/harvest/gold/research_dossier/security_key=UNH_US_Equity/as_of=2026-10-17.f73f295a3671b8da.json
+  continuation_key=amgt/harvest/gold/research-continuation/security_key=UNH_US_Equity/b89177eb99c0dc00.json (the ch-7 /5 object)
+  source_keys(13): ai_fill/ai_fill.json; research-continuation/.../ (prefix) + b89177eb99c0dc00.json; research_dossier/.../as_of=2026-10-17.f73f295a3671b8da.json; silver/research-report/ (prefix) + the same 8 parts; bloomberg exec_officers 20261007T113713Z.json
+  dossier_fields: fund_form_ref {uri s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=pfoe/827a2c870bc5efa6.json, content_sha256 9816c713509fac2d72443537d7f1c454be22e55755735aa8d9f7de3ea9fd585a}; fund_of_record PFOE; last_stated_position {PFOE, line_only true, size_pct null, text "Maintain positions in PFOE and DIVZ"};
+    model_rows = list of rows, every figure stamp 20261017T131006Z (rows with a value per the driver: 92)
+  continuation_fields (3 returned, 1 omitted): thesis_pillars absent; thesis_summary absent; fund_of_record PFOE; last_stated_position (same)
+  research_reports(1): 48d81f053e5076e8 class B PFOE holding, part=date=2026-09-25/part-20261018T010034Z.parquet
+CPA_US_Equity: as_of=2026-10-12 content_sha256=61b9977a5ddfe65a5584d69f87178849da84704161f5563b004942a111510f6d method_version=amgt-corpus-dossier/15
+  denominator=24 truncated=true omitted_items={dossier_fields:1, continuation_fields:1, research_reports:28} (model_rows is the omitted dossier field: the gateway response-size cap, row D1-S50)
+  duplicates_dropped.research_dossier={listed:14,distinct_as_of:6,dropped:8}; denominator_note="dossier fields read 24; research_dossier objects listed 14, distinct as_of 6, duplicates dropped 8"
+  dossier_key=amgt/harvest/gold/research_dossier/security_key=CPA_US_Equity/as_of=2026-10-12.2bd09162c4f47b3b.json
+  continuation_key=amgt/harvest/gold/research-continuation/security_key=CPA_US_Equity/96cd31de9852d563.json (the ch-7 /5 object)
+  source_keys(13): same shape as UNH's (dossier entry as_of=2026-10-12.2bd09162c4f47b3b.json; exec_officers 20261007T113616Z.json)
+  dossier_fields (3 returned, model_rows omitted): fund_form_ref {uri .../fund=idvz/668b09d8120f0118.json, content_sha256 0455da2da7d6490132a6a952dbf42751418cdc85abd7ea104ec3ed8b28bfb5d7}; fund_of_record IDVZ; last_stated_position {IDVZ, size_pct "2", text "1-2% position in IDVZ ..."}
+    served model_rows (S3-level, not in the gateway read): block stamp 20261011T130357Z, rows with a value 89
+  continuation_fields (4 returned, 1 omitted): thesis_summary absent+""; fund_of_record IDVZ; last_stated_position; thesis_pillars (5 entries)
+  research_reports(9 returned, 28 omitted): the same 9 entries as at ch-7, part=date=2026-09-25/part-20261018T010034Z.parquet

@@ -1,0 +1,22 @@
+# cj4_canary.out -- HVST-cj-4 step 2 / COO half C-7: gateway reads of UNH_US_Equity and CPA_US_Equity, fields ["fund_form_ref","fund_of_record","last_stated_position","model_rows"]
+BEFORE reads 07:34Z to 07:36Z (cj4_before.out step 0 iv); AFTER reads 07:54Z, after both canary objects were written and read back (cj4_written.out lines 1-2: UNH 07:49:11Z, CPA 07:54:00Z).
+Compared by the seat entry by entry from the two tool results (transcription); the machine records are the driver's COMPARE/GUARD/READBACK lines in cj4_run.log.
+UNH_US_Equity (expected move: fund_form_ref only)
+  fund_form_ref        pfoe/827a2c870bc5efa6.json sha 9816c713..  ->  pfoe/57cee6de8b2cd85e.json sha 74ad08d7..    MOVED as listed
+  model_rows           same rows, same block stamp 20261017T131006Z, same values (rows with a value 92 before and in the build)  EQUAL (not listed to move)
+  fund_of_record PFOE; last_stated_position {PFOE, line_only, null, text}   EQUAL
+  continuation_key (b89177eb..), continuation_fields (3 returned, 1 omitted), research_reports (1), ai_fill_* (key, as_of, blocks), management_roster   EQUAL
+  as_of 2026-10-17 -> 2026-10-18; content_sha256 6bd7cea7.. -> 5a626492..; dossier_key as_of=2026-10-17.f73f295a3671b8da.json -> as_of=2026-10-18.75715538ce40ba9f.json   DIFFER (EXPECTED)
+  source_keys (13): the same 13 except the dossier entry as named above   DIFFERS ONLY there (EXPECTED)
+  duplicates_dropped.research_dossier {listed 15, distinct_as_of 6, dropped 9} -> {16, 7, 9}; denominator_note "objects listed 15, distinct as_of 6" -> "16, 7"   DIFFER (EXPECTED)
+  omitted_items {continuation_fields 1, ai_fill_blocks 1} and truncated true   EQUAL
+CPA_US_Equity (expected moves: fund_form_ref and model_rows)
+  fund_form_ref        idvz/668b09d8120f0118.json sha 0455da2d..  ->  idvz/65a5baab3afd06f0.json sha 3f3d60a3..    MOVED as listed
+  model_rows           NOT VISIBLE through the gateway: omitted before and after by the response-size cap (omitted_items.dossier_fields 1 in both reads, row D1-S50). Seen at S3 level by the driver: block stamp 20261011T130357Z -> 20261017T130327Z, rows with a value 89 -> 89 (the guard PASSED).
+  fund_of_record IDVZ; last_stated_position {IDVZ, size 2, text}   EQUAL
+  continuation_key (96cd31de..), continuation_fields (4 returned, 1 omitted; thesis_pillars 5 entries), research_reports (9 returned, 28 omitted), ai_fill_*, management_roster   EQUAL
+  as_of 2026-10-12 -> 2026-10-18; content_sha256 61b9977a.. -> 0fd9d4be..; dossier_key as_of=2026-10-12.2bd09162c4f47b3b.json -> as_of=2026-10-18.73bdd8804b06829e.json   DIFFER (EXPECTED)
+  source_keys (13): the same 13 except the dossier entry   DIFFERS ONLY there (EXPECTED)
+  duplicates_dropped.research_dossier {listed 14, distinct_as_of 6, dropped 8} -> {15, 7, 8}; denominator_note 14/6 -> 15/7   DIFFER (EXPECTED)
+  omitted_items {dossier_fields 1, continuation_fields 1, research_reports 28} and truncated true   EQUAL
+CANARY: fund_form_ref and model_rows moved as cj4_expected_moves.txt says (CPA model_rows only at S3 level, stated above) and nothing else moved but the pointers the COO half names. Not a STOP.
