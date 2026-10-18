@@ -27,7 +27,7 @@ import fitz  # noqa: E402
 from lib.research.print import render_pack as rp  # noqa: E402
 
 FN = "opal-amgt-scoped-api"
-UNCONFIRMED = "does not confirm this figure's currency"
+UNCONFIRMED_WORDS = ("currency not stated", "does not confirm this figure's currency")  # the page's two wordings: a valued amount with no currency, and an unmeasured basis
 LAM = boto3.client("lambda", region_name="us-east-1")
 
 
@@ -108,7 +108,7 @@ def grade(key):
             if own:
                 verdict = "OK" if (cur == own and mag_ok) else ("WRONG-CURRENCY" if cur != own else "WRONG-MAGNITUDE")
             else:
-                if UNCONFIRMED in ln and (cur in (None, "local currency") or cur.lower() == "currency"):
+                if any(w in ln for w in UNCONFIRMED_WORDS) and (cur in (None, "local currency") or cur.lower() == "currency"):
                     verdict = "OK-UNCONFIRMED" if mag_ok else "WRONG-MAGNITUDE"
                 else:
                     verdict = "WRONG-CURRENCY" if cur not in (None, "local currency") else "NO-UNCONFIRMED-WORDS"
