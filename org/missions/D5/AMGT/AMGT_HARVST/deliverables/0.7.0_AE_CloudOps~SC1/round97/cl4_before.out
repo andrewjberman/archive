@@ -1,0 +1,64 @@
+HVST-cl-4 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, started 2026-10-18T15:43Z (issuer GO msg 8109 sent 15:23:11Z, READ-acked 15:42Z after the cl-2 close at 15:40:17Z; the start condition "cl-2 ledger CLOSED and committed" was met at 15:40:17Z). Ledger harvst-cl4-dossiers-slash-after-1302z opened 15:43:51Z BEFORE any read (committed).
+Order sha256 prefix db7e6a0a3f7bd083 (equal to the GO). COO half sha256 512874fb6489162b6fd720921080c73ced3bf80d803e5ca8d64412a7f8220164 (equal to the CTO half's binding); CTO half committed @de80883964, SIGNED, sha256 prefix 2c06d0e378d2ff27 (equal to the GO). Site Z: cleared the prefix from 15:22Z for 90 minutes (CTO msg 35738), end by 16:50Z.
+WINDOW (my reading, stated): the order says "from my GO to 60 minutes later". The GO was sent 15:23:11Z, so the driver's window is GO_UTC 2026-10-18T15:23:11Z to 16:23:11Z, inside site Z's 16:50Z. If the second name has not landed by 16:23:11Z, stop and tell the issuer.
+--- WHAT THIS CHANGES (stated plainly, order section 0)
+The served value that moves is model_rows (cause model_block: the stored dossiers cite the 20261017T130241Z (BP) and 20261017T130649Z (NG) blocks, the build cites 20261018T130249Z and 20261018T130703Z) plus the pointers (dossier_key, content_sha256, the dossier entry of source_keys, the duplicates_dropped and denominator_note counts). fund_form_ref does NOT move. Observation: in these gateway reads model_rows IS returned (BP 105 entries, NG a list), it is not cut by the response-size cap (truncated is true only for continuation_fields and ai_fill_blocks), so its move will be visible as the stamp inside the figures. Rollback is an S3 delete of the two new keys, which is not mine to take.
+--- PLAN-MODE RUN (read only, cl4_plan.out, 15:46:24Z to 15:47:27Z, nothing put)
+BP: moved=model_rows expected=model_rows match_expected=True input_kinds_differ=model_block; GUARD record_status=SERVED new_stamp=20261018T130249Z served_stamp=20261017T130241Z rows_with_value_new=91 served=91 build_block_key_equals_record=True PASS.
+NG: moved=model_rows match_expected=True input_kinds_differ=model_block; GUARD SERVED new_stamp=20261018T130703Z served_stamp=20261017T130649Z rows_with_value 64 and 64 key_equals_record True PASS.
+The guard reads the record through dossier._model_block_read only (the driver has no second reader), the call build() itself makes; the order's "print both if your guard reads it another way" does not arise.
+--- SCHEDULED-TASK READ (Get-ScheduledTask 15:4xZ)
+207 tasks read; control OPAL_autolaunch_agents found: 1. Tasks whose action names dossier, continuation, fund_form, fund-form, corpus or research: 3, all LLM-batch launchers of the research folder: OpalResearch-ExecManagement (run_management.cmd, Disabled), OpalResearch-FilingsAnalyzer (run_filings.cmd, Ready, last run 2026-10-18 07:30:01 rc 0, next 2026-10-19 07:30:00), OpalResearch-Scores (run_scores.cmd, Disabled). None builds a dossier, a continuation or a fund form, and none runs in the window.
+--- STEP 0 PRINTS (cl4_before.py, 15:49:22Z; table counts are client-side counts of a paginated listing)
+--- PIN
+git rev-parse HEAD = 4c7a60cabe15ecd04686d7b06f7c8215fbc74971
+git diff 4c7a60cabe HEAD -- lib/research : 0 bytes (empty = 0)
+--- LIST FILES (read from the shared checkout)
+cl4_names.txt sha256 1e8570870bcd47bc16b6958649b72797423afaaaa17c724c871317c3335bd923 lines 2
+cl4_expected_moves.txt sha256 e81381b913d0922c5448f5302a0330f39298313b1da48b90e729391fc61bcbb1 lines 2
+--- TABLE COUNTS (paginated list_objects_v2 counted client side)
+research_dossier objects under amgt/harvest/gold/research_dossier/ : 1556 (the table held 1556 after cj-5)
+research-continuation objects under amgt/harvest/gold/research-continuation/ : 446 (446 after cj-5)
+partition security_key=BP-SLASH-_LN_Equity objects 16 | raw-spelling prefix amgt/harvest/gold/research_dossier/BP/_LN_Equity/ objects 0
+partition security_key=NG-SLASH-_LN_Equity objects 15 | raw-spelling prefix amgt/harvest/gold/research_dossier/NG/_LN_Equity/ objects 0
+--- WRITER: the table's other writers in the window: see the scheduled-task read; no site Z write in flight per the GO (CTO msg 35738)
+--- HOW A ROW WITH A VALUE IS COUNTED (as cj-5): a model_rows list element whose ['figure']['value'] is not None
+--- THE TWO PERSISTED GATEWAY BEFORE READS (BP)
+[BP/_LN_Equity (raw spelling request)] bytes_of_tool_result=60250
+  dossier_key amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.2d0238f7570cff0e.json
+  content_sha256 66dea0800b334d3446edbd9ffd555f9e23c6ead22127b5952487a58865287c2b as_of 2026-10-18 method amgt-corpus-dossier/15
+  continuation_key amgt/harvest/gold/research-continuation/security_key=BP-SLASH-_LN_Equity/4ecc7216257f7d08.json
+  source_keys 14 dossier entry: ['amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.2d0238f7570cff0e.json']
+  dossier_fields [('fund_form_ref', 'present'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('model_rows', 'list[105]')]
+  fund_form_ref entry {"content_sha256": "3f3d60a3e85ff4ebc6eb77b61216a47789dd37b5d5af92805fdfefdfe6d8ab1c", "uri": "s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/65a5baab3afd06f0.json"}
+  fund_of_record entry {"citation": {"extract_key": "s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=BP-SLASH-_LN_Equity/45e5848c94ac5b9c/extract.json", "locator": 2, "passage": "RECOMMENDATI
+  last_stated_position entry {"citation": {"extract_key": "s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=BP-SLASH-_LN_Equity/45e5848c94ac5b9c/extract.json", "locator": 2, "passage": "RECOMMENDATI
+  model_rows entries 105 rows_with_value 91 stamps ['20261017T130241Z']
+  continuation_fields [('thesis_summary', 'ABSENT'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('thesis_pillars', 'present')]
+  research_reports 7 ['2c74cb1648740970', '45e5848c94ac5b9c', '5398813dd2cc9af8', '5dfc4c6fc7894bd3', 'a6fc79de305cb304', 'd583d0e490858627', 'df63e0984e2b1ca8']
+  duplicates_dropped {"research_dossier": {"distinct_as_of": 8, "dropped": 8, "listed": 16}} | denominator_note dossier fields read 24; research_dossier objects listed 16, distinct as_of 8, duplicates dropped 8
+  truncated True omitted_items {"continuation_fields": 1} stored_spelling {} parts_absent {}
+[BP-SLASH-_LN_Equity (encoded request)] bytes_of_tool_result=60250
+  dossier_key amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.2d0238f7570cff0e.json
+  content_sha256 66dea0800b334d3446edbd9ffd555f9e23c6ead22127b5952487a58865287c2b as_of 2026-10-18 method amgt-corpus-dossier/15
+  continuation_key amgt/harvest/gold/research-continuation/security_key=BP-SLASH-_LN_Equity/4ecc7216257f7d08.json
+  source_keys 14 dossier entry: ['amgt/harvest/gold/research_dossier/security_key=BP-SLASH-_LN_Equity/as_of=2026-10-18.2d0238f7570cff0e.json']
+  dossier_fields [('fund_form_ref', 'present'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('model_rows', 'list[105]')]
+  fund_form_ref entry {"content_sha256": "3f3d60a3e85ff4ebc6eb77b61216a47789dd37b5d5af92805fdfefdfe6d8ab1c", "uri": "s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/65a5baab3afd06f0.json"}
+  fund_of_record entry {"citation": {"extract_key": "s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=BP-SLASH-_LN_Equity/45e5848c94ac5b9c/extract.json", "locator": 2, "passage": "RECOMMENDATI
+  last_stated_position entry {"citation": {"extract_key": "s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=BP-SLASH-_LN_Equity/45e5848c94ac5b9c/extract.json", "locator": 2, "passage": "RECOMMENDATI
+  model_rows entries 105 rows_with_value 91 stamps ['20261017T130241Z']
+  continuation_fields [('thesis_summary', 'ABSENT'), ('fund_of_record', 'present'), ('last_stated_position', 'present'), ('thesis_pillars', 'present')]
+  research_reports 7 ['2c74cb1648740970', '45e5848c94ac5b9c', '5398813dd2cc9af8', '5dfc4c6fc7894bd3', 'a6fc79de305cb304', 'd583d0e490858627', 'df63e0984e2b1ca8']
+  duplicates_dropped {"research_dossier": {"distinct_as_of": 8, "dropped": 8, "listed": 16}} | denominator_note dossier fields read 24; research_dossier objects listed 16, distinct as_of 8, duplicates dropped 8
+  truncated True omitted_items {"continuation_fields": 1} stored_spelling {} parts_absent {}
+BP raw request body == BP encoded request body (the two persisted tool results, parsed JSON equal): True
+--- S3-LEVEL SERVED DOSSIERS (the pick over the encoded partition, read from the bucket)
+BP/_LN_Equity newest by (as_of stamp, LastModified): as_of=2026-10-18.2d0238f7570cff0e.json LastModified 2026-10-18T11:30:25Z bytes 265712 sha256 7baf3fc889fb03a8 model_rows entries 105 inputs 7
+NG/_LN_Equity newest by (as_of stamp, LastModified): as_of=2026-10-18.1af6506669c49a8a.json LastModified 2026-10-18T11:34:16Z bytes 109719 sha256 ae7b31043f4b5482 model_rows entries 102 inputs 4
+--- THE NG GATEWAY BEFORE READS (inline tool results, 15:4xZ; they are not saved to a file, so these values are transcribed by reading, stated)
+NG/_LN_Equity (raw) and NG-SLASH-_LN_Equity (encoded) returned the same body on every identifying field I read: dossier_key ...security_key=NG-SLASH-_LN_Equity/as_of=2026-10-18.1af6506669c49a8a.json; content_sha256 5863bdfb5c9fbc5ee5894ec81b6374416ab4256f7887398e085576216bb3b449; as_of 2026-10-18; method amgt-corpus-dossier/15; continuation_key ...research-continuation/security_key=NG-SLASH-_LN_Equity/cb76efa8bfd9173f.json; source_keys 13 (ai_fill, continuation prefix and key, the dossier key, silver prefix and 8 parts, 1 bronze exec_officers); dossier_fields fund_form_ref ABSENT ("continuation's fund_of_record is absent"), last_stated_position ABSENT, fund_of_record ABSENT, model_rows a list whose figures carry stamp 20261017T130649Z; continuation_fields 4 entries all ABSENT, 1 omitted; ai_fill_key ...ai_fill.json (as_of 2026-10-16, 2 blocks shown, 3 omitted); research_reports 1 (bf410e6c790c70fd, part date=2026-09-23/part-20261018T010056Z.parquet); duplicates_dropped research_dossier listed 15 distinct_as_of 8 dropped 7; denominator_note "dossier fields read 24; research_dossier objects listed 15, distinct as_of 8, duplicates dropped 7"; truncated true; omitted_items {continuation_fields 1, ai_fill_blocks 3}; stored_spelling {}; parts_absent {}.
+S3 level: NG newest dossier as_of=2026-10-18.1af6506669c49a8a.json (LastModified 2026-10-18T11:34:16Z), model_rows 102 entries.
+--- DEVIATIONS / NOTES
+No Bloomberg use, no etfs_compare_peers, no module --write, no continuation write. The persisted BP tool results are in the session's tool-results folder (toolu_018Q..., toolu_0177...); the digest above is of those files.
+BEFORE complete 2026-10-18T15:5xZ
