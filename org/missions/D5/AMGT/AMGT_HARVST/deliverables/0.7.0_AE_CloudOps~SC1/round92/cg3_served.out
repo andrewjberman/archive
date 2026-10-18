@@ -1,0 +1,24 @@
+HVST-cg-3 SERVED record, 0.7.0_AE_CloudOps~SC1, 2026-10-18 02:07Z to 02:12Z, after the deploy (landed 02:06:03Z; restart 02:05:55Z). Reads: mcp opalgateway harvest_get_research, fields ["fund_of_record","last_stated_position"], through the gateway as this session's Opal principal; etfs_compare_peers NOT called (C-4).
+
+RELEASE (cg3_cut.out, cg3_deploy.out, cg3_hostread_after.txt): rel-amgt-harvst-cg3 @4257a2aa42e5366270b3652f21dba90872dbb1e0, parent d077cef043 = the live commit read equal on manifest, S3 artifact and instance marker at 02:03Z; b77e08e198^1 harvest_research.py IDENTICAL to the live file (md5 6d9e0dd38166b82943d6834a0ce482b5); git diff --name-status lists exactly 3 paths; the harvest_research.py diff is exactly 2 hunks; release md5 596c299597067fe5a8afb8e3493a0ed9, and the HOST's app/harvest_research.py after the deploy reads 596c299597067fe5a8afb8e3493a0ed9; tests 31 passed + 17 passed (cc1/cc2/cc3 from 319c9413a2, run only); the host's other four named files (server.py, harvest_figures.py, harvest_identity.py, config.py) are byte-identical before and after.
+
+TOOLS AND HEALTH (C-6): before (01:44Z and 02:03Z) /health 200, tool-name count 127, names md5 9a593c843feb61c2753d8c08a84eb61d; after (02:06:42Z) /health 200, count 127, names md5 9a593c843feb61c2753d8c08a84eb61d. EQUAL.
+
+GOLD READS BEFORE (cg3_before.out, 01:45Z) vs AFTER (02:10Z), KMB_US_Equity, CPA_US_Equity, UNH_US_Equity:
+ EQUAL in all three: as_of, content_sha256 (KMB 79ebfe89..., CPA 61b9977a..., UNH 6bd7cea7...), dossier_key, continuation_key, every dossier_fields and continuation_fields entry (fund_of_record, last_stated_position, citations), source_keys (KMB 14, CPA 13, UNH 13: same lists), ai_fill_blocks, misfiled_reports_excluded and misfiled_fields_excluded (KMB: the same 2 reports, fields []), management_roster, omitted_items except the CPA note below.
+ research_reports[] entries: every attribute equal (report_id, class, class_evidence, fund, fund_evidence, fund_absent_reason, period..., author..., and the part pointer, which did not move this time) EXCEPT the added key fund_relation on each entry (KMB 3 of 3 none; UNH 1 of 1 holding; CPA class A report 0c51730281bceb11 holding, the others none).
+ ONE OBSERVATION on CPA, stated plainly: the tool truncates research_reports to a response-size cap. Before: 10 entries shown, omitted_items.research_reports 27 (37 in all). After: 9 entries shown, omitted 28 (37 in all). The total is equal; the added key makes each entry larger, so one more entry falls under the cap (the last shown before, report 4816fe6d87f0fc59, is among the omitted now). I did not read the 28 omitted entries, so this is the cap's arithmetic (denominator equal at 37), not a read of the omitted entry. The order's AC2 names gold field entries, content_sha256 and source_keys, all equal.
+
+FUND_RELATION SERVED (C-8), research_reports[] entries that have a fund, 02:08Z:
+ ADBE_US_Equity: report a89e0cd31b4919a5 fund PFOE fund_evidence "RECOMMENDATION: CANDIDATE FOR PFOE" fund_relation candidate.
+ SNPS_US_Equity: report 336bd8d23ceec8ae fund PFOE "RECOMMENDATION: CANDIDATE FOR PFOE" fund_relation candidate.
+ MNST_US_Equity: report 12221d56f9087d0e fund PFOE "RECOMMENDATION: CANDIDATE FOR PFOE" fund_relation candidate.
+ CLX_US_Equity: reports 4dc5970014a76749 and 8a7e211cacbe9c27 fund DIVZ "RECOMMENDATION: Candidate for DIVZ" fund_relation candidate (both); the 8 other entries none.
+ ML_FP_Equity: report 615fde6598a49c72 fund IDVZ "RECOMMENDATION: [BUY IN IDVZ" fund_relation template; the 9 other entries none.
+ UNH_US_Equity (control): report 48d81f053e5076e8 fund PFOE "Recommendation: Maintain positions in PFOE" fund_relation holding.
+ Gold values served for these five names are the cf-4 values (fund_of_record absent, a candidate or template stance), unchanged by this release.
+ Served ce-3 sentence: not triggered by any live read (as stated in cg3_before.out); its proof is the offline test (test_ce3_parts_absent_wording passed on the branch).
+RELEASE_THREE_PATHS_AND_EQUALITY=PASS
+SERVED_GOLD_READS_UNCHANGED=PASS
+TOOLS_AND_HEALTH_EQUAL=PASS
+FUND_RELATION_SERVED=PASS

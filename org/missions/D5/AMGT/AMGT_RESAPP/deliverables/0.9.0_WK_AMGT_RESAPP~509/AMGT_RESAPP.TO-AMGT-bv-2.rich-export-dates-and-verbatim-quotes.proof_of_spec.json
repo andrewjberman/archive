@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-bv-2.rich-export-dates-and-verbatim-quotes",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e58e97c92e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bv-2.rich-export-dates-and-verbatim-quotes.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-bv-2.rich-export-dates-and-verbatim-quotes.md",
+    "group": "OTHER",
+    "vintage_commit": "e58e97c92e"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~509",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "de7ca7acc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit de7ca7acc7 on branch wk-AMGT_RESAPP-509 (C:/dev/wk-resapp-509). Not pushed, not deployed. The deployed scoped API Lambda serves the old renderer until AMGT-bv-5.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_bv2_rich_dates_and_quotes.py",
+      "kind": "script",
+      "commit_or_etag": "de7ca7acc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit de7ca7acc7. Test file; not deployed.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/fixtures/bv2_quote_blocks.json",
+      "kind": "script",
+      "commit_or_etag": "de7ca7acc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit de7ca7acc7. The quote census (37 functions, 30 blocks, 6 exempt).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~509/BV2_RECEIPT.md",
+      "kind": "script",
+      "commit_or_etag": "de7ca7acc7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit de7ca7acc7. The receipt: Quote census, What changed, What scoped_amgt does with the rich text, Not verified.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the pytest summary line reads `5 passed` or more with 0 failed and 0 skipped, Q1 to Q5 each present by name, and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-509 && timeout 300 python -m pytest lib/research/print/tests/test_bv2_rich_dates_and_quotes.py -q -p no:cacheprovider --color=no; echo \"exit=$?\"",
+      "output_evidence": "5 passed in 7.92s\nexit=0\n\nQ1 to Q5 present by name (grep of the file's test definitions): test_Q1_rich_export_of_rio_ln_has_no_iso_day (line 103); test_Q2_verbatim_passage_is_byte_faithful_and_the_system_sentence_beside_it_reads_long (line 118); test_Q3_control_inverse_of_export_equals_base_export_recorded_at_base_head (line 147); test_Q4_control_bu3_pack_test_still_passes (line 159); test_Q5_census_fixture_denominator_and_exempt_rule (line 172)",
+      "denominator": "5 of 5 tests passed, 0 failed, 0 skipped; Q1 to Q5 each present (5 of 5 definitions)",
+      "status": "PASS",
+      "expect": "5 passed[\\s\\S]*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly one FAILED line, `FAILED lib/research/print/tests/test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words` (it fails at the base as well: the base reads `1 failed, 120 passed`), and the summary reads `1 failed, P passed` with P at least 125",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-509 && timeout 580 python -m pytest lib/research/print/tests -q -p no:cacheprovider --color=no 2>&1 | grep -E \"^FAILED|passed|failed\" | sed \"s/ - .*//\"",
+      "output_evidence": "FAILED lib/research/print/tests/test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words\n1 failed, 125 passed in 27.99s",
+      "denominator": "126 tests collected: 125 passed, 1 failed (the named av2 test, pre-existing); P = 125 >= 125",
+      "status": "PASS",
+      "expect": "FAILED lib/research/print/tests/test_av2_export_equals_page\\.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words\\n1 failed, 12[5-9] passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Unedited head e58e97c92e (render_pack.py identical to base; git diff empty), the new test file run once before the product edit, as the order requires: Q1 and Q2 must FAIL, Q3, Q4 and Q5 must PASS. Recorded in BV2_RECEIPT.md, Test runs.",
+      "expected": "2 failed, 3 passed; failed Q1 Q2; passed Q3 Q4 Q5",
+      "observed": "2 failed, 3 passed in 8.43s; failed test_Q1 (line 105, the long-form presence check) and test_Q2 (PDF arm, passage long-formed); passed Q3, Q4, Q5",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run at the edit and again on the committed bytes, plus the AC2 suite run twice on the same bytes",
+      "observed": "AC1: 5 passed in 6.96s (at the edit), 5 passed in 7.92s (committed), exit 0 both times. AC2: 1 failed, 125 passed in 25.42s and 1 failed, 125 passed in 27.99s, the same failing test both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The <status> flip of AMGT_RESAPP.TO-AMGT-bv-2",
+      "reason": "The flip is the issuer's (2.0.0_SA_COO~R1). No flip was made here."
+    },
+    {
+      "item": "Deploy of lib/research/print/render_pack.py to the scoped API Lambda",
+      "reason": "Not in this order. AMGT-bv-5 carries the deploy; the deployed Lambda serves the old renderer until then."
+    },
+    {
+      "item": "Live export and live packs (BA, HD, KMB) read",
+      "reason": "Not in this order's bounds. The census is read at the base code, and the live-pack question is recorded as row AMGT_RESAPP-D1-W509-S1."
+    },
+    {
+      "item": "The av2 test failure (test_pdf_text_carries_no_field_code_and_names_every_line_in_words)",
+      "reason": "Pre-existing at the base, named by the order, and outside this order's paths. Not fixed."
+    },
+    {
+      "item": "Push, DEV and PROD, portal",
+      "reason": "Bounds of the order: no push, no DEV or PROD, nothing under portal/ or org/devices/ committed."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W509-S1: the order's Step B premise does not hold at the base: build_pack prints no evidence passage, so the pack's only verbatim source text is the filing-sentence kind (exempt K05, K08, K10, K12); the BA, HD and KMB live packs were not read.",
+    "AMGT_RESAPP-D1-W509-S2: the order's Q3 control cannot hold line for line for a correct product: the base export's ISO timestamps reduce to their day and the inverse cannot restore the time; Q3 compares days on both sides and the recorded base text is unedited.",
+    "AMGT_RESAPP-D1-W509-S3: an accession number carries a day-shaped run that the un-bounded day pattern would rewrite once the export's long-form pass covers the citation line; caught before it was armed and fixed in this commit by a digit-bounded pattern, which Q2 asserts."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~509/BV2_RECEIPT.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (test_bv2_rich_dates_and_quotes.py)",
+      "invocation": "cd C:/dev/wk-resapp-509 && timeout 300 python -m pytest lib/research/print/tests/test_bv2_rich_dates_and_quotes.py -q -p no:cacheprovider --color=no",
+      "result": "5 passed in 7.92s, exit 0 on de7ca7acc7"
+    },
+    {
+      "tool": "pytest (lib/research/print/tests, AC2 suite)",
+      "invocation": "cd C:/dev/wk-resapp-509 && timeout 580 python -m pytest lib/research/print/tests -q -p no:cacheprovider --color=no",
+      "result": "1 failed, 125 passed in 27.99s on de7ca7acc7 (the named av2 test, pre-existing)"
+    },
+    {
+      "tool": "commit-gate (.tools/commit-gate.sh)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/print/render_pack.py lib/research/print/tests/test_bv2_rich_dates_and_quotes.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
