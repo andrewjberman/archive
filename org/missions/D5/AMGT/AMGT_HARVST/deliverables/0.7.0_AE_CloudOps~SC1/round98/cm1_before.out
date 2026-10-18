@@ -1,0 +1,49 @@
+HVST-cm-1 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, started 2026-10-18T16:46:52Z (issuer GO msg 8137 sent 16:31:17Z, READ-acked 16:41Z; the ca-5 ledger closed 16:30Z first). Ledger harvst-cm1-drain-queued-bp-pull opened 16:45:59Z BEFORE any read (committed).
+Order sha256 prefix 80106e7f10b23695 (equal to the GO). COO half sha256 688cd3187e2d019089ee64bc7d889be1c2e978ffad5be4697cdf9d37f26274a3 (equal to the CTO half's binding); CTO half @6683c373ba SIGNED, sha256 prefix 2ad1ac063bf0e7f1 (equal to the GO). Site Z CLEAR 90 minutes from 16:30Z (CTO and COO~O); ~MDPF1 may send one read-only DEMQUE probe. Window (my reading): GO 16:31:17Z to 17:31:17Z.
+I read integrations/bloomberg/READ_HERE.md (sections 1 to 3) and integrations/bloomberg/research/pull_consumer.py in full before acting (start condition b).
+--- WHAT THIS CHANGES (stated plainly, order section 0)
+If the drain runs: BP's newest bronze pull and derived model block (which the gateway serves) move to a new stamp; the BP dossier written at 15:51:21Z is then one model block behind until a refresh; the rollback of the add-only objects is an S3 delete that is not mine.
+--- (i) QUEUE
+{"ApproximateNumberOfMessages":"1","ApproximateNumberOfMessagesNotVisible":"0","ApproximateNumberOfMessagesDelayed":"0"}
+--- (ii) STATUS BODY (saved as the rollback bytes)
+{
+  "state": "REQUESTED",
+  "ticker": "BP/ LN Equity",
+  "security_key": "BP/_LN_Equity",
+  "requested_at": "2026-10-18T15:26:59Z",
+  "updated_at": "2026-10-18T15:26:59Z",
+  "reason": null
+}
+status_before.json bytes 190 sha256 2587af21f9e5e213d9e42b773e333ebe8a06ec935e7775bcb614167ac07cce88
+--- (iii) KEYS
+packs/BP-SLASH-_LN_Equity/ :
+packs/BP-SLASH-_LN_Equity/input_ledger.json	7335	2026-10-18T13:02:50+00:00
+packs/BP-SLASH-_LN_Equity/status.json	190	2026-10-18T15:27:00+00:00
+packs/BP/_LN_Equity/ :
+packs/BP/_LN_Equity/input_ledger.json	1654	2026-09-25T04:26:05+00:00
+newest BP bronze/derived keys now (so the after-read can name what is new):
+  bloomberg/harvest/bronze/refdata/security_key=BP-SLASH-_LN_Equity/ : count 17; newest: bloomberg/harvest/bronze/refdata/security_key=BP-SLASH-_LN_Equity/20261018T130240Z.json	17153	2026-10-18T13:02:48+00:00
+  bloomberg/harvest/bronze/histdata/security_key=BP-SLASH-_LN_Equity/ : count 17; newest: bloomberg/harvest/bronze/histdata/security_key=BP-SLASH-_LN_Equity/20261018T130240Z.json	23534	2026-10-18T13:02:48+00:00
+  bloomberg/harvest/bronze/bestdata/security_key=BP-SLASH-_LN_Equity/ : count 16; newest: bloomberg/harvest/bronze/bestdata/security_key=BP-SLASH-_LN_Equity/20261018T130240Z.json	2778	2026-10-18T13:02:49+00:00
+  amgt/harvest/state/pull_log/security_key=BP-SLASH-_LN_Equity/ : count 16; newest: amgt/harvest/state/pull_log/security_key=BP-SLASH-_LN_Equity/20261018T130240Z.json	6431	2026-10-18T13:02:49+00:00
+  derived/model_block/BP-SLASH-_LN_Equity/ : count 25; newest: derived/model_block/BP-SLASH-_LN_Equity/20261018T130249Z/model_block.json	559885	2026-10-18T13:02:51+00:00
+--- (v) THE BOX AND THE INTERPRETER
+hostname: DESKTOP-HK1UU7N
+PY_AWS (from integrations/bloomberg/pipeline/scheduled_daily_pull.cmd lines 143 and 427): C:\Users\Opal Bloomberg\AppData\Local\Programs\Python\Python311\python.exe -- DOES NOT EXIST on this box
+/c/Users/All Users/ /c/Users/Default User/ /c/Users/Default/ /c/Users/Public/ /c/Users/Test/ 
+python on PATH: Python 3.14.7 at /c/Users/Test/AppData/Local/Programs/Python/Python314/python
+import check under the box's python: blpapi -> NOT importable
+import check under the box's python: boto3 -> importable
+import check under the box's python: pyarrow -> importable
+py launcher interpreters:
+ -V:3.14 *        C:\Users\Test\AppData\Local\Programs\Python\Python314\python.exe
+ -V:3.12          C:\Users\Test\AppData\Local\Programs\Python\Python312\python.exe
+BEFORE (read-only part) complete 2026-10-18T16:47:11Z
+--- (v) continued: the other interpreter and the Terminal, read 16:48Z (PowerShell)
+Python 3.12 (C:\Users\Test\AppData\Local\Programs\Python\Python312\python.exe): blpapi NOT importable, boto3 importable, pyarrow importable. Python 3.14 (the PATH one): blpapi NOT importable, boto3 and pyarrow importable. C:\Users holds Test and Public only (no "Opal Bloomberg" profile). TCP port 8194: 0 listeners. Processes named bbcomm, wintrv, blp or bloomberg: 0 (of 589 processes read; control: 21 powershell.exe rows).
+--- (iv) SCHEDULED TASKS AND PROCESSES (control found)
+207 tasks read; control OPAL_autolaunch_agents found: 1. Tasks naming bloomberg, bbg, blpapi, pull_consumer, scheduled_daily_pull, terminal-upload or harvest: 1 -- "Opal Data Harvest - Continuous Cycle" (Running; the sa lane's cycle_runner, pythonw.exe, lib.opal_data_harvest; no Terminal use on this box). No scheduled_daily_pull, no pull_consumer.py and no bbg_signin process (589 processes read; the 7 matching rows are the cycle_runner pythonw.exe pair, this seat's own shells and my runner-log watcher).
+--- STOP (order section 3: "the interpreter cannot import blpapi, boto3 or pyarrow")
+The order and both halves place this act on dell1 with PY_AWS (C:\Users\Opal Bloomberg\AppData\Local\Programs\Python\Python311\python.exe, from integrations/bloomberg/pipeline/scheduled_daily_pull.cmd lines 143 and 427). On THIS box that interpreter does not exist, no interpreter imports blpapi, port 8194 has no listener and no Terminal process runs: there is no Terminal here to sign in or to health-check. I ran NOTHING beyond the read-only step 0 above: no health read, no consumer, no sign-in (no bbg_credentials.py call, no attempt of the 2-attempt budget spent), no Bloomberg call, no queue receive. The queue still holds its one message and the status object is unchanged. The order's own word for a health read, model_block_pull.bloomberg_health(), is not a function in model_block_pull.py (the consumer calls mbp._load_blp_client().health()); that would also have needed blpapi.
+What I do NOT know: which box holds the Terminal session (the 13:02Z BP bronze objects in the bucket were written by something with a Terminal, not by this box; I have not looked for it) and whether the consumer is meant to run there. That is for the issuer and the CTO.
+BEFORE record complete 2026-10-18T16:51Z; the order stays pending; no cm1_served.out and no proof instance were written (nothing ran to grade).
