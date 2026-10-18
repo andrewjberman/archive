@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pr-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "42fd32e32c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-5.round-43-listener-leaves-the-service-access-log-alone.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "42fd32e32c"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~156",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+      "kind": "script",
+      "commit_or_etag": "0d49aa5387",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "gateway module change on the worker branch wk-NFRA_OPLGTW-156; no release, no deploy, no IAM, no SSM write (the release is OG-ap-44)",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr5.py",
+      "kind": "test",
+      "commit_or_etag": "0d49aa5387",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new test file on the worker branch; three named tests, no socket opened (make_server(port=0) only)",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6dd4286a48",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended: NFRA_OPLGTW-Z-W156-S1 and NFRA_OPLGTW-Z-W156-S2 (surprise-row-gate OK at commit)",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the three new tests pass. Run AC1 and AC3 THREE times each and report the three results.",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_named.sh tests/test_og_pr5.py test_ogpr5_ac01 test_ogpr5_ac02 test_ogpr5_ac03; echo \"exit=$?\"",
+      "output_evidence": "run 1: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0\nrun 2: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0\nrun 3: pytest rc=0; named tests passed 3 of 3; failed/error lines 0 / RESULT: PASS / exit=0\nverbose pytest (python -m pytest tests/test_og_pr5.py -v): test_ogpr5_ac01 PASSED, test_ogpr5_ac02 PASSED, test_ogpr5_ac03 PASSED; 3 passed in 0.14s",
+      "denominator": "3 of 3 named tests passed in each of the 3 runs; failed/error lines 0 in each run",
+      "status": "PASS",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: your commits touch only the module and the new test file.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_wkbound.sh 0.9.0_WK_NFRA_OPLGTW~156 '^infra/aws/ec2/opal-gateway/(app/probe_listener\\.py|tests/test_og_pr5\\.py)$'; echo \"exit=$?\"",
+      "output_evidence": "write-set bound for 0.9.0_WK_NFRA_OPLGTW~156: files touched 3; product files 2; outside the allowed set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files touched across the worker's commits (2 product files: app/probe_listener.py and tests/test_og_pr5.py; 1 surprise-channel record); 0 outside the allowed set",
+      "status": "PASS",
+      "expect": "(?s)write-set bound for 0\\.9\\.0_WK_NFRA_OPLGTW~156: files touched [1-9]\\d*; product files [1-9]\\d*; outside the allowed set 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the new tests, the thirteen existing test_og_pr1.py tests (unchanged) and three more gateway test files pass together in both orders with the same count. Run AC3 THREE times.",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh pr5set tests/test_og_pr5.py tests/test_og_pr1.py tests/test_og_en21.py tests/test_og_cl2.py tests/test_og_en9.py; echo \"exit=$?\"",
+      "output_evidence": "run 1: pr5set forward: passed 31; failed 0 / pr5set reverse: passed 31; failed 0 / RESULT: PASS / exit=0\nrun 2: pr5set forward: passed 31; failed 0 / pr5set reverse: passed 31; failed 0 / RESULT: PASS / exit=0\nrun 3: pr5set forward: passed 31; failed 0 / pr5set reverse: passed 31; failed 0 / RESULT: PASS / exit=0",
+      "denominator": "31 passed and 0 failed in the forward order and 31 passed and 0 failed in the reverse order, in each of the 3 runs (the same count in both orders)",
+      "status": "PASS",
+      "expect": "(?s)pr5set forward: passed (\\d+); failed 0.*pr5set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Deleting the finally restore in make_server (the one change: finally: pass) must make ac01 and ac02 fail; the file was restored byte-equal afterwards (sha1 d0224badf6d26843d74e116a5496c0692b21c713, cmp against the saved good copy).",
+      "expected": "ac01 FAILED, ac02 FAILED, ac03 PASSED (the mutant leaves the listener's access_log and log_level unchanged)",
+      "observed": "ac01 FAILED (AssertionError: uvicorn); ac02 FAILED (AssertionError: uvicorn.access); ac03 PASSED; 2 failed, 1 passed; restored byte-equal (BYTE-EQUAL)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the three AC1 runs and the three AC3 runs compared (same inputs, same tests, run in sequence in one session)",
+      "observed": "AC1: 3 of 3 in each of 3 runs; AC3: 31 forward and 31 reverse in each of 3 runs; no run differed",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The deployed host's uvicorn version (the gateway requirement is uvicorn[standard]>=0.30.0)",
+      "reason": "The configure_logging mechanism was read from the installed uvicorn 0.51.0 only; the host was not read by this cell (surprise row NFRA_OPLGTW-Z-W156-S2)."
+    },
+    {
+      "item": "The live journey: the service's POST /mcp access lines reaching the journal under traffic",
+      "reason": "Out of this cell by design: the order proves the mechanism offline; the journal-versus-audit-lake criterion is the release order OG-ap-44 (ap44.AC2)."
+    },
+    {
+      "item": "serve() and any real socket",
+      "reason": "Not exercised: the order's tests build the server object with make_server(port=0) and never call serve(), so no socket is opened."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W156-S1: the task order's ac03 names config.log_level 'equal to the WARNING level', but uvicorn 0.51.0 stores log_level as the string given ('warning'); the test resolves the string through uvicorn.config.LOG_LEVELS (hazard INERT)",
+    "NFRA_OPLGTW-Z-W156-S2: the uvicorn mechanism was read from uvicorn 0.51.0 on the worker's interpreter; the gateway requirement is uvicorn[standard]>=0.30.0 and the deployed host's version was not measured (hazard INERT)"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (gateway suite, Python 3.14.8, pytest 9.1.1)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_og_pr5.py -v -p no:cacheprovider",
+      "result": "rc=0; 3 passed in 0.14s"
+    },
+    {
+      "tool": "uvicorn Config.configure_logging read (installed package, uvicorn 0.51.0)",
+      "invocation": "read of uvicorn/config.py lines 261, 296, 412-422 in the installed site-packages",
+      "result": "Config stores log_level as given (line 261); the constructor calls configure_logging (line 296); configure_logging sets the uvicorn.error, uvicorn.access and uvicorn.asgi levels and, for access_log False, empties uvicorn.access handlers and sets its propagate False"
+    }
+  ]
+}
