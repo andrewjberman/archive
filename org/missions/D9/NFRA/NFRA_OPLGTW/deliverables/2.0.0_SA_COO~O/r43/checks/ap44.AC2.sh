@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # OPLGTW OG-ap-44 AC2 (round 43, the tenth batched gateway release, PHASE B): the release landed, the ledger closed AFTER the host clock and failed units were read, the 27-tool read passes 27 of 27 under the guard, UNARMED ONLY,
 # and THE ACCESS LOG IS BACK (the CTO's criterion, msg 35769): the journal shows the service's own `POST /mcp` lines again under traffic, counted against the audit lake over the SAME 30-minute read-back window.
-# Rule fixed before the run: post_mcp_lines_readback > 0 AND post_mcp_lines_readback >= 0.25 * audit_records_readback (the OG-ap-38 windows read about 0.55: roughly 164 lines to 295 records); listener lines in the journal: 0 (the listener's own access log stays off, so none to confuse).
+# Rule fixed before the run: post_mcp_lines_readback > 0 AND post_mcp_lines_readback >= 0.25 * audit_records_readback (the OG-ap-38 windows read about 0.55: roughly 164 lines to 295 records); listener ACCESS lines in the journal (POST /probe/...): 0 (the listener's own access log stays off; its INFO startup lines `Started server process` / `Uvicorn running on http://127.0.0.1:8099` may now appear once per service start and are not access lines).
 # Record W/CODE11_SERVED.json = {"body": {the CODE10 fields of ap42.AC2 (health_status, env_key_count 65, reader_env_keys_present 7, registry_count 103, per_tool_good 27, harness_guard, host_md5, tools_list_before/after, muse_env_present, marker_sha,
 #  unit_limits, host_clock, systemd_failed_units, clock_read_before_close, readback with nrestarts_during_readback),
 #  "probe": {"armings": 0, "unarmed_status": 403, "unarmed_error": "probe_not_armed", "lease_parameter_absent_before": true, "lease_parameter_absent_after": true, "listener_bound": ["127.0.0.1"], "nrestarts_after": 0},
-#  "access_log": {"window_minutes": 30, "post_mcp_lines_readback": n, "audit_records_readback": m, "post_mcp_lines_before_ap40_30min": n0 (the OG-ap-38 window, for the baseline), "listener_lines_in_journal": 0, "method": "<how the lines were counted>"}}}
+#  "access_log": {"window_minutes": 30, "post_mcp_lines_readback": n, "audit_records_readback": m, "post_mcp_lines_before_ap40_30min": n0 (the OG-ap-38 window, for the baseline), "listener_lines_in_journal": 0 (ACCESS lines only), "method": "<how the lines were counted>"}}}
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/../../r37/checks/_landed.sh"
 W="org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1"
