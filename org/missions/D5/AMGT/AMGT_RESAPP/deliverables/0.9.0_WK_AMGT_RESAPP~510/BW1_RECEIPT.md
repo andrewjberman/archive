@@ -4,9 +4,9 @@ Worker `0.9.0_WK_AMGT_RESAPP~510`, order `AMGT_RESAPP.TO-AMGT-bw-1.pack-currency
 issued by `2.0.0_SA_COO~R1`. Base `52a137e363` (the issuance commit). Branch `wk-AMGT_RESAPP-510`, local only. Offline:
 no store, no deploy, no vendor, no model call, no push. The nested `portal` worktree was read only.
 
-**Outcome in one line:** the labels now follow each figure's own served `currency`; the order's C1 and C2 alias clauses
-are NOT met, because the existing same-value dedup drops the CRNCY_ADJ_MKT_CAP line once it prints the same code as
-CUR_MKT_CAP (surprise row `AMGT_RESAPP-D1-W510-S1`, BLOCKING). The order stays open.
+**Outcome in one line:** the labels follow each figure's own served `currency`; the same-value dedup stays (issuer ruling,
+AMENDMENT 1, 2026-10-18, row `AMGT_RESAPP-D1-W510-S1`), so the C1 and C2 alias clauses are corrected to the ruled
+expectations. AC1 and AC2 meet the amended expectations at `e288a1b0a6` (see `## Test runs`).
 
 ## Premise check (re-grounded at the base)
 
@@ -61,7 +61,7 @@ Against base `52a137e363` (line counts from `git diff --numstat`; new files from
 | path | change |
 |---|---|
 | `lib/research/print/render_pack.py` | 43 added, 11 removed. Currency-labelling only: `NO_CURRENCY_WORDS`, `_own_currency`, `_money`, the four money branches of `_format_figure_value`, `_CONVERTED_LABEL`, `_converted`, the alias label in `_header_figures_for_print`. `build_pack`, the dedup and the call shape are unchanged. |
-| `lib/research/print/tests/test_bw1_currency_labels.py` | new, 187 lines: C1 to C7 by name, plus C8 (a converted alias). |
+| `lib/research/print/tests/test_bw1_currency_labels.py` | new, 196 lines: C1 to C7 by name, plus C8 (a converted alias). AMENDMENT 1 (commit `e288a1b0a6`): the alias-count clauses of C1 and C2 now expect ONE line (the dedup ruling), C2 adds a no-Market-value and no-GBp-on-money-line check, and C8 uses a USD alias against the PHP market cap (was EUR). 15 added, 6 removed. |
 | `lib/research/print/tests/fixtures/bw1_header_figures.json` | new, 39 lines: SYNTHETIC header figures for ICT PM, RIO LN and GOOGL US, carrying the order's currency, value and unit facts. |
 | `lib/research/print/tests/fixtures/bw1_pack_text_base_ICT_PM.txt` | new, 21 lines: base text, recorded from the unedited renderer. |
 | `lib/research/print/tests/fixtures/bw1_pack_text_base_RIO_LN.txt` | new, 21 lines: base text, from the unedited renderer. |
@@ -74,6 +74,10 @@ Against base `52a137e363` (line counts from `git diff --numstat`; new files from
 | `lib/research/print/tests/test_bu3_pack_long_dates.py` | 2 lines changed: T5's two inline figures carry `currency` (`USD`, `GBP`). Expectations unchanged. |
 | `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md` | 104 lines added: four rows, `AMGT_RESAPP-D1-W510-S1` to `-S4`. |
 | `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~510/` | this receipt, the proof instance and the session log. |
+
+Dedup ruling (AMENDMENT 1, issuer, 2026-10-18): the same-value dedup in `_header_figures_for_print` STAYS, and no line of
+`render_pack.py` changed for it. The census is unchanged. C1 and C2 were corrected in the test file (commit `e288a1b0a6`):
+ICT PM and RIO LN each print ONE market cap line and no `Market value, currency-adjusted` line; the words are the rule's.
 
 Existing tests changed: `test_aw2_print_as_document.py`, `test_ax4_brand_form.py`, `test_bu3_pack_long_dates.py` (T5). Each
 expectation that encoded the removed fallback now asserts the rule; the reason is the rule itself. T6 and the bv2 control
@@ -106,7 +110,13 @@ Every other C1 and C2 clause passes: no `currency-adjusted` wording, no `USD` on
 on the market cap, `USD 33,087.5 million` enterprise value, `PHP 860.00 per share`; for RIO LN no `GBp` or `USD` on the
 market cap, `115,578.9 million currency not stated`, `173,616.0 million currency not stated`, `GBp 6,816.00 per share`.
 
-## Dedup finding (the reason C1 and C2 are not met)
+Final runs, AMENDMENT 1 (commit `e288a1b0a6`, the test file is the only change since `78c948c919`):
+AC1 `11 passed in 4.88s`, exit=0 (C1, C2, C3, C4 x3, C5, C6, C7 x2, C8). AC2 `1 failed, 136 passed in 30.84s`, the one
+FAILED line the pre-existing av2 test (base failure, unchanged). Mutant control on the final test file against the base
+renderer bytes (`.scratch/bw1_mutant_run_final.txt`): `6 failed, 5 passed`, the same split as before the amendment.
+The rule at `78c948c919` is unchanged, so AC1 and AC2 were run against the same `render_pack.py`.
+
+## Dedup finding (the reason C1 and C2 were first not met; ruled, see above)
 
 The alias line is dropped by the existing AMGT-ax-4 rule: a second market-cap line whose printed value equals the first's
 is skipped. After the own-currency fix:
@@ -115,9 +125,8 @@ is skipped. After the own-currency fix:
 - RIO LN: both print `115,578.9 million currency not stated`, so it is dropped.
 - GOOGL US (the control, C3): both print `USD 4,143,539.9 million`, so the base already drops it.
 
-C3 requires the GOOGL US text unchanged, so the same dedup must stay. The order's C1 and C2 require the alias printed for
-ICT PM and RIO LN. No rule separates those cases from GOOGL US. The dedup is not changed here (outside the labelling
-functions). The CVO or CTO must rule: keep the dedup and amend C1 and C2, or keep the alias and amend C3.
+C3 requires the GOOGL US text unchanged, so the same dedup must stay. RULED by the issuer (AMENDMENT 1, 2026-10-18):
+keep the dedup and amend C1 and C2. The dedup is not changed here (outside the labelling functions).
 
 ## What the rich export does
 
@@ -135,9 +144,11 @@ in this file. Not edited.
 ## Not verified
 
 - The deployed Lambda serves the old renderer until the round-116 redeploy (`AMGT-bw-5`). No live pack was looked at here.
+- The order's AMENDMENT 1 names `Net debt` as carrying no code on RIO LN. The synthetic fixture (`bw1_header_figures.json`)
+  carries no Net debt figure, so no test asserts it; the rule (`_own_currency` empty gives the words) covers it by construction, unexercised.
 - The UNMEASURED `currency_basis` path (the page withholds the amount and shows `CURRENCY_UNCONFIRMED_WORDS`) is not mirrored
   (row `AMGT_RESAPP-D1-W510-S2`).
-- The alias rule for a converted figure is covered by C8 with a synthetic EUR figure; no served converted figure was examined.
+- The alias rule for a converted figure is covered by C8 with a synthetic USD figure against a PHP market cap; no served converted figure was examined.
 - `test_av2_export_equals_page.py` was not repaired (row `AMGT_RESAPP-D1-W510-S4`).
 - The portal was not edited, and no portal test was run.
 - Pre-commit risk reflex (HOLD on `render_pack.py`, comp-pulse): it cites the AMGT rs-2 redeploy record
