@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-cn-2.the-one-valued-row-that-the-pbr-build-drops-is-named-with-its-cause",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-2.the-one-valued-row-that-the-pbr-build-drops-is-named-with-its-cause.md",
+    "group": "OTHER",
+    "vintage_commit": "d4b82a35ec"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "d4b82a35ec",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-cn-2.the-one-valued-row-that-the-pbr-build-drops-is-named-with-its-cause.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~180",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.py",
+      "kind": "script",
+      "commit_or_etag": "93ff7a9c0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only finder for PBR_US_Equity: served dossier by a copy of the gateway _pick_dossier, dossier.build in memory, rows matched on source|key|period, causes from the two Model blocks through dossier._figure_for_row_key, controls on UNH_US_Equity and a planted deletion. No write call; the Guarded client forwards get, head, list and the list paginator on opal-data-harvest only. Unchanged since 93ff7a9c0c; run once in the foreground after the sparse set gained the CRO scan folder."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
+      "kind": "doc",
+      "commit_or_etag": "732727efc9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Output of the completed foreground run (RC=0), LF endings, 16 lines: the header, the two block reads with their counts, the REPRODUCE checks (yes, yes), IDENTITY-DUPLICATES none, COUNTS, one ROWMISS with its CAUSE, CONTROL-POSITIVE rows_missed=0, CONTROL-NEGATIVE rows_missed=1 matched_planted=yes, and the PBR-DROPPED-ROW line last."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "dcf549dbde",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended by bytes: AMGT_HARVST-D1-W180-S1 (BLOCKING, INERT; commit 93ff7a9c0c) and AMGT_HARVST-D1-W180-S2 (OBSERVATION, INERT; the missed row and its cause; commit dcf549dbde). Each commit diff is insertions only; the row gate passed on the staged bytes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out expect (?m)^PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=\\d+ cause=\\S+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
+      "output_evidence": "PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=0 cause=field_absent_in_new_block gets=774 bytes=138755870\nCommentary: the one missed row is typecast|BEST_DPS|FY1 (stored value 9.546). The CAUSE line reads field_absent_in_new_block, decided from the two blocks: the built block 20261018T130759Z carries no BEST_DPS figure (459 figures against 460) and lists BEST_DPS under unresolved (SA fallback held off by --no-sa-fallback). The stored block 20261017T130744Z carries the FY1 forecast figure. Both dossiers carry 105 entries; the counts are the finding and were not adjusted. Surprise AMGT_HARVST-D1-W180-S2.",
+      "denominator": "1 of 1 PBR-DROPPED-ROW line; 56 stored and 55 built valued model_rows entries, 1 missed, 0 new",
+      "status": "PASS",
+      "expect": "(?m)^PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=\\d+ cause=\\S+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out expect (?s)CONTROL-POSITIVE UNH_US_Equity rows_missed=0.*CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=\\S+",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.out",
+      "output_evidence": "CONTROL-POSITIVE UNH_US_Equity rows_missed=0 rows_new=0 rows_stored=92 rows_built=92 served_object=amgt/harvest/gold/research_dossier/security_key=UNH_US_Equity/as_of=2026-10-18.75715538ce40ba9f.json\nCONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=typecast|ARD_SHARES_OUTSTANDING|2025 matched_planted=yes\nCommentary: the positive control on UNH_US_Equity found no miss, so the finder does not invent misses on an unchanged name. The planted deletion from PBR's stored rows was found and matched its own identity.",
+      "denominator": "2 of 2 control lines present (CONTROL-POSITIVE, CONTROL-NEGATIVE); UNH 92 of 92 built valued rows matched",
+      "status": "PASS",
+      "expect": "(?s)CONTROL-POSITIVE UNH_US_Equity rows_missed=0.*CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=\\S+",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CONTROL-NEGATIVE: one valued row removed from a copy of PBR_US_Equity's stored model_rows and compared with the stored rows by the same finder; the expected line is rows_missed=1 with the planted identity.",
+      "expected": "CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=<planted row>",
+      "observed": "CONTROL-NEGATIVE planted_row_dropped rows_missed=1 identity=typecast|ARD_SHARES_OUTSTANDING|2025 matched_planted=yes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the order names one foreground run, and the S3 listing is live, so a second run would compare two states rather than repeat one. The two earlier runs failed before any comparison (NameError, then FileNotFoundError) and are not comparable.",
+      "observed": "one completed run, RC=0, after the sparse set gained the CRO scan folder; the output file holds the single completed run.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The full text of the built block's unresolved reason for BEST_DPS: the output carries the first 120 characters only (HELD_OFF: SA fallback held off by --no-sa-fallback; gap left unfilled).",
+      "reason": "The cause is decided by the lookup (no figure in the built block), not by the reason text; the tail of the reason is not needed for the cause word and was not re-read by a second S3 call, since the order runs once."
+    },
+    {
+      "item": "Any write to S3, any gold or silver writer, any call to Bloomberg, any model call, any gateway call, any edit of a source file, any edit outside the order's paths.",
+      "reason": "Out of scope by the order. The script has no write call and the Guarded client refuses every operation except get, head, list and the list paginator on opal-data-harvest. Nothing was written outside the deliverables folder and the investigation file."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W180-S1: dossier.build(PBR_US_Equity) could not run in the sparse worktree (KPI census input not in the sparse set); BLOCKING. The coordinator added the CRO scan folder to the sparse set; the build then ran.",
+    "AMGT_HARVST-D1-W180-S2: the one valued PBR row the build drops is typecast|BEST_DPS|FY1 (stored 9.546), cause field_absent_in_new_block: the 2026-10-18 Model block carries no BEST_DPS figure and lists it unresolved (SA fallback held off by --no-sa-fallback); OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "cn2_pbr.py (read-only finder for PBR_US_Equity; no write call)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~180/cn2_pbr.py (foreground, from the worktree root)",
+      "result": "RC=0; PBR-DROPPED-ROW rows_stored=56 rows_built=55 rows_missed=1 rows_new=0 cause=field_absent_in_new_block gets=774 bytes=138755870; CONTROL-POSITIVE UNH_US_Equity rows_missed=0; CONTROL-NEGATIVE planted_row_dropped rows_missed=1 matched_planted=yes."
+    }
+  ]
+}
