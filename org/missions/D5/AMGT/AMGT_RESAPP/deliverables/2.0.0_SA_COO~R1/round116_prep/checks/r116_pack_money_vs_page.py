@@ -28,6 +28,7 @@ import fitz  # noqa: E402
 from lib.research.print import render_pack as rp  # noqa: E402
 
 FN = "opal-amgt-scoped-api"
+WITHHELD_WORDS = "Bloomberg does not confirm this figure's currency"  # the page's CURRENCY_UNCONFIRMED_WORDS, StatTile.tsx
 UNCONFIRMED_WORDS = ("currency not stated", "does not confirm this figure's currency")  # the page's two wordings: a valued amount with no currency, and an unmeasured basis
 LAM = boto3.client("lambda", region_name="us-east-1")
 
@@ -106,6 +107,19 @@ def grade(key):
         labels = [label] + (["Market value, currency-adjusted"] if fig.get("mnemonic") == "CRNCY_ADJ_MKT_CAP" else [])
         cands = [ln for ln in lines if any(ln.lower().startswith(lb.lower()) for lb in labels)]
         seen = set()
+        unmeasured = bool(re.match(r"\s*UNMEASURED\b", str(fig.get("currency_basis") or "")))
+        if unmeasured:  # round 117: the PAGE withholds an UNMEASURED money figure (StatTile.tsx isUnmeasuredBasis; a dash, the hover words); so does the pack: the page's words, NO amount
+            mine = [ln for ln in cands if ":" in ln]
+            if not mine:
+                alias = fig.get("mnemonic") == "CRNCY_ADJ_MKT_CAP"  # the second market-value line is dropped by the same-value dedup (round 116): its absence is the dedup, not a miss
+                results.append((fig.get("mnemonic"), label, own, None, 0.0, exp[1], "OK-DEDUPED" if alias else "MISSING-LINE", "(no pack line%s)" % (": the same-value dedup of the market cap line" if alias else " for a figure the page withholds")))
+            for ln in mine:
+                val = ln.split(":", 1)[1]
+                has_words = WITHHELD_WORDS in val
+                has_digit = bool(re.search(r"\d", val.split(" - ")[0]))
+                verdict = "OK-WITHHELD" if has_words and not has_digit else ("WRONG-AMOUNT-PRINTED" if has_digit else "NO-WITHHELD-WORDS")
+                results.append((fig.get("mnemonic"), label, own, None, 0.0, exp[1], verdict, ln[:110]))
+            continue
         for ln in cands:
             if ln in seen or ":" not in ln:
                 continue
