@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ci-3.what-a-dossier-rebuild-of-the-95-names-would-move",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-3.what-a-dossier-rebuild-of-the-95-names-would-move.md",
+    "group": "OTHER",
+    "vintage_commit": "1386eb78b9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "1386eb78b9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-3.what-a-dossier-rebuild-of-the-95-names-would-move.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~170",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.py",
+      "kind": "script",
+      "commit_or_etag": "8f329a10b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script, committed in 8f329a10b9. Built from the ch8 census of 0.9.0_WK_AMGT_HARVST~168. Serves the gateway pick (harvest_research.py 239-255, copied) on the slash-safe partition; builds dossier.build in memory (write_one is never referenced); compares fields by parsed value; cause from the differing inputs entries; the S3 wrapper forwards get, head, list and the list paginator on opal-data-harvest only and memoises identical reads within one process; pins team_sheet field map to the HEAD blob when the worktree copy is absent. Run as 10 foreground slices of 10 names, then --final (run three times, identical output).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out",
+      "kind": "doc",
+      "commit_or_etag": "8f329a10b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output written by --final with LF line endings, ASCII only, 341 lines; the CENSUS-DOSSIER-MOVE line is last. 95 NAME lines (0 no_stored, 0 build-error); 112 DIFF lines (fund_form_ref 56, model_rows 56); cause_other 91; CONTROL-POSITIVE 0, CONTROL-NEGATIVE 1; FIELD-MAP line records the pin.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.parts.out",
+      "kind": "doc",
+      "commit_or_etag": "8f329a10b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Parts file: 10 SLICE lines (start 0 to 95 in steps of 10, nothing overlapping or missing), summing to gets=16321 bytes=2646018948. The first slice ran without the memo (gets=8484); slices 10-95 ran with the memo (SLICE-CACHE lines). A slice that was run before the BP/_LN_Equity lookup fix was rolled back by line truncation and re-run; the rolled-back lines are not in the file.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8f329a10b9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended by bytes in 8f329a10b9 (103 insertions, 0 deletions): AMGT_HARVST-D1-W170-S1 (cause other), S2 (sparse checkout and field map pin), S3 (slash-name dossier partition), S4 (served identifier constant), S5 (memo and capacity). The JSON array parses.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out expect (?m)^CENSUS-DOSSIER-MOVE names=95 no_stored_dossier=\\d+ unchanged=\\d+ moved=\\d+ fields_moved=\\d+ cause_other=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out",
+      "output_evidence": "CENSUS-DOSSIER-MOVE names=95 no_stored_dossier=0 unchanged=18 moved=77 fields_moved=112 cause_other=91 gets=16321 bytes=2646018948\n(ci3_census.out last line, printed by --final; the counts are the finding and were not adjusted)",
+      "denominator": "1 of 1 CENSUS-DOSSIER-MOVE line; 95 of 95 names: 18 unchanged + 77 moved + 0 no_stored_dossier",
+      "status": "PASS",
+      "expect": "(?m)^CENSUS-DOSSIER-MOVE names=95 no_stored_dossier=\\d+ unchanged=\\d+ moved=\\d+ fields_moved=\\d+ cause_other=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out expect (?m)^CONTROL-POSITIVE UNH_US_Equity stored_vs_stored fields_moved=0$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out",
+      "output_evidence": "CONTROL-POSITIVE UNH_US_Equity stored_vs_stored fields_moved=0\n(ci3_census.out; the UNH served dossier compared with a deep copy of itself by the same comparator)",
+      "denominator": "1 of 1 CONTROL-POSITIVE line",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-POSITIVE UNH_US_Equity stored_vs_stored fields_moved=0$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out expect (?m)^CONTROL-NEGATIVE UNH_US_Equity planted fields_moved=1$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.out",
+      "output_evidence": "CONTROL-NEGATIVE UNH_US_Equity planted fields_moved=1\n(ci3_census.out; detail line: planted_field=cases, list=cases, served_object=amgt/harvest/gold/research_dossier/security_key=UNH_US_Equity/as_of=2026-10-17.f73f295a3671b8da.json)",
+      "denominator": "1 of 1 CONTROL-NEGATIVE line",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-NEGATIVE UNH_US_Equity planted fields_moved=1$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CONTROL-NEGATIVE: the served UNH_US_Equity dossier is copied in memory, the first sorted field (cases) is replaced in the copy, and the same field comparator must report exactly one changed field.",
+      "expected": "fields_changed=1",
+      "observed": "CONTROL-NEGATIVE UNH_US_Equity planted fields_moved=1 (planted_field=cases, list=cases)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the census ran once, as ten slices, each recorded in the parts file. The final step was run three times from the same parts file and reproduced ci3_census.out byte for byte (IDENTICAL-OUTPUT), which is a check of the write, not a second census read.",
+      "observed": "three --final runs, identical output; SLICE ranges 0-95 contiguous, no gap or duplicate (PARTS-GAP not printed)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write to S3, any gold or silver writer (dossier.write_one, continuation.write_one, gold_put, --write), any deploy, any edit of a source file, any edit outside <paths>",
+      "reason": "Out of scope by the order. The census wrapper refuses every operation except get, head, list and the list paginator, and refuses any bucket other than opal-data-harvest. The census calls dossier.build only."
+    },
+    {
+      "item": "The task-order file's status flip",
+      "reason": "The worker face says the issuer flips the status; the order is not in <paths> and was not edited. The instance is left for the issuer to close."
+    },
+    {
+      "item": "Worktree sparse checkout excludes integrations/ (team_sheet's field map)",
+      "reason": "The census pinned team_sheet._FIELD_MAP_PATH in memory to the HEAD blob of integrations/bloomberg/research/field_map.json, verified by git blob id 3b2829c3aa7ce572bea37a10b9bce8879cf13a96. No file was written in the tree; the pin is recorded on the FIELD-MAP line of ci3_census.out and in surprise row AMGT_HARVST-D1-W170-S2."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W170-S1: 91 DIFF lines (56 names) carry cause other: the one moved input family outside the cell's named causes is model_block, which the module names and inputs_bloomberg does not.",
+    "AMGT_HARVST-D1-W170-S2: The worktree is a sparse checkout that excludes integrations/, so team_sheet's field map is absent from the tree; the census pinned the tracked HEAD blob, and the base checkout copy has different bytes.",
+    "AMGT_HARVST-D1-W170-S3: The stored research_dossier objects of the two slash names (BP/_LN_Equity, NG/_LN_Equity) sit under the slash-safe partition; a raw-key listing finds none, the same mechanism W168-S2 records for the continuation prefix.",
+    "AMGT_HARVST-D1-W170-S4: The NAME line's served identifier (first 8 characters of the object name) reads as_of=20 for every stored dossier, because dossier object names begin with the as_of stamp; the INPUTS line carries the full object name.",
+    "AMGT_HARVST-D1-W170-S5: dossier.build reads the team-sheet master template for every name (about 850 requests and 130 MB per name without a memo); the first ten names cost 8484 requests and 1.32 GB, and a process-scoped read-through memo brought each later slice to about 880 requests and 147 MB."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ci3_census.py (read-only dossier census; foreground slices of 10 names, then --final)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.py --start S --stop E  (S = 0,10,...,90; E = S+10, last E = 95); then python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~170/ci3_census.py --final",
+      "result": "10 slices, each rc=0; --final rc=0; CENSUS-DOSSIER-MOVE names=95 no_stored_dossier=0 unchanged=18 moved=77 fields_moved=112 cause_other=91 gets=16321 bytes=2646018948; CONTROL-POSITIVE fields_moved=0; CONTROL-NEGATIVE fields_moved=1."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ci-3.what-a-dossier-rebuild-of-the-95-names-would-move.md",
+      "result": "recorded in the worker report"
+    }
+  ]
+}
