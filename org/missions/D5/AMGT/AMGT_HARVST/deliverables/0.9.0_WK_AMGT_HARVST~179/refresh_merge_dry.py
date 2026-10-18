@@ -28,9 +28,10 @@ def main(paths):
         raise SystemExit("MERGE REFUSED: a name appears twice across the slices")
     counts = Counter(_STATUS.search(r).group(1) for r in rows)
     census = ("REFRESH-CENSUS names=%d written=%d would_write=%d unchanged=%d no_new_model_block=%d "
-              "skipped_allowed=%d skipped_guard=%d errors=%d mode=dry-run"
+              "no_today_model_block=%d skipped_allowed=%d skipped_guard=%d errors=%d mode=dry-run"
               % (len(rows), counts["WRITTEN"], counts["WOULD_WRITE"], counts["UNCHANGED"],
-                 counts["NO_NEW_MODEL_BLOCK"], counts["SKIPPED_ALLOWED"], counts["SKIPPED_GUARD"], counts["ERROR"]))
+                 counts["NO_NEW_MODEL_BLOCK"], counts["NO_TODAY_MODEL_BLOCK"], counts["SKIPPED_ALLOWED"],
+                 counts["SKIPPED_GUARD"], counts["ERROR"]))
     with open(OUT, "w", encoding="utf-8", newline="\n") as fh:
         for r in rows:
             fh.write(r + "\n")
