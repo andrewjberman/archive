@@ -1,0 +1,36 @@
+{
+  "body": {
+    "limiter": {
+      "limit": 120,
+      "window_s": 60,
+      "key": "validated Entra principal key '<tid>/<oid>' (context.py:47-48, principal.key), not the email; one bucket per principal on /mcp",
+      "retry_after_header": true,
+      "fail_mode": "open",
+      "source": [
+        "infra/aws/ec2/opal-gateway/app/ratelimit.py:111-146 (check: sliding-window log; a refused request is not appended, lines 137-146)",
+        "infra/aws/ec2/opal-gateway/app/ratelimit.py:170-182 (enforce_identity_counted: FAIL-OPEN on any exception, lines 180-182)",
+        "infra/aws/ec2/opal-gateway/app/ratelimit.py:218-248 (record_identity_refusal: one audit row per principal per 10 s; failures swallowed and counted in process)",
+        "infra/aws/ec2/opal-gateway/app/config.py:397-398 (RL_MCP_IDENTITY_LIMIT default 120, RL_MCP_IDENTITY_WINDOW default 60; no environment override in this repository)",
+        "infra/aws/ec2/opal-gateway/app/server.py:177-186 (GuardMiddleware: 429 JSON error rate_limited scope identity, Retry-After header at line 184)"
+      ]
+    },
+    "identities_24h": {
+      "source": "s3://opal-mcp-audit audit/dt=2026-10-17/ and audit/dt=2026-10-18/ (UTC; bucket from infra/aws/ec2/opal-gateway/deploy-to-ec2.sh:512 and infra/aws/terraform/opal-gateway/audit-lake.tf:18); 11301 record objects with record ts in the 24 h window read by boto3 get_object, 0 failed, 1 gw_ratelimit row; client_keys is the COUNT of distinct by_client keys (values withheld); counted 2026-10-18 12:13Z",
+      "absent_reason": null,
+      "denominator": 1,
+      "rows": [
+        {
+          "principal_hash": "9e7f3e39",
+          "refused": 1,
+          "client_keys": 4
+        }
+      ]
+    },
+    "reconnect_path": {
+      "retry_after_seconds_max": 61,
+      "client_retry_inside_window_rehits": "yes",
+      "evidence": "A refused request is never appended (ratelimit.py:137-146), so the 120 in-window entries stay until the oldest ages out, Retry-After = int(oldest + window - now) + 1 (60 at most, 61 only on an exact monotonic tie), so a retry before that instant is refused again and only one slot frees per expiry, which means N requests opened together at the limit get one admitted per expiry; the MCP client's own retry code is not in this repository, so its retry timing is unknown."
+    },
+    "recommendation": "No change is made by this cell. The lake holds one refusal row in the last 24 hours (one principal, count_in_window 120 of limit 120, retry_after_s 57, at 2026-10-17T17:21:43Z), and it holds no gw_ratelimit row dated 2026-10-18 through 12:13Z, although the issuer reports a 429 with scope identity on that day and the lake was still writing that day (latest key 12:06Z). The first later step is audit visibility: measure whether the best-effort refusal write fails (ratelimit.py:245-248 counts failures in process memory only) before any change to the 120 limit, the 60 s window or the keying, because the lake cannot yet confirm the event the limit is being judged on."
+  }
+}
