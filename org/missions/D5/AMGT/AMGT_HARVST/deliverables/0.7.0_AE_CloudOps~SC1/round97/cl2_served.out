@@ -1,0 +1,29 @@
+HVST-cl-2 SERVED RECORD, 0.7.0_AE_CloudOps~SC1, written 2026-10-18T15:3xZ. GO msg 8103 (15:10Z), pair: COO half a72a3823a58f68be.. (sha256 equal to the CTO half's binding), CTO half @5e345c92f5 (C-7 ruled YES: ONE real invoke, queue only). Order sha256 34aea74ddfc0c285... (equal to the GO). Ledger harvst-cl2-pull-enqueue-canonical-status, opened 15:13Z.
+Window: 15:13Z (ledger open) to the close; the apply landed 2026-10-18T15:24:23Z (function LastModified); there is no service restart.
+
+WHAT WAS DONE (each in its file in this folder):
+  cl2_before.out  : source at 349e7ee0da md5 45c83ddf74640e90368e8bebf712b52c; live CodeSha256 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo= (2690 B, LastModified 2026-10-12T15:38:20Z, rev bab0bc61..); live artifact VersionId pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2 whose sha256 b64 equals that CodeSha256 (this is the rollback copy, kept at scratchpad cl2/PREV_pull_enqueue.zip); queue 0/0/0; packs/ZZ-SLASH-PROBE* absent; scheduled tasks 207 read with the control found, none applies Terraform; the 38 tests of the folder pass in the build tree.
+  cl2_upload.out  : build-and-upload.sh from the worktree; new zip 3090 B, ONE entry lambda_function.py whose sha256 ad395e19.. equals the source; VersionId oV0CTP3MzbVWkp8Rsw7YuDVnRF_.e6kn, content-sha256 7c4gYrZHxrNDhf2bqv3wo2JTUWdUxt/BeDFQsp33fx4=, read back; re-downloaded by VersionId and checked independently.
+  cl2_plan.out    : untargeted plan of infra/aws/terraform/harvest (shared tree HEAD 1c0d5c8470), 53 resource_changes = 52 no-op + 1 update; the update is module.harvest_enqueue.aws_lambda_function.this, attributes differing: last_modified (computed), s3_object_version, source_code_hash; environment, role, layers, memory, timeout, handler, runtime, reserved concurrency, architectures, function_name, s3_bucket, s3_key EQUAL; no create, delete or replace. Sweep of every worktree's open ledgers by CONTENT: none other touches the function.
+  cl2_apply.out   : safe-apply of the SAVED plan with HALT_ACK=1 after get_delivery_state showed 1 of 1 READ; "Apply complete! Resources: 0 added, 1 changed, 0 destroyed."
+  cl2_after.out   : CodeSha256 7c4gYrZHxrNDhf2bqv3wo2JTUWdUxt/BeDFQsp33fx4= equals the new zip; size 3090; runtime python3.11, handler lambda_function.lambda_handler, memory 256, timeout 30, role, layers null, architectures x86_64 and the three environment KEYS (RESEARCH_BUCKET, HARVEST_BUCKET, QUEUE_URL) read equal to the before values (compared by reading the two printed lines); the deployed code package from the code location is the same 3090 bytes, one entry, byte equal to the source; plan after the apply: No changes.
+  cl2_probe.out   : ONE direct invoke, tier internal, 'ZZ-SLASH-PROBE US Equity', AFTER step 4 passed: statusCode 400, body {"error": "missing or invalid 'ticker' in request body"}; queue 0/0/0 before and 20 s after; no object under packs/ZZ-SLASH-PROBE; positive control (the listing call finds packs/BP-SLASH-_LN_Equity/input_ledger.json) 1.
+  cl2_slash_write.out : step 5b, ONE real invoke for 'BP/ LN Equity' at 15:26:59Z: statusCode 202; packs/BP-SLASH-_LN_Equity/status.json (190 B, 15:27:00Z) exists with state REQUESTED and security_key the RAW BP/_LN_Equity; NOTHING under packs/BP/_LN_Equity/status.json (that prefix still holds only input_ledger.json); one message enqueued with the RAW security_key (read once by a non-destructive peek, visibility timeout 0, no redrive policy). Invokes in this order: two (the probe and this one).
+
+WHAT THE GRADE DOES NOT PROVE (order step 6):
+  A. The status object's later states belong to the box consumer. At the last read, 15:33:26Z (6.5 minutes after the invoke), the status still reads REQUESTED and the message is still in the queue (ApproximateNumberOfMessages 1; its ReceiveCount was 1 at my 15:30:58Z peek, so the consumer had not received it). The CTO half's third bullet, "the drained pull lands normally", is therefore NOT shown by me; the issuer regrades it. Row AMGT_HARVST-D1-S63.
+  B. The queue accepted the message; there was no refusal on budget, so the line is PASS and not REFUSED_BY_QUEUE.
+  C. The behaviour change for a key the shared rule refuses (a -SLASH- or non-ASCII ticker now gets a 400 with zero writes) is shown by the probe only for the -SLASH- ticker, not for a non-ASCII one.
+  D. A drift guard for the Lambda's copy of the slash rule (CTO condition 2): the folder's tests (38 passed, arm 3 of test_cl1_status_key_canonical over the fixture keys) ran in the build tree; I did not read the guard's fixture myself.
+
+DEVIATIONS AND ODDITIES, plainly:
+  1. record-terraform-deploy.sh harvest REFUSED (rc=2, 15:28:59Z, cl2_record.out): "1 applied address(es) have NO source-map row under harvest: module.harvest_enqueue.aws_lambda_function.this". Nothing was written; the function has no row in infra/aws/lambda/ci/function-map. Not fixed (a new carrier outside the order's paths): row AMGT_HARVST-D1-S62.
+  2. The plan was taken from the shared tree (HEAD 1c0d5c8470), the build from the worktree at 349e7ee0da; the Lambda's code comes from the S3 object, so the tree supplies configuration only.
+  3. The SQS peek was not asked for by the order; it changed nothing (no redrive policy) and is recorded above.
+  4. The config comparison before/after is by reading the two printed lines (my comparison script failed to parse them); the plan's own EQUAL lines cover the same fields.
+Rollback was not needed or taken: re-upload PREV_pull_enqueue.zip (sha256 b64 cWiraC3EeuTU9WDIpc5RXzpw6+RT9WxoeqfH/eZiaxo=, the version pHqpZEyjzx1PPaeKAGgJUIB.1hQUU.v2 is still stored in the versioned bucket) and apply the one-attribute plan the same way.
+PLAN_ONE_CHANGE=PASS
+DEPLOYED_BYTES_EQUAL_SOURCE=PASS
+ENV_AND_CONFIG_UNCHANGED=PASS
+REFUSAL_PROBE_NO_SIDE_EFFECT=PASS
+SLASH_WRITE_CANONICAL=PASS
