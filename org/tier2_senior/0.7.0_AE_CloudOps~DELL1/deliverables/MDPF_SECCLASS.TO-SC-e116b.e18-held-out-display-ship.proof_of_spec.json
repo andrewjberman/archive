@@ -1,0 +1,107 @@
+{
+ "schema_version": "1.0",
+ "to_id": "MDPF_SECCLASS.TO-SC-e116b.e18-held-out-display-ship",
+ "genre": "DEPLOY",
+ "firm": "MDPF",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/prd/MDPF_SECCLASS_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "4dda49c7e3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R29.md",
+  "vintage_commit": "964be4af93",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/MDPF_SECCLASS.TO-SC-e116b.e18-held-out-display-ship.md"
+ },
+ "assignee": "0.7.0_AE_CloudOps~DELL1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "s3://opal-data-bd/code/gold/E_18.detect_new_securities.py",
+   "kind": "s3_object",
+   "commit_or_etag": "197eac28db037323fbb3f862867589ab",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-deploy on box/dell1 at 2026-10-18T06:46Z (object LastModified 06:46:32Z), HALT_ACK=1 for the already-read GO msg 7936, after a same-shell gate re-read at 06:45:27Z (0 gold-layer-runner instances, trigger-pending 404, served base ETag, repo md5 197eac28): `bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py`, rc=0, 'DEPLOYED [bd] ...E_18...', 'VERIFY OK comp-pipescript deployed', 'OK: safe-deploy gate PASS -- all 1 file(s) deployed and verified'. Pre-act ETag f5c03ee69eaa1810159aefb6e2145bb4 at VersionId ij219ZfHeFTL7H_e8evmlrOipp2QHz_c (rollback handle, unused); post-act VersionId Sygi3RJFsN5MbrcDa6H49gCB2FHJj_bz, 13,760 B.",
+   "artifact_covered_by": [
+    "SC29-e116b-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "SC29-e116b-AC1",
+   "criterion_verbatim": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/e116_shipped_check.py -- expect 'E116-SHIPPED ok=True'",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/e116_shipped_check.py",
+   "expect": "E116-SHIPPED ok=True",
+   "output_evidence": "E116-SHIPPED ok=True e18=197eac28|197eac28|MATCH display=1 compiles=True old_list_lines=0 dispatch=165933f6|165933f6|MATCH (rc=0), read right after the ship. Preserved at org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/e116_ac1_post_ship.txt.",
+   "denominator": "1 moving key at its signed md5, gold_dispatch.sh unchanged at 165933f6. Code/gold watch set, one list_object_versions page each: pre=290 latest keys (372 versions, 100 delete markers), post=290 (373 versions), added=0 removed=0 moved=[E_18] (E116_LEGP_20261018.json vs E116_LEGD_AFTER_20261018.json). The discriminator moved: the order records the same check at the base as 'ok=False e18=f5c03ee6|197eac28|DIFF display=0 compiles=True old_list_lines=0 dispatch=165933f6|165933f6|MATCH' (issuer read ~02:3xZ); this seat read the served base ETag in step 0 and did not run the check itself before the ship.",
+   "status": "PASS"
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "safe-deploy.sh",
+   "invocation": "bash .tools/safe-deploy.sh data/black_diamond/scripts/gold/E_18.detect_new_securities.py",
+   "result": "OK -- gate PASS, 1 of 1 deployed and verified, one DEPLOYED line and three '[not shipped]' lines; seat-gates CROSSBOX-DEPLOY CLEAR."
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": ".tools/deploy_ledger.py open --leg V|P|D|C|Q|G ; close-leg ; close",
+   "result": "Entry secclass-e116b-e18-held-out-display-dell1-20261018 opened with 6 legs before the act, every leg closed with proof, entry CLOSED."
+  },
+  {
+   "tool": "e111_legp.py",
+   "invocation": "python -I e111_legp.py gold|table|diff",
+   "result": "code/gold census 290 keys before and after, only E_18 moved; etf-classifications 11375 items, 13 seeded present, 9 held-out absent, first 200 keys equal before and after the single."
+  },
+  {
+   "tool": "e116_ab_local.py",
+   "invocation": "python -I e116_ab_local.py <base E_18 f5c03ee6> <new E_18>",
+   "result": "Local plan-form A/B on the same holdings file (2026-10-16.parquet), reads only: counts equal (Already resolved 14, candidates 0, written/refused 0/0, unresolved 109); the new file adds the held-out block (14 pairs)."
+  },
+  {
+   "tool": "e108-style ship check",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R29_CHECKS/e116_shipped_check.py",
+   "result": "ok=True after the ship."
+  }
+ ],
+ "controls": {
+  "ship_check": {
+   "description": "AC1's served-equals-repo test plus the display-line test discriminate landed from not landed: at the base the served E_18 md5 differs from the repo's and display=0, so a no-op ship reads ok=False.",
+   "expected_landed": "E116-SHIPPED ok=True e18=197eac28|197eac28|MATCH display=1 compiles=True",
+   "expected_not_landed": "E116-SHIPPED ok=False e18=f5c03ee6|197eac28|DIFF display=0 compiles=True",
+   "observed": "landed arm read here after the ship; not-landed arm recorded by the issuer in the order at the base; step-0 head-object here read the base ETag f5c03ee6.",
+   "status": "PASS"
+  },
+  "window_and_watch_set": {
+   "description": "Arms that could STOP the act: served base ETag exact, repo md5 exact, runner stopped, no trigger-pending, code/gold watch set moved only the one key (CTO condition 1).",
+   "expected_landed": "watch set moved = [E_18], added 0, removed 0",
+   "expected_not_landed": "any other key moved is a STOP with a same-session restore by VersionId",
+   "observed": "step 0 and the in-shell re-read at 06:45:27Z: base ETag exact, md5 197eac28, 0 gold-layer-runner instances pending/running/stopping, trigger-pending 404; post census moved=1 added=0 removed=0.",
+   "status": "PASS"
+  }
+ },
+ "risk_class": "WORLD",
+ "never_widen_pair": {
+  "coo_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_HELD_OUT_DISPLAY_SHIP_20261018.md@554d3d227f",
+  "cto_half": "org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_E18_HELD_OUT_DISPLAY_SHIP_20261018.md@554d3d227f"
+ },
+ "rollback": "Copy-object VersionId ij219ZfHeFTL7H_e8evmlrOipp2QHz_c over code/gold/E_18.detect_new_securities.py (the base bytes, md5 f5c03ee6), then re-run the check expecting the base line. Not used: leg Q read exit 0, no ERROR, table unchanged.",
+ "declared_exclusions": [
+  {
+   "item": "Leg Q figure 'Already resolved (in resolution table): 9' against the single's 14.",
+   "reason": "The order expected the 23:00Z fire's 9 (holdings 2026-10-09.parquet); today's single loaded the newer holdings file 2026-10-16.parquet. Controlled A/B on the same file, plan form, reads only: the base E_18 (md5 f5c03ee6) also prints Already resolved 14, candidates 0, unresolved 109, so the count comes from the input, not the ship. The held-out block lists 14 pairs: the nine named tickers plus FPE, TRRJX, VTTVX, WTM, XPMIX. Candidates 0 as expected; written/refused 0/0. Reported to the issuer; see org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/E116_LEGQ_FINDINGS_20261018.md."
+  },
+  {
+   "item": "Leg G: the first scheduled fire after the ship.",
+   "reason": "The issuer's by the order ('LEG G is the issuer's'). Not measurable until the fire runs."
+  },
+  {
+   "item": "comp-adversary on the named-ship set.",
+   "reason": "Declared RUN by the issuer in the order's preflight; this seat did not run it. The equivalent here is the printed member list and the 290-key watch set."
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/session_e116b_e18_held_out_display_0642-0700Z.md"
+}
