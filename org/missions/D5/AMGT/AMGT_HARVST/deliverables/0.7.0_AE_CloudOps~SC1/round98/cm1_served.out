@@ -1,0 +1,19 @@
+HVST-cm-1 SERVED RECORD, 0.7.0_AE_CloudOps~SC1 on dell1, written 2026-10-18T17:2xZ. Read-only after-reads on the issuer's GO (msg 8166, 17:11:04Z) under order AMENDMENT 1 (commit 424ad170bb): the drain ran at SITE Z on its own Terminal box as its own order; dell1 ran no consumer, signed in nowhere, made no Bloomberg call and received nothing from the queue. My ledger harvst-cm1-drain-queued-bp-pull is closed as a STOP with nothing written (committed c6e983f926). Files in this folder: cm1_before.out (the BEFORE record, 16:46Z), cm1_after.out (17:16Z), cm1_cause.out.
+
+WHAT I READ:
+  - queue 0 / 0 / 0 (before 1 / 0 / 0).
+  - status.json LANDED, updated_at 2026-10-18T17:06:20Z, raw_stamp 20261018T170612Z, derived_stamp 20261018T170620Z, ref_key, hist_key and derived_key all under security_key=BP-SLASH-_LN_Equity (565 B; before REQUESTED, 190 B).
+  - new keys under the five prefixes: refdata, histdata, bestdata and pull_log 20261018T170612Z (17153 B, 23534 B, 2804 B, 6431 B) and derived/model_block/BP-SLASH-_LN_Equity/20261018T170620Z/model_block.json (559911 B). Counts 17 -> 18 (refdata), 17 -> 18 (histdata), 16 -> 17 (bestdata), 16 -> 17 (pull_log), 25 -> 26 (model_block): exactly one new object each, one new stamp.
+  - nothing newer than 16:46Z under any raw-spelling prefix: refdata, histdata, bestdata, pull_log 0 objects; derived/model_block/BP/_LN_Equity/ holds 6 old objects, 0 newer; packs/BP/_LN_Equity/ holds only the old input_ledger.json, 0 newer, no status.json (positive control: the same predicate counts 2 newer objects under the canonical packs prefix).
+  - gateway: harvest_get_fundamentals kind model for BP/_LN_Equity names model_block_key ...20261018T170620Z (as_of 2026-10-18T17:06:20Z, raw_stamp_used 20261018T170612Z; the versions list now ends with that stamp; stored_spelling canonical).
+
+LIMITS AND DIFFERENCES, PLAINLY:
+  1. QUEUE_DRAINED_ONCE rests on the queue counts (1 -> 0), exactly one new stamp under each prefix and one status LANDED; "1 message over 1 poll" is site Z's word (MSTR msg 8163), which I could not read. I did not watch the queue during the drain.
+  2. Site Z listed 5 written objects; S3 shows 7 writes: the 5 add-only objects above PLUS packs/BP-SLASH-_LN_Equity/input_ledger.json rewritten in place (7335 B -> 7772 B at 17:06:21Z), which neither the order nor the pair names (they name only the status object as an in-place write). The pull_log object is one the order expects and site Z's list omitted. I did not read the ledger's content. The rewrite is in the canonical partition, not under a raw prefix. Not graded as a failure; the issuer rules.
+  3. The cause (cm1_cause.out) is named from my evidence and the order's text; the relayed site Z report carried no cause sentence.
+  4. Everything on the Bloomberg side (health read, consumer run, no sign-in) is site Z's report, not mine.
+  5. The BP dossier written 15:51:21Z (HVST-cl-4) now cites the 13:02Z model block while a newer block exists (17:06:20Z): its model_rows is one block behind until the round-98 refresh, as the pair stated.
+QUEUE_DRAINED_ONCE=PASS
+STATUS_LANDED_CANONICAL=PASS
+NOTHING_UNDER_RAW_PREFIX=PASS
+CAUSE_NAMED=PASS
