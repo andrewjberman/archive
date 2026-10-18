@@ -1,0 +1,19 @@
+HVST-ch-5 SERVED record, 0.7.0_AE_CloudOps~SC1, 2026-10-18 04:28Z to 04:35Z. GO msgs 7896 and 7898: site Z CLEAR 04:25Z to 05:55Z (its msg 35617), --go-utc 2026-10-18T04:25:00Z, window to 05:55Z; the write was 04:29:21Z. One object, no canary. Nothing served changes in value (no curated tool reads a fund form; no security's fund_of_record is DIVZ). fund_form --write was NOT run; etfs_compare_peers was NOT called; no dossier or continuation write_one was run.
+
+THE OBJECT (ch5_written.out, ch5_run.log; one foreground python -u command):
+ DIVZ  0 reports  fund=divz/a181f84957dbb8b7.json  369 B  VersionId fvVgy7mIKjGzALtUf__muLHHEVUegxyE  04:29:21Z  sha256 c827229d19a57f25d3286839e0378b08dd77e2eef0ef27f6f5f5f271ef0613a3  put_performed True existed False  READBACK fund=DIVZ reports=0 equal=PASS
+ Before the write: the in-memory build equalled the measurement (object a181f84957dbb8b7.json, reports 0, content_sha256 34524f75..), the stored count was 11, the DIVZ key was absent. READBACK checks: subject.fund DIVZ, method_version "2", fields.reports 0, fields.absent "no report whose silver row states fund_relation == holding names DIVZ", skeleton and by_class empty, inputs [], recomputed content_sha256 equal to the stored and to the build's (34524f757fccede61fe5f41f26979e06524ada45de42f864ed97b935fc994413), name = _inputs_sha16([]). Manifest closing line: WRITTEN forms=1 reports=0. No retry, no error.
+
+AFTER (ch5_after.out):
+ read_latest("DIVZ") returns the new object: key amgt/harvest/gold/research-fund-form/fund=divz/a181f84957dbb8b7.json, method_version 2, inputs [], fields {"absent": "no report whose silver row states fund_relation == holding names DIVZ", "by_class": {}, "reports": 0, "skeleton": []} (before: LookupError). read_latest IDVZ and PFOE return the version-2 objects of HVST-cf-5 (82 and 33 reports, content_sha256 3f3d60a3.. and 74ad08d7.., unchanged).
+ substrate._pick_stored("research-fund-form", "fund=divz", fund_form.current_inputs("DIVZ") = [], "2", client) returns uri .../fund=divz/a181f84957dbb8b7.json, current True, method_version 2, reports 0 (before: the stale v1 e19a2eb0.., current False). The v1 DIVZ object stays.
+ python -u -m lib.research.corpus.fund_form --compare (read only, from the pinned worktree) RAN TO COMPLETION, rc=0, over three funds: fund DIVZ reports 0 sections 0; fund IDVZ reports 82 sections 735; fund PFOE reports 33 sections 4271; pairs DIVZ/IDVZ shared 0 (only_IDVZ 735), DIVZ/PFOE shared 0 (only_PFOE 4271), IDVZ/PFOE shared 66 (only_IDVZ 669, only_PFOE 4205). It raised before. The DIVZ line "reports 0 sections 0" is the expected one.
+ Stored count 12 (11 before plus the DIVZ object).
+
+GATEWAY READ, UNH_US_Equity, fields fund_of_record and last_stated_position, BEFORE (ch5_before.out, 04:19Z) and AFTER (04:33Z): EQUAL in every returned field entry, as_of 2026-10-17, content_sha256 6bd7cea7091cb8254e553af1a54e13462406a881224fe6c9c1cd3e185244e0f1, dossier_key, continuation_key (4d837586380648bd.json), source_keys (13, same list: the gateway part pointers and source_keys are equal here, as stated in the order, because there was no silver write), research_reports[] (1 entry 48d81f053e5076e8, fund_relation holding, part date=2026-09-25/part-20261018T010034Z.parquet), ai_fill_blocks, management_roster, omitted_items. No difference. A gateway catalog read of the research-fund-form table would list ONE MORE DIVZ object now (add-only; expected, order section 3); I did not read the catalog.
+ Nothing differs that the order did not name; nothing was self-graded.
+C-6: the DIVZ-form part of C-6 is LIFTED by this close (a build that reads DIVZ's form resolves the new object). C-6 STAYS in force for every name with no /5 continuation until HVST-ch-1 and HVST-ch-2 are merged and their censuses read 0 differing (CTO ruling @162d5a6934).
+FORM_WRITTEN_AND_READ_BACK=PASS
+READ_LATEST_AND_PICK_CURRENT=PASS
+COMPARE_RUNS_OVER_THREE_FUNDS=PASS
+GATEWAY_READS_UNCHANGED=PASS
