@@ -1,0 +1,24 @@
+HVST-cg-2 SERVED record, 0.7.0_AE_CloudOps~SC1, 2026-10-18 01:00Z to 01:22Z. Nothing served changes in VALUE until HVST-cg-3 (the gateway release); this file records the three parts, the newest-part rule applied to the bucket, and the gateway reads before and after.
+
+PARTS (cg2_written.out, cg2_run.log; one date per foreground python -u command, the part read back and the manifest read before the next):
+ 2026-09-25 (canary) 84 rows  part-20261018T010034Z.parquet  29937 B   VersionId yBc6EvZM.kO9dg9EGIwLt2yJ1Rohe7UK   written 01:00:35Z  READBACK equal=PASS
+ 2026-09-23          121 rows part-20261018T010056Z.parquet  39348 B   VersionId jbGhhPNbW1LUml6sAJXjAP87SNItcFNx   written 01:00:57Z  READBACK equal=PASS
+ 2026-09-24          148 rows part-20261018T010114Z.parquet  44617 B   VersionId fm_D9nDO1V5iTTToDHQURpxo2iCfOx7V   written 01:01:14Z  READBACK equal=PASS
+ Manifest closing line: WRITTEN parts=3 rows=353. Each part's bytes equal the dry run's WOULD_PUT (29937, 39348, 44617). Each READBACK: row count, column fund_relation, the (security_key, report_id) key set, every column other than fund_relation and record_hash equal to the superseded row, fund_relation equal to classify(fund, fund_evidence), and the per-relation counts equal to the plan. All inside the window 00:30Z to 02:30Z (site Z cleared, msg 7796); 0 retries, 0 errors.
+
+NEWEST PER REPORT (cg2_newest.out; the gateway rule, the part whose KEY sorts highest, the two misfiled KMB reports excluded):
+ parts=8 (5 old + 3 new) rows_read=708 distinct_reports=355 kept=353. All 353 kept reports' newest row carries a fund_relation value (missing=0) and comes from one of the three new parts (353 of 353); the stored value equals classify() on all 353 (0 mismatches).
+ COUNTS holding=121 candidate=14 initiate=2 interest=2 template=1 unclassified=0 none=213 = CENSUS (equal).
+ PROOF-NAMES ADBE_US_Equity=candidate SNPS_US_Equity=candidate MNST_US_Equity=candidate ML_FP_Equity=template CLX_US_Equity=candidate UNH_US_Equity=holding = the census line (equal).
+
+GATEWAY READS, UNH_US_Equity and CPA_US_Equity, fields fund_of_record and last_stated_position (cg2_before.out step 0 iv before the first write; cg2_after_reads.out after the last):
+ EQUAL: content_sha256 (UNH 6bd7cea7..., CPA 61b9977a...), as_of, dossier_key, continuation_key, every dossier_fields and continuation_fields entry, ai_fill_blocks, management_roster, omitted_items, and every research_reports[] attribute except the part pointer; no entry carries a fund_relation key.
+ DIFFERENT, two named differences, ruled by the issuer in AMENDMENT 2 of the order (commit 17ede77bad) on SC1's msg 7809 (reply msg 7811): the gateway lists in source_keys the silver parts it read and names in research_reports[].part the part that won the newest-part rule, so after an add-only rewrite whose new parts win both move.
+   (1) research_reports[].part names the new part (UNH report 48d81f053e5076e8: part-20260925T050517Z.parquet became part-20261018T010034Z.parquet; all 10 CPA entries shown the same).
+   (2) source_keys lists the three new parts besides the old five (11 keys before, 13 after).
+ The issuer's ruling: these are the EXPECTED consequence of the new parts winning; C-7's sentence that source_keys and the report entries are equal was the issuer's error, not a mismatch in the act. The seat did not grade this itself; the grade below is that ruling applied.
+ LIMIT: the tool truncates CPA's research_reports (27 omitted before and after); the comparison covers the 10 shown plus content_sha256.
+ etfs_compare_peers was NOT called (C-8); no S3 delete by this seat; no grant, key or policy requested (C-4).
+PARTS_WRITTEN_AND_READ_BACK=PASS
+NEWEST_PER_REPORT_EQUALS_CENSUS=PASS
+GATEWAY_READS_UNCHANGED=PASS
