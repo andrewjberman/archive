@@ -1,0 +1,41 @@
+HVST-cg-2 BEFORE record, 0.7.0_AE_CloudOps~SC1 on dell1, started 2026-10-18T00:57:24Z. READ ONLY. Nothing served changes until HVST-cg-3; the proof of this cell is the read-back of the written parts and the equality of two gateway reads before and after.
+WORKTREE C:/tmp/cg2-build HEAD=a9aecdd593293b4ad36fb6b628a8ac83ba4096e4 status_lines=0
+git diff a9aecdd593 HEAD -- lib/research : [0 bytes]
+COO half sha256 11cf6bd0e637fd440b89881ecd9357c0a10d9c942644f57a3193a7fd287b9158 (signed 11cf6bd0e637fd440b89881ecd9357c0a10d9c942644f57a3193a7fd287b9158)
+--- (i) CENSUS
+org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~163/cg5_census.py
+RELATION UNVGY_US_Equity afd6889d51bdb924 B fund=PFOE relation=holding evidence=Recommendation: Maintain position in PFOE
+RELATION VIVT3_BZ_Equity b52dee678cc3f1ea B fund=IDVZ relation=holding evidence=RECOMMENDATION: MAINTAIN 2% POSITION IN IDVZ
+RELATION VIVT3_BZ_Equity dbdbf797436385ea B fund=IDVZ relation=holding evidence=RECOMMENDATION: MAINTAIN 2% POSITION IN IDVZ
+RELATION V_US_Equity 5370b2503b248da2 A fund=PFOE relation=holding evidence=RECOMMENDATION: MAINTAIN POSITION IN PFOE
+RELATION V_US_Equity f7ae6a6ce77a6464 B fund=PFOE relation=holding evidence=Recommendation: Maintain position in PFOE
+RELATION WALMEX*_MM_Equity b441879799bbb1b1 B fund=IDVZ relation=none evidence=6 Adj EPS 0.65 0.68 0.85 0.72 0.65 2.87 3.03 3.25 3.22 Fund IDVZ y/y G
+RELATION WDAY_US_Equity 6845ad7e01e1e96f B fund=PFOE relation=holding evidence=Recommendation: Maintain position in PFOE
+RELATION WDAY_US_Equity a06ddca9fe9b5778 A fund=PFOE relation=candidate evidence=RECOMMENDATION: CANDIDATE FOR PFOE
+RELATION ZTS_US_Equity 61ee402a5e4ce562 A fund=PFOE relation=holding evidence=RECOMMENDATION: INCREASE POSITION IN PFOE
+NONHOLDING_SECURITIES 16 8035_JP_Equity,ADBE_US_Equity,BZLFY_US_Equity,CDNS_US_Equity,CELH_US_Equity,CLX_US_Equity,CNR_CN_Equity,HEI_US_Equity,ISRG_US_Equity,ML_FP_Equity,MNST_US_Equity,MSCI_US_Equity,NOW_US_Equity,SNPS_US_Equity,ST_SP_Equity,WDAY_US_Equity
+CENSUS-FUND-RELATION rows=355 reports=353 securities=94 holding=121 candidate=14 initiate=2 interest=2 template=1 unclassified=0 none=213 gets=6 bytes=133462
+PROOF-NAMES ADBE_US_Equity=candidate SNPS_US_Equity=candidate MNST_US_Equity=candidate ML_FP_Equity=template CLX_US_Equity=candidate UNH_US_Equity=holding
+--- (ii) DRY RUN
+# DENOMINATOR parts=5 rows_read=355 rows_given=353 relations={'candidate': 14, 'holding': 121, 'initiate': 2, 'interest': 2, 'none': 213, 'template': 1}
+# METHOD silver_append('amgt', 'research-report', rows, ('security_key', 'report_id'), run_stamp, client=RecordingClient)
+# METHOD gets counts every S3 request (list pages and object gets); bytes counts object bytes read
+WOULD_PUT amgt/harvest/silver/research-report/date=2026-09-23/part-20261018T005730Z.parquet rows=121 bytes=39348
+WOULD_PUT amgt/harvest/silver/research-report/date=2026-09-24/part-20261018T005730Z.parquet rows=148 bytes=44617
+WOULD_PUT amgt/harvest/silver/research-report/date=2026-09-25/part-20261018T005730Z.parquet rows=84 bytes=29937
+REBUILD-PLAN rows=353 skipped_unchanged=0 new_parts=3 dates=3 puts_recorded=3 puts_performed=0 gets=12 bytes=266924
+# written_rows_per_silver_append=353 run_stamp=20261018T005730Z
+rc_dry=0
+--- (iii) SCHEDULED TASKS
+tasks listed (rows incl. repeats): 0
+rows naming typed.main / typed / induction / research-report / corpus:
+0
+positive control (rows naming OPAL_autolaunch): 0
+(i) RESULT: the last two census lines EQUAL the order: CENSUS-FUND-RELATION rows=355 reports=353 securities=94 holding=121 candidate=14 initiate=2 interest=2 template=1 unclassified=0 none=213 gets=6 bytes=133462 and PROOF-NAMES ADBE=candidate SNPS=candidate MNST=candidate ML_FP=template CLX=candidate UNH=holding.
+(ii) RESULT: REBUILD-PLAN rows=353 skipped_unchanged=0 new_parts=3 dates=3 puts_recorded=3 puts_performed=0 equals the order; WOULD_PUT row counts 121 (2026-09-23), 148 (2026-09-24), 84 (2026-09-25) equal the COO half.
+--- (iii) SCHEDULED TASKS (second read; the first, schtasks in bash, returned 0 rows INCLUDING the positive control and is VOID)
+PowerShell Get-ScheduledTask: 207 tasks listed; positive control OPAL_autolaunch* = 1 (the instrument sees tasks). Tasks whose action text names typed, induction, lib.research, research-report or corpus: 0. The one harvest task, 'Opal Data Harvest - Continuous Cycle' (Running), runs `-m lib.opal_data_harvest.cycle_runner ... --publishers wsj barrons sa` from the runner pin worktree; its only silver_append call (lib/opal_data_harvest/uploads.py) takes source and table as arguments for the publisher tables and names no research-report; it does not run typed.main or the induction. LIMIT: this is a read of task actions and of the runner's code, not a trace of every table the runner may touch.
+--- (iv) BEFORE gateway reads (00:5xZ to 01:0xZ, fields fund_of_record and last_stated_position)
+UNH_US_Equity: as_of 2026-10-17; content_sha256 6bd7cea7091cb8254e553af1a54e13462406a881224fe6c9c1cd3e185244e0f1; source_keys 11 (silver prefix plus the 5 parts date=2026-09-23/part-20260923T044515Z, 2026-09-24/part-20260924T121349Z and part-20260924T214637Z, 2026-09-25/part-20260925T050517Z and part-20260926T004147Z; continuation 4d837586380648bd.json; dossier as_of=2026-10-17.f73f295a3671b8da.json); fund_of_record "PFOE"; last_stated_position {"fund": "PFOE", "line_only": true, "size_pct": null, "text": "Maintain positions in PFOE and DIVZ"}; research_reports[] = 1 entry report_id 48d81f053e5076e8 class B fund PFOE fund_evidence "Recommendation: Maintain positions in PFOE" period 2026-Q2 part date=2026-09-25/part-20260925T050517Z.parquet, no fund_relation key. Equal to the 22:5xZ read of cf-4.
+CPA_US_Equity: as_of 2026-10-12; content_sha256 61b9977a5ddfe65a5584d69f87178849da84704161f5563b004942a111510f6d; same source_keys list; continuation dc143a9f2ecaad5e.json; dossier as_of=2026-10-12.2bd09162c4f47b3b.json; fund_of_record "IDVZ"; last_stated_position {"fund": "IDVZ", "size_pct": "2", "text": "1-2% position in IDVZ Copa owns ..."}; research_reports[] (truncated by the tool, 27 omitted): 10 shown, first report_id 039303c03e4cdc55, class A report 0c51730281bceb11 fund IDVZ part date=2026-09-25/part-20260925T050517Z.parquet, no fund_relation key. LIMIT: the tool truncates research_reports for CPA, so the AFTER read compares what is shown plus content_sha256.
+etfs_compare_peers was NOT called (C-8).
