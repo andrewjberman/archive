@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings.md",
+    "group": "OTHER",
+    "vintage_commit": "8f45e32674"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "8f45e32674",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~172",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.py",
+      "kind": "script",
+      "commit_or_etag": "c151b694b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only census script committed in c151b694b1. Its only S3 operations are list_objects_v2 and get_object on opal-data-harvest (the wrapper refuses every other operation); no put, delete, copy or sync; the live gateway is not called. Prefixes are read from app/harvest_research.py, harvest_figures.py and harvest_identity.py; slash keys are read from cj1_census.out and confirmed by KEYSCAN.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out",
+      "kind": "doc",
+      "commit_or_etag": "c151b694b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Census output of the one foreground run (rc=0), committed in c151b694b1; ASCII, LF endings; the CENSUS-PATHKEY line is last. 2 slash keys; 13 distinct prefix templates; 26 cells; 913 requests and 4902522 GET bytes (budget 4000 requests and 400 MiB). Four same-name pairs differ in bytes (rows AMGT_HARVST-D1-W172-S2 to S5).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c151b694b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five rows appended by bytes in c151b694b1: AMGT_HARVST-D1-W172-S1 (OBSERVATION, INERT: the matrix), S2 and S3 (peers 2026-09-24T2252Z.json, BP and NG; OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~W1), S4 and S5 (packs input_ledger.json, BP and NG; OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~W1). The diff is 111 insertions and 0 deletions; the JSON array parses with 534 rows.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance. Pins the census artifacts to c151b694b1.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out expect (?m)^CENSUS-PATHKEY slash_keys=([2-9]|\\d\\d+) prefixes=\\d+ cells=\\d+ raw_objects=\\d+ canonical_objects=\\d+ same_name=\\d+ same_name_differ=\\d+ gets=\\d+ bytes=\\d+$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out",
+      "output_evidence": "CENSUS-PATHKEY slash_keys=2 prefixes=13 cells=26 raw_objects=40 canonical_objects=80 same_name=40 same_name_differ=6 gets=913 bytes=4902522\n(ck1_census.out, the deciding line, printed by the census run at c151b694b1. Commentary: the final line counts the two input_ledger.json objects twice, since the packs/ directory template and the _ledger object template list the same objects; the distinct values are raw 38, canonical 78, same-name 38, differ 4.)",
+      "denominator": "1 of 1 CENSUS-PATHKEY line; slash_keys=2 (the issuer expects 2 or more; KEYSCAN-SLASH-SET match=yes against cj1); 26 cells = 2 keys x 13 distinct prefixes; 913 requests of 4000 and 4902522 GET bytes of 419430400",
+      "status": "PASS",
+      "expect": "(?m)^CENSUS-PATHKEY slash_keys=([2-9]|\\d\\d+) prefixes=\\d+ cells=\\d+ raw_objects=\\d+ canonical_objects=\\d+ same_name=\\d+ same_name_differ=\\d+ gets=\\d+ bytes=\\d+$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out expect (?m)^CONTROL-POSITIVE UNH_US_Equity raw_equals_canonical=yes$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out",
+      "output_evidence": "CONTROL-POSITIVE UNH_US_Equity raw_equals_canonical=yes\n(ck1_census.out, the deciding line, printed by the census run at c151b694b1)",
+      "denominator": "1 of 1 CONTROL-POSITIVE line; the raw and canonical prefix are the same string under all 13 distinct templates for UNH_US_Equity",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-POSITIVE UNH_US_Equity raw_equals_canonical=yes$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out expect (?m)^CONTROL-NEGATIVE synthetic equal=equal differ=differ raw_only=raw_only canonical_only=canonical_only$",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.out",
+      "output_evidence": "CONTROL-NEGATIVE synthetic equal=equal differ=differ raw_only=raw_only canonical_only=canonical_only\n(ck1_census.out, the deciding line, printed by the census run at c151b694b1)",
+      "denominator": "1 of 1 CONTROL-NEGATIVE line; 4 of 4 synthetic pairs classified as expected ((same, same bytes), (same, different bytes), (raw only), (canonical only))",
+      "status": "PASS",
+      "expect": "(?m)^CONTROL-NEGATIVE synthetic equal=equal differ=differ raw_only=raw_only canonical_only=canonical_only$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "CONTROL-NEGATIVE: the census's one classifier is run on four synthetic pairs and must return equal, differ, raw_only and canonical_only. CONTROL-POSITIVE: the non-slash key UNH_US_Equity builds the same raw and canonical prefix under all 13 templates.",
+      "expected": "CONTROL-NEGATIVE equal=equal differ=differ raw_only=raw_only canonical_only=canonical_only; CONTROL-POSITIVE UNH_US_Equity raw_equals_canonical=yes",
+      "observed": "CONTROL-NEGATIVE synthetic equal=equal differ=differ raw_only=raw_only canonical_only=canonical_only; CONTROL-POSITIVE UNH_US_Equity raw_equals_canonical=yes",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the census ran once in the foreground; a second run would repeat 913 requests of the same listing and GET for no new finding.",
+      "observed": "single run, rc=0",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The task-order file's status flip",
+      "reason": "The worker face says the issuer flips the status and not to edit the order file; the order file is not in <paths>, so it was not edited. The instance is left for the issuer to close."
+    },
+    {
+      "item": "Any write to S3, any writer, any deploy, any edit of a source file, any call to the live gateway",
+      "reason": "Out of scope by the order. The census reaches S3 only through list_objects_v2 and get_object on opal-data-harvest; the gateway tools were imported for their constants and the _segment function, never called."
+    },
+    {
+      "item": "Deduplicating the input_ledger.json objects in the final line",
+      "reason": "The order says the counts are the finding and nothing is changed to make them read anything; the census was not re-run. The double count is disclosed in the final line's commentary and in row AMGT_HARVST-D1-W172-S1, with the distinct values (38/78/38/4)."
+    },
+    {
+      "item": "The reason for each of the four differing same-name pairs",
+      "reason": "Not read by this census (two objects with different LastModified and content; the writer of either object is not read). The order forbids guessing a reason; each pair is a row, and the reason is left open there."
+    },
+    {
+      "item": "The served answers of the gateway tools under each spelling",
+      "reason": "Out of scope: the order is a read-only census of stored prefixes. Row AMGT_HARVST-D1-W172-S4 records the code reading of the coverage tool's ledger read (harvest_identity.py _ledger) and states that the served answers were not read."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W172-S1: The census matrix (round 96): 2 slash keys, 13 distinct path-component prefixes, 26 cells; distinct objects 38 raw and 78 canonical; 38 same-name pairs, of which 34 are equal and 4 differ in bytes; no raw-only object in any template; the _ROOT template builds publication-links/v1/BP// from the raw spelling (both spellings list 0 objects); the final line counts input_ledger.json twice.",
+    "AMGT_HARVST-D1-W172-S2: Same-name pair with differing bytes, peers/v1 2026-09-24T2252Z.json under BP/_LN_Equity (raw 9252 bytes, last modified 2026-09-24T22:53:31Z) and BP-SLASH-_LN_Equity (canonical 10732 bytes, last modified 2026-10-02T08:34:19Z); reason not read.",
+    "AMGT_HARVST-D1-W172-S3: Same-name pair with differing bytes, peers/v1 2026-09-24T2252Z.json under NG/_LN_Equity (raw 9252 bytes, last modified 2026-09-24T22:53:57Z) and NG-SLASH-_LN_Equity (canonical 10732 bytes, last modified 2026-10-02T08:34:29Z); reason not read.",
+    "AMGT_HARVST-D1-W172-S4: Same-name pair with differing bytes, packs/BP/_LN_Equity/input_ledger.json (raw 1654 bytes, last modified 2026-09-25T04:26:05Z) and packs/BP-SLASH-_LN_Equity/input_ledger.json (canonical 6898 bytes, last modified 2026-10-17T13:02:42Z); reason not read.",
+    "AMGT_HARVST-D1-W172-S5: Same-name pair with differing bytes, packs/NG/_LN_Equity/input_ledger.json (raw 1654 bytes, last modified 2026-09-25T04:29:21Z) and packs/NG-SLASH-_LN_Equity/input_ledger.json (canonical 6898 bytes, last modified 2026-10-17T13:06:50Z); reason not read."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "ck1_census.py (read-only path-component prefix census, foreground, one run)",
+      "invocation": "python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/ck1_census.py  (from the worktree root; writes ck1_census.out beside itself)",
+      "result": "rc=0; CENSUS-PATHKEY slash_keys=2 prefixes=13 cells=26 raw_objects=40 canonical_objects=80 same_name=40 same_name_differ=6 gets=913 bytes=4902522"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~172/AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-ck-1.census-of-the-path-component-prefixes-under-both-slash-key-spellings.md",
+      "result": "recorded in the worker report"
+    }
+  ]
+}
