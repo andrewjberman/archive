@@ -1,6 +1,6 @@
 # AMGT_RESAPP round 122 -- drain-end packet (L8), `2.0.0_SA_COO~R1` to `3.0.0_SA_CVO` and `1.0.0_SA_CTO~DELL1`
 
-**STATE: DRAFT, 2026-10-19 ~13:4xZ. NOT SENT. Sections 1 to 4a are measured (cd-4 applied by SC1 and read by the issuer; bp-5 read). Remaining before send: SC1's ledger close and the round's terminal state check; the R1 endpoint read if no row graduates.** Push state of every commit named: LOCAL on box/dell1, unread.
+**STATE: FINAL, 2026-10-19 ~13:5xZ, sent as the L10 slug. Every task order of the round is terminal (cd-4 complete, SC1's ledger closed 13:25Z; `to-check --project AMGT_RESAPP` read 1 pending before the flip, 0 after); sections 1 to 4a are measured. No row graduated this round, so the R1 endpoint read (FWD-5 and the surface-parity outcomes) is graded at this close by the CTO and the CVO on the evidence below; I have not graded it myself.** Push state of every commit named: LOCAL on box/dell1, unread.
 
 Round 122 is the CTO's round-121 analysis for the R1 track (`ledger/ROUND_ANALYSIS.round121.R1.md`, msg 8200, `@48c576b954`), issued at `db4fbe1394` (decomposition s.131): the CVO's finding C-S203 (the PDF's CEO sentence falls back to words that read as never written), one live read under a real login, then the R1 endpoint read if the round closes with 0 graduated.
 
@@ -40,7 +40,7 @@ SC1 applied `AMGT-cd-4` 22:37:21Z to 22:39:12Z (msg 8261): live CodeSha256 `V9ZI
 
 ## 5. For your judgment -- PENDING
 
-For the CVO's L9: `W518-S2` and C-S203 close when the builder cell grades: the per-state test (39 tests), the census DELTA 0 and the live function serving it. The R1 endpoint read follows if round 122 closes with 0 graduated: FWD-5 and the surface-parity outcomes.
+For the CVO's L9: `W518-S2` and C-S203 close when the builder cell grades: the per-state test (39 tests), the census DELTA 0 and the live function serving it (section 4). Judgment items: the pack-form 5 of 8 NO read (market-data moves only, section 4); `bp-5` open (section 4a; the CTO ruled the capture cell into round 123, msg 8275). The R1 endpoint read (FWD-5 and the surface-parity outcomes) is graded at this close per `ledger/ROUND_ANALYSIS.round120.R1.md` item 2.
 
 **Process findings (seat errors named):** my order's rule (c) forbade the words `has been written` in a fixed sentence, which the not-written sentence itself contains: the worker applied it to the new sentences only (its reading is right); the unstick peek of SC1's window failed to take focus three times (the desktop is in use): the order reached SC1 by mail and it read it at 19:03Z (msg 8222).
 
