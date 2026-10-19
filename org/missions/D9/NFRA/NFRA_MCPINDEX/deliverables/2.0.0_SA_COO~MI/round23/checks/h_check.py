@@ -430,7 +430,7 @@ def src_ref_ok(text):
     return os.path.isfile(f) and 1 <= int(m.group(2)) <= len(open(f, encoding="utf-8", errors="replace").read().split("\n"))
 
 
-def k_ac2(channel_ids, prefix):
+def k_ac2(channel_ids, prefix, src_channels=None):
     cen, tools, scope = k_scope(channel_ids)
     senders = sorted(t for t in scope if is_sender(tools[t]))
     unclassified = sorted(t for t in scope if tools[t].get("write_class") == "UNCLASSIFIED" and t not in senders)
@@ -446,10 +446,95 @@ def k_ac2(channel_ids, prefix):
     readers = [t for t in scope if t not in senders]
     arm("every reader has a case that expects an answer (nonempty or empty), not only refusals", all(any(c.get("expect") in ("nonempty", "empty") for c in by.get(t, [])) for t in readers), "readers without: %r" % [t for t in readers if not any(c.get("expect") in ("nonempty", "empty") for c in by.get(t, []))])
     arm("every case of a tool whose write_class is UNCLASSIFIED ends its source_hint with a [app/<file>.py:<line>] reference to the definition that shows it only reads", all(src_ref_ok(c.get("source_hint")) for t in unclassified for c in by.get(t, [])), "a case of %r lacks the reference" % [t for t in unclassified if not all(src_ref_ok(c.get("source_hint")) for c in by.get(t, []))])
+    chan_of = {}
+    for ch in cen["channels"]:
+        for t in ch["tools"]:
+            chan_of.setdefault(t, ch["id"])
+    need = set(src_channels or ())
+    miss = [c.get("case_id") for c in cases if c.get("expect") in ("nonempty", "empty") and chan_of.get(c.get("tool")) in need
+            and not (isinstance(c.get("expect_source"), str) and c["expect_source"].strip() and all(ord(ch) < 128 for ch in c["expect_source"]))]
+    arm("every reader case that expects an answer, in a channel named below, carries a non-empty ASCII expect_source (%s)" % ", ".join(sorted(need)) if need else "no channel of this cell needs expect_source", not miss, "cases without expect_source: %r" % miss[:6])
     qs = [str(c.get("question", "")).strip() for c in cases]
     arm("questions are ASCII, plain English of at least four words, and unique", all(len(q.split()) >= 4 for q in qs) and len(qs) == len(set(qs)) and all(all(ord(ch) < 128 for ch in q) for q in qs), "a question is short, repeated or not ASCII")
     arm("no case argument holds a credential-shaped value or an email address", not re.search(r"(@[A-Za-z0-9.-]+\.[a-z]{2,}|AKIA[0-9A-Z]{8,}|Bearer\s+\S+|password)", json.dumps(cases)), "an argument looks like an email or a credential")
     arm("a case that needs an earlier answer says so with depends_on, naming an existing case id", all((not c.get("depends_on")) or all(d in {x.get("case_id") for x in cases} for d in c["depends_on"]) for c in cases), "depends_on names a missing case")
+
+
+# ------------------------------------------------------------------------------------------------ h6: misrouted
+BATT_PY = os.path.join(PKG, "tool_battery.py")
+
+
+def h6_grade(tmp, tag, results_path):
+    out = os.path.join(tmp, "g_%s.json" % tag)
+    rc, so, se = run([BATT_PY, "grade", "--census", os.path.join(R22, "fixtures", "expected_census.json"), "--cases", fx("h6_cases.json"), "--results", results_path,
+                      "--channel", "opal-data-harvest", "--channel", "opal-data-assets", "--out", out])
+    return rc, so, se, (jload(out) if os.path.isfile(out) else None)
+
+
+def tool_of(doc, tool):
+    for t in (doc or {}).get("tools", []):
+        if t.get("tool") == tool:
+            return t
+    return {}
+
+
+def h6_ac1(tmp):
+    print("DENOMINATOR: fixture census scoped to opal-data-harvest and opal-data-assets: 4 tools, 4 cases; R1 and R2 carry expect_source, R3 and R4 do not")
+    res = jload(fx("h6_results.json"))
+    rc, so, se, doc = h6_grade(tmp, "g", fx("h6_results.json"))
+    arm("green: every answer carries the expected source, PASS=4", rc == 0 and line(so, "GRADE") == "GRADE tools=4 PASS=4 EMPTY-CORRECT=0 REFUSED-CORRECT=0 PREVIEW-ONLY=0 FAIL=0", "rc=%s %r %s" % (rc, line(so, "GRADE"), se[-200:]))
+
+    def variant(mutate, tag):
+        r = copy.deepcopy(res)
+        mutate(r)
+        p = os.path.join(tmp, "r_%s.json" % tag)
+        jdump(r, p)
+        return h6_grade(tmp, tag, p)
+
+    def get(r, cid):
+        return [x for x in r["results"] if x["case_id"] == cid][0]
+
+    def m1(r):
+        get(r, "R1")["answer_source"] = ["bloomberg/harvest/silver/article/date=2026-10-05/"]
+    rc, so, se, doc = variant(m1, "m1")
+    arm("an answer from another source reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted" and tool_of(doc, "harvest_list").get("verdict") == "FAIL", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+
+    def m2(r):
+        del get(r, "R1")["answer_source"]
+    rc, so, se, doc = variant(m2, "m2")
+    arm("an answer with no source field reads FAIL source_unchecked, never PASS", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "source_unchecked", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+
+    def m3(r):
+        get(r, "R1")["answer_source"] = []
+    rc, so, se, doc = variant(m3, "m3")
+    arm("an empty answer_source list reads FAIL source_unchecked", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "source_unchecked", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+
+    def m4(r):
+        get(r, "R3")["answer_source"] = ["anything/at/all/"]
+    rc, so, se, doc = variant(m4, "m4")
+    arm("a case with no expect_source is unaffected by its answer_source", rc == 0 and tool_of(doc, "client_get_holdings").get("verdict") == "PASS", "rc=%s %r" % (rc, tool_of(doc, "client_get_holdings")))
+    arm("one matching element among several is enough", tool_of(h6_grade(tmp, "g2", fx("h6_results.json"))[3], "harvest_read").get("verdict") == "PASS", "harvest_read not PASS")
+
+
+def h6_ac2(tmp):
+    print("DENOMINATOR: the planted wrong link (plant-route) and the round-22 battery arms (g4.AC1 and g4.AC2) still holding")
+    out = os.path.join(tmp, "planted.json")
+    rc, so, se = run([BATT_PY, "plant-route", "--cases", fx("h6_cases.json"), "--results", fx("h6_results.json"), "--case", "R1", "--out", out])
+    arm("plant-route rc 0 and writes the file", rc == 0 and os.path.isfile(out), "rc=%s %s" % (rc, se[-200:]))
+    if os.path.isfile(out):
+        planted = jload(out)
+        orig = jload(fx("h6_results.json"))
+        changed = [x["case_id"] for x, y in zip(planted["results"], orig["results"]) if x != y]
+        r1 = [x for x in planted["results"] if x["case_id"] == "R1"][0]
+        arm("only the named case changes, and its answer_source no longer names the expected source", changed == ["R1"] and isinstance(r1.get("answer_source"), list) and r1["answer_source"] and all("amgt/harvest/gold/" not in s for s in r1["answer_source"]), "changed=%r answer_source=%r" % (changed, r1.get("answer_source")))
+        rc, so, se, doc = h6_grade(tmp, "p", out)
+        arm("the planted wrong link reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+    rc, so, se = run([BATT_PY, "plant-route", "--cases", fx("h6_cases.json"), "--results", fx("h6_results.json"), "--case", "R3", "--out", os.path.join(tmp, "p3.json")])
+    arm("plant-route on a case with no expect_source is refused (rc 2)", rc == 2, "rc=%s" % rc)
+    for cid in ("g4.AC1", "g4.AC2"):
+        p = subprocess.run([sys.executable, os.path.join(R22, "checks", "g_check.py"), cid], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
+        o = p.stdout.decode("utf-8", "replace").replace("\r", "")
+        arm("round-22 %s still PASSes" % cid, p.returncode == 0 and "RESULT: PASS" in o, o[-300:])
 
 
 CHECKS = {
@@ -458,10 +543,11 @@ CHECKS = {
     "h3.AC1": h3_ac1, "h3.AC2": h3_ac2, "h3.AC3": lambda t: arm("pytest", pytest_count(os.path.join(TESTS, "test_index_coverage_explained.py"), 4)),
     "h4.AC1": lambda t: d_ac1(False), "h4.AC2": lambda t: d_ac2(False),
     "h5.AC1": lambda t: d_ac1(True), "h5.AC2": lambda t: d_ac2(True),
-    "k1.AC1": lambda t: k_ac1(("opal-data-etfs",), "K1-"), "k1.AC2": lambda t: k_ac2(("opal-data-etfs",), "K1-"),
-    "k2.AC1": lambda t: k_ac1(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-"), "k2.AC2": lambda t: k_ac2(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-"),
-    "k3.AC1": lambda t: k_ac1(("opal-data-assets", "schwab", "blackdiamond"), "K3-"), "k3.AC2": lambda t: k_ac2(("opal-data-assets", "schwab", "blackdiamond"), "K3-"),
-    "k4.AC1": lambda t: k_ac1(("dynamodb", "globgrph", "opal_discover", "opal_portal"), "K4-"), "k4.AC2": lambda t: k_ac2(("dynamodb", "globgrph", "opal_discover", "opal_portal"), "K4-"),
+    "h6.AC1": h6_ac1, "h6.AC2": h6_ac2, "h6.AC3": lambda t: arm("pytest", pytest_count(os.path.join(TESTS, "test_tool_battery_route.py"), 5)),
+    "k1.AC1": lambda t: k_ac1(("opal-data-etfs",), "K1-"), "k1.AC2": lambda t: k_ac2(("opal-data-etfs",), "K1-", ("opal-data-etfs",)),
+    "k2.AC1": lambda t: k_ac1(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-"), "k2.AC2": lambda t: k_ac2(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-", ("opal-data-portal-v2", "opal-data-mdpf", "portal_index")),
+    "k3.AC1": lambda t: k_ac1(("opal-data-assets", "schwab", "blackdiamond"), "K3-"), "k3.AC2": lambda t: k_ac2(("opal-data-assets", "schwab", "blackdiamond"), "K3-", ("opal-data-assets", "schwab", "blackdiamond")),
+    "k4.AC1": lambda t: k_ac1(("dynamodb", "globgrph", "opal_discover", "opal_portal"), "K4-"), "k4.AC2": lambda t: k_ac2(("dynamodb", "globgrph", "opal_discover", "opal_portal"), "K4-", ("dynamodb",)),
     "k5.AC1": lambda t: k_ac1(("ycharts",), "K5-"), "k5.AC2": lambda t: k_ac2(("ycharts",), "K5-"),
     "k6.AC1": lambda t: k_ac1(("m365",), "K6-"), "k6.AC2": lambda t: k_ac2(("m365",), "K6-"),
 }
