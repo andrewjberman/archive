@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-h-1.partition-window-measurer",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4b8dcf3b86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+    "vintage_commit": "ec6b4b428d8",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-h-1.partition-window-measurer.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~62",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/partition_windows.py",
+      "kind": "script",
+      "commit_or_etag": "9bf7759b0fe66a049b8bb01dfcdcc574a6948a04",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-NFRA_MCPINDEX-62; no deploy in this cell. The issuer runs it live at the drain with the default boto3 client; this worker ran it with --fake only.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_partition_windows.py",
+      "kind": "test",
+      "commit_or_etag": "9bf7759b0fe66a049b8bb01dfcdcc574a6948a04",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "python -m pytest workflows/gateway_battery/tests/test_partition_windows.py -q -p no:cacheprovider -> 9 passed (rc 0). Same commit as the script.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; rc 1 with the file written; `WINDOWS rows=7 dated=3 undated=2 empty=1 error=1`; the header; the two-page window 2026-09-28..2026-10-08 with 4 partitions; the as_of key; the mixed prefix; undated and contents-only; empty; the error row with its text -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/h1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: 7 fixture rows over fake listings: dated 3 (two pages; as_of key; a mixed prefix with a bad date and a non-date folder), undated 2, empty 1, error 1\n  ok   an error row makes rc 1 and the file is still written\n  ok   stdout line\n  ok   header\n  ok   two pages read: earliest, latest and the partition count\n  ok   an as_of key\n  ok   a non-date folder and a bad date are ignored\n  ok   undated (a partition key with no date) and contents-only\n  ok   empty\n  ok   an unlistable prefix reads error with its text, never zero\nARMS: 9 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "9 of 9 arms ok (ARMS: 9 ok, 0 failed); 7 of 7 fixture rows read: dated 3, undated 2, empty 1, error 1 (stdout line matched exactly); rc 1 with the file written",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; two runs give the same bytes; the source names no object read, write, copy or delete call; a missing rows key, a row without prefix, a row without bucket, an empty list and an absent file each exit 2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/h1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: determinism over two runs; the client is only ever asked to list; rows input refusals\n  ok   two runs give the same bytes\n  ok   the source names no object read, write, copy or delete call\n  ok   missing rows key refused (rc 2)\n  ok   row without prefix refused (rc 2)\n  ok   row without bucket refused (rc 2)\n  ok   empty rows refused (rc 2)\n  ok   an absent rows file is refused (rc 2)\nARMS: 7 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 arms ok (ARMS: 7 ok, 0 failed): 2 runs byte-identical; source checked for 9 forbidden object-call tokens; 5 refusal arms (4 bad rows bodies and an absent file) each rc 2",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 6 passed) for `test_partition_windows.py` -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/h1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=9 (minimum 6) file=workflows\\gateway_battery\\tests\\test_partition_windows.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 arm ok (ARMS: 1 ok, 0 failed); pytest rc=0 passed=9 against minimum 6 in test_partition_windows.py",
+      "status": "PASS",
+      "expect": "RESULT: PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted defect: the error row of window_of written as kind=empty (one token, in a copy restored byte-exact after the run); h1.AC1 must read FAIL.",
+      "expected": "h1.AC1 reads RESULT: FAIL, the error-row arms fail and the run exits 1",
+      "observed": "Planted kind=empty on error rows in window_of (restored byte-exact after the run). h1.AC1 output:   ok   undated (a partition key with no date) and contents-only |   ok   empty |   FAIL an unlistable prefix reads error with its text, never zero  -- got {'entity': 'e_error', 'bucket': 'bkt', 'prefix': 'gold/tbl_e/', 'kind': 'empty', 'partition_key': None, 'earliest': None, 'latest': None, 'partitions': 0, 'error': \"KeyError: 'bkt|gold/tbl_e/'\"} | ARMS: 6 ok, 3 failed | RESULT: FAIL | exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the measurer on the h1 fixtures with --now 2026-10-19T16:30:00Z, outputs compared with cmp",
+      "observed": "DETERMINISM: two runs byte-identical (both rc 1; WINDOWS rows=7 dated=3 undated=2 empty=1 error=1; 1517 bytes)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live listing of the real catalog prefixes through boto3.client(\"s3\")",
+      "reason": "the issuer runs it live at the drain; this worker made no AWS, network or gateway call (EGRESS CLASS NONE)."
+    },
+    {
+      "item": "the commit-time risk reflex answer",
+      "reason": "PARTIAL_OR_BLIND on the commit (danger map stale, 0 of 2 files scanned); comp-adversary is DECLARED-NOT-APPLICABLE in the face. Surprise NFRA_MCPINDEX-Z-W62-S2."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W62-S1: the commit-time naming gate printed NAMING ERROR (function-map folder missing) on this sparse worktree and commit 9bf7759b0fe landed rc 0 with the staged names ungraded.",
+    "NFRA_MCPINDEX-Z-W62-S2: the pre-commit risk reflex answered PARTIAL_OR_BLIND on commit 9bf7759b0fe (danger map 93.0h STALE; 0 of 2 files scanned).",
+    "NFRA_MCPINDEX-Z-W62-S3: the row schema the face names (org/surprise_channel/schemas/investigation_item.schema.json) is absent from this sparse worktree; rows follow the shape of the rows already in the channel.",
+    "NFRA_MCPINDEX-Z-W62-S4: the face says the worktree was cut at the amendment commit ec6b4b428d; HEAD at the start was 060b3afa809, a descendant with 44 commits between."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~62/logs/session.log",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest workflows/gateway_battery/tests/test_partition_windows.py -q -p no:cacheprovider",
+      "result": "9 passed in 1.61s (rc 0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 workflows/gateway_battery/partition_windows.py workflows/gateway_battery/tests/test_partition_windows.py",
+      "result": "All checks passed! (rc 0)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh workflows/gateway_battery/partition_windows.py workflows/gateway_battery/tests/test_partition_windows.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc 0)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~62 <0.9.0_WK_NFRA_MCPINDEX~62@opal.agent>\" -F .scratch/msg_mxh1_work.txt -- workflows/gateway_battery/partition_windows.py workflows/gateway_battery/tests/test_partition_windows.py",
+      "result": "commit 9bf7759b0fe on wk-NFRA_MCPINDEX-62 (LOCAL); commit-gate OK 2 of 2; naming-gate printed NAMING ERROR function-map folder missing (surprise S1)"
+    }
+  ]
+}
