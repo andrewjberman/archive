@@ -1,0 +1,79 @@
+SESSION LOG -- 0.9.0_WK_NFRA_MCPINDEX~60 on NFRA_MCPINDEX.TO-MX-g-4.fwd24-tool-battery
+worktree: C:/tmp/wk-mcpindex-60   branch: wk-NFRA_MCPINDEX-60   script commit: e3bd8194123c808c692558366a6cfade018f8f28 (LOCAL)
+Date: 2026-10-19 (UTC, approximately 15:10Z to 15:25Z)
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-60; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded: the fixtures (expected_census.json, cases_min.json, results_min.json, graded_min.json)
+   and checks (g_check.py, g4.AC1.sh, g4.AC2.sh, g4.AC3.sh) are present under
+   org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/. Sparse set already held
+   workflows/gateway_battery and workflows/gateway_battery/tests; no sparse change was made.
+3. Built workflows/gateway_battery/tool_battery.py (plan, grade, plant) and tests/test_tool_battery.py.
+   Commit e3bd8194123 (2 files, 522 insertions).
+4. Unit tests: python -m pytest workflows/gateway_battery/tests/test_tool_battery.py -q -p no:cacheprovider
+   -> 12 passed in 0.21s (rc 0).
+5. Lint and compile: ruff check --target-version py39 (both files) -> All checks passed! (rc 0);
+   python -m py_compile tool_battery.py -> rc 0; non-ASCII byte count 0 in both files.
+
+--- criterion runs (final, after commit e3bd8194123) ---
+
+$ timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g4.AC1.sh; echo "exit=$?"
+DENOMINATOR: fixture census 9 tools; 8 in scope (undeclared channel out); 9 cases; green results cover all 9
+  ok   plan in scope rc 0
+  ok   plan over all channels flags the tool with no case
+  ok   grade green rc 0
+  ok   grade stdout
+  ok   preview-only listed by name
+  ok   per-tool verdicts
+  ok   graded file equals graded_min.json on cases, tools, counts, case_counts, preview_only and fails
+  ok   per-case verdicts and the question carried
+ARMS: 8 ok, 0 failed
+RESULT: PASS
+exit=0
+
+$ timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g4.AC2.sh; echo "exit=$?"
+DENOMINATOR: seven planted arms over the green results; each reads FAIL with its class and grade exits 1
+  ok   plant subcommand rc 0
+  ok   G1 planted broken tool reads FAIL tool_error
+  ok   G2 source disagrees
+  ok   G3 no source check is not a PASS
+  ok   G4 a send is a FAIL
+  ok   G5 a case not run
+  ok   G6 unexpected empty
+  ok   G7 an ungranted principal that is not refused
+  ok   G8 an unexpected refusal
+  ok   G9 a census tool with no case reads FAIL no_case
+ARMS: 10 ok, 0 failed
+RESULT: PASS
+exit=0
+
+$ timeout 120 bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g4.AC3.sh; echo "exit=$?"
+DENOMINATOR: pytest rc=0 passed=12 (minimum 6) file=workflows\gateway_battery\tests\test_tool_battery.py
+  ok   pytest
+ARMS: 1 ok, 0 failed
+RESULT: PASS
+exit=0
+
+--- controls (direct CLI, same fixtures; the SC scope is --channel opal-data-harvest --channel opal-data-assets --channel dynamodb --channel ycharts --channel m365) ---
+
+$ python workflows/gateway_battery/tool_battery.py grade ... --results results_min.json $SC --out g1.json   (rc 0)
+GRADE tools=8 PASS=6 EMPTY-CORRECT=0 REFUSED-CORRECT=1 PREVIEW-ONLY=1 FAIL=0
+PREVIEW-ONLY TOOLS: send_email
+$ same grade a second time -> g2.json; cmp g1.json g2.json -> DETERMINISM: two grade runs byte-identical
+
+$ python workflows/gateway_battery/tool_battery.py plan ... $SC --out plan.json   (rc 0)
+PLAN tools=8 cases=9 tools_without_case=0
+
+$ python workflows/gateway_battery/tool_battery.py plant --cases cases_min.json --results results_min.json --tool harvest_read --out planted.json   (rc 0)
+PLANT tool=harvest_read cases=2
+
+$ python workflows/gateway_battery/tool_battery.py grade ... --results planted.json $SC --out gp.json   (rc 1)
+GRADE tools=8 PASS=5 EMPTY-CORRECT=0 REFUSED-CORRECT=1 PREVIEW-ONLY=1 FAIL=1
+PREVIEW-ONLY TOOLS: send_email
+harvest_read -> {'tool': 'harvest_read', 'verdict': 'FAIL', 'fail_class': 'tool_error', 'cases': ['C2', 'C3']}
+
+6. Surprises filed in org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md:
+   NFRA_MCPINDEX-Z-W60-S1 (naming gate NAMING ERROR on sparse worktree, commit landed rc 0),
+   NFRA_MCPINDEX-Z-W60-S2 (risk reflex PARTIAL_OR_BLIND, 0 of 2 files scanned),
+   NFRA_MCPINDEX-Z-W60-S3 (step 5.2 status flip names a file outside <paths>; flip not made),
+   NFRA_MCPINDEX-Z-W60-S4 (the row schema named by the face is outside the sparse set).
+7. Status flip: NOT made. The task order file is not in <paths> (see S3). Reported to the issuer.
