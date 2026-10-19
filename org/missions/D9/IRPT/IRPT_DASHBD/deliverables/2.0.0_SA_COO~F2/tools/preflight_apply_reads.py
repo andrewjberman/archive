@@ -29,6 +29,9 @@ print("inf: fence pattern role/*-inf-* present", ":role/*-inf-*" in bp)
 for k, key in inf.KEYS.items():
     v = inf.aws_json(R, ["s3api", "list-object-versions", "--bucket", inf.CODE_BUCKET, "--prefix", key, "--max-items", "5"])
     print("inf: versions of", k, len([x for x in (v or {}).get("Versions", []) if x["Key"] == key]))
+dv = inf.aws_json(R, ["s3api", "list-object-versions", "--bucket", inf.CODE_BUCKET, "--prefix", inf.KEYS["dispatch"], "--max-items", "20"])
+dl = [x for x in (dv or {}).get("Versions", []) if x["Key"] == inf.KEYS["dispatch"] and x.get("IsLatest")]
+print("inf: dispatch latest version", dl[0]["VersionId"] if dl else None, "expected pre-state", inf.PRIOR_DISPATCH_VERSION, "equal", bool(dl) and dl[0]["VersionId"] == inf.PRIOR_DISPATCH_VERSION)
 st = inf.aws_json(R, ["ec2", "describe-instances", "--instance-ids", inf.INSTANCE])["Reservations"][0]["Instances"][0]["State"]["Name"]
 print("inf: runner", st)
 r = inf.aws_json(R, ["s3api", "list-objects-v2", "--bucket", inf.GOLD_BUCKET, "--prefix", inf.GOLD_PREFIX, "--delimiter", "/"]) or {}

@@ -44,8 +44,13 @@ CODE_BUCKET = "opal-data-inf"
 CODE_PREFIX = "code/gold/"
 KEYS = {"launcher": CODE_PREFIX + "INF_G_01.account_transaction_gold.py", "zip": CODE_PREFIX + "INF_G_01.bundle.zip",
         "receipt": CODE_PREFIX + "INF_G_01.bundle.receipt.json", "dispatch": CODE_PREFIX + "orion-gold-dispatch.sh"}
-DISPATCH_SHA12 = "7b206030bfc7"
-PRIOR_DISPATCH_VERSION = "0JwOjjCwp0uaux9Ded7FlOAMNWtTfZdU"
+DISPATCH_SHA12 = "d2ff692abd23"  # addendum 1: the pin that carries FB1's change as well as the pair's own
+PRIOR_DISPATCH_VERSION = "hK5vY2H31oT3NHmoiArlZ00ra8gkuDaO"  # addendum 1: FB1's upload of 2026-10-19T14:22:09Z, the pre-state and the rollback target
+PRE_STATE_SHA12 = "9495cd56228b"
+PAIR_DISPATCH_DIFF_LINES = 145
+FB1_UPLOAD_UTC = "2026-10-19T14:22:09Z"
+ADDENDUM_REL = D + "2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md"
+ADDENDUM_SHA = "115ba6e99cba005ae836018e77987d3ca13d13b5e65061d5ec50a9521d5648aa"
 SCHEMA_HASH = "ac652e2f71b18427b52f321858163768158f850ec173d1e592c7c3abe815bb6a"
 GOLD_BUCKET = "opal-data-inflection"
 GOLD_PREFIX = "irpt/inflection/gold/account_transaction/"
@@ -86,8 +91,22 @@ def head_problems(rec):
         and g["one_change_at_a_time"]["worktrees_read"] > 0 and g["one_change_at_a_time"].get("open_markers_naming_this_surface") == 0
     if not ok:
         pr.append("gates must record the packet sha256, both halves signed, the pins, Monday's 49 Financial first-fire read PASSED, and the worktree denominator with 0 open markers naming this surface")
+    f = g.get("fb1_door6") if isinstance(g, dict) else None
+    f_ok = isinstance(f, dict) and (f.get("ledger_state") == "CLOSED" or (
+        f.get("ledger_state") == "OPEN" and f.get("l7_ancestor_rc") == 0 and isinstance(f.get("marker_versions"), list) and len(f["marker_versions"]) > 0
+        and isinstance(f.get("marker_newest_utc"), str) and f["marker_newest_utc"] <= FB1_UPLOAD_UTC and "Chain complete" in str(f.get("chain_completion_line", ""))
+        and "Door 6" in str(f.get("chain_completion_line", "")) and f.get("chain_log_key")))
+    if not (isinstance(g, dict) and g.get("fb1_door6_ledger_dispositioned") is True and f_ok):
+        pr.append("gates must record FB1's ledger advi-firmbkts-fb-p-2-door6-retirement-20261017 CLOSED, or OPEN with the CTO's measured-artifact reads: 9bfa234989 an ancestor of origin/CLOUD (rc 0) and the pipeline-complete.json "
+                  "version list with nothing newer than %s across a completed chain whose log line is printed" % FB1_UPLOAD_UTC)
     if not (isinstance(rec["ledger_entry"], str) and rec["ledger_entry"].strip()):
         pr.append("ledger_entry must name the ledger")
+    b = rec["before"]
+    d = b.get("dispatch_pre_check") if isinstance(b, dict) else None
+    if not (isinstance(d, dict) and d.get("verdict") == "PRE-STATE-OK" and d.get("live_version_id") == PRIOR_DISPATCH_VERSION and d.get("live_sha12") == PRE_STATE_SHA12
+            and d.get("diff_lines") == PAIR_DISPATCH_DIFF_LINES and d.get("diff_equals_pair_change") is True and d.get("pin_sha12") == DISPATCH_SHA12):
+        pr.append("before.dispatch_pre_check must record tools/dispatch_diff_check.py's PRE-STATE-OK: live version %s sha %s, %d live-to-pin lines equal to the pair's own change, pin %s"
+                  % (PRIOR_DISPATCH_VERSION, PRE_STATE_SHA12, PAIR_DISPATCH_DIFF_LINES, DISPATCH_SHA12))
     a = rec["role_audit"]
     if not (isinstance(a, dict) and a.get("new_role_absent_before") is True and isinstance(a.get("inline_policies"), list) and sorted(a["inline_policies"]) == sorted(OTHER_POLICIES)):
         pr.append("role_audit must show the runner role's 13 inline policies and that the new role %s is absent before (anything else STOPS the pair)" % NEW_ROLE)
@@ -168,6 +187,13 @@ def packet_problems(root):
         txt = t.read_text(encoding="utf-8") if t.is_file() else ""
         need(PACKET_SHA in txt or PACKET_SHA[:8] in txt, "the %s half is missing or does not name the packet's sha256" % who)
         need("SIGNED" in txt, "the %s half is not SIGNED" % who)
+    a = Path(root, ADDENDUM_REL)
+    need(a.is_file() and hashlib.sha256(a.read_bytes()).hexdigest() == ADDENDUM_SHA, "addendum 1's bytes are not the signed ones (sha256)")
+    for rel, who in ((COO_REL, "COO"), (CTO_REL, "CTO")):
+        t = Path(root, rel)
+        txt = t.read_text(encoding="utf-8") if t.is_file() else ""
+        i = txt.find("ADDENDUM 1")
+        need(i >= 0 and (ADDENDUM_SHA in txt[i:] or ADDENDUM_SHA[:8] in txt[i:]) and "SIGNED" in txt[i:], "the %s half carries no SIGNED ADDENDUM 1 section naming addendum 1's sha256" % who)
 
 
 def ac1(root):
@@ -244,6 +270,8 @@ def ac2(root):
             if name == "dispatch":
                 if not h.startswith(DISPATCH_SHA12):
                     pr.append("the dispatch object must be the packet's pinned script (%s)" % DISPATCH_SHA12)
+                if u.get("prior_version_id") != PRIOR_DISPATCH_VERSION:
+                    pr.append("uploads.dispatch.prior_version_id must be FB1's version %s (the rollback target), not an older one" % PRIOR_DISPATCH_VERSION)
                 if PRIOR_DISPATCH_VERSION not in ids:
                     pr.append("the prior dispatch version %s must still be present (the rollback target)" % PRIOR_DISPATCH_VERSION)
             if name == "receipt":
@@ -287,10 +315,13 @@ def selftest():
 
     snap = {"snapshot_line": "INF_G_01 run_day 2026-10-16 snapshot 2026-10-16 upload False", "snapshot_partitions": 1}
     rec = {"claim": "measured", "applier": APPLIER, "ledger_entry": "x", "ledger_closed": False, "reads": {},
-           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True,
+           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True, "fb1_door6_ledger_dispositioned": True,
+                     "fb1_door6": {"ledger_state": "OPEN", "l7_ancestor_rc": 0, "marker_versions": ["uLToDEvBYZP6B2 2026-10-16T12:56:43Z"], "marker_newest_utc": "2026-10-16T12:56:43Z",
+                                   "chain_completion_line": "Chain complete (2026-10-20); pipeline-complete.json marker write retired (Door 6), not written", "chain_log_key": "gold/logs/x.log"},
                      "one_change_at_a_time": {"worktrees_read": 90, "open_markers_naming_this_surface": 0}},
            "role_audit": {"new_role_absent_before": True, "inline_policies": list(OTHER_POLICIES)},
-           "before": {}, "apply_finished_utc": "2026-10-20T13:00:00Z", "uploads": {}, "runner": {},
+           "before": {"dispatch_pre_check": {"verdict": "PRE-STATE-OK", "live_version_id": PRIOR_DISPATCH_VERSION, "live_sha12": PRE_STATE_SHA12, "diff_lines": 145,
+                                             "diff_equals_pair_change": True, "pin_sha12": DISPATCH_SHA12}}, "apply_finished_utc": "2026-10-20T13:00:00Z", "uploads": {}, "runner": {},
            "plan": {"add": 3, "change": 0, "destroy": 0, "addresses": list(NEW_ADDRESSES), "statement_sids": list(SIDS), "replan_no_changes": True, "naming_gate_refuse": 0},
            "simulation": {"lines": [{"decision": dec, "label": lab, "with_resource_policy": lab in SIM_WITH_RESOURCE_POLICY} for dec, lab in SIM_REQUIRED]},
            "dry_run": {"assumed": {"role": NEW_ROLE, "session": SESSION_NAME}, **snap, "run_day": "2026-10-16", "s6": {"events": 96, "with_equal_amount_line": 96, "missing": 0}, "target_objects_after": 0, "repeated_source_lines": 0, "window": {"newest_written": None}},
@@ -300,6 +331,17 @@ def selftest():
     arm("events-green", events_problems(rec), [])
     arm("plan-two-changes", len(head_problems(dict(rec, plan=dict(rec["plan"], change=1)))), 1)
     arm("audit-new-role-present-before", len(head_problems(dict(rec, role_audit=dict(rec["role_audit"], new_role_absent_before=False)))), 1)
+    pre = rec["before"]["dispatch_pre_check"]
+    arm("dispatch-precheck-stop", len(head_problems(dict(rec, before={"dispatch_pre_check": dict(pre, verdict="STOP the live-to-pin diff is not the pair's own change")}))), 1)
+    arm("dispatch-live-not-pre-state", len(head_problems(dict(rec, before={"dispatch_pre_check": dict(pre, live_sha12="7b206030bfc7")}))), 1)
+    arm("dispatch-diff-lines-wrong", len(head_problems(dict(rec, before={"dispatch_pre_check": dict(pre, diff_lines=144)}))), 1)
+    arm("dispatch-precheck-missing", len(head_problems(dict(rec, before={}))), 1)
+    fb = rec["gates"]["fb1_door6"]
+    arm("fb1-open-marker-newer", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, marker_newest_utc="2026-10-20T12:56:00Z"))))), 1)
+    arm("fb1-open-not-ancestor", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, l7_ancestor_rc=1))))), 1)
+    arm("fb1-open-no-chain-line", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, chain_completion_line=""))))), 1)
+    arm("fb1-closed-ok", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6={"ledger_state": "CLOSED"})))), 0)
+    arm("fb1-ledger-open", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6_ledger_dispositioned=False)))), 1)
     arm("plan-one-add", len(head_problems(dict(rec, plan=dict(rec["plan"], add=1)))), 1)
     nores = [dict(x, with_resource_policy=False) for x in rec["simulation"]["lines"]]
     arm("sim-without-resource-policy", len(head_problems(dict(rec, simulation={"lines": nores}))), 1)
