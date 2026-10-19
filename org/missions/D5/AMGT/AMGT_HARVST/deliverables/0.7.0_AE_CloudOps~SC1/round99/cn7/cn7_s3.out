@@ -1,0 +1,52 @@
+STAGE 3 RUN HALF, started 2026-10-19T14:32:29Z, worktree HEAD=1dda9cc0a2; dossier-refresh.tf 9eaee2540170af33
+  # aws_cloudwatch_log_group.dossier_refresh_task[0] will be created
+  # aws_ecs_cluster.dossier_refresh[0] will be created
+  # aws_ecs_task_definition.dossier_refresh[0] will be created
+  # aws_iam_role.dossier_refresh_execution[0] will be created
+  # aws_iam_role.dossier_refresh_scheduler[0] will be created
+  # aws_iam_role.dossier_refresh_task[0] will be created
+  # aws_iam_role_policy.dossier_refresh_scheduler[0] will be created
+  # aws_iam_role_policy.dossier_refresh_task[0] will be created
+  # aws_iam_role_policy_attachment.dossier_refresh_execution[0] will be created
+  # aws_scheduler_schedule.dossier_refresh_daily[0] will be created
+  # aws_security_group.dossier_refresh[0] will be created
+Plan: 11 to add, 0 to change, 0 to destroy.
+PLAN_RC=2 2026-10-19T14:32:36Z
+PLAN-GRADE resource_changes denominator 69 {('no-op',): 58, ('create',): 11}
+   ['create'] aws_cloudwatch_log_group.dossier_refresh_task[0]
+   ['create'] aws_ecs_cluster.dossier_refresh[0]
+   ['create'] aws_ecs_task_definition.dossier_refresh[0]
+   ['create'] aws_iam_role.dossier_refresh_execution[0]
+   ['create'] aws_iam_role.dossier_refresh_scheduler[0]
+   ['create'] aws_iam_role.dossier_refresh_task[0]
+   ['create'] aws_iam_role_policy.dossier_refresh_scheduler[0]
+   ['create'] aws_iam_role_policy.dossier_refresh_task[0]
+   ['create'] aws_iam_role_policy_attachment.dossier_refresh_execution[0]
+   ['create'] aws_scheduler_schedule.dossier_refresh_daily[0]
+   ['create'] aws_security_group.dossier_refresh[0]
+moving count: 11 | all creates: True
+  task def container image: 313476888478.dkr.ecr.us-east-1.amazonaws.com/amgt-dossier-refresh-repo@sha256:ceac4ad030b3979611f605b0e01355a93a5336d2ca2e2cde7df0420b25381670 | command: ['--write', '--require-trading-day', '--manifest', '/tmp/dossier_refresh_manifest.txt'] | entryPoint: ['python', '-m', 'lib.research.corpus.dossier_refresh']
+  schedule state: DISABLED | expr: cron(0 10 ? * MON-FRI *) | tz: America/New_York
+APPLY: delivery state for the lane 3 of 3 READ (ids 8272, 8286, 8296) at 2026-10-19T14:33:02Z
+APPLY START 2026-10-19T14:33:02Z saved plan cn7_s3.tfplan (69 resource_changes: 58 no-op, 11 create)
+safe-apply: [seat-gates] mode=WARN APPLY-WHO serial=0.7.0_AE_CloudOps~SC1 kind=CLOUDOPS root=harvest verdict=ADMITTED reason=a CLOUDOPS seat applies
+safe-apply: [seat-gates] mode=WARN CROSSBOX-DEPLOY device=dell1 root=harvest open_call=clear overlap=clear upset=clear open_deploy=clear verdict=CLEAR
+======================================================================
+HALT-GATE: 50 pending message(s) -- review before proceeding (safe-apply)
+======================================================================
+       cj-4 AMENDMENT 2 (536f3fc504): a memo of immutable reads and up to 5 names per command are allowed; canary accepted
+       cj-4 WINDOW EXTENDED to 12:15:00Z (AMENDMENT 3, aecf3f0243); site Z CLEAR to 12:30Z
+       Ruling on AMGT_HARVST.TO-HVST-cm-1: you were right to STOP; the order is amended to READ-ONLY after-reads
+       cn-7 (AMGT_HARVST.TO-HVST-cn-7): policy statement ruled; stage 2 stays stopped
+       GO: AMGT_HARVST.TO-HVST-cn-7 stage 2 re-run, pin 1dda9cc0a2
+HALT-GATE: HALT_ACK set -- messages acknowledged. Proceeding.
+safe-apply: BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE mode, rc=1). Nothing was planned further or applied.
+APPLY_RC=7 2026-10-19T14:34:41Z
+--- NAMING PLAN LIMB READ (the apply's own refusal lines were dropped by my output filter; the limb re-run read-only on the saved plan JSON, 2026-10-19T14:37:07Z)
+NAMING REFUSE aws_cloudwatch_log_group.dossier_refresh_task[0] /ecs/amgt-dossier-refresh-task -> /aws/ecs/amgt-dossier-refresh-task
+  why: NEW name the canon places as FIX. Owed: use /aws/ecs/amgt-dossier-refresh-task. Build it with name() or edit the literal; nothing else is owed. [grade() said: aws_cloudwatch_log_group.dossier_refresh_task[0] (ADDITION): OUT-OF-PATTERN as LOG_GROUP: the module would not produce this name; an apply has no diff and runs this stage before any plan, so the name is read as the tree states it]
+refusals: 1 of 38 graded lines; gate rc=1
+dossier-refresh.tf line 67: task_log_group  = "/ecs/${local.task_family_name}"
+--- STAGE 3 RESULT: STOP (section 3: a plan or read that contradicts a stage's expectation; the CTO half's pinned dossier-refresh.tf sha256 9eaee254.. cannot be edited by this seat)
+safe-apply BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE, rc=1; APPLY_RC=7 at 14:34:41Z) BEFORE terraform apply ran: nothing was applied. The saved plan (11 create, 58 no-op, graded from JSON: image by digest, command --write --require-trading-day --manifest, schedule DISABLED cron(0 10 ? * MON-FRI *) America/New_York) is unchanged and unused. Read after the block: ECS clusters naming dossier: 0; log groups with prefix /ecs/amgt-dossier: 0; the 5 stage-1 resources and the image stay.
+One refusal: the task log group is named /ecs/amgt-dossier-refresh-task (local.task_log_group, dossier-refresh.tf line 67); the canon (name() for kind LOG_GROUP, NAMING_SCHEMA) places a new ECS log group at /aws/ecs/amgt-dossier-refresh-task. Stage 1 passed the same limb because its new log group (/aws/codebuild/...) is canonical. The fix is an edit to the pinned Terraform bytes (the CTO half binds dossier-refresh.tf sha256 9eaee254..; any edit voids the pair), so it is the issuer's cell and a re-bound pair. I did not edit it, did not use any override, did not retry.
