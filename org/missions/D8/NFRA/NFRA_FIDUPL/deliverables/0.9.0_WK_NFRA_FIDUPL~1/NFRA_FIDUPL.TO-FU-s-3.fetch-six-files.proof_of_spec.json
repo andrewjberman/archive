@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "37a986573917461285cd3b540e171a6542185106"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d293f51594fe4a6471ab5a851401123",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-3.fetch-six-files.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/fetch.py",
+      "kind": "script",
+      "commit_or_etag": "dafda501f1332431357978a5fab871ca2748817e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round-1 fetch module committed on wk-NFRA_FIDUPL-1; not deployed to the box (no AWS or box write in this order); the live fetch is FU-x-1's",
+      "artifact_covered_by": ["FU3-AC1", "FU3-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_fetch.py",
+      "kind": "test",
+      "commit_or_etag": "dafda501f1332431357978a5fab871ca2748817e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fake-session test file (synthetic data, no network) committed with the module",
+      "artifact_covered_by": ["FU3-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU3-AC1",
+      "criterion_verbatim": "the eight named tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu3",
+      "output_evidence": "R1-FU3-OK passed=10",
+      "denominator": "10 passed of 8 named fetch tests required (the check requires at least 8 passing; 8 named plus 2 guards)",
+      "status": "PASS",
+      "expect": "R1-FU3-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FU3-AC2",
+      "criterion_verbatim": "the fetch's output meets the handoff contract the lander reads.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu3c",
+      "output_evidence": "R1-FU3C-OK rows=6 listing=fidelity-handoff/1",
+      "denominator": "6 rows of 6 names in the contract check (six COMPLETED files on a fake session), schema fidelity-handoff/1",
+      "status": "PASS",
+      "expect": "R1-FU3C-OK rows=6 listing=fidelity-handoff/1"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "COMPLETED status filter removed from _select_rows in a scratch copy of fetch.py",
+      "expected": "test_only_completed_rows_of_the_six_names fails",
+      "observed": "1 failed, 9 passed of 10 in test_fetch.py; the failure is test_only_completed_rows_of_the_six_names",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of pytest over test_fetch.py compared",
+      "observed": "run 1: 10 passed in 0.08s; run 2: 10 passed in 0.09s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PlaywrightSession against the live Wealthscape context, and the live status list and downloads",
+      "reason": "FU-x-1 proves them; the names and parameters are listed in NFRA_FIDUPL-D1-W1-S6 and the status-list shape in NFRA_FIDUPL-D1-W1-S4"
+    },
+    {
+      "item": "a refused status list has no handoff failure class",
+      "reason": "the contract has four strings and none fits; fetch_day raises FetchError and writes no listing.json; recorded as NFRA_FIDUPL-D1-W1-S5 for the contract owner"
+    },
+    {
+      "item": "retiring signin_recon.ContextSession in favour of PlaywrightSession",
+      "reason": "signin_recon.py is outside this order's grant; recorded as NFRA_FIDUPL-D1-W1-S7"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W1-S5: the handoff contract has no failure class for a refused status list; fetch_day raises FetchError and writes no listing.json (OBSERVATION, INERT).",
+    "NFRA_FIDUPL-D1-W1-S6: the status-row and download field names fetch.py reads are reference-stated and unmeasured; FU-x-1 proves them live (OBSERVATION, INERT).",
+    "NFRA_FIDUPL-D1-W1-S7: two session adapters now exist, fetch.PlaywrightSession and signin_recon.ContextSession (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~1/NFRA_FIDUPL.TO-FU-s-3.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_fetch.py",
+      "result": "10 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/fetch.py infra/aws/ec2/canonical-fidelity/tests/test_fetch.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
