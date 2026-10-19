@@ -106,7 +106,8 @@ body = {
               "window_set_passed": t["window_forward"]["passed"], "window_set_failed": t["window_forward"]["failed"] + t["window_reverse"]["failed"], "window_both_orders_equal": t["window_forward"]["passed"] == t["window_reverse"]["passed"]},
     "process_wide_state": PROCESS_WIDE % {"before": rl["routes"], "after": rc["routes"]},
     "service": hl["service"], "scratch_removed": hl["scratch_removed"], "candidate_bytes_equal_release": hl["candidate_bytes_equal_release"],
-    "host_before": {"md5_differ": len(json.load(io.open(P + "host_md5_before.json", encoding="utf-8")).get("differ", [])), "marker": json.load(io.open(P + "step1_before.json", encoding="utf-8")).get("marker")},
+    "host_before": {"md5_differ": len(json.load(io.open(P + "host_md5_before.json", encoding="utf-8")).get("differ", [])), "marker_state": json.load(io.open(P + "step1_before.json", encoding="utf-8")).get("marker", "").split("=", 1)[0],
+                    "marker": json.load(io.open(P + "step1_before.json", encoding="utf-8")).get("marker", "").split("=", 1)[-1]},
 }
 io.open(W + "PHASE_A_OG-ap-50.json", "w", encoding="utf-8", newline="\n").write(json.dumps({"body": body}, indent=1) + "\n")
 print(json.dumps({k: body[k] for k in ("route_leg", "tests", "service", "host_before", "listener")}, indent=1)[:3500])
