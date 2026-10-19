@@ -1,0 +1,152 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_ANLREQ.TO-AR-g-163",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-163.price-pages-repoint-existing-statistics.md",
+  "group": "OTHER",
+  "vintage_commit": "b1e3d6abca"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R57_G.md",
+  "vintage_commit": "b1e3d6abca",
+  "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-163.price-pages-repoint-existing-statistics.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_ANLREQ~301",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json",
+   "kind": "config_data",
+   "commit_or_etag": "4470af3ff2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "eight element source objects re-pointed (p2.e14, p2.e11, p2.e15, p7.e04, p7.e13, p7.e12, p7.e10, p7.e11); id, page, kind, label and claim unchanged; 254 elements; OPAL_HELD count 158 at base and 156 at head, OWN_SERIES count 9 at base and 17 at head; nothing deployed, the map reaches the served report only through a later resident release under its own never-widen pair (pricing on and off)",
+   "artifact_covered_by": [
+    "AR163-g-AC1",
+    "AR163-g-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_repoint.py",
+   "kind": "test",
+   "commit_or_etag": "4470af3ff2",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five tests, python -m pytest -q: 5 passed; runs the shipped producer over the real overview map with a deterministic 133-month history (AAA, BBB, CCC, SPY, BIL); asserts VALUE by OWN_SERIES for the eight ids, the cross-element agreements, and NOT_IN_THIS_VERSION with pricing off",
+   "artifact_covered_by": [
+    "AR163-g-AC1",
+    "AR163-g-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py",
+   "kind": "test",
+   "commit_or_etag": "4c1b7d3d16",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three numbers only under AMENDMENT 1 and 2: line 623 and line 625 158 to 156 (OPAL_HELD count), line 754 9 to 17 (OWN_SERIES count); no assertion weakened; 50 passed",
+   "artifact_covered_by": [
+    "AR163-g-AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "3631edc45b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rows IRPT_ANLREQ-D2-W301-S1 (BLOCKING, ARMED), IRPT_ANLREQ-D2-W301-S2 and IRPT_ANLREQ-D2-W301-S3 (OBSERVATION, INERT) appended at the end; surprise-row-gate --check reads OK with 3 new rows",
+   "artifact_covered_by": [
+    "AR163-g-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AR163-g-AC1",
+   "criterion_verbatim": "AC1: the eight elements are VALUE with pricing on, method OWN_SERIES, with the cross-element agreements above (YTD equals the p2.e13 YTD cell; the p7.e10 row equals p2.e13's; p7.e11 and p7.e12 are the bars of their rows; p7.e04 equals p7.e13). At base it FAILs.",
+   "method": "test_suite",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 build",
+   "output_evidence": "AR-PRICE-163-OK build: all arms | rc=0 at HEAD 3631edc45b (run under timeout 120); a second same-input run gives the same line and rc=0. Base falsifier (.scratch/base_probe.py, the parent commit c016f7e2bb map bytes, the checker unchanged): 17 failure lines, first line 'p2.e15 is not VALUE (NOT_AVAILABLE, NOT_IN_THIS_VERSION)'",
+   "denominator": "8 of 8 elements VALUE by OWN_SERIES with pricing on; cross-element arms: 1 YTD cell (p2.e14 = p2.e13 'Total return YTD'), 4 p7.e10 cells equal p2.e13's 1Y/3Y/5Y/10Y, p7.e11 4 bars in column order, p7.e04 equals p7.e13 on 4 cells, p7.e12 4 bars in column order; 0 failed; base: 17 failed",
+   "expect": "^AR-PRICE-163-OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AR163-g-AC2",
+   "criterion_verbatim": "AC2: with pricing off every element of the map reads exactly as at the base; with pricing on nothing outside the 17 round-57 elements moves and the nine base VALUE elements are byte-equal. At base it PASSes.",
+   "method": "test_suite",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 guard",
+   "output_evidence": "AR-PRICE-163-OK guard: all arms | rc=0 at HEAD 3631edc45b (run under timeout 120)",
+   "denominator": "pricing-off arm: every element of the base status map (254 of 254) reads as at base, and each new round-57 id reads NOT_AVAILABLE / NOT_IN_THIS_VERSION; pricing-on arm: every base element reads as at base except the 17 round-57 ids, which are VALUE; the nine base VALUE elements are byte-equal; 0 failed",
+   "expect": "^AR-PRICE-163-OK",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AR163-g-AC3",
+   "criterion_verbatim": "AC3: runs six existing producer and layout test files on their own, then that the branch changed only your files, your folder, the order and the channel file. At base it PASSes.",
+   "method": "test_suite",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 regress",
+   "output_evidence": "AR-PRICE-163-REGRESS-OK  (empty failure list) | rc=0 at HEAD 4c1b7d3d16 (run under timeout 300); test_layout_overview.py 50 passed in 13.77s after the three-number pin under AMENDMENT 1 and 2 (lines 623, 625: 158 to 156; line 754: 9 to 17); the other five test files pass on their own; the scope check printed no file outside the write set",
+   "denominator": "6 of 6 test files pass on their own (test_layout_overview.py 50 of 50; the other five pass); scope: 0 files outside the write set against merge-base with box/dell2",
+   "expect": "^AR-PRICE-163-REGRESS-OK",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Base falsifier: the cell 163 build arms run against the base map bytes (parent commit c016f7e2bb) through .scratch/base_probe.py, which loads ar_price_checks.py unchanged and swaps only the map input.",
+   "expected": "AC1 build FAILs on the base map (the order's base FAIL)",
+   "observed": "17 failure lines, including p2.e11, p2.e14, p2.e15 and p7.e04 to p7.e13 not VALUE, method VENDOR_SOURCED or OPAL_HELD (want OWN_SERIES), and p7.e04 and p7.e13 not both tables",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of ar_price_checks.py 163 build compared on the verdict line and rc",
+   "observed": "both runs: AR-PRICE-163-OK build: all arms, rc=0",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "test_runner.py line 943 (holds a 158)",
+   "reason": "Not in this order's regress set and not in the amended grant; AMENDMENT 2 says the issuer fixes it at the merge. Not touched."
+  },
+  {
+   "item": "Served-output effect of the eight elements and the release pair",
+   "reason": "Nothing is deployed by this cell; the served report changes only through a later resident release that carries the map, under its own never-widen pair covering pricing on and off. Not measured here."
+  },
+  {
+   "item": "Rendered PDF of the price pages",
+   "reason": "The criteria read the producer's run records and sections, not pixels; the rendered page was not inspected."
+  },
+  {
+   "item": "Base-commit AC2 PASS re-measured by this worker",
+   "reason": "The order records the base PASS; this worker measured AC2 at HEAD only."
+  }
+ ],
+ "surprises": [
+  "IRPT_ANLREQ-D2-W301-S1: test_layout_overview.py (outside the grant) carries two asserts the cell's map change makes stale: 158 OPAL_HELD asserted, 156 read; 9 OWN_SERIES asserted, 17 read; AC3 regress reads FAIL.",
+  "IRPT_ANLREQ-D2-W301-S2: the worktree's sparse checkout omits org/surprise_channel, so the row schema named in the worker face is not on disk; it was read at HEAD with git show.",
+  "IRPT_ANLREQ-D2-W301-S3: the pre-commit comp-pulse risk reflex answered PARTIAL_OR_BLIND (danger map 92.1h stale, 0 of 2 files scanned) on the map commit; the commit gate still passed."
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+ "compiler_tools": [
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 build",
+   "result": "AR-PRICE-163-OK build: all arms (rc=0)"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 guard",
+   "result": "AR-PRICE-163-OK guard: all arms (rc=0)"
+  },
+  {
+   "tool": "python",
+   "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 163 regress",
+   "result": "AR-PRICE-163-REGRESS-OK (empty failure list), rc=0 at HEAD 4c1b7d3d16"
+  },
+  {
+   "tool": "python -m pytest",
+   "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_repoint.py",
+   "result": "5 passed"
+  }
+ ]
+}
