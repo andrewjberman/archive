@@ -11,7 +11,7 @@
  },
  "decomp_ref": {
   "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
-  "vintage_commit": "b5557f67e1",
+  "vintage_commit": "df47b978ac",
   "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-10.round-44-is-the-audit-refusal-write-failing.md"
  },
  "artifacts_produced": [
@@ -20,7 +20,7 @@
    "kind": "doc",
    "commit_or_etag": "034bd0f21a",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "STEP 1 record (read-only): journal from 2026-10-18T19:23:53+0000 to 2026-10-19T02:57:18+0000: 1413 POST /mcp lines in all, 0 answered 429, 0 writer WARN lines; lake: 0 gw_ratelimit rows over 5568 objects, 0 read errors; counter exposed by no route; controlled refusal none; verdict NOT_EXPOSED. The 10 records of the OG-ev-7 window not labelled probe: 9 etfs_compare_peers source reads inside the 3 served calls and 1 hx_teams (GET /hx/teams/chats), all matched to journal lines.",
+   "deploy_evidence": "STEP 1 record (read-only) and STEP 2 (amendment A1, the one-object writer test): journal from 2026-10-18T19:23:53+0000 to 2026-10-19T02:57:18+0000: 1413 POST /mcp lines in all, 0 answered 429, 0 writer WARN lines; lake: 0 gw_ratelimit rows over 5568 objects, 0 read errors; counter exposed by no route; controlled refusal none; verdict FAILS. The 10 records of the OG-ev-7 window not labelled probe: 9 etfs_compare_peers source reads inside the 3 served calls and 1 hx_teams (GET /hx/teams/chats), all matched to journal lines. WRITER TEST: one synthetic OG-ev-10 gw_ratelimit object, written under the instance role by a guarded host process (put returned, key audit/dt=2026-10-19/2026-10-19T05:22:48.598766+00:00-bc8d907c.jsonl), 1 object under the synthetic principal, the host process's own get_object AccessDenied (the instance role cannot read the lake) and this seat's role read it back; verdict by the amended rule as written: FAILS.",
    "artifact_covered_by": [
     "AC1"
    ]
@@ -43,7 +43,7 @@
    "method": "command",
    "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/ev10.AC1.sh; echo \"exit=$?\"",
    "expect": "(?s)journal: 429 lines \\d+, writer WARN lines \\d+ .*: ok; lake: gw_ratelimit rows \\d+ over \\d+ objects, read errors 0: ok.*verdict by the rule fixed before the run: (WRITES|FAILS|NOT_EXPOSED), the record says \\1: consistent.*OG-ev-7 window records not labelled probe: 10 \\(PEERS_MEASURE\\.json gives 10\\); pairs sum 10: ok; email-shaped strings 0 \\(want 0\\); digit runs of 9 or more 0 \\(want 0\\).*RESULT: PASS.*exit=0",
-   "output_evidence": "journal: 429 lines 0, writer WARN lines 0 (first access line 2026-10-18T19:23:53+0000): ok; lake: gw_ratelimit rows 0 over 5568 objects, read errors 0: ok\ncounter exposed by a route False; controlled refusal none: ok; verdict by the rule fixed before the run: NOT_EXPOSED, the record says NOT_EXPOSED: consistent\nOG-ev-7 window records not labelled probe: 10 (PEERS_MEASURE.json gives 10); pairs sum 10: ok; email-shaped strings 0 (want 0); digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
+   "output_evidence": "journal: 429 lines 0, writer WARN lines 0 (first access line 2026-10-18T19:23:53+0000): ok; lake: gw_ratelimit rows 0 over 5568 objects, read errors 0: ok\nwriter test (CTO ruling 35872): written True, read back False, key audit/dt=2026-10-19/2026-10-19T05:22:48.598766+00:00-bc8d907c.jsonl: ok\ncounter exposed by a route False; controlled refusal none: ok; verdict by the rule fixed before the run: FAILS, the record says FAILS: consistent\nOG-ev-7 window records not labelled probe: 10 (PEERS_MEASURE.json gives 10); pairs sum 10: ok; email-shaped strings 0 (want 0); digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
    "denominator": "5568 lake objects read (0 errors); 1413 journal POST /mcp lines; 10 records of the OG-ev-7 window",
    "status": "PASS"
   }
@@ -63,16 +63,20 @@
  },
  "declared_exclusions": [
   {
-   "item": "STEP 2 (the controlled refusal)",
-   "reason": "The order stops at NOT_EXPOSED and waits for the issuer's reply; STEP 2 needs an ask, three signed halves and a GO."
+   "item": "the controlled refusal (a 429 through /mcp)",
+   "reason": "No non-person /mcp principal exists (the ask of 2026-10-19); the CTO ruled the writer test instead (msg 35872) and controlled_refusal stays null."
+  },
+  {
+   "item": "a read-back by the instance role",
+   "reason": "The host process's get_object under the instance role was AccessDenied; the object was read back by this seat's own role, and the record keeps read_back false as the ask defined it (the issuer rules whether the runner-side read counts)."
   }
  ],
  "surprises": [],
- "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-10 STEP 1 (GO 35852; read-only). The journal and the lake were read by ev10_step1.py (SSM send-command for the journal, boto3 list and get for the lake); the OG-ev-7 limb was cross-checked against the journal of 21:08:00Z to 21:09:05Z by class (5 probe lines, 1 hx line, 4 health lines, 0 POST /mcp, 1 outbound Graph client line). No ask, no halves, nothing written to AWS.",
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-10 (GOs 35852 and 35874/35890). STEP 1 read-only: the journal and lake counts by ev10_step1.py, the OG-ev-7 limb cross-checked by class against the journal. STEP 2 (A1) on all three halves at ask sha256 da4cfe576419: ev10_writer_host.py and ev10_writer_run.py committed first (4aa83afef8), uploaded bytes equal to the committed blobs, AUDIT_PATH set before app.config was imported (the CVO's C1; the record shows the local floor was the scratch file), ONE call: the put under the instance role returned, the object read back by this seat's role, the host process's own get_object AccessDenied. Also counted, read-only, the lake over 2026-10-18T19:00Z to 20:00Z: 399 objects, 0 gw_ratelimit rows.",
  "compiler_tools": [
   {
    "tool": "boto3 / ssm / s3",
-   "invocation": "ev10_step1.py",
+   "invocation": "ev10_step1.py, ev10_writer_run.py with ev10_writer_host.py, ev10_window.py",
    "result": "PASS",
    "note": "Counts, UTC times and (label, tool) names only."
   }
