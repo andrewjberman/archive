@@ -49,3 +49,21 @@ B8. Criteria, re-run on the committed tree (same invocations):
 
 PART C -- not done, by design: no terraform apply, no safe-apply, no enable of any rule, no start or stop of the box,
 no AWS object created or changed. The instance is left as created (W4-S6).
+
+PART D -- REPAIR (order reopened by the issuer; fresh worktree cut from 3c4d2b16d7, same path and branch)
+
+D1. git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-4 ; TREE-OK ; HEAD 3c4d2b16d7 (the repair commit of the order file).
+D2. automation.tf: run_command changed from "python3 /opt/fidelity-uploader/box/run.py" to
+    "/opt/fidelity-uploader/venv/bin/python /opt/fidelity-uploader/box/run.py" (the venv holds boto3 and playwright; system
+    python3 on the box has neither). Nothing else in the root changed. terraform fmt re-aligned the locals block.
+D3. Commit d2faf35fc7 (automation.tf only).
+D4. Criteria, run on the committed tree (same invocations as the order):
+    R1-FU6V-OK Success! The configuration is valid.                                          (rc 0)
+    R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK  (rc 0)
+    R1-FU6P2-OK Plan: 0 to add, 1 to change, 0 to destroy. (the automation document only)    (rc 0)
+    R1-FU6C-OK the automation runs the wrapper with /opt/fidelity-uploader/venv/bin/python    (rc 0)
+D5. Direct plan (read only, same tree): "  # aws_ssm_document.run will be updated in-place" and
+    "Plan: 0 to add, 1 to change, 0 to destroy." The one input change is the content command:
+    ~ "python3 /opt/fidelity-uploader/box/run.py" -> "/opt/fidelity-uploader/venv/bin/python /opt/fidelity-uploader/box/run.py",
+    The other changed lines are computed attributes that follow from the content change (default_version, document_version,
+    hash, latest_version, and the parameter list shown as known after apply). The plan is not applied; the CloudOps seat re-applies.

@@ -349,11 +349,101 @@ def x1_probe():
     return out("%s-OK list_narrows=%s options=%s restored_starting_g=yes" % (tag, m.group(1), n.group(1)))
 
 
+def fu5_static():
+    tag = "R1-FU5C"
+    p = "%s/box/bootstrap.sh" % CF
+    if not os.path.isfile(p):
+        return out("%s-FAIL absent %s" % (tag, p))
+    text = open(p, encoding="utf-8").read()
+    m = re.search(r"amzn\)(.*?);;", text, re.S)
+    if not m:
+        return out("%s-FAIL no amzn branch" % tag)
+    amzn = m.group(1)
+    bad = []
+    if "dnf install" not in amzn:
+        bad.append("the amzn branch never runs dnf install")
+    for lib in ("nss", "mesa-libgbm", "alsa-lib", "pango"):
+        if lib not in amzn:
+            bad.append("the amzn branch installs no %s" % lib)
+    # --with-deps shells out to apt-get; it may appear only inside the ubuntu|debian branch of the case statement
+    deb = re.search(r"ubuntu\|debian\)(.*?);;", text, re.S)
+    deb_text = deb.group(1) if deb else ""
+
+    def live_with_deps(blob):
+        return [ln for ln in blob.splitlines() if "--with-deps" in ln and not ln.lstrip().startswith("#")]
+    if len(live_with_deps(text)) > len(live_with_deps(deb_text)):
+        bad.append("--with-deps is run outside the ubuntu|debian branch (apt-get is absent on amzn)")
+    if "playwright install" not in text:
+        bad.append("no playwright install")
+    if bad:
+        return out("%s-FAIL %s" % (tag, "; ".join(bad)))
+    return out("%s-OK amzn branch installs browser libraries with dnf; --with-deps only in the ubuntu|debian branch" % tag)
+
+
+def tf_venv():
+    tag = "R1-FU6C"
+    p = "%s/automation.tf" % TF_ROOT
+    if not os.path.isfile(p):
+        return out("%s-FAIL absent %s" % (tag, p))
+    text = open(p, encoding="utf-8").read()
+    if "/opt/fidelity-uploader/venv/bin/python" not in text:
+        return out("%s-FAIL the automation never names the venv python" % tag)
+    if re.search(r"(?<![/\w])python3\s+/opt/fidelity-uploader", text):
+        return out("%s-FAIL the automation still runs system python3 on the wrapper" % tag)
+    return out("%s-OK the automation runs the wrapper with /opt/fidelity-uploader/venv/bin/python" % tag)
+
+
+def tf_plan_doc_only():
+    tag = "R1-FU6P2"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "init", "-input=false", "-no-color"], 110)
+    if rc != 0:
+        return out("%s-FAIL init rc=%s" % (tag, rc))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-no-color"], 115)
+    if rc != 0 or "Plan: 0 to add, 1 to change, 0 to destroy." not in o:
+        return out("%s-FAIL plan rc=%s %s" % (tag, rc, [x for x in o.splitlines() if x.startswith(("Plan:", "No changes"))][:1]))
+    if "aws_ssm_document" not in o:
+        return out("%s-FAIL the one change is not the automation document" % tag)
+    return out("%s-OK Plan: 0 to add, 1 to change, 0 to destroy. (the automation document only)" % tag)
+
+
+def box_live():
+    tag = "R1-FU7B"
+    try:
+        import time
+
+        import boto3
+        rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "output", "-raw", "instance_id"], 60)
+        iid = o.strip()
+        if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
+            return out("%s-FAIL no instance_id output (rc=%s)" % (tag, rc))
+        py = ("import boto3, playwright; from playwright.sync_api import sync_playwright as sp; "
+              "p = sp().start(); b = p.chromium.launch(); b.close(); p.stop(); print('FIDUPL-BOX-OK chromium=launched')")
+        ssm = boto3.client("ssm", region_name="us-east-1")
+        cid = ssm.send_command(InstanceIds=[iid], DocumentName="AWS-RunShellScript",
+                               Parameters={"commands": ['/opt/fidelity-uploader/venv/bin/python -c "%s"' % py]})["Command"]["CommandId"]
+        inv = {"Status": "Pending"}
+        for _ in range(30):
+            time.sleep(4)
+            try:
+                inv = ssm.get_command_invocation(CommandId=cid, InstanceId=iid)
+            except Exception:  # noqa: BLE001 -- not registered yet
+                continue
+            if inv["Status"] in ("Success", "Failed", "TimedOut", "Cancelled"):
+                break
+        if inv["Status"] != "Success" or "FIDUPL-BOX-OK chromium=launched" not in inv.get("StandardOutputContent", ""):
+            return out("%s-FAIL ssm status=%s" % (tag, inv["Status"]))
+        return out("%s-OK chromium=launched" % tag)
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
