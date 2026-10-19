@@ -117,3 +117,27 @@ CloudOps principal was refused the delete (AccessDenied, no bucket deny). No IAM
 - The third run prints whether its own upload resolves onto the same `ART-` key, since the file's bytes are identical.
 
 Andrew's word covers synthetic deletes (2026-10-16).
+
+---
+
+## ADDENDUM 4 (2026-10-19 ~14:5xZ) -- the third run stopped at RESOLVING with 0 resolve lines
+
+**Answers:** `0.7.0_AE_CloudOps~IB2` msg 10726, receipt
+`org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e3/A_E2E3.txt` (5fea80e453):
+- the mint, the advisor and the login were ok;
+- the upload answered RESOLVING 5 times over 20 s, and the resident journal shows 0 RESOLVE lines (1 line in the whole window);
+- the run reused run 2's upload token, so the same `ART-` key (K yes) applies;
+- 6 of 7 keys were deleted; the leftover is filed as D2-S214.
+
+**Reading:** reusing run 2's token resumed a row whose index items run 2 had deleted. Re-dispatch fires only after
+`REDRIVE_SECONDS` (`uploads.py:526-531`), so this run cannot tell "the resident never resolves uploads" apart from "this
+stale row was never re-dispatched". Andrew's own filings resolved this morning, through the same door.
+
+**RULING:**
+1. `~Y2` runs ONE LOCAL plus read-only cell. It traces the resolve dispatch for a FRESH token (`uploads.py:547-` and the
+   resident's resolve poll: which queue, which journal literal). It also counts, for Andrew's 13:43Z filing, the resident
+   journal's resolve lines (counts only), as the positive control.
+2. The fourth run uses a FRESH upload token and distinct synthetic bytes. It never reuses a token or a row an earlier run
+   deleted. Everything else stands under the same pair, by an ADDENDUM 3 that names the fresh token and bytes.
+3. If the control shows real filings resolve and the fresh token does not, that is a product defect with its own cell and
+   pair.

@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-20",
+  "firm": "INF",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "vintage_commit": "21c1202920",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-20.boundary-measure-pairs-on-the-next-trading-day.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-20.boundary-measure-pairs-on-the-next-trading-day.md",
+    "group": "OTHER",
+    "vintage_commit": "21c1202920"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~320",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~316/run_scope_feed_real.py",
+      "kind": "script",
+      "commit_or_etag": "6483b07dfc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on branch wk-IRPT_DASHBD-320 at 6483b07dfc. Not deployed and not run against real data: the module is read by the DB-i-16 test file and by the checker only.",
+      "introduces": ["def next_trading_day(day_iso):"],
+      "artifact_covered_by": ["DBI133-1-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
+      "kind": "test",
+      "commit_or_etag": "6483b07dfc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on branch wk-IRPT_DASHBD-320 at 6483b07dfc. Runs offline against the feed's own harness; 14 passed on the committed tree.",
+      "introduces": ["def test_boundary_mutant_calendar_day_plus_one_rule_finds_no_friday_to_monday_pair"],
+      "artifact_covered_by": ["DBI133-1-AC1", "DBI133-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI133-1-AC1",
+      "criterion_verbatim": "`DBI133-1-AC1` -- the behaviour, graded on partitions the checker writes with the feed's own `run()`: a Friday pairs with the Monday (1 pair, 1000.0 basis points) and the calendar rule on the same frames finds 0; a Monday that is not RETURNED is not paired; a holiday-eve pairs with the next open day under a calendar double; an ordinary Tuesday still pairs with the Wednesday; `next_trading_day` answers the real holiday table; `run_real` keeps its signature and counts the Friday-to-Monday pair. Base: FAIL (no `next_trading_day`).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r133/p133_boundary.py\" . DBI133-1-AC1",
+      "output_evidence": "DBI133-1-AC1 PASS  (rc=0, run on the committed tree at 6483b07dfc; the checker's WARN lines from lib/trading_calendar are the expected hardcoded-table notice and are excluded)",
+      "denominator": "1 of 1 criterion PASS; the checker's grade_behaviour evaluates 19 needs (signature 2, Friday-to-Monday 3, not-RETURNED Monday 1, holiday-eve 3, Tuesday 2, next_trading_day table 6, run_real 2)",
+      "status": "PASS",
+      "expect": "DBI133-1-AC1 PASS"
+    },
+    {
+      "criterion_id": "DBI133-1-AC2",
+      "criterion_verbatim": "`DBI133-1-AC2` -- the tests: at least three tests named `*boundary*` (one naming Friday and Monday, one naming a holiday, one named `*mutant*` that passes the calendar rule as `next_day=` and asserts 0 pairs), the boundary tests call `measure_boundary` and drive the feed's `run()`, no hand-built feed frame, and the file passes with at least 12 tests. Base: FAIL (fewer than three boundary tests).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r133/p133_boundary.py\" . DBI133-1-AC2",
+      "output_evidence": "DBI133-1-AC2 PASS  (rc=0, run on the committed tree at 6483b07dfc; the file under the checker's pytest run: 14 passed)",
+      "denominator": "1 of 1 criterion PASS; 4 boundary-named tests (3 required); 14 of 14 collected tests passed (12 required); 0 hand-built feed frames (no pd.DataFrame([ in the file)",
+      "status": "PASS",
+      "expect": "DBI133-1-AC2 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_boundary_mutant_calendar_day_plus_one_rule_finds_no_friday_to_monday_pair: the same feed frames as the Friday-to-Monday test, measured with next_day= the calendar day+1 rule; the count of pairs must be 0 where the default rule finds 1.",
+      "expected": "the calendar-rule measure finds 0 pairs on the Friday-to-Monday frames",
+      "observed": "1 passed, 13 deselected (pytest -q -k boundary_mutant on 6483b07dfc, rc 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the full test file, results compared",
+      "observed": "run 1: 14 passed in 3.13s; run 2: 14 passed in 4.27s; both rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A measure on the real Scope feed silver, and any AWS, network or vendor read",
+      "reason": "Outside the grant and the cell. The order's bounds forbid them; the re-read of landed days is DB-i-22, a separate order."
+    },
+    {
+      "item": "Any edit to the harness, the wrapper, the adapter, the feed script, lib/ or the sibling DB-i-16 test file",
+      "reason": "Outside the grant. The sibling test file was run read-only: 13 passed on the committed tree."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~320/SESSION_LOG_DB_I20.json",
+  "compiler_tools": [
+    {
+      "tool": "p133_boundary.py (issuer checker, criteria DBI133-1-AC1 and DBI133-1-AC2)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r133/p133_boundary.py\" . DBI133-1-AC1 (AC2 the same way)",
+      "result": "DBI133-1-AC1 PASS and DBI133-1-AC2 PASS, each rc 0, on the committed tree"
+    },
+    {
+      "tool": "p133_boundary.py --selftest",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r133/p133_boundary.py\" --selftest",
+      "result": "selftest PASS rc 0 (base module FAIL; reference PASS; four AC1 mutants FAIL; AC2 synthetic cases as designed)"
+    },
+    {
+      "tool": "pytest (feed-shape test file)",
+      "invocation": "python -I -m pytest -q -p no:cacheprovider data/assets/scripts/gold/irpt_reporting/tests/test_inflection_scope_feed_real_shape.py",
+      "result": "14 passed, rc 0"
+    }
+  ]
+}

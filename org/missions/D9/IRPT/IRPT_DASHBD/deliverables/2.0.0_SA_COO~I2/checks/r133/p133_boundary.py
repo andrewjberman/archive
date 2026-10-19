@@ -184,6 +184,8 @@ def next_trading_day(day):
 
 
 def reference_source(base):
+    if "def next_trading_day(" in base:      # E1 is already in the module: it IS the reference
+        return base
     s = base
     need(s.count("def measure_boundary(silver):") == 1, "base module drifted: measure_boundary header")
     need(s.count("        after = rows.get((account, _next_day(day)))\n") == 1, "base module drifted: the pairing line")
@@ -197,25 +199,32 @@ def selftest(root):
     root = Path(root).resolve()
     real = root / SCRIPT_REL
     base = real.read_bytes().decode("ascii")
-    try:
-        grade_behaviour(root, load_variant(base, real, "rsfr_base"))
-        raise Fail("selftest: the BASE module passed AC1")
-    except Fail as exc:
-        if str(exc).startswith("selftest"):
-            raise
-        print("selftest BASE (before the fix)        -> FAIL (%s)" % str(exc)[:70])
-    except TypeError as exc:
-        print("selftest BASE (before the fix)        -> FAIL (TypeError %s)" % str(exc)[:60])
+    if "def next_trading_day(" in base:
+        print("selftest BASE (before the fix)        -> skipped (E1 is merged; the module under test is the reference)")
+    else:
+        try:
+            grade_behaviour(root, load_variant(base, real, "rsfr_base"))
+            raise Fail("selftest: the BASE module passed AC1")
+        except Fail as exc:
+            if str(exc).startswith("selftest"):
+                raise
+            print("selftest BASE (before the fix)        -> FAIL (%s)" % str(exc)[:70])
+        except TypeError as exc:
+            print("selftest BASE (before the fix)        -> FAIL (TypeError %s)" % str(exc)[:60])
     ref = reference_source(base)
     grade_behaviour(root, load_variant(ref, real, "rsfr_ref"))
     print("selftest REFERENCE                    -> PASS")
+    weekend_only = re.sub(
+        r"nxt = tc\.first_trading_day_on_or_after\(dt\.date\.fromisoformat\((\w+)\) \+ dt\.timedelta\(days=1\)\)\n(\s+)return None if nxt is None else nxt\.isoformat\(\)",
+        lambda m: ("d = dt.date.fromisoformat(%s) + dt.timedelta(days=1)\n%swhile d.weekday() >= 5:\n%s    d += dt.timedelta(days=1)\n%sreturn d.isoformat()"
+                   % (m.group(1), m.group(2), m.group(2), m.group(2))), ref)
+    itself = re.sub(r"first_trading_day_on_or_after\(dt\.date\.fromisoformat\((\w+)\) \+ dt\.timedelta\(days=1\)\)",
+                    r"first_trading_day_on_or_after(dt.date.fromisoformat(\1))", ref)
+    cal_fn = "def cal_next_day(day):\n    return (dt.date.fromisoformat(day) + dt.timedelta(days=1)).isoformat()\n\n\ndef next_trading_day("
     mutants = [
-        ("default stays calendar d+1", ref.replace("(next_day or next_trading_day)", "(next_day or _next_day)")),
-        ("weekends only, no holidays", ref.replace(
-            "    nxt = tc.first_trading_day_on_or_after(dt.date.fromisoformat(day) + dt.timedelta(days=1))\n    return None if nxt is None else nxt.isoformat()\n",
-            "    d = dt.date.fromisoformat(day) + dt.timedelta(days=1)\n    while d.weekday() >= 5:\n        d += dt.timedelta(days=1)\n    return d.isoformat()\n")),
-        ("partner is the day itself", ref.replace("tc.first_trading_day_on_or_after(dt.date.fromisoformat(day) + dt.timedelta(days=1))",
-                                                  "tc.first_trading_day_on_or_after(dt.date.fromisoformat(day))")),
+        ("default stays calendar d+1", ref.replace("(next_day or next_trading_day)", "(next_day or cal_next_day)").replace("def next_trading_day(", cal_fn, 1)),
+        ("weekends only, no holidays", weekend_only),
+        ("partner is the day itself", itself),
         ("next_day argument ignored", ref.replace("(next_day or next_trading_day)", "next_trading_day")),
     ]
     for label, src in mutants:
