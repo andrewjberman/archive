@@ -1,0 +1,88 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K5-01",
+   "tool": "ycharts_freshness",
+   "question": "Is the shared YCharts session live right now?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "a second authenticated GET of the same probe; its ok flag must agree [app/integrations/ycharts/integration.py:125]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-02",
+   "tool": "ycharts_snapshot_metrics",
+   "question": "What was the year to date total return of the S&P 500?",
+   "args": {
+    "symbols": ["^SPX"],
+    "columns": ["ytd_total_return"]
+   },
+   "expect": "nonempty",
+   "source_hint": "the same column for ^SPX read again from the YCharts indices table; the two values must agree [app/integrations/ycharts/integration.py:134]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-03",
+   "tool": "ycharts_snapshot_metrics",
+   "question": "What are the price and P/E ratio of the S&P 500 today?",
+   "args": {
+    "symbols": ["^SPX"],
+    "columns": ["price", "pe_ratio"]
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same two columns on the YCharts indices table for ^SPX [app/integrations/ycharts/integration.py:134]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-04",
+   "tool": "ycharts_time_series",
+   "question": "Show the daily price history of the S&P 500 for the first half of 2026",
+   "args": {
+    "symbol": "^SPX",
+    "metric": "price",
+    "start_date": "2026-01-01",
+    "end_date": "2026-06-30"
+   },
+   "expect": "nonempty",
+   "source_hint": "the point count against the trading days in that window, which the answer's points field states [app/integrations/ycharts/integration.py:147]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-05",
+   "tool": "ycharts_fund_series",
+   "question": "Give me the daily closing price history of the SPY fund",
+   "args": {
+    "symbol": "SPY",
+    "calc": "price"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the returned points against the trading days of the last year [app/integrations/ycharts/integration.py:160]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-06",
+   "tool": "ycharts_risk_return_scatter",
+   "question": "How do volatility and total return compare across SPY, QQQ and IWM?",
+   "args": {
+    "symbols": ["SPY", "QQQ", "IWM"],
+    "x_metric": "annualized_volatility",
+    "y_metric": "annualized_total_return"
+   },
+   "expect": "nonempty",
+   "source_hint": "the series count must equal the three symbols sent; a second scatter read of the same tickers [app/integrations/ycharts/integration.py:173]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-07",
+   "tool": "ycharts_search",
+   "question": "What is the YCharts symbol for the S&P 500 index?",
+   "args": {
+    "query": "S&P 500"
+   },
+   "expect": "nonempty",
+   "source_hint": "the caret symbol the answer cites must appear in a second search for the same query [app/integrations/ycharts/integration.py:187]",
+   "expect_source": "ycharts"
+  }
+ ]
+}
