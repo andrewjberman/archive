@@ -20,7 +20,7 @@
       "kind": "script",
       "commit_or_etag": "3b589f17ea",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "_price_table_element and _opal_map append opal.prices.holdings after the last page (after the classified page); produce and produce_package pass the price stage's record as prices= to lo.compute_all; nothing deployed (rides the next resident release that touches this module)",
+      "deploy_evidence": "_price_table_element and _opal_map append opal.prices.holdings after the last page (after the classified page); produce and produce_package pass the price stage's record as prices= to lo.compute_all; unchanged by AMENDMENT 1; nothing deployed (rides the next resident release that touches this module)",
       "artifact_covered_by": [
         "AR166-g-AC1",
         "AR166-g-AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
       "kind": "script",
-      "commit_or_etag": "3b589f17ea",
+      "commit_or_etag": "cde87e2dce",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "PRICE_TABLE computed method (_compute_price_table), price-based under pricing off, compute_element and compute_all take prices=None; nothing deployed (rides the next resident release that touches this module)",
+      "deploy_evidence": "PRICE_TABLE computed method (_compute_price_table) with the neutral Source labels (PRICE_SOURCE_LABELS, UNKNOWN_PRICE_LABEL), price-based under pricing off, compute_element and compute_all take prices=None; nothing deployed (rides the next resident release that touches this module)",
       "artifact_covered_by": [
         "AR166-g-AC1",
         "AR166-g-AC2",
@@ -41,11 +41,21 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_table.py",
       "kind": "test",
-      "commit_or_etag": "3b589f17ea",
+      "commit_or_etag": "cde87e2dce",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "5 passed offline (python -m pytest, plain python); asserts the three priced rows, the not-priced row, the pricing-off reading, and the rendered rows; not one of the six AC3 regress files",
+      "deploy_evidence": "7 passed offline (python -m pytest, plain python): the three neutral-labelled priced rows, the not-priced row, the pricing-off reading, the rendered rows, no tier word on the priced page, the unknown-tier fallback; not one of the six AC3 regress files",
       "artifact_covered_by": [
         "AR166-g-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py",
+      "kind": "test",
+      "commit_or_etag": "cde87e2dce",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1: opal.prices.holdings appended as the last member of the expected element id list at the element-list assertion; nothing else in the file changed; the file passes (with test_opal_producer_page_wording.py, 24 passed)",
+      "artifact_covered_by": [
+        "AR166-g-AC3"
       ]
     },
     {
@@ -65,8 +75,8 @@
       "criterion_verbatim": "with pricing on, `opal.prices.holdings` is VALUE with inputs `[\"prices\"]` and equals the three dicts `{\"Ticker\", \"Last price date\": \"2026-10-14\", \"Source\": estate|yfinance|ycharts}` for AAA, BBB, CCC in that order. At base it FAILs (the element does not exist).",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 166 build",
-      "output_evidence": "AR-PRICE-166-OK build: all arms | rc=0 under timeout 120 at HEAD be770c0599 (the code commit 3b589f17ea is an ancestor); base run before the edit printed AR-PRICE-166-FAIL build: opal.prices.holdings is not VALUE (None)",
-      "denominator": "1 element (opal.prices.holdings): status VALUE, inputs [\"prices\"], 3 of 3 rows equal to AAA estate, BBB yfinance, CCC ycharts at 2026-10-14 in that order; 0 failed",
+      "output_evidence": "AR-PRICE-166-OK build: all arms | rc=0 under timeout 120 at HEAD cde87e2dce; base run before the edit printed AR-PRICE-166-FAIL build: opal.prices.holdings is not VALUE (None). The Source value is the neutral label the amended checker expects (AMENDMENT 1), per the order's wording, so the tier name is the run.json claim, not the table value",
+      "denominator": "1 element (opal.prices.holdings): status VALUE, inputs [\"prices\"], 3 of 3 rows equal to AAA Opal data store, BBB Public market data, CCC Licensed market data at 2026-10-14 in that order; 0 failed",
       "expect": "^AR-PRICE-166-OK",
       "status": "PASS"
     },
@@ -75,7 +85,7 @@
       "criterion_verbatim": "with pricing off every base element reads exactly as at the base and the new element reads NOT_AVAILABLE / NOT_IN_THIS_VERSION; with pricing on nothing outside the 17 round-57 elements and the new one moves, and the nine base VALUE elements are byte-equal. At base it PASSes.",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 166 guard",
-      "output_evidence": "AR-PRICE-166-OK guard: all arms | rc=0 under timeout 120 at HEAD be770c0599",
+      "output_evidence": "AR-PRICE-166-OK guard: all arms | rc=0 under timeout 120 at HEAD cde87e2dce",
       "denominator": "257 base elements compared with pricing off (each reads its base status and reason); the new element reads NOT_AVAILABLE / NOT_IN_THIS_VERSION; 257 base elements compared with pricing on (17 round-57 ids may move to VALUE, the other 240 are unchanged); 9 of 9 base VALUE sections byte-equal; 0 failed",
       "expect": "^AR-PRICE-166-OK",
       "status": "PASS"
@@ -85,11 +95,10 @@
       "criterion_verbatim": "runs six existing producer and layout test files, then that the branch changed only your files, your folder, the order and the channel file. At base it PASSes.",
       "method": "test_suite",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 166 regress",
-      "output_evidence": "AR-PRICE-166-REGRESS-FAIL test_opal_producer.py: rc=1 1 failed, 19 passed; test_opal_producer_page_wording.py: rc=1 3 failed, 1 passed | rc=1 under timeout 120 at HEAD be770c0599; the four other files (test_layout_overview.py, test_opal_producer_prices.py, test_layout_own_series_columns.py, test_opal_producer_benchmark.py) printed no failure line; the scope arm printed no stray path. Base run before the edit: AR-PRICE-166-REGRESS-OK",
-      "denominator": "6 test files: 4 pass, 2 fail (test_opal_producer.py 1 of 20 tests failed; test_opal_producer_page_wording.py 3 of 4 tests failed); scope: 0 files outside the write set against merge-base with box/dell2",
+      "output_evidence": "AR-PRICE-166-REGRESS-OK  (empty failure list) | rc=0 under timeout 120 at HEAD cde87e2dce; the checker prints a failure line only for a failing file or a stray path, and none was printed. Before AMENDMENT 1 (HEAD be770c0599) the same arm printed AR-PRICE-166-REGRESS-FAIL for test_opal_producer.py and test_opal_producer_page_wording.py",
+      "denominator": "6 of 6 test files rc=0 (test_layout_overview.py, test_opal_producer.py, test_opal_producer_prices.py, test_layout_own_series_columns.py, test_opal_producer_page_wording.py, test_opal_producer_benchmark.py); scope: 0 files outside the write set against merge-base with box/dell2",
       "expect": "^AR-PRICE-166-REGRESS-OK",
-      "status": "FAIL",
-      "status_reason": "Two existing test files in the regress set fail on the committed code, for reasons the cell itself creates and this order cannot resolve within its grant. test_opal_producer.py pins the exact element id list and the new opal.prices.holdings id is one more (surprise row IRPT_ANLREQ-D2-W303-S2). test_opal_producer_page_wording.py forbids the vendor word ycharts on a priced Opal page, and the cell's rendered table prints it for CCC (surprise row IRPT_ANLREQ-D2-W303-S1). Neither test file was edited and no check was weakened; the order stays open pending a ruling."
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -115,13 +124,13 @@
       "reason": "No vendor call is made by this cell; every price reader is the offline fixture reader."
     },
     {
-      "item": "Resolution of the AC3 conflict",
-      "reason": "Not resolved by this worker. The conflict is named in surprise rows IRPT_ANLREQ-D2-W303-S1 and -S2; resolving it needs a ruling on the R8 vendor word and on the element-list pin, and both test files are outside this order's grant."
+      "item": "Disposition of the channel rows",
+      "reason": "AMENDMENT 1 resolves the code side of rows IRPT_ANLREQ-D2-W303-S1 and -S2; the rows stay UNDER_INVESTIGATION on the channel, and their disposition belongs to the channel owner, not to this worker."
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W303-S1: the rendered price table prints the tier name ycharts on a priced Opal page, and test_opal_producer_page_wording.py forbids that word on such a page; AC3 cannot pass as written.",
-    "IRPT_ANLREQ-D2-W303-S2: test_opal_producer.py pins the exact element id list, so the new element fails it; the file is outside this order's grant.",
+    "IRPT_ANLREQ-D2-W303-S1: the rendered price table printed the tier name ycharts on a priced Opal page, and test_opal_producer_page_wording.py forbids that word there; AMENDMENT 1 resolved it in code (neutral Source labels, commit cde87e2dce).",
+    "IRPT_ANLREQ-D2-W303-S2: test_opal_producer.py pins the exact element id list, so the new element failed it; AMENDMENT 1 appended the id as the last member of that list (commit cde87e2dce).",
     "IRPT_ANLREQ-D2-W303-S3: the worktree is sparse-checked out, so the channel schema named by the premise is tracked at HEAD but not on disk; the commit gate read it from the index."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
@@ -129,7 +138,7 @@
     {
       "tool": "python",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_price_checks.py 166 build | guard | regress",
-      "result": "AR-PRICE-166-OK build; AR-PRICE-166-OK guard; AR-PRICE-166-REGRESS-FAIL (2 of 6 test files fail: 1 and 3 tests)"
+      "result": "AR-PRICE-166-OK build; AR-PRICE-166-OK guard; AR-PRICE-166-REGRESS-OK (6 of 6 test files, scope clean) at HEAD cde87e2dce"
     }
   ]
 }
