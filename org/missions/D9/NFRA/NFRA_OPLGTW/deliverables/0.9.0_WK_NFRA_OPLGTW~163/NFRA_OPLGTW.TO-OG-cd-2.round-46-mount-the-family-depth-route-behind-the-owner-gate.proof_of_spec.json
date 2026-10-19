@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cd-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5b26fdd4c6",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cd-2.round-46-mount-the-family-depth-route-behind-the-owner-gate.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5b26fdd4c6"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~163",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_api.py",
+      "kind": "script",
+      "commit_or_etag": "26e2894302",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-163 (not pushed). Two added lines and no removed line against base blob c1885ec0404f45714616addeec961923ff549ed0: the import of family_depth and the owner-gated Route for GET /gateway/families. No release, no deploy, no AWS call.",
+      "introduces": ["/gateway/families"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_cd2.py",
+      "kind": "test",
+      "commit_or_etag": "26e2894302",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-163 (not pushed). New file with exactly the three named tests (test_ogcd2_ac01, test_ogcd2_ac02, test_ogcd2_ac03). Offline: built from the real app.admin_api.admin_app; ALB identity stubbed on app.owner_gate._alb_oidc_identity; family_depth.read replaced by a recording stub; monkeypatch restores everything after each test.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the route is mounted behind the owner gate: no identity 401, a non-owner 403 with the read never called, the owner 200 with the read's body.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/cd2.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)pytest rc=0; named tests passed 3 of 3; failed/error lines 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests passed (test_ogcd2_ac01, test_ogcd2_ac02, test_ogcd2_ac03); 0 failed or error lines; pytest rc=0. Run before and after commit 26e2894302 with identical summary.",
+      "status": "PASS",
+      "status_reason": "Check run unchanged at commit 26e2894302: RESULT: PASS and exit=0 on both runs.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the mount is the smallest change, two added lines, none removed.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/cd2.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)added lines 2 \\(want 2\\), removed lines 0 \\(want 0\\); import line 1 \\(want 1\\); owner-gated Route line 1 \\(want 1\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "added lines 2 (want 2), removed lines 0 (want 0); import line 1 (want 1); owner-gated Route line 1 (want 1)\nRESULT: PASS\nexit=0",
+      "denominator": "2 added lines of 2 (want 2); 0 removed lines of 0 (want 0); 1 import line of 1; 1 owner-gated Route line of 1, diffed against base blob c1885ec0404f45714616addeec961923ff549ed0. Run before and after commit 26e2894302 with identical counts.",
+      "status": "PASS",
+      "status_reason": "Check run unchanged at commit 26e2894302: RESULT: PASS and exit=0 on both runs.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant to plant. Discrimination is taken from the pre-mount run of the same three tests at the base.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "Pre-mount run of tests/test_og_cd2.py at the base commit 5b26fdd4c6: 3 of 3 failed (ac01: no /gateway/families route in admin_api.routes; ac02 and ac03: GET /gateway/families answered 404).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run before and after commit 26e2894302; the output of the two runs compared line for line.",
+      "observed": "AC1 summary 'pytest rc=0; named tests passed 3 of 3; failed/error lines 0' identical in both runs. AC2 counts 'added lines 2 (want 2), removed lines 0 (want 0); import line 1 (want 1); owner-gated Route line 1 (want 1)' identical in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The flip of the order's one <status> tag to complete (task-orders/NFRA_OPLGTW.TO-OG-cd-2.round-46-mount-the-family-depth-route-behind-the-owner-gate.md, the tag below its RECORD FACE marker).",
+      "reason": "The order file is outside this worker's <paths> write grant. Both criteria PASS. Filed as NFRA_OPLGTW-Z-W163-S4; the issuer places the flip."
+    },
+    {
+      "item": "Release and deploy of the mounted route to the gateway.",
+      "reason": "The preflight declares no deploy and no schedule for this cell; the release is order OG-ap-50 and the read IAM grant is OG-cd-3."
+    },
+    {
+      "item": "The client-data-check WARN printed by the commit gate on commit 26e2894302 (hashed account-id list absent on this device).",
+      "reason": "The same condition as NFRA_OPLGTW-Z-W161-S3. Not graded by this worker; the diff adds no account id on this worker's read."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W163-S1: the face names branch wk-NFRA_OPLGTW-163-portal; the worktree is on wk-NFRA_OPLGTW-163.",
+    "NFRA_OPLGTW-Z-W163-S2: get_config() returns a new Config per call, so the cell's roster patch reaches owner_gate._cfg only through the extra patch the test makes.",
+    "NFRA_OPLGTW-Z-W163-S3: the naming gate printed NAMING ERROR (function-map folder missing) on commit 26e2894302, which landed at rc=0.",
+    "NFRA_OPLGTW-Z-W163-S4: the <status> flip sits in the order below RECORD FACE and outside the write grant; not made by this worker."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~163/NFRA_OPLGTW.TO-OG-cd-2.round-46-mount-the-family-depth-route-behind-the-owner-gate.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~163 <0.9.0_WK_NFRA_OPLGTW~163@opal.agent>\" -F <msgfile> -- infra/aws/ec2/opal-gateway/app/admin_api.py infra/aws/ec2/opal-gateway/tests/test_og_cd2.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[msg-verify] committed 26e2894302; [surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields; WARN client-data-check hashed account-id list ABSENT (recorded as NFRA_OPLGTW-Z-W161-S3); NAMING ERROR function-map folder missing (recorded as NFRA_OPLGTW-Z-W163-S3); commit rc=0"
+    }
+  ]
+}
