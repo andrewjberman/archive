@@ -2,7 +2,7 @@
 
 Reads the Scope feed's silver table (scope_account_returns) through the round-108 GET-only reader, hands the partitions to
 the round-127 wrapper (inflection_scope_feed_run.run) with a PRIVATE local output directory, and returns counts only:
-the Orion boundary measure (startValue(t+1) against endValue(t)) and a chain check over a 238-to-365-day window.
+the Orion boundary measure (startValue(next trading day) against endValue(t)) and a chain check over a 238-to-365-day window.
 When the silver does not exist yet the result is NO_SILVER_YET (one LIST, nothing written); a read cap gives
 STOPPED_AT_CAP (the LIST only, nothing written). No write call, no vendor call, no secret: the reader is GET-only and
 the only files written are the private directory the wrapper fills and the record file named on the command line.
@@ -63,16 +63,21 @@ def _key(account_id, day):
     return (str(int(account_id)), str(day))
 
 
-def _next_day(day):
-    return (dt.date.fromisoformat(day) + dt.timedelta(days=1)).isoformat()
+def next_trading_day(day_iso):
+    """The ISO day of the first trading day STRICTLY after day_iso (lib/trading_calendar.py), or None when the calendar
+    finds none. Weekends and market holidays both come from the library."""
+    nxt = tc.first_trading_day_on_or_after(dt.date.fromisoformat(day_iso) + dt.timedelta(days=1))
+    return None if nxt is None else nxt.isoformat()
 
 
-def measure_boundary(silver):
+def measure_boundary(silver, next_day=None):
     """(pairs, pairs_equal, max_rel_diff_bp) over the feed rows of every partition in silver (a dict of frames).
 
-    A pair: a RETURNED row on day d with a non-null end_market_value and a RETURNED row for the same account on d + 1
-    with a non-null start_market_value. diff = |end(d) - start(d+1)|; equal when diff <= 0.005; the relative difference
-    is diff / max(|start(d+1)|, 1e-9) in basis points; max_rel_diff_bp is None when there are no pairs.
+    A pair: a RETURNED row on day d with a non-null end_market_value and a RETURNED row for the same account on the partner
+    day with a non-null start_market_value. The partner is next_day(d), an ISO day or None; next_day=None means
+    next_trading_day, the next TRADING day after d (a Friday pairs with the Monday; a holiday-eve with the next open day).
+    diff = |end(d) - start(partner)|; equal when diff <= 0.005; the relative difference is diff / max(|start(partner)|, 1e-9)
+    in basis points; max_rel_diff_bp is None when there are no pairs.
     """
     rows = {}
     for frame in silver.values():
@@ -84,8 +89,11 @@ def measure_boundary(silver):
         if row.get("status") != "RETURNED":
             continue
         end = _num(row.get("end_market_value"))
-        after = rows.get((account, _next_day(day)))
-        if end is None or after is None or after.get("status") != "RETURNED":
+        if end is None:
+            continue
+        partner = (next_day or next_trading_day)(day)
+        after = rows.get((account, partner)) if partner else None
+        if after is None or after.get("status") != "RETURNED":
             continue
         start = _num(after.get("start_market_value"))
         if start is None:
