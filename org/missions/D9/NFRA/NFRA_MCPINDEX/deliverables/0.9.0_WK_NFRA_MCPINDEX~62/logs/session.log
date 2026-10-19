@@ -1,0 +1,51 @@
+== h1.AC1 (captured)
+DENOMINATOR: 7 fixture rows over fake listings: dated 3 (two pages; as_of key; a mixed prefix with a bad date and a non-date folder), undated 2, empty 1, error 1
+  ok   an error row makes rc 1 and the file is still written
+  ok   stdout line
+  ok   header
+  ok   two pages read: earliest, latest and the partition count
+  ok   an as_of key
+  ok   a non-date folder and a bad date are ignored
+  ok   undated (a partition key with no date) and contents-only
+  ok   empty
+  ok   an unlistable prefix reads error with its text, never zero
+ARMS: 9 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== h1.AC2 (captured)
+DENOMINATOR: determinism over two runs; the client is only ever asked to list; rows input refusals
+  ok   two runs give the same bytes
+  ok   the source names no object read, write, copy or delete call
+  ok   missing rows key refused (rc 2)
+  ok   row without prefix refused (rc 2)
+  ok   row without bucket refused (rc 2)
+  ok   empty rows refused (rc 2)
+  ok   an absent rows file is refused (rc 2)
+ARMS: 7 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== h1.AC3 (captured)
+DENOMINATOR: pytest rc=0 passed=9 (minimum 6) file=workflows\gateway_battery\tests\test_partition_windows.py
+  ok   pytest
+ARMS: 1 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== mutant h1.AC1 (planted kind=empty; restored byte-exact)
+DENOMINATOR: 7 fixture rows over fake listings: dated 3 (two pages; as_of key; a mixed prefix with a bad date and a non-date folder), undated 2, empty 1, error 1
+  FAIL an error row makes rc 1 and the file is still written  -- rc=0 
+  FAIL stdout line  -- got 'WINDOWS rows=7 dated=3 undated=2 empty=2 error=0'
+  ok   header
+  ok   two pages read: earliest, latest and the partition count
+  ok   an as_of key
+  ok   a non-date folder and a bad date are ignored
+  ok   undated (a partition key with no date) and contents-only
+  ok   empty
+  FAIL an unlistable prefix reads error with its text, never zero  -- got {'entity': 'e_error', 'bucket': 'bkt', 'prefix': 'gold/tbl_e/', 'kind': 'empty', 'partition_key': None, 'earliest': None, 'latest': None, 'partitions': 0, 'error': "KeyError: 'bkt|gold/tbl_e/'"}
+ARMS: 6 ok, 3 failed
+RESULT: FAIL
+exit=1
+
+== determinism: two runs on the h1 fixtures compared with cmp: byte-identical, 1517 bytes, rc 1 both
