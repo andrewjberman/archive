@@ -591,8 +591,28 @@ def r1_ac1(tmp):
     u1 = by.get("tU1", {})
     arm("a tool with no source set reads UNTRACED, never ROUTED", u1.get("verdict") == "UNTRACED", "got %r" % u1)
     arm("every ROUTED or MISROUTED tool carries its source set with a cite per member", all(t.get("source_set") and all(s.get("cite") for s in t["source_set"]) for t in by.values() if t.get("verdict") != "UNTRACED"), "a source set or cite is missing")
+    r1_serves(tmp)
     cnt = (doc or {}).get("counts", {})
     arm("counts", (cnt.get("tools"), cnt.get("pairs"), cnt.get("routed_pairs"), cnt.get("link"), cnt.get("code"), cnt.get("display"), cnt.get("untraced")) == (7, 8, 7, 1, 1, 1, 1), "got %r" % cnt)
+
+
+def r1_serves(tmp):
+    out = os.path.join(tmp, "rt_s.json")
+    sv = os.path.join(tmp, "serves.json")
+    rc, so, se = run([ROUTING_PY, "--census", fx("r1_census.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", fx("r1_sources.json"), "--out", out, "--serves-out", sv])
+    doc = jload(sv) if os.path.isfile(sv) else {}
+    by = {t.get("tool"): t for t in doc.get("tools", [])}
+
+    def pair(lst):
+        return sorted((x.get("vendor"), x.get("firm")) for x in lst or [])
+
+    arm("--serves-out writes gateway_serves/1 for the six traced tools, and the SERVES line", doc.get("schema") == "gateway_serves/1" and sorted(by) == ["tB1", "tC1", "tD1", "tM1", "tS1", "tS2"] and line(so, "SERVES") == "SERVES tools=6 changed=2", "got %r %r" % (sorted(by), line(so, "SERVES")))
+    s1 = by.get("tS1", {})
+    arm("tS1: the catalog claims Black Diamond, the code cannot reach it: generated Schwab only, removed Black Diamond", (pair(s1.get("serves")), pair(s1.get("removed")), pair(s1.get("added"))) == ([("schwab", "f1")], [("blackdiamond", "f9")], []), "got %r" % s1)
+    c1 = by.get("tC1", {})
+    arm("tC1: the code reads Black Diamond too, so the generated serves ADDS it", (pair(c1.get("serves")), pair(c1.get("added")), pair(c1.get("removed"))) == ([("blackdiamond", "f9"), ("schwab", "f1")], [("blackdiamond", "f9")], []), "got %r" % c1)
+    arm("tM1 (two vendor branches) and tB1 are unchanged, and each pair set is sorted", all(not by[t].get("added") and not by[t].get("removed") for t in ("tM1", "tB1", "tS2", "tD1")) and pair(by.get("tM1", {}).get("serves")) == [("market", "none"), ("schwab", "f1")], "got %r" % by.get("tM1"))
+    arm("counts", (doc.get("counts") or {}).get("tools") == 6 and (doc.get("counts") or {}).get("changed") == 2, "counts=%r" % doc.get("counts"))
 
 
 def r1_ac2(tmp):
