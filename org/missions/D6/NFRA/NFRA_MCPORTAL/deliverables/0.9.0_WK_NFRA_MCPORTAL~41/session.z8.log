@@ -1,0 +1,24 @@
+0.9.0_WK_NFRA_MCPORTAL~41 -- session log -- NFRA_MCPORTAL.TO-MP-z-8 (GWZ round 1), second order of this worker
+date: 2026-10-19 (UTC session)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-41 ; test -d org && test -d .tools -> TREE-OK.
+   Worker face read from the committed task order up to its RECORD FACE marker only (grep -n gave the marker line 83 of 95; printed to that line).
+   Base: workspace 5d28a9fc159 (MP-z-7 proof), nested mcportal cb17848 (MP-z-7 code).
+2. Premises: the order's interface (GatewayIndexPair, optional index_pairs) and the five test names match the AC1 check script's list.
+3. Edits (mcportal worktree only):
+   - src/api/admin.ts: exported interface GatewayIndexPair {index, vendor, firm}; GatewayTool gains index_pairs?: GatewayIndexPair[].
+   - src/pages/gateway/GatewayView.tsx: indexesForSegment(tool, segment) returns tool.indexes when index_pairs is undefined; otherwise the
+     index names whose vendor and firm equal the segment's, each once, in the order sent. SegmentSection maps its own tools through it; ToolRow unchanged.
+   - src/pages/gateway/gateway.test.tsx: type import widened (GatewaySegment, GatewayTool); five new tests appended; three new helpers
+     at file end (pairBreakdown, segmentBlock, indexCell). No existing test or fixture changed. Synthetic index names only.
+   Commit in mcportal: 21ad404 on wk-NFRA_MCPORTAL-41-mcportal (plain git commit, author 0.9.0_WK_NFRA_MCPORTAL~41).
+4. bun test src after the edits -> 79 pass, 0 fail, rc=0, 436 expect() calls.
+5. AC1: bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/gwz/checks/z8.AC1.sh -> named tests present in sources 5 of 5; RESULT: PASS, exit=0.
+6. Mutant control: GatewayView.tsx copied to .scratch; the row map replaced by an identity map (.map((tool) => tool)); bun test src
+   -> 75 pass, 4 fail, rc=1. The four failing tests are the four that depend on the filter (segment table, two pairs, empty index_pairs, audit case).
+   The no-index_pairs test passes under the mutant, as it must. File restored from the copy; cmp equal; git status clean.
+7. Determinism control: bun test src run twice; summary lines (timing stripped) compared with cmp -> identical (79 pass, 0 fail, 436 expect() calls).
+8. tsc --noEmit -p tsconfig.app.json (mcportal/node_modules/.bin/tsc) -> rc=0, no output.
+9. bun run build -> rc=0, built in 753ms.
+10. Not done: no push, no network call, no vendor call, no deploy, no real index name printed, no change to index lists in fixtures (MP-z-7 fixtures untouched), order <status> not flipped.
+11. Artifact commit pins are nested-repo commits; the checker reads them UNRESOLVED-HERE, the same class as surprise row NFRA_MCPORTAL-Z-W41-S1.
