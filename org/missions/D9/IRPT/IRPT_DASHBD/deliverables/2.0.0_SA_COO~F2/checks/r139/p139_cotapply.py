@@ -45,6 +45,7 @@ NEW_SID = "WriteTheAccountTransactionGoldPrefixOnly"
 NEW_RESOURCE = "arn:aws:s3:::%s/%s*" % (BUCKET, TX_PREFIX)
 SCHEMA_HASH = "ac652e2f71b18427b52f321858163768158f850ec173d1e592c7c3abe815bb6a"
 MAX_DAYS = 25
+SEQUENCE_WAIVER = "ANDREW_DIRECT_20261019_181xZ"  # the CTO's sequence condition (after the Inflection pair) superseded by Andrew-direct 2026-10-19 ~18:1xZ
 MAX_NEW_RANGE_DAYS = 24  # a 25-day range event names the Act 4 day too, which is reported already landed
 MAX_NOT_MEASURABLE_SHARE = 0.15  # the CTO's REVISION 2 condition on each settle day
 
@@ -84,12 +85,12 @@ def head_problems(rec):
         pr.append("claim must be measured and applier %s" % APPLIER)
     g = rec["gates"]
     ok = isinstance(g, dict) and g.get("packet_sha256") == PACKET_SHA and g.get("coo_half_signed") is True and g.get("cto_half_signed") is True and g.get("pins_ok") is True \
-        and g.get("monday_49f_read_passed") is True and g.get("inflection_receipt_closed") is True and g.get("b332_closed_superseded") is True \
+        and g.get("monday_49f_read_passed") is True and g.get("sequence_waiver") == SEQUENCE_WAIVER and g.get("b332_closed_superseded") is True \
         and g.get("release_commit_in_head") == "36da4e101f" \
         and g.get("open_rewrite_ledgers_on_root") == 0 and isinstance(g.get("one_change_at_a_time"), dict) and is_int(g["one_change_at_a_time"].get("worktrees_read")) \
         and g["one_change_at_a_time"]["worktrees_read"] > 0 and g["one_change_at_a_time"].get("open_markers_naming_this_surface") == 0
     if not ok:
-        pr.append("gates must record the packet sha256, both halves signed, the pins, Monday's 49 Financial read PASSED, the Inflection receipt, TO-DB-b-332 closed as superseded, the release commit 36da4e101f in HEAD, 0 open rewrite ledgers on the root, and the worktree denominator with 0 open markers")
+        pr.append("gates must record the packet sha256, both halves signed, the pins, Monday's 49 Financial read PASSED, the Andrew-direct sequence waiver, TO-DB-b-332 closed as superseded, the release commit 36da4e101f in HEAD, 0 open rewrite ledgers on the root, and the worktree denominator with 0 open markers")
     if not (isinstance(rec["ledger_entry"], str) and rec["ledger_entry"].strip()):
         pr.append("ledger_entry must name the ledger")
     bf = rec["before"]
@@ -245,7 +246,7 @@ def selftest():
 
     rec = {"claim": "measured", "applier": APPLIER, "ledger_entry": "x", "ledger_closed": False, "reads": {},
            "before": {"first_fire_owed_days": ["2026-10-22"], "first_fire_settle_days": ["2026-10-01"], "rollback_targets": {"2026-10-01": {"data.parquet": "v1", "manifest.json": "v2"}}},
-           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True, "inflection_receipt_closed": True,
+           "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True, "sequence_waiver": SEQUENCE_WAIVER,
                      "b332_closed_superseded": True, "release_commit_in_head": "36da4e101f", "open_rewrite_ledgers_on_root": 0, "one_change_at_a_time": {"worktrees_read": 90, "open_markers_naming_this_surface": 0}},
            "build": {"zip_sha256_b64": BUILD_B64, "second_run_equal": True, "import_smoke_rc": 0, "atc_import_error": None, "landed_version_id": "v1", "built_equals_landed": True},
            "plan": {"add": 0, "change": 2, "destroy": 0, "change_addresses": ["a", "b"], "policy_added_sids": [NEW_SID], "function_change_attributes_code_only": True, "naming_gate_refuse": 0,
