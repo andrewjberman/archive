@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-169",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-169.opal-model-composition-read-trace.md",
+    "group": "OTHER",
+    "vintage_commit": "64dd702bb6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R58_G.md",
+    "vintage_commit": "64dd702bb6",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-169.opal-model-composition-read-trace.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~304",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~304/MODEL_COMPOSITION_TRACE.md",
+      "kind": "doc",
+      "commit_or_etag": "ff04557258",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the six-answer record Q1-Q6 (read-only trace, 37 lines inserted); LOCAL commit on wk-IRPT_ANLREQ-304; no product file touched; nothing deployed",
+      "artifact_covered_by": ["AR169-g-AC1", "AR169-g-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9c9b92cdb6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows IRPT_ANLREQ-D2-W304-S1 to S4 appended at the end (104 lines); the row gate graded 4 new rows OK at commit; LOCAL commit on wk-IRPT_ANLREQ-304",
+      "artifact_covered_by": ["AR169-g-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR169-g-AC1",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py build",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py build",
+      "output_evidence": "AR-G169-OK build: all arms | rc=0 under timeout 120 at HEAD 9c9b92cdb6 (record commit ff04557258)",
+      "denominator": "6 of 6 answer labels Q1..Q6 present exactly once in MODEL_COMPOSITION_TRACE.md, each with a claim word and at least 60 characters; 0 failed",
+      "expect": "^AR-G169-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR169-g-AC2",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py guard",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py guard",
+      "output_evidence": "AR-G169-OK guard: all arms | rc=0 under timeout 120 at HEAD 9c9b92cdb6 (the planted uncited control line was refused by the same rule before the record was read)",
+      "denominator": "6 of 6 answer lines cite a path:line or say NOT READ; the planted control line (no citation, no NOT READ) refused; 0 failed",
+      "expect": "^AR-G169-OK",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR169-g-AC3",
+      "criterion_verbatim": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py regress",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py regress",
+      "output_evidence": "AR-G169-REGRESS-OK  (empty failure list) | rc=0 under timeout 120 at HEAD 9c9b92cdb6",
+      "denominator": "2 files changed against merge-base 1b03ef0aa2 with box/dell2 (the record and the channel file), both inside the write set; 0 stray files",
+      "expect": "^AR-G169-REGRESS-OK",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the guard's planted control line 'Q9 ... MEASURED ... (no file named)' carries no path:line and no NOT READ; the rule must refuse it",
+      "expected": "refused by guard_rule",
+      "observed": "refused (guard prints AR-G169-OK)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A -- a text read of the record and a git diff; no clock read in the checks",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live S3 listings, bucket policies and the live IAM state",
+      "reason": "The order is a code read; no AWS call was made. Recorded as NOT READ in the record."
+    },
+    {
+      "item": "The start trigger of mdpf-daily-dispatch.sh",
+      "reason": "Not read. Q4 states the Stage 0 position in the dispatch and says the start trigger was NOT READ."
+    },
+    {
+      "item": "Base-state FAIL of AC1 re-measured by this worker",
+      "reason": "The order records base FAIL as the issuer's dry-run result. This worker measured the criteria at HEAD only."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W304-S1: the order's Q6 premise (vendor_id UST, ST, INT, LT, ULT) differs from templates.json, where four of five candidate.vendor_id values are YCharts P: ids; the record states the corrected premise",
+    "IRPT_ANLREQ-D2-W304-S2: the order's irpt-resident process name is absent from Terraform; the resident runs as irpt-ycharts-runner-role on one host; the record answers Q5 against that role",
+    "IRPT_ANLREQ-D2-W304-S3: the silver model_composition address is typed as literals in the WS-C feeder and has no builder registry row, against the CLAUDE.md section 4 rule; the record marks it not builder output",
+    "IRPT_ANLREQ-D2-W304-S4: the investigation_item schema path named by the worker face is absent from the worktree; the rows were written in the shape of the channel's existing rows"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_g169_checks.py build | guard | regress",
+      "result": "AR-G169-OK build: all arms; AR-G169-OK guard: all arms; AR-G169-REGRESS-OK (empty failure list)"
+    }
+  ]
+}
