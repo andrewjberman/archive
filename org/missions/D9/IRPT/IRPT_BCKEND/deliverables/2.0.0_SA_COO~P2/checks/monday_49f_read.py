@@ -62,8 +62,11 @@ if n:
     print("NEWEST daily_key_date=%s last_modified=%s size=%s" % (n["Key"].split("date=")[-1].split("/")[0], n["LastModified"], n["Size"]))
 else:
     print("NEWEST none")
-# the manifest table is large: read only the fire day's own partition(s), not the table
-mk = json.loads(aws("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", MANIFEST + "date=" + day, "--output", "json", "--no-paginate") or "{}").get("Contents") or []
-print("MANIF  fire_day_manifest_keys=%d newest_last_modified=%s" % (len(mk), max(o["LastModified"] for o in mk) if mk else "none"))
+# the manifest table is large: read only ONE partition, not the table. The partition is the run's AS-OF date (the newest
+# daily key's date: on a Monday the trading-day frontier is Friday), NOT the fire day (read 2026-10-19: the fire day's own
+# partition does not exist and reads 0, which is the wrong denominator).
+asof = n["Key"].split("date=")[-1].split("/")[0] if n else day
+mk = json.loads(aws("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", MANIFEST + "date=" + asof, "--output", "json", "--no-paginate") or "{}").get("Contents") or []
+print("MANIF  asof=%s manifest_keys=%d newest_last_modified=%s" % (asof, len(mk), max(o["LastModified"] for o in mk) if mk else "none"))
 ok = sha == CAND and inv is not None and inv >= 1 and err == 0 and n is not None and str(n["LastModified"]).startswith(day)
 print("VERDICT %s" % ("PASS_CANDIDATE (issuer still reads the manifest declared flag)" if ok else "NOT_YET_OR_DIFFERENT (read it)"))
