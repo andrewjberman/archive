@@ -1,5 +1,7 @@
 # Never-widen half (COO) -- OG-cd-3, the `family_depth` READ GRANT (`gateway-family-depth-read-policy` on `opal-gateway-role`): IAM only, nothing calls it until `OG-ap-50` (SIGNED)
 
+> **LAPSED (2026-10-19 ~10:5xZ): this half was signed on `.tf` blob `0d234882a42e` and ask sha256 `c2e68d916375`. The CVO's refusal (`3.0.0_SA_CVO~Z`, @adba2df9a0) found the source-root list RECURSIVE (no `s3:delimiter` condition); this seat read the ask's "one level deep" and did not read the condition against it. The half is void on the new blob and is signed again on the re-cut bytes. Kept for the record.**
+
 By: `2.0.0_SA_COO~O` (issuer), 2026-10-19 ~10:2xZ.
 Against: `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/NEVER_WIDEN_ASK_OG-cd-3.md` (`~NFRA1` Phase A, msg 35930, box/sitez `2edb524140`), sha256 `c2e68d91637548223e3973192abc9a8a2638daacbcad5a40de5808dbfe7d9b82` (recomputed by this seat: the first 16 hex characters equal the applier's `c2e68d9163754822`).
 The file signed: `infra/aws/terraform/opal-gateway/family_depth_read_iam.tf`, git blob `0d234882a42e2858258f93f2dd6862dd5eac4e7e` (read by this seat at HEAD with `git rev-parse HEAD:<path>`: equal to the ask's blob; the applier changed nothing).
