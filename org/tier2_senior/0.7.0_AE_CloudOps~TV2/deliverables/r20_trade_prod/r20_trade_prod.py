@@ -40,7 +40,7 @@ FN = "opal-ticket-api"
 PROTECTED = {"TCK-20261017-da2a1987", "TCK-20261017-5af976ff", "TCK-20261019-c50b4967"}
 PORTAL = "C:/dev/ajb_workspace/portal"
 START_HEAD = os.environ["R20T_HEAD"]
-LIFE = 480  # 8 minutes; the pair allows at most 20; the journey takes about 2
+LIFE = 300  # 5 minutes; the pair allows at most 20; the journey takes about 1
 KEY_SECRET = "opal/auth/jwt-private-key"
 FILENAME = "tckt-r20-trade-synthetic.csv"
 CONTENT_TYPE = "text/csv"
@@ -69,6 +69,7 @@ def iso(t=None):
 
 
 def say(msg):
+    msg = re.sub(r"(https://[^\s?]+)\?\S+", r"\g<1>?<redacted>", str(msg))
     line = "%s %s" % (iso(), msg)
     print(line, flush=True)
     trace["events"].append(line)
@@ -210,13 +211,7 @@ class Session:
                         return route.continue_()
                     if req.method == "GET" and self.open_wanted and self.s3_get_seen == 0:
                         self.s3_get_seen += 1
-                        resp = route.fetch()
-                        body = resp.body()
-                        state["readback_sha"] = hashlib.sha256(body).hexdigest()
-                        state["readback_len"] = len(body)
-                        state["readback_status"] = resp.status
-                        state["readback_path"] = u.path.lstrip("/")
-                        return route.fulfill(response=resp, body=body)
+                        return route.continue_()
                 if rtype in ("font", "stylesheet", "image", "media"):
                     return route.continue_()
                 trace["blocked_requests"].append("%s %s %s" % (req.method, u.netloc.split(".")[0], rtype))
@@ -266,9 +261,19 @@ class Session:
                     say("upload door answered %s: object key %s" % (r.status, state["key"]))
                 if u.path == "/api/scoped/tickets" and r.status in (200, 201):
                     state["ticket"] = ((body or {}).get("ticket") or {}).get("ticket_id")
+            elif u.netloc == HOSTPORT and m == "GET" and u.path.endswith("/attachment") and fs_open_wanted():
+                trace["statuses"]["GET open route"] = r.status
+                if r.status == 200:
+                    try:
+                        state["open_url"] = (r.json() or {}).get("url")
+                    except Exception:  # noqa: BLE001
+                        state["open_url"] = None
             elif s3_ok(u) and m == "PUT":
                 trace["statuses"]["PUT s3 trade-form object"] = r.status
                 state["put_status"] = r.status
+
+        def fs_open_wanted():
+            return self.open_wanted
 
         self.page.on("response", on_response)
 
@@ -415,12 +420,25 @@ def journey(browser, token, ctx_out):
     fs.allowed.add(("GET", "ATTACH"))
     openbtn.click()
     end = time.time() + 40
-    while time.time() < end and state["readback_sha"] is None:
+    while time.time() < end and not state.get("open_url"):
         time.sleep(0.5)
-    if state["readback_sha"] is None:
+    if not state.get("open_url"):
         refused = row.locator('[data-slot="trade-open-refused"]')
-        raise Stop("the open route returned no bytes; refused text: %s" % (refused.inner_text() if refused.count() else "none"))
-    fs.open_wanted = False
+        raise Stop("the open route returned no url (status %s); refused text: %s"
+                   % (trace["statuses"].get("GET open route"), refused.inner_text() if refused.count() else "none"))
+    import urllib.request
+    url = state.pop("open_url")
+    up = urlparse(url)
+    if not s3_ok(up):
+        raise Stop("the open route's url is not the firm bucket's trade-form object")
+    try:
+        with urllib.request.urlopen(url, timeout=30) as resp:
+            body, status = resp.read(), resp.status
+    except Exception as e:  # noqa: BLE001 -- the url is never printed
+        raise Stop("the presigned read failed: %s" % type(e).__name__)
+    del url
+    state["readback_sha"] = hashlib.sha256(body).hexdigest()
+    state["readback_len"], state["readback_status"], state["readback_path"] = len(body), status, up.path.lstrip("/")
     sha_up = hashlib.sha256(CONTENT).hexdigest()
     say("SHA-256 uploaded : %s (%d bytes)" % (sha_up, len(CONTENT)))
     say("SHA-256 readback : %s (%d bytes, http %s, object path %s)" % (state["readback_sha"], state["readback_len"], state["readback_status"], state["readback_path"]))
@@ -509,7 +527,7 @@ def main():
         stop = "STOP: %s" % e
         say(stop)
     except Exception as e:  # noqa: BLE001
-        stop = "STOP (unexpected %s): %s" % (type(e).__name__, str(e)[:300])
+        stop = "STOP (unexpected %s): %s" % (type(e).__name__, re.sub(r"\?\S+", "?<redacted>", str(e))[:300])
         say(stop)
     finally:
         try:

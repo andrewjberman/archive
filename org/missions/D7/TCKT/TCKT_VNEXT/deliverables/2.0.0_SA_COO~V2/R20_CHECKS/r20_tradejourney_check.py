@@ -1,7 +1,7 @@
 """TCKT_VNEXT round 20 -- the TRADE REQUEST JOURNEY ON PROD (cell R20-rv-6, the CTO's msg 10936): the mechanical legs.
 
   python r20_tradejourney_check.py              the live check: the result document, the saved ticket record, the shots, the ticket (ABSENT),
-                                                the filer row (ABSENT), the uploaded object (ABSENT) and the two protected tickets (present)
+                                                the filer row (ABSENT), the filer row (ABSENT) and the residue object(s) (PRESENT, the CTO ruling msg 11005) and the two protected tickets (present)
   python r20_tradejourney_check.py --self-test  the document scan on a good and several bad documents (no AWS)
 
 Prints RUN-OK (tradejourney) <detail> or RUN-BAD <reason>; exit 0/1. Read-only AWS reads (us-east-1). The CVO grades the shots (a judgment); this
@@ -22,7 +22,7 @@ ORIGIN = "https://opalinvest.dev"
 PROTECTED = {"TCK-20261017-da2a1987", "TCK-20261017-5af976ff", "TCK-20261019-c50b4967"}
 KEYS = {"browser_origin", "promote_proof", "filer", "firm", "ticket", "filename", "content_type", "size", "sha256_uploaded", "sha256_readback",
         "s3_bucket", "s3_key", "type_options", "shots", "fire_windows_answer", "token_exp", "row_deleted_at", "ticket_deleted_at",
-        "object_deleted_at", "ticket_absent_after", "object_absent_after", "row_absent_after", "no_engine_call", "token_printed"}
+        "residue", "ticket_absent_after", "object_left_present", "row_absent_after", "no_engine_call", "token_printed"}
 SHOT_ROLES = ["prod_trade_form_filled", "prod_trade_filed"]
 TYPES = {"application/pdf": ".pdf", "text/csv": ".csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx"}
 PNG = b"\x89PNG\r\n\x1a\n"
@@ -38,10 +38,10 @@ def doc_problem(doc):
         return "the browser origin is %r, not %s" % (doc["browser_origin"], ORIGIN)
     if doc["token_printed"] is not False or doc["no_engine_call"] is not True:
         return "token_printed or no_engine_call differs from the order"
-    for k in ("ticket_absent_after", "object_absent_after", "row_absent_after"):
+    for k in ("ticket_absent_after", "row_absent_after", "object_left_present"):
         if doc[k] is not True:
             return "%s must read True after the removal" % k
-    if not all(str(doc[k]) > str(doc["token_exp"]) for k in ("row_deleted_at", "ticket_deleted_at", "object_deleted_at")):
+    if not all(str(doc[k]) > str(doc["token_exp"]) for k in ("row_deleted_at", "ticket_deleted_at")):
         return "a removal happened before the token exp"
     if doc["ticket"] in PROTECTED:
         return "the run's ticket is one of the protected tickets"
@@ -59,6 +59,14 @@ def doc_problem(doc):
         return "the filename extension does not agree with the content type"
     if isinstance(doc["size"], bool) or not isinstance(doc["size"], int) or not (1 <= doc["size"] <= 1048576):
         return "the synthetic file must be 1 byte to 1 MiB"
+    pfx = "portal/%s/state/ticket_attachments/trade-form/" % doc["firm"]
+    res = doc["residue"]
+    if not isinstance(res, list) or not res or any(not isinstance(r, dict) or set(r) != {"key", "version_id"} for r in res):
+        return "residue must be a non-empty list of {key, version_id}: the objects left PRESENT (the CTO's ruling, msg 11005)"
+    if any(not str(r["key"]).startswith(pfx) or str(r["key"]).endswith("/") or not str(r["version_id"]).strip() for r in res):
+        return "a residue entry is outside the trade-form prefix or has no version id"
+    if doc["s3_key"] not in [r["key"] for r in res]:
+        return "the run's own object is not named in the residue"
     if not SHA.match(str(doc["sha256_uploaded"])) or doc["sha256_uploaded"] != doc["sha256_readback"]:
         return "the bytes read back are not the bytes uploaded"
     low = [str(o).lower().replace("_", " ") for o in (doc["type_options"] if isinstance(doc["type_options"], list) else [])]
@@ -93,9 +101,9 @@ def item(table, key):
     return None if out is None else out.get("Item")
 
 
-def object_present(bucket, key):
-    """True/False from a head-object: only a 404 reads ABSENT; any other failure (403, network) raises, never reads absent."""
-    out = subprocess.run([AWS, "s3api", "head-object", "--bucket", bucket, "--key", key, "--region", "us-east-1"], capture_output=True, text=True, timeout=120)
+def object_present(bucket, key, version_id):
+    """True/False from a head-object at the recorded version: only a 404 reads ABSENT; any other failure (403, network) raises, never reads absent."""
+    out = subprocess.run([AWS, "s3api", "head-object", "--bucket", bucket, "--key", key, "--version-id", version_id, "--region", "us-east-1"], capture_output=True, text=True, timeout=120)
     if out.returncode == 0:
         return True
     if "404" in out.stderr or "Not Found" in out.stderr:
@@ -141,9 +149,10 @@ def live():
         if item("opal-users-v2", {"PK": {"S": "USER#" + doc["filer"]}, "SK": {"S": "PROFILE"}}) is not None:
             print("RUN-BAD the filer row is still PRESENT")
             return 1
-        if object_present(doc["s3_bucket"], doc["s3_key"]):
-            print("RUN-BAD the uploaded object is still PRESENT")
-            return 1
+        for r in doc["residue"]:
+            if not object_present(doc["s3_bucket"], r["key"], r["version_id"]):
+                print("RUN-BAD a residue object is not PRESENT at its recorded version")
+                return 1
         for keep in sorted(PROTECTED):
             if item("opal-tickets", {"ticket_id": {"S": keep}}) is None and keep != "TCK-20261019-c50b4967":
                 print("RUN-BAD a protected ticket %s is no longer present" % keep)
@@ -151,7 +160,7 @@ def live():
     except (RuntimeError, ValueError, KeyError, OSError, subprocess.SubprocessError) as e:
         print("RUN-BAD live read failed: %s" % e)
         return 1
-    print("RUN-OK (tradejourney) Trade Request filed with one attachment on %s and the bytes read back equal; the synthetic ticket, the filer row and the object ABSENT; the protected tickets present" % ORIGIN)
+    print("RUN-OK (tradejourney) Trade Request filed with one attachment on %s and the bytes read back equal; the synthetic ticket and the filer row ABSENT; the residue object(s) PRESENT at the recorded version; the protected tickets present" % ORIGIN)
     return 0
 
 
@@ -165,8 +174,8 @@ def good_doc():
             "type_options": ["Trade Request", "Service Request", "Meeting Request", "Other"],
             "shots": {"prod_trade_form_filled": shot("prod_trade_form_filled"), "prod_trade_filed": shot("prod_trade_filed")},
             "fire_windows_answer": "CTO, IB2 and Y2: none open or due", "token_exp": "2026-10-19T20:30:00Z", "row_deleted_at": "2026-10-19T20:40:00Z",
-            "ticket_deleted_at": "2026-10-19T20:41:00Z", "object_deleted_at": "2026-10-19T20:42:00Z", "ticket_absent_after": True,
-            "object_absent_after": True, "row_absent_after": True, "no_engine_call": True, "token_printed": False}
+            "ticket_deleted_at": "2026-10-19T20:41:00Z", "residue": [{"key": "portal/cottonwood/state/ticket_attachments/trade-form/x/synthetic.csv", "version_id": "v1"}],
+            "ticket_absent_after": True, "object_left_present": True, "row_absent_after": True, "no_engine_call": True, "token_printed": False}
 
 
 def self_test():
@@ -178,9 +187,12 @@ def self_test():
         "token printed": lambda d: d.update(token_printed=True),
         "engine called": lambda d: d.update(no_engine_call=False),
         "ticket still present": lambda d: d.update(ticket_absent_after=False),
-        "object still present": lambda d: d.update(object_absent_after=False),
+        "object not left present": lambda d: d.update(object_left_present=False),
+        "no residue": lambda d: d.update(residue=[]),
+        "residue lacks the run's key": lambda d: d.update(residue=[{"key": "portal/cottonwood/state/ticket_attachments/trade-form/y/o.csv", "version_id": "v"}]),
+        "residue outside the prefix": lambda d: d["residue"].append({"key": "portal/cottonwood/state/other/o.csv", "version_id": "v"}),
+        "residue without a version": lambda d: d["residue"][0].update(version_id=" "),
         "row still present": lambda d: d.update(row_absent_after=False),
-        "object deleted before exp": lambda d: d.update(object_deleted_at="2026-10-19T20:00:00Z"),
         "ticket deleted before exp": lambda d: d.update(ticket_deleted_at="2026-10-19T20:00:00Z"),
         "row deleted before exp": lambda d: d.update(row_deleted_at="2026-10-19T20:00:00Z"),
         "andrew's ticket": lambda d: d.update(ticket="TCK-20261017-5af976ff"),
