@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-7",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-7.apply-and-deploy.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-7.apply-and-deploy.md",
+    "group": "OTHER",
+    "vintage_commit": "3c4d2b16d7"
+  },
+  "assignee": "0.7.0_AE_CloudOps~NFRA1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
+      "kind": "terraform",
+      "commit_or_etag": "de3f1f276e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply rc=0: first apply 18 added 0 changed 0 destroyed; repair apply 0 added 1 changed (aws_ssm_document.run) 0 destroyed; post-apply plan No changes (R1-FU7A-OK). Root applied: 18 resources first, then aws_ssm_document.run."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/bootstrap.sh",
+      "kind": "script",
+      "commit_or_etag": "a5b60e6b4e",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Delivered to /opt/fidelity-uploader on i-028e830f7226cc685 with 21 other files (bundle sha256 124540a2ff4852745922ed2c50a64c0e18e6efa147c487d562fcf2c2ef0cf93b, HASH-MATCH on the box); SSM md5sum of the 22 running files all equal the repo manifest; bootstrap.sh rc=0; venv python launches Chromium (R1-FU7B-OK).",
+      "artifact_covered_by": [
+        "FU7-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261019T2113Z_nfra-fidupl-apply-20261019_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "3ca4289dfe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ledger entry CLOSED, 3 of 3 legs proven, sentinel removed (R1-FU7L-OK)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU7-AC1",
+      "criterion_verbatim": "the applied root plans to no changes.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu7a",
+      "output_evidence": "R1-FU7A-OK No changes.",
+      "denominator": "1 of 1 plan runs (rc 0, -detailed-exitcode)",
+      "status": "PASS",
+      "expect": "R1-FU7A-OK No changes\\."
+    },
+    {
+      "criterion_id": "FU7-AC2",
+      "criterion_verbatim": "the change-management entry is closed and no sentinel remains.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu7l",
+      "output_evidence": "R1-FU7L-OK completion entries=1, open sentinels=0",
+      "denominator": "1 of 1 fidupl completion entries; 0 fidupl sentinels in .open_deploys",
+      "status": "PASS",
+      "expect": "R1-FU7L-OK completion entries=\\d+, open sentinels=0"
+    },
+    {
+      "criterion_id": "FU7-AC3",
+      "criterion_verbatim": "on the real box the venv python imports boto3 and playwright and launches headless Chromium.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu7b",
+      "output_evidence": "R1-FU7B-OK chromium=launched",
+      "denominator": "1 of 1 SSM runs on i-028e830f7226cc685",
+      "status": "PASS",
+      "expect": "R1-FU7B-OK chromium=launched"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the checks read a live plan, a ledger directory and one SSM run; no spec name has a defined mutation here.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "FU7-AC1 plan run twice against the live backend (post-apply and at the check)",
+      "observed": "both No changes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any Wealthscape sign-in, enabling an EventBridge rule, stopping the box",
+      "reason": "The order forbids a sign-in (FU-x-1) and a hand stop; the rules were created DISABLED."
+    },
+    {
+      "item": "an S3 code home",
+      "reason": "Not used: the builder homes the code tier of scope alongside in the unprovisioned opal-data-alongside; delivery was by SSM."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-S2: bootstrap.sh failed on Amazon Linux 2023 (apt-get); repaired under FU-s-5, re-run rc=0.",
+    "NFRA_FIDUPL-D1-S3: the automation ran system python3; repaired under FU-s-6, re-applied.",
+    "NFRA_FIDUPL-D1-S4: land.py finds the naming mirror only by walking up; bridged by three symlinks on the box, accepted by the issuer."
+  ],
+  "session_log": "org/critical_paths/change_management/20261019T2113Z_nfra-fidupl-apply-20261019_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-apply.sh",
+      "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+      "result": "rc=0 twice: 18 added; then 1 changed."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open; close-leg L1 L3 L2; close",
+      "result": "OK: CLOSED, all 3 legs proven, sentinel removed."
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu7a | fu7l | fu7b",
+      "result": "R1-FU7A-OK No changes.; R1-FU7L-OK completion entries=1, open sentinels=0; R1-FU7B-OK chromium=launched"
+    }
+  ]
+}
