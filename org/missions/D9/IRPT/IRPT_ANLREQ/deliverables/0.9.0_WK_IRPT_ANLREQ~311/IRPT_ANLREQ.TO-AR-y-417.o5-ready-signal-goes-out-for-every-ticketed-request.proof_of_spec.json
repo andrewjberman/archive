@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-417.o5-ready-signal-goes-out-for-every-ticketed-request",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-417.o5-ready-signal-goes-out-for-every-ticketed-request.md",
+    "group": "OTHER",
+    "vintage_commit": "992923c429f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "992923c429f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-417.o5-ready-signal-goes-out-for-every-ticketed-request.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~311",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "a732c5ef25a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "send_ready_if_ticketed only: the commentary_requested condition and its COMMENTARY_NOT_REQUESTED journal line are removed; NO_TICKET is still checked first. Committed LOCAL on wk-IRPT_ANLREQ-311 as a732c5ef25a. Nothing deployed; the resident release (r34m) is a later act."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ready_signal_on_ready.py",
+      "kind": "test",
+      "commit_or_etag": "a732c5ef25a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly five tests (ticketed True, False, member absent; no ticket skipped with NO_TICKET; COMMENTARY_NOT_REQUESTED never printed). Committed LOCAL as a732c5ef25a. Offline, fakes only.",
+      "artifact_covered_by": ["AR417-y-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ready_signal_commentary_gate.py",
+      "kind": "test",
+      "commit_or_etag": "a732c5ef25a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The old gate re-pinned to the new rule under its old test names (a, b, c, d, e x2). Committed LOCAL as a732c5ef25a.",
+      "artifact_covered_by": ["AR417-y-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
+      "kind": "script",
+      "commit_or_etag": "the deliverables commit that adds this file together with this instance (the flip commit that follows it is separate)",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The branch-bound checker for AR417-y-AC3 (stdlib only; git merge-base HEAD box/dell2; changed paths outside org/ must be exactly the three files; only send_ready_if_ticketed may differ in resident_worker.py by ast.dump). Passes commit-gate.sh.",
+      "artifact_covered_by": ["AR417-y-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR417-y-AC1",
+      "criterion_verbatim": "`AR417-y-AC1`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider -- expect 5 passed.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "worker run at HEAD ab9b503a788 (code commit a732c5ef25a), rc=0, printed: 5 passed in 4.54s. Second run: rc=0, 5 passed in 4.87s. Literal invocation WITHOUT the IRPT_FIRM_REGISTRY pointer: rc=1, 5 errors in 2.45s (ids.IdRefused: the firm registry was not found); see surprise IRPT_ANLREQ-D2-W311-S1.",
+      "denominator": "5 of 5 new tests passed",
+      "expect": "5 passed",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line is '5 passed'. Prerequisite: the worktree is a sparse checkout without data/firm_registry.json, so the pointer names the base checkout copy whose git hash-object equals the HEAD blob cdb9f785. The literal run without the pointer errors (recorded as a surprise row)."
+    },
+    {
+      "criterion_id": "AR417-y-AC2",
+      "criterion_verbatim": "`AR417-y-AC2`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider -- expect ^[0-9]+ passed.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "worker run at HEAD ab9b503a788, rc=0, printed: 32 passed, 21 subtests passed in 15.83s. Baseline before the change (same pointer, commit 992923c429f): 32 passed, 21 subtests passed in 16.72s. Literal invocation without the pointer: rc=1, 7 passed, 30 errors (fixture setup, registry not found).",
+      "denominator": "32 of 32 tests passed (21 subtests passed); baseline 32 of 32",
+      "expect": "^[0-9]+ passed",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches ^[0-9]+ passed with zero errors and zero failures. The regex alone would also match a run with setup errors ('7 passed, 30 errors'), which is why the pointer-run line is recorded in full."
+    },
+    {
+      "criterion_id": "AR417-y-AC3",
+      "criterion_verbatim": "`AR417-y-AC3`: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py -- expect O5-BOUND-OK files=3.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
+      "output_evidence": "run at HEAD ab9b503a788 (branch point 992923c429f6f514055c5f4e97a04c45837e44c3): printed O5-BOUND-OK files=3, rc=0. Before the code commit (HEAD equal to the branch point) the same script printed O5-BOUND-BAD changed-outside-org=[] expected=[...3 paths...], rc=1.",
+      "denominator": "3 of 3 expected changed files outside org/; 1 differing top-level definition in resident_worker.py (send_ready_if_ticketed) and 0 other top-level differences",
+      "expect": "O5-BOUND-OK files=3",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line equals the expected line exactly."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR417-y-AC1/AC2 control: resident_worker.py copied to .scratch/mutant/infra/aws/lambda/investor-reporting (mirrored repo layout, docs/contracts copied alongside), with the commentary_requested is-not-True skip and its COMMENTARY_NOT_REQUESTED line restored before send_ready in send_ready_if_ticketed; the new test file run against that copy. Not committed. The same run against the unchanged base code (992923c429f) gives the same three failures.",
+      "expected": "tests 2 (ticketed, False) and 3 (ticketed, member absent) FAIL",
+      "observed": "3 failed, 2 passed: test_2 and test_3 FAIL with sent [] against one analysis_ready; test_5 FAIL because the COMMENTARY_NOT_REQUESTED line is printed; tests 1 and 4 pass.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of the AR417-y-AC1 invocation at HEAD ab9b503a788 with the same pointer; the summary lines were compared.",
+      "observed": "run A rc=0 '5 passed in 4.54s'; run B rc=0 '5 passed in 4.87s'. Only the timing differs; the pass set is identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "data/firm_registry.json (the worktree is a sparse checkout without data/)",
+      "reason": "not copied, not extracted and the sparse set not changed. The test run reads the base checkout copy through IRPT_FIRM_REGISTRY, which is byte-identical to the HEAD blob cdb9f785e043cd69e451c545dc384e598431b263 (git hash-object). Recorded as IRPT_ANLREQ-D2-W311-S1."
+    },
+    {
+      "item": "ycharts/research/opal_packager.py and the packager payload",
+      "reason": "out of the cell: the order forbids touching the packager. The commentary-failure withholding of the other three attachments is raised separately (the brief's O5 second sentence)."
+    },
+    {
+      "item": "upload, deploy, AWS call, network, push",
+      "reason": "none performed: the order is a local change and test run only; the resident release r34m is a later act."
+    },
+    {
+      "item": "the scratch copy .scratch/mutant (git-ignored)",
+      "reason": "the mutant control's copy; not committed; left in place for the record."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W311-S1: the sparse worktree does not carry data/firm_registry.json, so the literal pytest invocations error at fixture setup (BLOCKING, INERT); the criteria were graded with the IRPT_FIRM_REGISTRY pointer to the byte-identical base copy."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest <the three baseline files and the new file> -q --color=no -p no:cacheprovider",
+      "result": "baseline 32 passed (commit 992923c429f); unchanged code with the new file: 3 failed, 2 passed (tests 2, 3, 5); after the change: 5 passed (new file) and 32 passed (three baseline files)"
+    },
+    {
+      "tool": "check_o5_bound.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
+      "result": "before the code commit: O5-BOUND-BAD changed-outside-org=[] rc=1; after: O5-BOUND-OK files=3 rc=0"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <resident_worker.py, both test files, check_o5_bound.py>",
+      "result": "All checks passed / pre-commit gate clean for 1 of 1 file(s) for each file; no non-ASCII in the three code files"
+    }
+  ]
+}
