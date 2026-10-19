@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-r-1.routing-table-emitter",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4b8dcf3b86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+    "vintage_commit": "0def6f4233a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-r-1.routing-table-emitter.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~70",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/routing_table.py",
+      "kind": "script",
+      "commit_or_etag": "60058aca164",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local script, no deploy in scope (no AWS call, no grant, no push). Committed at 60058aca164 on branch wk-NFRA_MCPINDEX-70.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_routing_table.py",
+      "kind": "test",
+      "commit_or_etag": "60058aca164",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local test file, run by path with pytest. Committed at 60058aca164 on branch wk-NFRA_MCPINDEX-70.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; rc 1 with the table written; `ROUTING tools=7 pairs=8 routed_pairs=7 misrouted_tools=3 link=1 code=1 display=1 untraced=1`; clean tools ROUTED; the Black Diamond row linked on a Schwab tool is MISROUTED (link) and its Schwab row ROUTED; a Schwab tool whose code reads Black Diamond is MISROUTED (code) with a ROUTED link; a tool listed under a vendor it does not read is MISROUTED (display); a tool with no source set is UNTRACED; every traced tool carries its source set with a cite per member; the counts -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/r1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: fixture census 7 tools (4 channels), catalog 3 rows, source sets for 6 tools (tU1 has none); 8 (tool, row) pairs, one of them a Black Diamond row linked on a Schwab tool\n  ok   exit 1 (defects remain) and the table is written\n  ok   stdout line\n  ok   header and one entry per census tool\n  ok   clean tools read ROUTED\n  ok   Andrew's case: the Black Diamond row linked on a Schwab tool is MISROUTED (link), its Schwab row ROUTED, the tool MISROUTED (link)\n  ok   the intent check: a Schwab tool whose code reads a Black Diamond source is MISROUTED (code) although its link is right\n  ok   the display check: a tool listed under a vendor segment its code does not read is MISROUTED (display)\n  ok   a tool with no source set reads UNTRACED, never ROUTED\n  ok   every ROUTED or MISROUTED tool carries its source set with a cite per member\n  ok   --serves-out writes gateway_serves/1 for the six traced tools, and the SERVES line\n  ok   tS1: the catalog claims Black Diamond, the code cannot reach it: generated Schwab only, removed Black Diamond\n  ok   tC1: the code reads Black Diamond too, so the generated serves ADDS it\n  ok   tM1 (two vendor branches) and tB1 are unchanged, and each pair set is sorted\n  ok   counts\n  ok   counts\nARMS: 15 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "fixture census 7 tools (4 channels), catalog 3 rows, source sets for 6 tools (tU1 has none); 8 (tool, row) pairs; 15 of 15 arms ok (ARMS: 15 ok, 0 failed)",
+      "status": "PASS",
+      "expect": "(?m)^RESULT: PASS$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; the three planted negatives on tS1 (link, code, display) each print their PLANT line and exit 0 with the planted tool MISROUTED of that class; two runs give the same bytes; a plant on a tool the census does not serve, a source with no cite and an absent census each exit 2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/r1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: three planted negatives on the clean tool tS1; each must be detected with its class; determinism; refusals\n  ok   planted link: detected as MISROUTED (link), rc 0 and the PLANT line\n  ok   planted code: detected as MISROUTED (code), rc 0 and the PLANT line\n  ok   planted display: detected as MISROUTED (display), rc 0 and the PLANT line\n  ok   two runs give the same bytes\n  ok   a plant on a tool the census does not serve is refused (rc 2)\n  ok   a source with no cite is refused (rc 2)\n  ok   an absent census is refused (rc 2)\nARMS: 7 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "three planted negatives on tS1 (link, code, display), determinism and refusals; 7 of 7 arms ok (ARMS: 7 ok, 0 failed)",
+      "status": "PASS",
+      "expect": "(?m)^RESULT: PASS$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 8 passed) for `test_routing_table.py` -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/r1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=18 (minimum 8) file=workflows\\gateway_battery\\tests\\test_routing_table.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "pytest on test_routing_table.py: rc=0, passed=18 (minimum 8)",
+      "status": "PASS",
+      "expect": "(?m)^RESULT: PASS$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three planted negatives on tS1 applied in memory (link, code, display); the table must read the planted tool MISROUTED of that class, rc 0 and the PLANT line (AC2).",
+      "expected": "PLANT kind=link|code|display tool=tS1 verdict=MISROUTED class=<same kind>, rc 0 for each",
+      "observed": "ok   planted link: detected as MISROUTED (link), rc 0 and the PLANT line; ok   planted code: detected as MISROUTED (code), rc 0 and the PLANT line; ok   planted display: detected as MISROUTED (display), rc 0 and the PLANT line",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of routing_table.py on the fixture inputs, compared byte for byte (AC2 arm 'two runs give the same bytes')",
+      "observed": "ok   two runs give the same bytes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live S3 measurer and any --fake test path (TO bound 2.1).",
+      "reason": "The MX-r-1 contract (section 1, ROUTING TABLE) defines no measurer and no --fake option, and the section 3 grant names no measurer file. The emitter reads local files only. Filed as NFRA_MCPINDEX-Z-W70-S2."
+    },
+    {
+      "item": "Checking that each cited app/<file>.py contains its bucket, store, integration or graph string.",
+      "reason": "The contract states that rule for the writer of the source sets, not for the emitter; the emitter reads no app file. The fixture cites name files outside this tree."
+    },
+    {
+      "item": "Any change to the sparse checkout (infra/aws/lambda ci function-map).",
+      "reason": "No cell input needs it. The naming gate's ERROR for that folder is filed as NFRA_MCPINDEX-Z-W70-S3."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W70-S1: TO step 6 names the h1 checks (cell MX-h1, partition_windows.py) while the proof names r1; the worker ran the proof's r1.AC1-3 and did not run h1. ARMED, disarm_owner 2.0.0_SA_COO~MI.",
+    "NFRA_MCPINDEX-Z-W70-S2: TO bound 2.1 refers to a measurer and a --fake path that the MX-r-1 contract does not define; none was written. INERT.",
+    "NFRA_MCPINDEX-Z-W70-S3: the safe-commit naming gate printed NAMING ERROR for infra/aws/lambda/ci/function-map/, outside the sparse checkout; the commit still landed. INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~70/routing-table-emitter.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python (3.14.8 on this device) and pytest, via the r1 check scripts",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/r1.AC1.sh (and r1.AC2.sh, r1.AC3.sh)",
+      "result": "RESULT: PASS for AC1, AC2 and AC3, each exit 0; pytest passed=18"
+    },
+    {
+      "tool": "ruff 0.15.11 with target py39",
+      "invocation": "ruff check --target-version py39 workflows/gateway_battery/routing_table.py workflows/gateway_battery/tests/test_routing_table.py",
+      "result": "All checks passed! (rc 0)"
+    }
+  ]
+}
