@@ -1,0 +1,85 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-cd-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "866f1447f8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cd-3.round-46-apply-the-family-depth-read-grant.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/family_depth_read_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b2e75e528d",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live policy opal-gateway-role/gateway-family-depth-read-policy. safe-apply targeted at aws_iam_role_policy.gw_family_depth_read, .tf blob 0f5da21da8d9a68287182a1509b44c6af0a3d75c: 1 added, 0 changed, 0 destroyed at 2026-10-19T12:04Z. get-role-policy reads exactly FOUR Allow statements over events:DescribeRule, s3:GetObject, s3:ListBucket, the source-root list carrying s3:delimiter StringEquals /; policy sha256-16 2dd3ee621be1436d; the role's inline policies 24 -> 25, the other 24 unchanged; the targeted re-plan reads No changes. Records: FD_APPLIED.json, FD_APPLY.txt, FD_PLAN_AT_APPLY.txt, FD_REPLAN.txt, FD_CT3_CENSUS.json in the seat's deliverables folder.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the one .tf grants exactly the three read actions, the plan adds one policy, the ask has three halves, and the source-root list carries the delimiter bound.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/cd3.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)delimiter bound: the \\.tf and the plan name s3:delimiter True; simulation all as expected True, root list with NO delimiter denied [1-9]\\d* case\\(s\\), root list WITH delimiter allowed [1-9]\\d* case\\(s\\): ok.*terraform: role policies 1 \\(want 1\\); actions \\['events:DescribeRule', 's3:GetObject', 's3:ListBucket'\\] \\(want .*?\\); wildcard action or resource False \\(want False\\); other resource types 0 \\(want 0\\).*plan: 1 to add, 0 to change, 0 to destroy True; ask has the three halves True.*RESULT: PASS.*exit=0",
+   "output_evidence": "delimiter bound: the .tf and the plan name s3:delimiter True; simulation all as expected True, root list with NO delimiter denied 1 case(s), root list WITH delimiter allowed 1 case(s): ok\nterraform: role policies 1 (want 1); actions ['events:DescribeRule', 's3:GetObject', 's3:ListBucket'] (want ['events:DescribeRule', 's3:GetObject', 's3:ListBucket']); wildcard action or resource False (want False); other resource types 0 (want 0)\nplan: 1 to add, 0 to change, 0 to destroy True; ask has the three halves True\nRESULT: PASS\nexit=0",
+   "denominator": "1 policy; 3 actions; 1 plan; 3 halves",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the policy is live, allows the two reads, refuses both writes by the simulator, and the ledger is closed.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/cd3.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)ledger CLOSED 1 of 1; sentinel at HEAD 0; policy \\S+ shape ok; simulate DescribeRule allowed, GetObject allowed; root list with delimiter allowed, root list with NO delimiter \\(negative control\\) (?:implicitDeny|explicitDeny); negative controls PutRule (?:implicitDeny|explicitDeny), PutObject (?:implicitDeny|explicitDeny).*RESULT: PASS.*exit=0",
+   "output_evidence": "ledger CLOSED 1 of 1; sentinel at HEAD 0; policy gateway-family-depth-read-policy shape ok; simulate DescribeRule allowed, GetObject allowed; root list with delimiter allowed, root list with NO delimiter (negative control) implicitDeny; negative controls PutRule implicitDeny, PutObject implicitDeny\nRESULT: PASS\nexit=0",
+   "denominator": "1 ledger entry; 1 policy; 6 simulator cases named",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 were run against the same committed state in this session after the Phase B records were committed.",
+   "observed": "each matched its expect pattern",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the issuer's pre-cut fixture arms and the simulator's negative controls are the discriminating arms.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a push",
+   "reason": "The order forbids it: the issuer drains the branch."
+  },
+  {
+   "item": "comp-schedule --drift full scan",
+   "reason": "Recorded as partial (budget) in the Phase B commit 2afab6a54b; no schedule or trigger was added or changed (order preflight: DECLARED-NOT-APPLICABLE)."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Seat 0.7.0_AE_CloudOps~NFRA1, OG-cd-3. Phase A 06:15 local, amendment A1 re-cut 07:06, ledger nfra-oplgtw-grants-cd3 opened 07:49, Phase B apply 08:10 (GO 35947), ledger CLOSED 20261019T121225Z (commit 9d166ab726, merged 80d60983f8). CT3 census: 19 top-level prefixes, 12 beyond the eight sources, 4 hold a silver child under a scope (bloomberg, commonwealth, gateway, yahoo); 1 non-date partition folder among 35239 under the eight roots. This proof instance was written by the next session of the seat after the first session ended before writing it.",
+ "compiler_tools": [
+  {
+   "tool": "safe-apply / aws iam simulate-principal-policy",
+   "invocation": "targeted apply then get-role-policy and simulate-principal-policy",
+   "result": "PASS",
+   "note": "Counts, statement shapes and decision words only; no account number printed."
+  }
+ ]
+}
