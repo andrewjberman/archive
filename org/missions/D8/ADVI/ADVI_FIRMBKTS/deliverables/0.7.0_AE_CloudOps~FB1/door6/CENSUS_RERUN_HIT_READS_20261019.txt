@@ -1,0 +1,22 @@
+FB-p-2 step 5 census re-run -- hit-line reads. 0.7.0_AE_CloudOps~FB1, 2026-10-19 ~14:11Z-14:15Z. Claim: measured.
+
+Census: door6_live_reader_census.py --out door6/CENSUS_RERUN.json (needle 'pipeline-complete')
+  functions_listed=245 zip=241 image_not_scanned=4 scanned_ok=241 errors=0 hit functions=16 env_hits=0
+  runner_objects=None, runner_errors=['list rc=3221225477'] (the tool's own runner listing crashed; read separately below)
+
+Hit lines, each read from the deployed zip of the function (aws lambda get-function Code.Location, line +-2 printed):
+  opal-assets-ingest-mirror        lambda_function.py:58   docstring: "absolute Deny on opal-data-inf/gold/meta/pipeline-complete.json" -- comment, not a reader
+  inf-portal-publisher             lambda_function.py:5    docstring: "Triggered by: S3 ObjectCreated on ..." -- comment; no notification points at it (STEP5_PREREADS item 3)
+  opal-assets-silver-etf           mirror_conversion.py:12 docstring -- comment
+  opal-assets-silver-blackdiamond  mirror_conversion.py:12 same file, same line -- comment (not separately printed; identical position)
+  opal-assets-silver-eclipse       mirror_conversion.py:12 same -- comment (not separately printed)
+  opal-assets-silver-orion         mirror_conversion.py:12 same -- comment (not separately printed)
+  etfs-netassets-daily             lambda_function.py:58   docstring -- comment
+  inf-etf-ownership-daily          lambda_function.py:14   docstring -- comment
+  8 functions (rivalfunds-* x3, outlook-global-* x2, etfs-rivalfunds-* x2, teams-global-* x1): infra/logic/registry/event_rules.json:78-79 and key_rulings.json:436-439 -- registry JSON, not readers (the order's rule)
+  hits_reading_key = 0 (16 hit functions = 5 printed above + 3 silver-* siblings at the identical file:line (not printed) + 8 registry-JSON functions)
+
+Runner objects (census listing crashed, read directly): list-objects-v2 s3://opal-data-inf/code/runner/ -> 2 objects
+  inf-gold-layer-runner.service (570 B), run-gold-layer.sh (5888 B); grep -c 'pipeline-complete' = 0 and 0; grep 'gold/meta' = no lines.
+Not scanned (census limits): 4 container-image functions (opal-news-ai-sentiment, daily-sprint-generator, news-semantic-clustering, ycharts-session-capture), layers, keys built from parts.
+Event consumers: mdpf-feeder-accelerator DISABLED at 2026-10-19T14:08Z (step 4); no other rule or notification consumes the key (STEP5_PREREADS item 3, read 2026-10-17).
