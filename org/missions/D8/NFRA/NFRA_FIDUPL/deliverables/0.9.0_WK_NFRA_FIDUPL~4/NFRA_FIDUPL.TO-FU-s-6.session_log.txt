@@ -1,0 +1,51 @@
+SESSION LOG -- 0.9.0_WK_NFRA_FIDUPL~4 on NFRA_FIDUPL.TO-FU-s-6 (2026-10-19, worktree C:/tmp/fidupl-w4, branch wk-NFRA_FIDUPL-4)
+Verbatim outputs of the criterion invocations and of the probes behind the surprise rows. No account number, no client
+name and no secret value appears here: the plan output carries only resource creates and the summary line.
+
+PART A -- first pass (before the issuer amendment, HEAD a21a9e198f's predecessor chain)
+
+A1. git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-4 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+A2. Builder probes (python -I, lib/opal_naming.py):
+    address('fidelity','alongside','bronze','x','20000101') -> s3://opal-data-assets/fidelity/alongside/bronze/x/20000101
+    name('fidelity','alongside','uploader','role') -> fidelity-alongside-uploader-role
+    name('fidelity','alongside','wealthscape','credentials') -> ValueError: kind 'credentials' is neither a NAMING_SCHEMA.json kind nor a cadence
+    python -I lib/opal_naming.py generate --out .scratch/gen (no --target) -> FileNotFoundError: data/firm_registry.json
+A3. R1-FU6V-OK Success! The configuration is valid.                                          (rc 0)
+A4. R1-FU6G-FAIL 0.0.0.0/0; no prevent_destroy on the secret                                  (rc 0; verdict line)
+A5. R1-FU6P-FAIL plan rc=1 scope_class).                                                      (rc 0; verdict line)
+A6. terraform plan (direct) -- 13 x "Error: Module output value precondition failed" -- "local.name_scope_ok is false".
+A7. Commits: 1b5c10e11a (the Terraform root), abf169f208 (surprise rows W4-S1..S7), a21a9e198f (proof, first pass).
+    A first safe-commit over the directory pathspec was refused: the gitignored local provider cache under .terraform/
+    was staged. Nothing was committed by that attempt; the next attempt named the .tf files explicitly.
+
+PART B -- after the issuer amendment (commit d88c69d12c, fast-forward of the worker branch)
+
+B1. git merge --ff-only d88c69d12c -> branch at d88c69d12c (HEAD was an ancestor).
+    Amendment brings: generated_locals.tf into the grant; the corrected r1_checks.py (fu6g: ingress-only 0.0.0.0/0; Resource
+    star only under a STAR-OK comment within 3 lines above).
+B2. Regenerate: python lib/opal_naming.py generate --out .scratch/gen --target infra/aws/terraform/modules/opal_name/generated_locals.tf
+    -> "WROTE infra/aws/terraform/modules/opal_name/generated_locals.tf (5575 bytes)"
+    -> "GENERATE: 1 written, 0 skipped, into .scratch/gen at registry@d27205e1240e174c over all 17 registry file(s)"
+    Diff against the committed table: five added lines, all for scope alongside (scope_short, scope_long, scope_class,
+    scope_bucket, fence_patterns); no removed line. 08403355: not in scopes.json at HEAD or the CLOUD ref (grep count 0),
+    so not added -- surprise NFRA_FIDUPL-D1-W4-S8.
+B3. Secret name grade:
+    python -I -c "import sys; sys.path.insert(0,'lib'); import opal_naming as o; print(o.grade('fidelity/alongside/wealthscape-credentials','SECRET'))"
+    -> ('CONFORMANT', 'fidelity/alongside/wealthscape-credentials')
+B4. terraform fmt on the root; ASCII check on all .tf files and the generated table -> nonascii=0 for each.
+B5. Criteria, first run after the edits:
+    R1-FU6V-OK Success! The configuration is valid.                                          (rc 0)
+    R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK  (rc 0)
+    R1-FU6P-OK Plan: 18 to add, 0 to change, 0 to destroy.                                    (rc 0)
+B6. Direct plan (same tree): 18 "will be created" lines and the summary line
+    "Plan: 18 to add, 0 to change, 0 to destroy." (rc 0). Creates: 3 event rules, 3 event targets, instance profile,
+    3 IAM roles (automation, box, schedule), 3 inline IAM role policies, 1 SSM attachment, 1 EC2 instance, 1 Wealthscape
+    secret, 1 security group, 1 SSM Automation document.
+B7. Commits: 13fa8fe12b (amendment: generated table, secret.tf, box.tf, automation.tf, outputs.tf), 3a67aa08c0 (row W4-S8).
+B8. Criteria, re-run on the committed tree (same invocations):
+    R1-FU6V-OK Success! The configuration is valid.                                          (rc 0)
+    R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK  (rc 0)
+    R1-FU6P-OK Plan: 18 to add, 0 to change, 0 to destroy.                                    (rc 0)
+
+PART C -- not done, by design: no terraform apply, no safe-apply, no enable of any rule, no start or stop of the box,
+no AWS object created or changed. The instance is left as created (W4-S6).
