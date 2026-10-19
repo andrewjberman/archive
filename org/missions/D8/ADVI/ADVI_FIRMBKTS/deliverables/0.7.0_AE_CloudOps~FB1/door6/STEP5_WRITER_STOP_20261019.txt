@@ -1,0 +1,30 @@
+FB-p-2 step 5 -- marker writer stopped in the DEPLOYED copy. 0.7.0_AE_CloudOps~FB1, 2026-10-19 14:12Z-14:23Z. Claim: measured.
+
+Object: s3://opal-data-inf/code/gold/orion-gold-dispatch.sh (opal-data-inf, versioning Enabled)
+(i)   BEFORE: VersionId JjTLNaZeRRAQn342RRa7qEHSR0AUf1FV (LastModified 2026-10-17T13:29:03Z), 113445 bytes, 2128 lines,
+      sha256 e9aef66bc8a4a883196a2ba61567e56e645d4ffba82cfc74705cb6e270d59e43. VersionId re-read immediately before the
+      upload (14:21Z): unchanged.
+      Located by content: header "Chain-complete sentinel -- ADVI_INFETL.002" (deployed line 1889); success-branch write
+      `aws s3 cp - s3://${INF_S3_BUCKET}/gold/meta/pipeline-complete.json` (deployed line 1906).
+(ii)  Throwaway linked worktree C:/dev/wk-fbp2-orion (branch wk-fbp2-orion from HEAD f4c0ca7c1b): the deployed bytes copied over
+      data/inf/scripts/gold/orion-gold-dispatch.sh, then ONE edit by a byte-anchored script: inside `if [ "$chain_exit" -eq 0 ]; then`
+      the _sent_json build, the `aws s3 cp -` marker write and its OK/WARN echoes (deployed lines 1903-1912, 778 bytes) replaced by
+      two comment lines and one echo (387 bytes). The failure branch (pipeline-failed.json) and the _sent_ts/_sent_sha/_sent_iid
+      lines are untouched. `bash -n` OK. `diff deployed_before.sh edited` = ONE hunk, 1903,1912c1903,1905 (the block alone).
+      Non-ASCII lines before 10, after 10 (pre-existing, none added). _sent_rc/_sent_json: 0 other uses in the file.
+(iii) DEPLOY: `bash .tools/safe-deploy.sh data/inf/scripts/gold/orion-gold-dispatch.sh` (HALT_ACK=1 after reading the three routine GO
+      messages) printed "OK: safe-deploy -- no deploy-scope script files detected, nothing to do": safe_deploy_core.file_to_s3_target
+      and resolve_tree_layer return None for any path not ending .py (safe_deploy_core.py lines 680 and 718), so safe-deploy cannot
+      deploy a .sh. DEVIATION from the order's BOUNDS 2: the same bytes were uploaded with `aws s3api put-object` (SSE AES256,
+      content-type binary/octet-stream, as the prior version) at 2026-10-19T14:22:09Z.
+      AFTER: VersionId hK5vY2H31oT3NHmoiArlZ00ra8gkuDaO, 113054 bytes,
+      sha256 9495cd56228b0b5a4fe8d7d2ce4e22fc3a540fbedf9af02ccdbbee484e069013, read back with get-object = the edited file's sha256.
+      Worktree and branch removed (git worktree list: 0 rows for fbp2-orion).
+(iv)  Repo source data/inf/scripts/gold/orion-gold-dispatch.sh: the same block change by the same script (replaced 778 bytes with 387),
+      `bash -n` OK, git diff = 3 insertions, 10 deletions in that block; commit hash in the ledger leg L7.
+      The repo file is NOT the deployed bytes (the repo copy carries other projects' edits, e.g. the ASCII pass); only the block moved.
+Rollback: s3api copy-object --copy-source opal-data-inf/code/gold/orion-gold-dispatch.sh?versionId=JjTLNaZeRRAQn342RRa7qEHSR0AUf1FV
+          --bucket opal-data-inf --key code/gold/orion-gold-dispatch.sh (restores the marker write); revert the repo commit.
+Race note: another lane (IRPT_BCKEND ~IB2, ledger irpt-scope-feed-region-script-ibn4-20261017) replaces this same object from a repo commit;
+          if it uploads a file cut before (iv) lands, it restores the marker write. (iv) is the guard.
+gold-staging / rebuild: not edited (order bound 3).
