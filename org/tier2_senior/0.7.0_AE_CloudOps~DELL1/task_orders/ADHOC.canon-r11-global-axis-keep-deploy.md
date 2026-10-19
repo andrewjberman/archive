@@ -4,14 +4,14 @@
 <issued_by>2.0.0_SA_COO~D1</issued_by>
 <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
 <date>2026-10-19</date>
-<status>staged</status>
+<status>pending</status>
 <risk>WORLD</risk>
 <proof_genre>DEPLOY</proof_genre>
 <priority>P2 (round 11 of MDPF_CANON; target the 2026-10-20 13:30Z fire; BEHIND the CN-s-7 pair and the issuer's fresh written GO)</priority>
 
 <title>MDPF_CANON CN-s-7 DEPLOY under its never-widen pair: the gold lambda package built from the code commit (one commit on the deployed pin 128fce3524) with its commit stamp; a no-write dry-run invoke BEFORE (the reference) and AFTER (the test), both RETURNING the built bodies, graded by the issuer; the emitter and everything else are NOT touched</title>
 <context>
-The 2026-10-19 13:30Z scheduled fire found all three staged legs ending 2026-10-16 with values, so CN-s-6's drop of that date holds Global at as_of 2026-10-15. The CTO ruled (ruling record `org/missions/D8/MDPF/MDPF_CANON/ledger/CTO_RULING_S36_EMPTY_GLOBAL_AXIS_DROP_20261019.md` @176378e74d) to empty the drop set as the 2026-10-20 13:30Z fire's one gold change. The worker's code commit (CN-s-7) empties one constant and replaces one test in `data/mdpf/scripts/gold/`. **The code commit (the pin of this deploy) is `3d3d5ed5b91069a68b77d2d26b1ca37ae6a8fd8a`**, a child of the deployed pin `128fce3524a820c3c912a5f1e28ab149a68c5024`, on branch `wk-MDPF_CANON-34` in this repository (visible to you without a push; build from that SHA).
+The 2026-10-19 13:30Z scheduled fire found all three staged legs ending 2026-10-16 with values, so CN-s-6's drop of that date holds Global at as_of 2026-10-15. The CTO ruled (ruling record `org/missions/D8/MDPF/MDPF_CANON/ledger/CTO_RULING_S36_EMPTY_GLOBAL_AXIS_DROP_20261019.md` @176378e74d) to empty the drop set as the 2026-10-20 13:30Z fire's one gold change. The worker's code commit (CN-s-7) empties one constant and replaces one test in `data/mdpf/scripts/gold/`. **The code commit (the pin of this deploy) is `3d3d5ed5b91069a68b77d2d26b1ca37ae6a8fd8a`**, a GRANDCHILD of the deployed pin `128fce3524a820c3c912a5f1e28ab149a68c5024` (its parent is the issuer's grant commit `bda12c93f5`, which adds only an order, the decomposition and a check; see `NEVER_WIDEN_PAIR_R11_CN_S_7_ADDENDUM_1_ANCESTRY.md`), on branch `wk-MDPF_CANON-34` (origin tip `6be83371a2`, two commits beyond the code commit): build from the SHA `3d3d5ed5b9...`, never from the branch tip.
 **Read first:** the pair `org/missions/D8/MDPF/MDPF_CANON/deliverables/2.0.0_SA_COO~D1/round11/NEVER_WIDEN_PAIR_R11_CN_S_7.md` (sha256 `bb0120bb4412dd051b740ffe3cd9f5bb1fcda2233946cb5a9686653ebe36c3af`), its COO signature, and the CTO half (to be recorded at `org/missions/D8/MDPF/MDPF_CANON/ledger/`, binding that sha256). The live function you will move: `CodeSha256` `whMJ8Ei9g0ZUDFEUxSaEQAViS0kokkxt9CS+vlD7SGI=`, `MDPF_GOLD_COMMIT` `128fce3524...` (re-read at your start).
 </context>
 
