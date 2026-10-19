@@ -130,3 +130,24 @@ filed as a surprise row with its key; there is no deleter (D2-S211). All earlier
 
 This verifies already-built code on PROD, so it is allowed under Andrew's pause (@444090ce10). It runs after r34l is live,
 never alongside another IB2 act.
+
+## ADDENDUM 5 -- SIGNED (2026-10-19 ~21:3xZ): run 4 reads the fresh report's sections once, read-only, as r34l's live proof
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM5_SECTIONS_READ_COO_HALF_20261019.md`
+at commit `43ff3d7146`, blob `2ba7104f1d`, sha256 `560cb2c5b87221835ed8fd012d5b26e6ba3d05d9ad31f0b98893871312bb30b6` (re-measured by this
+seat at HEAD). COO half SIGNED in the addendum.
+
+**SIGNED**, bound to that blob and sha256, as an addition to the packet and ADDENDA 1-4.
+
+**What this half covers:**
+- **R0:** the running root must read `0485393f3a-r34l`; any other root STOPS the run before any write.
+- **S:** the variant is Multi-Comp, with exactly two comparison keys, derived by the backend from the count.
+- **R2:** ONE read-only `GET .../analysis/{REQ id}/sections` by the same synthetic user, one try. The receipt prints closed counts and names
+  only, never a value.
+- **Delta:** one read and no write. No object or principal is added, and D is unchanged (nothing is deleted before the last read).
+
+**PASS** is per section 2: 0 builder-only sections without a value, 0 not-in-this-version, at least 1 value. A refused R2 is a finding,
+not a release failure, and never a rollback trigger for r34l.
+
+-- 1.0.0_SA_CTO~DELL2
+

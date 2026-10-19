@@ -1,7 +1,7 @@
 """IRPT_DASHBD round 150 (issuer 2.0.0_SA_COO~D2) -- the APPLY of the signed ALL-DAYS rewrite pair: every landed Cottonwood gold day from the claim floor (66 days at the 2026-10-17 census) is REWRITTEN through the
 function's explicit rewrite event with the late-posting reader, in events of landed trading days (at most 25 days each), a single-day scaling dry run first, and the series republished ONCE. WORLD, served output. The record is
 the applier's (`0.7.0_AE_CloudOps~IB2`); the checker re-reads the gold days and their prior versions and COMPARES each sampled series with the PREVIOUS VERSION of its own object (the bucket is versioned), so the invariant
-"only the five changed-row days are added and only the three movable fields move on common days" is graded on the data, not on the applier's report. The expected row counts come from the issuer's committed dry derivation
+"only the five changed-row days are added and only the four movable fields move on common days" is graded on the data, not on the applier's report. The expected row counts come from the issuer's committed dry derivation
 (`reads/RD_COT_ALLDAYS_DRY_20261017.json`), not from the applier.
 
   DBC201-1-AC1  the record: both halves signed at the packet's sha256, the ledger, the before reads, the scaling run, every event's dry run in its band, the rewrites, the pre-write diff inside its STOP lines, the canary, the one republish, the after-read
@@ -55,7 +55,7 @@ DURATION_MAX_S = 720
 MEMORY_MAX_MB = 819
 REFUSED_MAX = 40
 MAX_NM_PCT = 15
-MOVABLE = ("total_return_daily", "day_quality", "return_basis")
+MOVABLE = ("total_return_daily", "day_quality", "return_basis", "external_flow")
 SCHED = {"account_return_daily": "ENABLED", "publish_daily": "DISABLED"}
 H.DIGIT_OK_KEYS = tuple(H.DIGIT_OK_KEYS) + ("packet_sha256", "account_digest12", "code_sha256", "invoked_utc", "abs_flow_cents", "abs_flow_after_cents")
 
@@ -414,7 +414,7 @@ def selftest():
     mut("prewrite zero gain", lambda r: r["prewrite"]["accounts_gaining_by_day"].update({"2026-07-14": 0}))
     mut("prewrite extra gain day", lambda r: r["prewrite"]["accounts_gaining_by_day"].update({"2026-07-15": 5}))
     mut("prewrite other fields", lambda r: r["prewrite"].update(other_field_changes_on_common_days=1))
-    mut("prewrite field list", lambda r: r["prewrite"].update(fields_changed=["total_return_daily", "external_flow"]))
+    mut("prewrite field list", lambda r: r["prewrite"].update(fields_changed=["total_return_daily", "value"]))
     mut("prewrite removed", lambda r: r["prewrite"].update(days_removed=1))
     mut("prewrite refused", lambda r: r["prewrite"].update(refused=41))
     mut("publish dry published", lambda r: r["publish_dry"].update(published=938))
@@ -443,6 +443,10 @@ def selftest():
     assert series_invariant(prev, cur, changed) == ["2026-07-14"]
     assert series_invariant(prev, prev, changed) == []
     red(lambda: series_invariant(prev, dict(cur, value=[1.1, 2.0, 3.0]), changed), "a common day's value moved")
+    flow_prev = dict(prev, external_flow=[5.0, 0.0])
+    flow_cur = dict(cur, external_flow=[1.0, 2.0, 0.0])
+    assert series_invariant(flow_prev, flow_cur, changed) == ["2026-07-14"]
+    red(lambda: series_invariant(flow_prev, dict(flow_cur, income=[1.0, 1.0, 1.0]), changed), "income appeared as a column")
     red(lambda: series_invariant(prev, {k: (v[1:] if isinstance(v, list) else v) for k, v in cur.items()}, changed), "a day removed")
     red(lambda: series_invariant(prev, cur, {"2026-08-03"}), "a day added that is not a changed-row day")
     red(lambda: series_invariant(prev, dict(cur, external_flow=[0, 0, 0]), changed), "a column appeared")
