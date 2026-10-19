@@ -45,6 +45,27 @@ NEW_SID = "WriteTheAccountTransactionGoldPrefixOnly"
 NEW_RESOURCE = "arn:aws:s3:::%s/%s*" % (BUCKET, TX_PREFIX)
 SCHEMA_HASH = "ac652e2f71b18427b52f321858163768158f850ec173d1e592c7c3abe815bb6a"
 MAX_DAYS = 25
+ADDENDUM_REL = D + "2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_COTTONWOOD_TRANSACTION_WIRING_ADDENDUM_1.md"
+ADDENDUM_SHA = "aed616de9b99ce0fc29be4d985a08b4437abf9334f6c97438e54616872db4ae3"
+BASE_IAM_REL = D + "2.0.0_SA_COO~F2/checks/r139/cot_iam_base.tf.txt"
+IAM_REL = "infra/aws/terraform/investor-reporting/account-return-daily/iam.tf"
+LIST_SID = "ListTheAccountTransactionGoldPrefixOnly"
+LIST_RESOURCE = "arn:aws:s3:::opal-data-cottonwood"
+LIST_PREFIX_VALUES = ["irpt/cottonwood/gold/account_transaction/*"]
+LIST_BLOCK = """  # ListBucket on the gold bucket under ONE prefix: the transaction stage lists the account_transaction prefix to find the
+  # newest landed day and to write each day once (handler.py _landed_transaction_days, DB-f-2706). Addendum 1 of the packet.
+  statement {
+    sid       = "ListTheAccountTransactionGoldPrefixOnly"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${local.irpt_arc_gold_bucket}"]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["irpt/${local.irpt_arc_firm}/gold/${local.irpt_arc_gold_table_transaction}/*"]
+    }
+  }
+"""
 SEQUENCE_WAIVER = "ANDREW_DIRECT_20261019_181xZ"  # the CTO's sequence condition (after the Inflection pair) superseded by Andrew-direct 2026-10-19 ~18:1xZ
 MAX_NEW_RANGE_DAYS = 24  # a 25-day range event names the Act 4 day too, which is reported already landed
 MAX_NOT_MEASURABLE_SHARE = 0.15  # the CTO's REVISION 2 condition on each settle day
@@ -78,7 +99,7 @@ def statement_hash(st):
 
 def head_problems(rec):
     pr = []
-    keys = ["claim", "gates", "ledger_entry", "applier", "before", "build", "plan", "apply_finished_utc", "after", "scheduled_dry_run", "settle_dry_runs", "dry_run", "first_write", "range", "ledger_closed", "reads"]
+    keys = ["claim", "gates", "ledger_entry", "applier", "before", "build", "plan", "apply_finished_utc", "after", "scheduled_dry_run", "settle_dry_runs", "addendum1", "dry_run", "first_write", "range", "ledger_closed", "reads"]
     if not isinstance(rec, dict) or any(k not in rec for k in keys):
         return ["the record must carry %s" % keys]
     if rec["claim"] != "measured" or rec["applier"] != APPLIER:
@@ -120,6 +141,20 @@ def head_problems(rec):
 def events_problems(rec):
     pr = []
     sd, st, dr, fw, rg = rec["scheduled_dry_run"], rec["settle_dry_runs"], rec["dry_run"], rec["first_write"], rec["range"]
+    a1 = rec["addendum1"]
+    pl = a1.get("plan") if isinstance(a1, dict) else None
+    r6 = a1.get("step6_rerun") if isinstance(a1, dict) else None
+    a1_ok = isinstance(pl, dict) and pl.get("add") == 0 and pl.get("change") == 1 and pl.get("destroy") == 0 and pl.get("change_addresses") == ["aws_iam_role_policy.irpt_account_return_daily_execution"] \
+        and pl.get("policy_added_sids") == [LIST_SID] and pl.get("naming_gate_refuse") == 0 and pl.get("replan_no_changes") is True and a1.get("iam_tf_commit") \
+        and isinstance(r6, dict) and r6.get("status_code") == 200 and r6.get("wrote_nothing") is True and r6.get("transaction_failed") == {} \
+        and is_int(r6.get("max_memory_mb")) and r6["max_memory_mb"] <= 819 and is_int(r6.get("duration_ms")) and r6["duration_ms"] <= 720000
+    try:
+        a1_ok = a1_ok and not in_fire_window(parse_utc(a1["apply_finished_utc"]))
+    except (ValueError, TypeError, KeyError):
+        a1_ok = False
+    if not a1_ok:
+        pr.append("addendum1 must record the ListBucket apply: plan exactly 0 add / 1 change / 0 destroy on aws_iam_role_policy.irpt_account_return_daily_execution adding %s, 0 naming REFUSE, a re-plan of No changes, "
+                  "the iam.tf commit, an apply outside 11:30Z to 14:15Z, and the re-run of step 6 with transaction_failed {} and nothing written, inside 819 MB and 720 s" % LIST_SID)
     ok = isinstance(sd, dict) and sd.get("payload") == {"dry_run": True} and sd.get("status_code") == 200 and sd.get("wrote_nothing") is True and isinstance(sd.get("settled"), dict) \
         and is_int(sd.get("max_memory_mb")) and sd["max_memory_mb"] <= 819 and is_int(sd.get("duration_ms")) and sd["duration_ms"] <= 720000 and sd.get("newest_writable_day")
     if not ok:
@@ -175,10 +210,40 @@ def packet_problems(root):
         txt = t.read_text(encoding="utf-8") if t.is_file() else ""
         need(PACKET_SHA in txt or PACKET_SHA[:8] in txt, "the %s half is missing or does not name the packet's sha256" % who)
         need("SIGNED" in txt, "the %s half is not SIGNED" % who)
+        i = txt.find("ADDENDUM 1")
+        need(i >= 0 and (ADDENDUM_SHA in txt[i:] or ADDENDUM_SHA[:8] in txt[i:]) and "SIGNED" in txt[i:], "the %s half carries no SIGNED ADDENDUM 1 section naming addendum 1's sha256" % who)
+    a = Path(root, ADDENDUM_REL)
+    need(a.is_file() and hashlib.sha256(a.read_bytes()).hexdigest() == ADDENDUM_SHA, "addendum 1's bytes are not the signed ones (sha256)")
+
+
+def iam_tf_problems(root):
+    """iam.tf of the root must be the pinned base plus EXACTLY the addendum's statement lines (a pure insertion, ASCII, LF)."""
+    base = Path(root, BASE_IAM_REL).read_bytes()
+    cur = Path(root, IAM_REL).read_bytes()
+    pr = []
+    if hashlib.sha256(base).hexdigest()[:12] != "7e76892b6891":
+        pr.append("the pinned base iam.tf is not 7e76892b6891")
+    if b"\r" in cur or any(x > 127 for x in cur):
+        pr.append("iam.tf must stay ASCII with LF endings")
+    import difflib
+    b_l, c_l = base.decode("ascii", "replace").splitlines(), cur.decode("ascii", "replace").splitlines()
+    removed, added = [], []
+    for ln in difflib.unified_diff(b_l, c_l, lineterm="", n=0):
+        if ln[:3] in ("---", "+++") or ln.startswith("@@"):
+            continue
+        (removed if ln[0] == "-" else added).append(ln[1:])
+    want = [x for x in LIST_BLOCK.splitlines() if x.strip()]
+    if removed:
+        pr.append("iam.tf removes %d base line(s); it must be a pure insertion" % len(removed))
+    if [x for x in added if x.strip()] != want:
+        pr.append("iam.tf must add exactly the %d lines of addendum 1's statement (found %d added lines)" % (len(want), len([x for x in added if x.strip()])))
+    return pr
 
 
 def ac1(root):
     packet_problems(root)
+    pr_iam = iam_tf_problems(root)
+    need(not pr_iam, "; ".join(pr_iam))
     pr = head_problems(load_record(root))
     need(not pr, "; ".join(pr))
 
@@ -191,12 +256,22 @@ def ac2(root):
             and not (c.get("Environment") or {}).get("Variables") and c["Handler"] == "handler.lambda_handler" and c["Runtime"] == "python3.12"):
         pr.append("the function must run the NEW code (CodeSha256 equal to the build) with memory 1024, timeout 900, the one layer, no environment, the same handler and runtime")
     st = {s["Sid"]: s for s in aws_json(root, ["iam", "get-role-policy", "--role-name", ROLE, "--policy-name", POLICY])["PolicyDocument"]["Statement"]}
-    if sorted(st) != sorted(OLD_SIDS + [NEW_SID]):
-        pr.append("the role policy must hold the five original statements and the new one")
+    if sorted(st) != sorted(OLD_SIDS + [NEW_SID, LIST_SID]):
+        pr.append("the role policy must hold the five original statements, the transaction write statement and the addendum's list statement (seven)")
     else:
         for sid in OLD_SIDS:
             if statement_hash(st[sid]) != rec["before"].get("policy", {}).get(sid):
                 pr.append("statement %s differs from the record's before-state (only one statement may be added)" % sid)
+        ls = st[LIST_SID]
+        lres = [ls["Resource"]] if isinstance(ls["Resource"], str) else list(ls["Resource"])
+        lact = [ls["Action"]] if isinstance(ls["Action"], str) else list(ls["Action"])
+        lcond = ls.get("Condition") or {}
+        lsl = lcond.get("StringLike") or {}
+        lpv = lsl.get("s3:prefix")
+        lpv = [lpv] if isinstance(lpv, str) else lpv
+        lcond_ok = list(lcond) == ["StringLike"] and list(lsl) == ["s3:prefix"] and lpv == list(LIST_PREFIX_VALUES)
+        if lres != [LIST_RESOURCE] or lact != ["s3:ListBucket"] or ls.get("Effect") != "Allow" or not lcond_ok:
+            pr.append("the list statement must be Allow, s3:ListBucket only, on %s, StringLike s3:prefix %r and nothing else" % (LIST_RESOURCE, LIST_PREFIX_VALUES))
         n = st[NEW_SID]
         res = [n["Resource"]] if isinstance(n["Resource"], str) else list(n["Resource"])
         act = [n["Action"]] if isinstance(n["Action"], str) else list(n["Action"])
@@ -255,6 +330,9 @@ def selftest():
            "scheduled_dry_run": {"payload": {"dry_run": True}, "status_code": 200, "wrote_nothing": True, "newest_writable_day": "2026-10-02", "max_memory_mb": 600, "duration_ms": 60000, "settled": {}},
            "settle_dry_runs": {"2026-10-01": {"payload": {"rewrite": {"start": "2026-10-01", "end": "2026-10-01"}, "dry_run": True}, "status_code": 200, "wrote_nothing": True, "rows": 834,
                                               "rows_tool": 834, "not_measurable_share": 0.046, "flow_accounts": 84, "max_memory_mb": 500, "duration_ms": 30000}},
+           "addendum1": {"plan": {"add": 0, "change": 1, "destroy": 0, "change_addresses": ["aws_iam_role_policy.irpt_account_return_daily_execution"], "policy_added_sids": [LIST_SID],
+                                  "naming_gate_refuse": 0, "replan_no_changes": True}, "apply_finished_utc": "2026-10-20T08:00:00Z", "iam_tf_commit": "abc1234",
+                         "step6_rerun": {"payload": {"dry_run": True}, "status_code": 200, "wrote_nothing": True, "transaction_failed": {}, "max_memory_mb": 300, "duration_ms": 5000}},
            "dry_run": {"transaction_rows": {"2026-10-02": 8500}, "transaction_failed": {}, "prefix_objects_after": 0, "max_memory_mb": 400, "duration_ms": 9000},
            "first_write": {"transaction_rows": {"2026-10-02": 8500}, "transaction_failed": {}, "partitions_after": ["2026-10-02"], "columns": 19, "schema_hash": SCHEMA_HASH, "claims_ok": True},
            "range": {"days_written": 2, "partitions_after": 3, "transaction_failed": {"2026-10-02": "already landed: a transaction day is written once"}, "returns_prefix_unchanged": True,
@@ -265,6 +343,13 @@ def selftest():
     arm("build-hash", len(head_problems(dict(rec, build=dict(rec["build"], zip_sha256_b64="x")))), 1)
     arm("apply-in-window", len(head_problems(dict(rec, apply_finished_utc="2026-10-21T12:15:00Z"))), 1)
     arm("apply-in-cto-band", len(head_problems(dict(rec, apply_finished_utc="2026-10-21T13:30:00Z"))), 1)
+    a1 = rec["addendum1"]
+    arm("addendum-plan-two-changes", len(events_problems(dict(rec, addendum1=dict(a1, plan=dict(a1["plan"], change=2))))), 1)
+    arm("addendum-wrong-sid", len(events_problems(dict(rec, addendum1=dict(a1, plan=dict(a1["plan"], policy_added_sids=["Other"]))))), 1)
+    arm("addendum-rerun-still-denied", len(events_problems(dict(rec, addendum1=dict(a1, step6_rerun=dict(a1["step6_rerun"], transaction_failed={"2026-09-29": "AccessDenied"}))))), 1)
+    arm("addendum-apply-in-band", len(events_problems(dict(rec, addendum1=dict(a1, apply_finished_utc="2026-10-20T12:30:00Z")))), 1)
+    arm("addendum-missing", len(events_problems(dict(rec, addendum1={}))), 1)
+    arm("list-block-is-ascii", all(ord(ch) < 128 for ch in LIST_BLOCK), True)
     arm("b332-open", len(head_problems(dict(rec, gates=dict(rec["gates"], b332_closed_superseded=False)))), 1)
     arm("no-rollback-targets", len(head_problems(dict(rec, before=dict(rec["before"], rollback_targets={})))), 1)
     arm("too-many-settle-days", len(head_problems(dict(rec, before=dict(rec["before"], first_fire_settle_days=["d%d" % i for i in range(6)])))), 1)
