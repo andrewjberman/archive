@@ -1,6 +1,6 @@
 {
   "body": {
-    "cause_class": "real_routing_defect",
+    "cause_class": "test_premise",
     "installed": {
       "starlette": "1.3.1"
     },
@@ -8,11 +8,10 @@
       "requirements_line": "starlette>=0.37.0"
     },
     "evidence": [
-      "infra/aws/ec2/opal-gateway/app/server.py:1198 Route('/{path:path}', dashboard_deep_link, methods=[GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS]) is the last entry of the app routes list and FULL-matches a POST to every path, shadowing the 405 of the hx routes above it (server.py:1155-1164 declare GET-only or SEND methods for them)",
-      "installed starlette 1.3.1 routing.py:251 Route.matches returns Match.PARTIAL on a method mismatch; routing.py:682-690 Router.app hands a PARTIAL to the 405 handler only when no route is a FULL match",
-      "one-request run on installed starlette 1.3.1, python .scratch/en32_method_repro.py (worktree wk-NFRA_OPLGTW-158): bare Route POST /hx/teams/me -> 405 allow='HEAD, GET'; same route with the trailing catch-all -> 404 body='Not Found'",
-      "git log: e42d2c35c3 (2026-10-13) added the catch-all at server.py:1198; db92656c72 (2026-10-02) added the hx routes whose tests expect 405; the catch-all comment at server.py:1197 says only a path nothing above matches reaches it",
-      "pytest, this worktree, python -m pytest -q -p no:cacheprovider on the five ids (cwd infra/aws/ec2/opal-gateway): 5 failed; each failing assert is a status == 405 that received 404 (tests/test_teams_route.py:364, :515; tests/test_mail_route.py:282, :309; tests/test_transcript_route.py:134); rc=1"
+      "infra/aws/ec2/opal-gateway/app/server.py:1198 Route('/{path:path}', dashboard_deep_link, methods=[GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS]) is the catch-all of NFRA_MCPORTAL cell MP-z-3 (row Z-S41), commit e42d2c35c3 (2026-10-13); dashboard_deep_link answers a plain 404 for any non-GET request or unlisted path (server.py:349-358)",
+      "installed starlette 1.3.1 one-request run, python .scratch/en32_method_repro.py (worktree wk-NFRA_OPLGTW-158): a bare Route POST /hx/teams/me answers 405 allow='HEAD, GET'; with the trailing catch-all the same POST answers 404 body='Not Found'",
+      "issuer ruling 2.0.0_SA_COO~O on row NFRA_OPLGTW-Z-W158-S1: the catch-all is intended, the application is not changed, and the five tests assert a status (405) the application no longer promises; the property they name (refused, closed, handler not run, body not served) holds with 404",
+      "pytest, this worktree, before the test edit: 5 failed, each status == 405 received 404 (tests/test_teams_route.py:364, :515; tests/test_mail_route.py:282, :309; tests/test_transcript_route.py:134); after the edit: 5 passed (en32.AC1.sh: passed 5 of 5; pytest rc=0)"
     ],
     "cases": [
       {"node_id": "tests/test_transcript_route.py::test_bearer_constant_time_own_prefix_only", "expected": 405, "got_at_base": 404},
@@ -22,9 +21,13 @@
       {"node_id": "tests/test_mail_route.py::test_graph_get_only_fails_closed", "expected": 405, "got_at_base": 404}
     ],
     "change": {
-      "kind": "none",
-      "files": [],
-      "why": "real_routing_defect in app/server.py:1198 (catch-all shadows the hx routes' 405); the app is not granted to this order, so no file changed and a BLOCKING row is filed (NFRA_OPLGTW-Z-W158-S1)"
+      "kind": "test_update",
+      "files": [
+        "infra/aws/ec2/opal-gateway/tests/test_transcript_route.py",
+        "infra/aws/ec2/opal-gateway/tests/test_teams_route.py",
+        "infra/aws/ec2/opal-gateway/tests/test_mail_route.py"
+      ],
+      "why": "each refusal-status assertion in the five cases accepts (404, 405) per the issuer ruling; no other assertion, case, or skip changed (7 lines in 3 files)"
     }
   }
 }
