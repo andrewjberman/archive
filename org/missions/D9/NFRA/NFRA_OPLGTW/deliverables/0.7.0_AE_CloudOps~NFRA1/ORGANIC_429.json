@@ -1,0 +1,106 @@
+{
+ "body": {
+  "code_sha": "e09c30c3f064296ae7f8eb2c47b91bfec0be9b60",
+  "organic_429_ts_range": {
+   "from": "2026-10-18T19:20:00Z",
+   "to": "2026-10-18T19:29:59Z"
+  },
+  "journal": {
+   "source": "ssm send-command on the host: journalctl -u opal-gateway --since '2026-10-18 19:00:00 UTC' --until '2026-10-18 20:00:00 UTC' --utc --no-pager -o short-iso | grep -cE '\"POST /mcp[^\"]*\" 429' (and the same for 429 on other routes); first access line = first 'POST /mcp' line; counts only",
+   "first_access_line_ts": "2026-10-18T19:23:53Z",
+   "window_end": "2026-10-18T20:00:00Z",
+   "post_mcp_429_lines": 0,
+   "other_429_lines": 0,
+   "last_line_ts": "2026-10-18T19:59:53Z",
+   "earliest_line_ts": "2026-10-18T19:00:18Z",
+   "post_mcp_lines": 180
+  },
+  "lake": {
+   "source": "s3://opal-mcp-audit audit/dt=2026-10-18/ listed (StartAfter the window start) and every object read; event gw_ratelimit counted, suppressed summed",
+   "window_start": "2026-10-18T19:00:00Z",
+   "window_end": "2026-10-18T20:00:00Z",
+   "gw_ratelimit_rows": 0,
+   "suppressed_sum": 0,
+   "denominator": 399,
+   "read_errors": 0
+  },
+  "alb_access_logs": {
+   "files_listed_under_the_day": 576,
+   "files_in_window": 26,
+   "files_read": 26,
+   "lines": 795,
+   "mcp_lines": 581,
+   "status_pairs_elb_target": {
+    "200/200": 463,
+    "202/202": 2,
+    "301/-": 4,
+    "302/-": 25,
+    "400/-": 12,
+    "400/400": 47,
+    "401/401": 45,
+    "403/-": 181,
+    "502/-": 16
+   },
+   "lines_with_elb_status_429": 0,
+   "lines_with_target_status_429": 0,
+   "429_lines_between_19_20_and_19_30": []
+  },
+  "alb_access_logs_by_day": {
+   "2026-10-17": {
+    "files": 601,
+    "files_read": 601,
+    "lines": 60572,
+    "lines_with_a_429": 26,
+    "429_first_second": "2026-10-17T17:21:43Z",
+    "429_last_second": "2026-10-17T17:21:44Z",
+    "429_on_mcp_with_target_429": 26
+   },
+   "2026-10-18": {
+    "files": 576,
+    "files_read": 576,
+    "lines": 14837,
+    "lines_with_a_429": 0,
+    "429_first_second": null,
+    "429_last_second": null,
+    "429_on_mcp_with_target_429": 0
+   },
+   "2026-10-19": {
+    "files": 146,
+    "files_read": 146,
+    "lines": 4885,
+    "lines_with_a_429": 0,
+    "429_first_second": null,
+    "429_last_second": null,
+    "429_on_mcp_with_target_429": 0
+   }
+  },
+  "lake_2026_10_17_1715_1730": {
+   "objects_listed": 209,
+   "rows": [
+    {
+     "object_time": "17:21:43Z",
+     "suppressed": 0,
+     "count_in_window": 120
+    }
+   ]
+  },
+  "throttle_rule": {
+   "refusal_window_s": 10.0,
+   "first_refusal_writes": true,
+   "source": "app/ratelimit.py:197 at e09c30c3f0"
+  },
+  "journal_covers_the_429_time": false,
+  "verdict": "UNDETERMINED",
+  "response_shape": {
+   "guard_middleware_body_seen": null,
+   "evidence": "No response body is kept by any log read here (the journal holds the access line only, the ALB access log holds status codes and sizes, not bodies), so the body shape could not be read: null. What was read: the ALB logged 26 lines with a 429 on the 2026-10-17 17:21 span, all POST /mcp with the TARGET (this service) answering 429, so the only 429s the account's ALB recorded in three days came from this service's limiter; on 2026-10-18 the ALB logged 14837 lines (0 with a 429) and on 2026-10-19 so far 4885 lines (0 with a 429)."
+  },
+  "evidence": [
+   "Journal 2026-10-18T19:23:53Z to 2026-10-18T20:00:00Z: 180 POST /mcp lines, 0 answered 429 and 0 429s on other routes; the unit's journal reaches back to 2026-10-18T19:00:18Z but the access log only returned at the first POST /mcp line, 2026-10-18T19:23:53Z, so the journal cannot show 19:20Z to 19:23:53Z: covers=False.",
+   "ALB access logs (kept by the account, read-only): 26 files / 795 lines for 2026-10-18T19:00Z to 20:00Z with status pairs {\"200/200\": 463, \"202/202\": 2, \"301/-\": 4, \"302/-\": 25, \"400/-\": 12, \"400/400\": 47, \"401/401\": 45, \"403/-\": 181, \"502/-\": 16}; 0 lines carry a 429 on the ALB or the target status, including 19:20Z to 19:30Z (the 502 lines with no target status are ALB-generated).",
+   "Whole days in the ALB logs: 2026-10-18 14837 lines, 0 with a 429; 2026-10-19 so far 4885 lines, 0 with a 429; the only 429s on 2026-10-17 to 19 are 26 lines from 2026-10-17T17:21:43Z to 2026-10-17T17:21:44Z on 2026-10-17, 26 of them POST /mcp answered by the target.",
+   "Lake, 2026-10-17T17:15Z to 17:30Z: 1 gw_ratelimit row(s) for those 26 ALB-logged 429s (row object times ['17:21:43Z'], suppressed [0]): the first refusal wrote and the throttle folded the rest, which is the throttle rule at e09c30c3f0 (refusal window 10.0 s) working as written.",
+   "Lake 2026-10-18T19:00Z to 20:00Z: 0 gw_ratelimit rows over 399 objects (0 read errors): there is no refusal to explain in that hour; a 429 at about 19:2xZ on 2026-10-18 is in neither the journal nor the ALB log."
+  ]
+ }
+}
