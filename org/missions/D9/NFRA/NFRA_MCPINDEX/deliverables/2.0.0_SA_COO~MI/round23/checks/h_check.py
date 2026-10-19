@@ -460,14 +460,20 @@ def k_ac2(channel_ids, prefix, src_channels=None):
     arm("a case that needs an earlier answer says so with depends_on, naming an existing case id", all((not c.get("depends_on")) or all(d in {x.get("case_id") for x in cases} for d in c["depends_on"]) for c in cases), "depends_on names a missing case")
 
 
-# ------------------------------------------------------------------------------------------------ h6: misrouted
+# ------------------------------------------------------------------------------------------------ h6 (v2): route recorded, misrouted
 BATT_PY = os.path.join(PKG, "tool_battery.py")
+ROUTING_PY = os.path.join(PKG, "routing_table.py")
 
 
-def h6_grade(tmp, tag, results_path):
+def h6_grade(tmp, tag, results_path, routing_path="__default__"):
     out = os.path.join(tmp, "g_%s.json" % tag)
-    rc, so, se = run([BATT_PY, "grade", "--census", os.path.join(R22, "fixtures", "expected_census.json"), "--cases", fx("h6_cases.json"), "--results", results_path,
-                      "--channel", "opal-data-harvest", "--channel", "opal-data-assets", "--out", out])
+    args = [BATT_PY, "grade", "--census", os.path.join(R22, "fixtures", "expected_census.json"), "--cases", fx("h6_cases.json"), "--results", results_path,
+            "--channel", "opal-data-harvest", "--channel", "opal-data-assets", "--out", out]
+    if routing_path == "__default__":
+        routing_path = fx("h6_routing.json")
+    if routing_path:
+        args += ["--routing", routing_path]
+    rc, so, se = run(args)
     return rc, so, se, (jload(out) if os.path.isfile(out) else None)
 
 
@@ -478,18 +484,34 @@ def tool_of(doc, tool):
     return {}
 
 
+def case_of(doc, cid):
+    for c in (doc or {}).get("cases", []):
+        if c.get("case_id") == cid:
+            return c
+    return {}
+
+
 def h6_ac1(tmp):
-    print("DENOMINATOR: fixture census scoped to opal-data-harvest and opal-data-assets: 4 tools, 4 cases; R1 and R2 carry expect_source, R3 and R4 do not")
+    print("DENOMINATOR: fixture census scoped to opal-data-harvest and opal-data-assets: 4 tools, 4 cases; a routing table with a source set per tool; R1 and R2 results cite their sources, R3 and R4 do not")
     res = jload(fx("h6_results.json"))
     rc, so, se, doc = h6_grade(tmp, "g", fx("h6_results.json"))
-    arm("green: every answer carries the expected source, PASS=4", rc == 0 and line(so, "GRADE") == "GRADE tools=4 PASS=4 EMPTY-CORRECT=0 REFUSED-CORRECT=0 PREVIEW-ONLY=0 FAIL=0", "rc=%s %r %s" % (rc, line(so, "GRADE"), se[-200:]))
+    arm("green: PASS=4", rc == 0 and line(so, "GRADE") == "GRADE tools=4 PASS=4 EMPTY-CORRECT=0 REFUSED-CORRECT=0 PREVIEW-ONLY=0 FAIL=0", "rc=%s %r %s" % (rc, line(so, "GRADE"), se[-200:]))
+    arm("the record says route: response-cited where the response names a source, code-cited where it does not",
+        (case_of(doc, "R1").get("route"), case_of(doc, "R2").get("route"), case_of(doc, "R3").get("route"), case_of(doc, "R4").get("route")) == ("response-cited", "response-cited", "code-cited", "code-cited"),
+        "routes=%r" % [case_of(doc, c).get("route") for c in ("R1", "R2", "R3", "R4")])
 
-    def variant(mutate, tag):
+    def variant(mutate, tag, rmutate=None):
         r = copy.deepcopy(res)
         mutate(r)
         p = os.path.join(tmp, "r_%s.json" % tag)
         jdump(r, p)
-        return h6_grade(tmp, tag, p)
+        rp = fx("h6_routing.json")
+        if rmutate:
+            t = jload(rp)
+            rmutate(t)
+            rp = os.path.join(tmp, "rt_%s.json" % tag)
+            jdump(t, rp)
+        return h6_grade(tmp, tag, p, rp)
 
     def get(r, cid):
         return [x for x in r["results"] if x["case_id"] == cid][0]
@@ -497,27 +519,33 @@ def h6_ac1(tmp):
     def m1(r):
         get(r, "R1")["answer_source"] = ["bloomberg/harvest/silver/article/date=2026-10-05/"]
     rc, so, se, doc = variant(m1, "m1")
-    arm("an answer from another source reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted" and tool_of(doc, "harvest_list").get("verdict") == "FAIL", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+    arm("a response that cites a source outside the routed set reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
 
     def m2(r):
-        del get(r, "R1")["answer_source"]
+        get(r, "R2")["answer_source"].append("opal-data-bd/silver/fees/")
     rc, so, se, doc = variant(m2, "m2")
-    arm("an answer with no source field reads FAIL source_unchecked, never PASS", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "source_unchecked", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+    arm("one cited source outside the set is enough to FAIL, even beside a matching one", rc == 1 and tool_of(doc, "harvest_read").get("fail_class") == "misrouted", "rc=%s %r" % (rc, tool_of(doc, "harvest_read")))
 
-    def m3(r):
-        get(r, "R1")["answer_source"] = []
-    rc, so, se, doc = variant(m3, "m3")
-    arm("an empty answer_source list reads FAIL source_unchecked", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "source_unchecked", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+    def noop(r):
+        pass
 
-    def m4(r):
-        get(r, "R3")["answer_source"] = ["anything/at/all/"]
-    rc, so, se, doc = variant(m4, "m4")
-    arm("a case with no expect_source is unaffected by its answer_source", rc == 0 and tool_of(doc, "client_get_holdings").get("verdict") == "PASS", "rc=%s %r" % (rc, tool_of(doc, "client_get_holdings")))
-    arm("one matching element among several is enough", tool_of(h6_grade(tmp, "g2", fx("h6_results.json"))[3], "harvest_read").get("verdict") == "PASS", "harvest_read not PASS")
+    def rm3(t):
+        [x for x in t["tools"] if x["tool"] == "schwab_query"][0].update({"verdict": "MISROUTED", "class": "code"})
+    rc, so, se, doc = variant(noop, "m3", rm3)
+    arm("a code-cited answer needs a ROUTED table row: MISROUTED reads FAIL route_unproven", rc == 1 and tool_of(doc, "schwab_query").get("fail_class") == "route_unproven" and tool_of(doc, "client_get_holdings").get("verdict") == "PASS", "rc=%s %r" % (rc, tool_of(doc, "schwab_query")))
+
+    def rm4(t):
+        t["tools"] = [x for x in t["tools"] if x["tool"] != "schwab_query"]
+    rc, so, se, doc = variant(noop, "m4", rm4)
+    arm("a tool absent from the routing table reads FAIL route_unproven", rc == 1 and tool_of(doc, "schwab_query").get("fail_class") == "route_unproven", "rc=%s %r" % (rc, tool_of(doc, "schwab_query")))
+    rc, so, se, doc = variant(m1, "m5", None)
+    # same wrong citation, but graded WITHOUT --routing: the round-22 behaviour, route null
+    rc2, so2, se2, doc2 = h6_grade(tmp, "m5b", os.path.join(tmp, "r_m1.json"), routing_path=None)
+    arm("without --routing the grade is the round-22 grade and the cases carry no route key", rc2 == 0 and "route" not in case_of(doc2, "R1") and line(so2, "GRADE") == "GRADE tools=4 PASS=4 EMPTY-CORRECT=0 REFUSED-CORRECT=0 PREVIEW-ONLY=0 FAIL=0", "rc=%s %r %r" % (rc2, line(so2, "GRADE"), case_of(doc2, "R1").get("route")))
 
 
 def h6_ac2(tmp):
-    print("DENOMINATOR: the planted wrong link (plant-route) and the round-22 battery arms (g4.AC1 and g4.AC2) still holding")
+    print("DENOMINATOR: the planted wrong citation (plant-route) and the round-22 battery arms (g4.AC1 and g4.AC2) still holding")
     out = os.path.join(tmp, "planted.json")
     rc, so, se = run([BATT_PY, "plant-route", "--cases", fx("h6_cases.json"), "--results", fx("h6_results.json"), "--case", "R1", "--out", out])
     arm("plant-route rc 0 and writes the file", rc == 0 and os.path.isfile(out), "rc=%s %s" % (rc, se[-200:]))
@@ -526,15 +554,147 @@ def h6_ac2(tmp):
         orig = jload(fx("h6_results.json"))
         changed = [x["case_id"] for x, y in zip(planted["results"], orig["results"]) if x != y]
         r1 = [x for x in planted["results"] if x["case_id"] == "R1"][0]
-        arm("only the named case changes, and its answer_source no longer names the expected source", changed == ["R1"] and isinstance(r1.get("answer_source"), list) and r1["answer_source"] and all("amgt/harvest/gold/" not in s for s in r1["answer_source"]), "changed=%r answer_source=%r" % (changed, r1.get("answer_source")))
+        arm("only the named case changes, and its answer_source is now a source outside every routed set", changed == ["R1"] and r1.get("answer_source") == ["planted/wrong/source/"], "changed=%r answer_source=%r" % (changed, r1.get("answer_source")))
         rc, so, se, doc = h6_grade(tmp, "p", out)
-        arm("the planted wrong link reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
-    rc, so, se = run([BATT_PY, "plant-route", "--cases", fx("h6_cases.json"), "--results", fx("h6_results.json"), "--case", "R3", "--out", os.path.join(tmp, "p3.json")])
-    arm("plant-route on a case with no expect_source is refused (rc 2)", rc == 2, "rc=%s" % rc)
+        arm("the planted wrong source reads FAIL misrouted", rc == 1 and tool_of(doc, "harvest_list").get("fail_class") == "misrouted", "rc=%s %r" % (rc, tool_of(doc, "harvest_list")))
+    rc, so, se = run([BATT_PY, "plant-route", "--cases", fx("h6_cases.json"), "--results", fx("h6_results.json"), "--case", "NOPE", "--out", os.path.join(tmp, "p3.json")])
+    arm("plant-route on a case that does not exist is refused (rc 2)", rc == 2, "rc=%s" % rc)
     for cid in ("g4.AC1", "g4.AC2"):
         p = subprocess.run([sys.executable, os.path.join(R22, "checks", "g_check.py"), cid], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
         o = p.stdout.decode("utf-8", "replace").replace("\r", "")
         arm("round-22 %s still PASSes" % cid, p.returncode == 0 and "RESULT: PASS" in o, o[-300:])
+
+
+# ------------------------------------------------------------------------------------------------ r1: the routing table emitter
+def r1_run(tmp, tag, extra=()):
+    out = os.path.join(tmp, "rt_%s.json" % tag)
+    rc, so, se = run([ROUTING_PY, "--census", fx("r1_census.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", fx("r1_sources.json"), "--out", out] + list(extra))
+    return rc, so, se, (jload(out) if os.path.isfile(out) else None)
+
+
+def r1_ac1(tmp):
+    print("DENOMINATOR: fixture census 7 tools (4 channels), catalog 3 rows, source sets for 6 tools (tU1 has none); 8 (tool, row) pairs, one of them a Black Diamond row linked on a Schwab tool")
+    rc, so, se, doc = r1_run(tmp, "g")
+    arm("exit 1 (defects remain) and the table is written", rc == 1 and doc is not None, "rc=%s %s" % (rc, se[-200:]))
+    arm("stdout line", line(so, "ROUTING") == "ROUTING tools=7 pairs=8 routed_pairs=7 misrouted_tools=3 link=1 code=1 display=1 untraced=1", "got %r" % line(so, "ROUTING"))
+    by = {t.get("tool"): t for t in (doc or {}).get("tools", [])}
+    arm("header and one entry per census tool", (doc or {}).get("schema") == "gateway_routing_table/1" and sorted(by) == ["tB1", "tC1", "tD1", "tM1", "tS1", "tS2", "tU1"], "tools=%r" % sorted(by))
+    arm("clean tools read ROUTED", all(by.get(t, {}).get("verdict") == "ROUTED" and by[t].get("class") is None for t in ("tS1", "tB1", "tM1")), "got %r" % {t: (by.get(t, {}).get("verdict"), by.get(t, {}).get("class")) for t in ("tS1", "tB1", "tM1")})
+    s2 = by.get("tS2", {})
+    pr = {p.get("row"): (p.get("verdict"), p.get("class")) for p in s2.get("pairs", [])}
+    arm("Andrew's case: the Black Diamond row linked on a Schwab tool is MISROUTED (link), its Schwab row ROUTED, the tool MISROUTED (link)",
+        pr == {"rowS1": ("ROUTED", None), "rowB1": ("MISROUTED", "link")} and (s2.get("verdict"), s2.get("class")) == ("MISROUTED", "link"), "got %r %r" % (pr, (s2.get("verdict"), s2.get("class"))))
+    c1 = by.get("tC1", {})
+    arm("the intent check: a Schwab tool whose code reads a Black Diamond source is MISROUTED (code) although its link is right", (c1.get("verdict"), c1.get("class")) == ("MISROUTED", "code") and [p.get("verdict") for p in c1.get("pairs", [])] == ["ROUTED"], "got %r" % c1)
+    d1 = by.get("tD1", {})
+    arm("the display check: a tool listed under a vendor segment its code does not read is MISROUTED (display)", (d1.get("verdict"), d1.get("class")) == ("MISROUTED", "display"), "got %r" % d1)
+    u1 = by.get("tU1", {})
+    arm("a tool with no source set reads UNTRACED, never ROUTED", u1.get("verdict") == "UNTRACED", "got %r" % u1)
+    arm("every ROUTED or MISROUTED tool carries its source set with a cite per member", all(t.get("source_set") and all(s.get("cite") for s in t["source_set"]) for t in by.values() if t.get("verdict") != "UNTRACED"), "a source set or cite is missing")
+    cnt = (doc or {}).get("counts", {})
+    arm("counts", (cnt.get("tools"), cnt.get("pairs"), cnt.get("routed_pairs"), cnt.get("link"), cnt.get("code"), cnt.get("display"), cnt.get("untraced")) == (7, 8, 7, 1, 1, 1, 1), "got %r" % cnt)
+
+
+def r1_ac2(tmp):
+    print("DENOMINATOR: three planted negatives on the clean tool tS1; each must be detected with its class; determinism; refusals")
+    for kind in ("link", "code", "display"):
+        out = os.path.join(tmp, "pl_%s.json" % kind)
+        rc, so, se = run([ROUTING_PY, "--census", fx("r1_census.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", fx("r1_sources.json"), "--out", out, "--plant", kind, "--tool", "tS1"])
+        doc = jload(out) if os.path.isfile(out) else {}
+        t = [x for x in doc.get("tools", []) if x.get("tool") == "tS1"]
+        arm("planted %s: detected as MISROUTED (%s), rc 0 and the PLANT line" % (kind, kind), rc == 0 and bool(t) and (t[0].get("verdict"), t[0].get("class")) == ("MISROUTED", kind)
+            and line(so, "PLANT") == "PLANT kind=%s tool=tS1 verdict=MISROUTED class=%s" % (kind, kind), "rc=%s %r %r" % (rc, line(so, "PLANT"), t[:1]))
+    rc1, _, _, d1 = r1_run(tmp, "a")
+    rc2, _, _, d2 = r1_run(tmp, "b")
+    arm("two runs give the same bytes", open(os.path.join(tmp, "rt_a.json"), "rb").read() == open(os.path.join(tmp, "rt_b.json"), "rb").read() if d1 and d2 else False, "differs or absent")
+    rc, so, se = run([ROUTING_PY, "--census", fx("r1_census.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", fx("r1_sources.json"), "--out", os.path.join(tmp, "x.json"), "--plant", "link", "--tool", "nope"])
+    arm("a plant on a tool the census does not serve is refused (rc 2)", rc == 2, "rc=%s" % rc)
+    bad = os.path.join(tmp, "bad_sources.json")
+    jdump({"schema": "gateway_source_sets/1", "tools": [{"tool": "tS1", "vendors": ["schwab"], "sources": [{"kind": "s3", "bucket": "bkt-s", "vendor": "schwab"}]}]}, bad)
+    rc, so, se = run([ROUTING_PY, "--census", fx("r1_census.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", bad, "--out", os.path.join(tmp, "y.json")])
+    arm("a source with no cite is refused (rc 2)", rc == 2, "rc=%s" % rc)
+    rc, so, se = run([ROUTING_PY, "--census", os.path.join(tmp, "absent.json"), "--catalog", fx("r1_catalog.yaml"), "--sources", fx("r1_sources.json"), "--out", os.path.join(tmp, "z.json")])
+    arm("an absent census is refused (rc 2)", rc == 2, "rc=%s" % rc)
+
+
+# ------------------------------------------------------------------------------------------------ s: source-set data cells
+SRC_VENDORS_EXTRA = ("opal", "ycharts", "microsoft", "bloomberg", "other")
+
+
+def s_scope(channel_ids):
+    cen, mm, tools, chan_of = real_scope()
+    return cen, tools, sorted({t for c in cen["channels"] if c["id"] in channel_ids for t in c["tools"]})
+
+
+def catalog_vendors():
+    import yaml
+    cat = yaml.safe_load(open(os.path.join(APP, "refs", "DATA_CATALOG.yaml"), encoding="utf-8"))
+    v = set()
+    for sec in ("silver_datasets", "portal_datasets", "harvest_datasets"):
+        for r in cat.get(sec) or []:
+            if isinstance(r, dict) and isinstance(r.get("vendor"), str):
+                v.add(r["vendor"])
+    return v | set(SRC_VENDORS_EXTRA)
+
+
+def cite_ok(text):
+    m = re.fullmatch(r"(app/[A-Za-z0-9_./-]+\.py):(\d+)", str(text))
+    if not m:
+        return None
+    f = os.path.join(APP, m.group(1)[len("app/"):])
+    if not os.path.isfile(f):
+        return None
+    txt = open(f, encoding="utf-8", errors="replace").read()
+    return txt if 1 <= int(m.group(2)) <= len(txt.split("\n")) else None
+
+
+def s_ac1(channel_ids):
+    cen, tools, scope = s_scope(channel_ids)
+    print("DENOMINATOR: %d tool(s) in scope: channels %s; census %s" % (len(scope), ",".join(channel_ids), os.path.basename(CENSUS)))
+    path = sys.argv[2] if len(sys.argv) > 2 else None
+    arm("a source-set file path was given and exists", bool(path) and os.path.isfile(path), "usage: h_check.py <id> <source_sets.json>")
+    if not (path and os.path.isfile(path)):
+        return
+    doc = jload(path)
+    arm("schema", doc.get("schema") == "gateway_source_sets/1" and isinstance(doc.get("tools"), list), "schema=%r" % doc.get("schema"))
+    names = [t.get("tool") for t in doc.get("tools", [])]
+    arm("every tool in scope appears exactly once, and no other", sorted(names) == scope, "missing=%r extra=%r dup=%r" % (sorted(set(scope) - set(names)), sorted(set(names) - set(scope)), sorted(n for n in set(names) if names.count(n) > 1)))
+    arm("every tool has at least one source", all(isinstance(t.get("sources"), list) and t["sources"] for t in doc.get("tools", [])), "a tool has no source")
+
+
+def s_ac2(channel_ids):
+    cen, tools, scope = s_scope(channel_ids)
+    print("DENOMINATOR: %d tool(s) in scope; the allowed vendors are the catalog's own plus %s" % (len(scope), ", ".join(SRC_VENDORS_EXTRA)))
+    path = sys.argv[2] if len(sys.argv) > 2 else None
+    arm("a source-set file path was given and exists", bool(path) and os.path.isfile(path), "usage: h_check.py <id> <source_sets.json>")
+    if not (path and os.path.isfile(path)):
+        return
+    doc = jload(path)
+    vendors = catalog_vendors()
+    need = {"s3": ("bucket", "prefix"), "store": ("store",), "integration": ("integration",), "graph": ("graph",)}
+    bad_shape, bad_vendor, bad_cite, bad_ground, bad_union = [], [], [], [], []
+    for t in doc.get("tools", []):
+        srcs = t.get("sources") or []
+        for s in srcs:
+            kind = s.get("kind")
+            if kind not in need or not all(isinstance(s.get(k), str) and (k == "prefix" or s[k].strip()) for k in need[kind]):
+                bad_shape.append(t.get("tool"))
+            if s.get("vendor") not in vendors:
+                bad_vendor.append((t.get("tool"), s.get("vendor")))
+            txt = cite_ok(s.get("cite"))
+            if txt is None:
+                bad_cite.append(t.get("tool"))
+            else:
+                key = s.get("bucket") or s.get("store") or s.get("integration") or s.get("graph")
+                if not (isinstance(key, str) and key.strip() and (key in txt or key.replace("-", "_") in txt or key.upper().replace("-", "_") in txt)):
+                    bad_ground.append((t.get("tool"), key))
+        if sorted({s.get("vendor") for s in srcs}) != sorted(t.get("vendors") or []):
+            bad_union.append(t.get("tool"))
+    arm("every source has the fields of its kind (s3: bucket and prefix; store; integration; graph)", not bad_shape, "tools %r" % sorted(set(bad_shape))[:6])
+    arm("every source vendor is in the allowed vocabulary", not bad_vendor, "got %r" % bad_vendor[:6])
+    arm("every cite is app/<file>.py:<line> naming a real line of the gateway source", not bad_cite, "tools %r" % sorted(set(bad_cite))[:6])
+    arm("the cited file names the source (the bucket, store, integration or graph string appears in it)", not bad_ground, "got %r" % bad_ground[:6])
+    arm("a tool's vendors list equals the set of its sources' vendors", not bad_union, "tools %r" % bad_union[:6])
 
 
 CHECKS = {
@@ -543,6 +703,13 @@ CHECKS = {
     "h3.AC1": h3_ac1, "h3.AC2": h3_ac2, "h3.AC3": lambda t: arm("pytest", pytest_count(os.path.join(TESTS, "test_index_coverage_explained.py"), 4)),
     "h4.AC1": lambda t: d_ac1(False), "h4.AC2": lambda t: d_ac2(False),
     "h5.AC1": lambda t: d_ac1(True), "h5.AC2": lambda t: d_ac2(True),
+    "r1.AC1": r1_ac1, "r1.AC2": r1_ac2, "r1.AC3": lambda t: arm("pytest", pytest_count(os.path.join(TESTS, "test_routing_table.py"), 8)),
+    "s1.AC1": lambda t: s_ac1(("opal-data-assets", "schwab", "blackdiamond")), "s1.AC2": lambda t: s_ac2(("opal-data-assets", "schwab", "blackdiamond")),
+    "s2.AC1": lambda t: s_ac1(("opal-data-etfs",)), "s2.AC2": lambda t: s_ac2(("opal-data-etfs",)),
+    "s3.AC1": lambda t: s_ac1(("opal-data-portal-v2", "opal-data-mdpf", "portal_index")), "s3.AC2": lambda t: s_ac2(("opal-data-portal-v2", "opal-data-mdpf", "portal_index")),
+    "s4.AC1": lambda t: s_ac1(("opal-data-harvest", "dynamodb")), "s4.AC2": lambda t: s_ac2(("opal-data-harvest", "dynamodb")),
+    "s5.AC1": lambda t: s_ac1(("ycharts", "globgrph", "opal_discover", "opal_portal")), "s5.AC2": lambda t: s_ac2(("ycharts", "globgrph", "opal_discover", "opal_portal")),
+    "s6.AC1": lambda t: s_ac1(("m365",)), "s6.AC2": lambda t: s_ac2(("m365",)),
     "h6.AC1": h6_ac1, "h6.AC2": h6_ac2, "h6.AC3": lambda t: arm("pytest", pytest_count(os.path.join(TESTS, "test_tool_battery_route.py"), 5)),
     "k1.AC1": lambda t: k_ac1(("opal-data-etfs",), "K1-"), "k1.AC2": lambda t: k_ac2(("opal-data-etfs",), "K1-", ("opal-data-etfs",)),
     "k2.AC1": lambda t: k_ac1(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-"), "k2.AC2": lambda t: k_ac2(("opal-data-portal-v2", "opal-data-mdpf", "portal_index"), "K2-", ("opal-data-portal-v2", "opal-data-mdpf", "portal_index")),
