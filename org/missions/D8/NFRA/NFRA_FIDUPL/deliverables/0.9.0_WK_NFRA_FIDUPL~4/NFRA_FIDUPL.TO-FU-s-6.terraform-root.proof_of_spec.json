@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-6",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-6.terraform-root.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-6.terraform-root.md",
+    "group": "OTHER",
+    "vintage_commit": "38d4f70df7"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-4. Never applied (plan only). Plan refused at the name precondition, see surprise NFRA_FIDUPL-D1-W4-S1."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/names.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. The 13 name() calls through modules/opal_name, system fidelity, scope alongside. Refused at plan (S1)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/box.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. Security group (no ingress, egress open, S3), instance profile, box role, SSM core attachment, box inline policy, t3.medium instance with IMDSv2 required and encrypted gp3 root. Never applied."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. SSM Automation document (start, wait Online, run wrapper, stop on failure) and its scoped automation role. Never applied."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. Three EventBridge rules at the Schwab window crons (PROVISIONAL), state DISABLED, and the scoped schedule role. Never applied; no schedule is enabled."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/outputs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1b5c10e11a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. Outputs: instance id, document name, box role ARN. The secret id pointer is absent (S2)."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "abf169f208",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows NFRA_FIDUPL-D1-W4-S1 through S7 appended, LOCAL on wk-NFRA_FIDUPL-4."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU6-AC1",
+      "criterion_verbatim": "the root initialises without a backend and validates.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v",
+      "output_evidence": "R1-FU6V-OK Success! The configuration is valid.",
+      "denominator": "1 of 1 validate runs (rc 0)",
+      "status": "PASS",
+      "expect": "R1-FU6V-OK Success! The configuration is valid\\."
+    },
+    {
+      "criterion_id": "FU6-AC2",
+      "criterion_verbatim": "no ingress, no wildcard secret grant, no secret version, prevent_destroy present.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6g",
+      "output_evidence": "R1-FU6G-FAIL 0.0.0.0/0; no prevent_destroy on the secret",
+      "denominator": "2 of 7 guard clauses failed (ingress, 0.0.0.0/0, secret prefix wildcard, Resource star, secret version, prevent_destroy, non-ASCII)",
+      "status": "FAIL",
+      "status_reason": "The guard's 0.0.0.0/0 clause is the order's egress-open rule (surprise NFRA_FIDUPL-D1-W4-S3); the prevent_destroy clause is absent because the Wealthscape secret piece is stopped (surprise NFRA_FIDUPL-D1-W4-S2). Not evaded.",
+      "expect": "R1-FU6G-OK no ingress"
+    },
+    {
+      "criterion_id": "FU6-AC3",
+      "criterion_verbatim": "the plan against the real backend only adds.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6p",
+      "output_evidence": "R1-FU6P-FAIL plan rc=1 scope_class). Direct plan: 13 x 'Error: Module output value precondition failed' -- 'local.name_scope_ok is false'.",
+      "denominator": "0 of 17 intended resources planned; 13 of 13 name calls refused by the builder precondition",
+      "status": "FAIL",
+      "status_reason": "The HCL builder's generated table predates the alongside scope row, so the plan is refused before any resource is planned (surprise NFRA_FIDUPL-D1-W4-S1).",
+      "expect": "R1-FU6P-OK Plan: \\d+ to add, 0 to change, 0 to destroy\\."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the three acceptance checks read validate, guard and plan outputs, and the only mutable act of this cell, dropping the scope from a name call, is refused by the builder (surprise S1) rather than changing a result.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the plan is refused at its first precondition; a second plan run was made directly and printed the same 13-error class, but no full output was retained for a line-by-line comparison.",
+      "observed": "direct plan: 13 precondition errors; fu6p check: rc=1 with the same refusal class",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Wealthscape secret resource (metadata only, prevent_destroy), its secret grant on the box role, and the secret id output",
+      "reason": "No SECRET-grammar builder exists; name() refuses a secret kind. The refusal clause forbids a typed name. Surprise NFRA_FIDUPL-D1-W4-S2."
+    },
+    {
+      "item": "terraform apply, safe-apply, enabling any EventBridge rule, starting or stopping the box, any AWS object created or changed",
+      "reason": "FU-s-6 is plan-only. The rules are created DISABLED and the box is never started by this round."
+    },
+    {
+      "item": "A Describe or List grant on a wildcard Resource for the automation's wait and stop steps",
+      "reason": "The order forbids a * Resource. The runtime need is unproven; surprise NFRA_FIDUPL-D1-W4-S4."
+    },
+    {
+      "item": "A dedicated VPC or subnet for the box",
+      "reason": "The order names none; the default VPC is used by data source. Surprise NFRA_FIDUPL-D1-W4-S7."
+    },
+    {
+      "item": "The FU6-AC2 egress literal and the prevent_destroy clause as the guard reads them",
+      "reason": "Recorded as a FAIL, not rewritten to pass the guard. Surprise NFRA_FIDUPL-D1-W4-S3."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W4-S1: the HCL name builder's generated_locals.tf predates the alongside scope row, so all 13 name calls refuse at plan.",
+    "NFRA_FIDUPL-D1-W4-S2: no builder names the Wealthscape secret (SECRET grammar graded only), so the secret piece is stopped.",
+    "NFRA_FIDUPL-D1-W4-S3: the FU6-AC2 guard flags the 0.0.0.0/0 egress rule the order requires.",
+    "NFRA_FIDUPL-D1-W4-S4: the wait and stop steps need describe actions that cannot be resource-scoped under the no-star rule (INFERRED).",
+    "NFRA_FIDUPL-D1-W4-S5: the schedule role carries iam:PassRole on the automation role, beyond the one action named.",
+    "NFRA_FIDUPL-D1-W4-S6: the box is created running; the first apply needs a stop (ARMED, disarm owner 2.0.0_SA_COO~P1).",
+    "NFRA_FIDUPL-D1-W4-S7: the default VPC is assumed by data source; the order names no VPC (INFERRED)."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~4/NFRA_FIDUPL.TO-FU-s-6.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/canonical-fidelity-ec2 init -backend=false; validate; plan",
+      "result": "Terraform v1.15.8: validate passes (FU6-AC1); plan refused by 13 module precondition errors on scope alongside (FU6-AC3)."
+    },
+    {
+      "tool": "lib/opal_naming.py (python -I)",
+      "invocation": "address('fidelity','alongside','bronze','x','20000101'); name('fidelity','alongside', <function>, <kind>)",
+      "result": "address gives s3://opal-data-assets/fidelity/alongside/bronze/x/20000101; name gives fidelity-alongside-<function>-<kind> for the chosen kinds; name refuses kind credentials."
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fu6p",
+      "result": "R1-FU6V-OK; R1-FU6G-FAIL; R1-FU6P-FAIL (verbatim in the session log)."
+    }
+  ]
+}

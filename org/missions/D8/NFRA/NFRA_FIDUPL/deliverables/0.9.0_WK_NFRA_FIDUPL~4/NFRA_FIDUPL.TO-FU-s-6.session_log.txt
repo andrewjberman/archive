@@ -1,0 +1,40 @@
+SESSION LOG -- 0.9.0_WK_NFRA_FIDUPL~4 on NFRA_FIDUPL.TO-FU-s-6 (2026-10-19, worktree C:/tmp/fidupl-w4, branch wk-NFRA_FIDUPL-4)
+Verbatim outputs of the criterion invocations and of the probes behind the surprise rows. No account number, no client
+name and no secret value appears here: the plan output carries only the precondition errors.
+
+1. First act
+   git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-4 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+
+2. Builder probes (python -I, lib/opal_naming.py, HEAD 96e9daa459 at the cut)
+   address('fidelity','alongside','bronze','x','20000101') -> s3://opal-data-assets/fidelity/alongside/bronze/x/20000101
+     (landing prefix with table and date stripped: fidelity/alongside/bronze)
+   name('fidelity','alongside','uploader','role') -> fidelity-alongside-uploader-role   (also profile, sg, policy, document,
+     runner, automation role/policy, schedule role/policy, fetch daily with qualifier leg-1)
+   name('fidelity','alongside','wealthscape','credentials') -> ValueError: kind 'credentials' is neither a NAMING_SCHEMA.json kind nor a cadence
+   python -I lib/opal_naming.py generate --out .scratch/gen -> FileNotFoundError: data/firm_registry.json
+
+3. Sibling reads: canonical-schwab-ec2/main.tf, secrets.tf, monolith-daily-schedule.tf, iam.tf; modules/opal_name/main.tf,
+   variables.tf, generated_locals.tf (no 'alongside' entry); infra/logic/registry/scopes.json (alongside row present).
+
+4. terraform version -> Terraform v1.15.8 on windows_amd64
+
+5. python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v
+   R1-FU6V-OK Success! The configuration is valid.                                     (rc 0)
+
+6. python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6g
+   R1-FU6G-FAIL 0.0.0.0/0; no prevent_destroy on the secret                             (rc 0; the verdict line is the result)
+
+7. python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6p
+   R1-FU6P-FAIL plan rc=1 scope_class).                                                 (rc 0; the verdict line is the result)
+
+8. terraform -chdir=infra/aws/terraform/canonical-fidelity-ec2 plan -input=false -no-color (direct, same tree)
+   13 x "Error: Module output value precondition failed" -- "local.name_scope_ok is false" --
+   "scope must be the LONG form of a FIRM, GLOBAL or MASTER row of infra/logic/registry/scopes.json (generated_locals.tf
+   scope_long, scope_class)."   The backend read and the state read succeeded; no resource was planned.
+
+9. Commits on wk-NFRA_FIDUPL-4 (LOCAL): 1b5c10e11a (the Terraform root), abf169f208 (surprise rows W4-S1..S7).
+   A first safe-commit attempt over the directory was refused by the commit gate because the local provider cache under
+   .terraform/ (gitignored) was staged by the directory pathspec; nothing was committed by that attempt, and the second
+   attempt named the six .tf files and the lock file explicitly.
+
+10. Not done, by design: no terraform apply, no safe-apply, no enable of any rule, no AWS object created or changed.
