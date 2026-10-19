@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_DASHBD.TO-DB-i-19",
+  "firm": "INF",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/decompositions/IRPT_DASHBD_DECOMP_B-IN.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_DASHBD/task-orders/IRPT_DASHBD.TO-DB-i-19.live-read-of-the-scope-feeds-first-silver-through-the-wrapper-against-the-feeds-own-manifest.md",
+    "vintage_commit": "5769ebb33f"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_DASHBD/prd/IRPT_DASHBD_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5769ebb33f"
+  },
+  "assignee": "0.9.0_WK_IRPT_DASHBD~319",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/live_read.py",
+      "kind": "script",
+      "commit_or_etag": "ecc0072d65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The DB-i-19 live read cell. Imports run_real from the round-129 run script by path, the adapter InflectionSilverReader, and lib/trading_calendar. Reads the landed silver and the bronze envelopes through the GET-only reader; writes only the private directory and the record file. Holds no write, vendor, credential or s3 literal. Run once on dell2 in this session: status RAN, rc 0.",
+      "artifact_covered_by": [
+        "DBI132-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/SCOPE_LIVE_READ_R132.json",
+      "kind": "config_data",
+      "commit_or_etag": "ecc0072d65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The run record: script hash, private extract hash, the run_real return value, the day-level agreement counts, the verdict MANIFEST_AGREES, the read counts and the basis words. Counts and verdict words only; no value, date, account or household id. Checked by p132_live.py DBI132-1-AC1 (PASS).",
+      "artifact_covered_by": [
+        "DBI132-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/SESSION_LOG_DB_I19.json",
+      "kind": "doc",
+      "commit_or_etag": "ecc0072d65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The session log of the steps, invocations and results, with the write counters (all zero).",
+      "artifact_covered_by": [
+        "DBI132-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_DASHBD/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ecc0072d65",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended as bytes, IRPT_DASHBD-D2-W319-S1 to S3, each OBSERVATION and INERT with grounding. The append-only prefix is unchanged. The commit carries the surprise-row gate's OK line.",
+      "artifact_covered_by": [
+        "DBI132-1-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DBI132-1-AC1",
+      "criterion_verbatim": "`DBI132-1-AC1` -- the record is complete and carries no identifier or date; the script is a tracked file hashed as recorded with no write, vendor-call or credential token, built on `InflectionSilverReader`, taking trading days from `lib/trading_calendar.py`; the extract's hash equals the recorded one; the run status is `RAN`; the day count, the per-day agreement of the silver row count with the bronze manifest, the trading-day count from the calendar, accounts x trading days = rows_present + rows_absent and `trading_days_unaccounted` 0 all equal the checker's recompute from the extract; no write, no push, no deploy. Base: FAIL (no record).",
+      "method": "command",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r132/p132_live.py\" . DBI132-1-AC1",
+      "output_evidence": "DBI132-1-AC1 PASS (rc 0; the same line and rc 0 on two runs). The checker's own recompute from the private extract: days_total 1, days_manifest_agree 1, days_manifest_disagree 0, trading_days_in_window 1, expected_rows 863 equal to rows_accounted 863 (rows_present 795 plus rows_absent 68), trading_days_unaccounted 0, verdict MANIFEST_AGREES.",
+      "denominator": "1 of 1 criterion PASS (the checker's sub-clauses on the one landed day: record keys against the whitelist, script clean-scan, extract hash, run status RAN, 5 recounted fields, expected_rows, rows_accounted, trading_days_unaccounted, verdict; every clause reached PASS)",
+      "expect": "DBI132-1-AC1 PASS",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own self-test: a GOOD record built from the feed's own writer, then ten mutants (wrong verdict, wrong day count, rows not accounted, trading days unaccounted, run not RAN, s3 write read as zero, a date in the record, a manifest that disagrees in the extract, a put_object script, a script with its own weekday helper).",
+      "expected": "GOOD PASS and each of the ten mutants FAIL",
+      "observed": "python -I p132_live.py --selftest . printed GOOD PASS and ten FAIL lines, each naming its reason; selftest PASS rc 0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the criterion, PASS lines compared",
+      "observed": "DBI132-1-AC1 PASS and rc 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A second landed day, and therefore a non-vacuous boundary measure and chain check",
+      "reason": "Only one silver day has landed. The run reads 0 pairs and WINDOW_TOO_SHORT; this is recorded as surprise S3, not repaired by choosing another window."
+    },
+    {
+      "item": "Orion's reported period return and any vendor call",
+      "reason": "Outside the cell; the order is read-only against AWS and forbids vendor calls."
+    },
+    {
+      "item": "Any field of the bronze envelope beyond the counts the order names, and any response body",
+      "reason": "The order keeps counts only; response bodies are never kept."
+    },
+    {
+      "item": "Repair of the wrapper, the run script, the feed writer or the checker",
+      "reason": "Refusal clause and the do-not-fix bound; the one field whose premise differs (households_without_id) is recorded as surprise S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_DASHBD-D2-W319-S1: the order reads households_without_id as a list whose length is kept; the feed writes an integer count, so the live read keeps the integer, OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W319-S2: lib/trading_calendar answered from its hardcoded NYSE fallback on this box because pandas_market_calendars is absent, for the live read and the checker recount, OBSERVATION, INERT.",
+    "IRPT_DASHBD-D2-W319-S3: the boundary measure has 0 pairs and the chain check reads WINDOW_TOO_SHORT on the one landed day, so neither measure carries a value yet, OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/SESSION_LOG_DB_I19.json",
+  "compiler_tools": [
+    {
+      "tool": "p132_live.py (issuer checker, DBI132-1-AC1)",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r132/p132_live.py\" . DBI132-1-AC1",
+      "result": "DBI132-1-AC1 PASS, rc 0, on two runs"
+    },
+    {
+      "tool": "p132_live.py self-test",
+      "invocation": "python -I \"org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~I2/checks/r132/p132_live.py\" --selftest .",
+      "result": "GOOD PASS; ten mutants FAIL; selftest PASS, rc 0"
+    },
+    {
+      "tool": "live_read.py (the DB-i-19 cell)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/live_read.py --private <private dir> --record org/missions/D9/IRPT/IRPT_DASHBD/deliverables/0.9.0_WK_IRPT_DASHBD~319/SCOPE_LIVE_READ_R132.json",
+      "result": "status RAN; 1 landed day; verdict MANIFEST_AGREES; 14 reads; 0 writes; rc 0"
+    }
+  ]
+}
