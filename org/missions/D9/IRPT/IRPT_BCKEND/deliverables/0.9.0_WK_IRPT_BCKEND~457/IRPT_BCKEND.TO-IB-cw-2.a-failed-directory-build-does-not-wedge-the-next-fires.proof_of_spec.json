@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-cw-2",
+  "firm": "COT",
+  "genre": "BUILD",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "e7bf14ca0f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-cw-2.a-failed-directory-build-does-not-wedge-the-next-fires.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-cw-2.a-failed-directory-build-does-not-wedge-the-next-fires.md",
+    "group": "OTHER",
+    "vintage_commit": "e7bf14ca0f"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~457",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "bb4a07c694",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. No AWS call, no deploy, no push. The Lambda release is a later order under its own never-widen pair."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_failed_command_redispatch.py",
+      "kind": "test",
+      "commit_or_etag": "bb4a07c694",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six named tests, fake S3 and SSM, invented ids and dates. Six passed in two identical runs (controls.determinism)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBCW2-AC1",
+      "criterion_verbatim": "AC1 the six named tests exist in tests/test_refresh_failed_command_redispatch.py and ALL pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r256/p256_cells.py\" . IBCW2-AC1",
+      "output_evidence": "OK: the six named tests exist and all pass | IBCW2-AC1 PASS | rc=0 (post-commit run, HEAD bb4a07c694)",
+      "denominator": "6 of 6 named tests PASSED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBCW2-AC2",
+      "criterion_verbatim": "AC2 DIFFERENTIAL: a Success previous command and an in-flight previous command produce, from the BASE refresh.py (HEAD~1) and from the NEW one, byte-identical results and the same SSM calls, and refresh.py actually changed",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r256/p256_cells.py\" . IBCW2-AC2",
+      "output_evidence": "OK: the Success and in-flight paths are byte-identical, with the same SSM calls, base versus new | IBCW2-AC2 PASS | rc=0 (post-commit run, HEAD bb4a07c694 against HEAD~1 e7bf14ca0f)",
+      "denominator": "2 of 2 fixture paths (Success, InProgress) identical base vs new; refresh.py changed (HEAD~1 differs from HEAD)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IBCW2-AC3",
+      "criterion_verbatim": "AC3 that your ONE commit (HEAD~1..HEAD) touches only refresh.py, the new test file and this order's paths, and both code files are in it",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r256/p256_cells.py\" . IBCW2-AC3",
+      "output_evidence": "OK: one commit, refresh.py and the new test file in it, nothing outside the order's paths | IBCW2-AC3 PASS | rc=0 (post-commit run)",
+      "denominator": "1 commit (HEAD~1..HEAD), 5 files changed, 0 outside the order's paths",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted in place in refresh.py: the terminal branch in SsmBuildDispatcher.__call__ disabled (the id test replaced by `if False and cid in self.reported_failed_cids:`). Run the six-test file, then restore the exact bytes (verified byte-identical, and refresh.py clean against HEAD afterwards).",
+      "expected": "the terminal re-dispatch tests fail",
+      "observed": "2 failed, 4 passed: test_a_reported_failed_command_is_terminal_and_the_fire_redispatches_exactly_once and test_a_fire_never_dispatches_twice fail; the unmutated run is 6 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the six-test file, summary lines compared",
+      "observed": "run A: 6 passed in 1.33s; run B: 6 passed in 1.15s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Lambda release and any deploy",
+      "reason": "The order is a BUILD in source and tests. The task order says the release is a later order under its own never-widen pair, applied outside the 11:30Z to 14:15Z band."
+    },
+    {
+      "item": "A test that drives the COMPLETED-carried command path",
+      "reason": "The six test names are fixed by the check. The path is covered by the same id-keyed terminal test in the dispatcher, but no test drives it. Recorded as IRPT_BCKEND-D2-W457-S2."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W457-S1: AC2 reads HEAD and HEAD~1 through git, so it FAILs before the one commit whatever the working tree holds; its pre-commit FAIL is kept in IBcw2_criteria_output.txt and AC2 PASSes after the commit.",
+    "IRPT_BCKEND-D2-W457-S2: a failed command carried on a COMPLETED record does not reach the hint's stop in _last_dispatched; the terminal test is keyed on the id in the dispatcher instead. Hazard ARMED until the release order.",
+    "IRPT_BCKEND-D2-W457-S3: commit bb4a07c694 rewrote 78 CRLF lines of another seat's rows in the append-only INVESTIGATION_v1.md to LF (text unchanged); the repair is the issuer's decision and was not made by a second commit."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~457/IBcw2_notes.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh checks run by safe-commit.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~457 <0.9.0_WK_IRPT_BCKEND~457@opal.agent>\" -F .scratch/IBcw2_commit_msg.txt -- <5 explicit paths>",
+      "result": "[commit-gate] All checks passed! (2 of 5 files .py-gated); commit bb4a07c694; [msg-verify] MATCH"
+    },
+    {
+      "tool": "surprise-row-gate.py (inside safe-commit)",
+      "invocation": "run by safe-commit on the staged INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (2 new rows at commit). Row IRPT_BCKEND-D2-W457-S3 was appended after the commit and was not gated."
+    },
+    {
+      "tool": "to-pipeline-gate.py (inside safe-commit)",
+      "invocation": "run by safe-commit on the staged paths",
+      "result": "OK: no task_orders/*.md in this commit"
+    },
+    {
+      "tool": "naming-gate.py (inside safe-commit)",
+      "invocation": "run by safe-commit on the staged paths",
+      "result": "NAMING ERROR: function-map folder missing in this sparse worktree (infra/aws/lambda/ci/function-map/). The commit proceeded and this was not graded here."
+    },
+    {
+      "tool": "client-data-check (inside safe-commit)",
+      "invocation": "run by safe-commit on the staged paths",
+      "result": "WARN: hashed account-id list absent at the operator path; this commit was NOT checked for client account ids."
+    }
+  ]
+}
