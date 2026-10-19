@@ -1,0 +1,19 @@
+NFRA_FIDUPL.TO-FU-s-4 -- session log of 0.9.0_WK_NFRA_FIDUPL~2 (worktree C:/tmp/fidupl-w2, branch wk-NFRA_FIDUPL-2)
+Synthetic fixtures only. No Fidelity export was read, logged or committed.
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-2 ; test -d org && test -d .tools -> TREE-OK
+2. Premises re-grounded: opal_naming.address('fidelity','alongside','bronze','account','20261016','account.txt')
+   -> s3://opal-data-assets/fidelity/alongside/bronze/account/20261016/account.txt ; 'demo' scope resolves too;
+   trading_calendar.is_trading_day(2026-10-16) True, (2026-10-17) False; calendar source NYSE/pandas_market_calendars.
+3. Code written: infra/aws/ec2/canonical-fidelity/land.py and tests/test_land.py (11 tests).
+4. Pytest: 11 passed (python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_land.py).
+5. Ruff py39: All checks passed! (after removing one unused import).
+6. Mutant: trading-day gate disabled -> test_non_trading_day_is_failure FAILED (AssertionError None == 'content date is not a trading day');
+   file restored byte-identical (cmp).
+7. Determinism: two dry-run calls on a synthetic handoff, outputs compared with cmp: identical.
+8. Commit attempt 1 (code paths) refused: git add reported the paths outside the sparse-checkout definition; commit --only found no match; rc=1.
+   Surprise rows W2-S1..S6 filed and committed (c2f1f4176b).
+9. Coordinator answer: the issuer added infra/aws/ec2/canonical-fidelity to the sparse definition. Retry of the code commit
+   through safe-commit.sh: rc=0, commit b3fd2a9ded (2 files, 579 insertions).
+10. Post-commit criteria: R1-FU4-OK passed=11 (rc 0); R1-FU4D-OK dests=6 (rc 0).
+11. git check-ignore on both paths: rc=1 (not ignored). git status --short on the paths: empty (clean).

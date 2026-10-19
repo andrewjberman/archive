@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ms-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "a3158d2403",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ms-1.round-46-register-master-08403355-in-the-gateway-code-and-contract.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a3158d2403"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~165",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL, drained to box/sitez as 9095ce68f39 (not pushed). MASTERS gains 08403355. No release here: it rides batch15 (OG-rz-2).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/schwab_audit.py",
+      "kind": "script",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. _MASTERS gains 08403355.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py",
+      "kind": "script",
+      "commit_or_etag": "a844325b8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. _ALIAS_MASTERS (the two contract masters) replaces de.MASTERS at the two alias gates, so the client_* tools keep refusing 08403355 (issuer ruling A1); the now-unused data_entitlement import removed (ruff F401).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. masters +1 (TaxSMA), data_prefixes +4, completion_prefixes +1.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. Byte-equal to the deploy copy; also carries t4g.large (cures OG-rz-1's one-copy edit that failed test_ogcm1_ac05).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/logic/registry/scopes.json",
+      "kind": "config_data",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. The 49financial masters list and a MASTER row for 08403355.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ms1.py",
+      "kind": "test",
+      "commit_or_etag": "0be402e218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. New file, 5 offline tests, all pass.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the master is registered in the code, the audit set, both contract copies (equal) and the scopes registry, and nothing else changed.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/ms1.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)MASTERS names 08403355: yes; schwab_audit _MASTERS names 08403355: yes; contract masters 3 \\(want 3\\), data_prefixes 12 \\(want 12\\), completion_prefixes 3 \\(want 3\\): yes; the two contract copies byte-equal: yes; target_instance_type t4g\\.large in both: yes.*scopes\\.json firm masters 3 and a MASTER row for 08403355: yes; client adapter alias gates keep the two masters \\(_ALIAS_MASTERS\\): yes.*files changed against the merge-base \\d+; outside the named set 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "MASTERS names 08403355: yes; schwab_audit _MASTERS names 08403355: yes; contract masters 3 (want 3), data_prefixes 12 (want 12), completion_prefixes 3 (want 3): yes; the two contract copies byte-equal: yes; target_instance_type t4g.large in both: yes\nscopes.json firm masters 3 and a MASTER row for 08403355: yes; client adapter alias gates keep the two masters (_ALIAS_MASTERS): yes\nfiles changed against the merge-base 8; outside the named set 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "8 files changed against the merge-base (7 named plus test_account_ref.py under tests/), 0 outside the named set; run by the issuer in the re-cut worker worktree at a844325b8e before the drain.",
+      "status": "PASS",
+      "status_reason": "Run by the issuer at a844325b8e: RESULT PASS and exit=0.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the new tests and the six neighbouring files pass except the one carried red.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/ms1.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)named test files: \\d+ passed, failed names \\[test_ogz1_ac08\\] \\(allowed: test_ogz1_ac08 only\\).*test_og_ms1: \\d+ passed, 0 failed.*RESULT: PASS.*exit=0",
+      "output_evidence": "named test files: 73 passed, failed names [test_ogz1_ac08] (allowed: test_ogz1_ac08 only)\ntest_og_ms1: 5 passed, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "73 passed across the seven named files, 1 failed (test_ogz1_ac08, the carried route-set pin); test_og_ms1 5 passed, 0 failed.",
+      "status": "PASS",
+      "status_reason": "Run by the issuer at a844325b8e: RESULT PASS and exit=0 (the worker's own run on its working tree read the same counts).",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant to plant. Discrimination is taken from the check at the base and from the first worker run.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "Both checks FAIL at the base; the first worker run (master added to MASTERS, adapter untouched) FAILED test_ogcl1_ac12 (assert 3 == 2), which is what exposed the adapter's reliance on MASTERS.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 run by the worker on its working tree and by the issuer in the re-cut worktree.",
+      "observed": "73 passed, failed names [test_ogz1_ac08] in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "This instance was written by the issuer, 2.0.0_SA_COO~O, not by worker ~165.",
+      "reason": "The worker's branch was re-cut: its first commit (0be402e218, a cherry-pick of 4f04fbb840) plus the adapter edit (a844325b8e), after the lane gate refused the adapter path (my cut defect) and the append-only gate refused deleting its channel row; the issuer ran both checks in the re-cut worktree before the drain."
+    },
+    {
+      "item": "Release and deploy of the master registration.",
+      "reason": "OG-rz-2 (batch15). The grant that gives Alyssa the master is OG-ms-2, after the release is live."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-S425: rules worker ~164's rows (a different cell); the worker ~165 row Z-W165-S1 (adapter alias gates reading MASTERS) is carried on the abandoned branch wk-NFRA_OPLGTW-165 and ruled by the issuer in this order's amendment A1"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO~O/drive_log_20261019T18Z_opal_bloomberg.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~165 <...>\" -F <msgfile> -- <paths>",
+      "result": "[msg-verify] committed a844325b8e; the first attempts were refused by ruff F401, the append-only row gate and the owned-paths lane rule (recorded in the order's amendments A1 and A2)"
+    }
+  ]
+}
