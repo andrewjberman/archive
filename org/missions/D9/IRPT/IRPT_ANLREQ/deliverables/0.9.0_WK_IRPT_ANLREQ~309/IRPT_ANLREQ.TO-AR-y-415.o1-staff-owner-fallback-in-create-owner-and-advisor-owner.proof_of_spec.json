@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-415.o1-staff-owner-fallback-in-create-owner-and-advisor-owner",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-415.o1-staff-owner-fallback-in-create-owner-and-advisor-owner.md",
+    "group": "OTHER",
+    "vintage_commit": "992923c429f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "992923c429f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-415.o1-staff-owner-fallback-in-create-owner-and-advisor-owner.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~309",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/served.py",
+      "kind": "script",
+      "commit_or_etag": "5811e72ffc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 5811e72ffc on wk-IRPT_ANLREQ-309 (LOCAL). Changes: a module-level import of ProspectOwnershipRefused, the class AdvisorUnprovisioned (one class, beside ON_BEHALF_ADVISOR_PARAM), and the bodies of _create_owner and _advisor_owner only. Nothing deployed, pushed or uploaded; the release is the IB2 apply of AR-y-416 with it."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_create_owner_on_behalf.py",
+      "kind": "script",
+      "commit_or_etag": "5811e72ffc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, nine test functions test_t1_ to test_t9_, committed LOCAL as 5811e72ffc. Passes commit-gate.sh (ruff clean, 1 of 1 file).",
+      "artifact_covered_by": ["AR415-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
+      "kind": "script",
+      "commit_or_etag": "5811e72ffc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only, read-only bound check, committed LOCAL as 5811e72ffc, passes commit-gate.sh. Run before the edit: O1-BOUND-BAD paths outside org/ are [] (rc 1). Run at HEAD after the commit: O1-BOUND-OK functions=2 classes=1 files=2 (rc 0).",
+      "artifact_covered_by": ["AR415-y-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR415-y-AC1",
+      "criterion_verbatim": "AR415-y-AC1: cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz/tests/test_create_owner_on_behalf.py -q --color=no -p no:cacheprovider -- expect 9 passed.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz/tests/test_create_owner_on_behalf.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "Run on wk-IRPT_ANLREQ-309 at HEAD 5811e72ffc, rc=0, printed: '9 passed in 0.14s' (the first run; the determinism rerun printed the same '9 passed' with the timing field removed). Difference control at the parent commit 992923c429f, same tests and the unchanged served.py, rc=1: '4 failed, 5 passed', FAILED test_t1, test_t2, test_t4 and test_t5 with the refusals 'an on-behalf upload must name the firm advisor', 'on-behalf advisor email required', 'advisor has no partner profile at the named firm' and 'advisor profile absent, disabled or of another firm'.",
+      "denominator": "9 of 9 named test functions pass at HEAD; at the parent commit 4 of 9 fail (T1, T2, T4, T5) and 5 of 9 pass (T3, T6, T7, T8, T9)",
+      "expect": "9 passed",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line reads '9 passed' exactly, with no failure at HEAD."
+    },
+    {
+      "criterion_id": "AR415-y-AC2",
+      "criterion_verbatim": "AR415-y-AC2: cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz -q --color=no -p no:cacheprovider -- expect ^[0-9]+ passed.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz -q --color=no -p no:cacheprovider",
+      "output_evidence": "Run on wk-IRPT_ANLREQ-309 at HEAD 5811e72ffc, rc=2, no 'N passed' line: 'ERROR _authz\\tests\\test_guarded_entries.py - AssertionError: published guarded directory-search operation missing' (also test_pointer_guard.py and test_wire_reason_codes.py, which import it), then 'Interrupted: 3 errors during collection' and '3 errors in 2.17s'. The same three collection errors occur at the parent commit 992923c429f before the change (.scratch baseline_full.txt, rc=2). Cause: the worktree is a sparse checkout with no infra/aws/terraform/ tree and no data/ tree, so routetable marks irpt-directory-search Unresolved (declared tf_file is not on disk). Supplementary, NOT the verdict: with --continue-on-collection-errors the folder reads '145 failed, 182 passed, 3 errors in 8.23s' at HEAD (182 includes the 9 new tests), 86 failure lines name KeyComponentRefused REGISTRY_UNREADABLE (data/firm_registry.json is outside the sparse set). A copy of the folder with the parent served.py reads '156 failed, 171 passed, 3 errors', and the difference from HEAD is the four owner controls plus seven svc_custody cases, which the copy's missing repo-root paths make UNAVAILABLE; that copy is not an equal environment and is not an attribution of those seven cases.",
+      "denominator": "0 of 1 summary lines carries a pass count (rc=2 interrupted at collection); 3 of 3 collection errors have the sparse-tree cause; 182 passed in the supplementary continued run, not the criterion's verdict",
+      "expect": "^[0-9]+ passed",
+      "status": "FAIL",
+      "status_reason": "The invocation as written prints no pass line in this worktree, so the expected ^[0-9]+ passed is not met. The cause is the premise failure recorded as IRPT_ANLREQ-D2-W309-S1 (BLOCKING). Read, not measured: IRPT_ANLREQ-D2-W309-S2 (BLOCKING, ARMED) records that test_served_on_behalf_create.py pins the refusals this change removes, so in a full checkout the folder would show failures from that file too. The worker may edit only served.py and the new test file, so this was not amended."
+    },
+    {
+      "criterion_id": "AR415-y-AC3",
+      "criterion_verbatim": "AR415-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py -- expect O1-BOUND-OK functions=2 classes=1 files=2.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
+      "output_evidence": "Run at HEAD 5811e72ffc, rc=0, printed: O1-BOUND-OK functions=2 classes=1 files=2. The two runs at HEAD printed the same line. Before the edit (worktree at 992923c429f), rc=1, printed: O1-BOUND-BAD paths outside org/ are [], want ['infra/aws/lambda/investor-reporting/_authz/served.py', 'infra/aws/lambda/investor-reporting/_authz/tests/test_create_owner_on_behalf.py'].",
+      "denominator": "2 of 2 changed paths outside org/ are the two named files; 2 of 2 changed methods (_create_owner, _advisor_owner) differ in ast.dump; 1 of 1 added top-level class (AdvisorUnprovisioned); 0 other top-level definitions or guard-class methods differ; 1 added top-level import, the allowed prospect import",
+      "expect": "O1-BOUND-OK functions=2 classes=1 files=2",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line equals the expected line exactly."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR415-y-AC1 control: the nine tests run against a copy of served.py WITHOUT the change. The copy is the parent commit 992923c429f blob of served.py written into .scratch/mut/infra/aws/lambda/investor-reporting/_authz/served.py, with the rest of the folder copied unchanged; the nine tests are run from that copy.",
+      "expected": "rc=1 with at least 4 FAILED (the difference control: T1, T2, T4 and T5 must fail on the unchanged code)",
+      "observed": "rc=1: '4 failed, 5 passed in 0.38s'. FAILED test_t1_staff_no_advisor_key_gets_the_signed_in_owner, test_t2_staff_blank_advisor_value_gets_the_signed_in_owner, test_t4_named_advisor_without_partner_profile_falls_back_to_the_signed_in_owner, test_t5_named_advisor_with_disabled_user_row_falls_back_to_the_signed_in_owner; the failing lines are the four refusals named above. T3, T6, T7, T8 and T9 pass on the unchanged code, as they should.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared with diff: the nine tests run twice at HEAD with the timing field removed (sed), and check_o1_bound.py run twice at HEAD",
+      "observed": "diff of the two nine-test outputs is empty; both print '9 passed'. Both bound-check runs print 'O1-BOUND-OK functions=2 classes=1 files=2'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/aws/terraform/ and data/ (absent from the sparse worktree)",
+      "reason": "Not on disk in C:/dev/wk-irpt-anlreq-309. The worker did not run git sparse-checkout, did not extract the trees and did not copy them from another checkout. This is the cause of AR415-y-AC2 FAIL, recorded as IRPT_ANLREQ-D2-W309-S1."
+    },
+    {
+      "item": "infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py (pinned on-behalf cases)",
+      "reason": "Outside this order's grant (the worker may edit served.py and the new test file only). Not edited. The change flips pinned cases there; recorded as IRPT_ANLREQ-D2-W309-S2 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2)."
+    },
+    {
+      "item": "AWS calls, network, push, deploy, release apply",
+      "reason": "None performed. The order is LOCAL only; the release is a separate act that ships with AR-y-416."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W309-S1: the worktree is a sparse checkout with no infra/aws/terraform/ and no data/ tree, so python -m pytest _authz does not collect and no pass line is printed (BLOCKING, INERT); AR415-y-AC2 is FAIL as written.",
+    "IRPT_ANLREQ-D2-W309-S2: the O1 change flips pinned cases in _authz/tests/test_served_on_behalf_create.py, which is outside the grant; the order's premise that no test pins the on-behalf branch is false (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2).",
+    "IRPT_ANLREQ-D2-W309-S3: a user row whose email differs from the lookup key is kept as a plain refusal, which the order does not name either way (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "check_o1_bound.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
+      "result": "rc=1 O1-BOUND-BAD before the edit; rc=0 O1-BOUND-OK functions=2 classes=1 files=2 at HEAD 5811e72ffc"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <served.py | test_create_owner_on_behalf.py | check_o1_bound.py>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each of the three files"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~309 <0.9.0_WK_IRPT_ANLREQ~309@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "5811e72ffc committed LOCAL on wk-IRPT_ANLREQ-309; msg-verify MATCH; naming gate and to-pipeline gate printed no refusal"
+    }
+  ]
+}
