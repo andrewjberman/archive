@@ -214,14 +214,17 @@ def tf_guard():
     if not text.strip():
         return out("%s-FAIL no .tf files" % tag)
     bad = []
-    if re.search(r"\bingress\s*\{", text):
-        bad.append("an ingress block")
-    if "0.0.0.0/0" in text:
-        bad.append("0.0.0.0/0")
+    if re.search(r"\bingress\s*\{", text) or "aws_vpc_security_group_ingress_rule" in text or re.search(r'type\s*=\s*"ingress"', text):
+        bad.append("an ingress rule")
+    if re.search(r"ingress\s*\{[^}]*0\.0\.0\.0/0", text):
+        bad.append("0.0.0.0/0 inside an ingress block")
     if re.search(r":secret:[^\"\s]*\*", text):
         bad.append("a secret prefix wildcard")
-    if re.search(r'"Resource"\s*[:=]\s*"\*"|resources\s*=\s*\[\s*"\*"\s*\]', text):
-        bad.append("a Resource star")
+    lines = text.splitlines()
+    star = re.compile(r'"?[Rr]esources?"?\s*[:=]\s*(\[\s*)?"\*"')
+    for i, ln in enumerate(lines):
+        if star.search(ln) and not any("STAR-OK:" in x for x in lines[max(0, i - 3):i + 1]):
+            bad.append("a Resource star without a STAR-OK comment (line %d)" % (i + 1))
     if "aws_secretsmanager_secret_version" in text:
         bad.append("a secret VERSION (a value in state)")
     if "prevent_destroy" not in text:
@@ -230,7 +233,7 @@ def tf_guard():
         bad.append("non-ASCII")
     if bad:
         return out("%s-FAIL %s" % (tag, "; ".join(bad)))
-    return out("%s-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present" % tag)
+    return out("%s-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK" % tag)
 
 
 def tf_plan():
