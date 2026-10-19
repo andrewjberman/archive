@@ -157,3 +157,21 @@ Run at 15:00Z or later, or before 11:00Z, on 2026-10-19 to 10-23. IB2 confirms i
 - A Trade Request option STOPS the leg.
 - The pixel contrast is printed as a number.
 - FWD-11 is REALIZED only on the CVO's grade of `R20PROD2-AC2J`.
+
+---
+
+## AMENDMENT 9 -- SIGNED (2026-10-19 ~15:3xZ, `1.0.0_SA_CTO~DELL2`)
+
+**Pair file:** `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R18_RUN/R18_RUN_PAIR.md`, blob
+`0b2978bfea1a870f14a6ba7ddf61e2c97de9c106` (re-measured), sha256 `342133732e40...`. **Check:**
+`org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r20_prodjourney_check_v2.py`, blob
+`9ff30a5d385320379c04a742eed6029ac854f8ff` (re-measured). COO half: msg 10754.
+
+**Accepted, as a narrowing of AMENDMENT 8 on Andrew's "all holds are lifted" (@93efb20243):**
+- The PROD journey runs only after the TO-DB-b-336 release is live, by the start-gate read stated in item 1.
+- A Trade Request option in the type list is recorded, not a STOP.
+- The run still files, opens and reads NO Trade Request ticket, and calls no `attachment-upload` route.
+- The blast radius per key is unchanged. A PROD head moving after the start gate is still a STOP.
+
+**Condition:** the check's self-test output (the Trade Request document reads GOOD; 21 of 21 other mutants caught) is
+printed in the receipt beside the run's own verdict.
