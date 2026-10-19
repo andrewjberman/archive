@@ -54,29 +54,29 @@
       "criterion_verbatim": "`AR417-y-AC1`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider -- expect 5 passed.",
       "method": "test_suite",
       "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider",
-      "output_evidence": "5 errors in 2.45s (rc=1, literal invocation, HEAD ab9b503a788, code commit a732c5ef25a). Every error is at fixture setup: ids.IdRefused: the firm registry was not found; data/firm_registry.json is absent from the sparse worktree (see surprise IRPT_ANLREQ-D2-W311-S1). Diagnostic only, not this criterion: with IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json exported (the base checkout copy, git hash-object cdb9f785e043cd69e451c545dc384e598431b263 = the HEAD blob), rc=0, 5 passed in 4.54s; second run rc=0, 5 passed in 4.87s.",
-      "denominator": "0 of 5 new tests pass on the literal invocation (5 setup errors); 5 of 5 pass with the diagnostic pointer",
+      "output_evidence": "5 passed in 6.85s (rc=0, literal invocation, worktree HEAD cfe68e37bd3 after the issuer's sparse-set fix that added data/ to the worktree; data/firm_registry.json present). Earlier literal run before the fix: 5 errors (surprise IRPT_ANLREQ-D2-W311-S1, resolved by the sparse-set fix).",
+      "denominator": "5 of 5 new tests passed",
       "expect": "5 passed",
-      "status": "FAIL",
-      "status_reason": "rc=1 and the printed line is '5 errors', not '5 passed'. The criterion is not met in this worktree as ordered. A path the worktree lacks is a BLOCKING row on that criterion, never an override, so the pointer run is recorded as a diagnostic only: it shows the new tests pass when the registry is present. The order stays open until data/firm_registry.json is available to the worktree or the order is re-cut."
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line is '5 passed', on the literal invocation with no environment pointer."
     },
     {
       "criterion_id": "AR417-y-AC2",
       "criterion_verbatim": "`AR417-y-AC2`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider -- expect ^[0-9]+ passed.",
       "method": "test_suite",
       "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider",
-      "output_evidence": "7 passed, 25 errors, 21 subtests passed in 3.65s (rc=1, literal invocation, HEAD ab9b503a788). The 25 errors are fixture setup, ids.IdRefused: the firm registry was not found (see surprise IRPT_ANLREQ-D2-W311-S1). Diagnostic only, not this criterion: with IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json exported, rc=0, 32 passed, 21 subtests passed in 15.83s; the same run at the base 992923c429f with the pointer gave 32 passed, 21 subtests passed in 16.72s.",
-      "denominator": "literal: 7 passing of 32 tests, 25 errors; with the diagnostic pointer: 32 of 32 tests passed (21 subtests passed), baseline 32 of 32",
+      "output_evidence": "32 passed, 21 subtests passed in 24.20s (rc=0, literal invocation, worktree HEAD cfe68e37bd3 after the issuer's sparse-set fix). Earlier literal run before the fix: 7 passed, 25 errors (surprise IRPT_ANLREQ-D2-W311-S1, resolved by the sparse-set fix).",
+      "denominator": "32 of 32 tests passed (21 subtests passed)",
       "expect": "^[0-9]+ passed",
-      "status": "FAIL",
-      "status_reason": "rc=1 and the printed line carries 25 errors. The expect regex matches the literal line ('7 passed, 25 errors'), which is why it is not a pass test on its own: a PASS needs rc 0 and no errors. A path the worktree lacks is a BLOCKING row on this criterion, never an override; the pointer run is a diagnostic only. The order stays open."
+      "status": "PASS",
+      "status_reason": "rc=0, the printed line matches ^[0-9]+ passed, and the line carries no errors or failures, on the literal invocation with no environment pointer."
     },
     {
       "criterion_id": "AR417-y-AC3",
       "criterion_verbatim": "`AR417-y-AC3`: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py -- expect O5-BOUND-OK files=3.",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
-      "output_evidence": "O5-BOUND-OK files=3 (rc=0, run at HEAD ab9b503a788; branch point 992923c429f6f514055c5f4e97a04c45837e44c3). Before the code commit (HEAD equal to the branch point) the same script printed O5-BOUND-BAD changed-outside-org=[] expected=[...3 paths...], rc=1.",
+      "output_evidence": "O5-BOUND-OK files=3 (rc=0, literal invocation re-run after the sparse-set fix at HEAD cfe68e37bd3; branch point 992923c429f6f514055c5f4e97a04c45837e44c3). Before the code commit (HEAD equal to the branch point) the same script printed O5-BOUND-BAD changed-outside-org=[] expected=[...3 paths...], rc=1.",
       "denominator": "3 of 3 expected changed files outside org/; 1 differing top-level definition in resident_worker.py (send_ready_if_ticketed) and 0 other top-level differences",
       "expect": "O5-BOUND-OK files=3",
       "status": "PASS",
@@ -98,8 +98,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "data/firm_registry.json (the worktree is a sparse checkout without data/)",
-      "reason": "not copied, not extracted and the sparse set not changed. The diagnostic runs read the base checkout copy through IRPT_FIRM_REGISTRY, which is byte-identical to the HEAD blob cdb9f785e043cd69e451c545dc384e598431b263 (git hash-object). The criteria themselves are graded on the literal invocation. Recorded as IRPT_ANLREQ-D2-W311-S1."
+      "item": "data/ in the worktree sparse set (the earlier absence of data/firm_registry.json)",
+      "reason": "the issuer added data to the worktree's sparse set (provisioning fix, coordinator ruling on IRPT_ANLREQ-D2-W311-S1). The worker did not copy, extract or change the sparse set. No data/ file is committed by this order. The criteria are graded on the literal invocations with no environment pointer."
     },
     {
       "item": "ycharts/research/opal_packager.py and the packager payload",
@@ -115,7 +115,7 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W311-S1: the sparse worktree does not carry data/firm_registry.json, so the literal pytest invocations of AR417-y-AC1 and AC2 error at fixture setup (BLOCKING, INERT); both criteria are recorded FAIL on the literal run, and the pointer runs are diagnostics only."
+    "IRPT_ANLREQ-D2-W311-S1: the worktree's sparse set did not carry data/, so data/firm_registry.json was absent and the literal pytest invocations of AR417-y-AC1 and AC2 errored at fixture setup (BLOCKING, INERT). RESOLVED by the issuer's sparse-set fix (data added to the worktree sparse set); all three criteria now pass on their literal invocations. The row itself is unchanged."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
