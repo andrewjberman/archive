@@ -1,7 +1,8 @@
 """O1 bound check for IRPT_ANLREQ TO-AR-y-415 (stdlib only, read-only, ASCII).
 
 Proves that the committed change of this worktree, outside org/, is exactly the two owner
-functions of the guard class in served.py, one added class, and the one new test file.
+functions of the guard class in served.py, one added class, the one new test file, and the one
+pinned test file that the amendment grants (three paths).
 
 Method: take the merge base of HEAD and box/dell2 (the branch point), list the changed paths,
 keep the ones not under org/, then compare ast.dump of every top-level definition and every
@@ -18,7 +19,8 @@ import subprocess
 
 SERVED = "infra/aws/lambda/investor-reporting/_authz/served.py"
 TEST_FILE = "infra/aws/lambda/investor-reporting/_authz/tests/test_create_owner_on_behalf.py"
-EXPECTED_PATHS = sorted([SERVED, TEST_FILE])
+PINNED_FILE = "infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py"
+EXPECTED_PATHS = sorted([SERVED, TEST_FILE, PINNED_FILE])
 CHANGED_METHODS = frozenset(["_create_owner", "_advisor_owner"])
 ADDED_CLASSES = frozenset(["AdvisorUnprovisioned"])
 ALLOWED_IMPORT = "from prospect import ProspectOwnershipRefused"
