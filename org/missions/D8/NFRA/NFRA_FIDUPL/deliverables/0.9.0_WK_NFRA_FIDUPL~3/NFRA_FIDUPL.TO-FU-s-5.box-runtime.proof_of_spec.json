@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "37a9865739"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-5.box-runtime.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/bootstrap.sh",
+      "kind": "script",
+      "commit_or_etag": "abd700c806",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-3 (LOCAL). Not run on any host; first execution is the FU-s-7 box build.",
+      "artifact_covered_by": [
+        "FU5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/run.py",
+      "kind": "script",
+      "commit_or_etag": "abd700c806",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-3 (LOCAL). Imports signin, fetch, land lazily; those modules are built by FU-s-2..4 and are not in this worktree.",
+      "artifact_covered_by": [
+        "FU5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_box_run.py",
+      "kind": "test",
+      "commit_or_etag": "abd700c806",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-3 (LOCAL). Fake-only; 5 tests pass at this commit.",
+      "artifact_covered_by": [
+        "FU5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "abd700c806",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_FIDUPL-D1-W3-S1..S4 appended; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU5-AC1",
+      "criterion_verbatim": "the five named tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5",
+      "output_evidence": "R1-FU5-OK passed=5",
+      "denominator": "5 passed of 5 named tests (test_calls_signin_fetch_land_in_order, test_stage_failure_exits_nonzero, test_failure_still_writes_record_via_lander, test_no_secret_in_environment, test_reads_config_pointers_only)",
+      "status": "PASS",
+      "expect": "R1-FU5-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FU5-AC2",
+      "criterion_verbatim": "the bootstrap parses, installs a browser and exports no secret.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b",
+      "output_evidence": "R1-FU5B-OK bash -n clean, browser install present, no secret export",
+      "denominator": "1 of 1 bootstrap checks (bash -n rc=0; playwright install line present; no secret-named export; ASCII only)",
+      "status": "PASS",
+      "expect": "R1-FU5B-OK bash -n clean"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Live sign-in, live Secrets Manager read and a real Playwright session",
+      "reason": "Out of FU-s-5 by design; proven only by FU-x-1 on the live path."
+    },
+    {
+      "item": "Execution of bootstrap.sh on a fresh AL2023 or Ubuntu host",
+      "reason": "No host reached from the worktree. The python3.12 dnf package name is unmeasured (surprise NFRA_FIDUPL-D1-W3-S3)."
+    },
+    {
+      "item": "Writing /opt/fidelity-uploader/config.json",
+      "reason": "Pointer file is FU-s-7's build; bootstrap only warns when it is absent."
+    },
+    {
+      "item": "Live wiring of signin.open_session, fetch.PlaywrightSession and land.land",
+      "reason": "Sibling modules are not in this worktree; wiring follows reference section 9 and is unverified (surprise NFRA_FIDUPL-D1-W3-S2)."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W3-S1: the failure field admits four strings, so an unexpected stage exception writes failure null with missing=all six and a run_error key; the lander's reading of that state is unverified.",
+    "NFRA_FIDUPL-D1-W3-S2: signin.py, fetch.py, land.py and quo_otp.py are absent from the worktree, so main() wiring follows reference section 9 and is unverified.",
+    "NFRA_FIDUPL-D1-W3-S3: AL2023 dnf package names python3.12 and python3.12-pip are unmeasured; the sibling exporter installs to python3.9 site-packages.",
+    "NFRA_FIDUPL-D1-W3-S4: the worktree's cone-mode sparse checkout omitted the granted new directory; the worker added that one path to its own cone (git sparse-checkout add) and changed no other file."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~3/NFRA_FIDUPL.TO-FU-s-5.session.log",
+  "controls": {
+    "mutant": {
+      "description": "Forced the run_once return code to 0 in a scratch copy of box/run.py (rc = 0 replacing the stage/listing/record failure expression); the real tests then run against the mutant.",
+      "expected": "test_stage_failure_exits_nonzero and test_failure_still_writes_record_via_lander fail",
+      "observed": "2 failed, 3 passed: test_stage_failure_exits_nonzero (assert 0 == 1) and test_failure_still_writes_record_via_lander (assert 0 == 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice on the committed tests at abd700c806 (two same-input runs compared)",
+      "observed": "run 1: 5 passed; run 2: 5 passed",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "r1_checks.py fu5",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5",
+      "result": "R1-FU5-OK passed=5 (rc=0)"
+    },
+    {
+      "tool": "r1_checks.py fu5b",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b",
+      "result": "R1-FU5B-OK bash -n clean, browser install present, no secret export (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check infra/aws/ec2/canonical-fidelity/box/run.py infra/aws/ec2/canonical-fidelity/tests/test_box_run.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
