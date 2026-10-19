@@ -1,0 +1,25 @@
+STAGE 4 DRY CANARY, started 2026-10-19T16:04:10Z
+schedule before: DISABLED cron(0 10 ? * MON-FRI *)
+security group id (read): sg-0e3918ef300c9f5e4
+run-task issued 2026-10-19T16:04:16Z failures: []
+task: arn:aws:ecs:us-east-1:313476888478:task/amgt-dossier-refresh-cluster/3d1131e0936e4b8785d06e22e2e1486a
+  status PENDING at 2026-10-19T16:04:32Z (desired RUNNING)
+  status RUNNING at 2026-10-19T16:05:05Z (desired RUNNING)
+  status DEPROVISIONING at 2026-10-19T16:05:55Z (desired STOPPED)
+  status STOPPED at 2026-10-19T16:06:11Z (desired STOPPED)
+stoppedReason: Essential container in task exited | stopCode: EssentialContainerExited
+container: dossier-refresh exitCode: 0 reason: None lastStatus: STOPPED image: 313476888478.dkr.ecr.us-east-1.amazonaws.com/amgt-dossier-refresh-repo@sha256:ceac4ad030b3979611f605b0e01355a93a5336d2ca2e2cde7df0420b25381670
+createdAt 2026-10-19T12:04:15.731000-04:00 startedAt 2026-10-19T12:04:52.092000-04:00 stoppedAt 2026-10-19T12:06:06.942000-04:00
+WALL SECONDS startedAt to stoppedAt: 74.8 ; createdAt to stoppedAt: 111.2
+overrides: {"containerOverrides": [{"name": "dossier-refresh", "command": ["--only", "UNH_US_Equity"]}], "inferenceAcceleratorOverrides": []}
+task definition: arn:aws:ecs:us-east-1:313476888478:task-definition/amgt-dossier-refresh-task:1
+log stream dossier-refresh/dossier-refresh/3d1131e0936e4b8785d06e22e2e1486a events: 3
+  LOG warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+  LOG REFRESH UNH_US_Equity status=WOULD_WRITE moved=model_rows inputs_differ=model_block guard=PASS reason=dry run: no write_one call
+  LOG REFRESH-CENSUS names=1 written=0 would_write=1 unchanged=0 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run
+schedule after: DISABLED
+STAGE 4 END 2026-10-19T16:06:21Z
+--- STAGE 4 RESULT 16:07Z (stated; the grading is the issuer's)
+Required by the order and read: exit code 0; startedAt 12:04:52 -0400 (16:04:52Z), stoppedAt 12:06:06 -0400 (16:06:06Z), WALL 74.8 s (created to stopped 111.2 s); a log line REFRESH-CENSUS names=1 ... errors=0 mode=dry-run (written=0, would_write=1); no AccessDenied, no image-pull failure, the log exists (3 events); the image the task ran is repo@sha256:ceac4ad0.. ; the schedule read DISABLED before and after; the task wrote nothing (written=0, dry run).
+DIFFERENCE NOT NAMED IN THE ORDER, STATED PLAINLY AND NOT SELF-GRADED: the order says the canary is expected to read status=UNCHANGED for UNH_US_Equity (the dossiers level after HVST-cn-3). It read status=WOULD_WRITE moved=model_rows inputs_differ=model_block guard=PASS. My reading of the census line (not a separate measurement): no_today_model_block=0 means a model block dated today (2026-10-19) exists for UNH, and the dossier cn-3 wrote on 2026-10-18 cites the earlier block, so the refresh would write one new object for UNH today. It is consistent with the 13:00Z model blocks of the new day having landed; I did not read the block stamps to confirm. A warning line about the deprecated `fitz` API also printed (not an error).
+Also: my output file was empty until the script ended (python without -u); no effect on the result.
