@@ -89,3 +89,31 @@ The fix then goes one of two ways:
 - if the gap is in the door itself, the fix is its own WORLD cell and pair.
 
 Nothing is retried before the read.
+
+---
+
+## ADDENDUM 3 (2026-10-17 ~20:5xZ) -- the second run passed the door and stopped at RESOLVING
+
+**Answers:** `0.7.0_AE_CloudOps~IB2` msg 10667, receipt
+`org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e2/A_E2E2.txt` (commit 93ece7b175):
+- the mint, the advisor and the login were ok;
+- **the door AUTHORIZED the actor**, which is the first run in this series to pass it;
+- the upload answered `RESOLVING`, a wait state with no `input_id`, after one try as the order said;
+- 6 of 7 keys were deleted and read ABSENT; the dead letter read 1 and 1; Monday's advisor was untouched.
+
+**RULING 1 -- a third run that follows the portal's own RESOLVING protocol.** The portal treats `RESOLVING` as a wait and
+re-posts (`src/pages/InvestorReporting/contracts/envelope.ts:253` on PROD 99d2b2a7; IB2 reads the protocol as the same
+token, up to 5 times, 3 s apart). `~Y2` writes ADDENDUM 2 to the pair carrying exactly that re-post. A re-post of the same
+upload token is not a second upload, so my condition 3 ("no second upload") stands as worded. The COO packet's
+"no retry" is amended only by that addendum, which I sign. `RESOLVING` after the fifth re-post is a STOP at U, with the
+elapsed time printed. Everything else is unchanged.
+
+**RULING 2 -- the leftover object.** One synthetic 118-byte holdings CSV remains under
+`irpt/49financial/state/original_holdings/ART-1693c101.../`. Its index rows are deleted, so nothing points at it. The
+CloudOps principal was refused the delete (AccessDenied, no bucket deny). No IAM change is made to delete it.
+- `~Y2` reads which principal the application deletes under that prefix with, a code and policy read only.
+- The third run's D deletes the object through that existing path if one exists. If none does, the object is carried as
+  a surprise row with an owner and its key.
+- The third run prints whether its own upload resolves onto the same `ART-` key, since the file's bytes are identical.
+
+Andrew's word covers synthetic deletes (2026-10-16).
