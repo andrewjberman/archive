@@ -1,7 +1,7 @@
 {
   "order": "FB-p-2",
-  "read_at": "2026-10-17T14:35:00Z",
-  "census_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/ledger/DOOR6_LIVE_READER_CENSUS_20261016.md @6edd023c81",
+  "read_at": "2026-10-19T14:26:00Z",
+  "census_ref": "org/missions/D8/ADVI/ADVI_FIRMBKTS/ledger/DOOR6_LIVE_READER_CENSUS_20261016.md @6edd023c81 (issuer's census); re-run 2026-10-19 in door6/CENSUS_RERUN.json and door6/CENSUS_RERUN_HIT_READS_20261019.txt (this record's commit)",
   "decision": {
     "text": "Retire the Inflection done-marker opal-data-inf/gold/meta/pipeline-complete.json and its watcher mdpf-feeder-accelerator (Andrew-direct 2026-10-13, Door 6, no successor marker). Order of acts per the CTO decision text and erratum 1: the catch-up and the feeder's second look first, the accelerator disabled only after the second look's first live fire, the marker write stopped last in the deployed copy. The marker object is not deleted (an S3 delete waits on Andrew's word).",
     "replaced_by": "the second look: aws_scheduler_schedule mdpf-feeder-trigger-second-look-daily at cron(8 13 * * ? *) UTC, firing mdpf-feeder-trigger, whose gold_complete.json gate test is the readiness check; the 12:52Z backstop stays"
@@ -37,7 +37,41 @@
       "schedule_state_after": "ENABLED",
       "terraform_commit": "831cb48e7c",
       "evidence": "org/missions/D8/ADVI/ADVI_FIRMBKTS/deliverables/0.7.0_AE_CloudOps~FB1/door6/act_second_look/",
-      "accelerator_state_before": "ENABLED"
+      "accelerator_state_before": "ENABLED",
+      "first_fire_at": "2026-10-19T13:08:25Z",
+      "first_fire_outcome": "dispatched",
+      "first_fire_read": "/aws/lambda/mdpf-feeder-trigger read by this seat 2026-10-19T14:05Z: 13:08:25Z OK: feeder chain dispatched, dispatched=true, run_date 2026-10-19, run_stamp 20261019T130825Z, ssm c13ef26d-0760-4654-b186-ecb9404ed8ad; the 12:52:09Z backstop fire also dispatched (ssm 5f2360d0-bad0-4eb4-8e62-295db1c7143e); 2 invocations in 12:45Z-13:20Z, 0 NOT-YET",
+      "accelerator_state_after": "DISABLED",
+      "accelerator_plan": "add=0 change=1 destroy=0",
+      "accelerator_disabled_at": "2026-10-19T14:08:00Z",
+      "accelerator_terraform_commit": "d3754c5eb0",
+      "accelerator_read_back": "events describe-rule mdpf-feeder-accelerator State DISABLED (rule not deleted); mdpf-feeder-backstop-daily ENABLED cron(52 12 * * ? *) and mdpf-feeder-trigger-second-look-daily ENABLED unchanged"
+    },
+    "marker_writer": {
+      "done_at": "2026-10-19T14:22:09Z",
+      "census_rerun": {
+        "done_at": "2026-10-19T14:11:48Z",
+        "functions_listed": 245,
+        "zip_scanned": 241,
+        "errors": 0,
+        "hits_reading_key": 0,
+        "note": "image_not_scanned 4 (issuer's census 5.2 read them); 16 hit functions read line by line (comments/docstrings and registry JSON, no reader); the tool's runner listing crashed (a native access-violation exit code, see door6/CENSUS_RERUN.json runner_errors) so code/runner/ was read directly: 2 objects, 0 hits"
+      },
+      "deployed_copy_path": "code/gold/orion-gold-dispatch.sh",
+      "deployed_version_before": "JjTLNaZeRRAQn342RRa7qEHSR0AUf1FV",
+      "deployed_version_after": "hK5vY2H31oT3NHmoiArlZ00ra8gkuDaO",
+      "deployed_sha256_before": "e9aef66bc8a4a883196a2ba61567e56e645d4ffba82cfc74705cb6e270d59e43",
+      "deployed_sha256_after": "9495cd56228b0b5a4fe8d7d2ce4e22fc3a540fbedf9af02ccdbbee484e069013",
+      "diff_only_marker_block": true,
+      "repo_source_changed": true,
+      "repo_source_commit": "9bfa23498977c8ad6d25e257d484f925ea5b9c18",
+      "located_by_content": true,
+      "stopped": true,
+      "marker_object_deleted": false,
+      "deploy_deviation": "safe-deploy.sh deploys .py only (safe_deploy_core.py:680, :718) and printed 'no deploy-scope script files detected, nothing to do' for this .sh; the same bytes were uploaded with s3api put-object and read back equal by sha256. See door6/STEP5_WRITER_STOP_20261019.txt",
+      "gold_staging": "not edited. Census ledger 5.1 (issuer, read 2026-10-16, not re-read here): code/gold-staging/ reads manual-only, zero readers; the deployed inf-gold-trigger and the live dispatch hold 0 references; no rule or schedule is named for it; the fence Deny stands",
+      "rebuild": "not edited. Census ledger 5.1 (issuer, read 2026-10-16, not re-read here): code/rebuild/inf_rebuild_runner.sh is 'ADVI_INFREF one-time canonical rebuild' run on the gold runner via SSM into STAGING prefixes, 0 SSM associations, reads manual-only, not proven",
+      "evidence": "PENDING (step 6): door6/STEP5_WRITER_STOP_20261019.txt holds steps i-iv. Marker baseline read 2026-10-19T14:24:55Z: gold/meta/pipeline-complete.json has 14 versions, latest uLToDEvBYZP6B2INALqrs.1EFv4PuJxa written 2026-10-16T12:56:43Z; none after, although the writer was live until 14:22Z on 10-17, 10-18 and 10-19. Proof of 'stopped' needs a chain day AFTER 14:22Z that is shown to have run (control), with no version after the baseline"
     }
   },
   "pair": {
