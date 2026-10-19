@@ -10,4 +10,15 @@ State at writing (2026-10-19 ~17:0xZ): round 46 has OG-gd-2, OG-cd-2, OG-cd-3 co
 | 4 | Ship `app/admin_people_access.py` and `tests/test_admin_people_access.py` whole from trunk (`b6dd9f9249`) | `2.0.0_SA_COO~MP` written yes, msgs 35981 and 35990 (row `Z-W27-S1` is closed) | Inert, unmounted; mounting stays with PD under the CTO's hold. `admin_people.py` is NOT in the take |
 | 5 | The owner-session read of `/api/admin/gateway/families` | `OG-ap-50` honest limit; Andrew's, later | The route's 401 after deploy is the served proof of the gate; an owner read is the real one |
 
+Added from the CTO (msg 36020, ruling `org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_RULING_GATEWAY_ASSETS_AUDIT_DEFECT_ROUTING_20261019_Z.md` @473f5177a8, on CRO~Z's audit @216dfc8144; the CTO cuts them in the analysis; no hand fix outside a release):
+
+| # | item | note |
+|---|---|---|
+| 6 | D1, FIRST: no `fence_kind` for orion, eclipse or commonwealth, so `firm_not_served` on every call | the CTO orders it first |
+| 7 | D2: the Cottonwood Black Diamond `_date()` accepts ISO only, against MM/DD/YYYY source dates | |
+| 8 | D3: `client_resolve_account` keeps the first adapter's envelope and hides other vendors' refusals | |
+| 9 | P1 handler half: the breakdown handler supplies (vendor, firm) per index | |
+
+The auditor files D1-D3 as rows in this channel with me as disarm owner (not yet read as filed at writing).
+
 Waiting, not items: `OG-ev-13` (GO no earlier than 2026-10-20 07:45Z, essential wait); FWD-21 (Andrew's act, open call `5b35`); the Schwab pilot walkthrough (open calls `a485`, `2ac2`).
