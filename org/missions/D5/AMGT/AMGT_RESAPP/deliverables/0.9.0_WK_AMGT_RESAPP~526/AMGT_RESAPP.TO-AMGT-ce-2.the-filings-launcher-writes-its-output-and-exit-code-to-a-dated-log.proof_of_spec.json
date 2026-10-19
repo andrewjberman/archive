@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ce-2.the-filings-launcher-writes-its-output-and-exit-code-to-a-dated-log",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ce-2.the-filings-launcher-writes-its-output-and-exit-code-to-a-dated-log.md",
+    "group": "OTHER",
+    "vintage_commit": "613ec8aef1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "613ec8aef1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ce-2.the-filings-launcher-writes-its-output-and-exit-code-to-a-dated-log.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~526",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/llm_batch/launchers/run_filings.cmd",
+      "kind": "script",
+      "commit_or_etag": "7a4698b848",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on branch wk-AMGT_RESAPP-526 (worktree C:/dev/wk-resapp-526); not merged to the shared tree and not deployed. The scheduled task runs the merged file only after the drain and the issuer's AMGT-ce-5 proof run.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/llm_batch/tests/test_launcher_capture.py",
+      "kind": "test",
+      "commit_or_etag": "7a4698b848",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed LOCAL on branch wk-AMGT_RESAPP-526; the test file is read and run by AC1 and, within the directory, by AC2.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the pytest summary line reads `5 passed` or more with 0 failed and 0 skipped (T1 to T5 each present by name; T6 present or replaced as the test text states), and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-526 && timeout 120 python -m pytest lib/research/llm_batch/tests/test_launcher_capture.py -q -p no:cacheprovider --color=no; echo \"exit=$?\"",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 3.67s\nexit=0",
+      "denominator": "6 of 6 tests passed (T1 to T6 each present by name), 0 failed, 0 skipped",
+      "status": "PASS",
+      "status_reason": "summary 6 passed, 0 failed, 0 skipped, exit=0 on the second same-input run. T6 is present as a static check of the cd-failure branch text; its runtime form is a documented manual read (declared_exclusions).",
+      "expect": "(?s)\\A.*6 passed in [0-9.]+s\\nexit=0\\s*\\Z",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the summary reads `P passed` with P at least 59 (the base reads `54 passed`) and no `failed` and no `error` in it",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-526 && timeout 120 python -m pytest lib/research/llm_batch/tests -q -p no:cacheprovider --color=no 2>&1 | tail -2",
+      "output_evidence": "............................................................             [100%]\n60 passed in 5.57s",
+      "denominator": "60 passed of 60 collected in lib/research/llm_batch/tests (floor 59; base 54 plus 6 new)",
+      "status": "PASS",
+      "status_reason": "summary reads 60 passed with no failed and no error, exit 0 on the second same-input run; 60 >= 59.",
+      "expect": "(?s)\\A.*\\n60 passed in [0-9.]+s\\s*\\Z",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run against the unedited base launcher (run_filings.cmd at base 2fe324e11e, before the Step C build): the capture tests must fail and the T5 control must pass.",
+      "expected": "T1, T2, T3, T4 and T6 fail; T5 passes",
+      "observed": "5 failed, 1 passed in 0.71s. FAILED: test_t1, test_t2, test_t3, test_t4, test_t6. T5 PASSED (the command-line and sibling-hash control).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "each literal invocation run twice on the same tree and the counts compared: AC1 (run 1 pytest -v, run 2 the literal AC1 line) and AC2 (run 1 and run 2 the literal AC2 line)",
+      "observed": "AC1: 6 passed in 3.34s (run 1), 6 passed in 3.67s (run 2). AC2: 60 passed in 5.41s (run 1), 60 passed in 5.57s (run 2). Pass counts identical on each pair.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The scheduled task OpalResearch-FilingsAnalyzer is not run, enabled, disabled or edited",
+      "reason": "Order bound: the scheduled task is never run here. The on-demand proof is the issuer's cell AMGT-ce-5, run after the merge."
+    },
+    {
+      "item": "The real batch, python -m lib.research.llm_batch.run filings without --dry-run",
+      "reason": "Order bound: it spends money and writes the store. Never run in this cell."
+    },
+    {
+      "item": "The runtime cd-failure branch of the launcher (T6 as a runtime test)",
+      "reason": "cmd resolves the four-level relative path above any temporary tree on this box (its ancestors exist), so a cd failure cannot be produced without writing outside tmp_path. T6 is a static check that the branch text exists; the runtime branch is a documented manual read."
+    },
+    {
+      "item": "The nostamp fallback branch (an empty PowerShell stamp)",
+      "reason": "Not reachable on this box without breaking PowerShell. The branch is read only: if not defined STAMP set STAMP=nostamp."
+    },
+    {
+      "item": "The UTC stamp on other Windows hosts, PowerShell versions or locales",
+      "reason": "Tested only on this box's PowerShell, as the order's Not verified section states."
+    },
+    {
+      "item": "Merge to the shared tree and the on-demand deploy proof",
+      "reason": "Out of the worker's write grant: the drain merges, and the issuer's AMGT-ce-5 runs the scheduled task."
+    },
+    {
+      "item": "CE2_RECEIPT.md as a markdown receipt file",
+      "reason": "Not written: the operator instruction forbids report .md files. The receipt content (what changed, tests, not verified) is in the worker's final message instead."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W526-S1: the order's stub python.cmd on PATH ends the launcher, because a batch called without CALL does not return; the test stub is a module shadowed on cwd instead, and the real batch is never imported."
+  ],
+  "session_log": "No committed session log. The worker's tool trace is the compiler_tools list; the run was the worker face of 2026-10-19 in worktree wk-AMGT_RESAPP-526, base 2fe324e11e.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/llm_batch/tests -q -p no:cacheprovider --color=no",
+      "result": "base before the build: 54 passed; after the build and the new tests: 60 passed"
+    },
+    {
+      "tool": "cmd.exe stamp probe",
+      "invocation": "cmd //c .scratch/stamp_probe.cmd (for /f over powershell -NoProfile UTC stamp, the same command the launcher uses)",
+      "result": "stamp=[20261019T151112Z], matching date -u of the same moment"
+    },
+    {
+      "tool": "git show",
+      "invocation": "git show HEAD:org/surprise_channel/schemas/investigation_item.schema.json",
+      "result": "rc=0, read to .scratch; the schema is absent from this sparse worktree, so the row form was taken from the HEAD read"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~526 <0.9.0_WK_AMGT_RESAPP~526@opal.agent>\" -F <msgfile> -- lib/research/llm_batch/launchers/run_filings.cmd lib/research/llm_batch/tests/test_launcher_capture.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "committed 7a4698b848 (3 files, 170 insertions, 2 deletions); msg-verify MATCH len=776"
+    }
+  ]
+}

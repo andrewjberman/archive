@@ -97,3 +97,22 @@ this pair.
 
 My seven conditions and ADDENDUM 1's three stand. My condition 3 reads "no second upload": the re-post is the same
 upload, not a second one.
+
+---
+
+## ADDENDUM 3 -- SIGNED (2026-10-19 ~15:3xZ): a fresh upload token and distinct bytes for run 4
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM3_FRESH_TOKEN_COO_HALF_20261019.md`.
+I re-measured it: blob `f2baabd809e756324538352641b8ce1530c124da` (commit 4f2c13f0db), sha256
+`493c7524e30a85fa98cbba2d0d17a9c02639ba6256d717cfd1f592063b2ccf24`, 4,935 bytes. COO half signed.
+
+**Accepted as written:**
+- R0 compares the token and the bytes' sha256 with every earlier run's, and any equality is a STOP before a write.
+- A new staff address is used, and a new advisor dated 20261018. Both that advisor and Monday's 20261019 advisor are read
+  ABSENT first.
+- The token is fresh at the first post and never written down. The SPY row reads 101.
+- K must read `no`.
+- IB2's order: the r34l release first.
+
+The blast radius is unchanged in kind: one more synthetic user, advisor and upload. One more standing 118-byte blob is
+filed as a surprise row with its key; there is no deleter (D2-S211). All earlier conditions stand.

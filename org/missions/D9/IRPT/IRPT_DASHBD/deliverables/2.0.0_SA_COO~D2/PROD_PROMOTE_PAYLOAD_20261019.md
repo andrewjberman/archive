@@ -1,25 +1,25 @@
 # PROD promote payload -- the dell2 portal set, recut onto PROD (Andrew-direct 2026-10-19)
 
 **Issuer:** 2.0.0_SA_COO~D2 (the IRPT_DASHBD issuer; no task order: an Andrew-direct act relayed by the CTO, msgs 10707 and 10727). **Records:** `org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20261019_142xZ_PROMOTE_ALL_DELL2_PORTAL_WORK_TO_PROD.md` and `..._144xZ_ALL_HOLDS_LIFTED.md`.
-**Candidate branch:** `cand/dell2/irpt-promote-all-dell2-ir-set-20261019`, head `6656627a` (two commits on origin/PROD `d729ee6d`: the Investor Reporting set `4766293f`, then the Trade Request set `6656627a` after the hold was lifted). **Source:** origin/DEV `f7074536`, file bytes written as DEV holds them.
+**Candidate branch:** `cand/dell2/irpt-promote-all-dell2-ir-set-20261019`, head `8c52f547` (three commits on origin/PROD `d729ee6d`: the Investor Reporting set `4766293f`; the Trade Request set `6656627a` after Andrew lifted the hold; the reveal `8c52f547`, the CTO's ruling msg 10752 that TicketCenter.tsx stops filtering `trade_request` out of the New Ticket list, with the two assertions that said it was hidden). **Source:** origin/DEV `f7074536`, file bytes written as DEV holds them, plus the six-line reveal edit.
 
 ## What it carries
 
-48 files: 31 new, 16 modified, 1 deleted (one test file DEV removed with DB-b-309, whose assertion about the firm banner the new behaviour retires). The tree differs from origin/DEV in exactly 5 `src` files, all dell1's and all left out: `lib/cottonwoodTrend.ts`, `lib/trendGrouping.ts`, `pages/ModelPortfolios.tsx`, and the two files of `pages/SecurityAnalysis/__harness__/`. The Ticket Center analysis-request and meeting-request files are already byte-equal on PROD. The branch `cand/dell2/anlreq-commentary-always-requested` is NOT included (ruling `RULING_COMMENTARY_GAP_TWO_CAUSES_20261017.md`).
+49 files: 31 new, 17 modified, 1 deleted (the one deletion is a test file DEV removed with DB-b-309, whose assertion about the firm banner the new behaviour retires; the 17th modified file is `meeting-request.test.tsx`, which is equal on PROD and DEV and changes only by the reveal). The tree differs from origin/DEV in exactly 5 dell1 `src` files, all left out (`lib/cottonwoodTrend.ts`, `lib/trendGrouping.ts`, `pages/ModelPortfolios.tsx`, and the two files of `pages/SecurityAnalysis/__harness__/`), and in the three files of the reveal (`TicketCenter.tsx`, `trade-form-upload.test.tsx`, `meeting-request.test.tsx`; six changed lines). The Ticket Center analysis-request and meeting-request components are already byte-equal on PROD. The branch `cand/dell2/anlreq-commentary-always-requested` is NOT included (ruling `RULING_COMMENTARY_GAP_TWO_CAUSES_20261017.md`). **The Trade Request type is OFFERED in the New Ticket list after this release.**
 
 ## Gates (run on the committed head in a workspace-layout worktree, 2026-10-19 ~15:0xZ)
 
 | gate | result |
 |---|---|
 | typecheck (`tsc -b --noEmit`) | 0 errors |
-| eslint on the 47 added or modified `.ts`/`.tsx` files | 0 errors, 54 warnings (the files are DEV's bytes, so no warning is new against DEV) |
-| `bun test src/pages/InvestorReporting src/pages/TicketCenter` | 15 failing test names on the recut against 17 on DEV; NONE fails on the recut that does not also fail on DEV (the two only DEV fails are F45-AC9 and FE-s-90); the two Trade Request files alone: 18 pass, 0 fail |
+| eslint on the 48 added or modified `.ts`/`.tsx` files | 0 errors, 54 warnings (all but the three reveal files are DEV's bytes, so no warning is new against DEV) |
+| `bun test src/pages/InvestorReporting src/pages/TicketCenter` | 15 failing test names on the recut against 17 on DEV; NONE fails on the recut that does not also fail on DEV; the trade-request, trade-form-upload and meeting-request files alone: 32 pass, 0 fail |
 | production build (`tsc -b && vite build`) | green, built in 18 s |
 | payload list | the table below |
 
 ## Pages changed and their class
 
-Investor Reporting > Performance tab and its report, export and print: **client-facing**. Ticket Center > Trade Request form: **client-facing**.
+Investor Reporting > Performance tab and its report, export and print: **client-facing**. Ticket Center > Trade Request form, now offered in the New Ticket list: **client-facing**.
 
 ## Files (path under `src/`, status against PROD, DEV commits over PROD touching it, newest such DEV commit)
 
@@ -73,3 +73,4 @@ Investor Reporting > Performance tab and its report, export and print: **client-
 | `pages/TicketCenter/TradeRequestParts.tsx` | modified | 1 | c05e3dda |
 | `pages/TicketCenter/__tests__/trade-form-upload.test.tsx` | new | 1 | c05e3dda |
 | `pages/TicketCenter/__tests__/trade-request.test.tsx` | modified | 1 | c05e3dda |
+| `pages/TicketCenter/__tests__/meeting-request.test.tsx` | modified | 0 (the reveal edit only) | 8c52f547 |
