@@ -56,6 +56,20 @@ DONE WHEN: EXERCISED -- Andrew names one box's projects this afternoon from the 
 | Andrew looked at the page live at the issuer's terminal and said the projects "display cleanly" (2026-10-16 ~18:5xZ); he closed call 21c5 on it | RECORDED, verbatim in the record named above | `org/tier1_exec/2.0.0_SA_COO~MP/deliverables/ANDREW_DIRECT_20261016_185xZ_CLOSE_21C5_21D9_44EB_GATEWAY_READS_WELL.md` |
 | Andrew NAMED one box and its projects, matched to the store | **ABSENT** | his words carry no box name and no project list; `x5_seen.json` was never written. `TO-MP-x-5` is `cancelled` for that reason (a record cannot be written from words that are not there). |
 
+## Gateway access log for Andrew's 2026-10-16 look -- MEASURED-NOW (addendum, 2026-10-19 ~18:3xZ), applies to FWD-14, 15, 16, 17 and 20
+
+Read by the issuer over SSM on the gateway host (read-only `journalctl -u opal-gateway`, request paths only, no query strings, bodies or addresses printed). Window 2026-10-16T18:30:00Z to 19:05:00Z; the log held it three days later (1,749 lines in the window).
+
+| item | count in the window | note |
+|---|---|---|
+| `GET /gateway` answered 200 | 1 (plus 1 answered 401) | and `GET /` 200 x2, `GET /` 401 x1 |
+| `GET /api/admin/gateway/breakdown` answered 200 | 24 | 9 in 18:40-18:49Z, 10 in 18:50-18:59Z, 5 in 19:00-19:04Z (the page re-reads about once a minute) |
+| the Control Plane page's four data routes, each answered 200 | `fabric/boxes` 2, `fabric/overlap` 2, `fabric/gitstate` 2, `fabric/calls` 3 | boxes, overlap, gitstate and 2 of the calls reads in 18:40-18:49Z; the third calls read in 18:50-18:59Z. Also `GET /api/admin/changes` 200 x5 |
+| a direct `GET /control-plane` or `GET /open-calls` | **0, on the whole of 2026-10-16** | the page was reached by in-app navigation after `GET /`; the data routes above are its evidence, not a direct load |
+| any `POST`, or any non-GET at all, to an `/api/admin/...` route (a close request from the page) | **0** of 347 POSTs in the window (`post_admin=0`, non-GET admin requests `=0`, counted without regard to query strings) | the POSTs were `/mcp`, `/graph/cypher` and `/token` |
+
+What it shows and does not: the page's overlap, git-state and open-calls reads were requested and answered 200 while Andrew was looking (the times match the record of his look at ~18:40-18:50Z). It does not show what he read, and no close was made from the page. The FWD-17 "close from the page" item above stays ABSENT, now with a measured zero beside it. Outside these FWDs: `GET /api/admin/people` 200 x4 and `GET /api/admin/people/<tid>/<oid>/access` 404 x5 in the same window (the served People page asked for a per-person access route that PD had not released).
+
 ## Not in this file, stated so nothing is assumed
 
 - `TO-MP-z-6` (FWD-20 close run) is NOT cancelled: Andrew's 2026-10-16 look named the gateway page ("gateway reads well"), so the order was released and a worker (`0.9.0_WK_NFRA_MCPORTAL~16`) was spawned on 2026-10-19 to run it against the window 2026-10-16T18:30Z-19:05Z. Its result, if any, is a separate record under `deliverables/0.9.0_WK_NFRA_MCPORTAL~16/`.
