@@ -1,0 +1,38 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-410",
+  "cell": "AR-y-410",
+  "base": "origin/DEV f70745362d8baa34d78c50b8246a5f98ba7c8862 (portal worktree HEAD at read time)",
+  "read_at": "f70745362d8baa34d78c50b8246a5f98ba7c8862",
+  "constants_and_loop": {
+    "src/pages/TicketCenter/analysisRequest.ts": {
+      "UPLOAD_MAX_TRIES": "line 96 (export const UPLOAD_MAX_TRIES = 5)",
+      "UPLOAD_WAIT_MS": "line 98 (export const UPLOAD_WAIT_MS = 3000)",
+      "fileAnalysisRequest doc comment": "lines 385-390 (names both constants)",
+      "loop": "lines 409-415: resolving predicate at 410; for (let attempt = 1; attempt < UPLOAD_MAX_TRIES && resolving(result); attempt++) at 411; deps.onWaiting?.(attempt) at 412; await wait(UPLOAD_WAIT_MS) at 413; re-post at 414",
+      "RESOLVING return": "line 426-429: returns state RESOLVING with STILL_CHECKING_MESSAGE at 428",
+      "checkingMessage": "lines 264-266 (takes attempt; text 'try N of ${UPLOAD_MAX_TRIES}')",
+      "STILL_CHECKING_MESSAGE": "lines 269-270 ('still being checked after several tries')",
+      "FileDeps.onWaiting": "line 282 (onWaiting?: (attempt: number) => void)"
+    },
+    "src/pages/TicketCenter/TicketCenter.tsx": {
+      "call site 1": "line 391 (fileAndRequestAnalysis deps: onWaiting: n => setUploadReport({ message: checkingMessage(n + 1), findings: [] }))",
+      "call site 2": "line 453 (fileAnalysisRequest deps: onWaiting: n => setUploadReport({ message: checkingMessage(n + 1), findings: [] }))"
+    }
+  },
+  "git_grep_in_portal_worktree": {
+    "command": "git grep -n -E 'UPLOAD_MAX_TRIES|UPLOAD_WAIT_MS|checkingMessage|onWaiting|STILL_CHECKING_MESSAGE' -- src",
+    "hits_outside_analysisRequest_and_TicketCenter": [
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:15 UPLOAD_MAX_TRIES import (changed)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:16 UPLOAD_WAIT_MS import (changed)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:60 onWaiting: (attempt) => ... (type still valid; left as is)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:89-90 pins 5 and 3000 (changed)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:99 waits toEqual UPLOAD_WAIT_MS (changed)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:130-131 pins UPLOAD_MAX_TRIES and minus one (changed)",
+      "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx:134 'still being checked' text (changed)"
+    ],
+    "other_hits": "none: no other test in src/ names these symbols; the 'several tries' and 'try N of' literals occur only in analysisRequest.ts"
+  },
+  "other_surfaces_read": {
+    "src/pages/InvestorReporting/tabs/analysis/ProspectComposer.tsx": "lines 306-309: its own RESOLVING re-POST every 3 s, up to 40 polls; not in the grant, not changed (recorded as S3)"
+  }
+}
