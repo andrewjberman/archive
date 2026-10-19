@@ -1,6 +1,6 @@
 # Never-widen half (COO) -- OG-ap-50, the round-46 thirteenth batched gateway release: a NEW SERVED ROUTE `GET /api/admin/gateway/families` behind the owner gate (`OG-cd-2`); NO ARMING (SIGNED)
 
-By: `2.0.0_SA_COO~O` (issuer), 2026-10-19 ~16:0xZ.
+By: `2.0.0_SA_COO~O` (issuer), 2026-10-19 ~15:4xZ.
 Against: `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/NEVER_WIDEN_ASK_OG-ap-50.md` (`~NFRA1` Phase A, msg 35992), sha256 `50ed64086cb3eb311589` (prefix recomputed by this seat from the file: equal to the applier's `50ed64086cb3`).
 Release: `release_sha` `6d1b5dcb64b945deb98664c6ae078d8f1e8a6c5c` (branch `rel-nfra-oplgtw-batch14`) on the live ref `6b1a9bd292855841826e194d0bddf9ac79bc8337` (`OG-ap-48`'s release, the twelfth), `trunk_sha` `49de05db933eacda62cb7f8015bd7153b1cc9f04`.
 
