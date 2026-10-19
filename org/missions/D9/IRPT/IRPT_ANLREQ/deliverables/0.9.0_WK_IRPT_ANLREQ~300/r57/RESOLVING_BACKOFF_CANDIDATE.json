@@ -1,0 +1,48 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-410",
+  "cell": "AR-y-410",
+  "base_sha": "f70745362d8baa34d78c50b8246a5f98ba7c8862",
+  "commit": "c8fefec6909cbdf1502028952f2e38789109962f",
+  "branch": "cand/dell2/anlreq-upload-resolving-backoff (LOCAL, created at the commit; never pushed)",
+  "files_changed": [
+    "src/pages/TicketCenter/analysisRequest.ts",
+    "src/pages/TicketCenter/TicketCenter.tsx",
+    "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx",
+    "src/pages/TicketCenter/__tests__/upload-resolving-backoff.test.tsx (new)"
+  ],
+  "diff_stat": "4 files changed, 195 insertions(+), 27 deletions(-) (git diff --stat f70745362d8baa34d78c50b8246a5f98ba7c8862 c8fefec6909cbdf1502028952f2e38789109962f)",
+  "tests": {
+    "new_file": {"file": "src/pages/TicketCenter/__tests__/upload-resolving-backoff.test.tsx", "passed": 7, "failed": 0, "cases": 7},
+    "folder": {"folder": "src/pages/TicketCenter", "passed": 228, "failed": 0, "files": 36},
+    "folder_note": "the folder count includes the 7 new cases; 221 existing cases pass unchanged except the repost file, which was updated"
+  },
+  "existing_tests_changed": [
+    {
+      "file": "src/pages/TicketCenter/__tests__/analysis-request-repost.test.tsx",
+      "reason": "it imported and pinned UPLOAD_MAX_TRIES (5), UPLOAD_WAIT_MS (3000) and the 'still being checked' text; the constants are removed, the ladder is pinned by uploadWaitMs(1) = 3000, the waits are [3000, 3000] for the two-RESOLVING case, the bounded case now expects 14 posts, 13 waits summing to UPLOAD_MAX_TOTAL_WAIT_MS, and the new 'still being processed' text"
+    }
+  ],
+  "before_arm": {
+    "where": "new file on f70745362d8baa34d78c50b8246a5f98ba7c8862 without the change",
+    "result": "3 pass, 4 fail, 7 tests across 1 file",
+    "failing": "(i) uploadWaitMs ladder; (ii) progress pair onWaiting (1, 0) and (2, 3000); (iii) 240000 total and text; (v) checkingMessage(45000) text",
+    "passing_on_base": "(iv) three guards: NEEDS_CORRECTION after RESOLVING, REFUSED after RESOLVING, NEEDS_CORRECTION on the first post; the base already ends the loop at once"
+  },
+  "mutant": {
+    "description": "analysisRequest.ts loop condition 'resolving(result) && waitedMs < UPLOAD_MAX_TOTAL_WAIT_MS;' replaced by 'resolving(result) && attempt <= 4;' (stops after four waits)",
+    "result": "MUTANT-FIRES new test file rc=1 fail=1 of 7; restored sha256 4820454fc95d7602095dfaaa4dd367f59bb8ddf260e0a7d933a10f77dde4ce4e"
+  },
+  "typecheck": {
+    "command": "bun run typecheck (tsc -b --noEmit) in the portal worktree",
+    "rc": 0,
+    "ts_errors": 0,
+    "note": "run in the sparse worktree; it completed with rc 0"
+  },
+  "claim": "The Ticket Center re-posts an identical RESOLVING upload with the ladder 3,3,6,6,12,12,24,24 s then 30 s until the waits reach 240000 ms, calls onWaiting(attempt, waitedMs) before each wait, shows 'Still processing the file (about N seconds so far)', and ends at once on NEEDS_CORRECTION or an accepted answer without an input. Nothing was pushed, merged or deployed.",
+  "not_read": [
+    "the live door's timing (the resolves of 0 to 13 s and the 181 s pair are the issuer's live reads, quoted in the TO, not re-measured here)",
+    "the rendered Ticket Center page (no browser run; the tests inject their fakes)",
+    "the door's own redrive at 960 s (stated in the TO's preflight; a four-minute wait never reaches it; not changed)",
+    "the sibling ProspectComposer loop (recorded as IRPT_ANLREQ-D2-W300-S3; not in the grant)"
+  ]
+}
