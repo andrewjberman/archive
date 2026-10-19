@@ -10,7 +10,7 @@
   "spec_ref": {
     "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-6.terraform-root.md",
     "group": "OTHER",
-    "vintage_commit": "38d4f70df7"
+    "vintage_commit": "3c4d2b16d7"
   },
   "assignee": "0.9.0_WK_NFRA_FIDUPL~4",
   "artifacts_produced": [
@@ -19,42 +19,42 @@
       "kind": "terraform",
       "commit_or_etag": "1b5c10e11a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-4. Never applied (plan only); the plan creates 18 resources and changes none."
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-4. The root was applied by the CloudOps seat (18 added); this worker never applied. The live post-apply plan is the FU6-AC3 change."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/names.tf",
       "kind": "terraform",
       "commit_or_etag": "1b5c10e11a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. The 13 name calls through modules/opal_name, system fidelity, scope alongside; all resolve in the plan."
+      "deploy_evidence": "Committed LOCAL. The 13 name calls through modules/opal_name, system fidelity, scope alongside."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/box.tf",
       "kind": "terraform",
       "commit_or_etag": "13fa8fe12b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. Security group (no ingress, egress open), instance profile, box role with SSM core attachment and the scoped box inline policy (Quo key, Wealthscape secret by exact ARN, Fidelity landing prefix), t3.medium instance with IMDSv2 required and encrypted gp3 root. Never applied."
+      "deploy_evidence": "Committed LOCAL. Security group (no ingress, egress open), instance profile, box role with SSM core attachment and the scoped box inline policy (Quo key, Wealthscape secret by exact ARN, Fidelity landing prefix), t3.medium instance with IMDSv2 required and encrypted gp3 root."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
       "kind": "terraform",
-      "commit_or_etag": "13fa8fe12b",
+      "commit_or_etag": "d2faf35fc7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. SSM Automation document (start, wait Online, run wrapper, stop on failure), its scoped automation role, and two STAR-OK statements (ssm:DescribeInstanceInformation, ec2:DescribeInstances). Never applied."
+      "deploy_evidence": "Committed LOCAL at d2faf35fc7 (repair): the run command is /opt/fidelity-uploader/venv/bin/python /opt/fidelity-uploader/box/run.py. The applied document still carries python3 until the CloudOps seat re-applies (plan: 0 to add, 1 to change, 0 to destroy)."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
       "kind": "terraform",
       "commit_or_etag": "1b5c10e11a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. Three EventBridge rules at the Schwab window crons (PROVISIONAL), state DISABLED, and the scoped schedule role with PassRole on the automation role (S5). Never applied; no schedule is enabled."
+      "deploy_evidence": "Committed LOCAL. Three EventBridge rules at the Schwab window crons (PROVISIONAL), state DISABLED, and the scoped schedule role. No schedule is enabled."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/secret.tf",
       "kind": "terraform",
       "commit_or_etag": "13fa8fe12b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. Wealthscape credentials secret fidelity/alongside/wealthscape-credentials, metadata only, prevent_destroy. Graded CONFORMANT by opal_naming.grade SECRET. Never applied; no value is set by the root."
+      "deploy_evidence": "Committed LOCAL. Wealthscape credentials secret fidelity/alongside/wealthscape-credentials, metadata only, prevent_destroy. Graded CONFORMANT by opal_naming.grade SECRET. The root sets no value."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/outputs.tf",
@@ -68,14 +68,14 @@
       "kind": "config_data",
       "commit_or_etag": "13fa8fe12b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL. Regenerated with lib/opal_naming.py generate --target at registry@d27205e1240e174c; the diff adds the alongside scope rows and removes nothing (S1 resolved)."
+      "deploy_evidence": "Committed LOCAL. Regenerated with lib/opal_naming.py generate --target at registry@d27205e1240e174c; the diff adds the alongside scope rows and removes nothing."
     },
     {
       "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "3a67aa08c0",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Surprise rows NFRA_FIDUPL-D1-W4-S1 through S8 on wk-NFRA_FIDUPL-4 (W4-S1..S7 as filed; W4-S8 added)."
+      "deploy_evidence": "Surprise rows NFRA_FIDUPL-D1-W4-S1 through S8 on wk-NFRA_FIDUPL-4 (as filed; S8 added in the amendment round). No row was added in the repair."
     }
   ],
   "acceptance": [
@@ -101,32 +101,42 @@
     },
     {
       "criterion_id": "FU6-AC3",
-      "criterion_verbatim": "the plan against the real backend only adds.",
+      "criterion_verbatim": "the plan against the real backend must now change exactly one thing, the automation document, and add and destroy nothing.",
       "method": "command",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6p",
-      "output_evidence": "R1-FU6P-OK Plan: 18 to add, 0 to change, 0 to destroy.",
-      "denominator": "18 of 18 planned resources are creates; 0 to change; 0 to destroy",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6p2",
+      "output_evidence": "R1-FU6P2-OK Plan: 0 to add, 1 to change, 0 to destroy. (the automation document only)",
+      "denominator": "1 of 1 changed resource is aws_ssm_document.run; 0 to add; 0 to destroy",
       "status": "PASS",
-      "expect": "R1-FU6P-OK Plan: \\d+ to add, 0 to change, 0 to destroy\\."
+      "expect": "R1-FU6P2-OK Plan: 0 to add, 1 to change, 0 to destroy\\."
+    },
+    {
+      "criterion_id": "FU6-AC4",
+      "criterion_verbatim": "the automation document runs the wrapper with the venv python.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6c",
+      "output_evidence": "R1-FU6C-OK the automation runs the wrapper with /opt/fidelity-uploader/venv/bin/python",
+      "denominator": "1 of 1 automation.tf file; 0 occurrences of system python3 on the wrapper",
+      "status": "PASS",
+      "expect": "R1-FU6C-OK the automation runs the wrapper with /opt/fidelity-uploader/venv/bin/python"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant was run: the three acceptance checks read validate, guard and plan outputs; the cell has no spec name whose mutation is a defined test here.",
+      "description": "No mutant was run: the four acceptance checks read validate, guard, plan and file-text outputs; the cell has no spec name whose mutation is a defined test here.",
       "expected": "n/a",
       "observed": "no mutant run",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "two same-input plan runs compared: the fu6p check, then a direct terraform plan on the same tree",
-      "observed": "fu6p: Plan: 18 to add, 0 to change, 0 to destroy.; direct plan: 18 'will be created' lines and Plan: 18 to add, 0 to change, 0 to destroy.",
+      "method": "two same-input plan runs compared: the fu6p2 check, then a direct terraform plan on the same tree",
+      "observed": "fu6p2: Plan: 0 to add, 1 to change, 0 to destroy.; direct plan: aws_ssm_document.run will be updated in-place and Plan: 0 to add, 1 to change, 0 to destroy.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "terraform apply, safe-apply, enabling any EventBridge rule, starting or stopping the box, any AWS object created or changed",
-      "reason": "FU-s-6 is plan-only. The rules are created DISABLED, and the box is left as created (W4-S6, issuer amendment item 4)."
+      "item": "terraform apply, safe-apply, enabling any EventBridge rule, starting or stopping the box, any AWS object created or changed by this worker",
+      "reason": "FU-s-6 is plan-only. The CloudOps seat applied the root and re-applies the document change; this worker never applies."
     },
     {
       "item": "Resource-wide grants other than the two STAR-OK actions",
@@ -134,11 +144,11 @@
     },
     {
       "item": "Runtime proof of the automation (the wait step, the state-change step, the wrapper run)",
-      "reason": "Plan only; nothing is executed. The runtime need of the STAR-OK actions is INFERRED (S4), proven at FU-x-1 or the first enabled run."
+      "reason": "Plan only here; the box run is the CloudOps seat's read (NFRA_FIDUPL-D1-S3). The STAR-OK runtime need stays INFERRED (S4)."
     },
     {
       "item": "A dedicated VPC or subnet for the box",
-      "reason": "Accepted as filed: the default VPC by data source (surprise NFRA_FIDUPL-D1-W4-S7, issuer amendment item 5)."
+      "reason": "Accepted as filed: the default VPC by data source (surprise NFRA_FIDUPL-D1-W4-S7)."
     },
     {
       "item": "A SECRET-grammar builder in lib/opal_naming.py",
@@ -160,7 +170,7 @@
     {
       "tool": "terraform",
       "invocation": "terraform -chdir=infra/aws/terraform/canonical-fidelity-ec2 init; validate; plan",
-      "result": "Terraform v1.15.8: validate passes (FU6-AC1); plan: Plan: 18 to add, 0 to change, 0 to destroy (FU6-AC3)."
+      "result": "Terraform v1.15.8: validate passes (FU6-AC1); plan: Plan: 0 to add, 1 to change, 0 to destroy, aws_ssm_document.run updated in-place (FU6-AC3)."
     },
     {
       "tool": "lib/opal_naming.py (python -I)",
@@ -169,8 +179,8 @@
     },
     {
       "tool": "r1_checks.py",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fu6p",
-      "result": "R1-FU6V-OK; R1-FU6G-OK; R1-FU6P-OK (verbatim in the session log, first run and re-run)."
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fu6p2 | fu6c",
+      "result": "R1-FU6V-OK; R1-FU6G-OK; R1-FU6P2-OK; R1-FU6C-OK (verbatim in the session log, Part D)."
     }
   ]
 }
