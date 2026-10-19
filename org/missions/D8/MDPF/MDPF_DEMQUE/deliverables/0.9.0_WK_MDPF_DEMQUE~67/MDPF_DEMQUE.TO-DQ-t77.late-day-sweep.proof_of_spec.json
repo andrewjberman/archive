@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t77",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t77.late-day-sweep.md",
+    "group": "OTHER",
+    "vintage_commit": "5a34d13381"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "5a34d13381",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t77.late-day-sweep.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~67",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "0e1b95c1e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The late-day SWEEP pass (DQ-t-77). run(..., sweep=True) dispatches to _run_sweep before the default trading-day gate, so the sweep draws on trading days too. The sweep's room is budgets.daily_total less production's spend (the day's production budget ledger, read with bbg_ledger_upload.rows_for_day, the drawer's own modes excluded, a None-cells row counted at its rows and its mode listed) less every actuals cell dated the day (_sweep_room). An absent or unreadable production ledger reads 0 with reason PRODUCTION_SPEND_UNREAD and no draw. One pool (amendment S2, ruled 2026-10-19): the sweep's only cap on any drawable request is daily_total_left, so the surface rooms, the untagged ceiling and the reference ceiling are all waived for the sweep. draw_hold, the tier floor, the probe rules, the empty-window cooldown, the per-request outcome and every vendor stop are kept (the sweep reuses _draw_history and _draw_reference unchanged). Its actuals lines carry pass sweep through record_actual(pass_=SWEEP_PASS). Its marker run.<day>.sweep.started.json is written before the first draw and never removed (ALREADY_RAN_TODAY on a second sweep). Its receipt and parquets are receipt.<day>.sweep.json, history-<day>.sweep.parquet and reference-<day>.sweep.parquet. --room --sweep (sweep_view) and --task-name --sweep (sweep_task_name, mdpf-demque-sweep-daily) are read only. The default pass is unchanged. Not deployed: DQ-t-78 registers the 16:00 ET task at site Z; this cell registers nothing.",
+      "artifact_covered_by": [
+        "DQ9-t77-AC1",
+        "DQ9-t77-AC2",
+        "DQ9-t77-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/bbg_quote.py",
+      "kind": "script",
+      "commit_or_etag": "0e1b95c1e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One change only, as the amendment granted (surprise MDPF_DEMQUE-D1-W67-S1): record_actual takes an optional keyword pass_=None and writes the member \"pass\" only when it is not None, the way the surface keyword already does. Nothing else in the file moves. The default pass calls record_actual without pass_, so its rows are unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t77-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_sweep.py",
+      "kind": "test",
+      "commit_or_etag": "345ecb0564",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the five named tests of DQ-t-77 build item 2, with EXACTLY the named test names. Stub vendor (TradingStub, no network), tmp_path for every write, OPAL_DEMQUE_HOME and RIVALFUNDS_BBG_BUDGET_DIR set to tmp_path, the budget recorder monkeypatched to a no-op, the priority gate stubbed, a temp allowance for the figures the test sets. No existing test was edited. Unchanged by the amendment; at 0e1b95c1e2 all five pass.",
+      "artifact_covered_by": [
+        "DQ9-t77-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t77-AC1",
+      "criterion_verbatim": "`DQ9-t77-AC1` -- the five named tests (test_the_sweep_draws_on_a_trading_day_up_to_the_daily_total_left, test_the_sweep_ignores_surface_lines_and_the_untagged_ceiling, test_the_sweep_counts_production_and_the_morning_fire_once_each, test_an_unreadable_production_ledger_gives_the_sweep_no_room, test_the_sweep_runs_once_a_day_and_never_draws_a_held_request).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t77_tests.py",
+      "output_evidence": "Run from the worktree root at 0e1b95c1e2: 'SWEEP-OK' rc=0. pytest over test_demque_sweep.py: '5 passed in 1.90s'. The first test's assertion that every actuals row carries \"pass\": \"sweep\" now passes, because bbg_quote.record_actual writes the member through pass_.",
+      "denominator": "5 of 5 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "SWEEP-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t77-AC2",
+      "criterion_verbatim": "`DQ9-t77-AC2` -- the drawer's own sweep read on the real allowance file: the built task name, a Monday with an empty ledger reads daily_total_left 2,500,000, and a Monday with no ledger reads 0 with PRODUCTION_SPEND_UNREAD.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t77_room.py",
+      "output_evidence": "Run from the worktree root at 0e1b95c1e2: 'SWEEP-OK' rc=0. (1) --task-name --sweep printed mdpf-demque-sweep-daily. (2) --room --sweep --day 2026-10-19 with an empty bbg_budget_2026-10-19.jsonl read pass sweep, trading_day true, daily_total_left 2500000. (3) The same with no budget file read daily_total_left 0 and reason PRODUCTION_SPEND_UNREAD.",
+      "denominator": "3 of 3 checked reads matched (task name, empty-ledger room, absent-ledger room)",
+      "status": "PASS",
+      "expect": "SWEEP-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t77-AC3",
+      "criterion_verbatim": "`DQ9-t77-AC3` -- the DIFFERENCE CONTROL: the drawer's existing tests and the DQ-t-69/74/75/76 tests pass unedited.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t77_regress.py",
+      "output_evidence": "Run from the worktree root at 0e1b95c1e2: '24 passed in 2.98s' over test_demque_standing_drawer.py, test_demque_standing_drawer_close.py, test_demque_surface_room.py (DQ-t-69), test_demque_outcome_per_request.py (DQ-t-74), test_demque_empty_window.py (DQ-t-75) and test_demque_probe_empty.py (DQ-t-76); then SWEEP-OK rc=0. No test in those files was edited.",
+      "denominator": "24 of 24 tests PASSED",
+      "status": "PASS",
+      "expect": "SWEEP-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The production-count filter in _sweep_production set to skip nothing (if False), so the drawer's demque-backfill rows are counted as production. The standing_drawer.py was restored from a scratch copy afterwards and confirmed byte-identical to the commit.",
+      "expected": "test_the_sweep_counts_production_and_the_morning_fire_once_each fails, because the drawer's 2,000 rows (4,000 cells at the demque-backfill conversion of 2) would be counted as production as well",
+      "observed": "1 failed at 0e1b95c1e2: the sweep view read daily_total_left 46000 (expected 50000); the assertion on spent_today failed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the read-only view: python data/mdpf/scripts/demque/standing_drawer.py --room --sweep --day 2026-10-19 over one fixed budget ledger and no actuals file, outputs compared with cmp",
+      "observed": "run1 and run2 rc=0, byte-identical at 0e1b95c1e2: {\"daily_total_left\": 2452000, \"day\": \"2026-10-19\", \"pass\": \"sweep\", \"spent_today\": {\"drawer\": 0, \"production\": 48000}, \"trading_day\": true, \"unconverted_modes\": [\"bbgtml-unmetered\"]}",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The whole-folder no-failure bar: no failure that was not failing at the base",
+      "reason": "Met as to the failures: the demque folder reads 4 failed, 237 passed, 8 errors (rc=1). The 4 failures (two test_demque_bbg_backfill vendor_limit_warning cases, two test_demque_bbg_ledger_upload cases) and the 8 collection errors are the base set named by the order (missing integrations/ and commonwealth_signs in this worktree). No new failure."
+    },
+    {
+      "item": "The 16:00 ET schedule at site Z",
+      "reason": "Out of this cell. DQ-t-78 registers the task; this cell registers nothing and nothing draws."
+    },
+    {
+      "item": "A named test for the reference-ceiling waiver",
+      "reason": "The order names no test for amendment S2. It was exercised once in a scratch script outside the repo: a reference request drew 6 cells on a day that had already drawn 52 reference cells, and its actuals line carried pass sweep. No committed test covers it."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W67-S1: the sweep's actuals rows could not carry the pass member, because bbg_quote.record_actual had no pass parameter and bbg_quote.py was outside the grant; resolved by the issuer's amendment (grant of one optional pass_ keyword), built at 0e1b95c1e2 (BLOCKING, INERT).",
+    "MDPF_DEMQUE-D1-W67-S2: the reference room was kept in the sweep because the order named only the surface rooms and the untagged ceiling as waived; ruled by the issuer as one pool, the reference ceiling is waived too, built at 0e1b95c1e2 (OBSERVATION, INERT).",
+    "MDPF_DEMQUE-D1-W67-S3: unconverted_modes lists bbgtml-unmetered on every non-empty production ledger with no bbgtml record, because rows_for_day appends that synthetic row; accepted by the issuer as built (OBSERVATION, INERT).",
+    "MDPF_DEMQUE-D1-W67-S4: an absent budgets.daily_total is not stated by the order; the sweep fails closed with NO_ALLOWANCE and daily_total_left 0; accepted by the issuer as built (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~67/MDPF_DEMQUE.TO-DQ-t77.late-day-sweep.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~67 <0.9.0_WK_MDPF_DEMQUE~67@opal.agent>\" -F .scratch/msg_amend_code.txt -- data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/bbg_quote.py",
+      "result": "commit 0e1b95c1e2 on wk-MDPF_DEMQUE-67 (LOCAL): commit-gate OK for 2 of 2 files, msg-verify MATCH."
+    },
+    {
+      "tool": "git merge (refused path)",
+      "invocation": "git merge --no-commit --no-ff box/dell1, then git merge --abort",
+      "result": "The merge of box/dell1 was clean but could not be committed: safe-commit refuses a commit while a merge is in progress and bare git commit is barred. The merge was aborted with no local work in flight, and only the amended order file was carried over (commit c16e4080a4, read from box/dell1 @e791e89779 with git show)."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider --continue-on-collection-errors data/mdpf/scripts/demque",
+      "result": "4 failed, 237 passed, 8 errors in 27.11s at 0e1b95c1e2 (the base set, see declared_exclusions)."
+    }
+  ]
+}
