@@ -1,0 +1,125 @@
+{
+  "to_id": "IRPT_ANLREQ.TO-AR-y-377",
+  "serial": "0.9.0_WK_IRPT_ANLREQ~169",
+  "cell": "AR-y-377",
+  "read_at": "2026-10-16T21:20:50Z",
+  "base_ref": "origin/DEV",
+  "base_sha": "fcbf2bcecb45eb502da8517c0933aafee68a688c",
+  "question": "Does any existing portal read return a firm's ADVISORS WITH THEIR EMAIL (the input the Ticket Center needs for advisor_email on an on-behalf upload)?",
+  "verdict": "NONE_FOUND",
+  "verdict_basis": "No read at base returns an advisor identity with an email for a firm. The Investor Reporting directory reads return firm, client, relationship and account entries; the firm chooser returns firms; the resolve-scope owner carries an advisor_id (an identifier, not a list, no email). The only email read on the Investor Reporting page is the signed-in user's own.",
+  "searched": [
+    {
+      "path": "src/pages/InvestorReporting/contracts/wire/DirectoryEntry.ts",
+      "lines": "12-19",
+      "fields": ["ids.firm_id", "ids.client_id", "ids.relationship_id", "ids.account_ids", "display_name", "masked_discriminator", "permitted_scope", "permitted_capabilities", "termination", "access", "revision", "cohort"],
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/InvestorReporting/contracts/directory-browse.ts",
+      "lines": "29-71",
+      "what": "document() and readDirectoryBrowse() accept only the closed DirectoryEntry key set above; no advisor or email key is admitted",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/api/endpoints/investor-reporting.ts",
+      "lines": "1242-1250 (searchDirectory, operation directory-search); 1252-1268 (browseDirectory, operation directory-browse); 1270-1289 (resolveScope and resolveDirectoryContext, operation resolve-scope)",
+      "what": "each returns DirectoryEntry lists, a DirectoryBrowsePage, or a ResolvedScope; none returns an advisor list",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/InvestorReporting/contracts/wire/ResolvedScope.ts",
+      "lines": "12-39",
+      "fields": ["viewer_policy", "principal_class", "entitlement_revision", "permitted_firm_catalogue (firm_id, selected)", "verified_request_firm_id", "permitted_account_set", "requested_scope", "resolved_scope", "partial_reason"],
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/InvestorReporting/contracts/wire/RequestComposition.ts",
+      "lines": "23-24",
+      "what": "resolved.owner.advisor_id: string or null (an identifier on a composed request, not a directory list, no email)",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/InvestorReporting/contracts/directory-context.ts",
+      "lines": "5-9",
+      "what": "DirectoryContext firms carry tenant, state, scope, reason; no advisor member",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/TicketCenter/TicketCenter.tsx",
+      "lines": "104-121",
+      "what": "loadAllowedFirms (the firm chooser) reads the Global context READY firms (id, label) for staff, or permittedFirms (id, label) for a firm caller. It returns firms only.",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/TicketCenter/analysisRequest.ts",
+      "lines": "71, 372, 378",
+      "what": "answersRefusal requires a typed advisor name; the upload call is uploadAnalysisInput(input.upload, input.answers.firm) with no advisor argument",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/TicketCenter/AnalysisRequestParts.tsx",
+      "lines": "156-157",
+      "what": "the Advisor input is free text (aria-label Advisor, placeholder Advisor (required))",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/api/endpoints/tickets.ts",
+      "lines": "38",
+      "what": "AnalysisRequestAnswers.advisor: string (a typed name for the report)",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/api/endpoints/trade-submission.ts",
+      "lines": "116-123, 128-133",
+      "what": "TradeUser {email, name, role, active, groups} and TradeUserMe: the trade-approval user record, not a firm's advisor list; no firm key",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/api/endpoints/advisor-intelligence.ts",
+      "lines": "467-475, 580-585, 856, 919-1014",
+      "what": "platinum/advisors reads return advisor_id and advisor_name only (for example advisor_name at 585 and 966); the file holds no email member",
+      "advisor_or_email_member": false
+    },
+    {
+      "path": "src/pages/InvestorReporting/index.tsx",
+      "lines": "75-85",
+      "what": "the only email read on the page: auth.user email for the signed-in user (not a directory)",
+      "advisor_or_email_member": false
+    }
+  ],
+  "negative_searches": [
+    {
+      "pattern": "(?i)email over src/pages/InvestorReporting/contracts (native Grep)",
+      "hits": 0
+    },
+    {
+      "pattern": "(?i)email over src/api/endpoints/investor-reporting.ts (native Grep)",
+      "hits": 0
+    },
+    {
+      "pattern": "(?i)advisor_?email|advisorEmail|partner.*email over src (native Grep, files)",
+      "hits": 1,
+      "file": "src/lib/firmAccess.ts",
+      "note": "FIRM_EMAIL_DOMAINS and isEmailFromFirm (domain test on an email, lines 174-208); no advisor list, no directory read"
+    },
+    {
+      "pattern": "(?i)email over src/api/endpoints (native Grep)",
+      "hits": 24,
+      "hits_by_file": {"portfolio.ts": 2, "trade-submission.ts": 19, "tickets.ts": 3},
+      "note": "portfolio.ts 91 and 247, tickets.ts 61, 146, 180, trade-submission.ts 76-163, 259-411; none is a firm advisor directory; none in advisor-intelligence.ts or investor-reporting.ts"
+    },
+    {
+      "pattern": "(?i)email over src/pages/InvestorReporting (*.ts, *.tsx, native Grep)",
+      "hits_files": 7,
+      "note": "RequestList.tsx and OwnedRequestHistory.tsx (prose only), index.tsx (signed-in user), and four tests"
+    }
+  ],
+  "not_read": [
+    "The live directory rows for 49financial (no live call was made: the order is WORLD-read-only and the stop is at the source read).",
+    "Whether the gateway forwards any query member to the upload door (no live call).",
+    "The rendered Ticket Center page (no browser run).",
+    "The backend door's advisor directory (infra/aws/lambda/investor-reporting, served.py _advisor_owner): not in the portal tree; the order bounds reads to the portal."
+  ],
+  "decision": "BLOCKING. No existing portal read returns a firm's advisors with their email. Per AR-y-377 step 1, the build is STOPPED and no picker, no advisor_email member, no test file and no candidate branch were made. A BLOCKING surprise row is filed for the issuer to cut a backend cell."
+}
