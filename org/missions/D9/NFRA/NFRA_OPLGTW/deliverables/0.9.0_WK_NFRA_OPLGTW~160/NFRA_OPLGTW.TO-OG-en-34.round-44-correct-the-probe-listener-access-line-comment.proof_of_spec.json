@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-34",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "9430e21d5d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-34.round-44-correct-the-probe-listener-access-line-comment.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "9430e21d5d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~160",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/probe_listener.py",
+      "kind": "script",
+      "commit_or_etag": "7def46ea34",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-160 (not pushed). Comment-only change: line 361 (the stale sentence) replaced by two comment lines. No code, docstring or import changed; AST equal to base blob 85ce5027cc. No release, no deploy.",
+      "introduces": ["hasHandlers"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8da7e5570d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended by this worker: NFRA_OPLGTW-Z-W160-S1 (OBSERVATION, INERT). surprise-row-gate OK at commit 8da7e5570d; no existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: only comment lines of probe_listener.py changed (at most three replaced), the AST equals the base blob's, the stale sentence is gone and the new one names hasHandlers.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en34.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)changed lines \\(either side\\) [1-6] \\(want 1 to 6, i\\.e\\. at most 3 replaced\\); every changed line is a comment yes; AST equal to the base blob yes; the stale sentence gone yes; the new comment names hasHandlers yes.*RESULT: PASS.*exit=0",
+      "output_evidence": "changed lines (either side) 3 (want 1 to 6, i.e. at most 3 replaced); every changed line is a comment yes; AST equal to the base blob yes; the stale sentence gone yes; the new comment names hasHandlers yes\nRESULT: PASS\nexit=0",
+      "denominator": "3 changed lines (1 removed, 2 added) against base blob 85ce5027cc8bd84dc93aa00bc71130e2c09c0795; 3 of 3 changed lines are comment lines; allowed 1 to 6. Run twice at 7def46ea34, identical output.",
+      "status": "PASS",
+      "status_reason": "Check ran unchanged at 7def46ea34 (the committed bytes equal the bytes checked). Both runs printed RESULT: PASS and exit=0.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (a control): the listener's two test files still pass.",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en34.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)test_og_pr1\\.py and test_og_pr5\\.py together: passed \\d+; failed 0; pytest rc=0.*RESULT: PASS.*exit=0",
+      "output_evidence": "test_og_pr1.py and test_og_pr5.py together: passed 16; failed 0; pytest rc=0\nRESULT: PASS\nexit=0",
+      "denominator": "16 tests passed of 16 executed across test_og_pr1.py and test_og_pr5.py; 0 failed; 0 errors reported by the check's failed-or-error count.",
+      "status": "PASS",
+      "status_reason": "Check ran unchanged at 7def46ea34; pytest rc=0 with no failures.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant to plant. The AC1 check itself compares the file to the base blob and grades any code change, docstring change or stale sentence as a FAIL.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "No mutant planted. The base-blob comparison is the check's own negative arm and was exercised by the two runs of AC1 on the committed file, both PASS.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "en34.AC1.sh run twice at 7def46ea34 with output captured to files; the two outputs compared. en34.AC2.sh run once (pytest, not repeated).",
+      "observed": "Both AC1 runs printed the identical three lines (changed lines 3; RESULT: PASS; exit=0). AC2 once: passed 16, failed 0, rc 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy, release and push of the listener comment (the eleventh release).",
+      "reason": "The cell is a comment correction; its preflight declares no deploy and no schedule. The comment rides the next release by the CTO's round-43 analysis, list item 5."
+    },
+    {
+      "item": "The NAMING ERROR printed by the commit gate on 7def46ea34: the function-map folder infra/aws/lambda/ci/function-map/ is absent from this worktree, so the naming gate graded nothing on that run.",
+      "reason": "The commit went through (msg-verify MATCH). This change is a Python comment and names no Lambda resource, so the naming gate has nothing to grade here. Observed and reported; not graded by this worker."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W160-S1: the commit gate printed 'WARN: client-data-check: hashed account-id list ABSENT' on this device and stated the commit (7def46ea34 comment-only edit) was NOT checked for client account ids; the commit went through on the WARN. OBSERVATION, INERT, disarm 2.0.0_SA_COO~O (filed by this worker).",
+    "NFRA_OPLGTW-Z-W160-S2: proof-of-spec-check.py ran in structural FALLBACK mode on this device (jsonschema not installed); its pre-flip VALID rc=0 did not carry the schema finding the commit-time gate raised on the same instance after the flip. OBSERVATION, INERT, disarm 2.0.0_SA_COO~O (filed by this worker)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~160/NFRA_OPLGTW.TO-OG-en-34.round-44-correct-the-probe-listener-access-line-comment.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~160 <0.9.0_WK_NFRA_OPLGTW~160@opal.agent>\" -F <msgfile> -- infra/aws/ec2/opal-gateway/app/probe_listener.py",
+      "result": "[commit-gate] All checks passed!; OK: pre-commit gate clean for 1 of 1 file(s); committed 7def46ea34"
+    },
+    {
+      "tool": "surprise-row-gate (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~160 <0.9.0_WK_NFRA_OPLGTW~160@opal.agent>\" -F <msgfile> -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields; committed 8da7e5570d"
+    }
+  ]
+}
