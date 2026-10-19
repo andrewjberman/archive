@@ -1,0 +1,24 @@
+0.9.0_WK_NFRA_MCPINDEX~73 on NFRA_MCPINDEX.TO-MX-s-3 -- session log (run from C:/tmp/wk-mcpindex-73)
+
+TREE CHECK: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-73; test -d org && test -d .tools -> TREE-OK
+CUT: 25 tools in census scope (channels opal-data-portal-v2, opal-data-mdpf, portal_index); 25 names confirmed against GATEWAY_SURFACE_CENSUS_20261019_v2.json
+
+AC1: bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s3.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/source_sets_portal.json
+  DENOMINATOR: 25 tool(s) in scope: channels opal-data-portal-v2,opal-data-mdpf,portal_index; census GATEWAY_SURFACE_CENSUS_20261019_v2.json
+  ARMS: 4 ok, 0 failed
+  RESULT: PASS  (exit 0)
+
+AC2: bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s3.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/source_sets_portal.json
+  DENOMINATOR: 25 tool(s) in scope; the allowed vendors are the catalog's own plus opal, ycharts, microsoft, bloomberg, other
+  ARMS: 6 ok, 0 failed
+  RESULT: PASS  (exit 0)
+
+SPOT-CHECK (five entries re-read at their cites): portal_get_macro app/portal_macro.py:357 (KEY_MACRO); mdpf_get_model_composition app/portal_served.py:248 (template replace); opal_asker_query app/firm_role.py:102 (get_object BUCKET); portal_get_market_returns app/portal_models.py:292 (_SERIES_PREFIX + ticker); etfs_get_positioning app/etfs_funds.py:34 (ENTITY_GOLD_BOOK). All five match their claims.
+
+GROUNDING MEASURE: python .scratch/ground.py -> sources 32, cited file has literal bucket 20, underscore-variant only 12 (row NFRA_MCPINDEX-Z-W73-S3).
+
+CONTROL MUTANT A (drop portal_get_trending; expected FAIL): s3.AC1 -> "FAIL every tool in scope appears exactly once, and no other -- missing=['portal_get_trending']"; ARMS: 3 ok, 1 failed; RESULT: FAIL (exit 1). FIRED-AS-EXPECTED.
+CONTROL MUTANT B (cite app/query_v0.py:99999; expected FAIL): s3.AC2 -> ARMS: 5 ok, 1 failed; RESULT: FAIL (exit 1). FIRED-AS-EXPECTED.
+DETERMINISM: s3.AC1 and s3.AC2 each run twice on the same input; outputs byte-identical (cmp).
+
+COMMITS: 70f76b50caadc7cc4a0fe3874a824730b0152302 (work: source_sets_portal.json, INVESTIGATION_v1.md rows S1-S3); proof instance and status flip in the second commit.

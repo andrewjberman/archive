@@ -1,0 +1,145 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-s-6.source-sets-m365",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7c42c0c7437"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+  "vintage_commit": "0def6f4233a",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-6.source-sets-m365.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~76",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~76/source_sets_m365.json",
+   "kind": "doc",
+   "commit_or_etag": "b5595abaa1b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Data file only (gateway_source_sets/1, 43 tools, 44 sources); no deploy in scope. Committed at b5595abaa1b on wk-NFRA_MCPINDEX-76 (LOCAL).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the DENOMINATOR line (43 tools in scope); the schema; every tool in scope exactly once and no other; every tool has at least one source -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s6.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~76/source_sets_m365.json; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR: 43 tool(s) in scope: channels m365; census GATEWAY_SURFACE_CENSUS_20261019_v2.json\n  ok   a source-set file path was given and exists\n  ok   schema\n  ok   every tool in scope appears exactly once, and no other\n  ok   every tool has at least one source\nARMS: 4 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "43 of 43 tools in scope; 4 of 4 arms; run twice, identical output",
+   "status": "PASS",
+   "expect": "DENOMINATOR: 43 tool\\(s\\) in scope[\\s\\S]*RESULT: PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the DENOMINATOR line; every source has the fields of its kind; every vendor is in the allowed vocabulary; every cite is app/<file>.py:<line> naming a real line; the cited file names the bucket, store, integration or graph string; a tool's vendors list equals the set of its sources' vendors -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s6.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~76/source_sets_m365.json; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR: 43 tool(s) in scope; the allowed vendors are the catalog's own plus opal, ycharts, microsoft, bloomberg, other\n  ok   a source-set file path was given and exists\n  ok   every source has the fields of its kind (s3: bucket and prefix; store; integration; graph)\n  ok   every source vendor is in the allowed vocabulary\n  ok   every cite is app/<file>.py:<line> naming a real line of the gateway source\n  ok   the cited file names the source (the bucket, store, integration or graph string appears in it)\n  ok   a tool's vendors list equals the set of its sources' vendors\nARMS: 6 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "43 of 43 tools in scope; 44 of 44 sources; 6 of 6 arms; run twice, identical output",
+   "status": "PASS",
+   "expect": "DENOMINATOR: 43 tool\\(s\\) in scope[\\s\\S]*RESULT: PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two scratch copies of the committed file, never committed: m1 drops the whoami entry; m2 sets copy_site_file_to_s3 source 0 vendor to bogusvendor and create_draft source cite to app/tools.py:99999. Each copy was run through both checks.",
+   "expected": "m1: AC1 FAIL (whoami missing from the tool set). m2: AC2 FAIL (vendor vocabulary, cite and vendor-union arms).",
+   "observed": "m1 s6.AC1: FAIL 'missing=[whoami]', RESULT: FAIL, exit=1. m1 s6.AC2: ARMS 6 ok, RESULT: PASS (form-only, as written). m2 s6.AC1: RESULT: PASS (does not read vendors or cites). m2 s6.AC2: FAIL on 3 of 6 arms, RESULT: FAIL, exit=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Each of s6.AC1 and s6.AC2 run twice on the committed file; the two outputs compared byte-for-byte with cmp.",
+   "observed": "Both pairs identical. s6.AC1 RESULT: PASS exit=0 each run; s6.AC2 RESULT: PASS exit=0 each run.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Correcting the members.yaml bucket_source line claims (40 of 43 tools) and the m365 census rows",
+   "reason": "BOUNDS 1: members.yaml and the census are read-only inputs. The disagreements are filed as OBSERVATION rows NFRA_MCPINDEX-Z-W76-S1..S40 for the issuer."
+  },
+  {
+   "item": "Sender-identity Graph reads that enrich Teams messages (/chats/{id}/members, /users/{id}) as separate sources",
+   "reason": "Smallest-thing decision (contract silent): each tool's data endpoint is its one source. The /users read of read_channel_messages is in a different endpoint family and is not traced as its own source; stated in session log section 7b."
+  },
+  {
+   "item": "Auth, entitlement and gate reads (token broker, identity_scope, data_entitlement, tier, blast_cap, opal_users gate, reply binding) as sources",
+   "reason": "They decide access and do not return data; the contract's sources are the data a tool reads or writes. Smallest-thing decision, session log section 7a."
+  },
+  {
+   "item": "The S3 destinations of copy_site_file_to_s3 and the Graph write targets of the send, create, upload and save tools as sources",
+   "reason": "They are writes; the contract traces what a tool's code can read. A write-only tool keeps its one Graph call as its source so AC1 (at least one source) holds."
+  },
+  {
+   "item": "Live responses cross-checking the trace (a response citing a source the trace lacks)",
+   "reason": "BOUNDS 1: no Opal gateway or AWS call and no network in this order. The trace is a code reading; the issuer's live cross-check is the drain-time step."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W76-S1: members.yaml claim app/tools.py:461 for create_draft does not name the graph POST at app/tools.py:465",
+  "NFRA_MCPINDEX-Z-W76-S2: members.yaml claim app/tools.py:547 for find_online_meeting does not name the graph GET at app/tools.py:551",
+  "NFRA_MCPINDEX-Z-W76-S3: members.yaml claim app/tools.py:697 for find_sharepoint_site is its decorator, not the graph GET at app/tools.py:701",
+  "NFRA_MCPINDEX-Z-W76-S4: members.yaml claim app/tools.py:925 for get_item is the def header, not the graph GET at app/tools.py:929",
+  "NFRA_MCPINDEX-Z-W76-S5: members.yaml claim app/tools.py:934 for get_site_item is the def header, not the graph GET at app/tools.py:938",
+  "NFRA_MCPINDEX-Z-W76-S6: members.yaml claim app/tools.py:428 for inspect_email_attachment is a docstring line, not the graph GET at app/tools.py:432",
+  "NFRA_MCPINDEX-Z-W76-S7: members.yaml claim app/tools.py:513 for list_calendar is an else branch, not the graph GET at app/tools.py:517",
+  "NFRA_MCPINDEX-Z-W76-S8: ROUTING members.yaml claim app/tools.py:1667 for list_channels lands in portal_get_peer_performance; the source is app/tools.py:1788",
+  "NFRA_MCPINDEX-Z-W76-S9: members.yaml claim app/tools.py:981 for list_chats is the def header, not the graph GET at app/tools.py:985",
+  "NFRA_MCPINDEX-Z-W76-S10: members.yaml claim app/tools.py:360 for list_email_attachments is the def header, not the graph GET at app/tools.py:364",
+  "NFRA_MCPINDEX-Z-W76-S11: members.yaml claim app/tools.py:326 for list_email_filtered is an error return, not the graph GET at app/tools.py:330",
+  "NFRA_MCPINDEX-Z-W76-S12: members.yaml claim app/tools.py:572 for list_meeting_transcripts is rows initialiser, not the path at app/tools.py:573",
+  "NFRA_MCPINDEX-Z-W76-S13: members.yaml claim app/tools.py:235 for list_recent_email is a closing brace, not the graph GET at app/tools.py:239",
+  "NFRA_MCPINDEX-Z-W76-S14: members.yaml claim app/tools.py:1264 for list_shared_folder is a blank line, not the graph GET at app/tools.py:1268",
+  "NFRA_MCPINDEX-Z-W76-S15: members.yaml claim app/tools.py:944 for list_site_drives is a docstring line, not the graph GET at app/tools.py:948",
+  "NFRA_MCPINDEX-Z-W76-S16: ROUTING members.yaml claim app/tools.py:1659 for list_teams is a decorator of portal_get_model_portfolio_timeseries; the source is app/tools.py:1780",
+  "NFRA_MCPINDEX-Z-W76-S17: ROUTING members.yaml claim app/tools.py:1707 for poll_addressed_teams_messages is a docstring line of read_chat_message_images; the source is app/tools.py:1828",
+  "NFRA_MCPINDEX-Z-W76-S18: members.yaml claim app/tools.py:744 for profile_site_file is an import line, not the graph GET at app/tools.py:748",
+  "NFRA_MCPINDEX-Z-W76-S19: members.yaml claim app/tools.py:1013 for read_channel_messages is a docstring line of the shared helper; the path is app/tools.py:1798",
+  "NFRA_MCPINDEX-Z-W76-S20: ROUTING members.yaml claim app/tools.py:1591 for read_chat_message_images is a blank line in client_get_holdings; the source is app/tools.py:1711",
+  "NFRA_MCPINDEX-Z-W76-S21: members.yaml claim app/tools.py:1013 for read_chat_messages is a docstring line of the shared helper; the path is app/tools.py:1697",
+  "NFRA_MCPINDEX-Z-W76-S22: members.yaml claim app/tools.py:960 for read_document is an import line; the branch that names the two sources is app/tools.py:961",
+  "NFRA_MCPINDEX-Z-W76-S23: members.yaml claim app/tools.py:351 for read_email is the def header, not the graph GET at app/tools.py:355",
+  "NFRA_MCPINDEX-Z-W76-S24: members.yaml claim app/tools.py:682 for read_file is the def header, not the graph GET at app/tools.py:686",
+  "NFRA_MCPINDEX-Z-W76-S25: members.yaml claim app/tools.py:606 for read_meeting_transcript is an error return, not the graph GET at app/tools.py:610",
+  "NFRA_MCPINDEX-Z-W76-S26: members.yaml claim app/tools.py:719 for read_site_file is a docstring line, not the graph GET at app/tools.py:723",
+  "NFRA_MCPINDEX-Z-W76-S27: members.yaml claim app/tools.py:871 for read_site_workbook is a docstring line, not the base path at app/tools.py:872",
+  "NFRA_MCPINDEX-Z-W76-S28: members.yaml claim app/tools.py:1220 for read_teams_attachment is an error return, not the graph GET at app/tools.py:1224",
+  "NFRA_MCPINDEX-Z-W76-S29: members.yaml claim app/tools.py:897 for read_workbook is a docstring line, not the base path at app/tools.py:898",
+  "NFRA_MCPINDEX-Z-W76-S30: members.yaml claim app/tools.py:490 for reply_email is a docstring line, not the graph POST at app/tools.py:494",
+  "NFRA_MCPINDEX-Z-W76-S31: members.yaml claim app/tools.py:384 for save_email_attachment_to_site is an error return, not the graph read at app/tools.py:388",
+  "NFRA_MCPINDEX-Z-W76-S32: members.yaml claim app/tools.py:340 for search_email is the decorator, not the graph GET at app/tools.py:344",
+  "NFRA_MCPINDEX-Z-W76-S33: members.yaml claim app/tools.py:656 for search_files is the decorator, not the graph GET at app/tools.py:660",
+  "NFRA_MCPINDEX-Z-W76-S34: members.yaml claim app/tools.py:916 for search_site_files is the def header, not the graph GET at app/tools.py:920",
+  "NFRA_MCPINDEX-Z-W76-S35: ROUTING members.yaml claim app/tools.py:1697 for send_channel_message is read_chat_messages' lambda; the source is app/tools.py:1818",
+  "NFRA_MCPINDEX-Z-W76-S36: ROUTING members.yaml claim app/tools.py:1648 for send_chat_message is the def header of portal_get_etf_returns; the source is app/tools.py:1769",
+  "NFRA_MCPINDEX-Z-W76-S37: members.yaml claim app/tools.py:481 for send_email is a closing brace, not the graph POST at app/tools.py:485",
+  "NFRA_MCPINDEX-Z-W76-S38: members.yaml claim app/tools.py:830 for upload_text_to_site is an error raise, not the graph upload at app/tools.py:834",
+  "NFRA_MCPINDEX-Z-W76-S39: members.yaml claim app/tools.py:801 for validate_ssavail_attachment is a blank line, not the graph GET at app/tools.py:806",
+  "NFRA_MCPINDEX-Z-W76-S40: members.yaml claim app/tools.py:212 for whoami is the decorator, not the graph GET at app/tools.py:217",
+  "NFRA_MCPINDEX-Z-W76-S41: naming-gate NAMING ERROR (function-map folder missing) and client-data WARN (account-id list absent) printed on work commit b5595abaa1b, rc=0; same as W63-S1 and W63-S2"
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~76/logs/s6_session.txt",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/h_check.py",
+   "invocation": "s6.AC1 and s6.AC2 on deliverables/0.9.0_WK_NFRA_MCPINDEX~76/source_sets_m365.json (each run twice); s6.AC1/s6.AC2 on .scratch/mutant_m1.json and .scratch/mutant_m2.json",
+   "result": "committed file: RESULT: PASS for both, identical across runs; mutant m1 AC1 RESULT: FAIL (missing whoami); mutant m2 AC2 RESULT: FAIL (3 of 6 arms)"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~76 <0.9.0_WK_NFRA_MCPINDEX~76@opal.agent>\" -F .scratch/msg_s6_work.txt -- source_sets_m365.json INVESTIGATION_v1.md",
+   "result": "rc=0; [surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields (40 new rows); [msg-verify] committed b5595abaa1"
+  }
+ ]
+}
