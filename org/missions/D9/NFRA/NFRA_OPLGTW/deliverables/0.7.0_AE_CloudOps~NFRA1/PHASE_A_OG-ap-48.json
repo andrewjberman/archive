@@ -1,0 +1,73 @@
+{
+ "body": {
+  "release_sha": "6b1a9bd292855841826e194d0bddf9ac79bc8337",
+  "audit_leg": {
+   "config": {
+    "connect_timeout": 2,
+    "read_timeout": 3,
+    "max_attempts": 2,
+    "retries_as_read": {
+     "mode": "standard",
+     "total_max_attempts": 2
+    },
+    "configured_retries_argument": {
+     "max_attempts": 1,
+     "mode": "standard"
+    },
+    "note": "botocore reads max_attempts 1 as total_max_attempts 2, i.e. ONE retry; the send attempts counted on the host were 2"
+   },
+   "failed_put_wall_s": 4.33,
+   "send_attempts_made": 2,
+   "counter_after_failure": 1,
+   "stderr_lines": 1,
+   "stderr_line_carries_only_class_and_count": true,
+   "floor_line_written": true,
+   "guard": "oom_score_adj_1000_cgroup_memmax_1400mb",
+   "endpoint": "non-routable (the black hole named in the order); the real audit lake was never touched; the throwaway bucket name is not a bucket",
+   "live_ref_disclosure": {
+    "finished_within_the_70_s_limit": false,
+    "failed_put_wall_s": 70.0,
+    "connect_timeout": 60,
+    "read_timeout": 60,
+    "retries_as_read": {
+     "mode": "legacy"
+    },
+    "send_attempts_made_by_the_limit": 2,
+    "failure_counter_exists": false,
+    "stderr_lines": 0,
+    "floor_line_written": true
+   }
+  },
+  "listener": {
+   "bound_host": "127.0.0.1",
+   "off_by_default": true,
+   "armings": 0,
+   "lease_parameter_written": false,
+   "lease_parameter_absent_now": true,
+   "basis": "probe_listener.py is not in this release (byte-equal to the live ref) and the running service was not touched; the lease parameter was read absent and no SSM write was made"
+  },
+  "tests": {
+   "named_passed": 20,
+   "named_failed": 0,
+   "window_set_passed": 75,
+   "window_set_failed": 0,
+   "union_both_orders_equal": true
+  },
+  "candidate_bytes_equal_release": {
+   "audit.py": true
+  },
+  "process_wide_state": "STDERR VOLUME and the boto3 S3 client's botocore Config; nothing else. I opened app/audit.py at the release and its diff against the live ref (5 hunks: the imports sys and time, a module counter with its lock and a 60 s constant, lake_put_failure_count() and _note_lake_failure(), the explicit botocore Config on the lazily built S3 client, and the except branch that now calls _note_lake_failure) and app/config.py (read only). Stderr: one line on the first failed lake put, then at most one per 60 s, carrying the exception class name and the running count only (never the message, bucket, key or record). The client Config: connect_timeout 2 s, read_timeout 3 s, retries mode standard with max_attempts 1 (botocore reads that as total_max_attempts 2: ONE retry). The floor-write lines of _emit are unchanged. No logger, handler, signal, thread, environment, sys.path or global-config change; the module-level lock and counter are this module's own. Measured in a fresh guarded process on the host against a non-routable endpoint.",
+  "service": {
+   "pid_before": "1327041",
+   "pid_after": "1327041",
+   "pid_stable": true,
+   "nrestarts_before": "0",
+   "nrestarts_after": "0"
+  },
+  "scratch_removed": true,
+  "host_before": {
+   "md5_differ": 0,
+   "marker": "PRESENT=e09c30c3f064296ae7f8eb2c47b91bfec0be9b60"
+  }
+ }
+}
