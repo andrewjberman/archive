@@ -1,0 +1,61 @@
+{
+ "body": {
+  "journal": {
+   "source": "ssm send-command on the host: journalctl -u opal-gateway --since '2026-10-18 19:20:00 UTC' --utc --no-pager -o short-iso | grep -cE '\"POST /mcp[^\"]*\" 429' ; | grep -c 'ratelimit-audit WARN: refusal row not recorded' (counts only; first access line = first 'POST /mcp' line)",
+   "first_access_line_ts": "2026-10-18T19:23:53+0000",
+   "last_line_ts": "2026-10-19T02:57:18+0000",
+   "post_mcp_429_lines": 0,
+   "ratelimit_audit_warn_lines": 0,
+   "post_mcp_lines": 1413,
+   "journal_lines_total": 14745,
+   "journal_earliest_line_ts": "2026-10-18T19:20:19+0000"
+  },
+  "lake": {
+   "source": "s3://opal-mcp-audit audit/dt=<day>/ listed (StartAfter the window start) and every object read, records with event gw_ratelimit counted; 5568 records read",
+   "window_start": "2026-10-18T19:23:53Z",
+   "window_end": "2026-10-19T02:57:27Z",
+   "gw_ratelimit_rows": 0,
+   "denominator": 5568,
+   "read_errors": 0
+  },
+  "counter_exposed": false,
+  "counter_evidence": "Grep audit_failure_count|_audit_failures over infra/aws/ec2/opal-gateway/**/*.py: 7 hits, none a route or health read: app/ratelimit.py:199 (the variable), :202 and :204 (the reader function), :222 (docstring), :223 and :246 (the writer's own global and increment); tests/test_og_en10.py:57, :154, :164 (the tests).",
+  "controlled_refusal": null,
+  "ev7_unlabelled": {
+   "window_start": "2026-10-18T21:08:03Z",
+   "window_end": "2026-10-18T21:08:59Z",
+   "records": 10,
+   "pairs": [
+    {
+     "label": "none",
+     "tool": "etfs_compare_peers",
+     "n": 9
+    },
+    {
+     "label": "none",
+     "tool": "hx_teams",
+     "n": 1
+    }
+   ],
+   "source": "s3://opal-mcp-audit audit/dt=2026-10-18/ objects after 2026-10-18T21:08:03 up to 21:08:59 (the ev7_run.py lake_labels rule), each object read; 15 records in the window, probe-labelled ones excluded; label = the probe:<order> token or none, tool = the record's tool or event",
+   "explained_by": "9 etfs_compare_peers records = the 3 source-table reads (peer_group_map, buying_trend, holding_contribution) the tool audits inside each of the 3 served probe calls (the call's own record is the one labelled probe:OG-ev-7); 1 hx_teams record = the service route GET /hx/teams/chats (a Teams read at 21:08:19Z), not a /mcp call"
+  },
+  "read_at": {
+   "start": "2026-10-19T02:57:25Z",
+   "end": "2026-10-19T02:57:27Z"
+  },
+  "verdict": "NOT_EXPOSED",
+  "reason": "no POST /mcp line answered 429 in the retained window and no route exposes the counter; 0 lake rows",
+  "ev7_journal_crosscheck": {
+   "window": "2026-10-18T21:08:00Z to 21:09:05Z",
+   "source": "journalctl -u opal-gateway --since/--until, lines counted by class (counts only)",
+   "lines_with_HTTP_1_1": 11,
+   "probe_lines": 5,
+   "hx_lines": 1,
+   "get_health_lines": 4,
+   "post_mcp_lines": 0,
+   "other_lines": "1 (an outbound Microsoft Graph client request line, not an access line)",
+   "reading": "the hx_teams lake record has its journal line (GET /hx/teams/chats, 200); the journal's POST /mcp is 0 because the window held no /mcp request; the 9 peers records are in-call source reads. No service /mcp record is missing from the journal."
+  }
+ }
+}

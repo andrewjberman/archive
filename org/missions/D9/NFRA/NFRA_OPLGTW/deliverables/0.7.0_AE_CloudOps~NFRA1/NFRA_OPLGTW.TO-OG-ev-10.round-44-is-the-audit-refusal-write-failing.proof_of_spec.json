@@ -1,0 +1,80 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-10",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "b5557f67e1",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-10.round-44-is-the-audit-refusal-write-failing.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/AUDIT_REFUSAL_WRITE.json",
+   "kind": "doc",
+   "commit_or_etag": "034bd0f21a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "STEP 1 record (read-only): journal from 2026-10-18T19:23:53+0000 to 2026-10-19T02:57:18+0000: 1413 POST /mcp lines in all, 0 answered 429, 0 writer WARN lines; lake: 0 gw_ratelimit rows over 5568 objects, 0 read errors; counter exposed by no route; controlled refusal none; verdict NOT_EXPOSED. The 10 records of the OG-ev-7 window not labelled probe: 9 etfs_compare_peers source reads inside the 3 served calls and 1 hx_teams (GET /hx/teams/chats), all matched to journal lines.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev10_step1.py",
+   "kind": "doc",
+   "commit_or_etag": "034bd0f21a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The read-only collector (journalctl over SSM, the lake listed and read). Writes nothing but its local record.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the journal and lake counts are present and read without error, the verdict equals what the rule returns from those counts, the 10 records of OG-ev-7's window not labelled probe are accounted for by (label, tool) pairs that sum to 10, and the record holds no email, no principal and no long digit run.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/ev10.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)journal: 429 lines \\d+, writer WARN lines \\d+ .*: ok; lake: gw_ratelimit rows \\d+ over \\d+ objects, read errors 0: ok.*verdict by the rule fixed before the run: (WRITES|FAILS|NOT_EXPOSED), the record says \\1: consistent.*OG-ev-7 window records not labelled probe: 10 \\(PEERS_MEASURE\\.json gives 10\\); pairs sum 10: ok; email-shaped strings 0 \\(want 0\\); digit runs of 9 or more 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "journal: 429 lines 0, writer WARN lines 0 (first access line 2026-10-18T19:23:53+0000): ok; lake: gw_ratelimit rows 0 over 5568 objects, read errors 0: ok\ncounter exposed by a route False; controlled refusal none: ok; verdict by the rule fixed before the run: NOT_EXPOSED, the record says NOT_EXPOSED: consistent\nOG-ev-7 window records not labelled probe: 10 (PEERS_MEASURE.json gives 10); pairs sum 10: ok; email-shaped strings 0 (want 0); digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "5568 lake objects read (0 errors); 1413 journal POST /mcp lines; 10 records of the OG-ev-7 window",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the check recomputes the verdict from the numbers, which is the discriminating arm.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "STEP 2 (the controlled refusal)",
+   "reason": "The order stops at NOT_EXPOSED and waits for the issuer's reply; STEP 2 needs an ask, three signed halves and a GO."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-10 STEP 1 (GO 35852; read-only). The journal and the lake were read by ev10_step1.py (SSM send-command for the journal, boto3 list and get for the lake); the OG-ev-7 limb was cross-checked against the journal of 21:08:00Z to 21:09:05Z by class (5 probe lines, 1 hx line, 4 health lines, 0 POST /mcp, 1 outbound Graph client line). No ask, no halves, nothing written to AWS.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 / ssm / s3",
+   "invocation": "ev10_step1.py",
+   "result": "PASS",
+   "note": "Counts, UTC times and (label, tool) names only."
+  }
+ ]
+}
