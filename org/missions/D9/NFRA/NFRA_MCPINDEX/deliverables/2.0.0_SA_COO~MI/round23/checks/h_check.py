@@ -415,7 +415,7 @@ def k_ac1(channel_ids, prefix):
 
 
 REAL_NO_CLASS = (None, "UNCLASSIFIED")
-MUTATING_UNCLASSIFIED = ("opal_data_refresh_upload",)   # the one mutating tool whose class is UNCLASSIFIED (deploy-to-ec2.sh: "ONE MUTATING tool")
+MUTATING_UNCLASSIFIED = ("opal_data_refresh_upload", "schwab_prepare_download")   # mutating tools whose class is UNCLASSIFIED (deploy-to-ec2.sh: "ONE MUTATING tool"; schwab_prepare_download mints a download-ticket record, integration.py:1112, export.py:122, row Z-W69-S1)
 
 
 def is_sender(t):

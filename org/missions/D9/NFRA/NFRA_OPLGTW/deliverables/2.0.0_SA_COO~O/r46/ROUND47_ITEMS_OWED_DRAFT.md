@@ -38,3 +38,11 @@ Added ~18:4xZ (Andrew-direct, gateway resize):
 | # | item | source | note |
 |---|---|---|---|
 | 15 | Resize the gateway EC2 (`i-07dccb1615503ac99`) from `t4g.small` to `t4g.large`: `main.tf:172` through `safe-apply` (the stop/start is confirmed by his word), the contract's `target_instance_type` with it, and a release raising the unit's `MemoryHigh`/`MemoryMax` to fit 8 GiB with the `test_og_un1` bounds moved to match; ONE deploy ledger, rollback to `t4g.small`; AFTER Alyssa's session, off-hours; tell `0.0.0_AB_MSTR~Z` the window so the other boxes know the gateway is down | CTO msg (record `ANDREW_DIRECT_20261019_183xZ_GATEWAY_EC2_RESIZE_TO_T4G_LARGE.md` @439343a969); MSTR~Z relay 36070 (Andrew: "Dont mind the gateway, we need to get it up to a larger EC2 because it's choking on large requests on small"; site Z's principal priority is to test and optimize the gateway, with that move) | supersedes the laptop's 17:23Z-release inference as the cause of the hang |
+
+Added ~19:5xZ: item 11's note (row `Z-S425`, from worker ~164): the contract's `target_memory_mib` (2048) and the admission keys still describe the 2 GiB host; they govern the in-process admission of fresh-process reads, so changing them is a behaviour change to be decided WITH the memory guard, not edited with the resize.
+
+Added ~19:5xZ:
+
+| # | item | source | note |
+|---|---|---|---|
+| 16 | Three client tools read outside the vendors the census declares for them: `client_get_allocation` (reads schwab, orion, smartx rows; declared blackdiamond, eclipse, smartx), `client_get_fees` (declared blackdiamond only; reads orion and schwab), `client_resolve_account` (declared blackdiamond, commonwealth, schwab, smartx; reads the Orion table via the eclipse branch) | `2.0.0_SA_COO~MI` msg 36098: live routing table (127 tools) `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/evidence/ROUTING_TABLE_20261019.json`, worker rows `NFRA_MCPINDEX-Z-W71-S1..S5` | evidence for the CTO's D1-D3 (items 6-8); one grain with them |
