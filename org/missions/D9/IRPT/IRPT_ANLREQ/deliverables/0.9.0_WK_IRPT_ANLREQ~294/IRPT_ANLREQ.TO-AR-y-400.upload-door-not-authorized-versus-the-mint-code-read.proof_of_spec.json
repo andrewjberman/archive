@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-400",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-400.upload-door-not-authorized-versus-the-mint-code-read.md",
+    "group": "OTHER",
+    "vintage_commit": "c877863508"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "c877863508",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-400.upload-door-not-authorized-versus-the-mint-code-read.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~294",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~294/r53/DOOR_VERSUS_MINT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_ANLREQ-294: the heading and the six labelled lines V1 to V6, each on one line with file:line citations read at HEAD c877863508 (worktree and git show HEAD). Read only; no source file, AWS call, network call or deploy; the mint file fwd1_mint.py was not edited."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-IRPT_ANLREQ-294: two rows appended (IRPT_ANLREQ-D2-W294-S1 OBSERVATION INERT, IRPT_ANLREQ-D2-W294-S2 BLOCKING INERT), 49 insertions and 0 deletions by git numstat."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR400-y-AC1",
+      "criterion_verbatim": "the six labelled answers exist: grep -c -E \"^V[1-6] \" on the record expects 6; at base the record is absent and it FAILS.",
+      "method": "command",
+      "invocation": "grep -c -E \"^V[1-6] \" org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~294/r53/DOOR_VERSUS_MINT.md",
+      "output_evidence": "run as timeout 120 grep -c ... rc=0, twice, cmp identical\n6\nDENOMINATOR: 6 of 6 labelled lines V1 to V6 present in the 7-line record (first line is the # door versus mint heading)",
+      "denominator": "6 of 6 labelled answers present (V1 to V6); two runs gave the same value",
+      "expect": "^6$",
+      "status": "PASS",
+      "status_reason": "rc=0 under timeout 120; the grep count is 6 and the expectation is 6."
+    },
+    {
+      "criterion_id": "AR400-y-AC2",
+      "criterion_verbatim": "at least five of the six lines carry a file:line citation: grep -c -E \"^V[1-6] .*[A-Za-z_0-9]+\\.(py|ts|tsx|mjs|md):[0-9]+\" on the record expects 5 or 6.",
+      "method": "command",
+      "invocation": "grep -c -E \"^V[1-6] .*[A-Za-z_0-9]+\\.(py|ts|tsx|mjs|md):[0-9]+\" org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~294/r53/DOOR_VERSUS_MINT.md",
+      "output_evidence": "run as timeout 120 grep -c ... rc=0\n6\nDENOMINATOR: 6 of 6 labelled lines carry a file:line citation (V1 to V6 each cite the door modules, the mint or the login module by file and line)",
+      "denominator": "6 of 6 labelled lines carry a file:line citation",
+      "expect": "^[5-6]$",
+      "status": "PASS",
+      "status_reason": "rc=0 under timeout 120; the grep count is 6, inside the expectation 5 or 6."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR400-y-AC1 control: a copy of the record in the worktree scratch folder with the V5 line removed; AC1 must stop reading 6.",
+      "expected": "AC1 count differs from 6 (the mutant is caught)",
+      "observed": "grep -c -E on the mutant copy printed 5",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR400-y-AC1 run twice on the record and the two outputs compared with cmp; AR400-y-AC2 run once",
+      "observed": "both AC1 outputs were 6 and cmp reported them identical; AC2 printed 6",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any source file change, AWS call, network call, deploy, or test that writes outside the worktree",
+      "reason": "READ ONLY per the order; the only writes are the record, the two appended investigation rows, this instance and the order status line"
+    },
+    {
+      "item": "the live system: the users table, the login, the upload door and the synthetic run",
+      "reason": "NOT READ: the order is a code read; the live users row and token the login issues are NOT READ, and V5 says so rather than inferring them"
+    },
+    {
+      "item": "secrets, passwords, hashes, tokens and client data",
+      "reason": "none read or written; the password and hash fields were read for name and type only"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W294-S1: the cell's login-code premise fails: the auth module lives under infra/aws/opalinvest_dev/lambda/auth-handler/src/, not under infra/aws/lambda/, and that tree is absent from this sparse worktree; read by git show HEAD.",
+    "IRPT_ANLREQ-D2-W294-S2: the upload door's on-behalf rule (served.py:1089-1091) refuses the synthetic row that AR-y-373 gave allowedFirmIds naming the run firm, because the run names no advisor; the one item_for-only admitting edit widens reach."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "grep",
+      "invocation": "grep -c -E on the record (AC1, AC2), a repeat run compared with cmp, and a mutant copy in .scratch with the V5 line removed",
+      "result": "6, 6, identical, mutant 5"
+    },
+    {
+      "tool": "git",
+      "invocation": "git show HEAD:<path> for the login module and the users-table shape (read only)",
+      "result": "read at HEAD c877863508; the login module is absent from the sparse worktree"
+    }
+  ]
+}
