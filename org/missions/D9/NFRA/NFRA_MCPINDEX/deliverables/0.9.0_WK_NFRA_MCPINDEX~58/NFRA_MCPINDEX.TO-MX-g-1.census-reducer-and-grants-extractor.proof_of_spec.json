@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-g-1.census-reducer-and-grants-extractor",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4b8dcf3b86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round22-GATEWAY.md",
+    "vintage_commit": "89e162889d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-g-1.census-reducer-and-grants-extractor.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~58",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/gateway_census.py",
+      "kind": "script",
+      "commit_or_etag": "00c51aac7c70f00eb5c884417e58fd898a5fe719",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local script, committed at 00c51aac7c on branch wk-NFRA_MCPINDEX-58. No deploy in scope: cell bound 1 (reads local files only; no AWS call, no network call, no grant, no deploy, no push).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_gateway_census.py",
+      "kind": "test",
+      "commit_or_etag": "00c51aac7c70f00eb5c884417e58fd898a5fe719",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local pytest file, committed at 00c51aac7c on branch wk-NFRA_MCPINDEX-58. Run by AC3: 16 passed.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; census rc 0; the stdout line `CENSUS channels=6 bucket=2 store=1 integration=1 native=1 undeclared=1 segments=2 tools=9 pairs=10 unindexed=4`; the census JSON equals `expected_census.json` -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g1.AC1.sh; echo \"exit=$?\"",
+      "expect": "RESULT: PASS\\s+exit=0",
+      "output_evidence": "DENOMINATOR: fixture breakdown channels=6 kinds bucket2 store1 integration1 native1 undeclared1; tools_distinct=9 pairs=10 segments=2 unindexed=4\n  ok   census rc 0\n  ok   stdout line\n  ok   census JSON equals expected_census.json\nARMS: 3 ok, 0 failed\nRESULT: PASS\nexit=0\nCLI stdout (census subcommand run directly on breakdown_sample.json, rc=0): CENSUS channels=6 bucket=2 store=1 integration=1 native=1 undeclared=1 segments=2 tools=9 pairs=10 unindexed=4",
+      "denominator": "fixture breakdown: 6 channels, 9 distinct tools, 10 tool-channel pairs, 2 segments, 4 unindexed tools; 3 of 3 arms ok",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; grants rc 0; the stdout line `GRANTS principals=2 population_tools=1`; the grants JSON equals `expected_grants.json`; an error body, an empty `channels`, a non-JSON file and a channel without `tools` each exit 2 from BOTH subcommands -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g1.AC2.sh; echo \"exit=$?\"",
+      "expect": "RESULT: PASS\\s+exit=0",
+      "output_evidence": "DENOMINATOR: fixture holders: 3 named rows (andrew, alyssa) plus 1 population row; 4 channels hold\n  ok   grants rc 0\n  ok   stdout line\n  ok   grants JSON equals expected_grants.json\n  ok   error body refused by census (rc 2)\n  ok   error body refused by grants (rc 2)\n  ok   empty channels refused by census (rc 2)\n  ok   empty channels refused by grants (rc 2)\n  ok   not json refused by census (rc 2)\n  ok   not json refused by grants (rc 2)\n  ok   channel without tools refused by census (rc 2)\n  ok   channel without tools refused by grants (rc 2)\nARMS: 11 ok, 0 failed\nRESULT: PASS\nexit=0\nCLI stdout (grants subcommand run directly on breakdown_sample.json, rc=0): GRANTS principals=2 population_tools=1",
+      "denominator": "fixture: 3 named holder rows plus 1 population row over 4 channels; 11 of 11 arms ok (3 positive arms and 8 refusal arms = 4 planted bodies x 2 subcommands)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 6 passed) for `test_gateway_census.py` -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round22/checks/g1.AC3.sh; echo \"exit=$?\"",
+      "expect": "DENOMINATOR: pytest rc=0 passed=\\d+ \\(minimum 6\\)[\\s\\S]*RESULT: PASS\\s+exit=0",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=16 (minimum 6) file=workflows\\gateway_battery\\tests\\test_gateway_census.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "test_gateway_census.py: 16 passed of 16 collected; minimum 6",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutates a valid breakdown body into each planted refusal input: an error body, an empty channels list, a non-JSON file and a channel without tools (g1.AC2 arms), and in the test file a channel without id, kind or tools, a tool without name, a kind outside the five, and a missing file. Each mutant is run through both subcommands.",
+      "expected": "every mutated body exits 2 from the subcommand under test with one ERROR: line and writes no output file",
+      "observed": "g1.AC2: 8 of 8 refusal arms ok (4 bodies x 2 subcommands, each rc 2); test_gateway_census.py: 16 passed, including the refusal tests test_error_body_refused_with_rc2, test_missing_or_empty_channels_refused_with_rc2, test_non_json_and_missing_file_refused_with_rc2, test_channel_without_id_kind_or_tools_refused_with_rc2 and test_kind_outside_the_five_is_refused",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input census runs compared byte-for-byte on breakdown_sample.json (cmp), plus test_output_is_deterministic_across_two_runs in the 16-test run",
+      "observed": "second census run byte-identical to the first (cmp printed DETERMINISTIC_BYTES); the determinism test passed in the 16 passed run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Step 5.2 status flip of the task-order file NFRA_MCPINDEX.TO-MX-g-1.census-reducer-and-grants-extractor.md to complete (the order stays at status issued in this commit)",
+      "reason": "The task-order file is not among the four <paths> the worker is granted (section 3), and the write grant is <paths>. All three criteria PASS, so the flip is owed; it is filed as NFRA_MCPINDEX-Z-W58-S4 (BLOCKING) for the issuer to make."
+    },
+    {
+      "item": "A run of the census and grants commands on the real gateway breakdown body",
+      "reason": "Cell bound 1: no AWS call and no network call. The issuer runs the real data through the script at the drain (section 5, final paragraph)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W58-S1",
+    "NFRA_MCPINDEX-Z-W58-S2",
+    "NFRA_MCPINDEX-Z-W58-S3",
+    "NFRA_MCPINDEX-Z-W58-S4"
+  ],
+  "session_log": "No session file written (the no-report-file rule). The worker report is the final message of 0.9.0_WK_NFRA_MCPINDEX~58 on NFRA_MCPINDEX.TO-MX-g-1.",
+  "compiler_tools": [
+    {
+      "tool": "pytest (unit tests for gateway_census.py)",
+      "invocation": "python -m pytest workflows/gateway_battery/tests/test_gateway_census.py -q -p no:cacheprovider --color=no",
+      "result": "16 passed in 2.67s"
+    },
+    {
+      "tool": "ruff py39 (lint of both committed files)",
+      "invocation": "python -m ruff check --target-version py39 workflows/gateway_battery/gateway_census.py workflows/gateway_battery/tests/test_gateway_census.py",
+      "result": "All checks passed! (rc 0; ruff 0.15.11)"
+    },
+    {
+      "tool": "commit gate via .tools/safe-commit.sh (commit 00c51aac7c)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~58 <0.9.0_WK_NFRA_MCPINDEX~58@opal.agent>\" -F .scratch/msg1.txt -- workflows/gateway_battery/gateway_census.py workflows/gateway_battery/tests/test_gateway_census.py",
+      "result": "[commit-gate] All checks passed for 2 of 2 files; the naming gate printed NAMING ERROR (function-map folder missing) and the risk reflex printed PARTIAL_OR_BLIND; both recorded as surprise rows S1 and S2; commit landed with rc 0"
+    }
+  ]
+}
