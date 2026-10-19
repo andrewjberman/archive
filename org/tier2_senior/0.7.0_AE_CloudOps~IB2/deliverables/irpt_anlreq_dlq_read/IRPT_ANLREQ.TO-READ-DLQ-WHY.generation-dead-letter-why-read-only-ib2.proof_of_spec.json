@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "three live reads, once each; ONE receive call on the dead letter queue with visibility timeout 0; the leak regex was run as DLQW-AC2",
+   "observed": "3 of 3 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-DLQ-WHY.generation-dead-letter-why-read-only-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-WHY.generation-dead-letter-why-read-only-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "2551f8f1fc"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-WHY.generation-dead-letter-why-read-only-ib2.md",
+  "vintage_commit": "2551f8f1fc"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three live reads: the two requests' job and request rows, the dead letter queue and its source queue with one visibility-timeout-0 receive (nothing consumed), the retained journal and log counts",
+   "artifact_covered_by": [
+    "DLQW-AC1",
+    "DLQW-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DLQW-AC1",
+   "invocation": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+   "expect": "^5$",
+   "output_evidence": "5\nexit code: 0\n(run 2026-10-19 from the repo root)",
+   "denominator": "1 record file, 5 answer lines (R1 twice, R2, R3, the closing line) plus 3 NOTE lines that the pattern does not match",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DLQW-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit code: 1\n(run 2026-10-19 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
+   "denominator": "8 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the four dead-letter messages one receive did not return",
+   "reason": "the order allows ONE receive; the queue holds 8 and the receive returned 4 (blind, as the order states)"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_read/A_DLQ_WHY.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 dynamodb, sqs, logs reads and one SSM read-only journal count (dlq_why.py)",
+   "invocation": "python dlq_why.py",
+   "result": "READS-DONE 3 of 3 answered; DLQW-AC1 5, DLQW-AC2 0"
+  }
+ ]
+}
