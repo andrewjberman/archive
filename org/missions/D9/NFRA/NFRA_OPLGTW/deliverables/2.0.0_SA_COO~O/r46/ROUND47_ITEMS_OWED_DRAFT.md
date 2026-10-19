@@ -46,3 +46,9 @@ Added ~19:5xZ:
 | # | item | source | note |
 |---|---|---|---|
 | 16 | Three client tools read outside the vendors the census declares for them: `client_get_allocation` (reads schwab, orion, smartx rows; declared blackdiamond, eclipse, smartx), `client_get_fees` (declared blackdiamond only; reads orion and schwab), `client_resolve_account` (declared blackdiamond, commonwealth, schwab, smartx; reads the Orion table via the eclipse branch) | `2.0.0_SA_COO~MI` msg 36098: live routing table (127 tools) `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/evidence/ROUTING_TABLE_20261019.json`, worker rows `NFRA_MCPINDEX-Z-W71-S1..S5` | evidence for the CTO's D1-D3 (items 6-8); one grain with them |
+
+Added ~20:3xZ:
+
+| # | item | source | note |
+|---|---|---|---|
+| 17 | Gateway battery FAILs over 127 tools, graded (round-47 evidence): `portal_get_security_scan` returns a raw AccessDenied `s3:ListBucket` for the reader role; `ycharts_time_series` and `ycharts_risk_return_scatter` return an upstream 403; `etfs_who_holds` returns 0 holders (newest date only); `opal_describe` ItemCount 386383 against the catalog's 381261; `portal_get_macro` returns macro null; as-of 2026-09-30 on `portal_get_model_attribution`, `portal_get_peer_performance`, `portal_get_pipeline_freshness`; eleven tools read misrouted (the response cites a source outside the traced set) | `2.0.0_SA_COO~MI` msg 36112; summary `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/evidence/BATTERY_SUMMARY_20261019.md` (commit 259ff2a3534, LOCAL) | the raw AccessDenied is a second grant-or-handler finding beside OG-cd-3's census (a reader role without `s3:ListBucket`); runs were held to two concurrent, the host stayed up |

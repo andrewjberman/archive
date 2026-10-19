@@ -39,14 +39,16 @@ try:
     row_ok = walk(sc)
 except Exception:
     firm_ok = row_ok = False
+ad = rd(gw + "/app/client_adapter_schwab.py")
+ok_ad = bool(re.search(r'(?m)^_ALIAS_MASTERS\s*=\s*\(\s*"08242234"\s*,\s*"08335338"\s*\)', ad)) and ad.count("master not in _ALIAS_MASTERS") == 2 and "master not in de.MASTERS" not in ad
 names = subprocess.run(["git", "diff", "--name-only", base, "--", "."], capture_output=True, text=True).stdout.split()
-named = {gw + "/app/data_entitlement.py", gw + "/app/schwab_audit.py", dep, std, "infra/logic/registry/scopes.json", gw + "/tests/test_og_ms1.py"}
+named = {gw + "/app/data_entitlement.py", gw + "/app/schwab_audit.py", gw + "/app/client_adapter_schwab.py", dep, std, "infra/logic/registry/scopes.json", gw + "/tests/test_og_ms1.py"}
 outside = [n for n in names if n not in named and not n.startswith(gw + "/tests/")]
 print("MASTERS names 08403355: %s; schwab_audit _MASTERS names 08403355: %s; contract masters %d (want 3), data_prefixes %d (want 12), completion_prefixes %d (want 3): %s; the two contract copies byte-equal: %s; target_instance_type t4g.large in both: %s"
       % ("yes" if ok_de else "no", "yes" if ok_au else "no", nm, nd, nc, "yes" if ok_c else "no", "yes" if eq else "no", "yes" if all(ti) else "no"))
-print("scopes.json firm masters 3 and a MASTER row for 08403355: %s" % ("yes" if firm_ok and row_ok else "no"))
+print("scopes.json firm masters 3 and a MASTER row for 08403355: %s; client adapter alias gates keep the two masters (_ALIAS_MASTERS): %s" % ("yes" if firm_ok and row_ok else "no", "yes" if ok_ad else "no"))
 print("files changed against the merge-base %d; outside the named set %d (want 0)" % (len(names), len(outside)))
-ok = ok_de and ok_au and ok_c and eq and all(ti) and firm_ok and row_ok and not outside and gw + "/tests/test_og_ms1.py" in names
+ok = ok_ad and ok_de and ok_au and ok_c and eq and all(ti) and firm_ok and row_ok and not outside and gw + "/tests/test_og_ms1.py" in names
 print("RESULT: PASS" if ok else "RESULT: FAIL")
 sys.exit(0 if ok else 1)
 EOF
