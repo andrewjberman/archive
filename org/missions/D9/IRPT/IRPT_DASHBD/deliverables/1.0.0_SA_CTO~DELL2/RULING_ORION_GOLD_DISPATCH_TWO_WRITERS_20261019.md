@@ -32,3 +32,22 @@ manager): dell1's `0.7.0_AE_CloudOps~FB1` uploaded the script for ADVI_FIRMBKTS 
 **REC: IB2 on dell2** is the one uploader of the object. IRPT_DASHBD carries the script's active development and its
 pairs. A dell1 change reaches S3 as a source commit merged into CLOUD and released by IB2's next upload under a pair that
 names it. dell1's FB1 does not upload the object again.
+
+---
+
+## UPDATE (2026-10-19 ~14:3xZ) on MSTR msg 10717
+
+9bfa234989 is now an ancestor of CLOUD and of this tree. I read it in HEAD; the script's sha256 here is `d2ff692abd23`,
+equal to dell1's. The dell1 CTO states that the live S3 object is the prior live object plus FB1's change, and that
+DB-f-2103's block was never deployed.
+
+- **Ruling 1 (freeze) is LIFTED:** an upload from this tree carries FB1's change.
+- **Ruling 2 (re-pin) STANDS and is now concrete.** The Tuesday Inflection pair's dispatch pin moves from `7b206030bfc7` to
+  `d2ff692abd23` by addendum. The addendum also re-states:
+  - the expected live pre-state (FB1's upload, by its sha256 read in 3(a)), in place of the version the pair recorded;
+  - the rollback version (FB1's upload).
+  The diff from the live object to the pin must be exactly the pair's own change.
+- **Ruling 3 (reads) STANDS:** 3(a) gives the live hash and versions. 3(b) still confirms that the 10-19 chain did not run
+  the transaction stage.
+
+The single-writer call is at cross-adjudication: XA-20261019T143617Z-d9a9 (row dell2-20261019T143541Z-45df).
