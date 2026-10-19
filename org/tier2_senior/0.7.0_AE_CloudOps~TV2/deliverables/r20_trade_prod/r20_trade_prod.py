@@ -27,8 +27,9 @@ import jwt as pyjwt
 from botocore.exceptions import ClientError
 
 REGION = "us-east-1"
-ORIGIN = "https://opalinvest.dev"
-HOSTPORT = "opalinvest.dev"
+ORIGIN = os.environ.get("R20T_ORIGIN", "https://opalinvest.dev")
+HOSTPORT = urlparse(ORIGIN).netloc
+DEV = "localhost" in ORIGIN  # AMENDMENT 3: the DEV proof first, same API and bucket, outputs under ./dev
 USERS, TICKETS = "opal-users-v2", "opal-tickets"
 STAMP = "20261019"
 FILER = "tckt-r20-trade-filer-%s@opal.invalid" % STAMP
@@ -47,13 +48,17 @@ CONTENT_TYPE = "text/csv"
 CONTENT = b"symbol,qty,px\r\nSYN1,100,12.34\r\n"
 ATTEMPT1_RESIDUE = {"key": "portal/cottonwood/state/ticket_attachments/trade-form/8b46f05593e643f0bb229023841d2a4a/tckt-r20-trade-synthetic.csv",
                     "version_id": "U2wA9rMN_iqdUnci740XcsAfyvgsTK3h"}
+ATTEMPT2_RESIDUE = {"key": "portal/cottonwood/state/ticket_attachments/trade-form/b35a21075c634b588e83a529a8a724c5/tckt-r20-trade-synthetic.csv",
+                    "version_id": "0pTf.3QXwPeHDLNgFTEKCnP32IE4IWuu"}
 SENT_RE = re.compile(r"WE_[A-Z_]*SENT\b")
 
-OUT = Path(__file__).resolve().parent
+BASE = Path(__file__).resolve().parent
+OUT = BASE / "dev" if DEV else BASE
+OUT.mkdir(exist_ok=True)
 TRACE = OUT / "R20_TRADE_TRACE.json"
 RESULT = OUT / "R20_TRADE_RESULT.json"
 RECORD = OUT / "R20_TRADE_TICKET_ITEM.json"
-SHOT_DIR_REL = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r20_trade_prod/"
+SHOT_DIR_REL = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r20_trade_prod/" + ("dev/" if DEV else "")
 
 ddb = boto3.client("dynamodb", region_name=REGION)
 s3 = boto3.client("s3", region_name=REGION)
@@ -172,6 +177,30 @@ def write_row_and_mint():
     return token
 
 
+def key_set(o, prefix=""):
+    """The member names of a JSON body, nested, no values."""
+    out = []
+    if isinstance(o, dict):
+        for k, v in o.items():
+            out.append(prefix + str(k))
+            out.extend(key_set(v, prefix + str(k) + "."))
+    elif isinstance(o, list) and o:
+        out.extend(key_set(o[0], prefix + "[]."))
+    return sorted(out)
+
+
+def find_url(o):
+    """The first https string naming amazonaws.com in a JSON body, wherever it sits."""
+    if isinstance(o, str):
+        return o if o.startswith("https://") and "amazonaws.com" in o else None
+    kids = o.values() if isinstance(o, dict) else (o if isinstance(o, list) else [])
+    for v in kids:
+        f = find_url(v)
+        if f:
+            return f
+    return None
+
+
 def norm_path(p):
     p = re.sub(r"TCK-[0-9]{8}-[0-9a-f]{8}", "<T>", p)
     return p
@@ -267,8 +296,12 @@ class Session:
                 trace["statuses"]["GET open route"] = r.status
                 if r.status == 200:
                     try:
-                        state["open_url"] = (r.json() or {}).get("url")
-                    except Exception:  # noqa: BLE001
+                        body = r.json()
+                        state["open_keys"] = key_set(body)
+                        say("Open route body key set (names only, no values): %s" % state["open_keys"])
+                        state["open_url"] = find_url(body)
+                    except Exception as e:  # noqa: BLE001
+                        say("Open route body could not be read as JSON: %s" % type(e).__name__)
                         state["open_url"] = None
             elif s3_ok(u) and m == "PUT":
                 trace["statuses"]["PUT s3 trade-form object"] = r.status
@@ -497,6 +530,18 @@ def remove_all():
     return row_deleted_at, row_absent, ticket_deleted_at, ticket_absent, residue
 
 
+def all_residue(own):
+    """DEV run: its own object. PROD run: attempts 1 and 2, the DEV proof's object (if its result exists) and this run's."""
+    if DEV:
+        return [own]
+    out = [ATTEMPT1_RESIDUE, ATTEMPT2_RESIDUE]
+    dev_res = BASE / "dev" / "R20_TRADE_RESULT.json"
+    if dev_res.exists():
+        out.extend(json.loads(dev_res.read_text(encoding="utf-8"))["residue"])
+    out.append(own)
+    return out
+
+
 def main():
     stop = None
     ctx_out = {"shots": {}}
@@ -539,13 +584,13 @@ def main():
         v = ctx_out["ticket_view"]
         RESULT.write_text(json.dumps({
             "claim": "measured", "browser_origin": ctx_out["origin"],
-            "promote_proof": (OUT / "promote_proof.txt").read_text(encoding="utf-8").strip(),
+            "promote_proof": (BASE / "promote_proof.txt").read_text(encoding="utf-8").strip(),
             "filer": FILER, "firm": FIRM, "ticket": state["ticket"], "filename": FILENAME, "content_type": CONTENT_TYPE, "size": len(CONTENT),
             "sha256_uploaded": ctx_out["sha_up"], "sha256_readback": state["readback_sha"], "s3_bucket": BUCKET, "s3_key": state["key"],
             "type_options": ctx_out["type_options"], "shots": ctx_out["shots"],
-            "fire_windows_answer": (OUT / "fire_windows_answer.txt").read_text(encoding="utf-8"),
+            "fire_windows_answer": (BASE / "fire_windows_answer.txt").read_text(encoding="utf-8"),
             "token_exp": iso(state["exp"]), "row_deleted_at": row_deleted_at, "ticket_deleted_at": ticket_deleted_at,
-            "residue": [ATTEMPT1_RESIDUE, own_residue], "object_left_present": True, "ticket_absent_after": True, "row_absent_after": True,
+            "residue": all_residue(own_residue), "object_left_present": True, "ticket_absent_after": True, "row_absent_after": True,
             "no_engine_call": not eng and not state.get("engine"), "token_printed": False,
             "http_statuses": {"upload_door": trace["statuses"].get("POST /api/scoped/tickets/attachment-upload"), "put": state["put_status"],
                               "ticket": trace["statuses"].get("POST /api/scoped/tickets")},
