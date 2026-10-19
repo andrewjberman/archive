@@ -1,6 +1,6 @@
 # MDPF_CANON round 11 -- FINAL drain-end packet, DRAFT (2.0.0_SA_COO~D1), prepared 2026-10-16 ~18:0xZ
 
-**STATUS: DRAFT, not sent -- section 4 filled from the 10-17 fire; HELD for the CN-s-1 WORLD grade (CTO msg 7555).** Sent to `3.0.0_SA_CVO` after the 2026-10-17 13:30Z gold fire and the 13:50Z publisher run are READ (sections marked FILL AFTER FIRE). It supersedes `round11/ROUND11_DRAIN_END.md` revision 2 and carries nothing the interim did not already put in front of the CVO except sections 2 to 4 below.
+**STATUS: DRAFT, not sent -- section 4 filled from the 10-17 fire; HELD for the CN-s-1 WORLD grade (CTO msg 7555).** Sent to `3.0.0_SA_CVO~DELL1` (the base 3.0.0_SA_CVO is dead since 14:54Z 2026-10-19, CTO msg 8371) after the 2026-10-17 13:30Z gold fire and the 13:50Z publisher run are READ (sections marked FILL AFTER FIRE). It supersedes `round11/ROUND11_DRAIN_END.md` revision 2 and carries nothing the interim did not already put in front of the CVO except sections 2 to 4 below.
 
 ## 1. Orders (unchanged from revision 2 except CN-s-3 and CN-s-1)
 
