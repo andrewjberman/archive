@@ -1,0 +1,592 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K6-01",
+   "tool": "whoami",
+   "question": "Who am I signed in as in Microsoft 365",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the displayName and mail of the answer equal the signed-in profile on a second read of GET /me"
+  },
+  {
+   "case_id": "K6-02",
+   "tool": "list_recent_email",
+   "question": "Show my three most recent emails",
+   "args": {
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of rows equals 3 and the newest receivedDateTime is the first row"
+  },
+  {
+   "case_id": "K6-03",
+   "tool": "list_recent_email",
+   "question": "Show my emails received after the year 2099",
+   "args": {
+    "top": 3,
+    "since_iso": "2099-01-01T00:00:00Z"
+   },
+   "expect": "empty",
+   "source_hint": "no mailbox item carries a receivedDateTime after 2099, so the count is 0"
+  },
+  {
+   "case_id": "K6-04",
+   "tool": "list_email_filtered",
+   "question": "List my newest emails received since the first of October 2026",
+   "args": {
+    "received_from": "2026-10-01",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of messages with receivedDateTime ge 2026-10-01 in the mailbox equals the rows returned, up to 3"
+  },
+  {
+   "case_id": "K6-05",
+   "tool": "list_email_filtered",
+   "question": "List my emails from September 2026 that carry attachments",
+   "args": {
+    "received_from": "2026-09-01",
+    "received_to": "2026-10-01",
+    "has_attachments": true,
+    "top": 3
+  },
+   "expect": "nonempty",
+   "source_hint": "a count of messages with hasAttachments true in September 2026 is at least one"
+  },
+  {
+   "case_id": "K6-06",
+   "tool": "list_email_filtered",
+   "question": "List the emails I got yesterday using the word yesterday",
+   "args": {
+    "received_from": "yesterday"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid received_from error, since the value is not an ISO8601 date"
+  },
+  {
+   "case_id": "K6-07",
+   "tool": "search_email",
+   "question": "Find my emails that mention Opal",
+   "args": {
+    "query": "Opal",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the same $search query in Outlook web returns at least one message"
+  },
+  {
+   "case_id": "K6-08",
+   "tool": "list_email_attachments",
+   "question": "List the attachments on the first email that has one",
+   "args": {
+    "message_id": "<id from K6-05>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the attachment count equals the hasAttachments message's attachment count in Outlook web",
+   "depends_on": ["K6-05"]
+  },
+  {
+   "case_id": "K6-09",
+   "tool": "inspect_email_attachment",
+   "question": "Identify the first attachment on that email without downloading it to me",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte count equals the size field of the attachment listed by list_email_attachments",
+   "depends_on": ["K6-05", "K6-08"]
+  },
+  {
+   "case_id": "K6-10",
+   "tool": "read_email",
+   "question": "Read the body of my most recent email",
+   "args": {
+    "message_id": "<id from K6-02>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the subject equals the subject of the first row of list_recent_email",
+   "depends_on": ["K6-02"]
+  },
+  {
+   "case_id": "K6-11",
+   "tool": "validate_ssavail_attachment",
+   "question": "Check an SSAVAIL attachment against the content contract before saving",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the verdict is PASS or FLAG and the sha256 equals a second read of the same attachment",
+   "depends_on": ["K6-05", "K6-08"]
+  },
+  {
+   "case_id": "K6-12",
+   "tool": "list_calendar",
+   "question": "What is on my calendar for the next seven days",
+   "args": {
+    "days": 7
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of calendarView rows for the seven-day window equals the count in the answer"
+  },
+  {
+   "case_id": "K6-13",
+   "tool": "list_calendar",
+   "question": "What was on my calendar on the fourth of January 1999",
+   "args": {
+    "days": 1,
+    "start_date": "1999-01-04"
+   },
+   "expect": "empty",
+   "source_hint": "a calendarView count for that one-day window in 1999 is 0"
+  },
+  {
+   "case_id": "K6-14",
+   "tool": "find_online_meeting",
+   "question": "Find the Teams meeting for the first calendar event with a join link",
+   "args": {
+    "join_url": "<joinUrl from K6-12>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of matches equals the number of calendar events carrying that join URL",
+   "depends_on": ["K6-12"]
+  },
+  {
+   "case_id": "K6-15",
+   "tool": "find_online_meeting",
+   "question": "Which Teams meeting has this made up join link",
+   "args": {
+    "join_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_k6nonexistent/0"
+   },
+   "expect": "empty",
+   "source_hint": "the count of meetings for a join URL that no meeting carries is 0"
+  },
+  {
+   "case_id": "K6-16",
+   "tool": "find_online_meeting",
+   "question": "Look up a Teams meeting with a blank join link",
+   "args": {
+    "join_url": "   "
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid join_url error before any Graph call"
+  },
+  {
+   "case_id": "K6-17",
+   "tool": "list_meeting_transcripts",
+   "question": "List every transcript of the first Teams meeting found",
+   "args": {
+    "meeting_id": "<id from K6-14>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of transcripts the meeting has in Teams, when it was recorded",
+   "depends_on": ["K6-14"]
+  },
+  {
+   "case_id": "K6-18",
+   "tool": "read_meeting_transcript",
+   "question": "Read the first two thousand bytes of a meeting transcript",
+   "args": {
+    "meeting_id": "<id from K6-14>",
+    "transcript_id": "<id from K6-17>",
+    "offset": 0,
+    "limit": 2000
+   },
+   "expect": "nonempty",
+   "source_hint": "total_bytes equals the byte size the transcript listing reports, and sha256 is stable on a second read",
+   "depends_on": ["K6-14", "K6-17"]
+  },
+  {
+   "case_id": "K6-19",
+   "tool": "read_meeting_transcript",
+   "question": "Read a transcript using a meeting id that holds a slash",
+   "args": {
+    "meeting_id": "a/b",
+    "transcript_id": "x1"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid meeting_id error before any Graph call"
+  },
+  {
+   "case_id": "K6-20",
+   "tool": "list_teams",
+   "question": "Which Microsoft Teams am I a member of",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count equals the count of joined teams in the Teams client"
+  },
+  {
+   "case_id": "K6-21",
+   "tool": "list_channels",
+   "question": "Which channels does my first team have",
+   "args": {
+    "team_id": "<id from K6-20>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the channel count equals the count shown for that team in the Teams client; every team has a General channel",
+   "depends_on": ["K6-20"]
+  },
+  {
+   "case_id": "K6-22",
+   "tool": "read_channel_messages",
+   "question": "Show the three newest messages in the first channel",
+   "args": {
+    "team_id": "<id from K6-20>",
+    "channel_id": "<id from K6-21>",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of top-level messages shown in the channel, up to 3",
+   "depends_on": ["K6-20", "K6-21"]
+  },
+  {
+   "case_id": "K6-23",
+   "tool": "list_chats",
+   "question": "Show my three most recently active Teams chats",
+   "args": {
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of chat rows equals the chats listed in the Teams client, up to 3"
+  },
+  {
+   "case_id": "K6-24",
+   "tool": "read_chat_messages",
+   "question": "Read the three newest messages in my most active chat",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of messages shown in that chat, up to 3",
+   "depends_on": ["K6-23"]
+  },
+  {
+   "case_id": "K6-25",
+   "tool": "read_chat_message_images",
+   "question": "Show any pasted images in the newest message of my most active chat",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "message_id": "<id from K6-24>"
+   },
+   "expect": "empty",
+   "source_hint": "the image count is 0 because a typical chat message carries no hostedContents; the count is printed, never the image bytes",
+   "depends_on": ["K6-23", "K6-24"]
+  },
+  {
+   "case_id": "K6-26",
+   "tool": "read_teams_attachment",
+   "question": "Read a Teams file through a non web link",
+   "args": {
+    "content_url": "ftp://example.invalid/attachment"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns the content_url must be an http or https URL error before any Graph call"
+  },
+  {
+   "case_id": "K6-27",
+   "tool": "read_teams_attachment",
+   "question": "Read the file attached to the newest message in my most active chat",
+   "args": {
+    "content_url": "<contentUrl from K6-24>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size fields equal the attachment entry of the message read by read_chat_messages",
+   "depends_on": ["K6-24"]
+  },
+  {
+   "case_id": "K6-28",
+   "tool": "poll_addressed_teams_messages",
+   "question": "Show Teams chats that got a new message after 2099",
+   "args": {
+    "since_iso": "2099-01-01T00:00:00Z",
+    "top": 5
+   },
+   "expect": "empty",
+   "source_hint": "no chat has a latest message after 2099, so new_messages count is 0"
+  },
+  {
+   "case_id": "K6-29",
+   "tool": "list_onedrive",
+   "question": "List the top level of my OneDrive",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count of root children equals the count shown in the OneDrive web root"
+  },
+  {
+   "case_id": "K6-30",
+   "tool": "search_files",
+   "question": "Search my OneDrive for files named Opal",
+   "args": {
+    "query": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of hits equals the count of the same search in the OneDrive web search box"
+  },
+  {
+   "case_id": "K6-31",
+   "tool": "get_item",
+   "question": "Show the type and size of the first OneDrive file found",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size equal the hit's name and size in the search result",
+   "depends_on": ["K6-30"]
+  },
+  {
+   "case_id": "K6-32",
+   "tool": "read_file",
+   "question": "Read the text of the first OneDrive file found",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte count of the content equals the size field from get_item, or a binary hint is returned",
+   "depends_on": ["K6-30"]
+  },
+  {
+   "case_id": "K6-33",
+   "tool": "read_workbook",
+   "question": "Read the first sheet of the first workbook in my OneDrive",
+   "args": {
+    "item_id": "<id from K6-30>",
+    "max_rows": 50
+   },
+   "expect": "nonempty",
+   "source_hint": "the rowCount of the used range equals a second read of the same worksheet",
+   "depends_on": ["K6-30"]
+  },
+  {
+   "case_id": "K6-34",
+   "tool": "read_document",
+   "question": "Render the first OneDrive document as a PDF",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte_size of the rendition is greater than 0, or the tool returns a format error for a non document file",
+   "depends_on": ["K6-30"]
+  },
+  {
+   "case_id": "K6-35",
+   "tool": "list_shared_folder",
+   "question": "List a shared folder from a non web address",
+   "args": {
+    "url": "ftp://example.invalid/share"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid_url error before any Graph call"
+  },
+  {
+   "case_id": "K6-36",
+   "tool": "list_shared_folder",
+   "question": "List the folder shared at the link of the first OneDrive file found",
+   "args": {
+    "url": "<webUrl from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the child count equals the count in the OneDrive web view of the same link, or the file metadata is returned",
+   "depends_on": ["K6-30"]
+  },
+  {
+   "case_id": "K6-37",
+   "tool": "find_sharepoint_site",
+   "question": "Find SharePoint sites named Opal",
+   "args": {
+    "name": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of sites equals the count returned by the SharePoint admin site search for the same name"
+  },
+  {
+   "case_id": "K6-38",
+   "tool": "list_site_drives",
+   "question": "Which document libraries does the first Opal site hold",
+   "args": {
+    "site_id": "<id from K6-37>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the library count equals the count shown on the site's contents page; a site has at least one",
+   "depends_on": ["K6-37"]
+  },
+  {
+   "case_id": "K6-39",
+   "tool": "list_site_files",
+   "question": "List the top folder of the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of root children equals the count shown in the site's default library",
+   "depends_on": ["K6-37"]
+  },
+  {
+   "case_id": "K6-40",
+   "tool": "get_site_item",
+   "question": "Show the metadata of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size equal the same item's entry in list_site_files",
+   "depends_on": ["K6-37", "K6-39"]
+  },
+  {
+   "case_id": "K6-41",
+   "tool": "read_site_file",
+   "question": "Read the text of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the content length equals the size from get_site_item, or a binary hint is returned",
+   "depends_on": ["K6-37", "K6-39"]
+  },
+  {
+   "case_id": "K6-42",
+   "tool": "profile_site_file",
+   "question": "Profile the layout of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the bytes and sha256 equal a second read of the same item's content",
+   "depends_on": ["K6-37", "K6-39"]
+  },
+  {
+   "case_id": "K6-43",
+   "tool": "read_site_workbook",
+   "question": "Read the first sheet of a workbook on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the rowCount of the used range equals a second read of the same worksheet",
+   "depends_on": ["K6-37", "K6-39"]
+  },
+  {
+   "case_id": "K6-44",
+   "tool": "search_site_files",
+   "question": "Search the first Opal site for files named Opal",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "query": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of hits equals the count of the same search in the site's document library",
+   "depends_on": ["K6-37"]
+  },
+  {
+   "case_id": "K6-45",
+   "tool": "copy_site_file_to_s3",
+   "question": "Copy a site file to the S3 bronze area with an extension it does not admit",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>",
+    "quarter": "2026Q3",
+    "extension": ".exe"
+   },
+   "expect": "preview",
+   "source_hint": "the extension is refused before any read or write (site_to_s3 _pair check), so the answer is refused true and nothing is written; no confirm or dry-run path exists in the definition",
+   "depends_on": ["K6-37", "K6-39"]
+  },
+  {
+   "case_id": "K6-46",
+   "tool": "create_draft",
+   "question": "Draft an email with no recipients named",
+   "args": {
+    "subject": "Preview only",
+    "body": "Preview only, nothing to save."
+   },
+   "expect": "preview",
+   "source_hint": "the required to argument is absent, so the call is refused before the function runs and no draft is written; the definition has no confirm or dry-run path"
+  },
+  {
+   "case_id": "K6-47",
+   "tool": "reply_email",
+   "question": "Draft a reply to my latest email and hold it until I confirm",
+   "args": {
+    "message_id": "<id from K6-02>",
+    "comment": "Thanks, I will review this today.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required before any Graph send (IRREVERSIBLE_SEND, uncountable blast); the answer is confirm_required true",
+   "depends_on": ["K6-02"]
+  },
+  {
+   "case_id": "K6-48",
+   "tool": "save_email_attachment_to_site",
+   "question": "Save an email attachment to a site folder with no folder named",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>",
+    "site_id": "<id from K6-37>",
+    "folder_path": "",
+    "filename": "preview.txt"
+   },
+   "expect": "preview",
+   "source_hint": "an empty folder_path returns invalid folder_path before any Graph call or write (tools.py:380-382)",
+   "depends_on": ["K6-05", "K6-08", "K6-37"]
+  },
+  {
+   "case_id": "K6-49",
+   "tool": "send_channel_message",
+   "question": "Post a status note to the first team channel, held until I confirm",
+   "args": {
+    "team_id": "<id from K6-20>",
+    "channel_id": "<id from K6-21>",
+    "message": "Status check, no action needed.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required after the opal-users send gate and before any POST (IRREVERSIBLE_SEND, uncountable)",
+   "depends_on": ["K6-20", "K6-21"]
+  },
+  {
+   "case_id": "K6-50",
+   "tool": "send_chat_message",
+   "question": "Post a short status note to my most active chat, held until I confirm",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "message": "Status check, no action needed.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required after the opal-users send gate and before any POST (IRREVERSIBLE_SEND, uncountable)",
+   "depends_on": ["K6-23"]
+  },
+  {
+   "case_id": "K6-51",
+   "tool": "send_email",
+   "question": "Send an email with no recipient named",
+   "args": {
+    "subject": "Preview only",
+    "body": "Preview only, nothing to send."
+   },
+   "expect": "preview",
+   "source_hint": "the required to argument is absent, so the call is refused before the function runs and nothing is sent; confirm=false is NOT a preview for send_email under the blast cap (see the surprise row)"
+  },
+  {
+   "case_id": "K6-52",
+   "tool": "upload_text_to_site",
+   "question": "Upload a text file with a slash in its name to the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "folder_path": "Reports",
+    "filename": "bad/name.txt",
+    "content": "preview"
+   },
+   "expect": "preview",
+   "source_hint": "a filename with a slash raises unsafe filename before the call and nothing is written (tools.py:826-827)",
+   "depends_on": ["K6-37"]
+  }
+ ]
+}
