@@ -1,0 +1,357 @@
+#!/usr/bin/env python3
+"""NFRA_FIDUPL round 1 -- the mechanical checks the task orders name (2.0.0_SA_COO~P1, 2026-10-19).
+
+Usage (from the repo or worktree root):  python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py <check>
+
+Each check prints exactly one line: R1-<ID>-OK ... or R1-<ID>-FAIL <reason>. Only that line is the verdict.
+Checks never write outside a temp dir, never print a secret and never print file contents. Python 3.9 syntax.
+"""
+import csv
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+CF = "infra/aws/ec2/canonical-fidelity"
+TF_ROOT = "infra/aws/terraform/canonical-fidelity-ec2"
+
+TEST_FILES = {
+    "fu1": ("%s/tests/test_quo_otp.py" % CF, [
+        "test_reads_only_configured_line_and_sender", "test_ignores_messages_before_window_opens",
+        "test_returns_code_for_fresh_message", "test_no_code_result_is_distinct_after_window",
+        "test_code_never_logged_or_printed", "test_sends_browser_user_agent_and_raw_key_header",
+        "test_other_line_never_read"]),
+    "fu2a": ("%s/tests/test_signin.py" % CF, [
+        "test_steps_in_order_password_factor_code_authorize", "test_selects_otpsms_factor",
+        "test_code_requested_after_send_instant", "test_sign_in_refused_classified",
+        "test_code_never_arrived_classified", "test_no_secret_in_logs_or_env",
+        "test_persistent_profile_dir_used"]),
+    "fu2b": ("%s/tests/test_signin_recon.py" % CF, [
+        "test_finds_g_number_column_by_index_and_counts", "test_prints_no_values",
+        "test_reports_column_count", "test_no_g_column_reports_none"]),
+    "fu2c": ("%s/tests/test_gprobe.py" % CF, [
+        "test_probe_switches_current_g_once_and_back", "test_probe_never_sets_default",
+        "test_probe_restores_starting_g_even_on_error", "test_probe_compares_before_after_counts",
+        "test_probe_prints_no_account_numbers_or_g_values"]),
+    "fu3": ("%s/tests/test_fetch.py" % CF, [
+        "test_lists_then_downloads_six", "test_sends_xsrf_header",
+        "test_only_completed_rows_of_the_six_names", "test_missing_file_reported_not_silent",
+        "test_export_not_generated_yet_class", "test_download_refused_class",
+        "test_bytes_written_exactly_as_served", "test_listing_has_sha256_and_contract_keys"]),
+    "fu4": ("%s/tests/test_land.py" % CF, [
+        "test_lands_six_to_builder_addresses", "test_scope_is_a_parameter",
+        "test_address_called_at_landing_time", "test_content_date_from_first_field",
+        "test_unreadable_date_is_failure_not_guess", "test_non_trading_day_is_failure",
+        "test_same_sha_lands_once", "test_run_record_shape", "test_missing_file_exits_nonzero",
+        "test_never_writes_outside_fidelity_prefix"]),
+    "fu5": ("%s/tests/test_box_run.py" % CF, [
+        "test_calls_signin_fetch_land_in_order", "test_stage_failure_exits_nonzero",
+        "test_failure_still_writes_record_via_lander", "test_no_secret_in_environment",
+        "test_reads_config_pointers_only"]),
+}
+SIX = ["account.txt", "position.txt", "balance.txt", "prices.txt", "security.txt", "transact.txt"]
+
+
+def out(line):
+    print(line)
+    return 0
+
+
+def run(cmd, timeout=100, cwd=None, env=None):
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env)
+        return p.returncode, (p.stdout or "") + (p.stderr or "")
+    except subprocess.TimeoutExpired:
+        return 124, "timeout"
+    except OSError as e:
+        return 127, str(e)
+
+
+def tests(cid):
+    rel, names = TEST_FILES[cid]
+    tag = "R1-%s" % cid.upper()
+    if not os.path.isfile(rel):
+        return out("%s-FAIL absent %s" % (tag, rel))
+    text = open(rel, encoding="utf-8", errors="replace").read()
+    missing = [n for n in names if ("def %s(" % n) not in text]
+    if missing:
+        return out("%s-FAIL missing tests %s" % (tag, ",".join(missing)))
+    rc, o = run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", rel])
+    m = re.search(r"(\d+) passed", o)
+    if rc != 0 or not m or "failed" in o or "error" in o.lower().split("passed")[-1]:
+        return out("%s-FAIL pytest rc=%s %s" % (tag, rc, o.strip().splitlines()[-1] if o.strip() else ""))
+    if int(m.group(1)) < len(names):
+        return out("%s-FAIL only %s passed of %d required" % (tag, m.group(1), len(names)))
+    return out("%s-OK passed=%s" % (tag, m.group(1)))
+
+
+def synth_handoff(d, date="20261016", with_listing=True):
+    """Six synthetic files: quoted CSV, no header, content date first, no client data."""
+    for n in SIX:
+        with open(os.path.join(d, n), "w", newline="", encoding="ascii") as f:
+            w = csv.writer(f, quoting=csv.QUOTE_ALL)
+            w.writerow([date, "SYNTH", n, "1"])
+            w.writerow([date, "SYNTH", n, "2"])
+    if with_listing:
+        rows = []
+        for n in SIX:
+            b = open(os.path.join(d, n), "rb").read()
+            import hashlib
+            rows.append({"fileName": n, "fileType": "X", "profileId": None, "requestId": None,
+                         "fileCreatedTimestamp": None, "fileDeliveredTimestamp": None,
+                         "fileStatusDescription": "COMPLETED", "bytes": len(b),
+                         "sha256": hashlib.sha256(b).hexdigest()})
+        json.dump({"schema": "fidelity-handoff/1", "source": "person", "business_day_requested": "2026-10-19",
+                   "fetched_at": "2026-10-19T20:00:00Z", "rows": rows, "missing": [], "failure": None},
+                  open(os.path.join(d, "listing.json"), "w"))
+
+
+class FakeSession(object):
+    """The session interface FU-s-3 is built against (see the FU-s-3 face)."""
+
+    def __init__(self, rows, files, status=200):
+        self.rows, self.files, self.status = rows, files, status
+        self.calls = []
+
+    def xsrf_token(self):
+        return "synthetic-xsrf"
+
+    def post_json(self, path, body, headers=None):
+        self.calls.append(("POST", path, body, headers or {}))
+        return 200, {"statusElements": self.rows}
+
+    def get_bytes(self, path, params, headers=None):
+        self.calls.append(("GET", path, params, headers or {}))
+        return self.status, self.files.get(params.get("fileName"), b"")
+
+
+def fu3_contract():
+    tag = "R1-FU3C"
+    if not os.path.isfile("%s/fetch.py" % CF):
+        return out("%s-FAIL absent %s/fetch.py" % (tag, CF))
+    sys.path.insert(0, CF)
+    try:
+        import importlib
+        fetch = importlib.import_module("fetch")
+        rows = [{"profileId": "p1", "requestId": "r%d" % i, "fileType": "T%d" % i, "fileName": n,
+                 "fileStatusDescription": "COMPLETED", "fileCreatedTimestamp": "2026-10-19T17:32:07Z",
+                 "fileDeliveredTimestamp": "2026-10-19T17:32:08Z"} for i, n in enumerate(SIX)]
+        files = dict((n, b'"20261016","SYNTH","%s"\r\n' % n.encode("ascii")) for n in SIX)
+        with tempfile.TemporaryDirectory() as d:
+            sess = FakeSession(rows, files)
+            listing = fetch.fetch_day(sess, "2026-10-19", d)
+            lj = json.load(open(os.path.join(d, "listing.json"), encoding="utf-8"))
+            need = ["schema", "source", "business_day_requested", "fetched_at", "rows", "missing", "failure"]
+            bad = [k for k in need if k not in lj]
+            ok_rows = len(lj.get("rows", [])) == 6 and all(
+                set(["fileName", "fileType", "bytes", "sha256"]) <= set(r) for r in lj.get("rows", []))
+            same = all(open(os.path.join(d, n), "rb").read() == files[n] for n in SIX)
+            if bad or not ok_rows or not same or lj.get("source") != "automated" or lj.get("failure") is not None:
+                return out("%s-FAIL listing keys missing=%s rows_ok=%s bytes_same=%s source=%s failure=%s"
+                           % (tag, bad, ok_rows, same, lj.get("source"), lj.get("failure")))
+            if not isinstance(listing, dict):
+                return out("%s-FAIL fetch_day returned %s not a dict" % (tag, type(listing).__name__))
+        return out("%s-OK rows=6 listing=fidelity-handoff/1" % tag)
+    except Exception as e:  # noqa: BLE001 -- a check reports, it does not raise
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
+def fu4_dry():
+    tag = "R1-FU4D"
+    if not os.path.isfile("%s/land.py" % CF):
+        return out("%s-FAIL absent %s/land.py" % (tag, CF))
+    with tempfile.TemporaryDirectory() as d:
+        synth_handoff(d)
+        rc, o = run([sys.executable, "%s/land.py" % CF, "--handoff-dir", d, "--scope", "alongside", "--dry-run"])
+        dests = re.findall(r"DRYRUN dest=(s3://opal-data-assets/fidelity/alongside/bronze/[a-z]+/20261016/[a-z]+\.txt)", o)
+        if rc != 0 or len(set(dests)) != 6:
+            return out("%s-FAIL rc=%s dests=%d last=%s" % (tag, rc, len(set(dests)),
+                                                         o.strip().splitlines()[-1][:100] if o.strip() else ""))
+    return out("%s-OK dests=6" % tag)
+
+
+def fu5_boot():
+    tag = "R1-FU5B"
+    p = "%s/box/bootstrap.sh" % CF
+    if not os.path.isfile(p):
+        return out("%s-FAIL absent %s" % (tag, p))
+    rc, o = run(["bash", "-n", p])
+    if rc != 0:
+        return out("%s-FAIL bash -n rc=%s" % (tag, rc))
+    text = open(p, encoding="utf-8").read()
+    if "playwright install" not in text:
+        return out("%s-FAIL bootstrap never installs a browser" % tag)
+    if re.search(r"(?im)^\s*export\s+\w*(PASSWORD|SECRET|API_?KEY|TOKEN)\w*=", text):
+        return out("%s-FAIL bootstrap exports a secret-named variable" % tag)
+    if re.search(r"[^\x00-\x7f]", text):
+        return out("%s-FAIL non-ASCII in bootstrap" % tag)
+    return out("%s-OK bash -n clean, browser install present, no secret export" % tag)
+
+
+def tf_validate():
+    tag = "R1-FU6V"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "init", "-backend=false", "-input=false", "-no-color"], 110)
+    if rc != 0:
+        return out("%s-FAIL init rc=%s %s" % (tag, rc, o.strip().splitlines()[-1][:100] if o.strip() else ""))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "validate", "-no-color"], 110)
+    if rc != 0 or "Success! The configuration is valid." not in o:
+        return out("%s-FAIL validate rc=%s" % (tag, rc))
+    return out("%s-OK Success! The configuration is valid." % tag)
+
+
+def tf_guard():
+    tag = "R1-FU6G"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    text = ""
+    for fn in sorted(os.listdir(TF_ROOT)):
+        if fn.endswith(".tf"):
+            text += open(os.path.join(TF_ROOT, fn), encoding="utf-8").read() + "\n"
+    if not text.strip():
+        return out("%s-FAIL no .tf files" % tag)
+    bad = []
+    if re.search(r"\bingress\s*\{", text):
+        bad.append("an ingress block")
+    if "0.0.0.0/0" in text:
+        bad.append("0.0.0.0/0")
+    if re.search(r":secret:[^\"\s]*\*", text):
+        bad.append("a secret prefix wildcard")
+    if re.search(r'"Resource"\s*[:=]\s*"\*"|resources\s*=\s*\[\s*"\*"\s*\]', text):
+        bad.append("a Resource star")
+    if "aws_secretsmanager_secret_version" in text:
+        bad.append("a secret VERSION (a value in state)")
+    if "prevent_destroy" not in text:
+        bad.append("no prevent_destroy on the secret")
+    if re.search(r"[^\x00-\x7f]", text):
+        bad.append("non-ASCII")
+    if bad:
+        return out("%s-FAIL %s" % (tag, "; ".join(bad)))
+    return out("%s-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present" % tag)
+
+
+def tf_plan():
+    tag = "R1-FU6P"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "init", "-input=false", "-no-color"], 110)
+    if rc != 0:
+        return out("%s-FAIL init rc=%s" % (tag, rc))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-no-color"], 115)
+    m = re.search(r"Plan: (\d+) to add, 0 to change, 0 to destroy\.", o)
+    if rc != 0 or not m:
+        return out("%s-FAIL plan rc=%s %s" % (tag, rc, o.strip().splitlines()[-1][:100] if o.strip() else ""))
+    return out("%s-OK Plan: %s to add, 0 to change, 0 to destroy." % (tag, m.group(1)))
+
+
+def tf_nochange():
+    tag = "R1-FU7A"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "init", "-input=false", "-no-color"], 110)
+    if rc != 0:
+        return out("%s-FAIL init rc=%s" % (tag, rc))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-no-color", "-detailed-exitcode"], 115)
+    if rc != 0 or "No changes." not in o:
+        return out("%s-FAIL plan rc=%s (0 = no changes, 2 = changes)" % (tag, rc))
+    return out("%s-OK No changes." % tag)
+
+
+def ledger():
+    tag = "R1-FU7L"
+    cm = "org/critical_paths/change_management"
+    done = [f for f in (os.listdir(cm) if os.path.isdir(cm) else [])
+            if "fidupl" in f.lower() and f.lower().endswith("deploy_completion.md")]
+    sent = [f for f in (os.listdir("org/critical_paths/.open_deploys") if os.path.isdir("org/critical_paths/.open_deploys") else [])
+            if "fidupl" in f.lower()]
+    if not done:
+        return out("%s-FAIL no NFRA_FIDUPL deploy_completion entry under %s" % (tag, cm))
+    if sent:
+        return out("%s-FAIL an open sentinel remains: %s" % (tag, ",".join(sent)))
+    return out("%s-OK completion entries=%d, open sentinels=0" % (tag, len(done)))
+
+
+def x1_run():
+    tag = "R1-X1R"
+    try:
+        sys.path.insert(0, "lib")
+        import boto3
+        import opal_naming
+        prefix = opal_naming.address("fidelity", "alongside", "bronze", "_runs", "00000000").rsplit("/00000000", 1)[0] + "/"
+        m = re.match(r"s3://([^/]+)/(.+)$", prefix)
+        s3 = boto3.client("s3", region_name="us-east-1")
+        best = None
+        for pg in s3.get_paginator("list_objects_v2").paginate(Bucket=m.group(1), Prefix=m.group(2)):
+            for o in pg.get("Contents", []):
+                if o["Key"].endswith(".json") and "/run-" in o["Key"]:
+                    if best is None or o["LastModified"] > best["LastModified"]:
+                        best = o
+        if best is None:
+            return out("%s-FAIL no run record under %s" % (tag, prefix))
+        rec = json.loads(s3.get_object(Bucket=m.group(1), Key=best["Key"])["Body"].read().decode("utf-8"))
+        landed = [f for f in rec.get("files", []) if f.get("action") == "landed"]
+        if rec.get("source") != "automated" or rec.get("failure_class") or len(landed) != 6:
+            return out("%s-FAIL source=%s failure_class=%s landed=%d" % (tag, rec.get("source"), rec.get("failure_class"), len(landed)))
+        return out("%s-OK source=automated landed=6 content_date=%s" % (tag, rec.get("business_date_in_content")))
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
+def x1_recon():
+    tag = "R1-X1G"
+    root = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables"
+    found = []
+    for dp, _dn, fns in os.walk(root):
+        for fn in fns:
+            if fn == "FU-x-1_account_gnumber_read.md":
+                found.append(os.path.join(dp, fn))
+    if not found:
+        return out("%s-FAIL no FU-x-1_account_gnumber_read.md under %s" % (tag, root))
+    text = open(found[0], encoding="utf-8").read()
+    m = re.search(r"columns=(\d+)", text)
+    g = re.search(r"g_number_columns=(\[[^\]]*\])", text)
+    if not m or not g:
+        return out("%s-FAIL record lacks columns= or g_number_columns=" % tag)
+    if re.search(r"G\d{8}", text):
+        return out("%s-FAIL the record carries a G number value" % tag)
+    return out("%s-OK columns=%s g_number_columns=%s" % (tag, m.group(1), g.group(1)))
+
+
+def x1_probe():
+    tag = "R1-X1P"
+    root = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables"
+    found = []
+    for dp, _dn, fns in os.walk(root):
+        for fn in fns:
+            if fn == "FU-x-1_g_selector_probe.md":
+                found.append(os.path.join(dp, fn))
+    if not found:
+        return out("%s-FAIL no FU-x-1_g_selector_probe.md under %s" % (tag, root))
+    text = open(found[0], encoding="utf-8").read()
+    m = re.search(r"list_narrows=(yes|no)", text)
+    n = re.search(r"options=(\d+)", text)
+    r = re.search(r"restored_starting_g=(yes|no)", text)
+    if not m or not n or not r:
+        return out("%s-FAIL record lacks list_narrows=, options= or restored_starting_g=" % tag)
+    if r.group(1) != "yes":
+        return out("%s-FAIL the starting G number was not restored" % tag)
+    if re.search(r"G\d{8}", text):
+        return out("%s-FAIL the record carries a G number value" % tag)
+    return out("%s-OK list_narrows=%s options=%s restored_starting_g=yes" % (tag, m.group(1), n.group(1)))
+
+
+CHECKS = {
+    "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"),
+    "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
+    "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
+    "fu7a": tf_nochange, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+}
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2 or sys.argv[1] not in CHECKS:
+        print("usage: r1_checks.py <%s>" % "|".join(sorted(CHECKS)))
+        sys.exit(2)
+    CHECKS[sys.argv[1]]()
