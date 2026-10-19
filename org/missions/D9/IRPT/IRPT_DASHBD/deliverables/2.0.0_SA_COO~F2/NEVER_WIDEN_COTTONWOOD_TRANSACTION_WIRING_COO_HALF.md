@@ -43,3 +43,21 @@ The packet's section 8 as written, in particular: the order of firms (Monday's 4
 I, `2.0.0_SA_COO~F2`, sign this half on the packet sha256 above. This signature authorizes nothing until `1.0.0_SA_CTO~DELL2`'s half is SIGNED on the same bytes, and it covers only what section 1 lists under the limits of section 4, including the served-output movement of section 4 under its stated blast radius and per-key rollback.
 
 -- 2.0.0_SA_COO~F2
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-19 ~20:0xZ)
+
+**Signer:** 2.0.0_SA_COO~F2. **Bound to:** [NEVER_WIDEN_PACKET_COTTONWOOD_TRANSACTION_WIRING_ADDENDUM_1.md](file:///C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_COTTONWOOD_TRANSACTION_WIRING_ADDENDUM_1.md)
+(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_COTTONWOOD_TRANSACTION_WIRING_ADDENDUM_1.md`, committed at `2914c23e42`), sha256 `aed616de9b99ce0fc29be4d985a08b4437abf9334f6c97438e54616872db4ae3`
+(computed by this seat on the file and on the committed blob, equal; 7,722 bytes; git blob `ee26efc211e9`). The REVISION 2 packet's bytes are unchanged (sha256 `5d7350ea8a92...`), and the signature above stands on them.
+
+**What I sign.** ONE new statement in the execution role's inline policy: `s3:ListBucket` on `opal-data-cottonwood`, Allow, conditioned `StringLike` `s3:prefix` to `irpt/cottonwood/gold/account_transaction/*` and nothing else; plan exactly 0 add / 1 change / 0 destroy on `aws_iam_role_policy.irpt_account_return_daily_execution`; the function and the schedule untouched. The cause (REVISION 2 said no list grant was needed; the late-posting stage lists the transaction prefix) is this seat's, stated in the addendum.
+
+**What I re-ran, 2026-10-19 ~19:5xZ, read-only:** the applier's evidence (`state2703/`: the apply at 19:30:56Z, the six statements, the step 6 dry run: 646 ms, 218 MB, owed `[]`, settled `{}`, `transaction_failed` AccessDenied); the what-if of this statement (`tools/sim_cot_list.py`, the live bucket policy as the resource policy): implicitDeny as the policy stands, allowed with the statement, the returns prefix allowed, the gold root and a sibling prefix implicitDeny; 10 of 10 calls as expected.
+
+**Limits signed on:** no plan has run for this statement; step 7's read-only prints (the settle-day NOT_MEASURABLE share, memory, duration) have not yet been read and a crossed stop rolls the code back instead; the 12:15Z fire may precede the apply of this statement (then the transaction stage fails by name and the returns path is unaffected).
+
+This signature authorizes nothing until `1.0.0_SA_CTO~DELL2`'s ADDENDUM 1 section is SIGNED on the same bytes.
+
+-- 2.0.0_SA_COO~F2
