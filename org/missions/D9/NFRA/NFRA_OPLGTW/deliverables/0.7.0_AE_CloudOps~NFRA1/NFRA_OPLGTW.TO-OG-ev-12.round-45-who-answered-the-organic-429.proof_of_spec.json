@@ -1,0 +1,80 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-12",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "866f1447f8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-12.round-45-who-answered-the-organic-429.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ORGANIC_429.json",
+   "kind": "doc",
+   "commit_or_etag": "d337e00efe",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only record: journal 2026-10-18T19:23:53Z to 2026-10-18T20:00:00Z (180 POST /mcp lines, 0 answered 429, 0 other-route 429s); lake 2026-10-18T19:00Z to 20:00Z 0 gw_ratelimit rows over 399 objects (0 read errors); the ALB access logs show no 429 on 2026-10-18 or 2026-10-19 so far and exactly one 429 span on 2026-10-17 (17:21:43Z to 17:21:44Z, answered by this service) against one lake row; throttle rule read at e09c30c3f0: refusal window 10.0 s; verdict UNDETERMINED by the rule fixed before the run.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev12_collect.py",
+   "kind": "doc",
+   "commit_or_etag": "d337e00efe",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The read-only collector (journalctl over SSM, the lake and the ALB access logs listed and read, the throttle rule via git show at the pinned sha). Writes nothing but its local record.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the journal and lake counts are present and read without error, the throttle rule is read at the pinned sha and equals the record, the verdict equals what the rule returns from those counts, and the record holds no email, no principal and no long digit run.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r45/checks/ev12.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)journal: 429 lines on POST /mcp \\d+, on other routes \\d+, first access line \\S+, window end \\S+: ok; lake 19:00Z to 20:00Z: gw_ratelimit rows \\d+ \\(suppressed \\d+\\) over \\d+ objects, read errors 0: ok.*throttle rule at the pinned code sha: refusal window [0-9.]+ s \\(the code at [0-9a-f]{10} reads [0-9.]+\\): ok; the journal covers the organic 429's time (yes|no); verdict by the rule fixed before the run: (THIS_SERVICE_WROTE_NOTHING|OTHER_LAYER|THROTTLED|UNDETERMINED), the record says \\2: consistent.*email-shaped strings 0 \\(want 0\\); digit runs of 9 or more 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "journal: 429 lines on POST /mcp 0, on other routes 0, first access line 2026-10-18T19:23:53Z, window end 2026-10-18T20:00:00Z: ok; lake 19:00Z to 20:00Z: gw_ratelimit rows 0 (suppressed 0) over 399 objects, read errors 0: ok\nthrottle rule at the pinned code sha: refusal window 10.0 s (the code at e09c30c3f0 reads 10.0): ok; the journal covers the organic 429's time no; verdict by the rule fixed before the run: UNDETERMINED, the record says UNDETERMINED: consistent\nresponse shape evidence present yes; evidence strings 5 (want >= 2); email-shaped strings 0 (want 0); digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "399 lake objects read (0 errors); 180 journal POST /mcp lines; 795 ALB lines in the window",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the check recomputes the verdict from the numbers, which is the discriminating arm.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 429 response body shape",
+   "reason": "No log read here keeps a response body; guard_middleware_body_seen is null and the evidence says what was read instead."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-12 (GO 35903; read-only). ev12_collect.py read the journal over SSM, the lake, the ALB access logs the account keeps (S3, read-only) and the throttle rule at the live sha. The journal's access log returned at 2026-10-18T19:23:53Z, after the 19:20Z start of the span, so by the rule fixed before the run the verdict is UNDETERMINED; the ALB logs add that no 429 passed the ALB on 2026-10-18 or 2026-10-19 so far, and that the one 429 span they hold (2026-10-17 17:21Z) has its first-refusal row in the lake.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 / ssm / s3",
+   "invocation": "ev12_collect.py",
+   "result": "PASS",
+   "note": "Counts, UTC times and status words only."
+  }
+ ]
+}
