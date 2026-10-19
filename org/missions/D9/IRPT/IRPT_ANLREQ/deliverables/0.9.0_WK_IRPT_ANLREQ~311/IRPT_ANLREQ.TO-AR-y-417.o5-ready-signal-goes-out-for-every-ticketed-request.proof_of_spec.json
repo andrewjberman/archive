@@ -20,7 +20,8 @@
       "kind": "script",
       "commit_or_etag": "a732c5ef25a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "send_ready_if_ticketed only: the commentary_requested condition and its COMMENTARY_NOT_REQUESTED journal line are removed; NO_TICKET is still checked first. Committed LOCAL on wk-IRPT_ANLREQ-311 as a732c5ef25a. Nothing deployed; the resident release (r34m) is a later act."
+      "deploy_evidence": "send_ready_if_ticketed only: the commentary_requested condition and its COMMENTARY_NOT_REQUESTED journal line are removed; NO_TICKET is still checked first. Committed LOCAL on wk-IRPT_ANLREQ-311 as a732c5ef25a. Nothing deployed; the resident release (r34m) is a later act.",
+      "artifact_covered_by": ["AR417-y-AC1", "AR417-y-AC2", "AR417-y-AC3"]
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ready_signal_on_ready.py",
@@ -41,9 +42,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
       "kind": "script",
-      "commit_or_etag": "the deliverables commit that adds this file together with this instance (the flip commit that follows it is separate)",
+      "commit_or_etag": "80742ed8b72",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The branch-bound checker for AR417-y-AC3 (stdlib only; git merge-base HEAD box/dell2; changed paths outside org/ must be exactly the three files; only send_ready_if_ticketed may differ in resident_worker.py by ast.dump). Passes commit-gate.sh.",
+      "deploy_evidence": "The branch-bound checker for AR417-y-AC3 (stdlib only; git merge-base HEAD box/dell2; changed paths outside org/ must be exactly the three files; only send_ready_if_ticketed may differ in resident_worker.py by ast.dump). Committed with this instance as 80742ed8b72. Passes commit-gate.sh.",
       "artifact_covered_by": ["AR417-y-AC3"]
     }
   ],
@@ -52,30 +53,30 @@
       "criterion_id": "AR417-y-AC1",
       "criterion_verbatim": "`AR417-y-AC1`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider -- expect 5 passed.",
       "method": "test_suite",
-      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider",
-      "output_evidence": "worker run at HEAD ab9b503a788 (code commit a732c5ef25a), rc=0, printed: 5 passed in 4.54s. Second run: rc=0, 5 passed in 4.87s. Literal invocation WITHOUT the IRPT_FIRM_REGISTRY pointer: rc=1, 5 errors in 2.45s (ids.IdRefused: the firm registry was not found); see surprise IRPT_ANLREQ-D2-W311-S1.",
-      "denominator": "5 of 5 new tests passed",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal_on_ready.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "5 errors in 2.45s (rc=1, literal invocation, HEAD ab9b503a788, code commit a732c5ef25a). Every error is at fixture setup: ids.IdRefused: the firm registry was not found; data/firm_registry.json is absent from the sparse worktree (see surprise IRPT_ANLREQ-D2-W311-S1). Diagnostic only, not this criterion: with IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json exported (the base checkout copy, git hash-object cdb9f785e043cd69e451c545dc384e598431b263 = the HEAD blob), rc=0, 5 passed in 4.54s; second run rc=0, 5 passed in 4.87s.",
+      "denominator": "0 of 5 new tests pass on the literal invocation (5 setup errors); 5 of 5 pass with the diagnostic pointer",
       "expect": "5 passed",
-      "status": "PASS",
-      "status_reason": "rc=0 and the printed line is '5 passed'. Prerequisite: the worktree is a sparse checkout without data/firm_registry.json, so the pointer names the base checkout copy whose git hash-object equals the HEAD blob cdb9f785. The literal run without the pointer errors (recorded as a surprise row)."
+      "status": "FAIL",
+      "status_reason": "rc=1 and the printed line is '5 errors', not '5 passed'. The criterion is not met in this worktree as ordered. A path the worktree lacks is a BLOCKING row on that criterion, never an override, so the pointer run is recorded as a diagnostic only: it shows the new tests pass when the registry is present. The order stays open until data/firm_registry.json is available to the worktree or the order is re-cut."
     },
     {
       "criterion_id": "AR417-y-AC2",
       "criterion_verbatim": "`AR417-y-AC2`: cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider -- expect ^[0-9]+ passed.",
       "method": "test_suite",
-      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider",
-      "output_evidence": "worker run at HEAD ab9b503a788, rc=0, printed: 32 passed, 21 subtests passed in 15.83s. Baseline before the change (same pointer, commit 992923c429f): 32 passed, 21 subtests passed in 16.72s. Literal invocation without the pointer: rc=1, 7 passed, 30 errors (fixture setup, registry not found).",
-      "denominator": "32 of 32 tests passed (21 subtests passed); baseline 32 of 32",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest ycharts/generate/tests/test_ready_signal.py ycharts/generate/tests/test_ready_signal_commentary_gate.py ycharts/generate/tests/test_commentary_requested_member.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "7 passed, 25 errors, 21 subtests passed in 3.65s (rc=1, literal invocation, HEAD ab9b503a788). The 25 errors are fixture setup, ids.IdRefused: the firm registry was not found (see surprise IRPT_ANLREQ-D2-W311-S1). Diagnostic only, not this criterion: with IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json exported, rc=0, 32 passed, 21 subtests passed in 15.83s; the same run at the base 992923c429f with the pointer gave 32 passed, 21 subtests passed in 16.72s.",
+      "denominator": "literal: 7 passing of 32 tests, 25 errors; with the diagnostic pointer: 32 of 32 tests passed (21 subtests passed), baseline 32 of 32",
       "expect": "^[0-9]+ passed",
-      "status": "PASS",
-      "status_reason": "rc=0 and the printed line matches ^[0-9]+ passed with zero errors and zero failures. The regex alone would also match a run with setup errors ('7 passed, 30 errors'), which is why the pointer-run line is recorded in full."
+      "status": "FAIL",
+      "status_reason": "rc=1 and the printed line carries 25 errors. The expect regex matches the literal line ('7 passed, 25 errors'), which is why it is not a pass test on its own: a PASS needs rc 0 and no errors. A path the worktree lacks is a BLOCKING row on this criterion, never an override; the pointer run is a diagnostic only. The order stays open."
     },
     {
       "criterion_id": "AR417-y-AC3",
       "criterion_verbatim": "`AR417-y-AC3`: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py -- expect O5-BOUND-OK files=3.",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~311/check_o5_bound.py",
-      "output_evidence": "run at HEAD ab9b503a788 (branch point 992923c429f6f514055c5f4e97a04c45837e44c3): printed O5-BOUND-OK files=3, rc=0. Before the code commit (HEAD equal to the branch point) the same script printed O5-BOUND-BAD changed-outside-org=[] expected=[...3 paths...], rc=1.",
+      "output_evidence": "O5-BOUND-OK files=3 (rc=0, run at HEAD ab9b503a788; branch point 992923c429f6f514055c5f4e97a04c45837e44c3). Before the code commit (HEAD equal to the branch point) the same script printed O5-BOUND-BAD changed-outside-org=[] expected=[...3 paths...], rc=1.",
       "denominator": "3 of 3 expected changed files outside org/; 1 differing top-level definition in resident_worker.py (send_ready_if_ticketed) and 0 other top-level differences",
       "expect": "O5-BOUND-OK files=3",
       "status": "PASS",
@@ -84,13 +85,13 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AR417-y-AC1/AC2 control: resident_worker.py copied to .scratch/mutant/infra/aws/lambda/investor-reporting (mirrored repo layout, docs/contracts copied alongside), with the commentary_requested is-not-True skip and its COMMENTARY_NOT_REQUESTED line restored before send_ready in send_ready_if_ticketed; the new test file run against that copy. Not committed. The same run against the unchanged base code (992923c429f) gives the same three failures.",
+      "description": "AR417-y-AC1/AC2 control: resident_worker.py copied to .scratch/mutant/infra/aws/lambda/investor-reporting (mirrored repo layout, docs/contracts copied alongside), with the commentary_requested is-not-True skip and its COMMENTARY_NOT_REQUESTED line restored before send_ready in send_ready_if_ticketed; the new test file run against that copy with the diagnostic pointer. Not committed. The same run against the unchanged base code (992923c429f) gives the same three failures.",
       "expected": "tests 2 (ticketed, False) and 3 (ticketed, member absent) FAIL",
       "observed": "3 failed, 2 passed: test_2 and test_3 FAIL with sent [] against one analysis_ready; test_5 FAIL because the COMMENTARY_NOT_REQUESTED line is printed; tests 1 and 4 pass.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two runs of the AR417-y-AC1 invocation at HEAD ab9b503a788 with the same pointer; the summary lines were compared.",
+      "method": "two runs of the AR417-y-AC1 test file at HEAD ab9b503a788 with the diagnostic pointer exported; the summary lines were compared.",
       "observed": "run A rc=0 '5 passed in 4.54s'; run B rc=0 '5 passed in 4.87s'. Only the timing differs; the pass set is identical.",
       "status": "STABLE"
     }
@@ -98,7 +99,7 @@
   "declared_exclusions": [
     {
       "item": "data/firm_registry.json (the worktree is a sparse checkout without data/)",
-      "reason": "not copied, not extracted and the sparse set not changed. The test run reads the base checkout copy through IRPT_FIRM_REGISTRY, which is byte-identical to the HEAD blob cdb9f785e043cd69e451c545dc384e598431b263 (git hash-object). Recorded as IRPT_ANLREQ-D2-W311-S1."
+      "reason": "not copied, not extracted and the sparse set not changed. The diagnostic runs read the base checkout copy through IRPT_FIRM_REGISTRY, which is byte-identical to the HEAD blob cdb9f785e043cd69e451c545dc384e598431b263 (git hash-object). The criteria themselves are graded on the literal invocation. Recorded as IRPT_ANLREQ-D2-W311-S1."
     },
     {
       "item": "ycharts/research/opal_packager.py and the packager payload",
@@ -114,14 +115,14 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W311-S1: the sparse worktree does not carry data/firm_registry.json, so the literal pytest invocations error at fixture setup (BLOCKING, INERT); the criteria were graded with the IRPT_FIRM_REGISTRY pointer to the byte-identical base copy."
+    "IRPT_ANLREQ-D2-W311-S1: the sparse worktree does not carry data/firm_registry.json, so the literal pytest invocations of AR417-y-AC1 and AC2 error at fixture setup (BLOCKING, INERT); both criteria are recorded FAIL on the literal run, and the pointer runs are diagnostics only."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest",
-      "invocation": "cd infra/aws/lambda/investor-reporting/ && IRPT_FIRM_REGISTRY=/c/dev/ajb_workspace/data/firm_registry.json python -m pytest <the three baseline files and the new file> -q --color=no -p no:cacheprovider",
-      "result": "baseline 32 passed (commit 992923c429f); unchanged code with the new file: 3 failed, 2 passed (tests 2, 3, 5); after the change: 5 passed (new file) and 32 passed (three baseline files)"
+      "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest <the three baseline files and the new file> -q --color=no -p no:cacheprovider",
+      "result": "literal: baseline 7 passed, 25 errors at 992923c429f (registry absent); after the change 7 passed, 25 errors for the three baseline files and 5 errors for the new file. Diagnostic with IRPT_FIRM_REGISTRY exported: baseline 32 passed; unchanged code with the new file 3 failed, 2 passed (tests 2, 3, 5); after the change 5 passed and 32 passed."
     },
     {
       "tool": "check_o5_bound.py",
@@ -131,7 +132,7 @@
     {
       "tool": "commit-gate",
       "invocation": "bash .tools/commit-gate.sh <resident_worker.py, both test files, check_o5_bound.py>",
-      "result": "All checks passed / pre-commit gate clean for 1 of 1 file(s) for each file; no non-ASCII in the three code files"
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each file (All checks passed)"
     }
   ]
 }
