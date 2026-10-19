@@ -1,0 +1,30 @@
+{
+  "body": {
+    "cause_class": "real_routing_defect",
+    "installed": {
+      "starlette": "1.3.1"
+    },
+    "pinned": {
+      "requirements_line": "starlette>=0.37.0"
+    },
+    "evidence": [
+      "infra/aws/ec2/opal-gateway/app/server.py:1198 Route('/{path:path}', dashboard_deep_link, methods=[GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS]) is the last entry of the app routes list and FULL-matches a POST to every path, shadowing the 405 of the hx routes above it (server.py:1155-1164 declare GET-only or SEND methods for them)",
+      "installed starlette 1.3.1 routing.py:251 Route.matches returns Match.PARTIAL on a method mismatch; routing.py:682-690 Router.app hands a PARTIAL to the 405 handler only when no route is a FULL match",
+      "one-request run on installed starlette 1.3.1, python .scratch/en32_method_repro.py (worktree wk-NFRA_OPLGTW-158): bare Route POST /hx/teams/me -> 405 allow='HEAD, GET'; same route with the trailing catch-all -> 404 body='Not Found'",
+      "git log: e42d2c35c3 (2026-10-13) added the catch-all at server.py:1198; db92656c72 (2026-10-02) added the hx routes whose tests expect 405; the catch-all comment at server.py:1197 says only a path nothing above matches reaches it",
+      "pytest, this worktree, python -m pytest -q -p no:cacheprovider on the five ids (cwd infra/aws/ec2/opal-gateway): 5 failed; each failing assert is a status == 405 that received 404 (tests/test_teams_route.py:364, :515; tests/test_mail_route.py:282, :309; tests/test_transcript_route.py:134); rc=1"
+    ],
+    "cases": [
+      {"node_id": "tests/test_transcript_route.py::test_bearer_constant_time_own_prefix_only", "expected": 405, "got_at_base": 404},
+      {"node_id": "tests/test_teams_route.py::test_methods_and_unknown_routes", "expected": 405, "got_at_base": 404},
+      {"node_id": "tests/test_teams_route.py::test_new_routes_are_get_only_and_allowlist_still_refuses_neighbours", "expected": 405, "got_at_base": 404},
+      {"node_id": "tests/test_mail_route.py::test_transcript_and_ms_bearers_refused_on_mail_prefix", "expected": 405, "got_at_base": 404},
+      {"node_id": "tests/test_mail_route.py::test_graph_get_only_fails_closed", "expected": 405, "got_at_base": 404}
+    ],
+    "change": {
+      "kind": "none",
+      "files": [],
+      "why": "real_routing_defect in app/server.py:1198 (catch-all shadows the hx routes' 405); the app is not granted to this order, so no file changed and a BLOCKING row is filed (NFRA_OPLGTW-Z-W158-S1)"
+    }
+  }
+}
