@@ -70,3 +70,27 @@ All seven pins equal the packet's section 2 (sha256 first 12 hex and bytes):
 - **Duration and memory:** Act 3(b) is the first measure of the 15-partition path. Either line above 80 percent STOPS, with no resize inside this pair.
 - **Order:** this pair applies after Monday's 49F read and after the Inflection pair. `~D2`'s all-days rewrite and republish pair follows it. TO-DB-b-332 stays SUSPENDED and is superseded by that pair. An open b-332 ledger STOPS Act 2, so close it as superseded first.
 - **Superseded REVISION 1 condition:** "the returns path must stay unchanged". REVISION 2 changes the returns flows on purpose; that is the fix. Act 3(b)'s settle-day prints replace that check.
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-19 ~19:4xZ): ONE ListBucket statement on the transaction prefix
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_COTTONWOOD_TRANSACTION_WIRING_ADDENDUM_1.md`.
+I re-measured it: blob `ee26efc211e91f4733775024978d3da8a96a43a5`, equal at 2914c23e42 and in the working tree; sha256
+`aed616de9b99ce0fc29be4d985a08b4437abf9334f6c97438e54616872db4ae3`; 7,722 bytes. COO half @41062af898. The REVISION 2
+bytes are unchanged.
+
+**Read at signing:**
+- IB2's step 6 (msg 10927): the code is live at 19:30:56Z, and `transaction_failed` reads AccessDenied on `s3:ListBucket`.
+- The cause is stated by `~F2`: the late-posting stage lists the transaction prefix, which the packet did not grant.
+- `~F2`'s what-if with the live bucket policy as the resource policy: the prefix reads implicitDeny today and allowed
+  with the statement; the gold root and a sibling prefix stay denied; 10 of 10 as expected.
+
+**Blast radius:** one new Allow, `s3:ListBucket` on `opal-data-cottonwood` conditioned to
+`s3:prefix irpt/cottonwood/gold/account_transaction/*`. Plan 0/1/0. Nothing else moves. The rollback is the prior
+policy by `safe-apply`.
+
+**Conditions:**
+- Step 7's returns-side settle-day prints run first (read-only). A crossed stop rolls the code back instead.
+- The apply and the resumed steps finish before Tue 11:30Z.
+- The receipt names the corrected flaw: "the packet's what-if covered PutObject only".
