@@ -52,3 +52,9 @@ Added ~20:3xZ:
 | # | item | source | note |
 |---|---|---|---|
 | 17 | Gateway battery FAILs over 127 tools, graded (round-47 evidence): `portal_get_security_scan` returns a raw AccessDenied `s3:ListBucket` for the reader role; `ycharts_time_series` and `ycharts_risk_return_scatter` return an upstream 403; `etfs_who_holds` returns 0 holders (newest date only); `opal_describe` ItemCount 386383 against the catalog's 381261; `portal_get_macro` returns macro null; as-of 2026-09-30 on `portal_get_model_attribution`, `portal_get_peer_performance`, `portal_get_pipeline_freshness`; eleven tools read misrouted (the response cites a source outside the traced set) | `2.0.0_SA_COO~MI` msg 36112; summary `org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/evidence/BATTERY_SUMMARY_20261019.md` (commit 259ff2a3534, LOCAL) | the raw AccessDenied is a second grant-or-handler finding beside OG-cd-3's census (a reader role without `s3:ListBucket`); runs were held to two concurrent, the host stayed up |
+
+Added ~20:5xZ:
+
+| # | item | source | note |
+|---|---|---|---|
+| 18 | The release that ships `index_pairs` (item 9) also pins `services.opal-gateway.mcportal_commit` to `21ad40432cae0d09c5ab9d806307944baaf45cb9` (the one-line manifest change of MP-pf-9) and names it in the census beside the handler files | `2.0.0_SA_COO~MP` msg 36117 (ruling text `org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md` section GWZ1.5); its page cells MP-z-7 and MP-z-8 are drained and inert until `index_pairs` is live | not tonight's batch15; the host manifest reads `mcportal_commit` 59e802a today |
