@@ -23,7 +23,7 @@ timeout 60 "$AWS" ssm get-command-invocation --command-id "$cid" --instance-id $
 python - "$T/out.txt" "$OUT" <<'PYEOF'
 import base64, gzip, json, sys
 lines = open(sys.argv[1], encoding="utf-8", errors="replace").read().splitlines()
-print("\n".join(l for l in lines if l.startswith(("health=", "RC=", "BREAKDOWN_BYTES", "Traceback")) or "Error" in l)[:600])
+print("\n".join(l for l in lines if l.startswith(("health=", "RC=", "BREAKDOWN_BYTES", "INTEGRATIONS_", "Traceback")) or "Error" in l)[:600])
 if "BREAKDOWN_B64GZ" not in lines:
     print("RESULT: FAIL (no marker)"); sys.exit(1)
 b64 = lines[lines.index("BREAKDOWN_B64GZ") + 1]
