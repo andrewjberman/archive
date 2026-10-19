@@ -6,11 +6,11 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-415.o1-staff-owner-fallback-in-create-owner-and-advisor-owner.md",
     "group": "OTHER",
-    "vintage_commit": "992923c429f"
+    "vintage_commit": "c909098088"
   },
   "decomp_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
-    "vintage_commit": "992923c429f",
+    "vintage_commit": "c909098088",
     "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-415.o1-staff-owner-fallback-in-create-owner-and-advisor-owner.md"
   },
   "assignee": "0.9.0_WK_IRPT_ANLREQ~309",
@@ -31,11 +31,19 @@
       "artifact_covered_by": ["AR415-y-AC1"]
     },
     {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py",
+      "kind": "script",
+      "commit_or_etag": "187c60592d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Granted by AMENDMENT 1 (c909098088). Five flipped functions now pin the staff fallback through the full path (falls_back helper); the mismatch refusal is split into its own function and kept; the read-error and body-named cases are untouched. Committed LOCAL as 187c60592d, commit-gate clean.",
+      "artifact_covered_by": ["AR415-y-AC2"]
+    },
+    {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
       "kind": "script",
-      "commit_or_etag": "5811e72ffc",
+      "commit_or_etag": "187c60592d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib-only, read-only bound check, committed LOCAL as 5811e72ffc, passes commit-gate.sh. Run before the edit: O1-BOUND-BAD paths outside org/ are [] (rc 1). Run at HEAD after the commit: O1-BOUND-OK functions=2 classes=1 files=2 (rc 0).",
+      "deploy_evidence": "Stdlib-only, read-only bound check for the three granted paths, committed LOCAL as 187c60592d. Before the pinned-file edit: O1-BOUND-BAD (rc 1, paths outside org/ were the two files). After: O1-BOUND-OK functions=2 classes=1 files=3 (rc 0).",
       "artifact_covered_by": ["AR415-y-AC3"]
     }
   ],
@@ -45,31 +53,31 @@
       "criterion_verbatim": "AR415-y-AC1: cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz/tests/test_create_owner_on_behalf.py -q --color=no -p no:cacheprovider -- expect 9 passed.",
       "method": "test_suite",
       "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz/tests/test_create_owner_on_behalf.py -q --color=no -p no:cacheprovider",
-      "output_evidence": "Run on wk-IRPT_ANLREQ-309 at HEAD 5811e72ffc, rc=0, printed: '9 passed in 0.14s' (first run; the re-run after data/ was added printed '9 passed in 0.12s', rc=0). Difference control at the parent commit 992923c429f, same tests and the unchanged served.py, rc=1: '4 failed, 5 passed', FAILED test_t1, test_t2, test_t4 and test_t5 with the refusals 'an on-behalf upload must name the firm advisor', 'on-behalf advisor email required', 'advisor has no partner profile at the named firm' and 'advisor profile absent, disabled or of another firm'.",
+      "output_evidence": "Literal run on wk-IRPT_ANLREQ-309 at HEAD 187c60592d, rc=0, printed: '9 passed in 0.11s'. Difference control at the parent commit 992923c429f, same tests and the unchanged served.py, rc=1: '4 failed, 5 passed', FAILED test_t1, test_t2, test_t4 and test_t5 with the refusals 'an on-behalf upload must name the firm advisor', 'on-behalf advisor email required', 'advisor has no partner profile at the named firm' and 'advisor profile absent, disabled or of another firm'.",
       "denominator": "9 of 9 named test functions pass at HEAD; at the parent commit 4 of 9 fail (T1, T2, T4, T5) and 5 of 9 pass (T3, T6, T7, T8, T9)",
       "expect": "9 passed",
       "status": "PASS",
-      "status_reason": "rc=0 and the printed line reads '9 passed' exactly, with no failure at HEAD."
+      "status_reason": "rc=0 and the printed line reads '9 passed' exactly."
     },
     {
       "criterion_id": "AR415-y-AC2",
       "criterion_verbatim": "AR415-y-AC2: cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz -q --color=no -p no:cacheprovider -- expect ^[0-9]+ passed.",
       "method": "test_suite",
       "invocation": "cd infra/aws/lambda/investor-reporting/ && python -m pytest _authz -q --color=no -p no:cacheprovider",
-      "output_evidence": "Literal run on wk-IRPT_ANLREQ-309 at HEAD 5811e72ffc, after the issuer added data/ to the sparse set, rc=2, no 'N passed' line: three ERROR lines at collection (test_guarded_entries.py, test_pointer_guard.py, test_wire_reason_codes.py) each 'AssertionError: published guarded directory-search operation missing', then 'Interrupted: 3 errors during collection' and '3 errors in 2.50s'. The same three collection errors occur at the parent commit 992923c429f before the change (rc=2). Cause: infra/aws/terraform/ is still absent from the worktree, so routetable marks irpt-directory-search Unresolved (declared tf_file is not on disk). The registry errors seen earlier are gone (data/ is now in the sparse set). Supplementary, NOT the verdict: with --continue-on-collection-errors the folder reads '17 failed, 310 passed, 3 errors in 3.86s' (rc=1). The 9 failures in test_served_on_behalf_create.py are the pinned on-behalf refusals that this change turns into the staff fallback: each returns data with state NORMALIZED where the test asserts a refusal (IRPT_ANLREQ-D2-W309-S2, measured now). The 8 failures in test_unguarded_census.py name Unresolved tf_file entries, the missing terraform tree (IRPT_ANLREQ-D2-W309-S4).",
-      "denominator": "0 of 1 summary lines carries a pass count (rc=2 interrupted at collection); 3 of 3 collection errors have the terraform cause; in the supplementary continued run 310 passed, 17 failed of 327 collected, 9 of the 17 are the pinned on-behalf cases the change flips and 8 the terraform census cases",
+      "output_evidence": "Literal run on wk-IRPT_ANLREQ-309 at HEAD 187c60592d, rc=0, printed: '375 passed in 17.44s'. Before the pinned-file update (the tree at 5811e72ffc) the same literal run printed '9 failed, 365 passed in 20.43s', rc=1, the nine failures being the pinned cases the change flips (IRPT_ANLREQ-D2-W309-S2). The 365 is the order's stated baseline. The total 375 is 365 + 9 new owner tests + 1, the +1 coming from splitting test_served_refuses_advisor_of_other_firm into two functions (one refusal kept, one fallback), with the same assertions.",
+      "denominator": "375 of 375 collected tests pass; baseline 365 pass at the parent commit 992923c429f (the order's figure, reproduced in the terraform-complete sparse set); +9 nine owner tests; +1 from the split",
       "expect": "^[0-9]+ passed",
-      "status": "FAIL",
-      "status_reason": "The literal invocation prints no pass line in this worktree, so the expected ^[0-9]+ passed is not met. The remaining cause is the absent terraform tree (IRPT_ANLREQ-D2-W309-S1, narrowed by S4). The change also flips nine pinned cases in test_served_on_behalf_create.py (IRPT_ANLREQ-D2-W309-S2, BLOCKING, ARMED, measured by S4). The worker may edit only served.py and the new test file, so that file was not amended."
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches ^[0-9]+ passed with no failure or error."
     },
     {
       "criterion_id": "AR415-y-AC3",
-      "criterion_verbatim": "AR415-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py -- expect O1-BOUND-OK functions=2 classes=1 files=2.",
+      "criterion_verbatim": "AR415-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py -- expect O1-BOUND-OK functions=2 classes=1 files=3.",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
-      "output_evidence": "Run at HEAD 5811e72ffc, rc=0, printed: O1-BOUND-OK functions=2 classes=1 files=2. The repeat runs at HEAD printed the same line. Before the edit (worktree at 992923c429f), rc=1, printed: O1-BOUND-BAD paths outside org/ are [], want ['infra/aws/lambda/investor-reporting/_authz/served.py', 'infra/aws/lambda/investor-reporting/_authz/tests/test_create_owner_on_behalf.py'].",
-      "denominator": "2 of 2 changed paths outside org/ are the two named files; 2 of 2 changed methods (_create_owner, _advisor_owner) differ in ast.dump; 1 of 1 added top-level class (AdvisorUnprovisioned); 0 other top-level definitions or guard-class methods differ; 1 added top-level import, the allowed prospect import",
-      "expect": "O1-BOUND-OK functions=2 classes=1 files=2",
+      "output_evidence": "Run at HEAD 187c60592d, rc=0, printed: O1-BOUND-OK functions=2 classes=1 files=3. The repeat run printed the same line. Before the pinned-file edit (HEAD 5811e72ffc plus the amended checker), rc=1, printed: O1-BOUND-BAD paths outside org/ are [served.py, test_create_owner_on_behalf.py], want [served.py, test_create_owner_on_behalf.py, test_served_on_behalf_create.py].",
+      "denominator": "3 of 3 changed paths outside org/ are the three named files; 2 of 2 changed methods (_create_owner, _advisor_owner) differ in ast.dump; 1 of 1 added top-level class (AdvisorUnprovisioned); 0 other top-level definitions or guard-class methods differ; 1 added top-level import, the allowed prospect import",
+      "expect": "O1-BOUND-OK functions=2 classes=1 files=3",
       "status": "PASS",
       "status_reason": "rc=0 and the printed line equals the expected line exactly."
     }
@@ -78,51 +86,47 @@
     "mutant": {
       "description": "AR415-y-AC1 control: the nine tests run against a copy of served.py WITHOUT the change. The copy is the parent commit 992923c429f blob of served.py written into .scratch/mut/infra/aws/lambda/investor-reporting/_authz/served.py, with the rest of the folder copied unchanged; the nine tests are run from that copy.",
       "expected": "rc=1 with at least 4 FAILED (the difference control: T1, T2, T4 and T5 must fail on the unchanged code)",
-      "observed": "rc=1: '4 failed, 5 passed in 0.38s'. FAILED test_t1_staff_no_advisor_key_gets_the_signed_in_owner, test_t2_staff_blank_advisor_value_gets_the_signed_in_owner, test_t4_named_advisor_without_partner_profile_falls_back_to_the_signed_in_owner, test_t5_named_advisor_with_disabled_user_row_falls_back_to_the_signed_in_owner; the failing lines are the four refusals named above. T3, T6, T7, T8 and T9 pass on the unchanged code, as they should.",
+      "observed": "rc=1: '4 failed, 5 passed in 0.33s'. FAILED test_t1_staff_no_advisor_key_gets_the_signed_in_owner, test_t2_staff_blank_advisor_value_gets_the_signed_in_owner, test_t4_named_advisor_without_partner_profile_falls_back_to_the_signed_in_owner, test_t5_named_advisor_with_disabled_user_row_falls_back_to_the_signed_in_owner; the failing lines are the four refusals named above. T3, T6, T7, T8 and T9 pass on the unchanged code.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs compared with diff: the nine tests run twice at HEAD with the timing field removed (sed), and check_o1_bound.py run twice at HEAD",
-      "observed": "diff of the two nine-test outputs is empty; both print '9 passed'. Both bound-check runs print 'O1-BOUND-OK functions=2 classes=1 files=2'.",
+      "method": "two same-input runs compared: the nine tests run twice at HEAD with the timing field removed (sed) and diffed; check_o1_bound.py run twice at HEAD",
+      "observed": "diff of the two nine-test outputs is empty, both '9 passed'. Both bound-check runs print 'O1-BOUND-OK functions=2 classes=1 files=3'.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "infra/aws/terraform/ (absent from the sparse worktree)",
-      "reason": "Not on disk in C:/dev/wk-irpt-anlreq-309. The worker did not run git sparse-checkout, did not extract the tree and did not copy it from another checkout. This is the remaining cause of AR415-y-AC2 FAIL (IRPT_ANLREQ-D2-W309-S1, narrowed by S4). data/ was added to the sparse set by the issuer and is now present."
-    },
-    {
-      "item": "infra/aws/lambda/investor-reporting/_authz/tests/test_served_on_behalf_create.py (pinned on-behalf cases)",
-      "reason": "Outside this order's grant (the worker may edit served.py and the new test file only). Not edited. The change flips nine pinned cases there; recorded as IRPT_ANLREQ-D2-W309-S2 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2) and measured by IRPT_ANLREQ-D2-W309-S4."
-    },
-    {
       "item": "AWS calls, network, push, deploy, release apply",
       "reason": "None performed. The order is LOCAL only; the release is a separate act that ships with AR-y-416."
+    },
+    {
+      "item": "the typed advisor email recorded as attribution",
+      "reason": "Not recorded anywhere. The unprovisioned fallback drops it and the stored owner never carries it (asserted by falls_back in the pinned file and by the nine-test suite)."
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W309-S1: the worktree is a sparse checkout with no infra/aws/terraform/ tree, so python -m pytest _authz does not collect and no pass line is printed; the registry gap is closed by the issuer's data/ addition (BLOCKING, INERT); AR415-y-AC2 is FAIL as written.",
-    "IRPT_ANLREQ-D2-W309-S2: the O1 change flips nine pinned cases in _authz/tests/test_served_on_behalf_create.py, which is outside the grant; the order's premise that no test pins the on-behalf branch is false (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2; measured by S4).",
-    "IRPT_ANLREQ-D2-W309-S3: a user row whose email differs from the lookup key is kept as a plain refusal, which the order does not name either way (OBSERVATION, INERT).",
-    "IRPT_ANLREQ-D2-W309-S4: re-run after the data/ addition: AC1 passes; AC2 still fails at collection on the terraform gap; the continued run's 17 failures are the nine S2 cases (measured) and eight terraform census cases (OBSERVATION, INERT)."
+    "IRPT_ANLREQ-D2-W309-S1: the worktree sparse set lacked infra/aws/terraform/ and data/, so the _authz battery did not collect; resolved by the issuer's sparse-set change and AMENDMENT 1 (c909098088). AC2 now runs literally to 375 passed.",
+    "IRPT_ANLREQ-D2-W309-S2: the change flips five pinned functions in test_served_on_behalf_create.py (nine cases) which was outside the grant; resolved by AMENDMENT 1 (c909098088) granting the file, updated in 187c60592d.",
+    "IRPT_ANLREQ-D2-W309-S3: a user row whose email differs from the lookup key is kept as a plain refusal, which the order does not name either way (OBSERVATION, INERT). Not resolved by the amendment; the issuer or ~P2 may move it.",
+    "IRPT_ANLREQ-D2-W309-S4: re-run measurement after the data/ addition (OBSERVATION, INERT); its nine flipped cases are now updated, and its eight terraform census cases are cleared by the terraform sparse-set change."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "check_o1_bound.py",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~309/check_o1_bound.py",
-      "result": "rc=1 O1-BOUND-BAD before the edit; rc=0 O1-BOUND-OK functions=2 classes=1 files=2 at HEAD 5811e72ffc"
+      "result": "rc=1 O1-BOUND-BAD before the pinned-file edit; rc=0 O1-BOUND-OK functions=2 classes=1 files=3 at HEAD 187c60592d"
     },
     {
       "tool": "commit-gate",
-      "invocation": "bash .tools/commit-gate.sh <served.py | test_create_owner_on_behalf.py | check_o1_bound.py>",
-      "result": "pre-commit gate clean for 1 of 1 file(s) for each of the three files"
+      "invocation": "bash .tools/commit-gate.sh <served.py | test_create_owner_on_behalf.py | test_served_on_behalf_create.py | check_o1_bound.py>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each of the four files"
     },
     {
       "tool": "safe-commit",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~309 <0.9.0_WK_IRPT_ANLREQ~309@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "5811e72ffc committed LOCAL on wk-IRPT_ANLREQ-309; msg-verify MATCH; naming gate and to-pipeline gate printed no refusal"
+      "result": "5811e72ffc, 187c60592d committed LOCAL on wk-IRPT_ANLREQ-309; msg-verify MATCH on each"
     }
   ]
 }
