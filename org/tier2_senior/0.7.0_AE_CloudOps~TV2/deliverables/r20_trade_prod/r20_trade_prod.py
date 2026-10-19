@@ -40,11 +40,13 @@ FN = "opal-ticket-api"
 PROTECTED = {"TCK-20261017-da2a1987", "TCK-20261017-5af976ff", "TCK-20261019-c50b4967"}
 PORTAL = "C:/dev/ajb_workspace/portal"
 START_HEAD = os.environ["R20T_HEAD"]
-LIFE = 300  # 5 minutes; the pair allows at most 20; the journey takes about 1
+LIFE = 180  # 3 minutes; the pair allows at most 20; the journey takes about 1 (the rerun must end by 21:30Z)
 KEY_SECRET = "opal/auth/jwt-private-key"
 FILENAME = "tckt-r20-trade-synthetic.csv"
 CONTENT_TYPE = "text/csv"
 CONTENT = b"symbol,qty,px\r\nSYN1,100,12.34\r\n"
+ATTEMPT1_RESIDUE = {"key": "portal/cottonwood/state/ticket_attachments/trade-form/8b46f05593e643f0bb229023841d2a4a/tckt-r20-trade-synthetic.csv",
+                    "version_id": "U2wA9rMN_iqdUnci740XcsAfyvgsTK3h"}
 SENT_RE = re.compile(r"WE_[A-Z_]*SENT\b")
 
 OUT = Path(__file__).resolve().parent
@@ -476,28 +478,15 @@ def remove_all():
         ticket_deleted_at = iso()
         ticket_absent = item_of(TICKETS, {"ticket_id": {"S": tid}}) is None
         say("ticket %s deleted at %s; ConsistentRead ABSENT=%s" % (tid, ticket_deleted_at, ticket_absent))
-    object_deleted_at = object_absent = None
+    residue = None
     if key and key.startswith(PREFIX) and not key.endswith("/"):
         try:
-            present = object_state(key)
+            h = s3.head_object(Bucket=BUCKET, Key=key)
+            residue = {"key": key, "version_id": h.get("VersionId")}
+            say("RESIDUE (the CTO's ruling 11005: the object STAYS, no delete is attempted): s3://%s/%s version %s, %s bytes"
+                % (BUCKET, key, h.get("VersionId"), h.get("ContentLength")))
         except Exception as e:  # noqa: BLE001
-            present = "unknown"
-            say("object head failed without a 404 (%s): the object is NOT read absent" % type(e).__name__)
-        if present == "present":
-            ver = s3.get_bucket_versioning(Bucket=BUCKET).get("Status")
-            say("DELETE BY KEY: s3://%s/%s (printed before the delete); bucket versioning=%s" % (BUCKET, key, ver))
-            r = s3.delete_object(Bucket=BUCKET, Key=key)
-            say("delete-object answered: DeleteMarker=%s VersionId=%s" % (r.get("DeleteMarker"), r.get("VersionId")))
-        object_deleted_at = iso()
-        try:
-            object_absent = object_state(key) == "absent"
-        except Exception:  # noqa: BLE001
-            object_absent = False
-        say("object deleted at %s; head-object 404 ABSENT=%s" % (object_deleted_at, object_absent))
-    elif key:
-        say("REFUSED: the object key %r is not under the trade-form prefix" % key)
-    else:
-        object_absent = True  # no key was ever returned: no object was created by this run
+            say("residue head failed: %s" % type(e).__name__)
     try:
         ddb.delete_item(TableName=USERS, Key=key_of(FILER))
     except Exception as e:  # noqa: BLE001
@@ -505,7 +494,7 @@ def remove_all():
     row_deleted_at = iso()
     row_absent = item_of(USERS, key_of(FILER)) is None
     say("filer row deleted at %s; ConsistentRead ABSENT=%s" % (row_deleted_at, row_absent))
-    return row_deleted_at, row_absent, ticket_deleted_at, ticket_absent, (object_deleted_at, object_absent)
+    return row_deleted_at, row_absent, ticket_deleted_at, ticket_absent, residue
 
 
 def main():
@@ -537,17 +526,16 @@ def main():
                 pw.stop()
         except Exception:  # noqa: BLE001
             pass
-        row_deleted_at = row_absent = ticket_deleted_at = ticket_absent = obj = None
+        row_deleted_at = row_absent = ticket_deleted_at = ticket_absent = own_residue = None
         if state["written"]:
-            row_deleted_at, row_absent, ticket_deleted_at, ticket_absent, obj = remove_all()
-    object_deleted_at, object_absent = obj if obj else (None, None)
+            row_deleted_at, row_absent, ticket_deleted_at, ticket_absent, own_residue = remove_all()
     eng = [k for k in trace["request_census"] if "/api/general/trades" in k]
     TRACE.write_text(json.dumps({"stop": stop, "exp": iso(state["exp"]) if state["exp"] else None, "row_deleted_at": row_deleted_at,
                                  "row_absent_after": row_absent, "ticket_deleted_at": ticket_deleted_at, "ticket_absent_after": ticket_absent,
-                                 "object_deleted_at": object_deleted_at, "object_absent_after": object_absent, "start_head": START_HEAD,
+                                 "residue": own_residue, "start_head": START_HEAD,
                                  "prefix_count_before": state["prefix_before"], "ctx": ctx_out, "engine_requests_seen": eng, "trace": trace},
                                 indent=1, default=str) + "\n", encoding="utf-8")
-    if stop is None and row_absent and ticket_absent and object_absent and len(ctx_out["shots"]) == 2:
+    if stop is None and row_absent and ticket_absent and own_residue and len(ctx_out["shots"]) == 2:
         v = ctx_out["ticket_view"]
         RESULT.write_text(json.dumps({
             "claim": "measured", "browser_origin": ctx_out["origin"],
@@ -557,7 +545,7 @@ def main():
             "type_options": ctx_out["type_options"], "shots": ctx_out["shots"],
             "fire_windows_answer": (OUT / "fire_windows_answer.txt").read_text(encoding="utf-8"),
             "token_exp": iso(state["exp"]), "row_deleted_at": row_deleted_at, "ticket_deleted_at": ticket_deleted_at,
-            "object_deleted_at": object_deleted_at, "ticket_absent_after": True, "object_absent_after": True, "row_absent_after": True,
+            "residue": [ATTEMPT1_RESIDUE, own_residue], "object_left_present": True, "ticket_absent_after": True, "row_absent_after": True,
             "no_engine_call": not eng and not state.get("engine"), "token_printed": False,
             "http_statuses": {"upload_door": trace["statuses"].get("POST /api/scoped/tickets/attachment-upload"), "put": state["put_status"],
                               "ticket": trace["statuses"].get("POST /api/scoped/tickets")},
