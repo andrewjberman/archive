@@ -1,0 +1,112 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-k-3.cases-assets",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f59634ebe3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+  "vintage_commit": "ec6b4b428d8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-k-3.cases-assets.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~69",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/cases_assets.json",
+   "kind": "config_data",
+   "commit_or_etag": "70f8b7a5a6340aa9f772a644cd84b98fc5449907",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "LOCAL commit 70f8b7a5a6 on wk-NFRA_MCPINDEX-69; no deploy, no AWS or network call in this cell. The issuer runs the cases through the signed-in connector at the drain.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the DENOMINATOR line (11 tools in scope); the schema; case ids unique and starting K3-; every tool in scope has a case and no case names another tool; every case carries case_id, tool, question, args as an object, expect and source_hint -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k3.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/cases_assets.json; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR: 11 tool(s) in scope: channels opal-data-assets,schwab,blackdiamond; census GATEWAY_SURFACE_CENSUS_20261019_v2.json\n  ok   a cases file path was given and exists\n  ok   schema\n  ok   case ids are unique and start with K3-\n  ok   every tool in scope has at least one case\n  ok   no case names a tool outside the scope\n  ok   every case carries its fields (case_id, tool, question, args as an object, expect, source_hint)\nARMS: 6 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "6 of 6 arms ok (ARMS: 6 ok, 0 failed); 11 of 11 tools in scope have a case; 11 tools in scope",
+   "status": "PASS",
+   "expect": "RESULT: PASS\\s+exit=0",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the DENOMINATOR line; every case of a sender is preview and each sender has one; every reader has a case expecting an answer; questions are ASCII, at least four words and unique; every reader case that expects an answer, in a bucket, store, Schwab, Black Diamond, portal_index or mdpf channel, carries expect_source; no argument holds an email address or a credential; depends_on names an existing case -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k3.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/cases_assets.json; echo \"exit=$?\"",
+   "output_evidence": "DENOMINATOR: 11 tool(s) in scope; senders 0 (a real write_class, or opal_data_refresh_upload); 5 with write_class UNCLASSIFIED treated as readers on a grounded source reference\n  ok   a cases file path was given and exists\n  ok   every case of a sender is preview, and a sender has a preview case\n  FAIL every reader has a case that expects an answer (nonempty or empty), not only refusals  -- readers without: ['schwab_prepare_download']\n  ok   every case of a tool whose write_class is UNCLASSIFIED ends its source_hint with a [app/<file>.py:<line>] reference to the definition that shows it only reads\n  ok   every reader case that expects an answer, in a channel named below, carries a non-empty ASCII expect_source (blackdiamond, opal-data-assets, schwab)\n  ok   questions are ASCII, plain English of at least four words, and unique\n  ok   no case argument holds a credential-shaped value or an email address\n  ok   a case that needs an earlier answer says so with depends_on, naming an existing case id\nARMS: 7 ok, 1 failed\nRESULT: FAIL\nexit=1",
+   "denominator": "7 of 8 arms ok (ARMS: 7 ok, 1 failed); 1 reader without an answer case of 11 tools in scope (schwab_prepare_download)",
+   "status": "FAIL",
+   "status_reason": "the arm 'every reader has a case that expects an answer' FAILs on schwab_prepare_download: the checker classes an UNCLASSIFIED tool as a reader, and this tool's definition mints a ticket record (export.py:122), so the face's sender rule (preview only) and a nonempty or empty case cannot both hold. Surprise NFRA_MCPINDEX-Z-W69-S1. The order stays open.",
+   "expect": "RESULT: PASS\\s+exit=0",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The issuer's planted arms are the mutant control; this worker ran no planted mutant. The AC2 reader arm fired on the real case set.",
+   "expected": "every reader without an answer case, and every UNCLASSIFIED case without a read-only reference, reads FAIL in k3.AC2",
+   "observed": "k3.AC2 arm 'every reader has a case that expects an answer' FAILED on schwab_prepare_download (real data, not planted); the UNCLASSIFIED reference arm and the expect_source arm PASSED on the real cases",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two same-input runs of k3.AC1.sh and k3.AC2.sh on the committed cases file, outputs compared byte for byte (cmp)",
+   "observed": "k3.AC1 run 1 and run 2 identical (rc 0); k3.AC2 run 1 and run 2 identical (rc 1)",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the status flip of NFRA_MCPINDEX.TO-MX-k-3 to complete",
+   "reason": "AC2 is FAIL on schwab_prepare_download (surprise NFRA_MCPINDEX-Z-W69-S1); the order stays open and the flip is not made."
+  },
+  {
+   "item": "a nonempty or empty case for schwab_prepare_download",
+   "reason": "its answer path mints a ticket record in the gateway store; the face's sender rule forbids a writing case, and no read-only definition line exists to cite. Surprise NFRA_MCPINDEX-Z-W69-S1."
+  },
+  {
+   "item": "the live run of the 11 cases through the signed-in connector",
+   "reason": "outside this cell: no AWS or network call, no grant; the issuer runs the cases at the drain."
+  },
+  {
+   "item": "placeholders for the 49F account inputs (K3-01 last four digits; K3-02..K3-05 account_ref from K3-01)",
+   "reason": "the face forbids account numbers in args and offers no public example; the staff member supplies the value at run time."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W69-S1: schwab_prepare_download mints a download ticket record (export.py:122) but h_check.py and decomposition ruling 6 classify an UNCLASSIFIED tool as a reader, so k3.AC2 FAILs on its missing answer case; BLOCKING, ARMED (disarm_owner 2.0.0_SA_COO~MI).",
+  "NFRA_MCPINDEX-Z-W69-S2: census links schwab_dim_asset to schwab_describe_dataset, but describe_dataset reads no bucket or prefix (integration.py:504-548); OBSERVATION.",
+  "NFRA_MCPINDEX-Z-W69-S3: schwab_get_access has no linked row, yet it reads the completion prefixes and every granted master and dataset through the catalog (integration.py:423-455); OBSERVATION.",
+  "NFRA_MCPINDEX-Z-W69-S4: census links only schwab_dim_asset to schwab_list_files, but the tool reads whichever dataset its argument names (integration.py:460-499); OBSERVATION.",
+  "NFRA_MCPINDEX-Z-W69-S5: census links opal_data_assets_silver_49f_dim_advisor_fee_role to client_get_fees, but the 49F fee branch reads only silver/fees (client_adapter_bd49f.py:702-712); OBSERVATION.",
+  "NFRA_MCPINDEX-Z-W69-S6: the schwab_dim_* and blackdiamond_fees catalog rows carry a bucket and no prefix or key, so expect_source comes from the code's constants (integration.py:69, contract data_prefixes); OBSERVATION."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/logs/session.log",
+ "compiler_tools": [
+  {
+   "tool": "k3.AC1.sh (h_check.py k3.AC1)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k3.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/cases_assets.json",
+   "result": "RESULT: PASS (rc 0); 6 of 6 arms ok; 11 tools in scope"
+  },
+  {
+   "tool": "k3.AC2.sh (h_check.py k3.AC2)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k3.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~69/cases_assets.json",
+   "result": "RESULT: FAIL (rc 1); 7 of 8 arms ok; readers without answer case [schwab_prepare_download]"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~69 <0.9.0_WK_NFRA_MCPINDEX~69@opal.agent>\" -F .scratch/msg_work_k3.txt -- cases_assets.json INVESTIGATION_v1.md",
+   "result": "commit 70f8b7a5a6 rc 0; surprise-row-gate: 6 new rows of 452 OK; commit-gate checked 0 of 2 files (json and md are outside its suffixes)"
+  }
+ ]
+}

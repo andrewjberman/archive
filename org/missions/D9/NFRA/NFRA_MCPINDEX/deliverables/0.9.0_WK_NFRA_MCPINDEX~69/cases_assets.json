@@ -1,0 +1,161 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K3-01",
+   "tool": "client_resolve_account",
+   "question": "Which 49 Financial accounts match the last four digits I type",
+   "args": {
+    "firm": "49financial",
+    "account_last4": "<last four digits of a 49 Financial Black Diamond account, typed by the staff member>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the candidate count equals the dim_account_xref rows for the same last four digits [app/client_adapter_bd49f.py:468]",
+   "expect_source": "blackdiamond/49f/silver/dim_account_xref/"
+  },
+  {
+   "case_id": "K3-02",
+   "tool": "client_get_holdings",
+   "question": "What does this 49 Financial Black Diamond account hold today",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the position count equals the unrealized lot rows of the newest opal-data-bd partition",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/unrealized/"
+  },
+  {
+   "case_id": "K3-03",
+   "tool": "client_get_transactions",
+   "question": "What trades did this 49 Financial account make in early October",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>",
+    "from_date": "2026-10-01",
+    "to_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the transaction lines of the same window in the opal-data-bd silver partitions",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/transactions/"
+  },
+  {
+   "case_id": "K3-04",
+   "tool": "client_get_allocation",
+   "question": "What is the current allocation of this 49 Financial account",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the weight rows equal the newest opal-data-bd allocations partition for the account",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/allocations/"
+  },
+  {
+   "case_id": "K3-05",
+   "tool": "client_get_fees",
+   "question": "What fees were charged to this 49 Financial account in early October",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>",
+    "from_date": "2026-10-01",
+    "to_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the fee rows equal the non-null fee amount lines of the same window in the opal-data-bd fees partitions",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/fees/"
+  },
+  {
+   "case_id": "K3-06",
+   "tool": "blackdiamond_list_fees",
+   "question": "What fees were charged on 49 Financial Black Diamond trades in early October",
+   "args": {
+    "scope": "49financial",
+    "date_from": "2026-10-01",
+    "date_to": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the fee lines of the same trade dates in the silver/fees partition objects",
+   "expect_source": "opal-data-bd/silver/fees"
+  },
+  {
+   "case_id": "K3-07",
+   "tool": "schwab_get_access",
+   "question": "Which Schwab dates can I download right now",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the available dates equal the complete markers under the completion prefix [app/integrations/schwab/integration.py:423]",
+   "expect_source": "schwab/08242234/meta/complete/"
+  },
+  {
+   "case_id": "K3-08",
+   "tool": "schwab_list_files",
+   "question": "Which Schwab security files exist for early October",
+   "args": {
+    "master": "08242234",
+    "dataset": "dim_asset",
+    "start_date": "2026-10-01",
+    "end_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the file count equals the dim_asset objects listed under that prefix for the same window [app/integrations/schwab/integration.py:460]",
+   "expect_source": "schwab/08242234/silver/dim_asset/"
+  },
+  {
+   "case_id": "K3-09",
+   "tool": "schwab_describe_dataset",
+   "question": "What fields and units does the Schwab position dataset have",
+   "args": {
+    "master": "08242234",
+    "dataset": "dim_position"
+   },
+   "expect": "nonempty",
+   "source_hint": "the field count equals the dim_position fields granted in datasets.json [app/integrations/schwab/integration.py:504]",
+   "expect_source": "data/assets/scripts/silver/schwab_schemas.py"
+  },
+  {
+   "case_id": "K3-10",
+   "tool": "schwab_query",
+   "question": "Show three Schwab positions held on a business day",
+   "args": {
+    "query": {
+     "master": "08242234",
+     "dataset": "dim_position",
+     "business_date": "2026-10-16",
+     "mode": "rows",
+     "columns": [
+      "cusip",
+      "ticker_symbol",
+      "quantity_settled"
+     ],
+     "page_size": 3
+    }
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the dim_position rows of that business date in the pinned object [app/integrations/schwab/integration.py:596]",
+   "expect_source": "schwab/08242234/silver/dim_position/"
+  },
+  {
+   "case_id": "K3-11",
+   "tool": "schwab_prepare_download",
+   "question": "Prepare a filtered CSV download of one Schwab listing",
+   "args": {
+    "catalog_id": "not-a-file-id"
+   },
+   "expect": "preview",
+   "source_hint": "refused by the catalog_id format check before any ticket is written; the ticket write it would make is at [app/integrations/schwab/export.py:122]"
+  }
+ ]
+}
