@@ -65,7 +65,7 @@ arev, _ = grant("andrew")
 andok = arev is not None and (mg2.get("andrew") or {}).get("grant_revision") is not None and arev == int(mg2["andrew"]["grant_revision"])
 tools = ("schwab_get_access", "schwab_list_files", "schwab_describe_dataset", "schwab_query")
 p = (load(sys.argv[3]).get("alyssa") or {})
-dec = all((p.get("admit") or {}).get(t) is True for t in tools) and (p.get("refuse") or {}).get("schwab_prepare_download") is True
+dec = all((p.get("admit") or {}).get(t) is True for t in tools) and (p.get("refuse") or {}).get("schwab_prepare_download") is True and p.get("tree") == "deployed" and len(str(p.get("code_sha") or "")) >= 10
 Y = lambda x: "yes" if x else "no"
 print("alyssa: active %s; newer grant revision %s; masters 3 %s; new master count == current %s; other masters' accounts unchanged %s; rest of scope unchanged %s" % (Y("alyssa" in prof), Y(newer), Y(three), Y(newok), Y(oldok), Y(restok)))
 print("andrew: grant revision unchanged %s" % Y(andok))
