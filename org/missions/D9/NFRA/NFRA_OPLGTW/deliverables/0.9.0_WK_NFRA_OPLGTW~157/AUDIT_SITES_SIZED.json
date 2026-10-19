@@ -1,0 +1,1313 @@
+{
+ "body": {
+  "base_sha": "581ee61977256c4daf2d71189997f9b7f5335727",
+  "base_note": "the call sites are read at this sha (git grep and git archive), never at trunk",
+  "sites": [
+   {
+    "file": "audit.py",
+    "line": 40,
+    "call": "def _emit(record: dict) -> None:",
+    "on_event_loop": "yes",
+    "loop_reason": "audit.py:40 _emit is called only by the log_* writers (audit.py:163, 200, 214, 240), which run on the loop via call_tool (tools.py:86), login (server.py:614), GuardMiddleware (server.py:181) and otp_fetch (server.py:861); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 68646,
+    "calls_7d_source": "per_tool_counts: sum of scaled_7d over all 69 names (every record passes audit._emit once, one record per object, k=6)"
+   },
+   {
+    "file": "audit.py",
+    "line": 163,
+    "call": "_emit(rec)",
+    "on_event_loop": "yes",
+    "loop_reason": "audit.py:163 called directly from async call_tool (tools.py:86); line 84 is the only to_thread and it wraps a different call",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 62016,
+    "calls_7d_source": "per_tool_counts: sum of scaled_7d over every name except gw_cred_observe (log_call writes a tool key; log_credential writes the gw_cred_observe event); gw_login and gw_ratelimit were not observed in the sample, so they add nothing that can be read"
+   },
+   {
+    "file": "audit.py",
+    "line": 200,
+    "call": "_emit(rec)",
+    "on_event_loop": "yes",
+    "loop_reason": "audit.py:200 called directly from async login (server.py:614-627) and async callback (server.py:676-703); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "audit.log_login writes the gw_login event; gw_login was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "audit.py",
+    "line": 214,
+    "call": "_emit({",
+    "on_event_loop": "yes",
+    "loop_reason": "audit.py:214 called from ratelimit.record_identity_refusal (ratelimit.py:218-241), which async GuardMiddleware.__call__ calls directly (server.py:181)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "audit.log_ratelimit writes the gw_ratelimit event; gw_ratelimit was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "audit.py",
+    "line": 240,
+    "call": "_emit({",
+    "on_event_loop": "yes",
+    "loop_reason": "audit.py:240 called directly from async otp_fetch, otp_health, otp_token (server.py:861, 903, 924) and async ms_token (server.py:1022); also from sync _ms_guard (server.py:948) under async ms_sites",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); log_credential is the only writer of this event"
+   },
+   {
+    "file": "harvest_read.py",
+    "line": 58,
+    "call": "audit.log_call(email, tool, {}, outcome, \"ref=%s verdict=%s bytes=%d\" % (ref, verdict, nbytes),",
+    "on_event_loop": "yes",
+    "loop_reason": "harvest_read.py:58 is in _audit (harvest_read.py:54, a sync def) and runs on the loop for the sync @mcp.tool wrappers that reach it: harvest_list (tools.py:1307) and harvest_read (tools.py:1316) call _run or the module directly, and FastMCP runs sync tool bodies on the loop (mcp 1.28.0 rule). The other _audit callers (etfs_*, harvest_typed, typed_scope, harvest_published) sit under no to_thread at base 581ee61977.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "_audit (harvest_read.py:54) is the writer for harvest_list, harvest_read, harvest_published, harvest_typed, typed_scope and the etfs_* callers, each passing its own tool name; the full caller set is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 151,
+    "call": "audit.log_call(email, tool, {}, \"denied\", _ent[\"error\"], tier=tier.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:151 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:151 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 167,
+    "call": "audit.log_call(email, tool, args, \"denied\", _scope_reason, tier=tier.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:167 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:167 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 174,
+    "call": "audit.log_call(email, tool, args, \"denied\", gd.reason, tier=tier.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:174 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:174 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 180,
+    "call": "audit.log_call(email, tool, args, \"error\",",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:180 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:180 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 186,
+    "call": "audit.log_call(email, tool, args, \"ok\", _person_detail, tier=_tier)",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:186 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:186 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "integrations/base.py",
+    "line": 189,
+    "call": "audit.log_call(email, tool, args, \"error\", \" \".join(x for x in (_person_detail, str(e)[:500]) if x), tier=_tier)",
+    "on_event_loop": "yes",
+    "loop_reason": "integrations/base.py:189 sync run_integration_tool is called from sync _admit (integrations/schwab/integration.py:1115-1117), which async _call calls directly (integration.py:1140-1141); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "base.py tool name is an argument from the integration dispatch; the set of integration tools reaching integrations/base.py:189 is not enumerated here, so no sum is written"
+   },
+   {
+    "file": "mail_route.py",
+    "line": 189,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"hx_msgs\", {}, outcome,",
+    "on_event_loop": "yes",
+    "loop_reason": "mail_route.py:189 sync _audit is called directly from async list_endpoint (mail_route.py:385-432) and async _handle (mail_route.py:445-480); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 7776,
+    "calls_7d_source": "per_tool_counts row hx_msgs (observed 1296 in 11441 sampled bodies, k=6, scaled = observed x 6); mail_route.py:189 is one outcome branch of the tool, so this is the tool total and an upper bound for the branch"
+   },
+   {
+    "file": "ms_ingest.py",
+    "line": 213,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"ms_sites\", {\"query\": query}, \"ok\")",
+    "on_event_loop": "yes",
+    "loop_reason": "ms_ingest.py:213 sync ms_sites runs inside a lambda passed to sync _ms_run (server.py:952-973), which async ms_sites calls directly",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "ms_sites not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "ms_ingest.py",
+    "line": 224,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"ms_site_children\",",
+    "on_event_loop": "yes",
+    "loop_reason": "ms_ingest.py:224 sync ms_site_children runs inside a lambda passed to sync _ms_call (server.py:960-985), which async ms_site_children calls directly",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 7080,
+    "calls_7d_source": "per_tool_counts row ms_site_children (observed 1180 in 11441 sampled bodies, k=6, scaled = observed x 6)"
+   },
+   {
+    "file": "ms_ingest.py",
+    "line": 236,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"ms_onedrive_children\",",
+    "on_event_loop": "yes",
+    "loop_reason": "ms_ingest.py:236 sync ms_onedrive_children runs inside a lambda passed to sync _ms_run (server.py:952-990), which async ms_onedrive_children calls directly",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "ms_onedrive_children not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "ms_ingest.py",
+    "line": 245,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"ms_search\", {\"query\": query}, \"ok\")",
+    "on_event_loop": "yes",
+    "loop_reason": "ms_ingest.py:245 sync ms_search runs inside a lambda passed to sync _ms_run (server.py:952-994), which async ms_search calls directly",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "ms_search not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "otp.py",
+    "line": 193,
+    "call": "audit.log_call(get_config().OTP_MAILBOX, \"otp_fetch\", {\"sender\": sender, \"found\": found}, outcome)",
+    "on_event_loop": "yes",
+    "loop_reason": "otp.py:193 sync audit_fetch is called directly from async otp_fetch (server.py:888); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 12,
+    "calls_7d_source": "per_tool_counts row otp_fetch (observed 2 in 11441 sampled bodies, k=6, scaled = observed x 6)"
+   },
+   {
+    "file": "probe_listener.py",
+    "line": 260,
+    "call": "audit.log_call(PROBE_EMAIL, tool, {}, outcome, detail, principal=PROBE_PRINCIPAL.key)",
+    "on_event_loop": "no",
+    "loop_reason": "probe_listener.py:260 _audit runs only through run_in_threadpool (probe_listener.py:266, 321, 323); the file's own comment at line 264 says the write is in a worker thread",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "probe_listener.py:260 passes a variable tool name (tool) from the probe listener; the probe names are not literal at this site, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 127,
+    "call": "audit.log_call(email, \"query_v0\", {\"verdict\": \"ENTITLEMENT-DENY\", \"reason\": body[\"error\"][:200]},",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:127 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 133,
+    "call": "audit.log_call(email, \"query_v0\", {\"verdict\": \"RATE-LIMITED\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:133 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 152,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"DENY\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:152 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 162,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"OVER-CAP\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:162 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 167,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"TIMEOUT\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:167 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 172,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"FETCH-ERROR\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:172 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 180,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"NOT-JSON\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:180 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 184,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"OVER-ROWS\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:184 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "query_v0.py",
+    "line": 190,
+    "call": "audit.log_call(email, \"query_v0\", {\"key\": key, \"firm\": pfirm, \"verdict\": \"SERVE\",",
+    "on_event_loop": "yes",
+    "loop_reason": "query_v0.py:190 enclosing function handle is async def and the call is not thread-wrapped (read at query_v0.py:127-190)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "query_v0 not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "revocation.py",
+    "line": 46,
+    "call": "audit.log_call(\"\", \"_revocation_control\", {}, \"alarm\", detail, tier=\"\")",
+    "on_event_loop": "yes",
+    "loop_reason": "revocation.py:46 _alarm <- _load_lines (revocation.py:51-61) <- is_revoked and token_revoked (revocation.py:86-129) <- oauth_as.validate_access_token (oauth_as.py:373) <- sync _bearer_auth (server.py:135-143) called directly from async GuardMiddleware.__call__ (server.py:172)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "_revocation_control not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 185,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"day\": day, \"verdict\": \"MISSING\", **extra}, \"error\", \"nosuchkey\")",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:185 enclosing function _serve_day is async def and the call is not thread-wrapped (read at rivalfunds_view.py:174-193)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 190,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"day\": day, \"verdict\": \"S3-ERROR\", **extra}, \"error\", name)",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:190 enclosing function _serve_day is async def and the call is not thread-wrapped (read at rivalfunds_view.py:174-193)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 193,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"day\": day, **extra}, \"ok\", bytes_returned=len(resp.body))",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:193 enclosing function _serve_day is async def and the call is not thread-wrapped (read at rivalfunds_view.py:174-193)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 205,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"verdict\": \"S3-ERROR\", \"route\": \"page\"}, \"error\", type(e).__name__)",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:205 enclosing function rivalfunds_page is async def and the call is not thread-wrapped (read at rivalfunds_view.py:205)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 253,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {**args, \"verdict\": \"MISSING\"}, \"error\", \"nosuchkey\")",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:253 enclosing function rivalfunds_chart is async def and the call is not thread-wrapped (read at rivalfunds_view.py:253-257)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 255,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {**args, \"verdict\": \"S3-ERROR\"}, \"error\", name)",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:255 enclosing function rivalfunds_chart is async def and the call is not thread-wrapped (read at rivalfunds_view.py:253-257)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 257,
+    "call": "audit.log_call(email, \"rivalfunds_view\", args, \"ok\", bytes_returned=len(body))",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:257 enclosing function rivalfunds_chart is async def and the call is not thread-wrapped (read at rivalfunds_view.py:253-257)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 268,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"verdict\": \"S3-ERROR\", \"route\": \"archive\"}, \"error\", type(e).__name__)",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:268 enclosing function rivalfunds_archive is async def and the call is not thread-wrapped (read at rivalfunds_view.py:268-277)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "rivalfunds_view.py",
+    "line": 277,
+    "call": "audit.log_call(email, \"rivalfunds_view\", {\"route\": \"archive\", \"days\": len(days)}, \"ok\", bytes_returned=len(resp.body))",
+    "on_event_loop": "yes",
+    "loop_reason": "rivalfunds_view.py:277 enclosing function rivalfunds_archive is async def and the call is not thread-wrapped (read at rivalfunds_view.py:268-277)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 60,
+    "calls_7d_source": "per_tool_counts row rivalfunds_view (observed 10 in 11441 sampled bodies, k=6, scaled = observed x 6); one of several branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "server.py",
+    "line": 226,
+    "call": "audit.log_login(\"refused\", \"deny_list\" if denial == 403 else \"deny_list_unreadable\",",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:226 enclosing function GuardMiddleware.__call__ is async def and the call is not thread-wrapped (read at server.py:166-239)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 234,
+    "call": "audit.log_login(\"refused\", \"no_verified_identity\")",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:234 enclosing function GuardMiddleware.__call__ is async def and the call is not thread-wrapped (read at server.py:166-239)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 239,
+    "call": "audit.log_login(\"refused\", \"blocklist\", email=email)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:239 enclosing function GuardMiddleware.__call__ is async def and the call is not thread-wrapped (read at server.py:166-239)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 614,
+    "call": "audit.log_login(\"refused\", decision.reason, email=email, tier=decision.tier,",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:614 enclosing function login is async def and the call is not thread-wrapped (read at server.py:604-627)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 622,
+    "call": "audit.log_login(\"refused\", \"upstream_unavailable\", email=email, tier=decision.tier)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:622 enclosing function login is async def and the call is not thread-wrapped (read at server.py:604-627)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 625,
+    "call": "audit.log_login(\"refused\", \"internal_error\", email=email, tier=decision.tier)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:625 enclosing function login is async def and the call is not thread-wrapped (read at server.py:604-627)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 627,
+    "call": "audit.log_login(\"admitted\", decision.reason, email=email, tier=decision.tier,",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:627 enclosing function login is async def and the call is not thread-wrapped (read at server.py:604-627)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 676,
+    "call": "audit.log_login(\"refused\", \"invalid_state\")",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:676 enclosing function callback is async def and the call is not thread-wrapped (read at server.py:676-703)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 687,
+    "call": "audit.log_login(\"refused\", \"deny_list\" if denial == 403 else \"deny_list_unreadable\", email=email)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:687 enclosing function callback is async def and the call is not thread-wrapped (read at server.py:676-703)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 696,
+    "call": "audit.log_login(\"refused\", \"deny_list\" if e.status == 403 else \"deny_list_unreadable\", email=email)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:696 enclosing function callback is async def and the call is not thread-wrapped (read at server.py:676-703)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 700,
+    "call": "audit.log_login(\"refused\", \"upstream_identity_refused\", email=email)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:700 enclosing function callback is async def and the call is not thread-wrapped (read at server.py:676-703)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 703,
+    "call": "audit.log_login(\"consent\", \"consent_completed\", email=principal.email or email, principal=principal.key)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:703 enclosing function callback is async def and the call is not thread-wrapped (read at server.py:676-703)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "login site: audit.log_login writes the gw_login event, which was not observed in the 11441 sampled bodies (k=6), so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 769,
+    "call": "audit.log_call(principal.email, audit_tool, {}, \"denied\", body[\"error\"][:200])",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:769 sync _entitlement_block is called directly from async teams_poll (server.py:798); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "server.py:769 passes audit_tool, a variable naming the denied tool; not a literal at this site"
+   },
+   {
+    "file": "server.py",
+    "line": 810,
+    "call": "audit.log_call(email, \"teams_poll\", {\"since\": since}, \"error\", str(ge))",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:810 enclosing function teams_poll is async def and the call is not thread-wrapped (read at server.py:808-814)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "teams_poll not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 814,
+    "call": "audit.log_call(email, \"teams_poll\", {\"since\": since}, \"ok\")",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:814 enclosing function teams_poll is async def and the call is not thread-wrapped (read at server.py:808-814)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "teams_poll not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "server.py",
+    "line": 861,
+    "call": "audit.log_credential(\"/otp/fetch\", cred_class, caller)  # FWD-12 migration observation",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:861 enclosing function otp_fetch is async def and the call is not thread-wrapped (read at server.py:861)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); event-level total across all five log_credential callers in server.py, so an upper bound for this one route"
+   },
+   {
+    "file": "server.py",
+    "line": 903,
+    "call": "audit.log_credential(\"/otp/health\", cred_class, caller)  # FWD-12 migration observation",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:903 enclosing function otp_health is async def and the call is not thread-wrapped (read at server.py:903)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); event-level total across all five log_credential callers in server.py, so an upper bound for this one route"
+   },
+   {
+    "file": "server.py",
+    "line": 924,
+    "call": "audit.log_credential(\"/otp/token\", \"exchange\", label)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:924 enclosing function otp_token is async def and the call is not thread-wrapped (read at server.py:924)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); event-level total across all five log_credential callers in server.py, so an upper bound for this one route"
+   },
+   {
+    "file": "server.py",
+    "line": 948,
+    "call": "audit.log_credential(request.url.path, cred_class, caller)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:948 sync _ms_guard runs under sync _ms_run (server.py:954) which async ms_sites calls directly (server.py:973)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); event-level total across all five log_credential callers in server.py, so an upper bound for this one route"
+   },
+   {
+    "file": "server.py",
+    "line": 1022,
+    "call": "audit.log_credential(\"/ms/token\", \"exchange\", label)",
+    "on_event_loop": "yes",
+    "loop_reason": "server.py:1022 enclosing function ms_token is async def and the call is not thread-wrapped (read at server.py:1022)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6630,
+    "calls_7d_source": "per_tool_counts event row gw_cred_observe (observed 1105 in 11441 sampled bodies, k=6, scaled = observed x 6); event-level total across all five log_credential callers in server.py, so an upper bound for this one route"
+   },
+   {
+    "file": "sprint_view.py",
+    "line": 183,
+    "call": "audit.log_call(email, \"sprint_view\", {\"verdict\": \"DENIED\"}, \"denied\", \"roster\")",
+    "on_event_loop": "yes",
+    "loop_reason": "sprint_view.py:183 enclosing function sprint_page is async def and the call is not thread-wrapped (read at sprint_view.py:183-212)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6,
+    "calls_7d_source": "per_tool_counts row sprint_view (observed 1 in 11441 sampled bodies, k=6, scaled = observed x 6); a single observation scaled; read as a sampling estimate with no interval"
+   },
+   {
+    "file": "sprint_view.py",
+    "line": 205,
+    "call": "audit.log_call(email, \"sprint_view\", {\"day\": day, \"variant\": variant, \"verdict\": \"MISSING\"}, \"error\", \"nosuchkey\")",
+    "on_event_loop": "yes",
+    "loop_reason": "sprint_view.py:205 enclosing function sprint_page is async def and the call is not thread-wrapped (read at sprint_view.py:183-212)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6,
+    "calls_7d_source": "per_tool_counts row sprint_view (observed 1 in 11441 sampled bodies, k=6, scaled = observed x 6); a single observation scaled; read as a sampling estimate with no interval"
+   },
+   {
+    "file": "sprint_view.py",
+    "line": 209,
+    "call": "audit.log_call(email, \"sprint_view\", {\"day\": day, \"variant\": variant, \"verdict\": \"S3-ERROR\"}, \"error\", name)",
+    "on_event_loop": "yes",
+    "loop_reason": "sprint_view.py:209 enclosing function sprint_page is async def and the call is not thread-wrapped (read at sprint_view.py:183-212)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6,
+    "calls_7d_source": "per_tool_counts row sprint_view (observed 1 in 11441 sampled bodies, k=6, scaled = observed x 6); a single observation scaled; read as a sampling estimate with no interval"
+   },
+   {
+    "file": "sprint_view.py",
+    "line": 212,
+    "call": "audit.log_call(email, \"sprint_view\", {\"day\": day, \"variant\": variant}, \"ok\")",
+    "on_event_loop": "yes",
+    "loop_reason": "sprint_view.py:212 enclosing function sprint_page is async def and the call is not thread-wrapped (read at sprint_view.py:183-212)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 6,
+    "calls_7d_source": "per_tool_counts row sprint_view (observed 1 in 11441 sampled bodies, k=6, scaled = observed x 6); a single observation scaled; read as a sampling estimate with no interval"
+   },
+   {
+    "file": "taxsma_workbook.py",
+    "line": 492,
+    "call": "audit._emit({",
+    "on_event_loop": "yes",
+    "loop_reason": "taxsma_workbook.py:492 sync _audit is called directly from async endpoint (taxsma_workbook.py:520-536); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "taxsma_workbook.py:492 writes a record with neither a tool nor an event key; no record without either key was observed in the 11441 sampled bodies (k=6), and no other direct audit._emit writer exists in the base app tree"
+   },
+   {
+    "file": "teams_route.py",
+    "line": 172,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"hx_teams\", {}, outcome,",
+    "on_event_loop": "yes",
+    "loop_reason": "teams_route.py:172 sync _audit is called directly from async _handle (teams_route.py:338-400); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 25410,
+    "calls_7d_source": "per_tool_counts row hx_teams (observed 4235 in 11441 sampled bodies, k=6, scaled = observed x 6)"
+   },
+   {
+    "file": "tools.py",
+    "line": 86,
+    "call": "audit.log_call(get_current_email(), name, {}, \"denied\", denial[\"error\"])",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:86 enclosing function _PolicyGuardedMCP.call_tool is async def and the call is not thread-wrapped (read at tools.py:82-86)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:86 names the dispatched tool of any call the data_entitlement denial refuses; the denied-call set needs an outcome split this count did not take, so no integer is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 139,
+    "call": "audit.log_call(\"\", tool, args, \"denied\", \"no verified identity established\", tier=\"\")",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:139 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:139 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 148,
+    "call": "audit.log_call(email, tool, {}, \"denied\", _ent[\"error\"], tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:148 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:148 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 161,
+    "call": "audit.log_call(email, tool, args, \"denied\", _scope_reason, tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:161 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:161 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 167,
+    "call": "audit.log_call(email, tool, args, \"denied\", gd.reason, tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:167 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:167 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 176,
+    "call": "audit.log_call(email, tool, args, \"denied\", reason, tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:176 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:176 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 181,
+    "call": "audit.log_call(email, tool, args, \"confirm_required\", _decision[\"summary\"], tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:181 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:181 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 186,
+    "call": "audit.log_call(email, tool, args, \"needs_login\", tier=_tier_val.value)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:186 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:186 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 196,
+    "call": "audit.log_call(email, tool, args, \"ok\", \" \".join(x for x in (audit_detail, _person_detail) if x),",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:196 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:196 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 200,
+    "call": "audit.log_call(email, tool, args, \"error\",",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:200 sits in _run (tools.py:127, a sync def). The sync @mcp.tool bodies that call _run run on the event loop (mcp 1.28.0 rule, see mcp_dispatch), so this line does too. Exception read at base 581ee61977: client_get_transactions (tools.py:1599) and client_get_fees (tools.py:1612) run _run in a worker thread through anyio.to_thread.run_sync, so on those two calls only the line is off the loop.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:200 is in _run (tools.py:127), the shared dispatch chokepoint: the tool name is its argument, so the reaching set is every _run tool; the count was not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 1128,
+    "call": "audit.log_call(email, \"opal_users_gate\", dict(counts, surface=surface, code=code), outcome, code)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:1128 sync _gate_audit is called from sync poll_addressed_impl (tools.py:1865), which async teams_poll calls directly (server.py:808); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "opal_users_gate not observed in the 11441 sampled bodies (every 6-th of 68643 keys); a zero at this sampling rate is not a count, and a name with only a few records in the window can be missed, so no integer is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 1192,
+    "call": "audit.log_call(email, tool, args, \"denied\", reason)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:1192 sits in _opal_users_send_gate (sync def at tools.py:1165), reached from send_chat_message (tools.py:1749, sync @mcp.tool) and send_channel_message (tools.py:1803, sync @mcp.tool). FastMCP runs sync tool bodies on the loop (mcp 1.28.0 rule); neither send path is wrapped in to_thread at base 581ee61977.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:1192 is in _opal_users_send_gate or _reply_unbound, reached by send_chat_message (observed 4, scaled 24) and send_channel_message (not observed in the sample); the denial branch is not split by outcome, so no sum is written"
+   },
+   {
+    "file": "tools.py",
+    "line": 1743,
+    "call": "audit.log_call(email, tool, args, \"denied\", reason)",
+    "on_event_loop": "yes",
+    "loop_reason": "tools.py:1743 sits in _reply_unbound (sync def at tools.py:1734), reached from send_chat_message (tools.py:1749, sync @mcp.tool) and send_channel_message (tools.py:1803, sync @mcp.tool). FastMCP runs sync tool bodies on the loop (mcp 1.28.0 rule); neither send path is wrapped in to_thread at base 581ee61977.",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": "ABSENT",
+    "absent_reason": "tools.py:1743 is in _opal_users_send_gate or _reply_unbound, reached by send_chat_message (observed 4, scaled 24) and send_channel_message (not observed in the sample); the denial branch is not split by outcome, so no sum is written"
+   },
+   {
+    "file": "transcript_route.py",
+    "line": 136,
+    "call": "audit.log_call(get_config().MS_INGEST_IDENTITY, \"hx_transcripts\", {}, outcome,",
+    "on_event_loop": "yes",
+    "loop_reason": "transcript_route.py:136 sync _audit is called directly from async _handle (transcript_route.py:183-215); no thread hop",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 336,
+    "calls_7d_source": "per_tool_counts row hx_transcripts (observed 56 in 11441 sampled bodies, k=6, scaled = observed x 6)"
+   },
+   {
+    "file": "yearinreview_view.py",
+    "line": 88,
+    "call": "audit.log_call(email, \"yearinreview_view\", {\"verdict\": \"DENIED\"}, \"denied\", \"roster\")",
+    "on_event_loop": "yes",
+    "loop_reason": "yearinreview_view.py:88 enclosing function yearinreview_page is async def and the call is not thread-wrapped (read at yearinreview_view.py:88-95)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 18,
+    "calls_7d_source": "per_tool_counts row yearinreview_view (observed 3 in 11441 sampled bodies, k=6, scaled = observed x 6); one of three branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "yearinreview_view.py",
+    "line": 93,
+    "call": "audit.log_call(email, \"yearinreview_view\", {\"verdict\": \"PAGE-ERROR\"}, \"error\", type(e).__name__)",
+    "on_event_loop": "yes",
+    "loop_reason": "yearinreview_view.py:93 enclosing function yearinreview_page is async def and the call is not thread-wrapped (read at yearinreview_view.py:88-95)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 18,
+    "calls_7d_source": "per_tool_counts row yearinreview_view (observed 3 in 11441 sampled bodies, k=6, scaled = observed x 6); one of three branches of the tool; this is the tool total, an upper bound for the branch"
+   },
+   {
+    "file": "yearinreview_view.py",
+    "line": 95,
+    "call": "audit.log_call(email, \"yearinreview_view\", {}, \"ok\")",
+    "on_event_loop": "yes",
+    "loop_reason": "yearinreview_view.py:95 enclosing function yearinreview_page is async def and the call is not thread-wrapped (read at yearinreview_view.py:88-95)",
+    "timeout_s": null,
+    "timeout_reason": "audit._emit builds boto3.client('s3', region_name=...) at audit.py:55 and calls put_object at audit.py:57-62 with no botocore Config, so no connect_timeout, read_timeout or retries is set in audit.py; botocore defaults apply (no number read from this code)",
+    "calls_7d": 18,
+    "calls_7d_source": "per_tool_counts row yearinreview_view (observed 3 in 11441 sampled bodies, k=6, scaled = observed x 6); one of three branches of the tool; this is the tool total, an upper bound for the branch"
+   }
+  ],
+  "mcp_dispatch": {
+   "package": "mcp",
+   "version": "1.28.0",
+   "source": "python -m pip download mcp==1.28.0 --no-deps -d <scratch>/mcp (Windows Python 3.14); the wheel mcp-1.28.0-py3-none-any.whl was unzipped in scratch and the FastMCP files read there; nothing was installed into the repository",
+   "rule": "In mcp 1.28.0 FastMCP, Tool.run awaits FuncMetadata.call_fn_with_arg_validation, which for a plain def (is_async False) calls fn(**arguments) directly inside the coroutine with no thread hop, so a sync @mcp.tool body runs on the event loop thread and blocks it for the call. The FastMCP tool path has no anyio.to_thread or run_in_executor (tool_manager.py, server.py, base.py and func_metadata.py were each read for one). Only an async def tool body is awaited on the loop; a sync one is not.",
+   "evidence": [
+    "mcp/server/fastmcp/tools/base.py:101-106 (Tool.run awaits call_fn_with_arg_validation, passing self.is_async)",
+    "mcp/server/fastmcp/utilities/func_metadata.py:93-96 (if fn_is_async: await fn(...); else: return fn(**...) with no thread)",
+    "mcp/server/fastmcp/tools/tool_manager.py:93 (return await tool.run(...))",
+    "mcp/server/fastmcp/server.py:343-346 (async call_tool awaits the tool manager; no thread)",
+    "mcp/server/fastmcp/tools/base.py:120-126 (_is_async_callable decides is_async from inspect.iscoroutinefunction)"
+   ]
+  },
+  "lake": {
+   "days": 7,
+   "bucket": "opal-mcp-audit",
+   "window_utc": [
+    "2026-10-13",
+    "2026-10-14",
+    "2026-10-15",
+    "2026-10-16",
+    "2026-10-17",
+    "2026-10-18",
+    "2026-10-19"
+   ],
+   "keys_listed": {
+    "2026-10-13": 8580,
+    "2026-10-14": 8876,
+    "2026-10-15": 9368,
+    "2026-10-16": 15627,
+    "2026-10-17": 14068,
+    "2026-10-18": 10627,
+    "2026-10-19": 1497
+   },
+   "total_keys": 68643,
+   "sample_every_k": 6,
+   "objects_read": 11441,
+   "read_errors": 0,
+   "parse_errors": 0,
+   "method": "boto3 1.43.114 (scratch venv) list_objects_v2 paginated with Prefix audit/dt=<day>/ for each of the 7 UTC days, every key counted (the window ends on today's UTC date, which is the 7th day); then get_object on every 6-th key of the sorted key list (11441 objects; up to 3 retries after the first try, zero failed); each body is one JSON line, counted by its tool key or, when absent, its event key. Only names and counts were kept; no principal, email, account or token value was copied, printed or stored."
+  },
+  "per_tool_counts": [
+   {
+    "tool": "hx_teams",
+    "observed": 4235,
+    "scaled_7d": 25410
+   },
+   {
+    "tool": "poll_addressed_teams_messages",
+    "observed": 1655,
+    "scaled_7d": 9930
+   },
+   {
+    "tool": "read_channel_messages",
+    "observed": 1593,
+    "scaled_7d": 9558
+   },
+   {
+    "tool": "hx_msgs",
+    "observed": 1296,
+    "scaled_7d": 7776
+   },
+   {
+    "tool": "ms_site_children",
+    "observed": 1180,
+    "scaled_7d": 7080
+   },
+   {
+    "tool": "gw_cred_observe",
+    "observed": 1105,
+    "scaled_7d": 6630
+   },
+   {
+    "tool": "harvest_get_research",
+    "observed": 61,
+    "scaled_7d": 366
+   },
+   {
+    "tool": "hx_transcripts",
+    "observed": 56,
+    "scaled_7d": 336
+   },
+   {
+    "tool": "whoami",
+    "observed": 29,
+    "scaled_7d": 174
+   },
+   {
+    "tool": "harvest_get_fundamentals",
+    "observed": 26,
+    "scaled_7d": 156
+   },
+   {
+    "tool": "search_email",
+    "observed": 23,
+    "scaled_7d": 138
+   },
+   {
+    "tool": "schwab_query",
+    "observed": 19,
+    "scaled_7d": 114
+   },
+   {
+    "tool": "harvest_resolve_security",
+    "observed": 18,
+    "scaled_7d": 108
+   },
+   {
+    "tool": "rivalfunds_view",
+    "observed": 10,
+    "scaled_7d": 60
+   },
+   {
+    "tool": "read_chat_messages",
+    "observed": 10,
+    "scaled_7d": 60
+   },
+   {
+    "tool": "list_email_filtered",
+    "observed": 9,
+    "scaled_7d": 54
+   },
+   {
+    "tool": "harvest_security_coverage",
+    "observed": 7,
+    "scaled_7d": 42
+   },
+   {
+    "tool": "list_site_files",
+    "observed": 6,
+    "scaled_7d": 36
+   },
+   {
+    "tool": "harvest_get_peers_and_scores",
+    "observed": 6,
+    "scaled_7d": 36
+   },
+   {
+    "tool": "harvest_read",
+    "observed": 5,
+    "scaled_7d": 30
+   },
+   {
+    "tool": "harvest_get_filing_analysis",
+    "observed": 5,
+    "scaled_7d": 30
+   },
+   {
+    "tool": "etfs_compare_peers",
+    "observed": 5,
+    "scaled_7d": 30
+   },
+   {
+    "tool": "send_chat_message",
+    "observed": 4,
+    "scaled_7d": 24
+   },
+   {
+    "tool": "opal_discover",
+    "observed": 4,
+    "scaled_7d": 24
+   },
+   {
+    "tool": "harvest_list",
+    "observed": 4,
+    "scaled_7d": 24
+   },
+   {
+    "tool": "search_files",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "read_email",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "ycharts_time_series",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "yearinreview_view",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "etfs_get_fund_holdings",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "list_teams",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "client_get_transactions",
+    "observed": 3,
+    "scaled_7d": 18
+   },
+   {
+    "tool": "ycharts_freshness",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "find_sharepoint_site",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "read_site_file",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "opal_describe",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "etfs_get_ownership_rollup",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "otp_fetch",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "harvest_search_articles",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "harvest_get_published_analysis",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "news_market_mood",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "list_channels",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "list_chats",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "read_chat_message_images",
+    "observed": 2,
+    "scaled_7d": 12
+   },
+   {
+    "tool": "ycharts_search",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "search_site_files",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "get_site_item",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "sprint_view",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "harvest_get_article",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_valuation",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_macro",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "news_keyword_intelligence",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_market_returns",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "news_search_articles",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_model_positioning",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_security_scan",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "news_for_security",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "etfs_get_monthly_report",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "list_shared_folder",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "read_document",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "harvest_get_chatter",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "graph_cypher",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "mdpf_get_security_classification",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "portal_get_pipeline_freshness",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "schwab_describe_dataset",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "read_teams_attachment",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "schwab_list_files",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "schwab_prepare_download",
+    "observed": 1,
+    "scaled_7d": 6
+   },
+   {
+    "tool": "mdpf_get_aggregate_aua",
+    "observed": 1,
+    "scaled_7d": 6
+   }
+  ],
+  "ranking": [
+   {
+    "rank": 1,
+    "proposal": "Bound the audit-lake write in audit._emit: give the boto3 client at audit.py:55 a botocore Config with connect and read timeouts and a retry cap, so one slow put cannot hold a request for an unbounded time; no thread or queue change.",
+    "sites": 81,
+    "basis": "all 81 sites reach audit._emit (audit.py:40), the single writer; audit.py sets no timeout today; the 7-day volume is 68646 scaled writes at k=6; 80 of 81 sites are on the loop, so the bound covers the blocking case on every one of them"
+   },
+   {
+    "rank": 2,
+    "proposal": "Move the S3 put off the event loop: run audit._emit's boto3 leg through anyio.to_thread.run_sync, or a single background writer with a bounded queue, so the on-loop sites do not wait on put_object; the local file append stays inline.",
+    "sites": 80,
+    "basis": "80 of 81 sites are on the loop (mcp 1.28.0 sync-tool rule); 68646 scaled writes in 7 days is about 9806 per day or 6.8 per minute, so the loop wait is paid per call and a thread hop removes it"
+   },
+   {
+    "rank": 3,
+    "proposal": "Batch the Teams read audit: hx_teams writes one record per call and is the largest name in the lake, so one aggregated record per poll would cut the volume without touching the tools' answers.",
+    "sites": 1,
+    "basis": "per_tool_counts hx_teams 25410 scaled of 68646 (37.0 percent); the literal site is teams_route.py:172 only, the other large names are reached through the shared _run chokepoint and have no literal site"
+   },
+   {
+    "rank": 4,
+    "proposal": "Make no repair yet: measure the put_object latency from the gateway to the lake before choosing a change, since the lake write is best-effort and this cell measured counts, not wait time.",
+    "sites": 0,
+    "basis": "the per-site counts size the volume only; no put latency was measured by this cell, so the wait cannot be sized from the table"
+   }
+  ]
+ }
+}
