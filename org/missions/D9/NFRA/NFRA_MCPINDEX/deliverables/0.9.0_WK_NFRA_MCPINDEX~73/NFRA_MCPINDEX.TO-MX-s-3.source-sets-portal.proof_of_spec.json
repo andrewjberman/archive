@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-s-3.source-sets-portal",
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "4b8dcf3b86"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+  "vintage_commit": "0def6f4233a",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-3.source-sets-portal.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~73",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/source_sets_portal.json",
+   "kind": "config_data",
+   "commit_or_etag": "70f76b50caadc7cc4a0fe3874a824730b0152302",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local JSON data file of traced source sets; no deploy in scope (face BOUNDS 1: no AWS call, no network call, no grant, no deploy, no push). Carried by commit 70f76b50ca (the work commit).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the DENOMINATOR line (25 tools in scope); the schema; every tool in scope exactly once and no other; every tool has at least one source -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s3.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/source_sets_portal.json; echo \"exit=$?\"",
+   "expect": "DENOMINATOR: 25 tool\\(s\\) in scope[\\s\\S]*?ARMS: 4 ok, 0 failed\\s*RESULT: PASS\\s*exit=0",
+   "output_evidence": "DENOMINATOR: 25 tool(s) in scope: channels opal-data-portal-v2,opal-data-mdpf,portal_index; census GATEWAY_SURFACE_CENSUS_20261019_v2.json\n  ok   a source-set file path was given and exists\n  ok   schema\n  ok   every tool in scope appears exactly once, and no other\n  ok   every tool has at least one source\nARMS: 4 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "25 of 25 tools in the census scope (channels opal-data-portal-v2, opal-data-mdpf, portal_index); 4 of 4 arms",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the DENOMINATOR line; every source has the fields of its kind; every vendor is in the allowed vocabulary; every cite is app/<file>.py:<line> naming a real line; the cited file names the bucket, store, integration or graph string; a tool's vendors list equals the set of its sources' vendors -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s3.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/source_sets_portal.json; echo \"exit=$?\"",
+   "expect": "DENOMINATOR: 25 tool\\(s\\) in scope[\\s\\S]*?ARMS: 6 ok, 0 failed\\s*RESULT: PASS\\s*exit=0",
+   "output_evidence": "DENOMINATOR: 25 tool(s) in scope; the allowed vendors are the catalog's own plus opal, ycharts, microsoft, bloomberg, other\n  ok   every source has the fields of its kind (s3: bucket and prefix; store; integration; graph)\n  ok   every source vendor is in the allowed vocabulary\n  ok   every cite is app/<file>.py:<line> naming a real line of the gateway source\n  ok   the cited file names the source (the bucket, store, integration or graph string appears in it)\n  ok   a tool's vendors list equals the set of its sources' vendors\nARMS: 6 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "25 of 25 tools; 32 sources (one per dispatch branch); 6 of 6 arms; 20 of 32 sources cite a file with the literal bucket, 12 of 32 with the entity-name form (surprise NFRA_MCPINDEX-Z-W73-S3)",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "two planted defects in copies of source_sets_portal.json under .scratch/: (A) portal_get_trending removed; (B) the first source's cite set to app/query_v0.py:99999 (a line past the end of the file). Run through s3.AC1 (A) and s3.AC2 (B).",
+   "expected": "s3.AC1 FAILS on the missing tool (A); s3.AC2 FAILS on the out-of-range cite (B)",
+   "observed": "(A) s3.AC1: FAIL every tool in scope appears exactly once, and no other -- missing=['portal_get_trending']; ARMS: 3 ok, 1 failed; RESULT: FAIL, exit 1. (B) s3.AC2: ARMS: 5 ok, 1 failed; RESULT: FAIL, exit 1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "each criterion run twice on the same deliverable; the two outputs compared byte for byte with cmp",
+   "observed": "s3.AC1 runs identical; s3.AC2 runs identical",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the live Gateway responses as a cross-check of the trace (a response citing a source the trace lacks is FAIL misrouted)",
+   "reason": "face BOUNDS 1 and the preflight: no call to the Opal gateway or AWS; the issuer reads a sample and the live responses at the drain."
+  },
+  {
+   "item": "the authorization and identity reads of each tool (access-state policy table, tenant registry, Graph chat and message resolution in asker_scope, rate limiter, principal resolution)",
+   "reason": "a source is the call whose bytes make up the tool's answer; authorization and identity lookups decide who is served, not what is served. Recorded here as the smallest-thing reading of the contract; the decision is stated in the worker report."
+  },
+  {
+   "item": "vendor values where the catalog names no owner (the Opal-internal served objects, the FRED-named macro object, the market-overview objects)",
+   "reason": "a stated decision from the catalog's own owner statements (Opal-internal data -> opal; macro_data_fred and yield_curve_fred -> other; market-overview price objects -> market); s3.AC2 grades the vocabulary, not the owner."
+  },
+  {
+   "item": "the key set of gateway_query_catalog and opal_asker_query (prefix empty)",
+   "reason": "the key set is bounded by catalog_gate over the runtime catalog's channel artifacts, not by a prefix in the code; the empty prefix is the honest value for a catalog-gated read."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W73-S1: etfs_get_positioning reads the gold holding table (opal-data-etfs, gold/holding/) on its fund_ticker branch for a non-object date; the census and members.yaml link it to the gold book only.",
+  "NFRA_MCPINDEX-Z-W73-S2: news_market_mood reads only the two json/sentiment/ singletons; the census links it to news_trending_and_sentiment, whose json/trending/latest.json this tool never reads.",
+  "NFRA_MCPINDEX-Z-W73-S3: 12 of 32 source cites name a file that carries the bucket only as an entity name; the bucket of a catalog-resolved read is declared in DATA_CATALOG.yaml, which the cite grammar cannot name.",
+  "NFRA_MCPINDEX-Z-W73-S4: safe-commit printed NAMING ERROR function-map folder missing and the commit landed (70f76b50ca); the commit gate checked 0 of 2 files."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~73/checks/session_log.txt",
+ "compiler_tools": [
+  {
+   "tool": "python json.load, ASCII check, cite and bucket grounding measure (.scratch/ground.py)",
+   "invocation": "python .scratch/ground.py",
+   "result": "sources 32 cited file has literal bucket 20 underscore-variant only 12"
+  },
+  {
+   "tool": "safe-commit (commit gate, naming gate, client-data check)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~73 <0.9.0_WK_NFRA_MCPINDEX~73@opal.agent>\" -F .scratch/msg_work_mx_s3.txt -- <2 paths>",
+   "result": "[msg-verify] committed 70f76b50ca; commit-gate checked 0 of 2 file(s); naming-gate NAMING ERROR function-map folder missing (surprise S4)"
+  }
+ ]
+}
