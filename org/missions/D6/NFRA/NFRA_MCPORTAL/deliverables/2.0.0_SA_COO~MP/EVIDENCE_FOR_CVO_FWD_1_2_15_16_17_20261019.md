@@ -46,7 +46,17 @@ DONE WHEN: EXERCISED -- one real overlap read on the page and checked against th
 | Andrew read one overlap, one box's git state, and closed one call FROM THE PAGE | **ABSENT** | `TO-MP-q-1` `cancelled`; `q1_seen.json` was never written. His closes of 21c5, 21d9, 44eb on 2026-10-16 were spoken to a seat, and the 2026-10-19 rows were closed by `1.0.0_SA_CTO~Z` citing his record (`closed.ruled_by: andrew`); neither is shown to have gone through the page. |
 | close-request results on the box's S3 list | MEASURED-NOW: `aws s3 ls .../fabric/open-calls/v1/box=sitez/request_results/` and `.../requests/` both print no rows, 2026-10-19 ~17:2xZ. Positive control: the parent `box=sitez/` lists `open_calls.json`, `open_deploys.json`, `scan.json`. | An empty prefix does not show that no page close ever happened: whether results are retained after the box applies them is not read here. |
 
+## FWD-14 -- addendum (2026-10-19 ~18:0xZ), outside the CTO's named five, same method
+
+DONE WHEN: EXERCISED -- Andrew names one box's projects this afternoon from the page alone (A14: matched to the store; a not-reporting box reads so).
+
+| item | level | where |
+|---|---|---|
+| activity-store handler, Control Plane page, fabric read grant, NARROW release serving it | RECORDED, `complete` | `TO-MP-x-1`, `-x-2`, `-x-3`, `-x-4` |
+| Andrew looked at the page live at the issuer's terminal and said the projects "display cleanly" (2026-10-16 ~18:5xZ); he closed call 21c5 on it | RECORDED, verbatim in the record named above | `org/tier1_exec/2.0.0_SA_COO~MP/deliverables/ANDREW_DIRECT_20261016_185xZ_CLOSE_21C5_21D9_44EB_GATEWAY_READS_WELL.md` |
+| Andrew NAMED one box and its projects, matched to the store | **ABSENT** | his words carry no box name and no project list; `x5_seen.json` was never written. `TO-MP-x-5` is `cancelled` for that reason (a record cannot be written from words that are not there). |
+
 ## Not in this file, stated so nothing is assumed
 
-- `TO-MP-x-5` (FWD-14 close run) and `TO-MP-z-6` (FWD-20 close run) are still `staged`. Their calls (21c5 and 21d9) were closed by Andrew's own words on 2026-10-16 with a live read, so they are a different case from the three cancelled here. The CTO's ruling named FWD-1, 2, 15, 16, 17 only; the issuer carries x-5 and z-6 as its own open item.
+- `TO-MP-z-6` (FWD-20 close run) is NOT cancelled: Andrew's 2026-10-16 look named the gateway page ("gateway reads well"), so the order was released and a worker (`0.9.0_WK_NFRA_MCPORTAL~16`) was spawned on 2026-10-19 to run it against the window 2026-10-16T18:30Z-19:05Z. Its result, if any, is a separate record under `deliverables/0.9.0_WK_NFRA_MCPORTAL~16/`.
 - No grade is given or implied. `3.0.0_SA_CVO~Z` grades at L9.
