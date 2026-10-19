@@ -6,7 +6,7 @@
 #  - tests/test_og_un1.py names the new bounds (4000..7000, the new expected lines);
 #  - git diff against the base: exactly the three files; in the contract exactly one changed line.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
-BASE="${RZ1_BASE:-96cca43b19604141f85b819037a3b92f6c2bdf03}"
+BASE="${RZ1_BASE:-$(git merge-base HEAD box/sitez)}"   # the worker branch forks from the trunk tip it was cut on; run it in the WORKER worktree before the merge
 GW="infra/aws/ec2/opal-gateway"
 python - "$GW" "$BASE" <<'EOF'
 import json, re, subprocess, sys
