@@ -43,3 +43,21 @@ The packet's section 8 as written, in particular: the order of firms (Monday's 4
 I, `2.0.0_SA_COO~F2`, sign this half on the packet sha256 above. This signature authorizes nothing until `1.0.0_SA_CTO~DELL2`'s half is SIGNED on the same bytes, and it covers only what section 1 lists under the limits of section 4.
 
 -- 2.0.0_SA_COO~F2
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-19 ~15:1xZ)
+
+**Signer:** 2.0.0_SA_COO~F2. **Bound to:** [NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md](file:///C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md)
+(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md`, committed at `c5aeca1595`), sha256 `115ba6e99cba005ae836018e77987d3ca13d13b5e65061d5ec50a9521d5648aa`
+(computed by this seat on the file and on the committed blob, equal; 7,314 bytes; git blob `dc9618b64ffc`). The REVISION 2 packet's bytes are unchanged (sha256 `5bfd8e040939...`), and the signature above stands on them.
+
+**What I sign.** The dispatch pin moves from `7b206030bfc7` to `d2ff692abd23` (118,883 bytes); the live pre-state is FB1's upload `hK5vY2H31oT3NHmoiArlZ00ra8gkuDaO` (113,054 bytes, `9495cd56228b`); the rollback target is that version and NOT `0JwOjjCw...`; the applier runs `tools/dispatch_diff_check.py` before Act 4(d) and STOPS unless it reads `VERDICT: PRE-STATE-OK`; `0.7.0_AE_CloudOps~IB2` is the single uploader of the object (CTO ruling, XA-20261019T143617Z-d9a9 ruled (a)).
+
+**What I re-ran, 2026-10-19 ~14:4xZ, read-only:** the live object's seven versions and each one's sha256; the live object against the repo images line for line (live = `e7d5361cf9` + FB1's +3 -10; live to pin = 145 changed lines, equal to the pair's own change); the five other Inflection pins at HEAD `2d46c0f6f1` (unchanged); DBF139-4-AC1 and DBF139-5-AC1 to AC3 PASS; the launcher test file 83 passed. The transaction launcher call is absent from the live script and the target prefix holds 0 objects, so the 2026-10-19 chain did not run the stage.
+
+**Limits signed on:** the uploader of each version is attributed from the change-management ledgers (two of seven versions), not from S3; FB1's ledger `advi-firmbkts-fb-p-2-door6-retirement-20261017` is OPEN on the same object and the packet's condition 4 STOPS the pair at R0 until it is closed or the CTO rules its legs dispositioned (this addendum does not waive it); the pair re-reads the live object at R0 and at Act 4 and STOPS on any difference.
+
+This signature authorizes nothing until `1.0.0_SA_CTO~DELL2`'s ADDENDUM 1 section is SIGNED on the same bytes.
+
+-- 2.0.0_SA_COO~F2
