@@ -1,0 +1,14 @@
+0.9.0_WK_NFRA_MCPINDEX~72 -- session log, NFRA_MCPINDEX.TO-MX-s-2 (source sets, etfs), 2026-10-19
+worktree C:/tmp/wk-mcpindex-72, branch wk-NFRA_MCPINDEX-72, cut from box/sitez
+
+1. git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-72; test -d org && test -d .tools -> TREE-OK
+2. Read the task-order face; read h_check.py (s2 arms: s_ac1, s_ac2, s_scope, cite_ok, catalog_vendors).
+3. Census (round22 GATEWAY_SURFACE_CENSUS_20261019_v2.json): channel opal-data-etfs holds 18 tools; the face table matches the census indexes for all 18.
+4. Trace: gateway source under infra/aws/ec2/opal-gateway/app. tools.py wrappers (lines 1477-1636) dispatch to etfs_funds.py, etfs_ownership.py, etfs_rivals.py, etfs_rivals_flow.py, etfs_silver.py. Each module binds its catalog rows by entity name (rows[ENTITY_*] or resolved[*_ENTITY]) from refs/DATA_CATALOG.yaml at call time; bucket and prefix come from those rows.
+5. Catalog: a yaml load of refs/DATA_CATALOG.yaml, 27 opal_data_etfs_* rows, bucket opal-data-etfs on all 27, vendor null on all 27.
+6. Wrote deliverables/0.9.0_WK_NFRA_MCPINDEX~72/source_sets_etfs.json (18 tools, 37 s3 sources).
+7. s2.AC1.sh and s2.AC2.sh run under timeout 120: both RESULT: PASS (checks/s2.AC1.txt, checks/s2.AC2.txt).
+8. Spot-check of 7 cited lines (etfs_rivals.py:573, 508; etfs_silver.py:283; etfs_ownership.py:287; etfs_rivals_flow.py:675, 714; etfs_funds.py:386): each line names the source its entry claims.
+9. Controls: mutant 1 (who_holds dropped) -> AC1 RESULT: FAIL; mutant 2 (cite line 99999) -> AC2 RESULT: FAIL; determinism: two reruns of AC1 and AC2 identical after the exit line.
+10. Surprise rows NFRA_MCPINDEX-Z-W72-S1..S11 appended to INVESTIGATION_v1.md (seven routing OBSERVATION rows, vendor-null, bucket-literal premise, naming-gate and client-data gate outputs).
+11. safe-commit of the work: commit 144def74b7e (rc=0; naming-gate NAMING ERROR and client-data WARN printed, rows S10 and S11).
