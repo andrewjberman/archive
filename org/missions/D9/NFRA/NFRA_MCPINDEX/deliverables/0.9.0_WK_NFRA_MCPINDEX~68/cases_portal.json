@@ -1,0 +1,333 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K2-01",
+   "tool": "etfs_get_positioning",
+   "question": "What does PFDE hold, and what is its AUM?",
+   "args": {
+    "fund_ticker": "PFDE"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of the positioning key; the PFDE block equals its entry in the whole object [app/integrations/portal_index/integration.py:501]",
+   "expect_source": "opal-data-portal-v2/platinum/etfs/positioning_data.json"
+  },
+  {
+   "case_id": "K2-02",
+   "tool": "etfs_get_positioning",
+   "question": "Show the whole Opal ETF positioning table with each fund's own as-of date.",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "head-object of the same key; the answer's as_of equals the object's own data_as_of [app/integrations/portal_index/integration.py:501]",
+   "expect_source": "opal-data-portal-v2/platinum/etfs/positioning_data.json"
+  },
+  {
+   "case_id": "K2-03",
+   "tool": "gateway_query_catalog",
+   "question": "Give me the model portfolio return series from the catalog.",
+   "args": {
+    "key": "json/benchmarks/model_portfolio_timeseries.json"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second get of the same catalog key; the row count equals the denominator of the answer",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-04",
+   "tool": "gateway_query_catalog",
+   "question": "Fetch a dataset key that the catalog does not list at all.",
+   "args": {
+    "key": "json/no-such-dataset/unlisted.json"
+   },
+   "expect": "refused",
+   "source_hint": "the catalog gate refuses an off-catalog key before any read"
+  },
+  {
+   "case_id": "K2-05",
+   "tool": "mdpf_get_account_distribution",
+   "question": "How is 49 Financial AUM distributed across account-size buckets?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the account-size buckets in the object against the answer's denominator [app/integrations/portal_index/integration.py:465]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/account-distribution.json"
+  },
+  {
+   "case_id": "K2-06",
+   "tool": "mdpf_get_account_distribution",
+   "question": "How is AUM distributed across account sizes for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:465]"
+  },
+  {
+   "case_id": "K2-07",
+   "tool": "mdpf_get_aggregate_aua",
+   "question": "How has Cottonwood's assets under advisement moved over time?",
+   "args": {
+    "scope": "cottonwood"
+   },
+   "expect": "nonempty",
+   "source_hint": "as_of_last of a second head-object read equals the newest point of the series [app/integrations/portal_index/integration.py:470]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/cottonwood/aggregate-aua-timeseries.json"
+  },
+  {
+   "case_id": "K2-08",
+   "tool": "mdpf_get_aggregate_aua",
+   "question": "What is the AUA trend over time for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:470]"
+  },
+  {
+   "case_id": "K2-09",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is total AUM for 49 Financial as of the latest period?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same object and its own as-of date [app/integrations/portal_index/integration.py:460]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/aum-metrics.json"
+  },
+  {
+   "case_id": "K2-10",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is the enterprise total AUM as of the latest period?",
+   "args": {
+    "scope": "global"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same object and its own as-of date [app/integrations/portal_index/integration.py:460]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/global/aum-metrics.json"
+  },
+  {
+   "case_id": "K2-11",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is total AUM for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:460]"
+  },
+  {
+   "case_id": "K2-12",
+   "tool": "mdpf_get_model_benchmarks",
+   "question": "Did each model beat its index benchmark since inception?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the first benchmark row equals the same row in a second read of the object [app/integrations/portal_index/integration.py:478]",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json"
+  },
+  {
+   "case_id": "K2-13",
+   "tool": "mdpf_get_category_views",
+   "question": "How is 49 Financial AUA split between Models, SMA and Client assets?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the five category nodes in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/category-views.json"
+  },
+  {
+   "case_id": "K2-14",
+   "tool": "mdpf_get_category_views",
+   "question": "How is AUA split by category for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a scope outside the firm scopes the catalog row enumerates"
+  },
+  {
+   "case_id": "K2-15",
+   "tool": "mdpf_get_model_composition",
+   "question": "What does each 49 Financial model hold, and at what weights?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of rows in the newest daily partition against the rows_newest_partition figure of the catalog contract",
+   "expect_source": "opal-data-mdpf/mdpf/feeds/model_composition/49financial/"
+  },
+  {
+   "case_id": "K2-16",
+   "tool": "mdpf_get_model_composition",
+   "question": "What does each Cottonwood model hold, and at what weights?",
+   "args": {
+    "scope": "cottonwood"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a scope the catalog row does not declare as a firm dimension"
+  },
+  {
+   "case_id": "K2-17",
+   "tool": "news_market_mood",
+   "question": "What is the market mood and the fear and greed index today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "generated_at of the fear-greed singleton equals the answer's as_of in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/sentiment/"
+  },
+  {
+   "case_id": "K2-18",
+   "tool": "opal_asker_query",
+   "question": "Ask the catalog for the model portfolio return series from a Teams message.",
+   "args": {
+    "chat_id": "<chat id of a recent Teams message from a profiled asker>",
+    "message_id": "<message id of that message>",
+    "key": "json/benchmarks/model_portfolio_timeseries.json"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same catalog key read by gateway_query_catalog under the asker's own grant; needs the ids of a live recent Teams message",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-19",
+   "tool": "portal_get_cma_assumptions",
+   "question": "What are the capital-markets assumptions for each asset class?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the row count of the assumptions list in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/capital-markets/assumptions.json"
+  },
+  {
+   "case_id": "K2-20",
+   "tool": "portal_get_correlations",
+   "question": "Which correlation windows and tickers does the portal hold?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the window names equal those in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/correlations/correlation_data.json"
+  },
+  {
+   "case_id": "K2-21",
+   "tool": "portal_get_etf_returns",
+   "question": "What did the ETF benchmarks return this quarter?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the data_as_of date equals the one in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/etf_returns.json"
+  },
+  {
+   "case_id": "K2-22",
+   "tool": "portal_get_factor_tilts",
+   "question": "Show the current factor tilt snapshot for the book.",
+   "args": {
+    "part": "tier1-snapshot"
+   },
+   "expect": "nonempty",
+   "source_hint": "the as_of of the tier1-snapshot part equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/factor-tilts/tier1-snapshot.json"
+  },
+  {
+   "case_id": "K2-23",
+   "tool": "portal_get_macro",
+   "question": "Show the macro indicators and their latest readings.",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the macro group count equals the count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/macro/macro_data.json"
+  },
+  {
+   "case_id": "K2-24",
+   "tool": "portal_get_market_regime",
+   "question": "What market regime are we in and why?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the as_of date equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/market/market-regime.json"
+  },
+  {
+   "case_id": "K2-25",
+   "tool": "portal_get_market_returns",
+   "question": "What were the index and sector returns for the year to date?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count of index and sector rows equals the count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json-tiered/market-overview/summary/all-returns.json"
+  },
+  {
+   "case_id": "K2-26",
+   "tool": "portal_get_model_attribution",
+   "question": "What were the QTD, YTD and since-inception attribution totals per model?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the per-model totals equal those in a second read of the holdings attribution object",
+   "expect_source": "opal-data-portal-v2/json/positioning/"
+  },
+  {
+   "case_id": "K2-27",
+   "tool": "portal_get_model_portfolio_timeseries",
+   "question": "What are the latest daily model and benchmark returns?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the newest date in the series equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-28",
+   "tool": "portal_get_model_positioning",
+   "question": "How is each model positioned versus its benchmark today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the model count equals the count in a second read of the positioning object",
+   "expect_source": "opal-data-portal-v2/json/positioning/"
+  },
+  {
+   "case_id": "K2-29",
+   "tool": "portal_get_peer_performance",
+   "question": "How does each model rank against peers over one year?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the model count equals the models key count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/peers/peer_performance.json"
+  },
+  {
+   "case_id": "K2-30",
+   "tool": "portal_get_pipeline_freshness",
+   "question": "As of what date is the portal model data, and when did the last refresh run?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the manifest run date equals the one in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/latest/manifest.json"
+  },
+  {
+   "case_id": "K2-31",
+   "tool": "portal_get_security_scan",
+   "question": "Which names in a universe that is not served score highest on quality?",
+   "args": {
+    "universe": "k2-no-such-universe",
+    "factor": "quality"
+   },
+   "expect": "empty",
+   "source_hint": "the universe folder is absent, so the answer has empty lists and an absent_reason; s3api list of the universes prefix",
+   "expect_source": "opal-data-portal-v2/json/security_scanner/latest/universes/"
+  },
+  {
+   "case_id": "K2-32",
+   "tool": "portal_get_trending",
+   "question": "What are today's top bullish and bearish news themes?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the bullish and bearish topic counts equal those in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/trending/latest.json"
+  },
+  {
+   "case_id": "K2-33",
+   "tool": "portal_get_valuation",
+   "question": "What are the valuation multiples and the equity risk premium today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the index count equals the count in a second read of valuation_data.json",
+   "expect_source": "opal-data-portal-v2/json/valuation/"
+  }
+ ]
+}
