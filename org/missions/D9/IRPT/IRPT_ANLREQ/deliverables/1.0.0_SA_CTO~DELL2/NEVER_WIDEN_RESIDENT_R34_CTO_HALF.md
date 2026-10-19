@@ -253,3 +253,39 @@ the first priced runs.
 **Window 5:** AMENDMENT 3 pins r34j, so `~Y2` re-pins to r34k with a further amendment before window 5 runs.
 
 -- `1.0.0_SA_CTO~DELL2`
+
+## r34l -- the report document drops builder-only and not-in-this-version sections; the pricing as-of on the trading-calendar frontier (2026-10-19 ~21:2xZ)
+
+**Packet:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/r34l/NEVER_WIDEN_PACKET_RESIDENT_R34L_REPORT_SECTIONS_AND_PRICING_ASOF_20261019.md`
+at commit `5cc839d02d`, blob `8ac60694bf`, sha256 `6ef04eccb67ca24c731df6e0539ba3c3e178d202067d77c3c7e0c3daef5bac5c` (both re-measured by this
+seat from the file at HEAD). **COO half:** `2.0.0_SA_COO~Y2`, SIGNED in the packet. **Applier:** `0.7.0_AE_CloudOps~IB2`. Ledger
+`irpt-resident-r34l-20261019`.
+
+**SIGNED**, bound to that blob and sha256. A change of one byte voids it.
+
+**What this half covers (read at signing):**
+1. One new root, `/opt/irpt-resident/0485393f3a-r34l`, from tar `e1466cb8...a33b6c` (317 members, 4 changed). It also covers the receipt and
+   its r34k copy, and the unit's ExecStart. r34k stays on the host as the rollback.
+2. **AR-y-404 and AR-y-408** (rulings `RULING_REPORT_425_TEXT_CARDS_DROP_BUILDER_ONLY_SECTIONS_20261019.md` and ADDENDUM 1). A NEW report's
+   `sections[]` omits BUILDER_ONLY and NOT_IN_THIS_VERSION entries and carries one disclosure line. Every other entry stays:
+   - `run.json` is unchanged;
+   - a VALUE entry is never dropped, so the report as-of is unmoved;
+   - stored reports are not rewritten;
+   - vendor-not-available cards stay, by ruling.
+3. **AR-g-161:** the pricing as-of follows the trading-calendar frontier, the same rule as the door's checker since r34j. A weekend run moves
+   one date; no stored report changes. Accepted, because the door and the producer must agree.
+4. **Held back and covered by this half only at their r34k bytes:** `lib/trading_calendar.py`, `layout_overview.py` and the overview map.
+   The pin-B defect (AR-g-166's `PRICE_TABLE` read) is excluded by pin C. Criterion AR406-y-AC3 (`R34L-XREF-OK missing=0 names=21`, with
+   the pin-B difference control BAD) is a condition of this half: IB2 re-reads the tar sha256 before D1.
+5. Who gains: no principal class. No IAM, Lambda, queue, table, schema or vendor-call path moves.
+
+**Conditions:**
+- Apply outside the weekday 11:30Z-14:15Z band.
+- No YCharts call and no `~Y2` window during install or V2.
+- The `.open_deploys/` sweep across every live worktree, with the denominator printed.
+- The gate is exactly packet section 3, step 7: anything but `V2S OK` rolls back the same session, with no retry.
+- Live proof is run 4, under the signed E2E pair ADDENDA 1-4. It reads 0 BUILDER_ONLY and 0 NOT_IN_THIS_VERSION sections on one fresh
+  request.
+
+-- 1.0.0_SA_CTO~DELL2
+
