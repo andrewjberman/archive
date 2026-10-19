@@ -1,0 +1,155 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K4-01",
+   "tool": "graph_cypher",
+   "question": "How many nodes does the estate graph hold right now?",
+   "args": {
+    "statement": "MATCH (n) RETURN count(n) AS nodes"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second run of the same count, read against the vintage in graph_status [app/integrations/globgrph/integration.py:66]"
+  },
+  {
+   "case_id": "K4-02",
+   "tool": "graph_status",
+   "question": "How old is the estate graph answer I am about to quote?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the served vintage and last swap time read again from the projection health endpoint [app/integrations/globgrph/integration.py:67]"
+  },
+  {
+   "case_id": "K4-03",
+   "tool": "mdpf_get_security_classification",
+   "question": "What asset class does the classification table give SPY?",
+   "args": {
+    "ticker": "SPY"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:etf-classifications",
+   "source_hint": "a second get_item of the SPY key in etf-classifications, compared on asset_class"
+  },
+  {
+   "case_id": "K4-04",
+   "tool": "mdpf_get_security_classification",
+   "question": "What was SPY classified as on a past date?",
+   "args": {
+    "ticker": "SPY",
+    "as_of": "2026-10-01"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses any as_of other than latest, because the table holds one value per ticker"
+  },
+  {
+   "case_id": "K4-05",
+   "tool": "news_search_articles",
+   "question": "Which articles mentioned tariffs over the last few days?",
+   "args": {
+    "text": "tariffs",
+    "date_from": "2026-10-16",
+    "date_to": "2026-10-18"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-news-articles",
+   "source_hint": "a second Query of the same article_date window on opal-news-articles, with the row count compared"
+  },
+  {
+   "case_id": "K4-06",
+   "tool": "news_search_articles",
+   "question": "Show every article about tariffs from the past six months",
+   "args": {
+    "text": "tariffs",
+    "date_from": "2026-04-01",
+    "date_to": "2026-10-18"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a window of fourteen days or more, so the request never reaches the table"
+  },
+  {
+   "case_id": "K4-07",
+   "tool": "news_keyword_intelligence",
+   "question": "Why is sentiment on the tariff story bearish?",
+   "args": {
+    "keyword": "tariffs"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-keyword-intelligence",
+   "source_hint": "a second get_item of the tariffs keyword in opal-keyword-intelligence, compared on generated_date"
+  },
+  {
+   "case_id": "K4-08",
+   "tool": "news_trending_topics",
+   "question": "What themes were trending in the news on October 16?",
+   "args": {
+    "date": "2026-10-16",
+    "side": "all",
+    "days": 1
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-news-trending-daily",
+   "source_hint": "a count of the ranked rows for that date in opal-news-trending-daily"
+  },
+  {
+   "case_id": "K4-09",
+   "tool": "opal_data_refresh_status",
+   "question": "Has the last data refresh run finished yet?",
+   "args": {
+    "execution_id": "example-run-20261018"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same execution_id read again from the status endpoint [app/integrations/opal_portal/integration.py:405]"
+  },
+  {
+   "case_id": "K4-10",
+   "tool": "opal_data_refresh_upload",
+   "question": "What would the data refresh send for October 16, without sending anything?",
+   "args": {
+    "date": "20261016",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "the confirm_required answer names the vintage, and no upload or trigger happens"
+  },
+  {
+   "case_id": "K4-11",
+   "tool": "opal_describe",
+   "question": "Describe the news articles table in the Opal catalog",
+   "args": {
+    "dataset": "dynamodb_dynamodb_opal_news_articles"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same catalog row read again at its entity key in DATA_CATALOG.yaml [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-12",
+   "tool": "opal_describe",
+   "question": "Describe a catalog entry that does not exist",
+   "args": {
+    "dataset": "no_such_catalog_key_20261018"
+   },
+   "expect": "empty",
+   "source_hint": "no catalog row carries this key, so no dataset is named [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-13",
+   "tool": "opal_discover",
+   "question": "Where does tariff news live in Opal's data?",
+   "args": {
+    "subject": "tariff news"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same subject searched again by text in DATA_CATALOG.yaml [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-14",
+   "tool": "opal_discover",
+   "question": "Where do zebra crossing traffic counts live in Opal's data?",
+   "args": {
+    "subject": "zebra crossing traffic counts"
+   },
+   "expect": "empty",
+   "source_hint": "the catalog holds no row for the subject, so no dataset is named [app/integrations/opal_discover/integration.py:104]"
+  }
+ ]
+}
