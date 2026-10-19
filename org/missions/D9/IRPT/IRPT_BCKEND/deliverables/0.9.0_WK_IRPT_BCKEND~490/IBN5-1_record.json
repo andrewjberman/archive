@@ -1,0 +1,35 @@
+{
+  "base_commit": "d5794f4cceebf3fec7c030f309e5ee225bd75908",
+  "changed_paths": [
+    "data/inf/manual_api/pull_inflection_scope_account_returns.py",
+    "data/inf/manual_api/test_pull_inflection_scope_account_returns.py",
+    "data/inf/manual_api/test_scope_feed_daily_factor.py",
+    "data/inf/manual_api/test_scope_feed_day_complete.py",
+    "data/inf/manual_api/test_scope_feed_region.py",
+    "data/inf/manual_api/test_scope_feed_run_object.py",
+    "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-pn-5.scope-feed-raw-replies-once-per-run.md"
+  ],
+  "tests_total": 55,
+  "tests_passed": 55,
+  "existing_assertions_edited": [
+    {"file": "data/inf/manual_api/test_scope_feed_day_complete.py", "test": "test_complete_day_writes_both_keys", "why": "the put count is 3 (bronze, silver and the one run object), was 2"},
+    {"file": "data/inf/manual_api/test_scope_feed_day_complete.py", "test": "test_from_date_window_writes_only_complete_days", "why": "the exact put-set comparison now includes the one run object's key read from the envelope"},
+    {"file": "data/inf/manual_api/test_scope_feed_day_complete.py", "test": "test_existing_behaviours_unchanged", "why": "the expected sorted put list now includes the one run object's key read from the envelope"},
+    {"file": "data/inf/manual_api/test_scope_feed_daily_factor.py", "test": "test_first_run_window_is_the_pull_date_only", "why": "the put count is 3 (bronze, silver and the one run object), was 2"},
+    {"file": "data/inf/manual_api/test_scope_feed_region.py", "test": "test_run_end_to_end_in_the_flat_layout_under_the_scrubbed_environment", "why": "the put set adds the run object's key (read from the bronze envelope through a local import of gzip) and the put count is 3, was 2"},
+    {"file": "data/inf/manual_api/test_pull_inflection_scope_account_returns.py", "test": "test_key_read_absent_first_and_never_overwritten", "why": "the put count is 2 (the run object and the silver key; the pre-existing bronze key is skipped), was 1"}
+  ],
+  "peak_memory_bytes_3day_fixture": 3608884,
+  "script_sha256": "acfe390bda5af03e3c38330ece8f18d32a87f122594f593f855fc6d802eb21a3",
+  "notes": [
+    "Criteria: IBN5-AC1, IBN5-AC2 (PASS, silver GOLDEN values match) and IBN5-AC3 (PASS) were run from the worktree root under timeout 120; outputs and exit codes are in IBN5-1_criteria_output.txt. The peak is the AC2 run's PEAK_MEMORY_BYTES line; a second AC2 run in the same session printed 3610383, so the value varies by a few KB between runs.",
+    "Tests: data/inf/manual_api ran 49 passed at the base after the sparse add and 55 passed after the change (49 existing and 6 in test_scope_feed_run_object.py).",
+    "Sparse directories added locally with git sparse-checkout add: data/inf/scripts/gold and data/inf/scripts/bronze (the order's sparse set did not carry them). Not committed. Filed as surprise row IRPT_BCKEND-D2-W490-S1.",
+    "The script's three run definitions (blocks SCOPE-FEED-A, -B and -C) each now build and write the run object once before their day loop (block C only when at least one day is complete) and each day envelope carries schema orion-scope-account-returns-bronze-v2, no responses member and raw_object {key, sha256}. The helpers run_object_address, build_run_object and write_run_object sit in block A.",
+    "Read: the feed script (whole), the test_scope_feed_day_complete.py file (whole), lib/opal_naming.py lines 2490-2549 (address() at 2517), and the check pn5_cells.py (read, not edited). The other four test files named in the order (pull_inflection, daily_factor, region, runner_layout) were searched by grep for put counts, put sets, responses and schema literals, and only the matching regions were read; runner_layout was not read beyond its grep hits.",
+    "Not read: the RECORD FACE of the order, the rest of INVESTIGATION_v1.md beyond its tail, and the ledger and other channel files.",
+    "No Orion request was made; no AWS write; the test fakes are in-memory. The criteria check output names the builder's home bucket because the fake store prints its writes; no account id or security identifier is in any tracked file."
+  ],
+  "aws_writes_made": 0,
+  "vendor_requests_sent": 0
+}
