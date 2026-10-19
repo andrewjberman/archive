@@ -1,0 +1,67 @@
+SESSION LOG -- 0.9.0_WK_NFRA_MCPINDEX~76 on NFRA_MCPINDEX.TO-MX-s-6.source-sets-m365
+worktree: C:/tmp/wk-mcpindex-76 (branch wk-NFRA_MCPINDEX-76)
+work commit: b5595abaa1b (source_sets_m365.json + 40 surprise rows NFRA_MCPINDEX-Z-W76-S1..S40)
+surprise commit: S41 row appended in the proof commit (see the proof instance)
+
+1. Preflight
+   git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-76 ; test -d org && test -d .tools -> TREE-OK
+   git sparse-checkout list -> .tools, infra/aws/ec2/opal-gateway/app, org/missions/D9/NFRA/NFRA_MCPINDEX, workflows/atom_decomposition (among others)
+   census read: round22/evidence/GATEWAY_SURFACE_CENSUS_20261019_v2.json -> channel m365 has 43 tools; every m365 tool has indexes [] and channels [m365]
+   members.yaml: every one of the 43 tools has member b or c, bucket graph, index None, links absent
+
+2. Trace (read-only, no AWS, no network)
+   infra/aws/ec2/opal-gateway/app/tools.py read by the Read tool at offsets 112-1310 and 1686-1896 (every m365 def lies in these ranges; 1311-1685 holds the harvest, portal, news, etfs and client tools, read by grep only for the claim lines 1591, 1648, 1659, 1667)
+   infra/aws/ec2/opal-gateway/app/integrations/advi_billing/site_to_s3.py read in full (copy_site_file_to_s3 is line 146; its graph reads are 168 and 175)
+   claim-line comparison: 40 of 43 members.yaml bucket_source line claims do not name the source line (6 land in another tool's code); copy_site_file_to_s3 agrees (168); list_onedrive claim 648 names the /me/drive folder branch and is not a disagreement; list_site_files claim 708 equals the trace cite
+
+3. Checks, final file (run twice each; the two runs of each were compared with cmp: identical)
+   $ bash .../round23/checks/s6.AC1.sh .../source_sets_m365.json ; echo exit=$?
+   DENOMINATOR: 43 tool(s) in scope: channels m365; census GATEWAY_SURFACE_CENSUS_20261019_v2.json
+     ok   a source-set file path was given and exists
+     ok   schema
+     ok   every tool in scope appears exactly once, and no other
+     ok   every tool has at least one source
+   ARMS: 4 ok, 0 failed
+   RESULT: PASS
+   exit=0
+
+   $ bash .../round23/checks/s6.AC2.sh .../source_sets_m365.json ; echo exit=$?
+   DENOMINATOR: 43 tool(s) in scope; the allowed vendors are the catalog's own plus opal, ycharts, microsoft, bloomberg, other
+     ok   a source-set file path was given and exists
+     ok   every source has the fields of its kind (s3: bucket and prefix; store; integration; graph)
+     ok   every source vendor is in the allowed vocabulary
+     ok   every cite is app/<file>.py:<line> naming a real line of the gateway source
+     ok   the cited file names the source (the bucket, store, integration or graph string appears in it)
+     ok   a tool's vendors list equals the set of its sources' vendors
+   ARMS: 6 ok, 0 failed
+   RESULT: PASS
+   exit=0
+
+4. Mutant controls (scratch copies only, .scratch/mutant_m1.json and .scratch/mutant_m2.json, never committed)
+   m1 = committed file with the whoami entry removed
+   m2 = committed file with copy_site_file_to_s3 source 0 vendor set to bogusvendor and create_draft source cite set to app/tools.py:99999
+   m1 s6.AC1: FAIL every tool in scope appears exactly once, and no other -- missing=['whoami']; RESULT: FAIL; exit=1
+   m1 s6.AC2: ARMS: 6 ok, 0 failed; RESULT: PASS; exit=0 (AC2 is form-only, as its arms are written)
+   m2 s6.AC1: ARMS: 4 ok, 0 failed; RESULT: PASS; exit=0 (AC1 does not read vendors or cites)
+   m2 s6.AC2: FAIL every source vendor is in the allowed vocabulary -- got [('copy_site_file_to_s3', 'bogusvendor')]; FAIL every cite ... -- tools ['create_draft']; FAIL a tool's vendors list equals ... -- tools ['copy_site_file_to_s3']; ARMS: 3 ok, 3 failed; RESULT: FAIL; exit=1
+
+5. Spot check (face step 3): five entries re-read at the cited lines
+   tools.py:1769 send_chat_message -> graph.call(t, "POST", f"/chats/{chat_id}/messages", ...)  matches /chats
+   tools.py:961 read_document -> drive = f"/sites/{site_id}/drive" if site_id else "/me/drive"  matches both sources
+   tools.py:1788 list_channels -> graph.call(t, "GET", f"/teams/{team_id}/channels", ...)  matches /teams
+   tools.py:217 whoami -> t, "GET", "/me", params=...  matches /me
+   site_to_s3.py:168 copy_site_file_to_s3 -> call(user_token, "GET", "/sites/%s/drive/items/%s" % ...)  matches /sites
+   no entry was wrong; none changed.
+
+6. Commit (i)
+   bash .tools/safe-commit.sh --author "0.9.0_WK_NFRA_MCPINDEX~76 <0.9.0_WK_NFRA_MCPINDEX~76@opal.agent>" -F .scratch/msg_s6_work.txt -- <the json> <the investigation file>
+   rc=0; [surprise-row-gate] 40 new row(s) of 512 total checked; [surprise-row-gate] OK; [msg-verify] committed b5595abaa1
+   printed also: [naming-gate] NAMING ERROR function-map folder missing (row S41); WARN client-data-check absent (row S41); commit-gate checked 0 of 2 file(s) (no .py staged)
+
+7. Decisions where the contract was silent (smallest thing)
+   a. Sources are data reads or the Graph call a write-only tool makes. Auth and entitlement reads (token broker, identity_scope, data_entitlement, tier store, blast cap, sender-gate reads) are not sources: they decide access, they do not return data.
+   b. Sender-identity lookups that enrich returned Teams messages (chat members at /chats/{id}/members, /users/{id}) are not separate sources. The data endpoint of each tool is its one source. read_channel_messages' /users lookup is the one such read in a different family; it is not traced separately (declared exclusion).
+   c. copy_site_file_to_s3: its .xlsx and .pptx pairs read the same Graph item endpoint; one graph source. The S3 destinations are writes and not sources.
+   d. read_document: two dispatch branches (site_id set -> /sites, else /me/drive); two sources, same cite line 961.
+   e. Vendor: every Graph source is microsoft (the vocabulary's own Graph value); no tool reads a catalog vendor's data directly.
+   f. cite: the line that names the call or path. For the Graph path built on a separate line (e.g. whoami, validate_ssavail_attachment) the cite is the line carrying the literal.
