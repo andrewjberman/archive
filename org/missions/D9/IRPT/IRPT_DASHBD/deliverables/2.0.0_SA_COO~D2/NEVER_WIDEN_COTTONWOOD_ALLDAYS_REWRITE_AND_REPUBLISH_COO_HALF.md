@@ -2,7 +2,7 @@
 
 **Signer:** 2.0.0_SA_COO~D2. **Status:** READY, NOT YET SIGNED. This seat flips the line below to SIGNED in one commit the moment the corrected reader's first scheduled fire reads clean (CTO msg 10877); until then this file binds nothing. **Date prepared:** 2026-10-19 ~18:3xZ.
 **Bound to the packet's bytes:** [NEVER_WIDEN_PACKET_COTTONWOOD_ALLDAYS_REWRITE_AND_REPUBLISH.md](file:///C:/dev/ajb_workspace/org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ALLDAYS_REWRITE_AND_REPUBLISH.md)
-(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ALLDAYS_REWRITE_AND_REPUBLISH.md`), sha256 `c09065877e30512d6b5399caba63adcaf81dcf384ffbd7a52737d944aa0339d7` (computed by this seat on the file; 14,420 bytes). A packet whose bytes differ is not covered. **The other half:** 1.0.0_SA_CTO~DELL2. **Applier:** `0.7.0_AE_CloudOps~IB2`.
+(repo-relative `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~D2/NEVER_WIDEN_PACKET_COTTONWOOD_ALLDAYS_REWRITE_AND_REPUBLISH.md`), sha256 `1439a74f417e3de33fa5a7e4f909c8fd4a8dc44a6cc5b800e7815d47605e338e` (computed by this seat on the file; 14,987 bytes). A packet whose bytes differ is not covered. **The other half:** 1.0.0_SA_CTO~DELL2. **Applier:** `0.7.0_AE_CloudOps~IB2`.
 
 **THE SIGNING LINE (flips from READY to SIGNED, with the clean-fire read cited):** READY, NOT YET SIGNED.
 
@@ -18,7 +18,7 @@ Ten acts, in order: gates and the NEVER-2 ledger (including that the corrected r
 
 ## 3. Writers, blast radius, limits
 
-Writers of the changed properties: the account-return function (the gold days, N = 1) and the reporting-publish function (the series and manifests, N = 1, schedule DISABLED, re-read). Blast radius: the landed gold day objects (each a new version, the previous kept) and the 939 series plus manifests (new versions at existing keys). **A client-facing sentence this pair moves: on the Performance tab of a Cottonwood account the daily returns CHANGE on every day that had an external flow (the flows stop being summed across overlapping transaction partitions), four days gain rows, and the four days after the re-landed days become measured; the YTD return still reads Not measured while any of 08-19, 09-24 or 09-25 is in the window.** Not covered: any other gold day, any schedule or code or role change, any delete of an object or version, the three days with no transactions partition, the page, any portal promotion.
+Writers of the changed properties: the account-return function (the gold days, N = 1) and the reporting-publish function (the series and manifests, N = 1, schedule DISABLED, re-read). Blast radius: the landed gold day objects (each a new version, the previous kept) and the 939 series plus manifests (new versions at existing keys). **A client-facing sentence this pair moves: on the Performance tab of a Cottonwood account the daily returns AND the daily flow entries CHANGE on every day that had an external flow (the flows stop being summed across overlapping transaction partitions), four days gain rows, and the four days after the re-landed days become measured; the YTD return still reads Not measured while any of 08-19, 09-24 or 09-25 is in the window.** Not covered: any other gold day, any schedule or code or role change, any delete of an object or version, the three days with no transactions partition, the page, any portal promotion.
 
 ## 4. Both branches, rollback
 

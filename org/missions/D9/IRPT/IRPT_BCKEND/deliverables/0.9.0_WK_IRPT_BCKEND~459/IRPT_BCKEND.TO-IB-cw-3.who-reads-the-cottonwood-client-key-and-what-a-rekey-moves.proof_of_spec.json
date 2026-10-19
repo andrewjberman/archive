@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-cw-3",
+  "firm": "COT",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "66ac649890"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "66ac649890",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-cw-3.who-reads-the-cottonwood-client-key-and-what-a-rekey-moves.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~459",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~459/IBcw3_findings.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A read-only findings file: 15 readers, a census and a release path, each cited file:line hashed at HEAD. Nothing is deployed, written to AWS or S3, or invoked.",
+      "artifact_covered_by": [
+        "IBCW3-AC1",
+        "IBCW3-AC2",
+        "IBCW3-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBCW3-AC1",
+      "criterion_verbatim": "the findings file's shape, at least four readers with distinct ids and closed-set fields, the three required kinds present, every cited file:line existing at HEAD with the stated hash, the census terms and consistent counts, the cited release path",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r259/p259_cells.py\" . IBCW3-AC1",
+      "output_evidence": "OK: findings well formed; 15 readers, every citation matches its line at HEAD, the census names the terms, the release path is cited / IBCW3-AC1 PASS (run before the commit, rc=0; recorded in IBcw3_criteria_output.txt)",
+      "denominator": "1 of 1 check invocation PASS, 15 readers graded",
+      "status": "PASS",
+      "expect": "IBCW3-AC1 PASS"
+    },
+    {
+      "criterion_id": "IBCW3-AC2",
+      "criterion_verbatim": "nothing in the worker's deliverables folder carries a raw identifier: no cli_ or acc_ ids, no 9-or-more digit run, no e-mail address, no hex run of 13 to 63 characters",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r259/p259_cells.py\" . IBCW3-AC2",
+      "output_evidence": "OK: 3 file(s) scanned, no raw identifier, e-mail, long digit run or odd-length hex run / IBCW3-AC2 PASS (run before the commit, rc=0; the re-run with the criteria output file present is recorded in IBcw3_criteria_output.txt)",
+      "denominator": "1 of 1 check invocation PASS, 3 files of the deliverables folder scanned",
+      "status": "PASS",
+      "expect": "IBCW3-AC2 PASS"
+    },
+    {
+      "criterion_id": "IBCW3-AC3",
+      "criterion_verbatim": "the worker's one commit (HEAD~1..HEAD) touches only the order's paths (its deliverables folder, the surprise file, the order)",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r259/p259_cells.py\" . IBCW3-AC3",
+      "output_evidence": "NOT RUN BEFORE THE COMMIT: AC3 reads HEAD~1..HEAD, and this instance is itself in that commit. Its post-commit result is in the worker report, not in this file.",
+      "denominator": "0 of 1 run before the commit (the check reads the commit that carries this file)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "AC3 is graded by the post-commit run of p259_cells.py IBCW3-AC3 over HEAD~1..HEAD, which the worker reports after the one commit; the issuer re-runs it.",
+      "expect": "IBCW3-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant control is named by the order: the order names three criteria and no mutation.",
+      "expected": "N/A (the order names no mutant)",
+      "observed": "not run by this worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once before the commit and once more with the criteria output file present; AC3 runs once after the commit. The lines are recorded verbatim in IBcw3_criteria_output.txt.",
+      "observed": "AC1 rc=0, AC2 rc=0 before the commit; AC3 is reported in the worker report",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS, S3, Lambda or SSM call",
+      "reason": "forbidden by the order's bounds: the read is of the repository only."
+    },
+    {
+      "item": "reading the portal submodule",
+      "reason": "the portal is a separate repository, not in this worktree; the order names it as NOT READ."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W459-S1: the order places the drop-guard refusal in carry_forward_removed about line 993; the function spans 985-1002 and only returns the held keys, and the refusal is raised in run_firm at 1282-1292.",
+    "IRPT_BCKEND-D2-W459-S2: the release path ends at the bundle_uri copy in refresh.py 714; no writer of that bundle object was found under .tools or infra in this worktree.",
+    "IRPT_BCKEND-D2-W459-S3: org/surprise_channel is tracked at HEAD but absent on disk in this sparse worktree; the row schema was read from the base checkout."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~459/IBcw3_notes.md",
+  "compiler_tools": [
+    {
+      "tool": "p259_cells.py (r259 check, issuer's, read-only)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r259/p259_cells.py\" . IBCW3-AC1|IBCW3-AC2|IBCW3-AC3",
+      "result": "before the commit: AC1 rc=0, AC2 rc=0; AC3 is run after the one commit and reported in the worker report"
+    }
+  ]
+}
