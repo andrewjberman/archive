@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-404",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-404.report-sections-exclude-builder-only-entries.md",
+    "group": "OTHER",
+    "vintage_commit": "7bc1fe7cc4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "7bc1fe7cc4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-404.report-sections-exclude-builder-only-entries.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~296",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "4050bbd629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed by worker 296 as 4050bbd629 on wk-IRPT_ANLREQ-296 (LOCAL). One expression in the sections comprehension now skips the entries that are BUILDER_ONLY and not VALUE. Nothing is built, uploaded, deployed or applied."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_builder_only_sections.py",
+      "kind": "test",
+      "commit_or_etag": "4050bbd629",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, committed by worker 296 as 4050bbd629 (LOCAL). Two tests."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR404-y-AC1",
+      "criterion_verbatim": "`AR404-y-AC1`: the new test passes, and (inside it) 0 builder-only non-VALUE sections, every VALUE section byte-identical to the unfiltered rule, run.json lists all entries, the difference control sees builder-only sections in the unfiltered list; at base the file is absent (\"no tests ran\") and it FAILS.",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_builder_only_sections.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "worker run on wk-IRPT_ANLREQ-296, rc=0\n2 passed in 0.59s\nDENOMINATOR: 2 of 2 tests in the new file passed; the 0 builder-only non-VALUE section assertion, the byte-equal VALUE sections, the kept NOT_AVAILABLE section, run.json listing every entry, and the difference control all run inside them.",
+      "denominator": "2 of 2 tests passed in test_opal_producer_builder_only_sections.py",
+      "expect": "[0-9]+ passed",
+      "status": "PASS",
+      "status_reason": "rc=0, summary '2 passed', no 'failed' or 'error' in the summary line."
+    },
+    {
+      "criterion_id": "AR404-y-AC2",
+      "criterion_verbatim": "`AR404-y-AC2`: the five existing producer test files pass with no `failed` in the summary line (48 passed at base); a summary line containing `failed` or `error` is a FAIL even if it also contains `passed`; if an existing test asserted a section count that included builder-only entries, update THAT assertion in the same commit and say which test and why in your report.",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_benchmark.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_page_wording.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_prices.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_swap.py -q --color=no -p no:cacheprovider",
+      "output_evidence": "worker run on wk-IRPT_ANLREQ-296, rc=0\n48 passed in 7.46s\nDENOMINATOR: 48 of 48 tests passed in the five existing producer test files (48 at base).",
+      "denominator": "48 of 48 tests passed across the five existing producer test files",
+      "expect": "[0-9]+ passed",
+      "status": "PASS",
+      "status_reason": "rc=0, summary '48 passed', no 'failed' or 'error'. One assertion was updated (test_opal_producer.py, the section-id equality) and it passes."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR404-y-AC1 control: opal_producer.py swapped for the old unfiltered line (sections built from every entry), the new test run, then the fixed file restored and its sha256 checked (0ed04863289902e25f00e44fa68a17d81fd97eafa1d2117d14780558cf8eab7a).",
+      "expected": "the new test file FAILS (rc 1) on the mutant",
+      "observed": "rc=1 on the mutant: '2 failed in 0.58s'. test_builder_only_unvalued_entries_have_no_section fails at the 0-builder-only assertion (['f1.title', ..., 'o.footer'] == []); test_difference_control fails at len(unfiltered) - len(sections) == len(builder_na) ((10 - 10) == 3). The restored file matches the fixed copy's sha256.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR404-y-AC1 test file run twice on the fixed tree with the same command: each run prints '2 passed', rc=0, and the count line 'section count before (unfiltered)=10 after (filtered)=7 builder-only entries in run.json=3'.",
+      "observed": "run 1 and run 2: 2 passed, rc=0, counts 10 -> 7, builder-only entries 3",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the PROD report at 13:43Z and its 425 text cards",
+      "reason": "not read: no AWS, network or PROD call was made by this worker; the 425 figure is recorded as an unreproduced premise (surprise row IRPT_ANLREQ-D2-W296-S2)."
+    },
+    {
+      "item": "the real overview layout map (254 elements, blob da312a9b)",
+      "reason": "absent from the sparse worktree; one committed blob was written into .scratch via git show HEAD:<path> and measured there (surprise row IRPT_ANLREQ-D2-W296-S1). The measurement, 257 -> 192 sections and 65 builder-only entries, is from that scratch copy."
+    },
+    {
+      "item": "the report validators (ReportValidator and the v1 and v2 AnalysisReport schemas)",
+      "reason": "read, not edited: no minimum section count and no per-element requirement found (infra/aws/lambda/investor-reporting/reports/resident_installed.py:212-252; docs/contracts/investor-reporting/v1/AnalysisReport.schema.json:126-190; infra/aws/lambda/investor-reporting/_contracts/AnalysisReport.v2.schema.json:135-199)."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W296-S1: the real overview map is absent from the sparse worktree; one committed blob was read into .scratch for the measurement (OBSERVATION, INERT)",
+    "IRPT_ANLREQ-D2-W296-S2: one producer run over the committed map yields 65 builder-only sections, not the 425 of the cell context; the 425 is not reproduced (OBSERVATION, INERT)",
+    "IRPT_ANLREQ-D2-W296-S3: the fixture's non-builder NOT_AVAILABLE elements read NOT_IN_THIS_VERSION; none reads OUTSIDE_TIME_BUDGET (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_builder_only_sections.py -q --color=no -p no:cacheprovider",
+      "result": "2 passed in 0.59s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_benchmark.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_page_wording.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_prices.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_swap.py -q --color=no -p no:cacheprovider",
+      "result": "48 passed in 7.46s"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh <each changed .py file>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each of the three files"
+    },
+    {
+      "tool": "real-map measurement",
+      "invocation": "python .scratch/probe_real_map.py (HEAD producer vs worktree producer; test fakes; pricing off; map = git show HEAD:org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json)",
+      "result": "BEFORE(HEAD) sections=257 entries=257 builder_only=65; AFTER sections=192; difference 65; run.json entries identical; VALUE sections identical; validation CERTIFIED 262 checks, 0 failed"
+    }
+  ]
+}
