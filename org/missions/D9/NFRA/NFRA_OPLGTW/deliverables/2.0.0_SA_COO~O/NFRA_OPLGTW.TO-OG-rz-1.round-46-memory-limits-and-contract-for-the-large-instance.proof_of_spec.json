@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-rz-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "2014e2e060",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rz-1.round-46-memory-limits-and-contract-for-the-large-instance.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2014e2e060"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~164",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy/opal-gateway.service",
+      "kind": "config_data",
+      "commit_or_etag": "5807068e36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-164, drained to box/sitez as 97ec4f8c60a (not pushed). MemoryHigh 1200M to 5600M and MemoryMax 1400M to 6400M; two comment lines reworded to the new numbers. No release, no deploy: the release is OG-rz-2, and only after the resize.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_un1.py",
+      "kind": "test",
+      "commit_or_etag": "5807068e36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. The MemoryMax range assertion 4000..7000, its message and docstring, the expected lines 5600M and 6400M, and the two comment entries of _ADDED_LINES that must equal the reworded unit comments.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "5807068e36",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL as above. One line: target_instance_type t4g.small to t4g.large (one changed line, 2 diff lines).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the unit, the test bounds and the contract carry the new values and nothing else changed (3 files, only the named lines).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/rz1.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)unit MemoryHigh 5600M MemoryMax 6400M \\(want 5600M and 6400M\\): yes; MemoryHigh strictly below MemoryMax: yes.*contract target_instance_type t4g\\.large \\(want t4g\\.large\\): yes.*files changed against the base 3 \\(want 3\\); lines changed outside the named ones 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "unit MemoryHigh 5600M MemoryMax 6400M (want 5600M and 6400M): yes; MemoryHigh strictly below MemoryMax: yes\ncontract target_instance_type t4g.large (want t4g.large): yes; test_og_un1 names the new bounds: yes\nfiles changed against the base 3 (want 3); lines changed outside the named ones 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "3 files changed of 3 (want 3) against the merge-base with box/sitez (11c572fef9 then 3878e45da7), 0 lines changed outside the named ones; run in the worker worktree at commit 5807068e36 before the drain.",
+      "status": "PASS",
+      "status_reason": "Run by the issuer in the worker worktree at 5807068e36: RESULT PASS and exit=0.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the unit reads MemoryMax=6400M and tests/test_og_un1.py passes against it.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/rz1.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)unit MemoryMax=6400M; test_og_un1: \\d+ passed, 0 failed.*RESULT: PASS.*exit=0",
+      "output_evidence": "unit MemoryMax=6400M; test_og_un1: 2 passed, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "2 passed, 0 failed of the file's 2 tests; unit MemoryMax=6400M; pytest rc=0.",
+      "status": "PASS",
+      "status_reason": "Run by the issuer in the worker worktree at 5807068e36 (the worker's own run on the uncommitted tree read the same 2 passed).",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant to plant. Discrimination is taken from the check at the base.",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "Both checks FAIL at the base (the unit reads 1200M and 1400M; the AC1 base run printed 'no' on the unit, contract and test lines).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 run by the worker on the uncommitted tree and by the issuer after commit 5807068e36.",
+      "observed": "'unit MemoryMax=6400M; test_og_un1: 2 passed, 0 failed' in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "This instance was written by the issuer, 2.0.0_SA_COO~O, not by worker ~164.",
+      "reason": "The worker could not commit (its sparse worktree failed the commit gate: rows NFRA_OPLGTW-Z-W164-S1, ruled in Z-S425); the issuer widened the worktree, fast-forwarded it to the trunk tip carrying the order, landed the worker's three files as 5807068e36 under the worker's author line and ran both checks in that worktree before the drain. The worker's own run on the uncommitted tree is in its report."
+    },
+    {
+      "item": "Release and deploy of the new limits.",
+      "reason": "OG-rz-2: the limits are released only AFTER the resize to t4g.large; MemoryMax 6400M on the 2 GiB host would invite the kernel OOM killer."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-S425: rules the worker's two rows: its commit refusal (a sparse cone narrower than the commit gate reads, and a worktree base older than the order) was the issuer's cut and is cured; the contract's target_memory_mib 2048 is carried to the memory guard"
+  ],
+  "session_log": "org/tier1_exec/2.0.0_SA_COO~O/drive_log_20261019T18Z_opal_bloomberg.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~164 <0.9.0_WK_NFRA_OPLGTW~164@opal.agent>\" -F <msgfile> -- <the three paths>, run by the issuer in the widened worktree",
+      "result": "[msg-verify] committed 5807068e36; first two attempts refused (sparse cone; owned-paths lane rule), recorded in NFRA_OPLGTW-Z-S425"
+    }
+  ]
+}
