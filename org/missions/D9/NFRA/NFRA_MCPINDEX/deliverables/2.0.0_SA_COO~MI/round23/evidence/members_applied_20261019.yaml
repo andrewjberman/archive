@@ -1,0 +1,1127 @@
+# tool_index/members.yaml -- MX-c-8 (FWD-20): the member (a / b / c) of every tool the DEPLOYED gateway serves.
+#
+# THE DENOMINATOR is not in this file. emit_catalog_v02.py runs tool_census.py (the gateway code at
+# services.opal-gateway.deployed_commit, never the trunk); a served tool with no entry here, or an entry here for a tool
+# the deployed gateway does not serve, REFUSES the emit. `definition` is the census's, written by the emitter.
+#
+# Each member is classified from what the tool's DEFINITION does, never from its name:
+#   a  reads data that a catalog row describes: read_tool (= the tool), index (the id of one such row, the `entity` or `key` of a
+#      row outside tool_index; MX-c-9: NEVER an `entity` or `key` here, row Z-S106), links (EVERY such row id), history_depth and freshness (claim measured | inferred | absent).
+#   b  reads data that no catalog row describes yet: owner (the project code that owns the data, or `unowned`).
+#   c  is not a data read (it sends, writes, uploads, issues a ticket or probes status): reason.
+# `measure: {row: <channel row id>}` (an (a) entry) names the catalog row whose served key measure.py lists, read-only, into
+# measured.yaml; the key is read from the catalog row, never typed here. `depth:` (MX-c-9, MX-c-10) is what measure.py reads for
+# history_depth, ONE named date field per object (nothing else of a body is printed or stored):
+#   {row, scope?, field, method?}      measured: the field's date; method body-field (default) | snapshot-asof | series-first
+#   {row, field, claim: inferred, source}   inferred: the date of one named field, where the object cannot be re-read at answer time
+#   {row, listing: {...}}              inferred: the served window (earliest..latest) of a live-queried row's partition listing
+#   {claim: per-link, links: [spec]}   a multi-index tool: one spec per row it links
+# The emitter reads the claim from measured.yaml and composes a measured claim's basis from the row's key. A claim written here is literal.
+# MX-c-21 (PRD v0.17 C-GROUP item 3): `bucket` and `bucket_source` are declared on EVERY member the catalog rows do not name
+#   (no row carries it as its read_tool). `bucket` is the S3 bucket the tool reads (opal-data-...), or dynamodb, graph (the Microsoft
+#   365 tools), or a store word (kuzu, ycharts, gateway, portal-refresh). `bucket_source` is <path>:<line>, the path relative to
+#   infra/aws/ec2/opal-gateway and the line in the tool's own code that names the bucket or the store; for an S3 bucket the bucket
+#   name must appear within 6 lines of that line (the emitter refuses otherwise).
+
+members:
+- tool: blackdiamond_list_fees
+  member: a
+  index: blackdiamond_fees
+  links:
+  - blackdiamond_fees
+  depth:
+    row: blackdiamond_fees
+    listing:
+      producer_read_at: true
+      basis_ref: the silver tier named by the row's producer, listed read-only by partition
+  freshness:
+    claim: absent
+    reason: a live-queried Black Diamond vendor API row has no served artifact to list; the fee dates come from the vendor
+      per request
+- tool: copy_site_file_to_s3
+  member: c
+  reason: 'WRITE: copies one SharePoint item into a builder bronze S3 prefix by conditional put'
+  bucket: graph
+  bucket_source: app/integrations/advi_billing/site_to_s3.py:168
+- tool: create_draft
+  member: c
+  reason: 'POSTs /me/messages: creates a DRAFT email in the caller''s mailbox; sends nothing and reads no dataset'
+  bucket: graph
+  bucket_source: app/tools.py:461
+- tool: etfs_get_positioning
+  member: a
+  index: portal_etfs_positioning
+  links:
+  - portal_etfs_positioning
+  - etfs.01.positioning-data
+  measure:
+    row: etfs.01.positioning-data
+  depth:
+    row: etfs.01.positioning-data
+    field: data_as_of
+    method: snapshot-asof
+- tool: find_online_meeting
+  member: c
+  reason: Looks up the caller's own Teams online meetings whose join URL matches the one given, returning each meeting's id, subject, organizer and start and end times from the caller's delegated view [app/tools.py:542]
+  bucket: graph
+  bucket_source: app/tools.py:547
+- tool: find_sharepoint_site
+  member: c
+  reason: Searches the SharePoint sites that the caller's own Microsoft 365 token can see by display name, returning their site ids for the other SharePoint tools [app/tools.py:698]
+  bucket: graph
+  bucket_source: app/tools.py:697
+- tool: gateway_query_catalog
+  member: a
+  index: mp.04.model-portfolio-timeseries
+  links:
+  - mp.04.model-portfolio-timeseries
+  - mp.05.model-portfolio-benchmarks
+  - mp.06.etf-returns
+  - cma.01.assumptions
+  - cma.02.views
+  - cor.01.correlation-data
+  - ft.01.tier1-snapshot
+  - ft.02.tier2-spreads
+  - ft.03.tier3-timeseries
+  - etfs.01.positioning-data
+  - mac.01.macro-data
+  - mac.02.timeseries-family
+  - mac.03.volatility-data
+  - mac.04.yield-curve-fred
+  - mkt.01.tiered-all-returns-PRIMARY
+  - mp.01.aum-metrics
+  - mp.02.account-distribution
+  - mp.03.aggregate-aua-timeseries
+  - mp.07.peer-performance
+  - att.01.allocation-summary
+  - att.04.positioning-data
+  - att.02.holdings-attribution
+  - news.03.live-singletons
+  - val.01.valuation-data
+  - val.02.risk-premium-data
+  depth: &query_depth
+    claim: per-link
+    links:
+    - row: mp.04.model-portfolio-timeseries
+      field: data_as_of
+      method: snapshot-asof
+    - row: mp.05.model-portfolio-benchmarks
+      field: data_as_of
+      method: snapshot-asof
+    - row: mp.06.etf-returns
+      field: data_as_of
+      method: snapshot-asof
+    - row: cma.01.assumptions
+      field: generated_at
+      claim: inferred
+      source: 'generated_at (the publish time of the assumption set) read from the served object by the worker; the object''s data_as_of is the year string 2026, not a date, so no as-of date is measured'
+    - row: cma.02.views
+      field: data_as_of
+      method: snapshot-asof
+    - row: cor.01.correlation-data
+      field: data_as_of
+      method: snapshot-asof
+    - row: ft.01.tier1-snapshot
+      field: data_as_of
+      method: snapshot-asof
+    - row: ft.02.tier2-spreads
+      field: data_as_of
+      method: snapshot-asof
+    - row: ft.03.tier3-timeseries
+      field: data_as_of
+      claim: inferred
+      source: 'data_as_of read from the served object by the worker; the object is over the answer-time read bound of opal_discover, so the gateway does not re-read it at answer time'
+    - row: etfs.01.positioning-data
+      field: data_as_of
+      method: snapshot-asof
+    - row: mac.01.macro-data
+      field: data_as_of
+      method: snapshot-asof
+    - row: mac.02.timeseries-family
+      listing: {row_prefix: true}
+    - row: mac.03.volatility-data
+      field: data_as_of
+      method: snapshot-asof
+    - row: mac.04.yield-curve-fred
+      field: generated_at
+      method: snapshot-asof
+    - row: mkt.01.tiered-all-returns-PRIMARY
+      field: data_as_of
+      claim: inferred
+      source: 'data_as_of read by the worker from the object; the row is BLOCKED-BY-ALLOWLIST for every principal, so the gateway serves nothing from it and opal_discover reads nothing from it at answer time'
+    - row: mp.01.aum-metrics
+      scope: global
+      field: total.series_start
+      method: body-field
+      depth_kind: series_start
+    - row: mp.02.account-distribution
+      scope: global
+      field: _provenance.source_vintages.global/account-distribution
+      method: snapshot-asof
+    - row: mp.03.aggregate-aua-timeseries
+      scope: global
+      field: as_of_first
+      method: body-field
+      depth_kind: series_start
+    - row: mp.07.peer-performance
+      field: data_as_of
+      method: snapshot-asof
+    - row: att.01.allocation-summary
+      field: data_as_of
+      claim: inferred
+      source: 'data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time'
+    - row: att.04.positioning-data
+      field: data_as_of
+      claim: inferred
+      source: 'data_as_of read by the worker after decoding the object, which is stored gzip-encoded (Content-Encoding gzip); the aws CLI and the opal_discover read do not decode it, so it is not re-read at answer time'
+    - row: att.02.holdings-attribution
+      field: data_as_of
+      method: snapshot-asof
+    - row: news.03.live-singletons
+      field: generated_at
+      claim: inferred
+      source: 'generated_at read by the worker from the first of the two singleton objects the row names; the row names two objects, so no single object is measured and opal_discover does not re-read it'
+      key_part: 0
+    - row: val.01.valuation-data
+      field: data_as_of
+      claim: inferred
+      source: 'data_as_of read from the served object by the worker; the object is over the answer-time read bound of opal_discover, so the gateway does not re-read it at answer time'
+    - row: val.02.risk-premium-data
+      field: data_as_of
+      method: snapshot-asof
+  freshness:
+    claim: absent
+    reason: this tool reads any one catalogued key per call; each key is a single overwritten JSON object described by its
+      own row, so there is no one served prefix to list (per-key as-of is answered by opal_discover from the row)
+- tool: get_item
+  member: c
+  reason: Reads the metadata (name, size, file or folder type, web URL and last-modified time) of one item in the caller's own OneDrive drive, by item id [app/tools.py:925]
+  bucket: graph
+  bucket_source: app/tools.py:925
+- tool: get_site_item
+  member: c
+  reason: Reads the metadata of one document library item of a SharePoint site, by site id and item id, through the caller's delegated Microsoft 365 access [app/tools.py:934]
+  bucket: graph
+  bucket_source: app/tools.py:934
+- tool: graph_cypher
+  member: b
+  owner: NFRA_CLDGRPH
+  reason: Runs one read-only Cypher statement against the estate graph projection, and no catalog row indexes this tool; a row naming the projection node and edge tables would create one [app/integrations/globgrph/integration.py:149]
+  bucket: kuzu
+  bucket_source: app/integrations/globgrph/integration.py:156
+- tool: graph_status
+  member: c
+  reason: returns the graph projection service's health (served vintage, last swap, last pointer read); no dataset rows
+  bucket: kuzu
+  bucket_source: app/integrations/globgrph/integration.py:164
+- tool: inspect_email_attachment
+  member: c
+  reason: Fetches one attachment of a message in the caller's own mailbox server-side and returns only its name, byte count, sha256, leading bytes and PDF facts, never the raw bytes [app/tools.py:424]
+  bucket: graph
+  bucket_source: app/tools.py:428
+- tool: list_calendar
+  member: c
+  reason: Lists the events of the caller's own Outlook calendar view over a window of days from a start date, with attendees, organizer and online-meeting join URLs [app/tools.py:501]
+  bucket: graph
+  bucket_source: app/tools.py:513
+- tool: list_channels
+  member: c
+  reason: Lists the channels of one Team the caller belongs to (id, display name, description, membership type) from the caller's own Teams data [app/tools.py:1785]
+  bucket: graph
+  bucket_source: app/tools.py:1667
+- tool: list_chats
+  member: c
+  reason: Lists the caller's own Teams 1:1 and group chats with a preview of each last message, most recently active first [app/tools.py:981]
+  bucket: graph
+  bucket_source: app/tools.py:981
+- tool: list_email_attachments
+  member: c
+  reason: Lists the attachment metadata (id, name, size, content type, inline flag) of one message in the caller's own mailbox, without downloading any content [app/tools.py:360]
+  bucket: graph
+  bucket_source: app/tools.py:360
+- tool: list_email_filtered
+  member: c
+  reason: Pages through the caller's own mailbox by exact sender address, received-date bounds and attachment flag, newest first, returning the message headers and a page token [app/tools.py:281]
+  bucket: graph
+  bucket_source: app/tools.py:326
+- tool: list_meeting_transcripts
+  member: c
+  reason: Lists every transcript row (id, created and end times) of one online meeting in the caller's own meeting records, following Graph pages to exhaustion [app/tools.py:564]
+  bucket: graph
+  bucket_source: app/tools.py:572
+- tool: list_onedrive
+  member: c
+  reason: Lists the files and folders of the caller's own OneDrive, at the root or under one folder path, with name, size and modified time [app/tools.py:645]
+  bucket: graph
+  bucket_source: app/tools.py:648
+- tool: list_recent_email
+  member: c
+  reason: Lists the caller's most recent mailbox messages (subject, sender, received time, read flag and body preview), newest first and optionally filtered by date or unread state [app/tools.py:223]
+  bucket: graph
+  bucket_source: app/tools.py:235
+- tool: list_shared_folder
+  member: c
+  reason: Lists the children of a OneDrive or SharePoint folder link shared to the caller, resolved under the caller's own token so only what is shared to that user is reachable [app/tools.py:1256]
+  bucket: graph
+  bucket_source: app/tools.py:1264
+- tool: list_site_drives
+  member: c
+  reason: Lists the document libraries (drives) of one SharePoint site the caller can reach, with their ids, names, types and web URLs [app/tools.py:943]
+  bucket: graph
+  bucket_source: app/tools.py:944
+- tool: list_site_files
+  member: c
+  reason: Lists the files and folders of one SharePoint site's default document library, at the root or under a folder path, through the caller's delegated access [app/tools.py:705]
+  bucket: graph
+  bucket_source: app/tools.py:708
+- tool: list_teams
+  member: c
+  reason: Lists the Microsoft Teams the caller is a member of (id, display name, description) from the caller's own joined-teams view in Graph [app/tools.py:1777]
+  bucket: graph
+  bucket_source: app/tools.py:1659
+- tool: mdpf_get_account_distribution
+  member: a
+  index: portal_mdpf_account_distribution
+  links:
+  - portal_mdpf_account_distribution
+  - mp.02.account-distribution
+  measure:
+    row: mp.02.account-distribution
+  depth:
+    row: mp.02.account-distribution
+    scope: global
+    field: _provenance.source_vintages.global/account-distribution
+    method: snapshot-asof
+- tool: mdpf_get_aggregate_aua
+  member: a
+  index: portal_mdpf_aggregate_aua
+  links:
+  - portal_mdpf_aggregate_aua
+  - mp.03.aggregate-aua-timeseries
+  measure:
+    row: mp.03.aggregate-aua-timeseries
+  depth:
+    row: mp.03.aggregate-aua-timeseries
+    scope: global
+    field: as_of_first
+    depth_kind: series_start
+- tool: mdpf_get_aum_metrics
+  member: a
+  index: portal_mdpf_aum_metrics
+  links:
+  - portal_mdpf_aum_metrics
+  - mp.01.aum-metrics
+  measure:
+    row: mp.01.aum-metrics
+  depth:
+    row: mp.01.aum-metrics
+    scope: global
+    field: total.series_start
+    method: body-field
+    depth_kind: series_start
+- tool: mdpf_get_model_benchmarks
+  member: a
+  index: portal_mdpf_model_benchmarks
+  links:
+  - portal_mdpf_model_benchmarks
+  - mp.05.model-portfolio-benchmarks
+  measure:
+    row: mp.05.model-portfolio-benchmarks
+  depth:
+    row: mp.05.model-portfolio-benchmarks
+    field: data_as_of
+    method: snapshot-asof
+- tool: opal_asker_query
+  member: a
+  index: mp.04.model-portfolio-timeseries
+  links:
+  - mp.04.model-portfolio-timeseries
+  - mp.05.model-portfolio-benchmarks
+  - mp.06.etf-returns
+  - cma.01.assumptions
+  - cma.02.views
+  - cor.01.correlation-data
+  - ft.01.tier1-snapshot
+  - ft.02.tier2-spreads
+  - ft.03.tier3-timeseries
+  - etfs.01.positioning-data
+  - mac.01.macro-data
+  - mac.02.timeseries-family
+  - mac.03.volatility-data
+  - mac.04.yield-curve-fred
+  - mkt.01.tiered-all-returns-PRIMARY
+  - mp.01.aum-metrics
+  - mp.02.account-distribution
+  - mp.03.aggregate-aua-timeseries
+  - mp.07.peer-performance
+  - att.01.allocation-summary
+  - att.04.positioning-data
+  - att.02.holdings-attribution
+  - news.03.live-singletons
+  - val.01.valuation-data
+  - val.02.risk-premium-data
+  depth: *query_depth
+  freshness:
+    claim: absent
+    reason: this tool reads any one catalogued key per call; each key is a single overwritten JSON object described by its
+      own row, so there is no one served prefix to list (per-key as-of is answered by opal_discover from the row)
+- tool: opal_data_refresh_status
+  member: c
+  reason: Probes the status of one data-refresh execution and the served manifest date with GET requests only, a status probe that returns no dataset row [app/integrations/opal_portal/integration.py:405]
+  bucket: portal-refresh
+  bucket_source: app/integrations/opal_portal/integration.py:418
+- tool: opal_data_refresh_upload
+  member: c
+  reason: uploads the day's two Bloomberg PKLs through the portal /data-refresh channel and, on confirm, triggers the yang-pipeline
+  bucket: opal-data-portal-v2
+  bucket_source: app/integrations/opal_portal/integration.py:109
+- tool: opal_describe
+  member: a
+  index: catalog:app/refs/DATA_CATALOG.yaml
+  links:
+  - catalog:app/refs/DATA_CATALOG.yaml
+  history_depth:
+    claim: absent
+    reason: no windows entry for the row catalog:app/refs/DATA_CATALOG.yaml
+  freshness:
+    claim: absent
+    reason: no windows entry for the row catalog:app/refs/DATA_CATALOG.yaml
+  bucket: gateway
+  bucket_source: app/integrations/opal_discover/integration.py:194
+- tool: opal_discover
+  member: a
+  index: catalog:app/refs/DATA_CATALOG.yaml
+  links:
+  - catalog:app/refs/DATA_CATALOG.yaml
+  history_depth:
+    claim: absent
+    reason: no windows entry for the row catalog:app/refs/DATA_CATALOG.yaml
+  freshness:
+    claim: absent
+    reason: no windows entry for the row catalog:app/refs/DATA_CATALOG.yaml
+  bucket: gateway
+  bucket_source: app/integrations/opal_discover/integration.py:194
+- tool: poll_addressed_teams_messages
+  member: c
+  reason: Polls the caller's own Teams chats for those whose latest message arrived after a given UTC time, returning the new messages with sender, preview and mention flag [app/tools.py:1873]
+  bucket: graph
+  bucket_source: app/tools.py:1707
+- tool: profile_site_file
+  member: c
+  reason: Downloads one SharePoint site file server-side under the caller's delegated access and returns only statistics (hash, line lengths, delimiter counts, sample lines), not the full text [app/tools.py:733]
+  bucket: graph
+  bucket_source: app/tools.py:744
+- tool: read_channel_messages
+  member: c
+  reason: Reads the recent top-level messages of one Teams channel the caller can see, newest first, with their attachment references [app/tools.py:1793]
+  bucket: graph
+  bucket_source: app/tools.py:1013
+- tool: read_chat_message_images
+  member: c
+  reason: Reads the images pasted inline into one message of one of the caller's own Teams chats (its hosted contents) and returns them as image content for the model to see [app/tools.py:1702]
+  bucket: graph
+  bucket_source: app/tools.py:1591
+- tool: read_chat_messages
+  member: c
+  reason: Reads recent messages of one of the caller's own Teams chats by chat id, newest first, with attachment names and content references [app/tools.py:1693]
+  bucket: graph
+  bucket_source: app/tools.py:1013
+- tool: read_document
+  member: c
+  reason: Renders one Word, PowerPoint or PDF file from the caller's OneDrive or a SharePoint site to a PDF rendition through Graph and returns its size and optionally its base64 bytes [app/tools.py:953]
+  bucket: graph
+  bucket_source: app/tools.py:960
+- tool: read_email
+  member: c
+  reason: Reads the full body and address and conversation fields of one message in the caller's own mailbox, by message id [app/tools.py:351]
+  bucket: graph
+  bucket_source: app/tools.py:351
+- tool: read_file
+  member: c
+  reason: Reads the text content of one file in the caller's own OneDrive by item id, returning a hint to a workbook or document reader instead of decoding binary Office or PDF bytes [app/tools.py:682]
+  bucket: graph
+  bucket_source: app/tools.py:682
+- tool: read_meeting_transcript
+  member: c
+  reason: Reads the speaker-attributed text of one transcript of an online meeting the caller can access, one byte-range page at a time with a sha256 of the full body [app/tools.py:595]
+  bucket: graph
+  bucket_source: app/tools.py:606
+- tool: read_site_file
+  member: c
+  reason: Reads the text content of one SharePoint site file by site id and item id under the caller's delegated access, returning a hint for binary Office or PDF bytes [app/tools.py:717]
+  bucket: graph
+  bucket_source: app/tools.py:719
+- tool: read_site_workbook
+  member: c
+  reason: Reads the used-range cell grid of one worksheet of an xlsx workbook held in a SharePoint site, via the Graph Workbook API under the caller's delegated access [app/tools.py:866]
+  bucket: graph
+  bucket_source: app/tools.py:871
+- tool: read_teams_attachment
+  member: c
+  reason: Resolves a file attachment on a Teams chat or channel message to the file in the sender's OneDrive or the channel's SharePoint library, then reads its text content [app/tools.py:1203]
+  bucket: graph
+  bucket_source: app/tools.py:1220
+- tool: read_workbook
+  member: c
+  reason: Reads the used-range cell grid of one worksheet of an xlsx workbook in the caller's own OneDrive, via the Graph Workbook API [app/tools.py:894]
+  bucket: graph
+  bucket_source: app/tools.py:897
+- tool: reply_email
+  member: c
+  reason: sends a reply to an email as the caller through Graph
+  bucket: graph
+  bucket_source: app/tools.py:490
+- tool: save_email_attachment_to_site
+  member: c
+  reason: fetches one email attachment and writes it into a SharePoint site folder
+  bucket: graph
+  bucket_source: app/tools.py:384
+- tool: schwab_describe_dataset
+  member: a
+  index: schwab_dim_asset
+  links:
+  - schwab_dim_asset
+  - schwab_dim_balance
+  - schwab_dim_position
+  - schwab_dim_transaction
+  depth: &schwab_depth
+    claim: per-link
+    links:
+    - row: schwab_dim_asset
+      listing: {contract_dataset: dim_asset}
+    - row: schwab_dim_balance
+      listing: {contract_dataset: dim_balance}
+    - row: schwab_dim_position
+      listing: {contract_dataset: dim_position}
+    - row: schwab_dim_transaction
+      listing: {contract_dataset: dim_transaction}
+  freshness:
+    claim: absent
+    reason: the tool describes the dataset's fields, types and grain from the contract; it reads no dated data, so there
+      is no served prefix to list a date from
+- tool: schwab_get_access
+  member: c
+  reason: Reports the caller's own Schwab grant revision, scope and per-dataset availability status, a grant report rather than a dataset read [app/integrations/schwab/integration.py:423]
+  bucket: opal-data-assets
+  bucket_source: deploy/NFRA_OPLGTW_CONTRACT.json:301
+- tool: schwab_list_files
+  member: a
+  index: schwab_dim_asset
+  links:
+  - schwab_dim_asset
+  - schwab_dim_balance
+  - schwab_dim_position
+  - schwab_dim_transaction
+  depth: *schwab_depth
+  freshness:
+    claim: absent
+    reason: 'a live-queried silver row has no served artifact to list: the dataset is read through its producer under the
+      caller''s own grant, so there is no S3 prefix of this catalog to read a date from'
+- tool: schwab_prepare_download
+  member: c
+  reason: issues a 5-minute Gateway download ticket (an audited release record) for a filtered CSV; the ticket is a write,
+    the data is read at redemption
+  bucket: opal-data-assets
+  bucket_source: deploy/NFRA_OPLGTW_CONTRACT.json:301
+- tool: schwab_query
+  member: a
+  index: schwab_dim_asset
+  links:
+  - schwab_dim_asset
+  - schwab_dim_balance
+  - schwab_dim_position
+  - schwab_dim_transaction
+  depth: *schwab_depth
+  freshness:
+    claim: absent
+    reason: 'a live-queried silver row has no served artifact to list: the dataset is read through its producer under the
+      caller''s own grant, so there is no S3 prefix of this catalog to read a date from'
+- tool: search_email
+  member: c
+  reason: Runs a full-text search over the caller's own mailbox (subject, body and sender) and returns the matching message summaries [app/tools.py:341]
+  bucket: graph
+  bucket_source: app/tools.py:340
+- tool: search_files
+  member: c
+  reason: Runs a name and content search over the caller's own OneDrive and returns the matching file ids, sizes, modified times and web URLs [app/tools.py:657]
+  bucket: graph
+  bucket_source: app/tools.py:656
+- tool: search_site_files
+  member: c
+  reason: Runs a name and content search over the default document library of one SharePoint site under the caller's delegated access [app/tools.py:916]
+  bucket: graph
+  bucket_source: app/tools.py:916
+- tool: send_channel_message
+  member: c
+  reason: posts a message into a Team channel as the caller
+  bucket: graph
+  bucket_source: app/tools.py:1697
+- tool: send_chat_message
+  member: c
+  reason: posts a message into a Teams chat as the caller
+  bucket: graph
+  bucket_source: app/tools.py:1648
+- tool: send_email
+  member: c
+  reason: 'POSTs /me/sendMail: sends an email as the caller (confirm-gated by a blast cap)'
+  bucket: graph
+  bucket_source: app/tools.py:481
+- tool: upload_text_to_site
+  member: c
+  reason: writes a small text file into a SharePoint site folder
+  bucket: graph
+  bucket_source: app/tools.py:830
+- tool: validate_ssavail_attachment
+  member: c
+  reason: Fetches one email attachment in the caller's own mailbox server-side and checks it against the SSAVAIL content contract, returning a verdict, a sha256 and a byte count and writing nothing [app/tools.py:788]
+  bucket: graph
+  bucket_source: app/tools.py:801
+- tool: whoami
+  member: c
+  reason: Reads the signed-in caller's own Microsoft profile (display name, mail, user principal name, job title, department) from Graph /me [app/tools.py:214]
+  bucket: graph
+  bucket_source: app/tools.py:212
+- tool: ycharts_freshness
+  member: c
+  reason: one authenticated GET that probes whether the shared YCharts session is live; returns session status, no dataset
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:130
+- tool: ycharts_fund_series
+  member: c
+  reason: Passes one YCharts fund_data call through and returns its native daily series, a vendor API pass-through with no served dataset read [app/integrations/ycharts/integration.py:160]
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:165
+- tool: ycharts_risk_return_scatter
+  member: c
+  reason: Passes one YCharts scatter_plot_data query through and returns the risk and return series it holds, a vendor API pass-through [app/integrations/ycharts/integration.py:173]
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:178
+- tool: ycharts_search
+  member: c
+  reason: Passes one YCharts suggest search through to the vendor and returns its category-keyed suggestions, a vendor API pass-through [app/integrations/ycharts/integration.py:187]
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:191
+- tool: ycharts_snapshot_metrics
+  member: c
+  reason: Passes one YCharts indices table_data call through and returns the per-column values, a vendor API pass-through [app/integrations/ycharts/integration.py:134]
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:139
+- tool: ycharts_time_series
+  member: c
+  reason: Passes one YCharts general_data history call through and returns the time series points, a vendor API pass-through [app/integrations/ycharts/integration.py:147]
+  bucket: ycharts
+  bucket_source: app/integrations/ycharts/integration.py:152
+- tool: harvest_get_article
+  member: b
+  owner: AMGT_HARVST
+  reason: Reads the newest article_security_mention part and one silver article partition for one article, and no catalog row indexes this tool; a row naming the harvest article partitions would create one [app/harvest_press.py:493]
+  bucket: opal-data-harvest
+  bucket_source: app/harvest_read.py:26
+- tool: harvest_get_chatter
+  member: a
+  index: harvest_chatter_daily
+  links:
+  - harvest_chatter_daily
+  - harvest_chatter_event
+  - harvest_chatter_window
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_chatter_daily
+      claim: inferred
+      value: 2026-09-22..2026-10-08
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_chatter_daily
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_chatter_event
+      claim: inferred
+      value: 2026-09-22..2026-10-03
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_chatter_event
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_chatter_window
+      claim: inferred
+      value: 2026-10-04..2026-10-04
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_chatter_window
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_get_filing_analysis
+  member: a
+  index: harvest_drafting_v1
+  links:
+  - harvest_drafting_v1
+  - harvest_filings_v1
+  - harvest_issuer_site_harvest_silver_filing_source
+  - harvest_sec_harvest_silver_filing_source
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_drafting_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_drafting_v1
+    - row: harvest_filings_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_filings_v1
+    - row: harvest_issuer_site_harvest_silver_filing_source
+      claim: inferred
+      value: 2026-09-22..2026-09-22
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_issuer_site_harvest_silver_filing_source
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_sec_harvest_silver_filing_source
+      claim: inferred
+      value: 2026-09-22..2026-10-09
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_sec_harvest_silver_filing_source
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_get_fundamentals
+  member: a
+  index: harvest_bloomberg_harvest_bronze_bestdata
+  links:
+  - harvest_bloomberg_harvest_bronze_bestdata
+  - harvest_bloomberg_harvest_bronze_exec_officers
+  - harvest_bloomberg_harvest_bronze_histdata
+  - harvest_bloomberg_harvest_bronze_histdata_daily_px
+  - harvest_bloomberg_harvest_bronze_price_history_px_last
+  - harvest_bloomberg_harvest_bronze_price_history_tot_return
+  - harvest_bloomberg_harvest_bronze_refdata
+  - harvest_bloomberg_harvest_bronze_segments
+  - harvest_derived_model_block
+  - harvest_derived_model_block_fye
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_bloomberg_harvest_bronze_bestdata
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_bestdata
+    - row: harvest_bloomberg_harvest_bronze_exec_officers
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_exec_officers
+    - row: harvest_bloomberg_harvest_bronze_histdata
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_histdata
+    - row: harvest_bloomberg_harvest_bronze_histdata_daily_px
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_histdata_daily_px
+    - row: harvest_bloomberg_harvest_bronze_price_history_px_last
+      claim: inferred
+      value: 2026-10-02..2026-10-16
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_bloomberg_harvest_bronze_price_history_px_last
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_bloomberg_harvest_bronze_price_history_tot_return
+      claim: inferred
+      value: 2026-10-13..2026-10-16
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_bloomberg_harvest_bronze_price_history_tot_return
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_bloomberg_harvest_bronze_refdata
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_refdata
+    - row: harvest_bloomberg_harvest_bronze_segments
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_segments
+    - row: harvest_derived_model_block
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_derived_model_block
+    - row: harvest_derived_model_block_fye
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_derived_model_block_fye
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_get_peers_and_scores
+  member: a
+  index: harvest_peers_v1
+  links:
+  - harvest_peers_v1
+  - harvest_posture_v1
+  - harvest_scores_v1
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_peers_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_peers_v1
+    - row: harvest_posture_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_posture_v1
+    - row: harvest_scores_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_scores_v1
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_get_research
+  member: a
+  index: harvest_ai_fill
+  links:
+  - harvest_ai_fill
+  - harvest_amgt_harvest_silver_research_report
+  - harvest_management_v1
+  - harvest_research-continuation
+  - harvest_research-dossier
+  - harvest_research_dossier
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_ai_fill
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_ai_fill
+    - row: harvest_amgt_harvest_silver_research_report
+      claim: inferred
+      value: 2026-09-23..2026-09-25
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_amgt_harvest_silver_research_report
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_management_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_management_v1
+    - row: harvest_research-continuation
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_research-continuation
+    - row: harvest_research-dossier
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_research-dossier
+    - row: harvest_research_dossier
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_research_dossier
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_query_columns
+  member: a
+  index: harvest_candidate_universe
+  links:
+  - harvest_candidate_universe
+  history_depth:
+    claim: inferred
+    value: 2026-08-06..2026-10-02
+    basis: s3://opal-data-harvest/
+    source: first-level partition listing of the row harvest_candidate_universe
+    method: partition-listing
+    read_at: '2026-10-19T19:42:28Z'
+  freshness:
+    claim: measured
+    value: '2026-10-02'
+    basis: s3://opal-data-harvest/
+    method: key-date
+    read_at: '2026-10-19T19:42:28Z'
+- tool: harvest_resolve_security
+  member: a
+  index: harvest_bloomberg_harvest_bronze_identity
+  links:
+  - harvest_bloomberg_harvest_bronze_identity
+  - harvest_crosswalk_v1
+  - harvest_identity_v1
+  - harvest_universe_v1
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_bloomberg_harvest_bronze_identity
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_bloomberg_harvest_bronze_identity
+    - row: harvest_crosswalk_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_crosswalk_v1
+    - row: harvest_identity_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_identity_v1
+    - row: harvest_universe_v1
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row harvest_universe_v1
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_search_articles
+  member: a
+  index: harvest_article_security_mention
+  links:
+  - harvest_article_security_mention
+  - harvest_article_sentiment
+  - harvest_barrons_harvest_silver_article
+  - harvest_bloomberg_harvest_silver_article
+  - harvest_ft_harvest_silver_article
+  - harvest_seeking_alpha_harvest_silver_article
+  - harvest_wsj_harvest_silver_article
+  history_depth:
+    claim: per-link
+    links:
+    - row: harvest_article_security_mention
+      claim: inferred
+      value: 2026-09-22..2026-10-08
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_article_security_mention
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_article_sentiment
+      claim: inferred
+      value: 2026-10-03..2026-10-03
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_article_sentiment
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_barrons_harvest_silver_article
+      claim: inferred
+      value: 2026-09-15..2026-10-19
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_barrons_harvest_silver_article
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_bloomberg_harvest_silver_article
+      claim: inferred
+      value: 2026-09-15..2026-10-15
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_bloomberg_harvest_silver_article
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_ft_harvest_silver_article
+      claim: inferred
+      value: 2026-09-15..2026-10-02
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_ft_harvest_silver_article
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_seeking_alpha_harvest_silver_article
+      claim: inferred
+      value: 2026-09-11..2026-10-19
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_seeking_alpha_harvest_silver_article
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+    - row: harvest_wsj_harvest_silver_article
+      claim: inferred
+      value: 2026-09-15..2026-10-19
+      basis: s3://opal-data-harvest/
+      source: first-level partition listing of the row harvest_wsj_harvest_silver_article
+      method: partition-listing
+      read_at: '2026-10-19T19:42:28Z'
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: harvest_security_coverage
+  member: a
+  index: harvest_packs
+  links:
+  - harvest_packs
+  history_depth:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row harvest_packs
+  freshness:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row harvest_packs
+- tool: news_for_security
+  member: b
+  owner: unowned
+  reason: Reads the newest harvest news mention part and returns the rows for one security inside a window, and no catalog row indexes this tool; a row naming that mention index part would create one [app/news_typed.py:595]
+  bucket: opal-data-harvest
+  bucket_source: app/harvest_read.py:26
+- tool: news_keyword_intelligence
+  member: a
+  index: dynamodb_dynamodb_opal_keyword_intelligence
+  links:
+  - dynamodb_dynamodb_opal_keyword_intelligence
+  history_depth:
+    claim: absent
+    reason: no windows entry for the row dynamodb_dynamodb_opal_keyword_intelligence
+  freshness:
+    claim: absent
+    reason: no windows entry for the row dynamodb_dynamodb_opal_keyword_intelligence
+- tool: news_market_mood
+  member: a
+  index: opal_data_portal_v2_served_news_trending_and_sentiment
+  links:
+  - opal_data_portal_v2_served_news_trending_and_sentiment
+  - opal_data_portal_v2_served_sentiment_singletons
+  history_depth:
+    claim: per-link
+    links:
+    - row: opal_data_portal_v2_served_news_trending_and_sentiment
+      claim: absent
+      reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_news_trending_and_sentiment
+    - row: opal_data_portal_v2_served_sentiment_singletons
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_sentiment_singletons
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: news_search_articles
+  member: a
+  index: dynamodb_dynamodb_opal_news_articles
+  links:
+  - dynamodb_dynamodb_opal_news_articles
+  history_depth:
+    claim: absent
+    reason: no windows entry for the row dynamodb_dynamodb_opal_news_articles
+  freshness:
+    claim: absent
+    reason: no windows entry for the row dynamodb_dynamodb_opal_news_articles
+- tool: news_trending_topics
+  member: a
+  index: dynamodb_dynamodb_opal_news_trending_daily
+  links:
+  - dynamodb_dynamodb_opal_news_trending_daily
+  - opal_data_news_v2_gold_trending_reports
+  history_depth:
+    claim: per-link
+    links:
+    - row: dynamodb_dynamodb_opal_news_trending_daily
+      claim: absent
+      reason: no windows entry for the row dynamodb_dynamodb_opal_news_trending_daily
+    - row: opal_data_news_v2_gold_trending_reports
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_news_v2_gold_trending_reports
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: portal_get_macro
+  member: a
+  index: opal_data_portal_v2_served_macro_data
+  links:
+  - opal_data_portal_v2_served_macro_data
+  - opal_data_portal_v2_served_macro_timeseries
+  - opal_data_portal_v2_served_volatility_data
+  - opal_data_portal_v2_served_yield_curve_fred
+  history_depth:
+    claim: per-link
+    links:
+    - row: opal_data_portal_v2_served_macro_data
+      claim: absent
+      reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_macro_data
+    - row: opal_data_portal_v2_served_macro_timeseries
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_macro_timeseries
+    - row: opal_data_portal_v2_served_volatility_data
+      claim: absent
+      reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_volatility_data
+    - row: opal_data_portal_v2_served_yield_curve_fred
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_yield_curve_fred
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: portal_get_market_regime
+  member: a
+  index: opal_data_portal_v2_served_market_regime
+  links:
+  - opal_data_portal_v2_served_market_regime
+  history_depth:
+    claim: absent
+    reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_market_regime
+  freshness:
+    claim: absent
+    reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_market_regime
+- tool: portal_get_market_returns
+  member: a
+  index: opal_data_portal_v2_served_market_overview_tiered
+  links:
+  - opal_data_portal_v2_served_market_overview_tiered
+  history_depth:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_market_overview_tiered
+  freshness:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_market_overview_tiered
+- tool: portal_get_model_attribution
+  member: a
+  index: opal_data_portal_v2_served_allocation_summary
+  links:
+  - opal_data_portal_v2_served_allocation_summary
+  - opal_data_portal_v2_served_holdings_attribution_data
+  history_depth:
+    claim: per-link
+    links:
+    - row: opal_data_portal_v2_served_allocation_summary
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_allocation_summary
+    - row: opal_data_portal_v2_served_holdings_attribution_data
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_holdings_attribution_data
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: portal_get_model_positioning
+  member: a
+  index: opal_data_portal_v2_served_opal_aggregate
+  links:
+  - opal_data_portal_v2_served_opal_aggregate
+  - opal_data_portal_v2_served_positioning_data
+  history_depth:
+    claim: per-link
+    links:
+    - row: opal_data_portal_v2_served_opal_aggregate
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_opal_aggregate
+    - row: opal_data_portal_v2_served_positioning_data
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_positioning_data
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+- tool: portal_get_pipeline_freshness
+  member: a
+  index: opal_data_portal_v2_served_pipeline_manifest
+  links:
+  - opal_data_portal_v2_served_pipeline_manifest
+  history_depth:
+    claim: absent
+    reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_pipeline_manifest
+  freshness:
+    claim: absent
+    reason: not dated at the first level (kind empty) for the row opal_data_portal_v2_served_pipeline_manifest
+- tool: portal_get_security_scan
+  member: a
+  index: opal_data_portal_v2_served_security_scanner
+  links:
+  - opal_data_portal_v2_served_security_scanner
+  history_depth:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_security_scanner
+  freshness:
+    claim: absent
+    reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_security_scanner
+- tool: portal_get_valuation
+  member: a
+  index: opal_data_portal_v2_served_risk_premium_data
+  links:
+  - opal_data_portal_v2_served_risk_premium_data
+  - opal_data_portal_v2_served_valuation_data
+  history_depth:
+    claim: per-link
+    links:
+    - row: opal_data_portal_v2_served_risk_premium_data
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_risk_premium_data
+    - row: opal_data_portal_v2_served_valuation_data
+      claim: absent
+      reason: not dated at the first level (kind undated) for the row opal_data_portal_v2_served_valuation_data
+  freshness:
+    claim: absent
+    reason: 'a multi-index tool: each linked row has its own freshness'
+
+# MX-c-21: harvest_list is a PENDING tool (served by the deployed census; its entry is in pending_members.yaml, which is not
+# read here). Its declared bucket lives in this top-level list, read by emit_catalog_v02.load_declared_buckets().
+buckets:
+- tool: harvest_list
+  bucket: opal-data-harvest
+  bucket_source: app/harvest_read.py:26
+- tool: harvest_get_published_analysis
+  bucket: opal-data-harvest
+  bucket_source: app/harvest_read.py:26
+- tool: mdpf_get_security_classification
+  bucket: dynamodb
+  bucket_source: app/mdpf_classification.py:34
