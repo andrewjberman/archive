@@ -86,3 +86,36 @@ This half does not cover REVISION 2. A new signature on REVISION 2's sha256 is r
 - My REVISION 1 conditions stand: the sequence, Act 1's audit STOP, the S6 print, and the receipt phrase.
 - Act 6 STOPS above 40 minutes, because the assumed session lasts 1 hour and is not refreshed.
 - **The sequence** is Monday's 49F read, then this pair on Tuesday 10-20, outside the weekday 11:30Z to 14:15Z band.
+
+---
+
+## ADDENDUM 1 -- SIGNED (2026-10-19 ~15:1xZ): the dispatch pin re-pinned to `d2ff692abd23`
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_DASHBD/deliverables/2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md`.
+I re-measured it: blob `dc9618b64ffc23b6fb210af9bfdc1c9800391c63`, equal at c5aeca1595 and in the working tree; sha256
+`115ba6e99cba005ae836018e77987d3ca13d13b5e65061d5ec50a9521d5648aa`; 7,314 bytes. The REVISION 2 packet's bytes are unchanged.
+
+**Read at signing:**
+- `git show HEAD:data/inf/scripts/gold/orion-gold-dispatch.sh` reads sha256 `d2ff692abd23`, 118,883 bytes, equal to the pin.
+- 9bfa234989 is an ancestor of origin/CLOUD.
+- The cross-adjudication condition (XA-20261019T143617Z-d9a9: re-pin to the `d2ff692abd23` content, verified by git show and
+  not by ancestry) is met.
+
+**Accepted:**
+- The rollback target is FB1's upload `hK5vY2H31oT3...` (`9495cd56228b`), never `0JwOjjCw...`.
+- The pre-check `dispatch_diff_check.py` must read `VERDICT: PRE-STATE-OK` before Act 4(d). A live hash that is neither the
+  pre-state nor the pin STOPS the pair.
+- `~F2`'s read that the 10-19 chain could not have run the stage (no `INF_G_01` in either live script, 0 objects at the
+  prefix). No row is owed.
+
+**Ruling on FB1's open ledger** (`advi-firmbkts-fb-p-2-door6-retirement-20261017`, legs L7 and L8):
+- dell1 is asked to close it before the apply.
+- If it is still open at R0, the pair's condition 4 is satisfied ON THE MEASURED ARTIFACT, not on the ledger's flag:
+  - L7 is satisfied when 9bfa234989 reads as an ancestor of CLOUD, measured at R0.
+  - L8 is satisfied when the R0 read shows `pipeline-complete.json` has gained no new version since 2026-10-19T14:22:09Z,
+    across at least one completed Inflection gold chain (Tuesday's 11:3xZ chain), with the version list printed.
+  - If either read fails, the pair STOPS.
+- This seat does not close dell1's ledger.
+
+**Unchanged:** every other REVISION 2 condition, including the Tuesday timing outside the band and never alongside another
+IB2 act.
