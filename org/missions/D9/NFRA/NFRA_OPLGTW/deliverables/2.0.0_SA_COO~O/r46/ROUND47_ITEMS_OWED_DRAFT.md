@@ -32,3 +32,9 @@ Added 2026-10-19 ~17:5xZ (urgent session, Alyssa 19:00Z):
 | 12 | Z-S409..Z-S412: D1, D2 (ARMED, Z-S410: Cottonwood answers an empty list as if the account had none), D3, S1 | CRO~Z msg 36027 | rows filed with me as disarm owner |
 | 13 | Menachem's Schwab grant, the same shape as Alyssa's, over the full current accounts; activate AFTER her 19:00Z session proves the shape; own never-widen | Andrew-direct via CTO msg 36049, record `ANDREW_DIRECT_20261019_175xZ_ROSTER_OPEN_CALLS_YES_TO_RECS_SCRATCH_NO_REC_WIDENINGS.md` @50bd4a33b4 | not granted: Wayne's client tools, AJ's Black Diamond fees, Yang's Schwab access |
 | 14 | The `client_*` tools for Alyssa and for Menachem, each under its own never-widen | same record | sequenced AFTER D1-D3 (items 6-8) land |
+
+Added ~18:4xZ (Andrew-direct, gateway resize):
+
+| # | item | source | note |
+|---|---|---|---|
+| 15 | Resize the gateway EC2 (`i-07dccb1615503ac99`) from `t4g.small` to `t4g.large`: `main.tf:172` through `safe-apply` (the stop/start is confirmed by his word), the contract's `target_instance_type` with it, and a release raising the unit's `MemoryHigh`/`MemoryMax` to fit 8 GiB with the `test_og_un1` bounds moved to match; ONE deploy ledger, rollback to `t4g.small`; AFTER Alyssa's session, off-hours; tell `0.0.0_AB_MSTR~Z` the window so the other boxes know the gateway is down | CTO msg (record `ANDREW_DIRECT_20261019_183xZ_GATEWAY_EC2_RESIZE_TO_T4G_LARGE.md` @439343a969); MSTR~Z relay 36070 (Andrew: "Dont mind the gateway, we need to get it up to a larger EC2 because it's choking on large requests on small"; site Z's principal priority is to test and optimize the gateway, with that move) | supersedes the laptop's 17:23Z-release inference as the cause of the hang |
