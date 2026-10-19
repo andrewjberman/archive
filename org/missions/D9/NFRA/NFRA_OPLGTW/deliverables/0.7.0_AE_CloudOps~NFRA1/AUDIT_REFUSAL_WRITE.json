@@ -44,8 +44,8 @@
    "start": "2026-10-19T02:57:25Z",
    "end": "2026-10-19T02:57:27Z"
   },
-  "verdict": "NOT_EXPOSED",
-  "reason": "no POST /mcp line answered 429 in the retained window and no route exposes the counter; 0 lake rows",
+  "verdict": "FAILS",
+  "reason": "by the amended rule as written: the writer test's object was written under the instance role (put returned, key printed) but the process's read-back was AccessDenied (the instance role has no get on the lake); the runner's own read of the object succeeded; the writer itself works",
   "ev7_journal_crosscheck": {
    "window": "2026-10-18T21:08:00Z to 21:09:05Z",
    "source": "journalctl -u opal-gateway --since/--until, lines counted by class (counts only)",
@@ -56,6 +56,24 @@
    "post_mcp_lines": 0,
    "other_lines": "1 (an outbound Microsoft Graph client request line, not an access line)",
    "reading": "the hx_teams lake record has its journal line (GET /hx/teams/chats, 200); the journal's POST /mcp is 0 because the window held no /mcp request; the 9 peers records are in-call source reads. No service /mcp record is missing from the journal."
+  },
+  "writer_test": {
+   "key_label": "OG-ev-10 (synthetic principal, no real identity)",
+   "lake_key": "audit/dt=2026-10-19/2026-10-19T05:22:48.598766+00:00-bc8d907c.jsonl",
+   "written": true,
+   "read_back": false,
+   "instance_role": true,
+   "halves": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/1.0.0_SA_CTO~Z/NEVER_WIDEN_HALF_CTO_OG-ev-10_20261019.md; org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/NEVER_WIDEN_HALF_COO_OG-ev-10_20261019.md; org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/3.0.0_SA_CVO~Z/NEVER_WIDEN_HALF_CVO_OG-ev-10_20261019.md",
+   "put_error_class": null,
+   "audit_failure_count_after": 0,
+   "objects_under_synthetic_principal": 1,
+   "guard": "oom_score_adj_1000_cgroup_memmax_1400mb",
+   "service_pid_stable": true,
+   "nrestarts_after": "0",
+   "read_back_by_the_host_process_under_the_instance_role": false,
+   "host_get_object_error_class": "AccessDenied",
+   "read_back_by_the_runner_with_this_seats_own_role": true,
+   "note": "The put under the instance role RETURNED (written true) and the object exists in the lake: this seat's own role read it back (one row, event gw_ratelimit, a synthetic OG-ev-10 principal). The ask defined the read-back as the guarded host process's get_object under the instance role, and that call was AccessDenied: the instance role can put to the lake but cannot read it. read_back therefore stays false as the ask defined it; the verdict below is the amended rule applied as written, and whether a runner-side read counts is the issuer's ruling."
   }
  }
 }
