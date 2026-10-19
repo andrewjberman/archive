@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-170",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-170.producer-guard-held-price-layout-and-stale-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "6b9d741e44"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R59_G.md",
+    "vintage_commit": "092a308769",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-170.producer-guard-held-price-layout-and-stale-tests.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~308",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "44afdd5d89",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_ANLREQ-D2-W308-S1 appended at the end of the channel file; python .tools/surprise-row-gate.py --check on the file printed OK: 1 file(s), all new rows carry their step-7/step-10 fields (rc=0). Nothing deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR170-g-AC1",
+      "criterion_verbatim": "the producer completes against a layout without PRICE_TABLE and without the prices keyword (no opal.prices.holdings), and with the layout untouched it lists the element and passes prices. At base it FAILs (the test file does not exist: no tests ran).",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 100 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_producer_held_layout_guard.py",
+      "output_evidence": "no tests ran in 0.00s (rc=4, measured at base 2026-10-19 in C:/dev/wk-irpt-anlreq-308 under timeout 100; the file ycharts/research/tests/test_producer_held_layout_guard.py does not exist yet, and Part B was not written because the worktree cannot import the producer, see IRPT_ANLREQ-D2-W308-S1)",
+      "denominator": "0 of 0 tests collected (file absent)",
+      "expect": "^[0-9]+ passed in",
+      "status": "FAIL",
+      "status_reason": "BLOCKED: the guard test file was not written; the invocation returns rc=4 (no tests ran) in this worktree. The cell cannot start until the worktree carries ycharts/session (IRPT_ANLREQ-D2-W308-S1)."
+    },
+    {
+      "criterion_id": "AR170-g-AC2",
+      "criterion_verbatim": "the 8 stale tests plus the rest of those four files pass (at base: 8 failed, 24 passed).",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 100 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_opal_producer_not_in_this_version.py ycharts/research/tests/test_price_pages_table.py ycharts/research/tests/test_price_pages_series.py ycharts/research/tests/test_price_pages_text.py",
+      "output_evidence": "4 errors in 0.86s (rc=2; Interrupted: 4 errors during collection; each file: ModuleNotFoundError: No module named 'operation_lease', raised from ycharts/research/runner.py:28 via opal_producer.py:60; measured at base under timeout 100, not the order's recorded 8 failed, 24 passed)",
+      "denominator": "0 of 0 tests run; 4 of 4 files fail at collection (the order's base was 8 failed of 32 collected)",
+      "expect": "^[0-9]+ passed in",
+      "status": "FAIL",
+      "status_reason": "BLOCKED: all four files fail at collection on operation_lease (ycharts/session absent from the sparse set); no test was repaired and none ran."
+    },
+    {
+      "criterion_id": "AR170-g-AC3",
+      "criterion_verbatim": "the six existing files that pass at base keep passing (at base: 146 passed). If your change moves the count, say so in the report.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 115 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_opal_producer.py ycharts/research/tests/test_opal_producer_prices.py ycharts/research/tests/test_opal_producer_page_wording.py ycharts/research/tests/test_price_pages_repoint.py ycharts/research/tests/test_layout_overview.py ycharts/research/tests/test_runner.py",
+      "output_evidence": "5 errors in 1.11s (rc=2; Interrupted: 5 errors during collection; the same ModuleNotFoundError: No module named 'operation_lease' from runner.py:28; measured at base under timeout 115, not the order's recorded 146 passed)",
+      "denominator": "0 of 0 tests run; 5 collection errors reported for the 6 named files (the per-file split was not captured; the order's base was 146 passed)",
+      "expect": "^[0-9]+ passed in",
+      "status": "FAIL",
+      "status_reason": "BLOCKED: all six files fail at collection on operation_lease (ycharts/session absent from the sparse set); no test ran."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant; the order's DIFFERENCE CONTROL (Part B arm 2) was not written because the cell could not start.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison: the criteria could not be collected in this worktree, so there is no output to compare.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Part A (opal_producer.py guard), Part B (test_producer_held_layout_guard.py) and Part C (repair of the 8 stale tests)",
+      "reason": "Not written. The three acceptance invocations cannot import the producer in this worktree (sparse checkout lacks infra/aws/lambda/investor-reporting/ycharts/session, which runner.py imports; see IRPT_ANLREQ-D2-W308-S1). Writing and committing an unverified edit to a WORLD producer path was refused; the cell is returned to the issuer as BLOCKING."
+    },
+    {
+      "item": "Repairing the worktree (git sparse-checkout add, copying operation_lease.py from another checkout, or PYTHONPATH)",
+      "reason": "Each would change the tree or the provenance of the verdict; the order's worker rules require a BLOCKING row and report in that case, not a reconstruction of the tree."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W308-S1: the worktree is a sparse checkout without ycharts/session, so opal_producer.py and every research test fail at import on operation_lease; all three criteria are BLOCKING and FAIL at base in this worktree."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-308; TREE-OK || Bash: python -m pytest --color=no -q -p no:cacheprovider on the AC2 files (4 errors in 0.86s, rc=2), AC1 file (no tests ran, rc=4), AC3 files (5 errors in 1.11s, rc=2); all collection errors on operation_lease || Bash: git ls-tree HEAD infra/aws/lambda/investor-reporting/ycharts/session/operation_lease.py -> blob 54f4dd1a823bbeafd4f537df1823009da6d0cb45; git sparse-checkout list names ycharts/research but not ycharts/session || Bash: python .tools/surprise-row-gate.py --check on INVESTIGATION_v1.md -> rc=0 (1 new row); safe-commit of the row -> 44afdd5d89 LOCAL on wk-IRPT_ANLREQ-308",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider <order AC file lists>",
+      "result": "collection errors on operation_lease at base; no test executed"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; rc=0"
+    }
+  ]
+}
