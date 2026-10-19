@@ -1,0 +1,1 @@
+Held under option (b), COO half G3 and CTO half: activating Andrew's grant re-creates his email_deny record (legacy consent sign-in 403) and removing it is a delete this order forbids; his grant revision stays 1; a follow-on order handles it.
