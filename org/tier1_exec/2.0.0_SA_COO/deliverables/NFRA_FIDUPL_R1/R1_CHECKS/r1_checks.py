@@ -293,8 +293,11 @@ def x1_run():
             return out("%s-FAIL no run record under %s" % (tag, prefix))
         rec = json.loads(s3.get_object(Bucket=m.group(1), Key=best["Key"])["Body"].read().decode("utf-8"))
         landed = [f for f in rec.get("files", []) if f.get("action") == "landed"]
-        if rec.get("source") != "automated" or rec.get("failure_class") or len(landed) != 6:
-            return out("%s-FAIL source=%s failure_class=%s landed=%d" % (tag, rec.get("source"), rec.get("failure_class"), len(landed)))
+        failed_files = [f for f in rec.get("files", []) if f.get("action") == "failed"]
+        if (rec.get("source") != "automated" or rec.get("failure_class") or rec.get("failed_step")
+                or rec.get("run_error") or failed_files or len(landed) != 6):
+            return out("%s-FAIL source=%s failure_class=%s failed_step=%s failed_files=%d landed=%d" % (
+                tag, rec.get("source"), rec.get("failure_class"), rec.get("failed_step"), len(failed_files), len(landed)))
         return out("%s-OK source=automated landed=6 content_date=%s" % (tag, rec.get("business_date_in_content")))
     except Exception as e:  # noqa: BLE001
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))

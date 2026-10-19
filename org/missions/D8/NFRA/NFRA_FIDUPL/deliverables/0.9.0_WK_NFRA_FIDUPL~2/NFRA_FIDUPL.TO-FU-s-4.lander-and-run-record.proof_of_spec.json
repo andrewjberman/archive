@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-4.lander-and-run-record.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "37a9865739"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/land.py",
+      "kind": "script",
+      "commit_or_etag": "b3fd2a9ded",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-2 (LOCAL); not deployed to the box or to S3 (the live grant is FU-s-6's)",
+      "artifact_covered_by": ["FU4-AC1", "FU4-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_land.py",
+      "kind": "test",
+      "commit_or_etag": "b3fd2a9ded",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-2 (LOCAL); a test file, not deployed",
+      "artifact_covered_by": ["FU4-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU4-AC1",
+      "criterion_verbatim": "the ten named tests exist and pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu4",
+      "output_evidence": "R1-FU4-OK passed=11",
+      "denominator": "10 of 10 named tests present in test_land.py; 11 passed (the ten named plus test_dry_run_passes_builder_refusal_as_exit_2)",
+      "status": "PASS",
+      "expect": "R1-FU4-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FU4-AC2",
+      "criterion_verbatim": "the real naming builder resolves all six destinations in a dry run.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu4d",
+      "output_evidence": "R1-FU4D-OK dests=6",
+      "denominator": "6 of 6 destinations resolved by opal_naming.address in the dry run",
+      "status": "PASS",
+      "expect": "R1-FU4D-OK dests=6"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Disabled the trading-day gate in land.py (if not trading becomes if False); the Saturday-date test must fail.",
+      "expected": "test_non_trading_day_is_failure fails",
+      "observed": "1 failed, 10 deselected: AssertionError: assert None == 'content date is not a trading day'; file restored byte-identical",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two dry-run calls of land.py on one synthetic six-file handoff; the two outputs compared with cmp",
+      "observed": "identical; rc 0 on both runs; six DRYRUN dest= lines each",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "listing.json sha256 cross-check against the computed bytes",
+      "reason": "not in the TO; the lander computes its own sha256 from the bytes and does not compare it with the listing row"
+    },
+    {
+      "item": "config-file fallback for locating lib/opal_naming.py (reference section 9)",
+      "reason": "recorded as NFRA_FIDUPL-D1-W2-S4; left for FU-s-5 or FU-s-7"
+    },
+    {
+      "item": "live S3 writes",
+      "reason": "every write in the tests goes to a recording fake; the live grant and any live run belong to FU-s-6 and FU-x-1"
+    },
+    {
+      "item": "the TO status flip if the gate refuses it",
+      "reason": "carried by NFRA_FIDUPL-D1-W2-S6 until the flip lands in this commit"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W2-S1: BLOCKING, INERT -- git refused to stage the new canonical-fidelity files before the issuer added the directory to the sparse definition; resolved by the issuer, the code commit then landed as b3fd2a9ded.",
+    "NFRA_FIDUPL-D1-W2-S2: ARMED (disarm owner 2.0.0_SA_COO~P1) -- the closed failure_class set has no class for file-level failures; a failed run can carry failure_class null with a non-null failed_step.",
+    "NFRA_FIDUPL-D1-W2-S3: INERT -- a re-served day with different bytes is refused and never overwritten; the TO does not say what to do.",
+    "NFRA_FIDUPL-D1-W2-S4: INERT -- the reference section 9 config fallback for the lib locator is not built.",
+    "NFRA_FIDUPL-D1-W2-S5: INERT -- the run record carries keys beyond reference section 6 and a dry-run action named planned.",
+    "NFRA_FIDUPL-D1-W2-S6: BLOCKING, INERT -- the TO status flip sat outside the paths block; the coordinator admitted the flip in the same commit as this proof instance."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~2/NFRA_FIDUPL.TO-FU-s-4.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_land.py",
+      "result": "11 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/land.py infra/aws/ec2/canonical-fidelity/tests/test_land.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~2 <0.9.0_WK_NFRA_FIDUPL~2@opal.agent>\" -F <msgfile> -- <the two code paths>",
+      "result": "rc=0; committed b3fd2a9ded on wk-NFRA_FIDUPL-2"
+    }
+  ]
+}
