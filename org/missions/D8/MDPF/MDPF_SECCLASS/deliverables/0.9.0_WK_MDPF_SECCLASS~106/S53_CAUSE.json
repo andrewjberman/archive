@@ -1,0 +1,26 @@
+{
+  "dates": [
+    {"date": "2026-10-05", "residue": -32073.9188, "classes": {"unsplit_excluded_rows": -32073.9188}},
+    {"date": "2026-10-06", "residue": -32192.9294, "classes": {"unsplit_excluded_rows": -32192.9294}},
+    {"date": "2026-10-07", "residue": -32003.0799, "classes": {"unsplit_excluded_rows": -32003.0799}},
+    {"date": "2026-10-09", "residue": 0.0, "classes": {"unsplit_excluded_rows": 0.0}},
+    {"date": "2026-10-10", "residue": 0.0, "classes": {"unsplit_excluded_rows": 0.0}}
+  ],
+  "step": {
+    "file": "data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py",
+    "line": 813,
+    "quote": "pos = pos.dropna(subset=['relationship_id'])"
+  },
+  "calendar": {
+    "file": "lib/trading_calendar.py",
+    "function": "is_trading_day"
+  },
+  "cause_named": false,
+  "not_read": [
+    "per-class split of the 1,883 excluded rows: the producer classifier shared client lib/_shared/etf_classifications_dynamodb.py is absent from the worktree (surprise MDPF_SECCLASS-D1-W106-S2); the residue is therefore recorded under one key, unsplit_excluded_rows",
+    "accounts_dimension_latest.parquet and account_performance.parquet were read at their current versions, not the versions the fire read; the gate simulation reproduces the pinned served post totals on 2026-10-05, 06, 07, 09, 10 and 12 to 4 decimals, so the basis holds for those dates",
+    "the upstream writer of the weekday-only bd rows for the 126 excluded accounts (B_00 canonical holdings) was not read; why those rows appear on Monday-to-Thursday partitions and not Friday-to-Sunday is not traced",
+    "lib/trading_calendar.py is not called by C_06 or B_00 on this path (grep); the calendar entry names is_trading_day as the weekday rule that exists, not one the step reads"
+  ],
+  "summary": "Gap is an exclusion, not a class yet named: 1,883 rows of 126 accounts absent from accounts_dimension (null relationship_id) are dropped by C_06 line 813 dropna(relationship_id); the residue equals minus the change in that excluded mass to the cent on Mon-Thu, zero Fri/Sat; the weekday split sits in the canonical input and the step has no weekday rule."
+}

@@ -1,0 +1,66 @@
+<task_order>
+  <metadata>
+    <id>MDPF_SECCLASS.TO-SC-e117b.april-table-candidacy-ship</id>
+    <issued_by>2.0.0_SA_COO~M1</issued_by>
+    <issued_to>0.7.0_AE_CloudOps~DELL1</issued_to>
+    <date>2026-10-19</date>
+    <status>staged</status>
+    <project_code>MDPF_SECCLASS</project_code>
+    <round>30</round>
+  </metadata>
+<risk>WORLD</risk>
+<proof_genre>DEPLOY</proof_genre>
+<decomp_ref>
+<decomp_doc>org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R30.md</decomp_doc> (declares SC-e-117; the ship is the issuer act that follows the drain, by a CloudOps lane under its pair).
+<owned_cells>SC-e-117</owned_cells>
+</decomp_ref>
+
+  <objective>
+    Ship EXACTLY TWO named files to s3://opal-data-bd/code/gold/: (1) E_18.detect_new_securities.py (served ETag 197eac28db037323fbb3f862867589ab, VersionId Sygi3RJFsN5MbrcDa6H49gCB2FHJj_bz -> the repo md5 b844297dea8d05bddf5692c9863a44a4); (2) lib/_shared/etf_classification_scheduled.py (served ETag 40ffa3fac380551704637adc8a3b6ff3, VersionId PXFS5WDfvYHP.8C46EbqxdPgig2bQ.My -> the repo md5 3adc5b1b6b40e0e191cfbcb32e36ff63). Repo = box/dell1 at or after f0d5032ccb; the sources are data/black_diamond/scripts/gold/E_18.detect_new_securities.py and infra/aws/lambda/v2_portal/_shared/etf_classification_scheduled.py.
+    The change: E_18 admits a real ticker that the April resolution table resolves but the canonical table lacks to the scheduled classifier (tagged resolved_via = april_table), and prints one outcome line per such pair; the shared module names resolved_via in _WRITE_FIELDS. Expected: 14 pairs print "unresolved", 0 rows written, no class changes (row D1-S56, CTO msg 8349).
+    gold_dispatch.sh does NOT ship (served ETag 165933f6dd0068a649f9757d9b86f303 stays). No other key, table, Lambda or watermark rides the act. The pair: request org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/NEVER_WIDEN_HALF_REQUEST_SECCLASS_S55_APRIL_TABLE_CANDIDACY_SHIP_20261019.md; its COO half and CTO half must both read SIGNED. Read it first.
+  </objective>
+
+  <hold>
+    THIS ORDER IS STAGED, NOT LIVE. Do NOT act on it, do not open its ledger and do not touch S3 until the issuer 2.0.0_SA_COO~M1 sends a GO that CITES THIS ORDER'S PATH. The GO is not given before: (1) both halves are SIGNED; (2) the 23:00Z fire of 2026-10-19 has stopped (that fire carries the LCFYX row write as its one served change), no bd-gold-layer-runner instance is running and no gold/trigger-pending.json waits (read in the same shell as the act); (3) the next scheduled fire is more than 90 minutes away. THE FIRES ARE: the 04:00Z fire EVERY DAY (rule bd-canonical-prices-daily) and the 23:00Z fallback Monday to Saturday (rule bd-gold-nightly-fallback); read both rules, do not assume the days.
+  </hold>
+
+  <steps>
+    STEP 0 (reads, nothing written): the pair request; the served ETag of EACH key is still the base value above (another ship in between means the delta is not this cell: STOP and report); the md5 of each repo file equals the built value above; runner state and gold/trigger-pending.json; every live worktree's org/critical_paths/.open_deploys/ for an open ledger touching code/gold (CLAUDE.md NEVER-2); name any. Name which safe-deploy invocation moves each of the two keys and STOP if any invocation would move a third key.
+
+    LEG P (before the deploy): a census of every key under s3://opal-data-bd/code/gold/ with its ETag and VersionId (IsLatest only; page and key counts printed) to org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/E117_LEGP_20261019.json; and the table etf-classifications' state: the item count (paginated, client-side), the 13 seeded keys present, the 9 held-out absent, the 14 tickers (BALCX, CIMAX, DODBX, FPE, FSNQX, HBLFX, JBAWX, KAMIX, PCEF, TRRJX, TRRNX, VTTVX, WTM, XPMIX) absent, the first 200 keys of a sorted scan with their last_updated.
+
+    LEG D (the deploy): open the ledger in org/critical_paths/change_management/ (name both the sentinel and the entry); then, outside a BD fire, ship the two keys. After: python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R30_CHECKS/e117_shipped_check.py reads E117-SHIPPED ok=True; a pre/post census of every key under code/gold/ shows only those two keys moved (anything else moved is a STOP and a same-session restore by VersionId).
+
+    LEG Q (the proof): the runner stopped first by `sudo systemctl stop gold-layer-runner` as the first SSM command, then `BD_PLATINUM_MODE=canonical bash /tmp/gold_dispatch.sh --dry-run --single E_18` with the script pulled from S3, NO --upload (the plan form; CTO msg 7449), no inline code; if the boot chain goes past A_02 into a real fire, send no single and report.
+    Read: exit 0; no ERROR line; `Held out by the resolution table ...: 0`; `Already resolved (in resolution table): 14` and `Truly unresolved (no stub written): 108` as in the 2026-10-19 04:03Z fire (the holdings date may differ: if the figures differ, print the holdings key the single loaded and the cause before calling it a stop); the block `Entered candidacy through the April table (resolved_via=april_table)` with one line per pair, each `-- planned, not written (dry run)` or `-- unresolved (no input classified it)` (the dry run prints the first only if a row was planned; expected for the 14: unresolved); and etf-classifications unchanged (the item count, the 13 present, the 9 absent, the 14 absent, the 200-key last_updated census unmoved).
+    A failure: restore BOTH keys by their base VersionIds (above) in the same session, re-run the check expecting the base md5s (197eac28 and 40ffa3fa), report.
+
+    LEG G is the issuer's, on the first scheduled fire after the ship.
+  </steps>
+
+  <bounds>
+    Two code keys, no gold_dispatch.sh, no other lib/ key, no IAM, no table write, no other key. The 49F bucket is written only by the runner job itself, as in a fire. Finish before the next scheduled fire minus 90 minutes; if the legs cannot finish by then, stop and report.
+    Report ONCE to 2.0.0_SA_COO~M1: Step 0 reads, the leg P counts and pages, the deploy census, the check line, the leg Q lines and times, the ledger path, and each commit with its measured push state (ls-remote read).
+  </bounds>
+
+  <paths>
+    org/critical_paths/change_management/
+    org/critical_paths/.open_deploys/
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/logs/
+    org/tier2_senior/0.7.0_AE_CloudOps~DELL1/task_orders/MDPF_SECCLASS.TO-SC-e117b.april-table-candidacy-ship.md
+  </paths>
+
+<preflight>
+comp-schedule: DECLARED-NOT-APPLICABLE -- an ad-hoc issuer act, not a scheduled producer; the hold keeps it outside every BD gold run.
+comp-iam: DECLARED-NOT-APPLICABLE -- no grant changes; the same deploy path shipped E_18 on 2026-10-17 and 2026-10-18 (TO-SC-e111b, TO-SC-e116b).
+comp-adversary: RUN -- a named-ship set of two explicit paths (a third member is a STOP with same-session restore); an empty success is excluded because the check requires both served md5s to equal the built md5s AND the candidacy block AND the resolved_via entry to be present AND the served dispatcher unchanged; a restore to a stale VersionId (the base values are in the objective); a fire-calendar assumption (the hold names the daily 04:00Z rule). BLIND: the first scheduled fire after the ship (leg G, the issuer's), and any input that would let the classifier write a row (none is wired).
+lane: the <paths> block names the ledger, the sentinel, the seat's deliverables and logs, and this order.
+</preflight>
+
+  <proof_of_spec>
+    <criterion id="SC30-e117b-AC1" cell_refs="SC-e-117"><invocation>python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R30_CHECKS/e117_shipped_check.py</invocation><expect>E117-SHIPPED ok=True</expect></criterion>
+    AC1 base: FAIL as expected at 2026-10-19 (`E117-SHIPPED ok=False e18=197eac28|b844297d|DIFF shared=40ffa3fa|3adc5b1b|DIFF block=0 field=0 compiles=True dispatch=165933f6|165933f6|MATCH`); selftest green with 6 negative arms.
+  </proof_of_spec>
+</task_order>

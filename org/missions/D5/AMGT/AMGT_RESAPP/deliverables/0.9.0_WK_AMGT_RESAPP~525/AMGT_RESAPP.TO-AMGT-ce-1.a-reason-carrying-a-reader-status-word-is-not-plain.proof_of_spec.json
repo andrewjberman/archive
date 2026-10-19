@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ce-1.a-reason-carrying-a-reader-status-word-is-not-plain",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "613ec8aef1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ce-1.a-reason-carrying-a-reader-status-word-is-not-plain.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ce-1.a-reason-carrying-a-reader-status-word-is-not-plain.md",
+    "group": "OTHER",
+    "vintage_commit": "613ec8aef1"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~525",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "ca2fbeac90",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit ca2fbeac90 on branch wk-AMGT_RESAPP-525, not pushed. The deployed Lambda serves the old pattern set until AMGT-ce-4.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_ce1_status_word_screen.py",
+      "kind": "test",
+      "commit_or_etag": "ca2fbeac90",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit ca2fbeac90 on branch wk-AMGT_RESAPP-525, not pushed. The file runs offline and is not deployed."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~525/CE1_RECEIPT.md",
+      "kind": "doc",
+      "commit_or_etag": "ca2fbeac90",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit ca2fbeac90 on branch wk-AMGT_RESAPP-525, not pushed. A receipt, not deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the pytest summary line reads `16 passed` or more with 0 failed and 0 skipped (T1 once, T2 eight times, T3 once or more, T4 to T8 each present by name), and exit=0",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-525 && timeout 300 python -m pytest lib/research/print/tests/test_ce1_status_word_screen.py -q -p no:cacheprovider --color=no; echo \"exit=$?\"",
+      "output_evidence": "28 passed in 3.04s\nexit=0",
+      "denominator": "28 tests collected in the file, 28 passed, 0 failed, 0 skipped (T1 x1, T2 x8, T3 x8, T4 x3, T5 x2, T6 x4, T7 x1, T8 x1)",
+      "status": "PASS",
+      "expect": "\\b(?:1[6-9]|[2-9][0-9]|[0-9]{3,}) passed in [0-9.]+s[\\s\\S]*\\bexit=0\\b"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "exactly one FAILED line, `FAILED lib/research/print/tests/test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words` (it fails at the base as well: the base reads `1 failed, 471 passed`), and the summary reads `1 failed, P passed` with P at least 487",
+      "method": "command",
+      "invocation": "cd C:/dev/wk-resapp-525 && timeout 580 python -m pytest lib/research/print/tests -q -p no:cacheprovider --color=no 2>&1 | grep -E \"^FAILED|passed|failed\" | sed \"s/ - .*//\"",
+      "output_evidence": "FAILED lib/research/print/tests/test_av2_export_equals_page.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words\n1 failed, 499 passed, 4 warnings in 282.88s (0:04:42)",
+      "denominator": "500 tests collected in lib/research/print/tests: 1 failed, 499 passed (the one FAILED line is the test named by the order, which fails at the base too: 1 failed, 471 passed)",
+      "status": "PASS",
+      "expect": "^FAILED lib/research/print/tests/test_av2_export_equals_page\\.py::test_pdf_text_carries_no_field_code_and_names_every_line_in_words[\\s\\S]*\\b1 failed, (?:48[7-9]|49[0-9]|[5-9][0-9][0-9]|[0-9]{4,}) passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutant is the unedited head: the status-word entry removed, the tuple at 10 entries. The new-behaviour tests must fail there.",
+      "expected": "T1, T2 for ABSENT and CONFIRMED, T3 for ABSENT and CONFIRMED, T7 and T8 fail; the control and already-screened cases pass",
+      "observed": "7 failed, 21 passed on the unedited head. Failing: T1, T2[ABSENT], T2[CONFIRMED], T3[ABSENT], T3[CONFIRMED], T7, T8. Passing: T4 (3), T5 (2), T6 (4), and T2 and T3 for the six underscore words, which the existing pattern already screened.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the post-edit run of test_ce1_status_word_screen.py, then the literal AC1 invocation on the same bytes",
+      "observed": "28 passed in 2.51s, then 28 passed in 3.04s; the same count and exit 0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the deployed Lambda pattern set",
+      "reason": "served only through AMGT-ce-4; this cell is LOCAL code and changes no deployed bytes"
+    },
+    {
+      "item": "lib/research/api/tests (the whole api folder)",
+      "reason": "not run in this sparse worktree; the issuer runs it in the full tree"
+    },
+    {
+      "item": "the 101-name census (AMGT-ce-3)",
+      "reason": "the issuer's read, not this worker's cell"
+    },
+    {
+      "item": "the literal chart line The chart: ABSENT in _thesis_driver_chart_markdown",
+      "reason": "a string literal outside the tuple, pinned by test_ba18_chart_line.py; surfaced as AMGT_RESAPP-D1-W525-S1 and not edited"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-D1-W525-S1: the chart line The chart: ABSENT is a string literal in render_pack.py _thesis_driver_chart_markdown, so the new status-word entry in _NOT_PLAIN_PATTERNS never screens it. Class OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R1.",
+    "AMGT_RESAPP-D1-W525-S2: the worktree HEAD is 2fe324e11e, two commits past the issuance commit 613ec8aef1 that the order says the branch was cut from; neither commit touches the order or the print folder. Class OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~R1."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~525/CE1_RECEIPT.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (pytest 9.1.1, Python 3.14.7)",
+      "invocation": "cd C:/dev/wk-resapp-525 && timeout 300 python -m pytest lib/research/print/tests/test_ce1_status_word_screen.py -q -p no:cacheprovider --color=no",
+      "result": "28 passed in 3.04s, exit 0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, surprise-corpus, to-pipeline-gate, missions-tree-check)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~525 <0.9.0_WK_AMGT_RESAPP~525@opal.agent>\" -F .scratch/ce1_commit1_msg.txt -- <4 paths>",
+      "result": "commit ca2fbeac90; commit-gate All checks passed; surprise-row-gate 2 new row(s) OK; msg-verify MATCH. WARN client-data-check: the account-id hash list is absent on this box, so the commit was not checked for client account ids."
+    }
+  ]
+}
