@@ -28,9 +28,9 @@
     {
       "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~16/z6_run.json",
       "kind": "doc",
-      "commit_or_etag": "4ee057fc346",
+      "commit_or_etag": "e02830e33e7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-16 (commit 4ee057fc346), not pushed, no deploy. Window unchanged. channel opal-data-etfs; code_tools null and store_tools null (not readable as written, rows S3 and S4); principal opalbloomberg@opalinvest.com (rule, row S5).",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-16 (commit e02830e33e7), not pushed, no deploy. Window unchanged. channel portal_index; code_tools == page_tools (six names); principal opalbloomberg@opalinvest.com; store_tools == page_holder_tools (five schwab_* tools).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -38,9 +38,9 @@
     {
       "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
       "kind": "doc",
-      "commit_or_etag": "4ee057fc346",
+      "commit_or_etag": "e02830e33e7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-16 (commit 4ee057fc346), not pushed. Rows appended: NFRA_MCPORTAL-Z-W16-S1 and -S2 (earlier commits), NFRA_MCPORTAL-Z-W16-S3, -S4 (BLOCKING), -S5 (OBSERVATION).",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-16 (commit e02830e33e7), not pushed. Rows appended across commits: S1, S2 (ee603ef7f5a, 4290f5ef4b4 era), S3-S5 (4ee057fc346), S6-S7 (e02830e33e7), S8 (in the working channel file, committed with this instance).",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -49,14 +49,14 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "breakdown 200s>=1; direct /control-plane 200s>=1; channel tools code==page: yes; principal tools store==page: yes -- RESULT: PASS -- exit=0",
+      "criterion_verbatim": "breakdown 200s>=1; control-plane data routes (fabric boxes, overlap, gitstate, calls) each answered 200: 4 of 4; channel tools code==page: yes; principal tools store==page: yes -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/fwd20/checks/z6.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "window 2026-10-16T18:30:00Z .. 2026-10-16T19:05:00Z; ssm status=Success; breakdown 200s=24; direct /control-plane 200s=0; channel tools code==page: no; principal tools store==page: no\nRESULT: FAIL\nexit=1",
-      "denominator": "4 sub-clauses: breakdown 200s = 24 (>=1 holds); direct /control-plane 200s = 0 (>=1 fails); channel code==page no (code_tools null); principal store==page no (store_tools null). 1 of 4 sub-clauses hold.",
-      "status": "FAIL",
-      "expect": "breakdown 200s>=1; direct /control-plane 200s>=1; channel tools code==page: yes; principal tools store==page: yes -- RESULT: PASS -- exit=0",
-      "status_reason": "Run from C:/tmp/mp-gw-16 under timeout 120 (no timeout hit). Measured: breakdown 200s 24 holds; direct /control-plane 200s 0 fails under the check's exact pattern for GET /control-plane HTTP/1.1 with 200 in the window; channel code==page is no because code_tools is not readable as written (the chosen channel is a bucket with no integration module; row NFRA_MCPORTAL-Z-W16-S3); principal store==page is no because store_tools is not readable as written (ops/schwab_entitlement_admin.py has no read or show subcommand; row NFRA_MCPORTAL-Z-W16-S4). The order is not met."
+      "output_evidence": "window 2026-10-16T18:30:00Z .. 2026-10-16T19:05:00Z; ssm status=Success; breakdown 200s=24; control-plane data routes 200 (of 4)=4; channel tools code==page: yes; principal tools store==page: yes\nRESULT: PASS\nexit=0",
+      "denominator": "4 sub-clauses measured: breakdown 200s = 24 (>=1 holds); control-plane data routes 200 = 4 of 4 (holds); channel code==page yes (6 of 6 names equal); principal store==page yes (5 of 5 names equal). 4 of 4 sub-clauses hold.",
+      "status": "PASS",
+      "expect": "breakdown 200s=[1-9][0-9]*; control-plane data routes 200 \\(of 4\\)=4; channel tools code==page: yes; principal tools store==page: yes\\s*RESULT: PASS\\s*exit=0",
+      "status_reason": "Run from C:/tmp/mp-gw-16 under timeout 120 (no timeout hit), once. Every clause passes as measured. The expect field is the order's expectation written as a pattern over the check's printed line: the check prints 'control-plane data routes 200 (of 4)=4' for the order's 'each answered 200: 4 of 4', and the check's own RESULT line is the verdict. The run file is commit e02830e33e7; the order's AMENDMENT 1 (commit cb3f744e8f) governs the control-plane clause."
     },
     {
       "criterion_id": "AC2",
@@ -79,51 +79,59 @@
     },
     "determinism": {
       "method": "N/A-WITH-REASON: no build artifact exists; the only act is one read-only run of z6.AC1.sh, which was not repeated.",
-      "observed": "one run, rc=1, RESULT: FAIL with the four sub-clause readings recorded above",
+      "observed": "one run, rc=0, RESULT: PASS with the four sub-clause readings recorded above",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
-      "item": "code_tools (step 2 of the order), recorded null",
-      "reason": "The order's method reads an integration module's IntegrationSpec.tools and register(); the channel it picks, opal-data-etfs, is a bucket with no integration module (surprise NFRA_MCPORTAL-Z-W16-S3). Not substituted."
+      "item": "Order status flip (<status> in the task-order file)",
+      "reason": "Every mechanical criterion passes, so the flip is due, but the task-order file is outside this worker's write grant (<paths>). Not flipped by the worker; row NFRA_MCPORTAL-Z-W16-S8 names it for the issuer."
     },
     {
-      "item": "store_tools (step 3 of the order), recorded null",
-      "reason": "The named operator script has no read or show subcommand; its subcommands are activate, revoke and deny-backfill, all writers (surprise NFRA_MCPORTAL-Z-W16-S4). No operator-role read was run."
+      "item": "Artifact extraction beyond the portal_index module",
+      "reason": "Not performed. Only the integration module the order names was read, from the S3 artifact git-ref 6d1b5dcb64b945deb98664c6ae078d8f1e8a6c5c."
     },
     {
-      "item": "Artifact download and extraction of opal-gateway-latest.tar.gz",
-      "reason": "Not performed. The S3 head-object metadata git-ref 6d1b5dcb64b945deb98664c6ae078d8f1e8a6c5c was read and equals EC2_MANIFEST deployed_commit; there is no integration module to list as written."
+      "item": "Query on POLICY#<tid>#<oid> under the operator role",
+      "reason": "Not attempted. The store read used GetItem on the same keys, which the order allows (Query/GetItem)."
     },
     {
-      "item": "Order status flip",
-      "reason": "AC1 is FAIL, so the order stays open. The flip is not made."
+      "item": "Credentials of the operator role",
+      "reason": "Held in process environment for one bash call and unset after; never printed, logged or written. Not a deliverable."
     }
   ],
   "surprises": [
     "NFRA_MCPORTAL-Z-W16-S1: the order names read-only paths under infra/aws/ec2/ that the first worktree did not carry; the first spawn stopped at the first act. The issuer's provisioning fix put them in the cone; S1 is inherited state.",
-    "NFRA_MCPORTAL-Z-W16-S2: the commit-time naming gate printed NAMING ERROR (function-map folder missing) on the proof-instance commit in the sparse worktree and the commit still landed at rc=0; the gate's error does not refuse.",
-    "NFRA_MCPORTAL-Z-W16-S3: step 2's method (an integration module's IntegrationSpec.tools and register()) has no module for the bucket channel opal-data-etfs that the pick rule selects (tied with opal-data-portal-v2 at 18 tools); code_tools recorded null.",
-    "NFRA_MCPORTAL-Z-W16-S4: step 3 names a read/show subcommand that ops/schwab_entitlement_admin.py does not have (activate, revoke, deny-backfill only); store_tools recorded null.",
-    "NFRA_MCPORTAL-Z-W16-S5: step 3 says the one real principal with a principal_profile, but three principals carry a data grant revision on the page; opalbloomberg@opalinvest.com was chosen by a stated rule."
+    "NFRA_MCPORTAL-Z-W16-S2: the commit-time naming gate printed NAMING ERROR (function-map folder missing) on a commit in the sparse worktree and the commit still landed at rc=0; the gate's error does not refuse.",
+    "NFRA_MCPORTAL-Z-W16-S3: step 2's method has no integration module for the bucket channel opal-data-etfs that the first pick rule selected; code_tools recorded null in the first run, superseded by AMENDMENT 1.",
+    "NFRA_MCPORTAL-Z-W16-S4: step 3 names a read/show subcommand that ops/schwab_entitlement_admin.py does not have; store_tools recorded null in the first run, superseded by AMENDMENT 1 (MP-pd-1 method).",
+    "NFRA_MCPORTAL-Z-W16-S5: three principals carry a data grant revision on the page; opalbloomberg@opalinvest.com chosen by the first non-owner rule, which AMENDMENT 1 keeps.",
+    "NFRA_MCPORTAL-Z-W16-S6: AMENDMENT 1 step 2 has a tie at 6 tools between portal_index and ycharts; portal_index taken in page order.",
+    "NFRA_MCPORTAL-Z-W16-S7: 11 smartx-exporter files show as modified in the materialised cone (CRLF against LF); none is staged or committed by this worker.",
+    "NFRA_MCPORTAL-Z-W16-S8: the status flip is due on passing criteria, but the task-order file is outside the write grant; left to the issuer."
   ],
   "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~16/session.log",
   "compiler_tools": [
     {
       "tool": "served _compute via SSM (import app.server first)",
-      "invocation": "bash -c '. checks/_root.sh && ssm_run <params of probe1.py>' and probe2.py (scratch under .scratch/z6/)",
-      "result": "SSM Success; grant_store status=read principals=3; channels 14; opal-data-etfs tools=18; opal-data-portal-v2 tools=18; schwab holders 3"
+      "invocation": "probe3.py through checks/_root.sh ssm_run (command 6ced0404-2369-4c13-884a-0eb20f784509); probe1 and probe2 (commands 200bedd3-7eab-46c1-8f5e-e199fe3ab0d0, 1998c941-d769-4131-97db-24fa4ec89278)",
+      "result": "grant_store status=read principals=3; integration channels portal_index 6, ycharts 6, schwab 5, globgrph 2, opal_discover 2, opal_portal 2, blackdiamond 1"
     },
     {
-      "tool": "aws s3api head-object",
-      "invocation": "aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key ec2/opal-gateway/opal-gateway-latest.tar.gz (via .tools/aws)",
-      "result": "Metadata git-ref 6d1b5dcb64b945deb98664c6ae078d8f1e8a6c5c; equals EC2_MANIFEST deployed_commit"
+      "tool": "aws s3api get-object (artifact)",
+      "invocation": "aws s3api get-object --bucket opal-313476888478-lambda-artifacts --key ec2/opal-gateway/opal-gateway-latest.tar.gz (via .tools/aws) into an empty scratch dir",
+      "result": "Metadata git-ref 6d1b5dcb64b945deb98664c6ae078d8f1e8a6c5c, 922315 bytes; equals EC2_MANIFEST deployed_commit"
+    },
+    {
+      "tool": "aws sts assume-role + dynamodb get-item (operator role)",
+      "invocation": "via .tools/aws: sts assume-role opal-gateway-access-admin; dynamodb get-item gateway-access-state-table on POLICY#<tid>#<oid> principal_profile and data_entitlement#<revision>",
+      "result": "caller arn assumed-role/opal-gateway-access-admin; 3 profiles read rc=0; grant revisions 1, 1, 6; opalbloomberg store_tools = 5 schwab_* tools"
     },
     {
       "tool": "z6.AC1.sh",
       "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/fwd20/checks/z6.AC1.sh; echo exit=$?",
-      "result": "RESULT: FAIL, exit=1; breakdown 200s=24; direct /control-plane 200s=0; channel code==page no; principal store==page no"
+      "result": "RESULT: PASS, exit=0 (breakdown 200s=24; control-plane data routes 200 of 4; both equalities yes)"
     }
   ]
 }
