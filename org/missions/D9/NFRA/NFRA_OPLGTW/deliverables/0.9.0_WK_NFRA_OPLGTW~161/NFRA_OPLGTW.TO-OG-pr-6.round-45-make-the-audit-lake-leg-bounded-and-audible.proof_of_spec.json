@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-pr-6",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "866f1447f8",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-pr-6.round-45-make-the-audit-lake-leg-bounded-and-audible.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "866f1447f8"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~161",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/audit.py",
+      "kind": "script",
+      "commit_or_etag": "7925828f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-161 (not pushed). Adds sys and time imports, the module state and lake_put_failure_count, _note_lake_failure, an explicit botocore Config in the lazy client block, and the except branch now calls _note_lake_failure. The _emit floor lines (def _emit through fh.write) are byte-equal to base blob b40d48c1be77731dac4a0a45fb359bb1eee5b0c0. No release, no deploy, no AWS call.",
+      "introduces": ["lake_put_failure_count", "_note_lake_failure"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_pr6.py",
+      "kind": "script",
+      "commit_or_etag": "7925828f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_OPLGTW-161 (not pushed). New file with exactly the three named tests; offline, stub S3 client that raises RuntimeError, AUDIT_PATH in a temporary directory, every patched module value restored by monkeypatch.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7925828f63",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended by this worker: NFRA_OPLGTW-Z-W161-S1, S2 and S3. surprise-row-gate OK at commit 7925828f63; no existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: a failed lake put is counted and writes ONE rate-bounded line (and a second only after 60 s, with the running count), the floor line is still written, and the floor-write lines of _emit equal the base.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r45/checks/pr6.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?s)the three named tests: passed 3 of 3; failed 0; pytest rc=0.*floor lines of _emit equal to the base blob: yes \\(\\d+ lines\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "the three named tests: passed 3 of 3; failed 0; pytest rc=0\nfloor lines of _emit equal to the base blob: yes (5 lines)\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests passed (0 failed); 5 floor-write lines of _emit equal to base blob b40d48c1be77731dac4a0a45fb359bb1eee5b0c0. Run twice at 7925828f63, identical output.",
+      "status": "PASS",
+      "status_reason": "Check ran unchanged at 7925828f63 (committed bytes equal the bytes checked); pytest rc=0; RESULT: PASS and exit=0 on both runs.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the audit S3 client is built with an explicit Config of bounded connect and read timeouts and a retry cap.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r45/checks/pr6.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?s)boto3\\.client call with an explicit botocore Config: yes; Config imported from botocore: yes; connect_timeout [0-9.]+ \\(want a number in \\(0, 5\\]\\); read_timeout [0-9.]+ \\(want a number in \\(0, 10\\]\\); retries max_attempts [12] \\(want 1 or 2\\).*RESULT: PASS.*exit=0",
+      "output_evidence": "boto3.client call with an explicit botocore Config: yes; Config imported from botocore: yes; connect_timeout 2 (want a number in (0, 5]); read_timeout 3 (want a number in (0, 10]); retries max_attempts 1 (want 1 or 2)\nRESULT: PASS\nexit=0",
+      "denominator": "1 boto3.client call carrying config=Config(...) of 1 boto3.client call in app/audit.py; 3 of 3 bound checks inside range (connect_timeout 2 in (0, 5]; read_timeout 3 in (0, 10]; max_attempts 1 in [1, 2]). Run twice at 7925828f63, identical output.",
+      "status": "PASS",
+      "status_reason": "Check ran unchanged at 7925828f63; RESULT: PASS and exit=0 on both runs.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the existing audit tests (test_audit_bytes_principal.py, test_audit_lake_key_stamp.py, test_audit_rivalfunds_args.py, test_og_en10.py) and the new file pass together in both orders with the same count.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r45/checks/pr6.AC3.sh; echo \"exit=$?\"",
+      "expect": "(?s)pr6set forward: passed (\\d+); failed 0.*pr6set reverse: passed \\1; failed 0.*RESULT: PASS.*exit=0",
+      "output_evidence": "pr6set forward: passed 20; failed 0\npr6set reverse: passed 20; failed 0\nRESULT: PASS\nexit=0",
+      "denominator": "20 of 20 tests passed forward and 20 of 20 reverse across the five files (test_audit_bytes_principal.py, test_audit_lake_key_stamp.py, test_audit_rivalfunds_args.py, test_og_en10.py, test_og_pr6.py); 0 failed in either order.",
+      "status": "PASS",
+      "status_reason": "Check ran unchanged at 7925828f63; forward and reverse counts equal; RESULT: PASS and exit=0.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant to plant. The failure path is exercised by the three named tests and by one synthetic run against a failing stub (below).",
+      "expected": "n/a: the order names no mutant to plant",
+      "observed": "No mutant planted. Synthetic run (.scratch/pr6_failline.py, one _emit against a stub whose put_object raises RuntimeError) printed one line: SCTY_PREMCP audit-lake WARN: lake put failed (RuntimeError) count=1 -- the local floor line is written; floor lines: 1; count: 1.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "pr6.AC1.sh and pr6.AC2.sh each run twice at 7925828f63 with output captured to files and compared; pr6.AC3.sh run once.",
+      "observed": "AC1 two runs identical (3 of 3 named tests, 5 floor lines equal base, RESULT PASS). AC2 two runs identical (connect 2, read 3, max_attempts 1, RESULT PASS). AC3 once (20 forward, 20 reverse, RESULT PASS).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Release and deploy of app/audit.py to the gateway.",
+      "reason": "The cell's preflight declares no deploy and no schedule; the change rides the next gateway release by the CTO's round-45 list."
+    },
+    {
+      "item": "The client-data-check WARN printed by the commit gate on 7925828f63 (hashed account-id list absent on this device).",
+      "reason": "Recorded as NFRA_OPLGTW-Z-W161-S3. The gate did not grade the commit for client account ids; this worker's read of the diff finds none. Observed and reported; not graded by this worker."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W161-S1: the order TO-OG-pr-6 has no <status> tag above its RECORD FACE marker, so the status flip the face asks for was not made by this worker.",
+    "NFRA_OPLGTW-Z-W161-S2: the spec's literal wording reads time.monotonic() twice per warned failure, the face's rate test feeds three values; the worker reads it once per failure, with the same warn decisions.",
+    "NFRA_OPLGTW-Z-W161-S3: the commit gate printed WARN client-data-check hashed account-id list ABSENT at the commit 7925828f63 and the commit was not checked for client account ids."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~161/NFRA_OPLGTW.TO-OG-pr-6.round-45-make-the-audit-lake-leg-bounded-and-audible.session.log",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~161 <0.9.0_WK_NFRA_OPLGTW~161@opal.agent>\" -F <msgfile> -- infra/aws/ec2/opal-gateway/app/audit.py infra/aws/ec2/opal-gateway/tests/test_og_pr6.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: committed 7925828f63; surprise-row-gate OK: 2 new row(s) of 1141 total checked; WARN client-data-check hashed account-id list ABSENT (recorded as S3)"
+    }
+  ]
+}
