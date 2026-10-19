@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-en-33",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "9430e21d5d01d51b08a5a1ac5320fae1ca1b93a1",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-33.round-44-the-both-orders-check-keeps-its-forward-text.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-en-33.round-44-the-both-orders-check-keeps-its-forward-text.md",
+    "group": "OTHER",
+    "vintage_commit": "9430e21d5d01d51b08a5a1ac5320fae1ca1b93a1"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~159",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r38/checks/_bothorders.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "repo check script; no deploy, no schedule. Repaired runner: BOTHORDERS_PYTEST and BOTHORDERS_OUT env, full forward and reverse text saved, NO PASS LINE block and FAIL verdict. Proven by en33.AC1.sh (both arms)."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~159/BOTHORDERS_COLD.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record of nine cold runs of the 18-file window, built by a script from the saved forward and reverse texts; nine of nine forward counts equal the reverse counts (71 and 71); cause NOT_REPRODUCED. Not a deploy."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the repaired script keeps and reports the forward text (control with two stub runners, both arms)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en33.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "arm A (forward prints a traceback): NO PASS LINE reported 1 (want 1); the saved forward text holds the traceback 1 (want 1); RESULT: FAIL printed 1 (want 1); exit 1 (want 1)\narm B (both orders print 3 passed): forward line 1 (want 1), reverse line 1 (want 1), RESULT: PASS printed 1 (want 1); exit 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 readings as wanted (arm A 4 of 4, arm B 4 of 4); run twice, identical",
+      "status": "PASS",
+      "expect": "(?s)arm A \\(forward prints a traceback\\): NO PASS LINE reported 1 \\(want 1\\); the saved forward text holds the traceback 1 \\(want 1\\); RESULT: FAIL printed 1 \\(want 1\\); exit 1 \\(want 1\\).*arm B \\(both orders print 3 passed\\): forward line 1 \\(want 1\\), reverse line 1 \\(want 1\\), RESULT: PASS printed 1 \\(want 1\\); exit 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "at least eight cold runs are recorded with their text, and the named cause agrees with them",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en33.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "cold runs recorded 9 (want >= 8), each with its forward and reverse text and counts: ok; runs where forward differs from reverse: 0\ncause: NOT_REPRODUCED: 9 cold runs on the 18-file window (runs 1,4,; consistent with the runs; email-shaped strings 0 (want 0)\nRESULT: PASS\nexit=0",
+      "denominator": "9 cold runs recorded of 9 run (want >= 8); 0 of 9 runs differed; 0 email-shaped strings",
+      "status": "PASS",
+      "expect": "(?s)cold runs recorded \\d+ \\(want >= 8\\), each with its forward and reverse text and counts: ok; runs where forward differs from reverse: \\d+.*consistent with the runs; email-shaped strings 0 \\(want 0\\).*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a forward run whose output is a traceback with no pass line (the Z-S399 shape) through a stub runner",
+      "expected": "NO PASS LINE reported 1; the saved forward text holds the traceback; RESULT: FAIL; exit 1",
+      "observed": "arm A (forward prints a traceback): NO PASS LINE reported 1 (want 1); the saved forward text holds the traceback 1 (want 1); RESULT: FAIL printed 1 (want 1); exit 1 (want 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of en33.AC1.sh compared (the stub control run twice, identical arguments)",
+      "observed": "run 1 and run 2 identical: arm A NO PASS LINE 1, RESULT: FAIL 1, exit 1; arm B forward 1, reverse 1, RESULT: PASS 1, exit 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the first-run flake's cause (row Z-S399) as a confirmed cause",
+      "reason": "not reproduced in nine cold runs (pycache removed, files touched, both); the record says NOT_REPRODUCED and does not assert a cause. The repaired script keeps the forward text if it recurs."
+    },
+    {
+      "item": "other check scripts that call _bothorders.sh",
+      "reason": "outside this order's <paths>; they inherit the repaired runner unchanged and their own outcomes are not re-run here"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~159/BOTHORDERS_COLD.json",
+  "compiler_tools": [
+    {
+      "tool": "en33.AC1.sh (stub-runner control of the repaired both-orders script)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en33.AC1.sh",
+      "result": "RESULT: PASS, exit 0; run twice, identical"
+    },
+    {
+      "tool": "en33.AC2.sh (cold-run record check)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r44/checks/en33.AC2.sh",
+      "result": "RESULT: PASS, exit 0; 9 cold runs, 0 differed"
+    }
+  ]
+}
