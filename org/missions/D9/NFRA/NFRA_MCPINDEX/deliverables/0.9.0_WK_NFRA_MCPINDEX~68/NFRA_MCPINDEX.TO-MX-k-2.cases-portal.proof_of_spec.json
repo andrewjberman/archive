@@ -1,0 +1,113 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_MCPINDEX.TO-MX-k-2",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "7c42c0c7437"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+  "vintage_commit": "ec6b4b428d8",
+  "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-k-2.cases-portal.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_MCPINDEX~68",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~68/cases_portal.json",
+   "kind": "config_data",
+   "commit_or_etag": "219f99dd3a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "gateway_battery_cases/1 data file, 33 cases over the 25 in-scope tools; no deploy, no AWS call, no network call. Committed at 219f99dd3a on wk-NFRA_MCPINDEX-68 (LOCAL).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "219f99dd3a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Three rows appended inside the fenced json array (NFRA_MCPINDEX-Z-W68-S1..S3); 446 pre-existing rows not edited. surprise-row-gate: 3 new row(s) of 449 total checked, OK.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the DENOMINATOR line (25 tools in scope); the schema; case ids unique and starting K2-; every tool in scope has a case and no case names another tool; every case carries case_id, tool, question, args as an object, expect and source_hint -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k2.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~68/cases_portal.json; echo \"exit=$?\"",
+   "expect": "RESULT: PASS",
+   "output_evidence": "DENOMINATOR: 25 tool(s) in scope: channels opal-data-portal-v2,opal-data-mdpf,portal_index; census GATEWAY_SURFACE_CENSUS_20261019_v2.json\n  ok   a cases file path was given and exists\n  ok   schema\n  ok   case ids are unique and start with K2-\n  ok   every tool in scope has at least one case\n  ok   no case names a tool outside the scope\n  ok   every case carries its fields (case_id, tool, question, args as an object, expect, source_hint)\nARMS: 6 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "25 of 25 tools in scope have a case; 6 of 6 arms ok",
+   "status": "PASS",
+   "judgment": false
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the DENOMINATOR line; every case of a sender is preview and each sender has one; every reader has a case expecting an answer; questions are ASCII, at least four words and unique; every reader case that expects an answer, in a bucket, store, Schwab, Black Diamond, portal_index or mdpf channel, carries expect_source; no argument holds an email address or a credential; depends_on names an existing case -- RESULT: PASS -- exit=0",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k2.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~68/cases_portal.json; echo \"exit=$?\"",
+   "expect": "RESULT: PASS",
+   "output_evidence": "DENOMINATOR: 25 tool(s) in scope; senders 0 (a real write_class, or opal_data_refresh_upload); 5 with write_class UNCLASSIFIED treated as readers on a grounded source reference\n  ok   a cases file path was given and exists\n  ok   every case of a sender is preview, and a sender has a preview case\n  ok   every reader has a case that expects an answer (nonempty or empty), not only refusals\n  ok   every case of a tool whose write_class is UNCLASSIFIED ends its source_hint with a [app/<file>.py:<line>] reference to the definition that shows it only reads\n  ok   every reader case that expects an answer, in a channel named below, carries a non-empty ASCII expect_source (opal-data-mdpf, opal-data-portal-v2, portal_index)\n  ok   questions are ASCII, plain English of at least four words, and unique\n  ok   no case argument holds a credential-shaped value or an email address\n  ok   a case that needs an earlier answer says so with depends_on, naming an existing case id\nARMS: 8 ok, 0 failed\nRESULT: PASS\nexit=0",
+   "denominator": "25 of 25 tools in scope; 0 senders; 5 UNCLASSIFIED readers with grounded source references; 8 of 8 arms ok",
+   "status": "PASS",
+   "judgment": false
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Planted mutant: the AC1 cases file copied to a scratch path with the expect_source removed from K2-17 (a reader case expecting an answer in the portal_index, opal-data-portal-v2 or opal-data-mdpf channels). k2.AC2 run on the mutant.",
+   "expected": "RESULT: FAIL on the expect_source arm, naming K2-17",
+   "observed": "FAIL every reader case that expects an answer ... carries a non-empty ASCII expect_source ... cases without expect_source: ['K2-17']; RESULT: FAIL; exit=1",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "k2.AC1.sh and k2.AC2.sh each run twice back to back on the committed file, outputs compared",
+   "observed": "both outputs byte-identical; both exit 0",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Argument validity of every case against the live gateway (a signed-in session runs the battery; the checks prove coverage and safety, not validity).",
+   "reason": "Bounds: no AWS call, no network call, no grant. The cell says the live run finds invalid arguments."
+  },
+  {
+   "item": "opal_asker_query nonempty case K2-18 runnable as written.",
+   "reason": "Its chat_id and message_id are placeholders for a live recent Teams message from a profiled asker; no static argument answers. Row NFRA_MCPINDEX-Z-W68-S2."
+  },
+  {
+   "item": "A nonempty security-scan case.",
+   "reason": "No universe or factor name is held in the catalog or the gateway code; K2-31 is empty by construction (absent universe folder). Row NFRA_MCPINDEX-Z-W68-S3."
+  },
+  {
+   "item": "A refused case for opal_asker_query.",
+   "reason": "Any made-up message id reaches the Graph call, whose failure mode is not known statically; not written rather than guessed."
+  },
+  {
+   "item": "Routing finding for news_market_mood (linked trending key not read by the code).",
+   "reason": "Not a gap in this cell: the cell's ROUTING clause says to keep expect_source on what the code reads and file one observation row, which is NFRA_MCPINDEX-Z-W68-S1."
+  }
+ ],
+ "surprises": [
+  "NFRA_MCPINDEX-Z-W68-S1: ROUTING -- news_market_mood links catalog row opal_data_portal_v2_served_news_trending_and_sentiment (json/trending/latest.json; json/sentiment/), but the code reads only the json/sentiment/ singletons; K2-17 carries the prefix the code reads.",
+  "NFRA_MCPINDEX-Z-W68-S2: PREMISE -- opal_asker_query has no static argument that surely answers; K2-18 carries placeholders for a live Teams chat_id and message_id.",
+  "NFRA_MCPINDEX-Z-W68-S3: PREMISE -- no security-scan universe or factor name is held in the catalog or the code; K2-31 is an empty case by construction."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~68/NFRA_MCPINDEX.TO-MX-k-2.cases-portal.proof_of_spec.json",
+ "compiler_tools": [
+  {
+   "tool": "k2.AC1.sh and k2.AC2.sh (issuer check scripts, grading through h_check.py k2.AC1 and k2.AC2)",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/k2.AC1.sh <cases_portal.json>; bash .../k2.AC2.sh <cases_portal.json>",
+   "result": "AC1 RESULT: PASS exit=0 (6 of 6 arms); AC2 RESULT: PASS exit=0 (8 of 8 arms); 25 tools in scope; 0 senders"
+  }
+ ]
+}
