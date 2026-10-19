@@ -1,0 +1,200 @@
+{
+ "schema": "gateway_surface_census/1",
+ "claim": "measured",
+ "source": "admin_gateway_breakdown body",
+ "read_at": "2026-10-19T15:00:00Z",
+ "channels": [
+  {
+   "id": "opal-data-harvest",
+   "name": "Opal Data Harvest",
+   "kind": "bucket",
+   "min_tier": "read_only",
+   "tools": [
+    "harvest_list",
+    "harvest_read"
+   ]
+  },
+  {
+   "id": "opal-data-assets",
+   "name": "Opal Data Assets",
+   "kind": "bucket",
+   "min_tier": "read_only",
+   "tools": [
+    "client_get_holdings",
+    "schwab_query"
+   ],
+   "segments": [
+    {
+     "vendor": "schwab",
+     "firm": "49financial",
+     "tools": [
+      "client_get_holdings",
+      "schwab_query"
+     ]
+    },
+    {
+     "vendor": "market",
+     "firm": "none",
+     "tools": [
+      "client_get_holdings"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dynamodb",
+   "name": "DynamoDB",
+   "kind": "store",
+   "min_tier": "read_only",
+   "tools": [
+    "mdpf_get_security_classification",
+    "whoami"
+   ]
+  },
+  {
+   "id": "ycharts",
+   "name": "YCharts",
+   "kind": "integration",
+   "min_tier": "read_only",
+   "tools": [
+    "ycharts_search"
+   ]
+  },
+  {
+   "id": "m365",
+   "name": "Microsoft 365",
+   "kind": "native",
+   "min_tier": "per tool",
+   "tools": [
+    "send_email",
+    "whoami"
+   ]
+  },
+  {
+   "id": "undeclared",
+   "name": "No source declared",
+   "kind": "undeclared",
+   "min_tier": "read_only",
+   "tools": [
+    "stray_tool"
+   ]
+  }
+ ],
+ "tools": [
+  {
+   "name": "client_get_holdings",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [
+    "assets_row_2"
+   ],
+   "channels": [
+    "opal-data-assets"
+   ]
+  },
+  {
+   "name": "harvest_list",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [],
+   "channels": [
+    "opal-data-harvest"
+   ]
+  },
+  {
+   "name": "harvest_read",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [
+    "harvest_row_1"
+   ],
+   "channels": [
+    "opal-data-harvest"
+   ]
+  },
+  {
+   "name": "mdpf_get_security_classification",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [
+    "dyn_row_1"
+   ],
+   "channels": [
+    "dynamodb"
+   ]
+  },
+  {
+   "name": "schwab_query",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [
+    "assets_row_1"
+   ],
+   "channels": [
+    "opal-data-assets"
+   ]
+  },
+  {
+   "name": "send_email",
+   "access": "write",
+   "write_class": "send",
+   "data_class": "mail",
+   "indexes": [],
+   "channels": [
+    "m365"
+   ]
+  },
+  {
+   "name": "stray_tool",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [],
+   "channels": [
+    "undeclared"
+   ]
+  },
+  {
+   "name": "whoami",
+   "access": "read",
+   "write_class": null,
+   "data_class": "none",
+   "indexes": [],
+   "channels": [
+    "dynamodb",
+    "m365"
+   ]
+  },
+  {
+   "name": "ycharts_search",
+   "access": "read",
+   "write_class": null,
+   "data_class": "internal",
+   "indexes": [
+    "yc_row_1"
+   ],
+   "channels": [
+    "ycharts"
+   ]
+  }
+ ],
+ "counts": {
+  "channels": 6,
+  "by_kind": {
+   "bucket": 2,
+   "store": 1,
+   "integration": 1,
+   "native": 1,
+   "undeclared": 1
+  },
+  "segments": 2,
+  "tools_distinct": 9,
+  "tool_channel_pairs": 10,
+  "tools_unindexed": 4
+ }
+}
