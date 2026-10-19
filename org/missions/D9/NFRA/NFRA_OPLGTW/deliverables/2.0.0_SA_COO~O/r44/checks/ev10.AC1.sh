@@ -12,7 +12,7 @@
 #   FAILS        if ratelimit_audit_warn_lines >= 1 (the writer's own stderr line "ratelimit-audit WARN: refusal row not recorded" is in the journal);
 #   FAILS        else if a controlled refusal was seen (refusals_seen >= 1) and no lake row followed within 120 s;
 #   FAILS        else if post_mcp_429_lines >= 1 and the lake holds 0 gw_ratelimit rows for the window;
-#   FAILS        else if a writer_test (CTO ruling 35872, the one-object writer test under the service's instance role) was run and its object was NOT written or NOT read back;
+#   FAILS        else if a writer_test (CTO ruling 35872, the one-object writer test under the service's instance role) was run and its object was NOT written or NOT read back BY ANY INDEPENDENT READER (AMENDMENT A2: the host process's own get_object under the instance role OR the runner's own read with the seat's role, `read_back_by_the_runner_with_this_seats_own_role`; the signed ask, section 3 step 3, requires the runner-side read; the instance role having no get on the lake is recorded, not graded);
 #   WRITES       else if post_mcp_429_lines >= 1 with >= 1 lake row, or a controlled refusal seen with its lake row within 120 s, or a writer_test whose one object was written AND read back;
 #   NOT_EXPOSED  otherwise (no refusal was observed and the counter is not readable from the running service).
 # ev7_unlabelled must account for EVERY record of OG-ev-7's window that is not labelled probe: records == (lake objects in that window) - (probe:OG-ev-7 labelled) - (probe:unarmed labelled), read from PEERS_MEASURE.json; its pairs sum to records.
@@ -34,6 +34,7 @@ j_ok = bool(j.get("source")) and isn(j.get("post_mcp_429_lines")) and isn(j.get(
 lk_ok = bool(lk.get("source")) and isn(lk.get("gw_ratelimit_rows")) and isn(lk.get("denominator")) and lk.get("denominator") > 0 and lk.get("read_errors") == 0 and bool(lk.get("window_start")) and bool(lk.get("window_end"))
 ce_ok = isinstance(b.get("counter_exposed"), bool) and bool(b.get("counter_evidence"))
 wt = b.get("writer_test")
+rb = bool(wt) and bool(wt.get("read_back") or wt.get("read_back_by_the_runner_with_this_seats_own_role") is True)
 wt_ok = wt is None or (isinstance(wt, dict) and "OG-ev-10" in str(wt.get("key_label", "")) and bool(wt.get("lake_key")) and isinstance(wt.get("written"), bool) and isinstance(wt.get("read_back"), bool) and wt.get("instance_role") is True and bool(wt.get("halves")))
 cr_ok = cr is None or (isinstance(cr, dict) and re.fullmatch(r"\*{4}[0-9A-Za-z]{4}", str(cr.get("principal_ref", ""))) and isn(cr.get("requests_made")) and isn(cr.get("refusals_seen"))
                        and isinstance(cr.get("lake_row_within_120s"), bool) and bool(cr.get("halves")))
@@ -41,9 +42,9 @@ warn = j.get("ratelimit_audit_warn_lines") or 0; n429 = j.get("post_mcp_429_line
 seen = (cr or {}).get("refusals_seen") or 0; crow = (cr or {}).get("lake_row_within_120s")
 if warn >= 1: want = "FAILS"
 elif cr and seen >= 1 and not crow: want = "FAILS"
-elif wt and not (wt.get("written") and wt.get("read_back")): want = "FAILS"
+elif wt and not (wt.get("written") and rb): want = "FAILS"
 elif n429 >= 1 and rows == 0: want = "FAILS"
-elif (n429 >= 1 and rows >= 1) or (cr and seen >= 1 and crow) or (wt and wt.get("written") and wt.get("read_back")): want = "WRITES"
+elif (n429 >= 1 and rows >= 1) or (cr and seen >= 1 and crow) or (wt and wt.get("written") and rb): want = "WRITES"
 else: want = "NOT_EXPOSED"
 v_ok = b.get("verdict") in ("WRITES", "FAILS", "NOT_EXPOSED") and b.get("verdict") == want and bool(b.get("reason"))
 lake7 = (pb.get("counts") or {}).get("lake") or {}
