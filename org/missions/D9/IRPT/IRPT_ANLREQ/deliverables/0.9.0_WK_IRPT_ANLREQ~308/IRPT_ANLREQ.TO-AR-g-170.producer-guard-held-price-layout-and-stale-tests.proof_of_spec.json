@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-170",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-170.producer-guard-held-price-layout-and-stale-tests.md",
+    "group": "OTHER",
+    "vintage_commit": "a44ac16b1ba"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R59_G.md",
+    "vintage_commit": "092a308769",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-170.producer-guard-held-price-layout-and-stale-tests.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~308",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "e65a1596a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-308 only; nothing deployed. Part A: _LAYOUT_HAS_PRICE_PAGES = hasattr(lo, PRICE_TABLE) is true against the current layout, so every call is as before. AC3 146 passed at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_producer_held_layout_guard.py",
+      "kind": "test",
+      "commit_or_etag": "d684832043",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Guard test as amended by AMENDMENT 2 at this commit: arm 1 sets op._LAYOUT_HAS_PRICE_PAGES false and uses the refusing compute_all wrapper, with no delattr of PRICE_TABLE. Created at b98b6e0f41, amended here. AC1 3 passed at this commit. Local commit only."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_opal_producer_not_in_this_version.py",
+      "kind": "test",
+      "commit_or_etag": "c711b81838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Repaired to the AR-y-408 rule: dropped count 6, price table by op.PRICE_TABLE_ID, no-drop test priced. Part of the AC2 run (32 passed) at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_table.py",
+      "kind": "test",
+      "commit_or_etag": "c711b81838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pricing-off test reads the layout's own computed value and asserts the document omits the element; no assertion deleted. Part of the AC2 run (32 passed) at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_series.py",
+      "kind": "test",
+      "commit_or_etag": "c711b81838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pricing-off fixture captures compute_all; the five elements read NOT_IN_THIS_VERSION in the layout and are absent from the document. Part of the AC2 run (32 passed) at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_price_pages_text.py",
+      "kind": "test",
+      "commit_or_etag": "c711b81838",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pricing-off fixture captures compute_all; the four elements read NOT_IN_THIS_VERSION in the layout and are absent from the document. Part of the AC2 run (32 passed) at this commit."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "c18cf83cd3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W308-S2 (BLOCKING, INERT) and IRPT_ANLREQ-D2-W308-S3 (OBSERVATION, INERT) appended. Neither row is edited by this order; S2 is answered by AMENDMENT 2 (issuer commit a44ac16b1ba)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR170-g-AC1",
+      "criterion_verbatim": "the producer completes against a layout without PRICE_TABLE and without the prices keyword (no opal.prices.holdings), and with the layout untouched it lists the element and passes prices. At base it FAILs (the test file does not exist: no tests ran).",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 100 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_producer_held_layout_guard.py",
+      "output_evidence": "3 passed in 0.42s (rc=0; measured at commit d684832043 in C:/dev/wk-irpt-anlreq-308 under timeout 100). Arm 1 (test_a_layout_without_the_price_pages_completes_and_lists_no_price_table, AMENDMENT 2: flag false, refusing compute_all wrapper, PRICE_TABLE not deleted) PASSED; arm 2 (test_the_untouched_layout_lists_the_price_table_and_passes_prices) PASSED; test_the_refusing_wrapper_raises_when_given_prices PASSED. Base: the file did not exist, no tests ran (rc=4).",
+      "denominator": "3 of 3 tests passed. Base: 0 of 0 collected (file absent).",
+      "expect": "^[0-9]+ passed in",
+      "status": "PASS",
+      "status_reason": "rc=0 and the summary line matches the expectation; 3 of 3 at the committed tree."
+    },
+    {
+      "criterion_id": "AR170-g-AC2",
+      "criterion_verbatim": "the 8 stale tests plus the rest of those four files pass (at base: 8 failed, 24 passed).",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 100 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_opal_producer_not_in_this_version.py ycharts/research/tests/test_price_pages_table.py ycharts/research/tests/test_price_pages_series.py ycharts/research/tests/test_price_pages_text.py",
+      "output_evidence": "32 passed in 1.90s (rc=0; measured at committed tree c711b81838 and unchanged by d684832043 in C:/dev/wk-irpt-anlreq-308 under timeout 100). Base re-measured by the worker before editing: 8 failed, 24 passed.",
+      "denominator": "32 of 32 tests passed (the 8 repaired from base failures and the 24 that already passed).",
+      "expect": "^[0-9]+ passed in",
+      "status": "PASS",
+      "status_reason": "rc=0 and the summary line matches the expectation; 32 of 32 at the committed tree."
+    },
+    {
+      "criterion_id": "AR170-g-AC3",
+      "criterion_verbatim": "the six existing files that pass at base keep passing (at base: 146 passed). If your change moves the count, say so in the report.",
+      "method": "test_suite",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 115 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_opal_producer.py ycharts/research/tests/test_opal_producer_prices.py ycharts/research/tests/test_opal_producer_page_wording.py ycharts/research/tests/test_price_pages_repoint.py ycharts/research/tests/test_layout_overview.py ycharts/research/tests/test_runner.py",
+      "output_evidence": "146 passed in 12.24s (rc=0; measured at committed tree c711b81838 and unchanged by d684832043 in C:/dev/wk-irpt-anlreq-308 under timeout 115). Base re-measured by the worker before editing: 146 passed.",
+      "denominator": "146 of 146 tests passed; the count did not move.",
+      "expect": "^[0-9]+ passed in",
+      "status": "PASS",
+      "status_reason": "rc=0 and the summary line matches the expectation; the count is unchanged from base (146)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The order's difference control (Part B arm 2) is the layout-untouched run, which PASSES.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was made; the three invocations were run once each at the committed tree.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Part B arm 1 as first worded (monkeypatch.delattr(lo, PRICE_TABLE))",
+      "reason": "Dropped by AMENDMENT 2 (issuer, 2026-10-19, on row IRPT_ANLREQ-D2-W308-S2): deleting PRICE_TABLE breaks the layout's own _price_based and compute_element. Arm 1 now sets the producer flag false and uses the refusing compute_all wrapper; it still proves no opal.prices.holdings and no prices keyword."
+    },
+    {
+      "item": "git sparse-checkout changes to the worktree",
+      "reason": "Not run by the worker. The issuer widened the sparse set (AMENDMENT 1) before this seating's base was re-run; the worker used the set as provisioned."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W308-S1: the first seating's sparse worktree lacked ycharts/session, so no code could run; inherited, and resolved by the issuer's AMENDMENT 1 (the base now runs from this worktree).",
+    "IRPT_ANLREQ-D2-W308-S2: TO-AR-g-170 Part B arm 1 cannot run as written; deleting lo.PRICE_TABLE makes the layout's own code raise NameError. BLOCKING for AC1, INERT. Answered by the issuer's AMENDMENT 2 (commit a44ac16b1ba); the arm is reworded at d684832043.",
+    "IRPT_ANLREQ-D2-W308-S3: a naming-gate ERROR for the missing function-map folder was printed during the producer commit; the commit landed. OBSERVATION, INERT."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-308; TREE-OK. Inherited: e65a1596a2 (Part A), c18cf83cd3 (rows S2, S3), b98b6e0f41 (guard test), c711b81838 (stale tests), 900cbcdfdd (BLOCKED-state proof), a44ac16b1ba (issuer AMENDMENT 2). Edit: guard test first test with the delattr removed and docstrings updated to AMENDMENT 2 -> d684832043 (AC1 3 passed). Final acceptance on the committed tree: AC1 rc=0 (3 passed), AC2 rc=0 (32 passed), AC3 rc=0 (146 passed). Status flip is a separate commit made only after all three PASS.",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider <order AC file lists>",
+      "result": "AC1 3 passed; AC2 32 passed; AC3 146 passed"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK at c18cf83cd3 (rc=0); no row appended by this order"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh ... -- infra/aws/lambda/investor-reporting/ycharts/research/tests/test_producer_held_layout_guard.py",
+      "result": "All checks passed! for 1 of 1 file(s); committed d684832043"
+    }
+  ]
+}
