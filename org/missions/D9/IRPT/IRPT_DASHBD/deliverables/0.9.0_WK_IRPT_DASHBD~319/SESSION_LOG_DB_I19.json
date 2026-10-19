@@ -1,0 +1,44 @@
+{
+  "to_id": "IRPT_DASHBD.TO-DB-i-19",
+  "assignee": "0.9.0_WK_IRPT_DASHBD~319",
+  "steps": [
+    {
+      "step": "worktree and tree grounding",
+      "invocation": "git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK",
+      "result": "branch wk-IRPT_DASHBD-319; TREE-OK; base 5769ebb33f"
+    },
+    {
+      "step": "read the checker and the round-129 run script, the adapter, the feed envelope writer and the calendar module",
+      "invocation": "read-only reads of p132_live.py, run_scope_feed_real.py, inflection_account_dim.py, inflection_account_return_daily.py, pull_inflection_scope_account_returns.py, lib/trading_calendar.py",
+      "result": "the envelope writes households_without_id as an integer count (surprise S1 of this order)"
+    },
+    {
+      "step": "address check without AWS",
+      "invocation": "python -I -c (feed_addresses against the silver table URI convention)",
+      "result": "silver address equals TABLE_URI plus date and data.parquet: True"
+    },
+    {
+      "step": "live read cell",
+      "invocation": "python -I live_read.py --private <private dir> --record <repo record>",
+      "result": "status RAN; 1 landed day; 1 of 1 day agrees with the bronze manifest; reads 14 (run 10 plus 4 after run); no write; WARN line for the fallback calendar (surprise S2)"
+    },
+    {
+      "step": "checker self-test",
+      "invocation": "python -I p132_live.py --selftest .",
+      "result": "GOOD PASS and 10 of 10 mutants FAIL; selftest PASS, rc 0"
+    },
+    {
+      "step": "criterion, twice",
+      "invocation": "python -I p132_live.py . DBI132-1-AC1",
+      "result": "DBI132-1-AC1 PASS on both runs, rc 0 on both runs"
+    }
+  ],
+  "writes": {
+    "s3": 0,
+    "dynamodb": 0,
+    "vendor": 0,
+    "secret_reads": 0,
+    "push": 0,
+    "deploy": 0
+  }
+}
