@@ -47,8 +47,15 @@ try:
 except Exception:
     before = {}
 res = {}
+import os
+HELD = os.path.exists(sys.argv[1].replace("MG2_BEFORE.json", "MG2_ANDREW_HELD.md"))   # amendment A1: option (b), Andrew's activation held
 for role in ("andrew", "alyssa"):
     rev, sc = grant(role); b = before.get(role) or {}
+    if role == "andrew" and HELD:
+        same = rev is not None and b.get("grant_revision") is not None and rev == int(b["grant_revision"])
+        res[role] = same
+        print("andrew: HELD by option (b); grant revision unchanged %s" % ("yes" if same else "no"))
+        continue
     newer = rev is not None and b.get("grant_revision") is not None and rev > int(b["grant_revision"])
     acc = (sc or {}).get("accounts") or {}
     counts_ok = bool(acc) and {m: len(v) for m, v in acc.items()} == b.get("accounts_current")
