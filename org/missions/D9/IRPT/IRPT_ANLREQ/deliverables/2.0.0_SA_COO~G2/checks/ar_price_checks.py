@@ -24,6 +24,7 @@ AS_OF = "2026-10-14"
 AMOUNTS = {"AAA": 500.0, "BBB": 300.0, "CCC": 200.0}
 FACT = {"AAA": lambda k: 1.012 if k % 7 else 0.97, "BBB": lambda k: 1.008, "CCC": lambda k: 1.01 if k % 5 else 0.985,
         "SPY": lambda k: 1.009 if k % 6 else 0.98, "BIL": lambda k: 1.002}
+LABEL = {"estate": "Opal data store", "yfinance": "Public market data", "ycharts": "Licensed market data"}  # AR-g-166 AMENDMENT 1: R8 forbids a vendor name on the page
 TIER = {"AAA": "estate", "SPY": "estate", "BIL": "estate", "BBB": "yfinance", "CCC": "ycharts"}
 IDS = {163: ["p2.e11", "p2.e14", "p2.e15", "p7.e04", "p7.e10", "p7.e11", "p7.e12", "p7.e13"],
        164: ["p2.e04", "p6.e21", "p2.e17", "p2.e18", "p7.e15"],
@@ -35,10 +36,12 @@ NINE = ["p2.e08", "p2.e13", "p6.e22", "p7.e02", "p7.e03", "p7.e05", "p7.e06", "p
 TEST_FILES = [TESTS + "/" + n for n in ("test_layout_overview.py", "test_opal_producer.py", "test_opal_producer_prices.py",
                                           "test_layout_own_series_columns.py", "test_opal_producer_page_wording.py",
                                           "test_opal_producer_benchmark.py")]
-OWN = {163: (MAP, TESTS + "/test_price_pages_repoint.py"),
-       164: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_series.py"),
-       165: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_text.py"),
-       166: (IR + "ycharts/research/layout_overview.py", IR + "ycharts/research/opal_producer.py", TESTS + "/test_price_pages_table.py")}
+PIN_TEST = TESTS + "/test_layout_overview.py"  # AMENDMENT 1: line 754 pins the count of OWN_SERIES elements of the real map; a cell moves it by its delta
+OWN = {163: (MAP, TESTS + "/test_price_pages_repoint.py", PIN_TEST),
+       164: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_series.py", PIN_TEST),
+       165: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_text.py", PIN_TEST),
+       166: (IR + "ycharts/research/layout_overview.py", IR + "ycharts/research/opal_producer.py", TESTS + "/test_price_pages_table.py",
+           TESTS + "/test_opal_producer.py")}
 SLOT = {163: 301, 164: 302, 165: 302, 166: 303}
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/", "org/tier1_exec/2.0.0_SA_COO~G2/")
@@ -296,7 +299,7 @@ def arms_build_166():
     if entry is not None and entry["inputs"] != ["prices"]:
         fails.append("%s inputs are %r, want ['prices']" % (TABLE_ID, entry["inputs"]))
     if row is not None:
-        want = [{"Ticker": t, "Last price date": AS_OF, "Source": TIER[t]} for t in ("AAA", "BBB", "CCC")]
+        want = [{"Ticker": t, "Last price date": AS_OF, "Source": LABEL[TIER[t]]} for t in ("AAA", "BBB", "CCC")]
         if row != want:
             fails.append("%s is %r, want %r" % (TABLE_ID, row, want))
     return fails

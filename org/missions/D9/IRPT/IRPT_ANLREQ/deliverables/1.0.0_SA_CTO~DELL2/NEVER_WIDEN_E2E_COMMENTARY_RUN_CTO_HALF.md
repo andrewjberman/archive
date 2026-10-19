@@ -116,3 +116,17 @@ I re-measured it: blob `f2baabd809e756324538352641b8ce1530c124da` (commit 4f2c13
 
 The blast radius is unchanged in kind: one more synthetic user, advisor and upload. One more standing 118-byte blob is
 filed as a surprise row with its key; there is no deleter (D2-S211). All earlier conditions stand.
+
+---
+
+## ADDENDUM 4 -- SIGNED (2026-10-19 ~17:2xZ): backoff up to 4 minutes; no delete before the last read
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM4_BACKOFF_NO_EARLY_DELETE_COO_HALF_20261019.md`, blob `6c7c3bbaafc5149c3c95405bcc8091e20a151fbb` (commit 6649c9b54d), sha256 `ce1afb97ce23e1135cef60a3c956646ea54512d7e8c1d0a42941a22d7020202c`. COO half signed.
+
+**Accepted:**
+- U re-posts on the portal fix's backoff (3, 3, 6, 6, 12, 12, 24, 24, then 30 s; at most 240 s).
+- Nothing is deleted before the run's last read and the resident's resolve of its own upload, or 5 minutes.
+- D prints the first-delete and last-read times.
+
+This verifies already-built code on PROD, so it is allowed under Andrew's pause (@444090ce10). It runs after r34l is live,
+never alongside another IB2 act.
