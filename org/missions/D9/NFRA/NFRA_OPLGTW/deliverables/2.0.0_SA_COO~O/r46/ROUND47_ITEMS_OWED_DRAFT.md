@@ -22,3 +22,13 @@ Added from the CTO (msg 36020, ruling `org/tier1_exec/1.0.0_SA_CTO/deliverables/
 The auditor files D1-D3 as rows in this channel with me as disarm owner (not yet read as filed at writing).
 
 Waiting, not items: `OG-ev-13` (GO no earlier than 2026-10-20 07:45Z, essential wait); FWD-21 (Andrew's act, open call `5b35`); the Schwab pilot walkthrough (open calls `a485`, `2ac2`).
+
+Added 2026-10-19 ~17:5xZ (urgent session, Alyssa 19:00Z):
+
+| # | item | source | note |
+|---|---|---|---|
+| 10 | Master-wide Schwab scope resolved at read time, no stored account list | CTO msg 36025, Andrew-direct @65a05f6658 ("there shouldnt be a persisted list") | `OG-mg-2` is the interim (re-activation at current accounts); this is the code cell |
+| 11 | A memory guard for concurrent battery load on the gateway host | CTO msg 36045; `2.0.0_SA_COO~MI` msg 36038 (hang at `MemoryHigh` 1.2 GB, six parallel runners, 10-17 reading 87 percent) | the restart is `OG-rs-1`; the guard is the cause |
+| 12 | Z-S409..Z-S412: D1, D2 (ARMED, Z-S410: Cottonwood answers an empty list as if the account had none), D3, S1 | CRO~Z msg 36027 | rows filed with me as disarm owner |
+| 13 | Menachem's Schwab grant, the same shape as Alyssa's, over the full current accounts; activate AFTER her 19:00Z session proves the shape; own never-widen | Andrew-direct via CTO msg 36049, record `ANDREW_DIRECT_20261019_175xZ_ROSTER_OPEN_CALLS_YES_TO_RECS_SCRATCH_NO_REC_WIDENINGS.md` @50bd4a33b4 | not granted: Wayne's client tools, AJ's Black Diamond fees, Yang's Schwab access |
+| 14 | The `client_*` tools for Alyssa and for Menachem, each under its own never-widen | same record | sequenced AFTER D1-D3 (items 6-8) land |
