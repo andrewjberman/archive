@@ -35,9 +35,10 @@ NINE = ["p2.e08", "p2.e13", "p6.e22", "p7.e02", "p7.e03", "p7.e05", "p7.e06", "p
 TEST_FILES = [TESTS + "/" + n for n in ("test_layout_overview.py", "test_opal_producer.py", "test_opal_producer_prices.py",
                                           "test_layout_own_series_columns.py", "test_opal_producer_page_wording.py",
                                           "test_opal_producer_benchmark.py")]
-OWN = {163: (MAP, TESTS + "/test_price_pages_repoint.py"),
-       164: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_series.py"),
-       165: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_text.py"),
+PIN_TEST = TESTS + "/test_layout_overview.py"  # AMENDMENT 1: line 754 pins the count of OWN_SERIES elements of the real map; a cell moves it by its delta
+OWN = {163: (MAP, TESTS + "/test_price_pages_repoint.py", PIN_TEST),
+       164: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_series.py", PIN_TEST),
+       165: (IR + "ycharts/research/layout_overview.py", MAP, TESTS + "/test_price_pages_text.py", PIN_TEST),
        166: (IR + "ycharts/research/layout_overview.py", IR + "ycharts/research/opal_producer.py", TESTS + "/test_price_pages_table.py")}
 SLOT = {163: 301, 164: 302, 165: 302, 166: 303}
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/",
