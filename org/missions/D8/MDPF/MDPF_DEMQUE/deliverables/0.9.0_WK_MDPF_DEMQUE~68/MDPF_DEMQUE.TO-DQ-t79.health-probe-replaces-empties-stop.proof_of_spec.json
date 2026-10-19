@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t79",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t79.health-probe-replaces-empties-stop.md",
+    "group": "OTHER",
+    "vintage_commit": "96e9daa459"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "96e9daa459",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t79.health-probe-replaces-empties-stop.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_DEMQUE~68",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "91c74decbf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-MDPF_DEMQUE-68 (LOCAL) for the integrator's drain; no deploy, schedule or task is registered by DQ-t-79. The change: EMPTY_WINDOW_STOP_AT no longer stops a fire. _empty_window now calls _health_trigger when the empty count passes it. _health_trigger runs _health_probe (one history request for /cusip/037833100, field PX_LAST, prev_trading_day(day), through ctx client, budget mode demque-backfill, cells added to res cells and probe_cells) unless 3 probes already ran (then SPARSE-STOP) or no room remains for one cell. UP resets the empty count; OUTAGE sets stop OUTAGE. The default pass and the sweep both receive health_probes and empty_counts in the receipt. The identifier-form probe, outcomes, rooms, the sweep room rule, the trading-day gate and the request files are unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t79-AC1",
+        "DQ9-t79-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_health_probe.py",
+      "kind": "test",
+      "commit_or_etag": "91c74decbf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file: the four named tests of DQ-t-79 build item 2, with EXACTLY the named test names. Stub client (Vendor), tmp_path for every write, OPAL_DEMQUE_HOME and RIVALFUNDS_BBG_BUDGET_DIR set to tmp_path, the priority gate stubbed, a temp allowance. Covers the UP path, the OUTAGE path (empty and raised probe), the SPARSE-STOP on a fourth trigger over 24 empties, and the budget ledger and receipt.",
+      "artifact_covered_by": [
+        "DQ9-t79-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_empty_window.py",
+      "kind": "test",
+      "commit_or_etag": "91c74decbf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE existing test edited, as the order permits: test_more_than_five_empty_windows_in_one_fire_stop_the_run. Its six-empty fire now carries an EMPTY health probe in the stub (sd.HEALTH_PROBE_IDENT: [\"empty\"]), so the fire stops OUTAGE, names the probe in health_probes, and asks no security after the six. Test name and the five-empty half unchanged. Every other test in the file is unchanged.",
+      "artifact_covered_by": [
+        "DQ9-t79-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "91c74decbf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended at the end of the fenced json array: MDPF_DEMQUE-D1-W68-S1 (OBSERVATION, INERT). No existing row edited. The one-writer WARN at commit concerns the unsuffixed file name the order names; the commit was accepted."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t79-AC1",
+      "criterion_verbatim": "`DQ9-t79-AC1` -- the four named tests (test_a_sixth_empty_window_runs_the_health_probe_and_a_priced_answer_keeps_drawing, test_an_empty_or_failed_health_probe_stops_the_fire_as_outage, test_a_fourth_trigger_stops_the_fire_as_sparse_stop_and_names_the_windows, test_the_health_probe_counts_against_the_fire_and_the_receipt_lists_it).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t79_tests.py",
+      "output_evidence": "Run from the worktree root at 91c74decbf: 'test_demque_health_probe.py::test_an_empty_or_failed_health_probe_stops_the_fire_as_outage PASSED [ 50%]' then '============================== 4 passed in 1.48s ==============================' then 'HEALTH-OK' rc=0.",
+      "denominator": "4 of 4 named tests PASSED by name",
+      "status": "PASS",
+      "expect": "HEALTH-OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "DQ9-t79-AC2",
+      "criterion_verbatim": "`DQ9-t79-AC2` -- the CONTROL: the drawer's existing tests and the DQ-t-69/74/75/76/77 tests pass, with the one permitted edit (test_demque_empty_window.py::test_more_than_five_empty_windows_in_one_fire_stop_the_run).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t79_regress.py",
+      "output_evidence": "Run from the worktree root at 91c74decbf: '29 passed in 5.67s' over test_demque_standing_drawer.py, test_demque_standing_drawer_close.py, test_demque_surface_room.py, test_demque_outcome_per_request.py, test_demque_empty_window.py, test_demque_probe_empty.py and test_demque_sweep.py, then 'HEALTH-OK' rc=0. The DQ-t-69/74/75/76/77 check scripts, run at the same commit, read 'SURF-OK', 'OUT-OK', 'EMPTY-OK', 'PROBE-OK' and 'SWEEP-OK', each rc=0.",
+      "denominator": "29 of 29 tests PASSED over the seven regress files; 5 of 5 DQ-t-69/74/75/76/77 check scripts rc=0",
+      "status": "PASS",
+      "expect": "HEALTH-OK",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In standing_drawer._health_trigger, the UP branch is disabled (if verdict == HEALTH_UP becomes if False), so an UP probe is treated as an OUTAGE. The file was restored from a scratch copy afterwards and confirmed byte-identical to the commit.",
+      "expected": "test_a_sixth_empty_window_runs_the_health_probe_and_a_priced_answer_keeps_drawing, test_a_fourth_trigger_stops_the_fire_as_sparse_stop_and_names_the_windows and test_the_health_probe_counts_against_the_fire_and_the_receipt_lists_it fail; test_an_empty_or_failed_health_probe_stops_the_fire_as_outage passes (an OUTAGE either way)",
+      "observed": "3 failed, 1 passed at the mutant (pytest over test_demque_health_probe.py): the three UP-dependent tests failed, the OUTAGE test passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the AC1 check at 91c74decbf, compared on the pytest count line",
+      "observed": "run 1: '4 passed in 1.44s' and run 2: '4 passed in 1.48s', both followed by HEALTH-OK rc=0; the count line and the verdict agree, the time differs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live probe of /cusip/037833100 at the vendor",
+      "reason": "Not run. The order forbids any vendor call and any draw. The health probe's behaviour is proven against the stub client only; the live answer is the integrator's to measure."
+    },
+    {
+      "item": "The 16:00 ET sweep and the 14:00Z default fire rerun",
+      "reason": "Not run. The order forbids any draw and any task registration; both passes share the code path that the tests exercise."
+    },
+    {
+      "item": "The whole-folder no-failure bar",
+      "reason": "Met as to the failures: data/mdpf/scripts/demque reads 4 failed, 241 passed, 8 errors (rc=1) at 91c74decbf. The base read 4 failed, 237 passed, 8 errors; the failure and error names are identical (two test_demque_bbg_backfill vendor_limit_warning cases, two test_demque_bbg_ledger_upload cases, and the 8 collection errors). The pass count rose by the four new tests. No new failure."
+    },
+    {
+      "item": "A named test for a trigger at which no room remains for one cell",
+      "reason": "The order names no case for it. The build asks no probe and sets no stop in that case; the surprise row MDPF_DEMQUE-D1-W68-S1 carries it for a ruling. No committed test covers it."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-D1-W68-S1: DQ-t-79 names no outcome for a sixth empty window that arrives with no room left for one health-probe cell; the build asks no probe and stops nothing (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_DEMQUE/deliverables/0.9.0_WK_MDPF_DEMQUE~68/MDPF_DEMQUE.TO-DQ-t79.health-probe-replaces-empties-stop.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_DEMQUE~68 <0.9.0_WK_MDPF_DEMQUE~68@opal.agent>\" -F .scratch/msg_commit1.txt -- data/mdpf/scripts/demque/standing_drawer.py data/mdpf/scripts/demque/test_demque_health_probe.py data/mdpf/scripts/demque/test_demque_empty_window.py org/missions/D8/MDPF/MDPF_DEMQUE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 91c74decbf on wk-MDPF_DEMQUE-68 (LOCAL): surprise-row-gate OK (1 new row of 182 checked), to-pipeline-gate OK, msg-verify MATCH."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider --color=no --continue-on-collection-errors -rfE data/mdpf/scripts/demque",
+      "result": "4 failed, 241 passed, 8 errors in 38.86s (base: 4 failed, 237 passed, 8 errors in 34.86s)."
+    }
+  ]
+}
