@@ -59,7 +59,7 @@ rk = b.get("ranking") or []
 rk_ok = bool(rk) and [r.get("rank") for r in rk if isinstance(r, dict)] == list(range(1, len(rk) + 1)) and all(isinstance(r.get("proposal"), str) and len(r["proposal"]) >= 40 and isinstance(r.get("sites"), int) and bool(r.get("basis")) for r in rk)
 leak = re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", raw)
 ok = len(want) >= 80 and not missing and not extra and not bad and unknown == 0 and md_ok and lk_ok and pt_ok and rk_ok and not leak
-print("call sites at base %s matched by the pattern: %d (the cut counted 81); listed: %d; missing from the record %d (want 0); not at that sha %d (want 0); malformed rows %d (want 0); event-loop column unknown on %d site(s) (want 0)" % (
+print("call sites at base %s matched by the pattern: %d (the cut counted 81); listed: %d; missing from the record %d (want 0); not at that sha %d (want 0); malformed rows %d (want 0); event-loop column unknown: %d (want 0)" % (
       str(b.get("base_sha"))[:10], len(want), len(have), len(missing), len(extra), bad, unknown))
 print("frequency counted on %d site(s), ABSENT with a reason on %d; lake: 7 days listed %d keys, every %s-th key read (%s objects, errors %s), per-tool rows %d with scaled = observed x k: %s; mcp 1.28.0 dispatch rule with %d evidence lines: %s" % (
       counted, absent, total, k, nread, lk.get("read_errors"), len(pt), "ok" if (lk_ok and pt_ok) else "NOT OK", len(md.get("evidence") or []), "ok" if md_ok else "NOT OK"))
