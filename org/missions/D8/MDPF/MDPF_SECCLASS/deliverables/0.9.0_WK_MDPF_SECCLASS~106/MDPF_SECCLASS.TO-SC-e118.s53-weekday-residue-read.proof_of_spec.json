@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_SECCLASS.TO-SC-e118",
+  "firm": "MDPF",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e118.s53-weekday-residue-read.md",
+    "group": "OTHER",
+    "vintage_commit": "bb1b988f11"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_SECCLASS/decompositions/MDPF_SECCLASS_DECOMP_R30.md",
+    "vintage_commit": "bb1b988f11",
+    "to_ref": "org/missions/D8/MDPF/MDPF_SECCLASS/task-orders/MDPF_SECCLASS.TO-SC-e118.s53-weekday-residue-read.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_SECCLASS~106",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_SECCLASS/deliverables/0.9.0_WK_MDPF_SECCLASS~106/S53_CAUSE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only cause file for SC-e-118: 5 dates (2026-10-05, 06, 07, 09, 10) with the residue copied from S48_RANGE_RECON.json; step = data/black_diamond/scripts/gold/C_06.client_mix_timeseries.py line 813 (pos = pos.dropna(subset=['relationship_id'])); calendar = lib/trading_calendar.py is_trading_day; cause_named false because the class split was not measured (surprise S2). Class-agnostic measure, exact to the cent: the residue on each Mon-Thu date equals minus the change in the excluded mass (2026-10-05 -32073.9188 = -(23494524.98 - 23462451.06)); the excluded mass is 1,883 rows of 126 accounts absent from accounts_dimension, zero on 2026-10-09 and 10-10. Served post totals reproduced to 4 decimals by a gate simulation on six dates. No object, table, checker or channel row was changed by this cell except the appended surprise rows.",
+      "artifact_covered_by": [
+        "SC30-e118-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "SC30-e118-AC1",
+      "criterion_verbatim": "the residues equal the reconciliation file's, each date's class numbers sum to its residue, the weekday split holds, the quoted step is in the repo file and the calendar function is defined.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R30_CHECKS/check_r30_reads.py s53-cause",
+      "output_evidence": "R30-s53-cause ok=False problems=['no file at org\\\\missions\\\\D8\\\\MDPF\\\\MDPF_SECCLASS\\\\deliverables\\\\0.9.0_WK_MDPF_SECCLASS~106\\\\S53_CAUSE.json']  (rc=1). Checker defect, surprise MDPF_SECCLASS-D1-W106-S1: ROOT is one level short (<repo>/org), so the file is searched at org/org/missions/...; the file exists at the granted path. Diagnostic only, not the verdict: the checker's own grade_s53 called with the repo root returns []",
+      "denominator": "0 of 1 criterion PASS; the file-level check did not reach the 5 dates, the 3 weekday dates and the 2 zero dates because the path resolution fails first",
+      "status": "FAIL",
+      "status_reason": "The criterion ran under timeout 120 (rc=1, not a timeout) and the checker reports no file at the S53 path because its ROOT resolves to <repo>/org; the file exists at the granted path (surprise MDPF_SECCLASS-D1-W106-S1). The order is left open. Only the checker's own grade_s53 with the repo root, a diagnostic and not the verdict, returns no problems.",
+      "expect": "R30-s53-cause ok=True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the checker's own selftest: the s53 negative arms (residue off, classes do not sum, quote missing, line far from quote, function missing, unnamed without not_read, too few weekdays, short summary) must fire",
+      "expected": "R30-SELFTEST ok=True with every negative arm True",
+      "observed": "R30-SELFTEST ok=True arms=green:ok,residue-off:ok,classes-do-not-sum:ok,quote-missing:ok,line-far-from-quote:ok,function-missing:ok,unnamed-without-not-read:ok,too-few-weekdays:ok,short-summary:ok (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A with reason: the verdict is a mechanical grade of one file against one reconciliation file; the reading itself is pinned to S3 version ids (served post l2Wqoi6iUJwQwwmTCu3lXWozfW4.Ak_. and canonical after/before ids from S48), so the values are fixed.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the per-class split of the excluded residue",
+      "reason": "the producer's classifier shared client lib/_shared/etf_classifications_dynamodb.py is absent from this worktree; the class of the 1,883 excluded rows could not be assigned by the producer's own rule. Not measured (surprise MDPF_SECCLASS-D1-W106-S2). The classes map carries one key, unsplit_excluded_rows."
+    },
+    {
+      "item": "why the weekday-only bd rows exist on Monday-to-Thursday partitions and not Friday-to-Sunday",
+      "reason": "the upstream writer (B_00 canonical holdings) was not read; the step that drops the rows (C_06 line 813) is weekday-blind, and the weekday split sits in the canonical input."
+    },
+    {
+      "item": "the premise reading of the 32k as a level gap",
+      "reason": "the level gap on Mon-Thu dates is about 23.5M; the 31.6k to 32.2k figures are the day-over-day residue (served delta minus canonical delta). Recorded in surprise MDPF_SECCLASS-D1-W106-S3."
+    }
+  ],
+  "surprises": [
+    "MDPF_SECCLASS-D1-W106-S1: R30_CHECKS/check_r30_reads.py resolves its repo root one level short (<repo>/org), so S53_CAUSE.json and S48_RANGE_RECON.json are searched under org/org/missions/; AC1 cannot pass in any worktree.",
+    "MDPF_SECCLASS-D1-W106-S2: the producer's shared classifier client is absent from the worktree (lib/_shared/etf_classifications_dynamodb.py), so the per-class split of the excluded residue is not measured.",
+    "MDPF_SECCLASS-D1-W106-S3: the order's premise reads the 32k as a level gap; the level gap on Mon-Thu dates is about 23.5M and the 32k is the day-over-day residue."
+  ],
+  "session_log": "Verified worktree branch wk-MDPF_SECCLASS-106 and TREE-OK. Read the WORKER FACE and S48_RANGE_RECON.json (worker ~103). Ran the checker's header and its selftest (read-only). Fetched by pinned version the served mix_daily_summary.json post and pre, and the canonical holdings after versions for 2026-10-05, 06, 07, 09, 10, 12 (scratch under .scratch/, uncommitted). Read C_06 process_date (lines 758-888), the firm accumulation (1083-1100) and the static loaders (712-751), and lib/exclusions.py. Gate simulation reproduced the served post totals to 4 decimals on six dates. Excluded-mass decomposition matched the residue to the cent on 2026-10-05, 06, 07. The class split was blocked by the missing shared classifier (BLOCKED). Wrote S53_CAUSE.json, appended three rows (MDPF_SECCLASS-D1-W106-S1..S3, byte mode), ran the criterion invocation (rc=1).",
+  "compiler_tools": [
+    {
+      "tool": "check_r30_reads.py (R30_CHECKS, read-only)",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R30_CHECKS/check_r30_reads.py s53-cause",
+      "result": "R30-s53-cause ok=False problems=['no file at org\\\\missions\\\\...S53_CAUSE.json'] rc=1 (path defect, surprise S1)"
+    },
+    {
+      "tool": "check_r30_reads.py selftest",
+      "invocation": "timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_SECCLASS_M/R30_CHECKS/check_r30_reads.py selftest",
+      "result": "R30-SELFTEST ok=True rc=0"
+    }
+  ]
+}
