@@ -265,7 +265,12 @@ def ac2(root):
         ls = st[LIST_SID]
         lres = [ls["Resource"]] if isinstance(ls["Resource"], str) else list(ls["Resource"])
         lact = [ls["Action"]] if isinstance(ls["Action"], str) else list(ls["Action"])
-        if lres != [LIST_RESOURCE] or lact != ["s3:ListBucket"] or ls.get("Effect") != "Allow" or ls.get("Condition") != {"StringLike": {"s3:prefix": LIST_PREFIX_VALUES}}:
+        lcond = ls.get("Condition") or {}
+        lsl = lcond.get("StringLike") or {}
+        lpv = lsl.get("s3:prefix")
+        lpv = [lpv] if isinstance(lpv, str) else lpv
+        lcond_ok = list(lcond) == ["StringLike"] and list(lsl) == ["s3:prefix"] and lpv == list(LIST_PREFIX_VALUES)
+        if lres != [LIST_RESOURCE] or lact != ["s3:ListBucket"] or ls.get("Effect") != "Allow" or not lcond_ok:
             pr.append("the list statement must be Allow, s3:ListBucket only, on %s, StringLike s3:prefix %r and nothing else" % (LIST_RESOURCE, LIST_PREFIX_VALUES))
         n = st[NEW_SID]
         res = [n["Resource"]] if isinstance(n["Resource"], str) else list(n["Resource"])
