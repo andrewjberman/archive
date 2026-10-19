@@ -128,10 +128,10 @@ def g2_ac1(tmp):
     print("DENOMINATOR: green fixture census 6 channels, 9 tools; catalog rows under a census channel 4 (retired and unplaced rows excluded)")
     rc, so, se, doc = cover(tmp, pending=fx("pending_min.yaml"), tag="g")
     arm("green rc 0", rc == 0, "rc=%s stderr=%s" % (rc, se[-200:]))
-    arm("green stdout", first_line(so, "COVERAGE") == "COVERAGE channels=6 tools=9 rows=4 refusals=0", "got %r" % first_line(so, "COVERAGE"))
+    arm("green stdout", first_line(so, "COVERAGE") == "COVERAGE channels=6 tools=9 rows=4 refusals=0 explained=0", "got %r" % first_line(so, "COVERAGE"))
     arm("green refusals empty", doc is not None and doc.get("refusals") == [], "refusals=%r" % (doc or {}).get("refusals"))
     rc, so, se, doc = cover(tmp, channels=("opal-data-harvest",), tag="h")
-    arm("one channel scope", rc == 0 and first_line(so, "COVERAGE") == "COVERAGE channels=1 tools=2 rows=1 refusals=0", "got %r rc=%s" % (first_line(so, "COVERAGE"), rc))
+    arm("one channel scope", rc == 0 and first_line(so, "COVERAGE") == "COVERAGE channels=1 tools=2 rows=1 refusals=0 explained=0", "got %r rc=%s" % (first_line(so, "COVERAGE"), rc))
     p = os.path.join(tmp, "bad.json")
     with open(p, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("not json")
