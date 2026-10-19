@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-4.source-sets-harvest",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4b8dcf3b86"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round23-GATEWAY.md",
+    "vintage_commit": "0def6f4233a",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-4.source-sets-harvest.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~74",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~74/source_sets_harvest.json",
+      "kind": "config_data",
+      "commit_or_etag": "0da57c1cf7651811f48a9a5eff47d352360d66d0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local data file (gateway_source_sets/1, 18 tools) committed at 0da57c1cf7 on branch wk-NFRA_MCPINDEX-74. No deploy in scope: cell bound 1 (reads local files only; no AWS call, no network call, no grant, no deploy, no push).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line (18 tools in scope); the schema; every tool in scope exactly once and no other; every tool has at least one source -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s4.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~74/source_sets_harvest.json; echo \"exit=$?\"",
+      "expect": "DENOMINATOR: 18 tool\\(s\\) in scope[\\s\\S]*RESULT: PASS\\s+exit=0",
+      "output_evidence": "DENOMINATOR: 18 tool(s) in scope: channels opal-data-harvest,dynamodb; census GATEWAY_SURFACE_CENSUS_20261019_v2.json\n  ok   a source-set file path was given and exists\n  ok   schema\n  ok   every tool in scope appears exactly once, and no other\n  ok   every tool has at least one source\nARMS: 4 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "18 tools in scope (census channels opal-data-harvest 14 + dynamodb 4); 4 of 4 arms ok",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; every source has the fields of its kind; every vendor is in the allowed vocabulary; every cite is app/<file>.py:<line> naming a real line; the cited file names the bucket, store, integration or graph string; a tool's vendors list equals the set of its sources' vendors -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s4.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~74/source_sets_harvest.json; echo \"exit=$?\"",
+      "expect": "DENOMINATOR: 18 tool\\(s\\) in scope[\\s\\S]*RESULT: PASS\\s+exit=0",
+      "output_evidence": "DENOMINATOR: 18 tool(s) in scope; the allowed vendors are the catalog's own plus opal, ycharts, microsoft, bloomberg, other\n  ok   a source-set file path was given and exists\n  ok   every source has the fields of its kind (s3: bucket and prefix; store; integration; graph)\n  ok   every source vendor is in the allowed vocabulary\n  ok   every cite is app/<file>.py:<line> naming a real line of the gateway source\n  ok   the cited file names the source (the bucket, store, integration or graph string appears in it)\n  ok   a tool's vendors list equals the set of its sources' vendors\nARMS: 6 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "18 tools in scope; 6 of 6 arms ok over every source of the file (the 18 tools carry 132 sources in total: 24 served-prefix sources each for harvest_list and harvest_read, 31 for harvest_security_coverage, and the rest)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the deliverable (.scratch/mutant_source_sets.json, not committed) with two planted defects: the first harvest_get_chatter source cite moved to app/harvest_press.py:99999 (a line that does not exist) and the mdpf_get_security_classification store vendor changed to acme (outside the vocabulary). Run through s4.AC2.",
+      "expected": "s4.AC2 FAILs on exactly the vendor-vocabulary, cite and vendors-union arms, naming the planted tools",
+      "observed": "RESULT: FAIL exit=1: FAIL every source vendor is in the allowed vocabulary (got mdpf_get_security_classification/acme); FAIL every cite names a real line (tools harvest_get_chatter); FAIL a tool's vendors list equals the set of its sources' vendors (tools mdpf_get_security_classification); 3 of 6 arms ok",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two runs of s4.AC2 on the real deliverable, stdout captured to .scratch/run1.txt and .scratch/run2.txt and compared with cmp; plus the base run of s4.AC1 with no deliverable path (the base dry-run arm).",
+      "observed": "rc1=0 rc2=0; cmp printed DETERMINISTIC_BYTES. Base run (no path): RESULT: FAIL exit=1, arm 'a source-set file path was given and exists' FAIL, so the criterion does not pass at the base.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Execution of the gateway runtime (the handlers were read, not run)",
+      "reason": "Cell bound 1 and the face's EGRESS CLASS NONE: no AWS call, no network call. The trace is the code reading; the issuer's drain sample and the live responses are the cross-check the face names."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W74-S1 OBSERVATION harvest_get_article: linked rows none, trace reads the mention gold part and five silver article prefixes",
+    "NFRA_MCPINDEX-Z-W74-S2 OBSERVATION harvest_get_chatter: members.yaml carries no bucket claim, trace reads opal-data-harvest",
+    "NFRA_MCPINDEX-Z-W74-S3 OBSERVATION harvest_get_filing_analysis: linked issuer-site filing source not read by any branch",
+    "NFRA_MCPINDEX-Z-W74-S4 OBSERVATION harvest_get_fundamentals: linked exec_officers, histdata_daily_px, price_history_tot_return not read by this tool",
+    "NFRA_MCPINDEX-Z-W74-S5 OBSERVATION harvest_get_peers_and_scores: members.yaml carries no bucket claim, trace reads opal-data-harvest",
+    "NFRA_MCPINDEX-Z-W74-S6 OBSERVATION harvest_get_published_analysis: census none, trace reads the AMGT scoped-API Lambda integration",
+    "NFRA_MCPINDEX-Z-W74-S7 OBSERVATION harvest_get_research: reads bloomberg exec_officers, not linked to this tool",
+    "NFRA_MCPINDEX-Z-W74-S8 OBSERVATION harvest_list: census none, trace lists all 24 served prefixes",
+    "NFRA_MCPINDEX-Z-W74-S9 OBSERVATION harvest_query_columns: seven allow-listed datasets, one linked",
+    "NFRA_MCPINDEX-Z-W74-S10 OBSERVATION harvest_read: 39 linked rows, every harvest_datasets row reachable under the served prefixes",
+    "NFRA_MCPINDEX-Z-W74-S11 OBSERVATION harvest_resolve_security: linked identity/v1 never read, amgt research_dossier read and not linked",
+    "NFRA_MCPINDEX-Z-W74-S12 OBSERVATION harvest_search_articles: members.yaml carries no bucket claim, trace reads opal-data-harvest",
+    "NFRA_MCPINDEX-Z-W74-S13 OBSERVATION harvest_security_coverage: one linked row, trace reads all 31 keyed prefixes",
+    "NFRA_MCPINDEX-Z-W74-S14 OBSERVATION mdpf_get_security_classification: census none, trace reads the etf-classifications table",
+    "NFRA_MCPINDEX-Z-W74-S15 OBSERVATION news_for_security: census none, trace reads the mention index and the articles store fallback",
+    "NFRA_MCPINDEX-Z-W74-S16 OBSERVATION news_trending_topics: second linked row opal-data-news-v2 trending_reports is read by no gateway code"
+  ],
+  "session_log": "No session file written (the no-report-file rule). The worker report is the final message of 0.9.0_WK_NFRA_MCPINDEX~74 on NFRA_MCPINDEX.TO-MX-s-4.",
+  "compiler_tools": [
+    {
+      "tool": "s4.AC1.sh (h_check.py s4.AC1) on the deliverable",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s4.AC1.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~74/source_sets_harvest.json",
+      "result": "RESULT: PASS (4 of 4 arms ok, exit 0)"
+    },
+    {
+      "tool": "s4.AC2.sh (h_check.py s4.AC2) on the deliverable",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round23/checks/s4.AC2.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~74/source_sets_harvest.json",
+      "result": "RESULT: PASS (6 of 6 arms ok, exit 0)"
+    },
+    {
+      "tool": "commit gate via .tools/safe-commit.sh (work commit 0da57c1cf7)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~74 <0.9.0_WK_NFRA_MCPINDEX~74@opal.agent>\" -F .scratch/commit_i.msg -- <deliverable> <INVESTIGATION_v1.md>",
+      "result": "rc=0; surprise-row-gate OK (16 new rows of 488, 472 pre-existing not re-graded); the naming gate printed NAMING ERROR (function-map folder missing) and the risk reflex printed PARTIAL_OR_BLIND; both carried in the commit output, not as rows of this worker's own"
+    }
+  ]
+}

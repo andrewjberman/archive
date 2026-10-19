@@ -1,0 +1,76 @@
+== h6.AC1 (captured, committed state)
+DENOMINATOR: fixture census scoped to opal-data-harvest and opal-data-assets: 4 tools, 4 cases; a routing table with a source set per tool; R1 and R2 results cite their sources, R3 and R4 do not
+  ok   green: PASS=4
+  ok   the record says route: response-cited where the response names a source, code-cited where it does not
+  ok   a response that cites a source outside the routed set reads FAIL misrouted
+  ok   one cited source outside the set is enough to FAIL, even beside a matching one
+  ok   a code-cited answer needs a ROUTED table row: MISROUTED reads FAIL route_unproven
+  ok   a tool absent from the routing table reads FAIL route_unproven
+  ok   without --routing the grade is the round-22 grade and the cases carry no route key
+ARMS: 7 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== h6.AC2 (captured, committed state)
+DENOMINATOR: the planted wrong citation (plant-route) and the round-22 battery arms (g4.AC1 and g4.AC2) still holding
+  ok   plant-route rc 0 and writes the file
+  ok   only the named case changes, and its answer_source is now a source outside every routed set
+  ok   the planted wrong source reads FAIL misrouted
+  ok   plant-route on a case that does not exist is refused (rc 2)
+  ok   round-22 g4.AC1 still PASSes
+  ok   round-22 g4.AC2 still PASSes
+ARMS: 6 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== h6.AC3 (captured, committed state)
+DENOMINATOR: pytest rc=0 passed=10 (minimum 5) file=workflows\gateway_battery\tests\test_tool_battery_route.py
+  ok   pytest
+ARMS: 1 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== g4.AC1 (round-22, committed state)
+DENOMINATOR: fixture census 9 tools; 8 in scope (undeclared channel out); 9 cases; green results cover all 9
+  ok   plan in scope rc 0
+  ok   plan over all channels flags the tool with no case
+  ok   grade green rc 0
+  ok   grade stdout
+  ok   preview-only listed by name
+  ok   per-tool verdicts
+  ok   graded file equals graded_min.json on cases, tools, counts, case_counts, preview_only and fails
+  ok   per-case verdicts and the question carried
+ARMS: 8 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== g4.AC2 (round-22, committed state)
+DENOMINATOR: seven planted arms over the green results; each reads FAIL with its class and grade exits 1
+  ok   plant subcommand rc 0
+  ok   G1 planted broken tool reads FAIL tool_error
+  ok   G2 source disagrees
+  ok   G3 no source check is not a PASS
+  ok   G4 a send is a FAIL
+  ok   G5 a case not run
+  ok   G6 unexpected empty
+  ok   G7 an ungranted principal that is not refused
+  ok   G8 an unexpected refusal
+  ok   G9 a census tool with no case reads FAIL no_case
+ARMS: 10 ok, 0 failed
+RESULT: PASS
+exit=0
+
+== mutant h6.AC1 (planted prefix match; restored byte-exact)
+DENOMINATOR: fixture census scoped to opal-data-harvest and opal-data-assets: 4 tools, 4 cases; a routing table with a source set per tool; R1 and R2 results cite their sources, R3 and R4 do not
+  ok   green: PASS=4
+  ok   the record says route: response-cited where the response names a source, code-cited where it does not
+  FAIL a response that cites a source outside the routed set reads FAIL misrouted  -- rc=0 {'tool': 'harvest_list', 'verdict': 'PASS', 'fail_class': None, 'cases': ['R1']}
+  FAIL one cited source outside the set is enough to FAIL, even beside a matching one  -- rc=0 {'tool': 'harvest_read', 'verdict': 'PASS', 'fail_class': None, 'cases': ['R2']}
+  ok   a code-cited answer needs a ROUTED table row: MISROUTED reads FAIL route_unproven
+  ok   a tool absent from the routing table reads FAIL route_unproven
+  ok   without --routing the grade is the round-22 grade and the cases carry no route key
+ARMS: 5 ok, 2 failed
+RESULT: FAIL
+exit=1
+
+== determinism: two grade runs with --routing on the h6 fixtures compared with cmp: byte-identical, 1656 bytes, rc 0 both
