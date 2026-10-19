@@ -48,6 +48,7 @@ DISPATCH_SHA12 = "d2ff692abd23"  # addendum 1: the pin that carries FB1's change
 PRIOR_DISPATCH_VERSION = "hK5vY2H31oT3NHmoiArlZ00ra8gkuDaO"  # addendum 1: FB1's upload of 2026-10-19T14:22:09Z, the pre-state and the rollback target
 PRE_STATE_SHA12 = "9495cd56228b"
 PAIR_DISPATCH_DIFF_LINES = 145
+FB1_UPLOAD_UTC = "2026-10-19T14:22:09Z"
 ADDENDUM_REL = D + "2.0.0_SA_COO~F2/NEVER_WIDEN_PACKET_INFLECTION_TRANSACTION_RELEASE_ADDENDUM_1.md"
 ADDENDUM_SHA = "115ba6e99cba005ae836018e77987d3ca13d13b5e65061d5ec50a9521d5648aa"
 SCHEMA_HASH = "ac652e2f71b18427b52f321858163768158f850ec173d1e592c7c3abe815bb6a"
@@ -90,8 +91,14 @@ def head_problems(rec):
         and g["one_change_at_a_time"]["worktrees_read"] > 0 and g["one_change_at_a_time"].get("open_markers_naming_this_surface") == 0
     if not ok:
         pr.append("gates must record the packet sha256, both halves signed, the pins, Monday's 49 Financial first-fire read PASSED, and the worktree denominator with 0 open markers naming this surface")
-    if not (isinstance(g, dict) and g.get("fb1_door6_ledger_dispositioned") is True):
-        pr.append("gates must record that FB1's open ledger advi-firmbkts-fb-p-2-door6-retirement-20261017 (it names the dispatch script) is closed or its legs dispositioned by the CTO (fb1_door6_ledger_dispositioned true)")
+    f = g.get("fb1_door6") if isinstance(g, dict) else None
+    f_ok = isinstance(f, dict) and (f.get("ledger_state") == "CLOSED" or (
+        f.get("ledger_state") == "OPEN" and f.get("l7_ancestor_rc") == 0 and isinstance(f.get("marker_versions"), list) and len(f["marker_versions"]) > 0
+        and isinstance(f.get("marker_newest_utc"), str) and f["marker_newest_utc"] <= FB1_UPLOAD_UTC and "Chain complete" in str(f.get("chain_completion_line", ""))
+        and "Door 6" in str(f.get("chain_completion_line", "")) and f.get("chain_log_key")))
+    if not (isinstance(g, dict) and g.get("fb1_door6_ledger_dispositioned") is True and f_ok):
+        pr.append("gates must record FB1's ledger advi-firmbkts-fb-p-2-door6-retirement-20261017 CLOSED, or OPEN with the CTO's measured-artifact reads: 9bfa234989 an ancestor of origin/CLOUD (rc 0) and the pipeline-complete.json "
+                  "version list with nothing newer than %s across a completed chain whose log line is printed" % FB1_UPLOAD_UTC)
     if not (isinstance(rec["ledger_entry"], str) and rec["ledger_entry"].strip()):
         pr.append("ledger_entry must name the ledger")
     b = rec["before"]
@@ -309,6 +316,8 @@ def selftest():
     snap = {"snapshot_line": "INF_G_01 run_day 2026-10-16 snapshot 2026-10-16 upload False", "snapshot_partitions": 1}
     rec = {"claim": "measured", "applier": APPLIER, "ledger_entry": "x", "ledger_closed": False, "reads": {},
            "gates": {"packet_sha256": PACKET_SHA, "coo_half_signed": True, "cto_half_signed": True, "pins_ok": True, "monday_49f_read_passed": True, "fb1_door6_ledger_dispositioned": True,
+                     "fb1_door6": {"ledger_state": "OPEN", "l7_ancestor_rc": 0, "marker_versions": ["uLToDEvBYZP6B2 2026-10-16T12:56:43Z"], "marker_newest_utc": "2026-10-16T12:56:43Z",
+                                   "chain_completion_line": "Chain complete (2026-10-20); pipeline-complete.json marker write retired (Door 6), not written", "chain_log_key": "gold/logs/x.log"},
                      "one_change_at_a_time": {"worktrees_read": 90, "open_markers_naming_this_surface": 0}},
            "role_audit": {"new_role_absent_before": True, "inline_policies": list(OTHER_POLICIES)},
            "before": {"dispatch_pre_check": {"verdict": "PRE-STATE-OK", "live_version_id": PRIOR_DISPATCH_VERSION, "live_sha12": PRE_STATE_SHA12, "diff_lines": 145,
@@ -327,6 +336,11 @@ def selftest():
     arm("dispatch-live-not-pre-state", len(head_problems(dict(rec, before={"dispatch_pre_check": dict(pre, live_sha12="7b206030bfc7")}))), 1)
     arm("dispatch-diff-lines-wrong", len(head_problems(dict(rec, before={"dispatch_pre_check": dict(pre, diff_lines=144)}))), 1)
     arm("dispatch-precheck-missing", len(head_problems(dict(rec, before={}))), 1)
+    fb = rec["gates"]["fb1_door6"]
+    arm("fb1-open-marker-newer", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, marker_newest_utc="2026-10-20T12:56:00Z"))))), 1)
+    arm("fb1-open-not-ancestor", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, l7_ancestor_rc=1))))), 1)
+    arm("fb1-open-no-chain-line", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6=dict(fb, chain_completion_line=""))))), 1)
+    arm("fb1-closed-ok", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6={"ledger_state": "CLOSED"})))), 0)
     arm("fb1-ledger-open", len(head_problems(dict(rec, gates=dict(rec["gates"], fb1_door6_ledger_dispositioned=False)))), 1)
     arm("plan-one-add", len(head_problems(dict(rec, plan=dict(rec["plan"], add=1)))), 1)
     nores = [dict(x, with_resource_policy=False) for x in rec["simulation"]["lines"]]
