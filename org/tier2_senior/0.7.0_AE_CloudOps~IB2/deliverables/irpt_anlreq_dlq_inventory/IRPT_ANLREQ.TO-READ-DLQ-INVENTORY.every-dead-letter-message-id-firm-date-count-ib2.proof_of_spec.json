@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "four receives with visibility timeout 0, stopped at the first receive with nothing new; the leak regex was run as DLQI-AC2",
+   "observed": "5 of 8 messages returned (complete=no, shortfall named); 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-DLQ-INVENTORY.every-dead-letter-message-id-firm-date-count-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-INVENTORY.every-dead-letter-message-id-firm-date-count-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "3f8271892f"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-INVENTORY.every-dead-letter-message-id-firm-date-count-ib2.md",
+  "vintage_commit": "3f8271892f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "repeated zero-visibility receives (4 of at most 8) over the generation dead letter: 5 distinct messages of depth 8; nothing consumed",
+   "artifact_covered_by": [
+    "DLQI-AC1",
+    "DLQI-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "DLQI-AC1",
+   "invocation": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "expect": "^2$",
+   "output_evidence": "2\nexit code: 0\n(run 2026-10-19 from the repo root)",
+   "denominator": "1 record file, 5 M rows, 5 Q rows, the counts line and the closing line",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "DLQI-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit code: 1\n(run 2026-10-19 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
+   "denominator": "13 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "three dead-letter messages the reads did not return (complete=no)",
+   "reason": "the order stops at the first receive that returns nothing new; the shortfall is named in the record"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 sqs and dynamodb reads (dlq_inventory.py)",
+   "invocation": "python dlq_inventory.py",
+   "result": "INVENTORY-DONE complete=no; DLQI-AC1 2, DLQI-AC2 0"
+  }
+ ]
+}

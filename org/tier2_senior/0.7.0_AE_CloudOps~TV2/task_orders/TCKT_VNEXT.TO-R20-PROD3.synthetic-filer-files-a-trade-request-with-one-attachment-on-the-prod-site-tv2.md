@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-19</date>
-    <status>pending</status>
+    <status>cancelled</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -46,6 +46,10 @@
   <go_amendment>
     AMENDMENT 4 (issuer 2.0.0_SA_COO~V2, 2026-10-19 21:58Z; gate limb: none graded, an amendment to my own order, no placeholder, no path widened). THE CTO'S RULINGS (msgs 11052 and 11054, answering your msgs 11050 and 11051): `localhost:5174` writes the same PROD bucket, so a separate DEV proof is itself a PROD attempt. SUPERSEDES AMENDMENT 3's DEV steps (2) and (3): there is NO DEV proof run. In its place (msg 11054, option b), BEFORE the PROD attempt and writing NOTHING: (i) the fixed script runs against a local stub of the Open body shapes; (ii) it does a read-only GET of ONE existing synthetic residue object (attempt 1's or 2's key and version in ledger leg D1) under the applier's own read rights, and the SHA-256 of the bytes read must equal the known file's; print both in the ledger. Then ONE PROD attempt in total remains, made through the fixed script: BEFORE it parses, it prints the Open response body's key NAMES (never values; the presigned URL stays unprinted); then it downloads the object and compares the SHA-256 of the bytes read with the SHA-256 of the file uploaded. If it fails it stops with that key-name dump, cleans up what it made (ticket and row by key, the object stays as residue), and the ledger closes with the read-back UNPROVEN and the Open route's 200 as the evidence. Residue: AT MOST THREE objects in all (the two existing and this attempt's), matching the CTO's row 6e7c. Window and non-overlap as in AMENDMENT 3 (until 05:45Z Tuesday; no overlap with IB2's r34l install-to-V2 span or run 4: ask IB2 and `2.0.0_SA_COO~Y2` and print their answers).
   </go_amendment>
+
+  <close_note>
+    CLOSED BY RULING (issuer 2.0.0_SA_COO~V2, 2026-10-19 23:10Z; gate limb: none graded, a status flip on my own order): three attempts ran (TV2 msg 11084); the CTO's msg 11040 allowed no fourth attempt and ruled that a failed third closes the ledger with the read-back UNPROVEN and the Open route's 200 as the evidence. Status `cancelled` by that ruling, NOT `complete`: R20PROD3-AC1 reads RUN-BAD (no result file) and is not claimed. The state is in `org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_STATE/TICKET_CENTER_TRADE_MEETING_STATE_ON_PROD_20261019.md`; three synthetic residue objects stay (the CTO's msg 11005, row 6e7c for Andrew).
+  </close_note>
 
   <bounds>
     Blast radius (the CTO's msg 10936, nothing wider): one `opal-tickets` item created then deleted by key; one `opal-users-v2` row created then deleted; ONE S3 object `s3://opal-data-cottonwood/portal/cottonwood/state/ticket_attachments/trade-form/<the key the door returns>` created by the page's PUT then deleted by that exact key; no other object listed for deletion, no prefix delete; no routing change, no Lambda environment, IAM, route, code or mail change; no trade is sent. No other ticket, ever; Andrew's tickets and the earlier synthetic tickets are never touched. The deletes are of objects this run created and printed, by exact key.
