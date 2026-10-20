@@ -1,0 +1,25 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~4 on NFRA_SCHWABBF.TO-BF-t2 (cell BF-t-2, the firm form)
+Worktree: C:\Users\AndrewBerman\Desktop\wt-bf-4 (Git Bash /cygdrive/c/Users/AndrewBerman/Desktop/wt-bf-4), branch wk-NFRA_SCHWABBF-4, base 87d44e203b
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-4; test -d org && test -d .tools -> TREE-OK.
+2. Re-ground: infra/logic/registry/scopes.json -> FIRM rows 49financial (masters 08242234, 08335338, 08403355),
+   cottonwood (masters z09, 08719286, 08134043, 08165601, 08480305), inflection (4698).
+   lib/opal_naming.py address('schwab', '49financial', 'bronze', 'acc', 'date=2026-10-16') ->
+   s3://opal-data-assets/schwab/49financial/bronze/acc/date=2026-10-16 (firm form, the builder's address).
+   address('schwab', '49financial' ...) is the firm form; the short form '49f' is refused by the builder.
+3. Read-only census (boto3 list_objects_v2, opal-data-assets): firm partitions for 2026-10-16 and 2026-10-17 are EMPTY
+   for 49financial and cottonwood. 0840 legacy layout 2026-10-16 holds 1 object (leading token 08403355); 2026-10-17 holds 0;
+   silver 0840 2026-10-16 holds 1 object, 2026-10-17 holds 0.
+4. Tests rewritten for the firm form (data/canonical/schwab/tests/test_thread_trace.py). Helper fixed once: _firm_prefix
+   returned the s3:// URI instead of the key (test bug, not a tool finding).
+5. AC1 against the UNCHANGED master-form tool (mutant control): 16 failed, 2 passed in 0.40s, pytest rc=1.
+6. Tool changed to the firm form (data/canonical/schwab/keyform/thread_trace.py): firm_of() from the registry,
+   addresses(master, day, firm), name filter 'M.', sibling-only -> cause=other-master-only (silver absent),
+   ERROR rc 3 for a master with no single firm row.
+7. AC1 -> 18 passed, rc 0 (after one test assertion changed to the round-1 any-form rule; surprise row W4-S5).
+8. AC2 (real) -> THREAD-OK master=08403355 day=2026-10-16 form=legacy, rc 0, 27 lines. Run twice and diffed: identical.
+9. AC3 (real) -> NOT-HELD master=08403355 day=2026-10-17 cause=no-bronze-no-silver, rc 2.
+10. Commits: b32d6ca4dd (tool + test), c4fb6168cd (surprise rows W4-S4, W4-S5).
+11. Gate notes from safe-commit: danger map STALE (reflex PARTIAL_OR_BLIND, 0 of 2 files scanned); hashed account-id list
+    ABSENT at C:\Users\AndrewBerman\.opal\account_id_hashes.txt (client-data check not run on this commit, absent is not empty).
+    The commit carries no account number; test constants are fixture values from round 1.
