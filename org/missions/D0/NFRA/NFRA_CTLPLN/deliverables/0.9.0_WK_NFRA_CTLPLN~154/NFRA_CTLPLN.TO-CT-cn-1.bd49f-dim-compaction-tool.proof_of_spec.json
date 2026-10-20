@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-cn-1.bd49f-dim-compaction-tool",
+  "phase": "BUILD-GENERAL",
+  "firm": "49F",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cn-1.bd49f-dim-compaction-tool.md",
+    "group": "OTHER",
+    "vintage_commit": "e7d8af9d1ce"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~154",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "e7d8af9d1ce",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cn-1.bd49f-dim-compaction-tool.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/bd49f_dim_compact.py",
+      "kind": "script",
+      "commit_or_etag": "9e9c9867ccf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The compaction tool: compact(dim) (consecutive identical SCD2_TUPLE periods per account merge; earliest row carried, effective_to / is_current / absent_from_feed_since from the last row; refuses two open rows), proofs(before, after) (current rows, per-account tuple runs, row counts), and a CLI with --mode plan (one get_object, writes nothing) and --mode apply (one put_object to the same key, refused unless both proofs hold, the confirm key equals the computed key and merged > 0). Not vendored into any Lambda; the converter is not touched. Never run against S3 by this worker (WORLD cell).",
+      "artifact_covered_by": ["CTcn1-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_bd49f_dim_compact.py",
+      "kind": "test",
+      "commit_or_etag": "9e9c9867ccf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Exactly six named pytest tests on in-memory frames and a FakeS3 class (get_object, head_object, put_object); no network. Last line of the run: 6 passed.",
+      "artifact_covered_by": ["CTcn1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "9e9c9867ccf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended, none edited: NFRA_CTLPLN-W154-S1 (OBSERVATION, INERT: the named worker checker path is absent from the worktree) and NFRA_CTLPLN-W154-S2 (OBSERVATION, INERT: apply refuses when the prior object has no VersionId). Both UNDER_INVESTIGATION."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTcn1-AC1",
+      "criterion_verbatim": "the six tests pass: identical neighbours merge (earliest from, latest to, current-state columns from the last row), a real change stays separate, float 0.0 and int 0 are identical after the cast, the proofs catch a merge across a real change (the difference control), apply refuses on a failed proof or a wrong confirm key and writes nothing, apply with zero merged writes nothing. Invocation: python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_compact.py -q",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_compact.py -q",
+      "output_evidence": "run from the worktree root under timeout 120; rc=0; last line verbatim: '6 passed in 1.55s' (the same file read '6 passed in 0.99s' and '6 passed in 1.09s' on two earlier runs of the same code)",
+      "denominator": "6 of 6 named tests passed (the six names the order fixes; no seventh test)",
+      "status": "PASS",
+      "expect": "6 passed"
+    },
+    {
+      "criterion_id": "CTcn1-AC2",
+      "criterion_verbatim": "the converter's tests are untouched and stay green (base: 29 passed, a control); report the whole last line. Invocation: python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
+      "output_evidence": "run from the worktree root under timeout 120; rc=0; last line verbatim: '29 passed in 3.34s' (base before any edit: '29 passed in 3.68s'; the converter and its test file are not in the commit)",
+      "denominator": "29 of 29 converter tests passed",
+      "status": "PASS",
+      "expect": "29 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two planted mutants run through the real test functions in a python -c process (the module object is shared, the file is not edited): (i) the scd2 cast replaced by a raw astype(str) (no float or bool cast); (ii) a compact that sets is_current to False on every merged row.",
+      "expected": "each mutant makes its named test fail: (i) test_float_zero_and_int_zero_tuple_are_identical_after_cast; (ii) test_identical_consecutive_periods_merge_earliest_from_latest_to",
+      "observed": "MUTANT-KILLED AssertionError (cast removed, test 3); MUTANT2-KILLED 'the open row stays open (current from last)' (open flag broken, test 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the criterion run twice or more on the committed code, same command, identical pass count: AC1 three runs (0.99s, 1.09s, 1.55s, each 6 passed); AC2 at least two runs (2.29s, 3.34s, each 29 passed)",
+      "observed": "AC1 6 passed on all three runs; AC2 29 passed on both runs read",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the read-only plan on the real partition (--mode plan --date 2026-10-19) and the one apply write (--mode apply --date 2026-10-20 on the real key)",
+      "reason": "WORLD cell: the tool can write a served object; the worker ran the tool in neither mode against S3 and ran no aws, terraform or deploy. The plan is the issuer's drain-time seam probe; the write is the issuer's and a CloudOps seat's (CT-co-1)."
+    },
+    {
+      "item": "the status flip of NFRA_CTLPLN.TO-CT-cn-1 to complete",
+      "reason": "the order file is outside this worker's <paths>; the issuer flips the status after the merge on a valid instance."
+    },
+    {
+      "item": "the converter, infra/, and any existing test",
+      "reason": "outside <paths> and the order's rules; the converter suite was run unchanged as the control (AC2)."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W154-S1: the checker the order names, .claude/agents/worker.md, is absent from the worktree; .tools/proof-of-spec-check.py (present in the tree) was run instead (OBSERVATION, INERT).",
+    "NFRA_CTLPLN-W154-S2: apply refuses, nonzero and writing nothing, when head_object returns no VersionId, a narrowing the order does not name; no named test covers that branch (OBSERVATION, INERT)."
+  ],
+  "session_log": "none: the worker transcript is not committed; no session log was written",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~154/NFRA_CTLPLN.TO-CT-cn-1.bd49f-dim-compaction-tool.proof_of_spec.json CTcn1-AC1,CTcn1-AC2",
+      "result": "VALID (rc=0) on the proof instance at the proof commit; the surprises limb resolved both NFRA_CTLPLN-W154 rows in the tree channel"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/assets/scripts/silver/bd49f_dim_compact.py data/assets/scripts/silver/tests/test_bd49f_dim_compact.py",
+      "result": "gate-rc=0: ruff and py_compile clean after one unused import removed; OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}

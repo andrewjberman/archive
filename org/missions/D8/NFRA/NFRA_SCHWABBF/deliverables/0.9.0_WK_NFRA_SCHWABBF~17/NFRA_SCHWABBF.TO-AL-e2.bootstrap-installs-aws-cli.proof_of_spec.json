@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-e2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "5af57b99d0b",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-e2.bootstrap-installs-aws-cli.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5af57b99d0b"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/bootstrap.ps1",
+      "kind": "script",
+      "commit_or_etag": "9102918995a9d70cd33565c6b88a18040a1e1ab7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob sha of the file as committed on branch wk-NFRA_SCHWABBF-17. Not deployed: nothing run, no AWS call, no download, no S3 transfer (WORLD floor). The script is not uploaded to s3://opal-data-assets/code/alongside-schwab-si2/ by this order.",
+      "artifact_covered_by": ["AL2-e2-AC1", "AL2-e2-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/RUNBOOK_ALONGSIDE_SITTING.md",
+      "kind": "doc",
+      "commit_or_etag": "7b559fe8334e65c34c935520d10e561b8966a876",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob sha of the runbook as committed on branch wk-NFRA_SCHWABBF-17. Only the new section Rebuilding the box was added; the other sections are unchanged. Nothing in the runbook was run.",
+      "artifact_covered_by": ["AL2-e2-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_box_scripts.py",
+      "kind": "test",
+      "commit_or_etag": "45a33fb9ab60147d4753d6b6af5314df970aa6f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob sha of the test file as committed on branch wk-NFRA_SCHWABBF-17. Three ensure_awscli tests added; no existing test was changed. The test reads text and runs only the PowerShell parser (Parser::ParseFile), never the script.",
+      "artifact_covered_by": ["AL2-e2-AC1", "AL2-e2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL2-e2-AC1",
+      "criterion_verbatim": "the bootstrap installs the CLI itself, with the backslash msi path and the accepted exit codes, before it needs the CLI.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no -k \"ensure_awscli\"",
+      "output_evidence": "...                                                                      [100%]\n3 passed, 13 deselected in 0.52s\n(rc=0, two runs, both 3 passed). Dry-run at the base 5af57b99d0b before the edit, with the test written first: 2 failed, 1 passed (the parse-and-ASCII test passed as a control), then rc=1 on the selection; base before any test existed: 0 selected, 13 deselected, rc=5.",
+      "denominator": "3 passed of 3 selected by -k ensure_awscli (13 deselected of 16 collected in the file); 0 failed.",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL2-e2-AC2",
+      "criterion_verbatim": "the whole box-scripts test file stays green with the edit.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "................                                                         [100%]\n16 passed in 2.61s\n(rc=0; second run 16 passed in 2.18s, rc=0). Control at the base: 13 passed (rc=0) before the three new tests.",
+      "denominator": "16 passed of 16 collected in the file (0 deselected, 0 failed). Includes the PowerShell parse arm of test_syntax_ps1_parse_zero_errors and of the bootstrap parse test: powershell.exe ran (no SKIP line, verified with -s -rs), parse errors 0.",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for AL-e-2; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Both acceptance invocations run twice on the same tree, with the test file and bootstrap.ps1 unchanged between runs.",
+      "observed": "AC1: 3 passed (two runs). AC2: 16 passed (two runs), rc=0 each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running bootstrap.ps1 or any of its steps, any aws CLI or AWS Tools command, the MSI download, msiexec, or any S3 transfer",
+      "reason": "WORLD floor in the order: nothing is run, downloaded or transferred. The build is text-only and proven by the test file and the PowerShell parser."
+    },
+    {
+      "item": "Executing the PowerShell parse target: Parser::ParseFile reads the file and never runs it",
+      "reason": "A parse proves syntax only. The runtime behaviour of Ensure-AwsCli on a real box is unmeasured and is for the first rebuild."
+    },
+    {
+      "item": "Committing or pushing the portal submodule change shown in the worktree status",
+      "reason": "Not in this order's paths. The gitlink portal is not touched by this order and is not in the commit."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W17-S1: the order asks to change an existing BOOTSTRAP test that pins a throw when aws.exe is missing; no such test exists at 5af57b99d0b. Nothing in an existing test was changed; the three ensure_awscli tests are new.",
+    "NFRA_SCHWABBF-W17-S2: the order's exact first-fetch command writes to C:\\schwab-sdd before bootstrap step 1 creates it; the runbook keeps the command verbatim and adds one caveat sentence, with no mkdir command added. Unrun."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no -k \"ensure_awscli\"",
+      "result": "3 passed in 0.52s, rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no",
+      "result": "16 passed in 2.61s, rc=0"
+    },
+    {
+      "tool": "PowerShell Parser::ParseFile (via the pytest parse tests, not a script run)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -s -rs -p no:cacheprovider --color=no -k \"parses_and_is_ascii or test_syntax_ps1_parse\"",
+      "result": "2 passed, no SKIP line, rc=0"
+    }
+  ]
+}
