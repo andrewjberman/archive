@@ -1,0 +1,51 @@
+{
+ "principals": {
+  "alyssa": {
+   "role": "alyssa",
+   "profile_present": true,
+   "client_tools": {
+    "client_resolve_account": "denied:entitlements",
+    "client_get_holdings": "denied:entitlements",
+    "client_get_transactions": "denied:entitlements",
+    "client_get_allocation": "denied:entitlements",
+    "client_get_fees": "denied:entitlements"
+   },
+   "gates_read": [
+    "tool_denial",
+    "entitlements",
+    "person_access",
+    "tier",
+    "admit_scope",
+    "identity_scope"
+   ],
+   "needs_write": true,
+   "reason": "decide() denies all five client tools (entitlement_denied): an active profile is confined to the grant's Schwab tools. A person_access record cannot admit them (it narrows after decide() and widens only at the identity-scope floor), so the instrument is a code or roster change, not a record."
+  },
+  "menachem": {
+   "role": "menachem",
+   "profile_present": false,
+   "client_tools": {
+    "client_resolve_account": "denied:entitlements",
+    "client_get_holdings": "denied:entitlements",
+    "client_get_transactions": "denied:entitlements",
+    "client_get_allocation": "denied:entitlements",
+    "client_get_fees": "denied:entitlements"
+   },
+   "gates_read": [
+    "tool_denial",
+    "entitlements",
+    "person_access",
+    "tier",
+    "admit_scope",
+    "identity_scope"
+   ],
+   "needs_write": true,
+   "reason": "decide() denies all five client tools (entitlement_denied): no profile, and the principal is not master_admin. A person_access record cannot admit them (it narrows after decide() and widens only at the identity-scope floor), so the instrument is a code or roster change, not a record."
+  }
+ },
+ "write_path": {
+  "mechanism": "person_access is written only by NFRA_MCPORTAL's grant writer (action set_person_access, invoked from the gateway's admin route /api/admin/people/{tid}/{oid}/access with the owner's forwarded identity header). It cannot fix this denial: person_access NARROWS after decide() and widens only at the identity-scope floor; the denial here is decide()'s entitlement_denied. A fix is a CODE change (allowed_tools or the client family's rule) or a tier-roster change, neither a record.",
+  "needs_owner_session": true,
+  "writer": "NFRA_MCPORTAL grant writer (mcportal-grant-writer-lambda); not a seat-owned path, and not the right instrument for this denial"
+ }
+}
