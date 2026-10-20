@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-m4",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R4.md",
+    "vintage_commit": "0429204ae715132239aecaddda234250bc42627d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-m4.move-tool-silver-tier.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f88e911af8e9e315aecc820124fd15"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/move_bronze_key_form.py",
+      "kind": "script",
+      "commit_or_etag": "d9df32a2289",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The tool is run by the issuer's release act against the real bucket; it was not run with --apply here (LOCAL bound). Its only AWS call in this order is the read-only listing in AC3.",
+      "artifact_covered_by": [
+        "BF4-m4-AC1",
+        "BF4-m4-AC2",
+        "BF4-m4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "d9df32a2289",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; fake S3, no network. 31 tests: the 20 bronze tests unchanged and 11 silver-tier tests.",
+      "artifact_covered_by": [
+        "BF4-m4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/fixtures/move_listing_silver.json",
+      "kind": "doc",
+      "commit_or_etag": "d9df32a2289",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Synthetic silver listing (7 keys: 4 in scope, one meta/ key, one wrong-shape silver key, one foreign key). Read by the test and by AC2.",
+      "artifact_covered_by": [
+        "BF4-m4-AC1",
+        "BF4-m4-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF4-m4-AC1",
+      "criterion_verbatim": "the bronze behavior unchanged (20 passed at the base) and the silver-tier arms.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "31 passed in 0.93s (rc=0); earlier runs: 31 passed in 1.15s (rc=0) and 31 passed in 0.93s (rc=0). Base: 20 passed in 0.87s (rc=0) before the edit.",
+      "denominator": "31 of 31 collected tests passed (0 failed, 0 deselected): 20 bronze tests unchanged, 11 silver-tier tests added",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF4-m4-AC2",
+      "criterion_verbatim": "the CLI on the synthetic silver listing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier silver --listing-file data/canonical/schwab/tests/fixtures/move_listing_silver.json",
+      "output_evidence": "MOVE-PLAN tier=silver in_scope=4 foreign=1 copy=4 already=0 events=0",
+      "denominator": "7 synthetic listed keys: 4 planned, 1 foreign (08335338), 1 unrecognized silver key, 1 meta/ key outside the silver prefix (not counted). Same run, rc=0: MOVE-SAMPLE src=schwab/08403355/silver/dim_balance/date=2023-10-17/data.parquet dst=schwab/49financial/silver/dim_balance/date=2023-10-17/08403355.parquet; MOVE-COUNT tier=silver table=dim_balance n=2; MOVE-COUNT tier=silver table=fact_rps n=2; MOVE-OTHER unrecognized=1. Two runs identical.",
+      "status": "PASS",
+      "expect": "^MOVE-PLAN tier=silver in_scope=4 foreign=1 copy=4 already=0 events=0$"
+    },
+    {
+      "criterion_id": "BF4-m4-AC3",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only listing of the real schwab/08403355/silver/ tree plans into the firm silver form. It writes nothing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier silver --master 08403355",
+      "output_evidence": "MOVE-PLAN tier=silver in_scope=7581 foreign=0 copy=7581 already=0 events=0",
+      "denominator": "7581 keys listed under schwab/08403355/silver/ and planned; 7581 of 7581 qualify; sum of the 18 per-table MOVE-COUNT lines = 7581; MOVE-OTHER unrecognized=0; foreign=0; already=0 (the firm silver prefix held no planned destination). Same run, rc=0: MOVE-SAMPLE src=schwab/08403355/silver/dim_asset/date=2024-09-27/data.parquet dst=schwab/49financial/silver/dim_asset/date=2024-09-27/08403355.parquet. Two runs: the MOVE-PLAN line identical.",
+      "status": "PASS",
+      "expect": "^MOVE-PLAN tier=silver in_scope=[0-9]+ foreign=0 copy=[0-9]+ already=[0-9]+ events=0$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant control: a scratch copy of the tool and tests (.scratch/mut, not committed) with the silver destination set to the source key, so nothing moves. Run against the same test file.",
+      "expected": "the silver destination, idempotence, verify and CLI tests fail",
+      "observed": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no on the mutant -> '4 failed, 27 passed in 1.10s' (rc=1); the four failures: test_silver_cli_fixture_plan_line, test_silver_destinations_equal_builder_plus_master_file, test_silver_copy_then_idempotent_replan_and_verify, test_silver_verify_catches_a_flipped_byte_after_rename",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary and MOVE-PLAN line compared",
+      "observed": "AC1: 31 passed on each of three runs. AC2: the same MOVE-PLAN line on both runs (in_scope=4 foreign=1 copy=4 already=0 events=0). AC3: the same MOVE-PLAN line on both runs (in_scope=7581 foreign=0 copy=7581 already=0 events=0). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "copy --apply against the real bucket, and verify against real objects",
+      "reason": "LOCAL bound: the only AWS call is the AC3 read-only listing. The issuer's release act runs the silver copy."
+    },
+    {
+      "item": "The old-key removal and any delete verb",
+      "reason": "Not in this tool and not in this order; the module text is checked by a test to hold no removal verb (test_module_text_has_no_removal_verb, green)."
+    },
+    {
+      "item": "The silver meta/ and _ops/ trees",
+      "reason": "Not this round: the builder refuses those tiers today (round 5), so the tool plans only the silver tier."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W2-S8"
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-m4.move-tool-silver-tier.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "31 passed in 0.93s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc=0)"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder; the silver destination is built through it)",
+      "invocation": "address('schwab', '49financial', 'silver', table, 'date=YYYY-MM-DD', object='08403355.parquet') via silver_destination and test_silver_destinations_equal_builder_plus_master_file",
+      "result": "every planned destination equals the builder key with the bucket removed, plus /08403355.parquet"
+    }
+  ]
+}
