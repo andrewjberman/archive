@@ -1,8 +1,8 @@
 {
  "body": {
-  "release_sha": "ce99b7463b5b249623046ee372b66a2547684935",
+  "release_sha": "8e3eddf95916e430e4e9bbf615ca4fd91f9e852f",
   "base_sha": "13917ef993207bee6b8df0124eec5444da4d62cd",
-  "trunk_sha": "7c5c24a4781a4db4b4f0d4b21744b86a5dca626b",
+  "trunk_sha": "c0a0ee2e9c21c4b9d4d0080b095240038be09354",
   "tests": {
    "named_passed": 217,
    "named_failed": 0,
@@ -30,7 +30,7 @@
     "only_in_live_ref": [],
     "only_in_release_explained": "the four tests that compare the gateway's contract copy with org/standards' copy: the release carries the gateway copy (capacity.target_memory_mib 8192) and the take list does not carry the standards copy, so the release tree reads them red alone; they PASS (4 of 4) with trunk's standards copy overlaid, and trunk holds both copies equal (landing carries it)"
    },
-   "standards_copy_overlay": "trunk 7c5c24a478 laid over the release tree's org/standards contract copy for these runs (uncommitted; restored after)",
+   "standards_copy_overlay": "trunk c0a0ee2e9c laid over the release tree's org/standards contract copy for these runs (uncommitted; restored after)",
    "standards_copy_restored_to_live_ref_bytes": true
   },
   "bash_n_deploy_script": true,
@@ -83,7 +83,7 @@
    "lease_parameter_absent_now": true,
    "basis": "probe_listener.py is not in this release (byte-equal to the live ref) and the running service was not touched; the lease parameter was read absent and no SSM write was made"
   },
-  "process_wide_state": "The service imports one new module, app/inflight_guard.py, whose module-level instance `guard` is a process-wide object (constants MAX_INFLIGHT 4 and QUEUE_WAIT_S 20.0; the asyncio primitives are created lazily inside the running loop, so import creates no semaphore, task or loop), and app/tools.py's _PolicyGuardedMCP.call_tool, the dispatch chokepoint of EVERY tool, now runs the tool body inside `async with inflight_guard.guard.slot(name)` after the entitlement denial (a denied call takes no slot): a fifth concurrent call waits up to 20 s and is then returned as an enveloped gateway_busy refusal, audited as denied/gateway_busy. app/harvest_typed.py's project() (used by every typed tool and the client core) now measures size as json.dumps(indent=2). READ, not instrumented: I opened app/inflight_guard.py whole (76 lines: imports asyncio, contextlib and typing, two constants, the Busy exception, the InflightGuard class and `guard = InflightGuard()`), the OG-mg-3 hunks of app/tools.py (the added import and the try/except around call_tool; no other module-level statement) and the OG-sz-1 hunks of app/harvest_typed.py (the _size measure and project()). No logger, handler, signal, thread, socket, environment read, sys.path change or global-config change happens at import. tools/list does NOT change: the candidate registry counted 103 tools on the host against 103 at the live ref (no tool is added). Nothing arms the probe listener or writes any parameter.",
+  "process_wide_state": "The service imports one new module, app/inflight_guard.py, whose module-level instance `guard` is a process-wide object (constants MAX_INFLIGHT 26 and QUEUE_WAIT_S 20.0; the asyncio primitives are created lazily inside the running loop, so import creates no semaphore, task or loop), and app/tools.py's _PolicyGuardedMCP.call_tool, the dispatch chokepoint of EVERY tool, now runs the tool body inside `async with inflight_guard.guard.slot(name)` after the entitlement denial (a denied call takes no slot): a call beyond the 26-th concurrent one waits up to 20 s and is then returned as an enveloped gateway_busy refusal, audited as denied/gateway_busy. app/harvest_typed.py's project() (used by every typed tool and the client core) now measures size as json.dumps(indent=2). READ, not instrumented: I opened app/inflight_guard.py whole (76 lines: imports asyncio, contextlib and typing, two constants, the Busy exception, the InflightGuard class and `guard = InflightGuard()`), the OG-mg-3 hunks of app/tools.py (the added import and the try/except around call_tool; no other module-level statement) and the OG-sz-1 hunks of app/harvest_typed.py (the _size measure and project()). No logger, handler, signal, thread, socket, environment read, sys.path change or global-config change happens at import. tools/list does NOT change: the candidate registry counted 103 tools on the host against 103 at the live ref (no tool is added). Nothing arms the probe listener or writes any parameter.",
   "service": {
    "pid_before": "2297",
    "pid_after": "2297",
