@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-12",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "8c6b6e77175",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-12.agent-drive.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-12.agent-drive.md",
+    "group": "OTHER",
+    "vintage_commit": "8c6b6e77175"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/agent_fill.py",
+      "kind": "script",
+      "commit_or_etag": "3a8498ba066",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7. Box-side helper (username, password, code); runs only on the box and was never run there. Not shipped to /opt/fidelity-uploader by this order.",
+      "artifact_covered_by": [
+        "FU12-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/agent_drive.py",
+      "kind": "script",
+      "commit_or_etag": "3a8498ba066",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7. dell1 controller; run() exercised only with injected fakes. No SSM session, no CDP attach, no sign-in.",
+      "artifact_covered_by": [
+        "FU12-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_agent_fill.py",
+      "kind": "test",
+      "commit_or_etag": "3a8498ba066",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7. 5 fakes-only tests, all passing.",
+      "artifact_covered_by": [
+        "FU12-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_agent_drive.py",
+      "kind": "test",
+      "commit_or_etag": "3a8498ba066",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7. 6 fakes-only tests (the 5 named plus one forward-timeout test), all passing.",
+      "artifact_covered_by": [
+        "FU12-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3a8498ba066",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise row NFRA_FIDUPL-D1-W7-S1 committed LOCAL on wk-NFRA_FIDUPL-7 (appended, no existing row edited); gate OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU12-AC1",
+      "criterion_verbatim": "the five box-side helper tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu12h",
+      "output_evidence": "R1-FU12H-OK passed=5",
+      "denominator": "5 of 5 required box-side helper tests present (def check) and passing (pytest 5 passed)",
+      "status": "PASS",
+      "expect": "R1-FU12H-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FU12-AC2",
+      "criterion_verbatim": "the five dell1 controller tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu12d",
+      "output_evidence": "R1-FU12D-OK passed=6",
+      "denominator": "5 of 5 required dell1 controller tests present (def check) and passing; pytest 6 passed in total (the 5 named plus test_forward_that_never_comes_up_ends_as_error)",
+      "status": "PASS",
+      "expect": "R1-FU12D-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the order names no mutant control for this cell, and the fakes assert the values-free contract directly.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the same two checker invocations run twice on the same committed tree, before and after the code commit",
+      "observed": "fu12h: R1-FU12H-OK passed=5 both runs; fu12d: R1-FU12D-OK passed=6 both runs; pytest 11 passed both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live call: the SSM port forward, the CDP attach to the box Chrome, the helper run on the box, a Quo read, a Secrets Manager read, a sign-in",
+      "reason": "The order is fakes only. The live leg belongs to the later order that runs the agent-driven sign-in on the box."
+    },
+    {
+      "item": "A real connect_over_cdp attach to a Chrome, and a real Playwright driver run",
+      "reason": "The fakes replace Playwright and the page. Whether the measured PlaywrightDriver steps run on an attached CDP page is for the live order, and the order's refusal clause governs it."
+    },
+    {
+      "item": "Changes to signin.py or quo_otp.py",
+      "reason": "Outside this order's grant; the order says do not change them. The transitive quo_otp import is filed as NFRA_FIDUPL-D1-W7-S1 for the issuer's ruling."
+    },
+    {
+      "item": "Shipping box/agent_fill.py to /opt/fidelity-uploader and the terraform or SSM document change",
+      "reason": "Deploy scope, not this order. The order's paths are the code and the tests only."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W7-S1: signin.py imports quo_otp at module top (line 32), so agent_drive.py, which must build signin.PlaywrightDriver, loads quo_otp transitively; no key is read on import and agent_drive.py names no quo_otp symbol. Filed OBSERVATION, INERT, UNDER_INVESTIGATION; the issuer rules whether the transitive load is the import the order forbids."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~7/NFRA_FIDUPL.TO-FU-s-12.agent-drive.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py (main-tree checker, run from the worktree)",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu12h ; ... fu12d",
+      "result": "R1-FU12H-OK passed=5 ; R1-FU12D-OK passed=6"
+    },
+    {
+      "tool": "ruff (target py39)",
+      "invocation": "ruff check --target-version py39 on box/agent_fill.py, agent_drive.py, tests/test_agent_fill.py, tests/test_agent_drive.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "ast (feature_version 3.9) and ASCII count",
+      "invocation": "ast.parse(src, feature_version=(3, 9)) and ord(c) > 127 count, per file",
+      "result": "OK for all four files, nonascii=0 in each"
+    }
+  ]
+}

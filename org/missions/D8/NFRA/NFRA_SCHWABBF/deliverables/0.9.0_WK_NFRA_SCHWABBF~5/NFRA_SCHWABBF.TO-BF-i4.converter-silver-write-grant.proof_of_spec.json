@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-i4",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R4.md",
+    "vintage_commit": "0429204ae715132239aecaddda234250bc42627d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-i4.converter-silver-write-grant.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f88e911af8e9e315aecc820124fd15"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "c959c9abdff47cb77fa7ca50118d69558b090700",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-NFRA_SCHWABBF-5; WORLD risk, nothing applied: no terraform init, plan or apply and no aws command were run. Adds aws_iam_role_policy silver_write_schwab_firm_silver on aws_iam_role.silver[\"schwab\"]. The apply is the NFRA CloudOps lane's act under safe-apply after the never-widen pair. The text is proven by the AC1 test reading it as text, and terraform fmt -check on the file returned rc 0."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "kind": "test",
+      "commit_or_etag": "c959c9abdff47cb77fa7ca50118d69558b090700",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: a text-reading pytest module; nothing deploys. Adds six silver_write arms; the eleven round-2 and round-3 arms are not edited."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1a1d3c96204daa2fe5cd1175db53cef0ef388c99",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: one appended row NFRA_SCHWABBF-W5-S8. Added first in 583e4a5194 with the line endings rewritten, then restored by 1a1d3c9620 so the file is a pure append (21 insertions, 0 deletions over the prior commit)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF4-i4-AC1",
+      "criterion_verbatim": "BF4-i4-AC1 -- the converter role's firm silver write entries per master, the absence of a folder wildcard and of delete, and the untouched old grants.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k silver_write",
+      "output_evidence": "......                                                                   [100%]\n6 passed, 12 deselected in 0.03s",
+      "denominator": "6 of 6 selected silver_write tests passed (0 failed, 0 errors); 12 deselected of 18 in the file. Covers: firm_objects_one_per_master (object set equals exactly the five per-master keys, 08403355 under 49financial and 08719286, 08134043, 08165601, 08480305 under cottonwood; no entry for 08242234 or 08335338), no_folder_wildcard_object_resource, no_delete_actions (actions equal PutObject, GetObject, ListBucket), list_prefixes_firm_only, old_master_grants_stay, scopes_unchanged. Run twice; both runs 6 passed, rc 0. At the base the same invocation was 12 deselected, rc 5 (no arm named silver_write).",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF4-i4-AC2",
+      "criterion_verbatim": "BF4-i4-AC2 -- the control: the round-2 and round-3 arms still pass (11 passed at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k \"iam_grants or event_rules\"",
+      "output_evidence": "...........                                                              [100%]\n11 passed, 7 deselected in 0.05s",
+      "denominator": "11 of 11 selected iam_grants and event_rules tests passed (0 failed, 0 errors); 7 deselected of 18 in the file. The base count was 11 passed, 1 deselected; the same eleven arms pass after the edit.",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The six silver_write arms run against the HEAD (unedited) silver.tf, via .scratch/mutant_control.py (scratch, not committed). The two guard arms are expected to pass on both texts; the four arms that name the new grant are expected to fail.",
+      "expected": "firm_objects_one_per_master, list_prefixes_firm_only, no_delete_actions and no_folder_wildcard_object_resource FAIL on the unedited text; old_master_grants_stay and scopes_unchanged PASS on both.",
+      "observed": "test_silver_write_firm_objects_one_per_master -> FAIL: resource aws_iam_role_policy.silver_write_schwab_firm_silver not found; test_silver_write_list_prefixes_firm_only -> FAIL: Sid ListSchwabFirmSilver not found; test_silver_write_no_delete_actions -> FAIL; test_silver_write_no_folder_wildcard_object_resource -> FAIL; test_silver_write_old_master_grants_stay -> PASS; test_silver_write_scopes_unchanged -> PASS; MUTANT: 4 failed of 6 silver_write arms against the HEAD silver.tf",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the edited tree and the two outputs compared",
+      "observed": "run 1: '6 passed, 12 deselected in 0.03s' rc 0; run 2: '6 passed, 12 deselected in 0.03s' rc 0; the verdict lines are identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, terraform plan, terraform apply, and any aws command or live IAM read",
+      "reason": "WORLD floor: nothing applied. The apply is the NFRA CloudOps lane's act under safe-apply after the never-widen pair."
+    },
+    {
+      "item": "AbortMultipartUpload and ListMultipartUploadParts, which the per-source write grant carries",
+      "reason": "Not named by the order, which lists PutObject, GetObject and ListBucket for the firm silver grant. CreateMultipartUpload and UploadPart are authorized under s3:PutObject, so multipart writes are covered. Only abort and listing of a failed multipart upload are absent."
+    },
+    {
+      "item": "Removing the old per-master silver grants for 08242234, 08335338 and 08403355, and any delete of the old silver keys",
+      "reason": "Out of scope: the old grants stay until Andrew confirms their delete."
+    },
+    {
+      "item": "meta/ and _ops/ firm-form grants",
+      "reason": "Round 5, per the order's build step 1. Not in this cell."
+    },
+    {
+      "item": "terraform fmt -check on silver.tf as a criterion",
+      "reason": "Not a criterion of this cell. It was run as a check (rc 0) and the test_fmt_edited_files arm passes inside the full file run (18 passed)."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W5-S8"
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~5/NFRA_SCHWABBF.TO-BF-i4.session.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (python 3.12.10)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k silver_write | -k \"iam_grants or event_rules\" | (full file)",
+      "result": "silver_write 6 passed (rc 0, twice); iam_grants or event_rules 11 passed (rc 0); full file 18 passed (rc 0); base silver_write 12 deselected (rc 5)"
+    },
+    {
+      "tool": "terraform fmt -check (terraform on PATH) on infra/aws/terraform/opal-assets/silver.tf",
+      "invocation": "terraform fmt -check -no-color infra/aws/terraform/opal-assets/silver.tf",
+      "result": "rc 0, no diff"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile, ds-precommit, to-pipeline, surprise-row gates)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_SCHWABBF~5 <0.9.0_WK_NFRA_SCHWABBF~5@opal.agent>\" -F <msg> -- infra/aws/terraform/opal-assets/silver.tf data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "result": "rc 0 on c959c9abdf (commit-gate All checks passed, 2 of 2 files). The risk reflex answered PARTIAL_OR_BLIND (danger map stale, scanned 0 of 2) and the naming gate printed NAMING ERROR for the missing function-map folder; both recorded in NFRA_SCHWABBF-W5-S8. WARN: client-data-check hashed account-id list ABSENT."
+    }
+  ]
+}

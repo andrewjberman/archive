@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-r3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-r3.readers-back-to-pre-round.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8d796975fc"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/build_canonical_daily.py",
+      "kind": "script",
+      "commit_or_etag": "2844394a375cf98d1b317e5766805a6d8c259159",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Restored to the 5f1ad506a4 blob on branch wk-NFRA_SCHWABBF-2 only. LOCAL grant: no S3, no network, no deploy.",
+      "artifact_covered_by": [
+        "BF3-r3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/silver/build_fact_tax_1099div.py",
+      "kind": "script",
+      "commit_or_etag": "2844394a375cf98d1b317e5766805a6d8c259159",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Restored to the 5f1ad506a4 blob on branch wk-NFRA_SCHWABBF-2 only; not deployed.",
+      "artifact_covered_by": [
+        "BF3-r3-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_canonical_daily_date_axis.py",
+      "kind": "test",
+      "commit_or_etag": "2844394a375cf98d1b317e5766805a6d8c259159",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Restored to the 5f1ad506a4 blob on branch wk-NFRA_SCHWABBF-2 only; test file, not deployed.",
+      "artifact_covered_by": [
+        "BF3-r3-AC1",
+        "BF3-r3-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-r3-AC1",
+      "criterion_verbatim": "BF3-r3-AC1 -- the three blobs at HEAD equal the blobs at `5f1ad506a4`.",
+      "method": "command",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/2.0.0_SA_COO~SB/R3_CHECKS/restore_readers_check.py",
+      "output_evidence": "RESTORE-OK files=3",
+      "denominator": "3 of 3 files: git rev-parse HEAD:<file> equals git rev-parse 5f1ad506a4:<file> for every file in the check FILES list (HEAD 2844394a375cf98d1b317e5766805a6d8c259159 at the commit; base before restore was RESTORE-FAIL differing=3 of 3, rc=1)",
+      "status": "PASS",
+      "expect": "^RESTORE-OK files=3$"
+    },
+    {
+      "criterion_id": "BF3-r3-AC2",
+      "criterion_verbatim": "BF3-r3-AC2 -- the control: the pre-round test file passes against the pre-round builder (16 passed expected; 17 at the round-2 head).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "16 passed in 1.00s (rc 0, run at HEAD 2844394a375cf98d1b317e5766805a6d8c259159)",
+      "denominator": "16 of 16 tests in test_canonical_daily_date_axis.py passed, 0 failed",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant: the criterion is a byte-equality check between two git blobs and a pass of a restore, not an assertion that a mutation could fire against. The restore itself is the only write.",
+      "expected": "N/A-SPEC-NAMES-NONE: the spec names no mutant to fire",
+      "observed": "N/A-SPEC-NAMES-NONE",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "restore_readers_check.py run before the restore (base) and after the commit (HEAD), same check, outputs compared",
+      "observed": "base: RESTORE-FAIL differing=3 of 3 rc=1; HEAD: RESTORE-OK files=3 rc=0. The two states differ exactly where the restore changed the bytes, which is the discrimination the check is for.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The tracked data/canonical/schwab/silver/__pycache__/_canonical_silver_lib.cpython-312.pyc, which the pytest import rewrote in the worktree",
+      "reason": "Outside the three-path grant; not staged and not committed. Left as the import wrote it; no checkout or clean was run."
+    },
+    {
+      "item": "Round-2 test files and tools outside the three-path grant",
+      "reason": "Out of the grant by order; not run as criteria."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-r3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "git show <5f1ad506a4>:<path> (blob restore) and git rev-parse (blob compare)",
+      "invocation": "git show 5f1ad506a4:<path> > <path> for the three paths",
+      "result": "3 files changed, 164 insertions(+), 165 deletions(-) before commit 2844394a375"
+    },
+    {
+      "tool": "restore_readers_check.py (round-3 R3_CHECKS, read-only)",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/2.0.0_SA_COO~SB/R3_CHECKS/restore_readers_check.py",
+      "result": "base: RESTORE-FAIL differing=3 of 3 (rc 1); HEAD 2844394a375: RESTORE-OK files=3 (rc 0)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_SCHWABBF~2 <0.9.0_WK_NFRA_SCHWABBF~2@opal.agent>\" -F .scratch/msg_bf3_r3.txt -- <three paths>",
+      "result": "commit 2844394a375 on wk-NFRA_SCHWABBF-2; commit-gate clean for 3 of 3; msg-verify MATCH len=648; rc=0"
+    }
+  ]
+}
