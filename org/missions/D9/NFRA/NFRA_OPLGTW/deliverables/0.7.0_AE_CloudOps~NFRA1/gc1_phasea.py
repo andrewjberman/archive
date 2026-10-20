@@ -89,6 +89,11 @@ for role in ("alyssa", "menachem"):
     denied = any(v.startswith("denied:") for v in ct.values())
     gates["principals"][role] = {"role": role, "profile_present": principals[role]["profile_present"], "client_tools": ct,
                                  "gates_read": ["tool_denial", "entitlements", "person_access", "tier", "admit_scope", "identity_scope"], "needs_write": denied,
+                                 "person_access_can_admit": False if denied else None,
+                                 "decide_lines_cited": ["app/data_entitlement.py decide() 729-736 (an ACTIVE profile is confined on DATA_GRANT_TOOLS, which holds the five client tools, to access.tools = allowed_tools(), Schwab tools only; entitlement_denied unless tier master_admin)",
+                                                        "decide() 737-743 (no profile: denied unless tier master_admin)",
+                                                        "tool_denial() 838-846 (decide() runs first; person_access is read only after it admits, and person_denial() only narrows)",
+                                                        "person_widens() 655-675 (widens only at the identity-scope floor, never past a decide() denial)"],
                                  "reason": ("decide() denies all five client tools (entitlement_denied): %s. A person_access record cannot admit them (it narrows after decide() and widens only at the identity-scope floor), so the instrument is a code or roster change, not a record."
                                             % ("an active profile is confined to the grant's Schwab tools" if principals[role]["profile_present"] else "no profile, and the principal is not master_admin"))}
 io.open(W + "GC1_GATES.json", "w", encoding="utf-8", newline="\n").write(json.dumps(gates, indent=1) + "\n")
