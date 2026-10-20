@@ -4,7 +4,7 @@
 # Record W/CODE16_SERVED.json (the RZ2_SERVED.json field names): health_after 200, marker_equals_release true, marker_sha = the release, unit_memory_high "5600M", unit_memory_max "6400M", tools_list 103 = tools_list_before,
 #  registry_count 103, tools_27_of_27 true, per_tool_good 27, harness_guard, nrestarts_after_deploy 0, env_key_count 65, muse_env_present false, host_md5 {differ 0, missing_on_host 0}, systemd_failed_units 0, clock_read_before_close true,
 #  host_clock {leap_status Normal, synchronised true}, readback {minutes >= 30, triggers_fired 0, nrestarts_during_readback 0}, probe {armings 0, unarmed_status 403, unarmed_error probe_not_armed, lease_parameter_absent_before/after true, listener_bound ["127.0.0.1"]},
-#  access_log {as in ap50}, audit_failure_counter {journal_lines_readback 0, counter_value 0}, inflight {guard_in_deployed_tree true, limit 4, wait_s 20.0, deployed_call_tool_hook true}.
+#  access_log {as in ap50}, audit_failure_counter {journal_lines_readback 0, counter_value 0}, inflight {guard_in_deployed_tree true, limit 26, wait_s 20.0, deployed_call_tool_hook true}.
 # Overrides (dry-run controls only): RL17_SERVED_OVERRIDE, RL17_RELREC_OVERRIDE, RL17_FORCE_LANDED.
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
 . "$(dirname "$0")/../../r37/checks/_landed.sh"
@@ -36,7 +36,7 @@ probe_ok = (pr.get("armings") == 0 and pr.get("unarmed_status") == 403 and pr.ge
 al_ok = (isn(al.get("post_mcp_lines_readback")) and al["post_mcp_lines_readback"] > 0 and isn(al.get("audit_records_readback")) and al["audit_records_readback"] > 0
          and al["post_mcp_lines_readback"] >= 0.25 * al["audit_records_readback"] and al.get("window_minutes") == 30 and bool(al.get("method")))
 afc_ok = isn(afc.get("journal_lines_readback")) and afc["journal_lines_readback"] == 0 and afc.get("counter_value") == 0 and bool(afc.get("method"))
-inf_ok = inf.get("guard_in_deployed_tree") is True and inf.get("limit") == 4 and inf.get("wait_s") == 20.0 and inf.get("deployed_call_tool_hook") is True
+inf_ok = inf.get("guard_in_deployed_tree") is True and inf.get("limit") == 26 and inf.get("wait_s") == 20.0 and inf.get("deployed_call_tool_hook") is True
 ok = (d.get("health_after") == 200 and d.get("env_key_count") == 65 and d.get("registry_count") == 103 and tool_ok and md5.get("differ") == 0 and md5.get("missing_on_host") == 0 and marker and limits_ok and clk_ok and rb_ok
       and probe_ok and al_ok and afc_ok and inf_ok and d.get("tools_list") == 103 and d.get("tools_list_before") == 103 and d.get("muse_env_present") is False and d.get("nrestarts_after_deploy") == 0)
 print("tools/list %s before %s (want 103 and 103); marker equals the release sha %s; health %s; registry %s (want 103); env keys %s (want 65); the 27-tool read %s of 27 under the hard guard %s; host md5 differ %s, missing %s (want 0, 0)" % (
