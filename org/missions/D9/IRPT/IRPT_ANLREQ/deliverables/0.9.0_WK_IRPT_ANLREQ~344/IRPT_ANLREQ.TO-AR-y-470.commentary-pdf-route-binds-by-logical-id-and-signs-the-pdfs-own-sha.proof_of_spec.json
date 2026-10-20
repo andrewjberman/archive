@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-470.commentary-pdf-route-binds-by-logical-id-and-signs-the-pdfs-own-sha",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "01eef4397d0f7a848bc023b8187475f89c717431",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-470.commentary-pdf-route-binds-by-logical-id-and-signs-the-pdfs-own-sha.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-470.commentary-pdf-route-binds-by-logical-id-and-signs-the-pdfs-own-sha.md",
+    "group": "OTHER",
+    "vintage_commit": "01eef4397d0f7a848bc023b8187475f89c717431"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~344",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+      "kind": "script",
+      "commit_or_etag": "d6fcee6365089e8c077ec0047a7121397395eade",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "commentary_pdf only: the sha comparison replaced by the retained family, a positive int byte_length and a 64-hex sha256; the link is signed with the retained sha256. Committed LOCAL as d6fcee63650 on wk-IRPT_ANLREQ-344. Not released, not deployed: the irpt-status release that ships it is a later order under a signed pair.",
+      "artifact_covered_by": [
+        "AR470-y-AC1",
+        "AR470-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py",
+      "kind": "test",
+      "commit_or_etag": "d6fcee6365089e8c077ec0047a7121397395eade",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New offline test file: the production shape (draft sha in commentary_ref, retained sha = sha256 of the PDF) signs the retained sha; four refusals each by their own name; no commentary_ref still answers COMMENTARY_PDF_NOT_RETAINED. Committed LOCAL as d6fcee63650 with owned_report.py.",
+      "artifact_covered_by": [
+        "AR470-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/check_commentary_binding.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only AST check of commentary_pdf in owned_report.py, offline. Prints COMMENTARY-BINDING-OK with five flags, or COMMENTARY-BINDING-BAD with the failing flags; --selftest mutates the source in memory and prints CONTROL-FIRES only when both mutants read BAD. Rides this commit.",
+      "artifact_covered_by": [
+        "AR470-y-AC2",
+        "AR470-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/MUTANT_REPORT.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cut-commit proof: the new test run against the route as it stood at 01eef4397d0 fails 2 of 7, the production-shape test at owned_report.py:371 with COMMENTARY_PDF_BINDING. Rides this commit.",
+      "artifact_covered_by": [
+        "AR470-y-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR470-y-AC1",
+      "criterion_verbatim": "AR470-y-AC1: python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider 2>&1 | tail -1 -- expect ^[0-9]+ passed",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "7 passed in 2.85s",
+      "denominator": "7 of 7 tests pass; the same run repeated, 7 passed again (determinism control). On the cut route 2 of 7 fail (MUTANT_REPORT.txt).",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed"
+    },
+    {
+      "criterion_id": "AR470-y-AC2",
+      "criterion_verbatim": "AR470-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/check_commentary_binding.py -- expect ^COMMENTARY-BINDING-OK family=yes length=yes sha_hex=yes signs_own_sha=yes draft_sha_compare_gone=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/check_commentary_binding.py",
+      "output_evidence": "COMMENTARY-BINDING-OK family=yes length=yes sha_hex=yes signs_own_sha=yes draft_sha_compare_gone=yes",
+      "denominator": "5 of 5 flags yes (family, length, sha_hex, signs_own_sha, draft_sha_compare_gone); on the cut source the same check reads COMMENTARY-BINDING-BAD with sha_hex, signs_own_sha, draft_sha_compare_gone failing (positive control)",
+      "status": "PASS",
+      "expect": "^COMMENTARY-BINDING-OK family=yes length=yes sha_hex=yes signs_own_sha=yes draft_sha_compare_gone=yes$"
+    },
+    {
+      "criterion_id": "AR470-y-AC3",
+      "criterion_verbatim": "AR470-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/check_commentary_binding.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~344/check_commentary_binding.py --selftest",
+      "output_evidence": "CONTROL-FIRES",
+      "denominator": "2 of 2 in-memory mutants read BAD (the old sha comparison put back; the sign call given the draft sha)",
+      "status": "PASS",
+      "expect": "^CONTROL-FIRES$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3 control: the selftest mutates owned_report.py in memory, (a) the old sha comparison put back, (b) the sign call given the draft sha; each must read BAD.",
+      "expected": "CONTROL-FIRES: both mutants read COMMENTARY-BINDING-BAD",
+      "observed": "CONTROL-FIRES rc=0 (AC3 run). Separately, the new pytest file against the cut route (01eef4397d0): 2 failed, 5 passed; the production-shape test fails at owned_report.py:371 with COMMENTARY_PDF_BINDING.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 pytest run twice with the same inputs; each output with the duration masked (sed) and diffed (diff rc=0). AC2 run twice; both outputs identical (the single differing line was a run label I appended).",
+      "observed": "AC1: '7 passed' both runs, diff rc=0. AC2: COMMENTARY-BINDING-OK line identical both runs, rc=0 both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The irpt-status release that ships the route change, and any AWS or PROD call",
+      "reason": "out of this cell: no network, no AWS call, no push, no deploy; the release is a later order under a signed pair."
+    },
+    {
+      "item": "A live run of the commentary PDF route against a real request",
+      "reason": "not seen offline: the run-7c request's artifact rows were deleted; the test uses the offline repository double."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (offline, ops tests, AR-y-470)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider",
+      "result": "7 passed in 2.85s (run 1); 7 passed in 2.60s (run 2)"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff)",
+      "invocation": "bash .tools/commit-gate.sh <each .py file>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for owned_report.py, the test file and check_commentary_binding.py"
+    }
+  ]
+}
