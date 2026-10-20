@@ -35,7 +35,7 @@
       "kind": "test",
       "commit_or_etag": "61850841c0d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Three tests added after test_scd2_duplicate_open_rows_raise: test_scd2_dtype_float_zero_vs_int_zero_is_unchanged, test_scd2_dtype_real_flat_fee_change_still_closes_and_opens, test_scd2_dtype_vendored_copy_is_byte_identical. NEVER EXECUTED in this worktree: the module fails at collection (see surprises).",
+      "deploy_evidence": "Three tests added after test_scd2_duplicate_open_rows_raise: test_scd2_dtype_float_zero_vs_int_zero_is_unchanged, test_scd2_dtype_real_flat_fee_change_still_closes_and_opens, test_scd2_dtype_vendored_copy_is_byte_identical. Executed at 61850841c0d: 29 passed (two runs). The float-zero test fires on the base converter (scratch mutant, see controls).",
       "artifact_covered_by": ["CTcl1-AC1"]
     },
     {
@@ -51,7 +51,7 @@
       "kind": "doc",
       "commit_or_etag": "1b16fb35990",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One row appended, none edited: NFRA_CTLPLN-W153-S1 (BLOCKING, INERT). The worktree is a sparse checkout; data/assets/scripts/lib/ is skip-worktree and absent on disk, so stream_parquet cannot import.",
+      "deploy_evidence": "One row appended, none edited: NFRA_CTLPLN-W153-S1 (BLOCKING, INERT). The worktree sparse set omitted data/assets/scripts/lib/; the issuer added it to the sparse set on the coordinator's ruling, and the criterion now runs.",
       "artifact_covered_by": ["CTcl1-AC1"]
     }
   ],
@@ -61,39 +61,35 @@
       "criterion_verbatim": "the three new tests pass beside the 26 existing ones: the float-zero versus int-zero tuple is unchanged, a real flat_fee change still closes and opens (the difference control), and the vendored copy is byte-identical (base: 26 passed, so this reads FAIL at the base as expected). Report the whole last line.",
       "method": "command",
       "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
-      "output_evidence": "Run from the worktree root under timeout 120, after the edits at 61850841c0d. Result: collection ERROR, no test executed. Last line verbatim: '1 error in 1.43s' (rc=2). Deciding lines: 'ERROR data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py' / 'E   ModuleNotFoundError: No module named stream_parquet' / 'Interrupted: 1 error during collection'. The plain invocation at the base, before any edit, gave the same collection error (last line '1 error in 7.71s', rc=2). Cause: the worktree is a sparse checkout; data/assets/scripts/lib/ is skip-worktree and absent on disk (surprise NFRA_CTLPLN-W153-S1). The lib folder was NOT copied into the worktree.",
-      "denominator": "0 of 29 expected tests executed (the base reads 26 passed; the three new tests are not exercised)",
-      "status": "FAIL",
-      "status_reason": "The expected last line is '29 passed'. The actual last line is '1 error in 1.43s' with rc=2. The module cannot import stream_parquet in this worktree. The fix and the three tests are committed but unverified here; the order stays open.",
+      "output_evidence": "Run from the worktree root under timeout 120 at 61850841c0d, after the coordinator's ruling that the issuer restored data/assets/scripts/lib/ to the sparse set. Whole last line verbatim (run 1, rc=0): '29 passed in 4.13s'. Run 2 (determinism): '29 passed in 1.91s', rc=0; the pass lines are identical modulo timing. Earlier, before the lib restore, the same command gave a collection ERROR at rc=2 (surprise NFRA_CTLPLN-W153-S1).",
+      "denominator": "29 of 29 tests passed (26 existing + 3 new)",
+      "status": "PASS",
+      "status_reason": "The whole last line reads '29 passed', rc=0, in two runs. The base file 'fails at base' claim is exercised by the scratch mutant: the base bd49f_dim_conversion.py at 41584d28e0e fails test_scd2_dtype_float_zero_vs_int_zero_is_unchanged (2 failed, 1 passed under -k dtype; the second failure is the scratch layout, which has no vendored path, not the mutant).",
       "expect": "29 passed",
       "judgment": false
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Not run. The base-failure of test_scd2_dtype_float_zero_vs_int_zero_is_unchanged is unverified, because no test executes in this worktree. The issuer's re-run of the new tests against the base file as the mutant is the pending control.",
-      "expected": "The float-zero vs int-zero test FAILS on the base converter (two rows: one closed, one open).",
-      "observed": "NOT OBSERVED: collection stops at the stream_parquet import before any test runs, so the mutant never fired in this worktree. The issuer's re-run of the new tests against the base file is the pending control.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "description": "Scratch mutant: the base bd49f_dim_conversion.py (git show 41584d28e0e) copied into .scratch/mut/silver with the new test file and the stream_parquet module, run with -k dtype. The tree is not touched.",
+      "expected": "The float-zero vs int-zero test FAILS on the base converter (two rows: one closed, one open). The control test (real 0.0 to 25.0 change) PASSES on the base.",
+      "observed": "2 failed, 1 passed (-k dtype, rc=1): FAILED test_scd2_dtype_float_zero_vs_int_zero_is_unchanged; FAILED test_scd2_dtype_vendored_copy_is_byte_identical (scratch layout has no vendored path, not a mutant effect); PASSED the real-change control.",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "N/A-WITH-REASON: no test executed. Two collection runs (once at the base before any edit, once after the edits) gave the identical ModuleNotFoundError, rc=2, but their inputs differ, so no same-input determinism is claimed.",
-      "observed": "Both runs: the identical ModuleNotFoundError at data/assets/scripts/silver/bd49f_dim_conversion.py line 61, rc=2. An environment failure, not a test verdict.",
-      "status": "N/A-WITH-REASON"
+      "method": "two same-input runs of the criterion command at 61850841c0d, pass lines compared with diff after stripping timing",
+      "observed": "run 1: '29 passed in 4.13s' rc=0; run 2: '29 passed in 1.91s' rc=0; diff of the pass lines (timing removed) identical.",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
-    {
-      "item": "The stream_parquet dependency (data/assets/scripts/lib/) in the worktree",
-      "reason": "Sparse checkout, skip-worktree on the whole folder. Not named in this order's paths. Restoring it would reconstruct the tree, which the worker rules forbid; it is the issuer's call (surprise NFRA_CTLPLN-W153-S1)."
-    },
     {
       "item": "The zip build, the apply, the Lambda invocation and the real run against the stored dim",
       "reason": "WORLD-class cell: no terraform, no aws, no deploy, no zip. These are the issuer's and CT-cm-1's."
     },
     {
       "item": "The status flip of NFRA_CTLPLN.TO-CT-cl-1 to complete",
-      "reason": "The criterion FAILs, so the order stays pending. The flip is not made."
+      "reason": "NOT made by this worker: the order file is outside this order's <paths> (surprise NFRA_CTLPLN-W153-S2). The instance validates rc=0 and CTcl1-AC1 is PASS, so the issuer can flip it."
     },
     {
       "item": "The portal gitlink (portal) shown modified in the worktree",
@@ -101,19 +97,20 @@
     }
   ],
   "surprises": [
-    "NFRA_CTLPLN-W153-S1: the worktree is a sparse checkout; data/assets/scripts/lib/ (stream_parquet, imported by the converter at line 61 and by the test path at line 20) is in HEAD and skip-worktree, absent on disk; the module fails at collection, rc=2, so AC1 cannot reach 29 passed (BLOCKING, INERT)."
+    "NFRA_CTLPLN-W153-S1: the worktree was a sparse checkout; data/assets/scripts/lib/ (stream_parquet, imported by the converter at line 61) was in HEAD and skip-worktree, absent on disk, so the module failed at collection (rc=2) until the issuer added the folder to the sparse set on the coordinator's ruling (BLOCKING, INERT).",
+    "NFRA_CTLPLN-W153-S2: the worker face asks for the flip to complete, but the order file is outside the order's <paths>, so the worker did not flip it (OBSERVATION, INERT)."
   ],
   "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~153/NFRA_CTLPLN.TO-CT-cl-1.bd49f-dim-convert-scd2-dtype-fix.proof_of_spec.json",
   "compiler_tools": [
     {
       "tool": "python",
       "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
-      "result": "rc=2, collection ERROR (ModuleNotFoundError: stream_parquet), no test executed; see AC1 output_evidence"
+      "result": "rc=0, '29 passed in 4.13s' (run 1); rc=0, '29 passed in 1.91s' (run 2)"
     },
     {
       "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
       "invocation": "bash .tools/safe-commit.sh --author ... -F <msg> -- <paths> at 61850841c0d",
-      "result": "'All checks passed!' on the converter, the test file and the vendored copy; commit-gate reports 'OK: pre-commit gate clean for 3 of 4 file(s)'; the naming gate reports the function-map folder missing from the sparse worktree (not graded)"
+      "result": "'All checks passed!' on the converter, the test file and the vendored copy; commit-gate reports 'OK: pre-commit gate clean for 3 of 4 file(s)'"
     }
   ]
 }
