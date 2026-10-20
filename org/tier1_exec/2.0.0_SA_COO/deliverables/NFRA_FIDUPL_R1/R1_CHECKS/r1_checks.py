@@ -44,6 +44,29 @@ TEST_FILES = {
         "test_trace_records_console_error_count", "test_trace_records_fingerprint_facts",
         "test_error_detection_requires_visible_text", "test_fingerprint_sets_window_chrome_and_languages",
         "test_user_agent_matches_installed_chromium_version"]),
+    "fr1a": ("%s/tests/test_gswitch.py" % CF, [
+        "test_parses_current_default_and_options", "test_switch_posts_form_without_isdefault",
+        "test_switch_asserts_current_equals_requested", "test_switch_failure_raises_and_names_no_value"]),
+    "fr1b": ("%s/tests/test_attribute.py" % CF, [
+        "test_sweeps_every_option_and_restores_start", "test_restores_start_even_on_error",
+        "test_never_sets_default", "test_summary_counts_only", "test_pages_account_list_until_short_page"]),
+    "fr2": ("%s/tests/test_split.py" % CF, [
+        "test_rows_split_by_account_to_firm_addresses", "test_account_under_two_g_of_one_firm_lands_once",
+        "test_account_under_two_firms_listed_not_landed", "test_unplaced_accounts_listed",
+        "test_unregistered_firm_scope_listed_not_landed", "test_raw_line_bytes_preserved",
+        "test_dry_run_writes_nothing", "test_record_has_counts_and_lists",
+        "test_unmapped_label_listed_not_landed"]),
+    "fr3": ("%s/tests/test_backfill.py" % CF, [
+        "test_windows_walk_backward_in_chunks", "test_stops_on_entitlement_refusal_and_names_it",
+        "test_stops_on_retention_limit_and_names_it", "test_stops_at_account_open_date",
+        "test_record_names_earliest_date_per_g_and_kind", "test_never_prints_g_numbers",
+        "test_calls_injected_lander_per_window"]),
+    "fr4": ("%s/tests/test_box_daily.py" % CF, [
+        "test_daily_sequence_signin_fetch_land_attribute_split_record",
+        "test_attribution_failure_still_records_and_exits_nonzero",
+        "test_split_failure_exits_nonzero_after_land",
+        "test_config_pointers_accept_firm_labels_and_account_columns",
+        "test_main_chooses_daily_mode_from_config"]),
     "fu3": ("%s/tests/test_fetch.py" % CF, [
         "test_lists_then_downloads_six", "test_sends_xsrf_header",
         "test_only_completed_rows_of_the_six_names", "test_missing_file_reported_not_silent",
@@ -582,11 +605,29 @@ def box_md5_all():
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
 
 
+def tf_plan_perg():
+    tag = "R1-FR5P"
+    if not os.path.isdir(TF_ROOT):
+        return out("%s-FAIL absent %s" % (tag, TF_ROOT))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "init", "-input=false", "-no-color"], 110)
+    if rc != 0:
+        return out("%s-FAIL init rc=%s" % (tag, rc))
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-no-color"], 115)
+    m = re.search(r"Plan: (\d+) to add, (\d+) to change, 0 to destroy\.", o)
+    if rc != 0 or not m or int(m.group(1)) != 1:
+        return out("%s-FAIL plan rc=%s %s" % (tag, rc, [x for x in o.splitlines() if x.startswith(("Plan:", "No changes"))][:1]))
+    if "aws_ssm_parameter" not in o:
+        return out("%s-FAIL the one added resource is not the SSM parameter" % tag)
+    if "SecureString" not in open("%s/perg.tf" % TF_ROOT, encoding="utf-8").read():
+        return out("%s-FAIL the parameter is not a SecureString" % tag)
+    return out("%s-OK Plan: 1 to add, %s to change, 0 to destroy. (the SSM parameter and the box role policy)" % (tag, m.group(2)))
+
+
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fr1a": lambda: tests("fr1a"), "fr1b": lambda: tests("fr1b"), "fr2": lambda: tests("fr2"), "fr3": lambda: tests("fr3"), "fr4": lambda: tests("fr4"), "fr5p": tf_plan_perg, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
