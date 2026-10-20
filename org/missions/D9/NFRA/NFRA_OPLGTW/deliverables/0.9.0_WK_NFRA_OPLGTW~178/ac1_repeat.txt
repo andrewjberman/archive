@@ -1,0 +1,14 @@
+contract firm_form keys: masters 08403355 -> 49financial, state_bucket opal-data-49financial, 4 silver prefixes, completion_prefix, backfill_status_prefix: ok
+every OLD-form field of the parsed contract equals the pinned base contract's (the old form is the fallback, unchanged): ok
+the deploy copy and the standards copy are identical (parsed): ok
+firm_form_masters and state_bucket accessors: ok
+parse_silver_key: new form takes the master from the FILE NAME; old form unchanged; a firm-folder data.parquet is refused: ok
+membership: the new-form 08403355 key and the old-form key pass; a PLANTED 08242234 file in the firm folder is refused (F_REJECTED_MASTER): ok (new [] old [] planted ['REJECTED_FOREIGN_MASTER'])
+head_set keeps the new-form and old-form 08403355 keys and DROPS the planted 08242234 file in the firm folder: ok (['schwab/08403355/silver/dim_position/date=2026-10-20/data.parquet', 'schwab/49financial/silver/dim_position/date=2026-10-20/08403355.parquet'])
+marker_locations: 08403355 new first (state bucket) then old; 08335338 old only: ok ([('opal-data-49financial', 'schwab/49financial/state/complete/date=2026-10-20/08403355.complete.json'), ('opal-data-assets', 'schwab/08403355/meta/complete/date=2026-10-20.json')])
+read_marker: the new location is ABSENT -> the old location is read (location reported old): ok (({'master': '08403355', 'date': '2026-10-20', 'closure': {'x': 1}}, 'v1', ('opal-data-assets', 'schwab/08403355/meta/complete/date=2026-10-20.json')))
+read_marker: both present -> the NEW one wins and the old one is not read: ok (({'master': '08403355', 'date': '2026-10-20', 'closure': {'x': 1}}, 'v1', ('opal-data-49financial', 'schwab/49financial/)
+read_marker: an ERROR (AccessDenied) on the new location raises the dependency error and does NOT fall back to the old: ok (raised _Dependency: cannot read the completion record (AccessDenied))
+read_marker for an old-form master touches the old location only (no state-bucket call): ok ([('get', 'opal-data-assets', 'schwab/08335338/meta/complete/date=2026-10-20.json')])
+list_dates: the union of new and old dates, newest first, the PLANTED 08242234 file under the new prefix ignored; an old-form master lists the old prefix only: ok (08403355 ['2026-10-21', '2026-10-20', '2026-10-19'], 08335338 [])
+RESULT: PASS

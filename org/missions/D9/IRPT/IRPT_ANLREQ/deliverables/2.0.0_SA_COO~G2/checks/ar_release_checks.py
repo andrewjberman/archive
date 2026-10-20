@@ -28,7 +28,7 @@ LAM = "infra/aws/lambda/investor-reporting/"
 R34N_TAR = "C:/dev/irpt-release-r35h/irpt-resident-0485393f3a-r34n.tar.gz"
 R34N_SHA = "89cad47247e6785e6b61e60112b04dfaa3cd2d5de88aef6023959692da76d899"
 MAP_SRC = "org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json"
-CHANGED = ["SHA256SUMS", "lib/trading_calendar.py", "ops/owned_report.py", "reports/resident_bindings.json", "reports/resident_installed.py",
+CHANGED = ["SHA256SUMS", "infra/logic/registry/reporting_policies.json", "lib/trading_calendar.py", "ops/owned_report.py", "reports/resident_bindings.json", "reports/resident_installed.py",
            "ycharts/generate/resident_worker.py", "ycharts/generate/ticket_confirmation.py", "ycharts/research/layout_overview.py",
            "ycharts/research/opal_packager.py", "ycharts/research/opal_producer.py", "ycharts/research/overview_map.json"]
 ADDED = ["_contracts/AnalysisAudit.v1.schema.json", "reports/analysis_audit.py", "ycharts/generate/ticket_audit_source.py",
@@ -61,7 +61,7 @@ def git_show(pin, path):
 def source_path(name):
     if name in SPECIAL:
         return SPECIAL[name]
-    if name.startswith("docs/") or name.startswith("data/") or name.startswith("census/"):
+    if name.startswith(("docs/", "data/", "census/", "infra/")):
         return name
     return LAM + name
 
@@ -152,9 +152,10 @@ def arm_tree(tar_path, pin):
                 "import ticket_audit_source, analysis_audit, model_source, comparables\n"
                 "import os\n"
                 "assert os.path.isfile(analysis_audit._schema_path()) if hasattr(analysis_audit, '_schema_path') else True\n"
+                "print(analysis_audit.audit_address('cottonwood', 'REQ-INVENTED01')[:23])\n"
                 "print('LAZY-OK')\n" % (dirs,))
         r = subprocess.run([sys.executable, "-I", "-B", "-c", code], capture_output=True, text=True, cwd=tmp)
-        if "LAZY-OK" not in r.stdout:
+        if "LAZY-OK" not in r.stdout or "s3://opal-data-irpt/irpt" not in r.stdout:
             fails.append("lazy imports failed: %s" % (r.stderr.strip().splitlines() or ["?"])[-1][:200])
     return fails
 
