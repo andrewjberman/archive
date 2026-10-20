@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-i2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "5af57b99d0b",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-i2.alongside-state-tier-iam-and-fence-row.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "5af57b99d0b"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~15",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "763bd26c47c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 763bd26c47c on wk-NFRA_SCHWABBF-15. Two master-scope statements removed (MonolithSchwabOpsWrite, MonolithSchwabMetaPullsWrite); StateTierWrite added (PutObject, 8 resources); locals.alongside_state_bucket added. Nothing applied: no terraform command was run."
+    },
+    {
+      "path_or_key": "infra/logic/registry/exemptions.json",
+      "kind": "config_data",
+      "commit_or_etag": "763bd26c47c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 763bd26c47c on wk-NFRA_SCHWABBF-15. One scoped row appended under opal-data-cottonwood for schwab-alongside-si2-box-role (actions s3:PutObject; prefixes schwab/cottonwood/state/pulls/ and schwab/cottonwood/state/daily_pull/). Numstat 8 added, 0 deleted. The fence apply waits on both never-widen halves and CTO condition 6."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_state_tier.py",
+      "kind": "test",
+      "commit_or_etag": "69f2b96fd3a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 69f2b96fd3a on wk-NFRA_SCHWABBF-15 (base pin fixed in this commit). 11 tests: 5 state_tier, 6 fence_row. Written first and watched fail on the unedited files (AC1 9 failed, AC2 5 failed) before the edits."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_box_tf.py",
+      "kind": "test",
+      "commit_or_etag": "763bd26c47c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 763bd26c47c on wk-NFRA_SCHWABBF-15. EXPECTED_SIDS swaps the two removed Sids for StateTierWrite; the ops/meta test now asserts their absence. Nothing else changed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL2-i2-AC1",
+      "criterion_verbatim": "the box role writes only the two run-record tables, per master, in the firm bucket, and the master-scope _ops/meta statements are gone.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no -k \"state_tier\"",
+      "output_evidence": "...........                                                              [100%]\n11 passed in 0.14s",
+      "denominator": "11 of 11 tests in the module pass. The -k selector state_tier matches the module name, so all 11 run: the 5 state_tier tests and the 6 fence_row tests",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL2-i2-AC2",
+      "criterion_verbatim": "the fence admits the role for exactly those two prefixes with PutObject, and no earlier row moved.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no -k \"fence_row\"",
+      "output_evidence": "......                                                                   [100%]\n6 passed, 5 deselected in 0.10s",
+      "denominator": "6 of 11 module tests pass (5 deselected): exists exactly, no other bucket admits the role, closed action set and no wildcard or delete, builder-derived prefixes, earlier rows of every bucket byte-equal to the base commit 5af57b99d0b, each prefix covered by StateTierWrite",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL2-i2-AC3",
+      "criterion_verbatim": "the whole Alongside Terraform test suite stays green with the edit.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py data/canonical/schwab/tests/test_alongside_schedule_tf.py data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "...............................  [100%]\n31 passed in 0.25s",
+      "denominator": "31 of 31 tests pass across the three Alongside test files (box_tf, schedule_tf, state_tier)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for AL-i-2; none was run.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC3 run twice on the same tree; the state_tier and fence_row selections run once each in the criteria table.",
+      "observed": "AC3 run 1: 31 passed in 0.25s, rc=0. AC3 run 2: 31 passed in 0.27s, rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and any aws command",
+      "reason": "WORLD floor in the order: the fence and IAM apply is the CloudOps lane's release act, after both never-widen halves are signed and CTO condition 6 is met."
+    },
+    {
+      "item": "infra/aws/ec2/alongside-schwab-si2/sdd-daily-pull.ps1 (the Alongside puller copy)",
+      "reason": "Not in the write grant (AL-p-2 territory). Read only. Its HEAD copy still writes master-scope _ops; surprise NFRA_SCHWABBF-W15-S1 is ARMED against the apply."
+    },
+    {
+      "item": "masters.tf, the opal_name module and the other exemptions rows",
+      "reason": "Read only, per the order's bounds. Nothing edited there."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W15-S1: OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~SA). The Alongside puller copy at HEAD still writes its run manifest to schwab/$Master/_ops, the grant this edit removes, and lacks the state-tier functions until AL-p-2 lands. The apply must follow the AL-p-2 landing. Filed in the investigation channel at commit 763bd26c47c.",
+    "NFRA_SCHWABBF-W15-S2: OBSERVATION, INERT. The worker worktree is a sparse checkout that omits org/surprise_channel/, so the row schema was read from git show HEAD. No grant path is affected. Filed at commit 763bd26c47c."
+  ],
+  "session_log": "none: this worker wrote no session log; the worker's final report carries the run record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, state_tier selection)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no -k \"state_tier\"",
+      "result": "11 passed in 0.14s, rc=0"
+    },
+    {
+      "tool": "pytest (AC2, fence_row selection)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no -k \"fence_row\"",
+      "result": "6 passed, 5 deselected in 0.10s, rc=0"
+    },
+    {
+      "tool": "pytest (AC3, whole Alongside suite)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py data/canonical/schwab/tests/test_alongside_schedule_tf.py data/canonical/schwab/tests/test_alongside_state_tier.py -q -p no:cacheprovider --color=no",
+      "result": "31 passed in 0.25s, rc=0"
+    }
+  ]
+}
