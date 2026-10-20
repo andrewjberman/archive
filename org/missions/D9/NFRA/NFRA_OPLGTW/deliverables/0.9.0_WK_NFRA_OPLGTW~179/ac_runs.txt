@@ -1,0 +1,36 @@
+OG-sk-3 (0.9.0_WK_NFRA_OPLGTW~179) -- session log, run after the commit 6b853afa689 (tf) and a8061667e1b (channel); each run under timeout 120.
+
+== AC1: timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC1.sh; exit=$? ==
+terraform console evaluated all ten locals (a name that does not evaluate reads null): ok
+state bucket and its ARN: ok
+firm silver object ARNs: four, the master in the FILE NAME (date=*/08403355.parquet), no folder wildcard: ok
+firm silver listing forms: the four table prefixes: ok
+state completion: one object ARN naming 08403355.complete.json, one listing form: ok
+data role: the OLD 12 object ARNs unchanged and in order, then the 4 firm ARNs; the listing forms the same: ok
+catalog role: the OLD 3 completion ARNs then the 1 state ARN; the listing form for the OLD bucket is UNCHANGED (3): ok
+no bucket-wide or folder-wide grant on the new bucket or the firm folder (no ARN ends in /*, or in 49financial/*, on opal-data-49financial; none names another master's file): ok
+RESULT: PASS
+exit=0
+
+== AC2: timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC2.sh; exit=$? ==
+terraform fmt -check accepts the file: ok
+catalog policy: 8 statements (6 old + 2 new), the new Deny and Allow on the state bucket's prefix form, DenyListingOtherBuckets names both bucket ARNs: ok (statements 8, deny True, allow True, both True)
+data policy: still 6 statements and no mention of the state bucket: ok (statements 6)
+added lines carry no write, delete, wildcard-action or sts action, and no bare "*" Resource: ok
+diff against the pin: 38 added, 4 removed (want 1 to 70 and at most 12): ok
+RESULT: PASS
+exit=0
+(copies: ac2_run1.txt and ac2_run2.txt in this folder, identical)
+
+== AC2 mutant control (in place, restored byte-identical by cmp): NotResource of DenyListingOtherBuckets reduced to the data bucket only ==
+catalog policy: 8 statements (6 old + 2 new), the new Deny and Allow on the state bucket's prefix form, DenyListingOtherBuckets names both bucket ARNs: NOT OK (statements 8, deny True, allow True, both False)
+RESULT: FAIL
+exit=1
+
+== AC3: timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC3.sh; exit=$? ==
+bucket named opal-data-49financial; owner_file infra/aws/terraform/shared-infra/s3-49financial.tf is a .tf that holds the bucket name (read here): ok
+policy_file infra/aws/terraform/shared-infra/s3-49financial.tf is null or a .tf that holds the bucket name (read here): ok
+needs_change True is consistent with denies_unlisted True and names_catalog_role False (a missing policy file means no denial and no change): ok
+reason stated: ok
+RESULT: PASS
+exit=0
