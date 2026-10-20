@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
       "kind": "terraform",
-      "commit_or_etag": "6f38e71fc3e",
+      "commit_or_etag": "3f0b44d5b11",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Additions only (git diff --numstat 19 0, one commit, alone). Adds local resident_audit_write_prefixes (one prefix per client firm from resident_scopes, the scope bucket, policy irpt-anlreq-x10-v1, family ANALYSIS_AUDIT) and ONE statement WriteTheAnalysisAudit (s3:PutObject only) after ReadTheAnalysisCommentaryDraft in aws_iam_role_policy.runner_resident. No KMS statement added. Terraform is not installed: nothing planned, applied or run. The locals index families[\"ANALYSIS_AUDIT\"], which is not on this branch until the AR-y-466 row merges (surprise IRPT_ANLREQ-D2-W342-S1).",
+      "deploy_evidence": "Additions only in the order's own commits: 6f38e71fc3e (+19/-0, the statement and the firm-bucket list) and 3f0b44d5b11 (+5/-6, the list rebuilt on local.resident_bucket per AMENDMENT 1). The merge of trunk 5143b9b2565 (bff0facc3d7) brought other lanes' edits and a trunk-side reformat. Local resident_audit_write_prefixes is built like resident_commentary_read_prefixes on local.resident_bucket; one statement WriteTheAnalysisAudit (s3:PutObject only). No KMS statement. Terraform is not installed: nothing planned, applied or run.",
       "artifact_covered_by": [
         "AR468-y-AC1",
         "AR468-y-AC2",
@@ -30,9 +30,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py",
       "kind": "script",
-      "commit_or_etag": "6490a2372a7",
+      "commit_or_etag": "ec6b5bd864",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib offline check: the HCL shape (a), the prefixes evaluated from scopes.json and reporting_policies.json and compared with lib/opal_naming.py address() loaded by path on bucket and key (b), and the family-row absence reported as a reason (c). --selftest mutates the table name of the family and the statement Action in memory and prints CONTROL-FIRES only when both read BAD for their own reason. Passes commit-gate.sh (ruff clean, ASCII only).",
+      "deploy_evidence": "Stdlib offline check: the HCL shape, the prefixes compared with lib/opal_naming.py reporting_destination (loaded by path; key minus its last two parts plus /*; writer bucket equal to the product scope bucket), and the family row's absence reported as a reason. --selftest mutates the family table and the statement Action in memory and prints CONTROL-FIRES only when both read BAD for their own reason. Passes commit-gate.sh.",
       "artifact_covered_by": [
         "AR468-y-AC1",
         "AR468-y-AC2"
@@ -51,9 +51,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "6490a2372a7",
+      "commit_or_etag": "ec6b5bd864",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Four rows appended (0 deletions): IRPT_ANLREQ-D2-W342-S1 (BLOCKING, ARMED: family absent on this branch), S2 (BLOCKING, INERT: bucket and fence), S3 (OBSERVATION, INERT: cell path ~331 vs ~342), S4 (OBSERVATION, INERT: bound anchor by path).",
+      "deploy_evidence": "Rows appended (0 deletions): W342-S1 (BLOCKING, ARMED; cleared by the issuer, the family row is on trunk 5143b9b2565), S2 (BLOCKING, INERT; ruled by AMENDMENT 1), S3 (OBSERVATION, INERT), S4 (OBSERVATION, INERT), S5 (OBSERVATION, INERT: KMS encryption-context gap on the product bucket), S6 (BLOCKING, INERT: the cumulative bound).",
       "artifact_covered_by": [
         "AR468-y-AC1"
       ]
@@ -65,11 +65,11 @@
       "criterion_verbatim": "AR468-y-AC1 (cell AR-y-468): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py -- expect ^AUDIT-WRITE-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py",
-      "output_evidence": "AUDIT-WRITE-GRANT-BAD family ANALYSIS_AUDIT absent from policy irpt-anlreq-x10-v1 in reporting_policies.json at this HEAD; firm 49financial: prefix (no family row) differs from builder; builder address gives arn:aws:s3:::opal-data-49financial/irpt/49financial/platinum/analysis_audit/*; firm cottonwood: prefix (no family row) differs from builder; builder address gives arn:aws:s3:::opal-data-cottonwood/irpt/cottonwood/platinum/analysis_audit/*; firm inflection: prefix (no family row) differs from builder; builder address gives arn:aws:s3:::opal-data-inflection/irpt/inflection/platinum/analysis_audit/*\nrc=1. Two runs printed identical output (diff rc=0).",
-      "denominator": "0 of 3 enabled client firm prefixes evaluable at this HEAD (3 FIRM client enabled scopes; the family row is absent from the policy row)",
+      "output_evidence": "AUDIT-WRITE-GRANT-OK firms=3 prefixes=3 builder_equal=yes put_only=yes\nrc=0. Two runs printed identical output (diff rc=0).",
+      "denominator": "3 of 3 enabled client firm prefixes equal the reporting_destination writer prefix (3 FIRM client enabled scopes; product bucket; put only)",
       "expect": "^AUDIT-WRITE-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes$",
-      "status": "FAIL",
-      "status_reason": "rc=1 and the printed line is AUDIT-WRITE-GRANT-BAD, not the OK line the expect regex requires. Cause: the registry row ANALYSIS_AUDIT (AR-y-466) is committed on wk-IRPT_ANLREQ-340 as 1c277930e66 and is not on this branch; the order's <paths> do not grant reporting_policies.json, so it was not merged or copied here. DIAGNOSTIC ONLY, not the verdict: with that row held in memory the same evaluation gives reasons=0 firms=3 prefixes=3. Surprise IRPT_ANLREQ-D2-W342-S1 (BLOCKING, ARMED). The order stays open until the row is on this branch and the invocation prints the OK line."
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect pattern. Amended per AMENDMENT 1: the prefixes name the product bucket (resident_bucket), compared with reporting_destination, not the firm buckets. The family row is AR-y-466's, merged from trunk 5143b9b2565."
     },
     {
       "criterion_id": "AR468-y-AC2",
@@ -77,21 +77,21 @@
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py --selftest",
       "output_evidence": "CONTROL-FIRES\nrc=0. Two runs printed the same line.",
-      "denominator": "2 of 2 mutants read BAD for their own reason (A: the table name analysis_audit_x differs from the builder; B: Action gains s3:GetObject, Action is not exactly s3:PutObject)",
+      "denominator": "2 of 2 mutants read BAD for their own reason (A: the table name analysis_audit_x differs from the writer prefix; B: Action gains s3:GetObject, Action is not exactly s3:PutObject)",
       "expect": "^CONTROL-FIRES$",
       "status": "PASS",
-      "status_reason": "rc=0 and the printed line matches ^CONTROL-FIRES$ exactly. Mutant A is evaluated in memory against a family row with the table changed, so the control does not depend on the row being present."
+      "status_reason": "rc=0 and the printed line matches ^CONTROL-FIRES$ exactly, two runs. Mutant A is evaluated in memory against a family row with the table changed."
     },
     {
       "criterion_id": "AR468-y-AC3",
       "criterion_verbatim": "AR468-y-AC3 (cell AR-y-468): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_bound.py -- expect ^AUDIT-WRITE-BOUND-OK numstat=[0-9]+/0 files=1$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_bound.py",
-      "output_evidence": "AUDIT-WRITE-BOUND-OK numstat=19/0 files=1\nrc=0",
-      "denominator": "1 of 1 path changed under infra/ since the cut 1471a6f87b6; 0 deletions of 19 insertions",
+      "output_evidence": "AUDIT-WRITE-BOUND-BAD infra/aws/ec2/opal-gateway/app/admin_api.py(+2,-0) infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml(+176,-52) infra/aws/ec2/opal-gateway/tests/test_og_mp1.py(+146,-0) infra/aws/terraform/investor-reporting/ops/iam.tf(+7,-1) infra/aws/terraform/investor-reporting/ycharts/resident.tf(+21,-3) infra/logic/registry/reporting_policies.json(+1,-0)\nrc=1",
+      "denominator": "6 changed paths under infra/ since the cut 1471a6f87b6; 1 of them is resident.tf; 5 came in with the trunk merge 5143b9b2565 (other lanes and the AR-y-466 row); 3 deletions in resident.tf are a trunk-side reformat",
       "expect": "^AUDIT-WRITE-BOUND-OK numstat=[0-9]+/0 files=1$",
-      "status": "PASS",
-      "status_reason": "rc=0 and the printed line matches the expect pattern."
+      "status": "FAIL",
+      "status_reason": "rc=1 and the printed line is AUDIT-WRITE-BOUND-BAD, not the OK line. The check was NOT re-anchored or narrowed, because the amendment fixes the bound against the cut. This order's own infra commits are additions only (6f38e71fc3e, 3f0b44d5b11 revises its own lines). Surprise IRPT_ANLREQ-D2-W342-S6 (BLOCKING): the issuer decides the anchor. The order stays pending."
     }
   ],
   "controls": {
@@ -103,7 +103,7 @@
     },
     "determinism": {
       "method": "AC1 run twice with its output written to .scratch and compared with diff; AC2 run twice; AC3 run once after the commit.",
-      "observed": "AC1 diff rc=0 (two identical BAD lines); AC2 two CONTROL-FIRES lines.",
+      "observed": "AC1 diff rc=0 (two identical OK lines); AC2 two CONTROL-FIRES lines.",
       "status": "STABLE"
     }
   },
@@ -119,13 +119,19 @@
     {
       "item": "KMS coverage of the new prefixes",
       "reason": "no KMS statement added, per the cell. The existing ReportEncryptionViaS3ForResidentFamiliesOnly statement lists the older prefixes only; the firm bucket's encryption is read from the resident.tf comment, not live."
+    },
+    {
+      "item": "the cumulative bound's trunk-merged infra paths",
+      "reason": "measured by AC3 as printed; not narrowed by this worker (surprise IRPT_ANLREQ-D2-W342-S6)."
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W342-S1: the ANALYSIS_AUDIT family row is AR-y-466's commit 1c277930e66 on wk-IRPT_ANLREQ-340, not on this branch; AC1 reads BAD here (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Y2).",
-    "IRPT_ANLREQ-D2-W342-S2: the audit grant names the firm scope buckets by the home rule, but the runner role is fenced out of firm buckets and the X10 writer uses the product reporting bucket (BLOCKING, INERT).",
-    "IRPT_ANLREQ-D2-W342-S3: the cell places the checks in deliverables ~331, but its invocations and paths name ~342 (OBSERVATION, INERT).",
-    "IRPT_ANLREQ-D2-W342-S4: the bound check anchors on the order file path, because the issuing commit does not carry the literal TO-AR-y-468 (OBSERVATION, INERT)."
+    "IRPT_ANLREQ-D2-W342-S1: the ANALYSIS_AUDIT family row was AR-y-466's commit, now on trunk 5143b9b2565 and merged into this branch; cleared by the issuer (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Y2).",
+    "IRPT_ANLREQ-D2-W342-S2: the firm-bucket grant versus the fence and the X10 writer; ruled by AMENDMENT 1, the prefixes name the product bucket (BLOCKING, INERT).",
+    "IRPT_ANLREQ-D2-W342-S3: the cell's ~331 folder versus the ~342 paths (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W342-S4: the bound check anchors on the order file path (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W342-S5: KMS encryption-context gap on the product bucket for the audit prefixes (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W342-S6: the cumulative bound against the cut reads BAD after the trunk merge (BLOCKING, INERT)."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
