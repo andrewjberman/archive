@@ -1,0 +1,27 @@
+0.9.0_WK_NFRA_SCHWABBF~2 on NFRA_SCHWABBF.TO-BF-m4 (move-tool-silver-tier), LOCAL only
+Worktree: wt-bf-2, branch wk-NFRA_SCHWABBF-2, base commit 0429204ae71 (HEAD at start)
+
+Premise re-grounding
+- TREE-OK at start: branch wk-NFRA_SCHWABBF-2, org/ and .tools/ present.
+- Baseline AC1 at base: 20 passed (rc=0), as the order states.
+- lib/opal_naming.py address('schwab','49financial','silver','dim_balance','date=2026-10-16') returned s3://opal-data-assets/schwab/49financial/silver/dim_balance/date=2026-10-16.
+- The firm name comes from firm_of in the silver key contract (data/canonical/schwab/silver/_canonical_silver_lib.py), which the tool already loads as K. The builder does not export firm_of.
+
+Build
+- data/canonical/schwab/keyform/move_bronze_key_form.py: --tier bronze|silver on plan (default bronze, bronze lines and entries unchanged); plan_silver_from_listing; print_silver_plan; list_live_silver; count_lines(tier=...); verify picks the count tier from the entries.
+- Silver destination = builder address() minus the bucket, with object=<master>.parquet.
+- Silver live listing reads schwab/08403355/silver/ and, beside it, schwab/49financial/silver/ (read-only) so that a re-plan reports already. Recorded as surprise NFRA_SCHWABBF-W2-S8.
+- data/canonical/schwab/tests/fixtures/move_listing_silver.json: synthetic, 7 keys (4 in scope, 1 meta/, 1 wrong-shape silver key, 1 foreign).
+- data/canonical/schwab/tests/test_move_bronze_key_form.py: 11 silver tests added to the 20 bronze tests.
+
+Runs
+- AC1: 31 passed in 0.93s (rc=0); earlier run 31 passed in 1.15s.
+- AC2: MOVE-PLAN tier=silver in_scope=4 foreign=1 copy=4 already=0 events=0 (rc=0), two runs identical.
+- AC3: MOVE-PLAN tier=silver in_scope=7581 foreign=0 copy=7581 already=0 events=0 (rc=0), two runs identical; 18 tables; sum of per-table counts 7581; unrecognized=0.
+- Commit gate on both .py files: OK, rc=0.
+
+Mutant control
+- .scratch/mut (not committed): move_bronze_key_form.py with the silver destination set to the source key.
+- Test file run against the mutant: 4 failed, 27 passed (rc=1). Failing: test_silver_cli_fixture_plan_line, test_silver_destinations_equal_builder_plus_master_file, test_silver_copy_then_idempotent_replan_and_verify, test_silver_verify_catches_a_flipped_byte_after_rename.
+
+Not run: copy --apply and verify against the real bucket (LOCAL bound).

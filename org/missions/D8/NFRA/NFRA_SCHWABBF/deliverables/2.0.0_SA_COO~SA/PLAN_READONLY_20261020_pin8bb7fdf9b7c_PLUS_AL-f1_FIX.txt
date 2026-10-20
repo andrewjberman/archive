@@ -1,0 +1,561 @@
+aws_secretsmanager_secret.alongside_sdd_credentials: Preparing import... [id=schwab/alongside/sdd-credentials]
+data.aws_ssm_parameter.windows_ami: Reading...
+aws_secretsmanager_secret.alongside_sdd_credentials: Refreshing state... [id=schwab/alongside/sdd-credentials]
+data.aws_ssm_parameter.windows_ami: Read complete after 0s [id=/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.alongside_daily["08134043"] will be created
+  + resource "aws_cloudwatch_event_rule" "alongside_daily" {
+      + arn                 = (known after apply)
+      + description         = "Alongside Schwab Box daily SDD pull of Cottonwood advisor Stephen SL08134043 (master 08134043) -> monolith bronze."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "schwab-08134043-si2-pull-daily"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(45 11,23 * * ? *)"
+      + state               = "DISABLED"
+      + tags_all            = (known after apply)
+    }
+
+  # aws_cloudwatch_event_rule.alongside_daily["08165601"] will be created
+  + resource "aws_cloudwatch_event_rule" "alongside_daily" {
+      + arn                 = (known after apply)
+      + description         = "Alongside Schwab Box daily SDD pull of Cottonwood advisor Christa Bass (master 08165601) -> monolith bronze."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "schwab-08165601-si2-pull-daily"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(15 12,0 * * ? *)"
+      + state               = "DISABLED"
+      + tags_all            = (known after apply)
+    }
+
+  # aws_cloudwatch_event_rule.alongside_daily["08480305"] will be created
+  + resource "aws_cloudwatch_event_rule" "alongside_daily" {
+      + arn                 = (known after apply)
+      + description         = "Alongside Schwab Box daily SDD pull of Cottonwood advisor Jay Rubottom (master 08480305) -> monolith bronze."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "schwab-08480305-si2-pull-daily"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(45 12,0 * * ? *)"
+      + state               = "DISABLED"
+      + tags_all            = (known after apply)
+    }
+
+  # aws_cloudwatch_event_rule.alongside_daily["08719286"] will be created
+  + resource "aws_cloudwatch_event_rule" "alongside_daily" {
+      + arn                 = (known after apply)
+      + description         = "Alongside Schwab Box daily SDD pull of Cottonwood firm FA08719286 (master 08719286) -> monolith bronze."
+      + event_bus_name      = "default"
+      + force_destroy       = false
+      + id                  = (known after apply)
+      + name                = "schwab-08719286-si2-pull-daily"
+      + name_prefix         = (known after apply)
+      + schedule_expression = "cron(15 11,23 * * ? *)"
+      + state               = "DISABLED"
+      + tags_all            = (known after apply)
+    }
+
+  # aws_cloudwatch_event_target.alongside_daily["08134043"] will be created
+  + resource "aws_cloudwatch_event_target" "alongside_daily" {
+      + arn            = "arn:aws:ssm:us-east-1::document/AWS-RunPowerShellScript"
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + input          = jsonencode(
+            {
+              + commands         = [
+                  + "$ErrorActionPreference='Continue'",
+                  + "$ProgressPreference='SilentlyContinue'",
+                  + "$aws='C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe'",
+                  + "$s3='s3://opal-data-assets/code/alongside-schwab-si2/sdd-daily-pull.ps1'",
+                  + "$local='C:\\schwab-sdd\\sdd-daily-pull.ps1'",
+                  + "New-Item -ItemType Directory -Force 'C:\\schwab-sdd' | Out-Null",
+                  + "& $aws s3 cp $s3 $local --only-show-errors",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not pull sdd-daily-pull.ps1 from S3 code/' }",
+                  + "$tn='OpalSddDailyPull-08134043'",
+                  + "$sns='arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts'",
+                  + "$tr='powershell.exe -ExecutionPolicy Bypass -File C:\\schwab-sdd\\sdd-daily-pull.ps1 -Master 08134043 -Target monolith -SnsTopicArn ' + $sns",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "schtasks /Create /TN $tn /TR $tr /SC ONCE /ST 23:59 /RU Administrator /IT /RL HIGHEST /F | Out-Null",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not register the Administrator scheduled task' }",
+                  + "$before = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime",
+                  + "schtasks /Run /TN $tn | Out-Null",
+                  + "$startDeadline = (Get-Date).AddSeconds(90)",
+                  + "do { Start-Sleep -Seconds 5; $st = (Get-ScheduledTask -TaskName $tn).State; $now = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime } while ($st -ne 'Running' -and $now -eq $before -and (Get-Date) -lt $startDeadline)",
+                  + "if ($st -ne 'Running' -and $now -eq $before) { throw \"FATAL: scheduled task $tn NEVER STARTED. An /IT (interactive) task requires the Administrator console session to be logged on. A no-run must never be read as a clean run.\" }",
+                  + "$runDeadline = (Get-Date).AddMinutes(50)",
+                  + "do { Start-Sleep -Seconds 15; $st = (Get-ScheduledTask -TaskName $tn).State } while ($st -eq 'Running' -and (Get-Date) -lt $runDeadline)",
+                  + "$rc = (Get-ScheduledTaskInfo -TaskName $tn).LastTaskResult",
+                  + "Get-Content C:\\schwab-sdd\\daily\\08134043\\daily-pull.log -Tail 25 -ErrorAction SilentlyContinue",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "if ($st -eq 'Running') { throw \"FATAL: pull for 08134043 still Running after the 50-minute deadline -- treating as hung.\" }",
+                  + "if ($rc -ne 0) { throw \"FATAL: sdd-daily-pull.ps1 for 08134043 exited rc=$rc (see the log tail above; the puller also SNS-paged).\" }",
+                  + "Write-Output ('OK: daily pull for 08134043 completed as Administrator, rc=' + $rc)",
+                  + "exit 0",
+                ]
+              + executionTimeout = [
+                  + "3600",
+                ]
+            }
+        )
+      + role_arn       = (known after apply)
+      + rule           = "schwab-08134043-si2-pull-daily"
+      + target_id      = (known after apply)
+
+      + run_command_targets {
+          + key    = "InstanceIds"
+          + values = (known after apply)
+        }
+    }
+
+  # aws_cloudwatch_event_target.alongside_daily["08165601"] will be created
+  + resource "aws_cloudwatch_event_target" "alongside_daily" {
+      + arn            = "arn:aws:ssm:us-east-1::document/AWS-RunPowerShellScript"
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + input          = jsonencode(
+            {
+              + commands         = [
+                  + "$ErrorActionPreference='Continue'",
+                  + "$ProgressPreference='SilentlyContinue'",
+                  + "$aws='C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe'",
+                  + "$s3='s3://opal-data-assets/code/alongside-schwab-si2/sdd-daily-pull.ps1'",
+                  + "$local='C:\\schwab-sdd\\sdd-daily-pull.ps1'",
+                  + "New-Item -ItemType Directory -Force 'C:\\schwab-sdd' | Out-Null",
+                  + "& $aws s3 cp $s3 $local --only-show-errors",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not pull sdd-daily-pull.ps1 from S3 code/' }",
+                  + "$tn='OpalSddDailyPull-08165601'",
+                  + "$sns='arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts'",
+                  + "$tr='powershell.exe -ExecutionPolicy Bypass -File C:\\schwab-sdd\\sdd-daily-pull.ps1 -Master 08165601 -Target monolith -SnsTopicArn ' + $sns",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "schtasks /Create /TN $tn /TR $tr /SC ONCE /ST 23:59 /RU Administrator /IT /RL HIGHEST /F | Out-Null",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not register the Administrator scheduled task' }",
+                  + "$before = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime",
+                  + "schtasks /Run /TN $tn | Out-Null",
+                  + "$startDeadline = (Get-Date).AddSeconds(90)",
+                  + "do { Start-Sleep -Seconds 5; $st = (Get-ScheduledTask -TaskName $tn).State; $now = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime } while ($st -ne 'Running' -and $now -eq $before -and (Get-Date) -lt $startDeadline)",
+                  + "if ($st -ne 'Running' -and $now -eq $before) { throw \"FATAL: scheduled task $tn NEVER STARTED. An /IT (interactive) task requires the Administrator console session to be logged on. A no-run must never be read as a clean run.\" }",
+                  + "$runDeadline = (Get-Date).AddMinutes(50)",
+                  + "do { Start-Sleep -Seconds 15; $st = (Get-ScheduledTask -TaskName $tn).State } while ($st -eq 'Running' -and (Get-Date) -lt $runDeadline)",
+                  + "$rc = (Get-ScheduledTaskInfo -TaskName $tn).LastTaskResult",
+                  + "Get-Content C:\\schwab-sdd\\daily\\08165601\\daily-pull.log -Tail 25 -ErrorAction SilentlyContinue",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "if ($st -eq 'Running') { throw \"FATAL: pull for 08165601 still Running after the 50-minute deadline -- treating as hung.\" }",
+                  + "if ($rc -ne 0) { throw \"FATAL: sdd-daily-pull.ps1 for 08165601 exited rc=$rc (see the log tail above; the puller also SNS-paged).\" }",
+                  + "Write-Output ('OK: daily pull for 08165601 completed as Administrator, rc=' + $rc)",
+                  + "exit 0",
+                ]
+              + executionTimeout = [
+                  + "3600",
+                ]
+            }
+        )
+      + role_arn       = (known after apply)
+      + rule           = "schwab-08165601-si2-pull-daily"
+      + target_id      = (known after apply)
+
+      + run_command_targets {
+          + key    = "InstanceIds"
+          + values = (known after apply)
+        }
+    }
+
+  # aws_cloudwatch_event_target.alongside_daily["08480305"] will be created
+  + resource "aws_cloudwatch_event_target" "alongside_daily" {
+      + arn            = "arn:aws:ssm:us-east-1::document/AWS-RunPowerShellScript"
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + input          = jsonencode(
+            {
+              + commands         = [
+                  + "$ErrorActionPreference='Continue'",
+                  + "$ProgressPreference='SilentlyContinue'",
+                  + "$aws='C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe'",
+                  + "$s3='s3://opal-data-assets/code/alongside-schwab-si2/sdd-daily-pull.ps1'",
+                  + "$local='C:\\schwab-sdd\\sdd-daily-pull.ps1'",
+                  + "New-Item -ItemType Directory -Force 'C:\\schwab-sdd' | Out-Null",
+                  + "& $aws s3 cp $s3 $local --only-show-errors",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not pull sdd-daily-pull.ps1 from S3 code/' }",
+                  + "$tn='OpalSddDailyPull-08480305'",
+                  + "$sns='arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts'",
+                  + "$tr='powershell.exe -ExecutionPolicy Bypass -File C:\\schwab-sdd\\sdd-daily-pull.ps1 -Master 08480305 -Target monolith -SnsTopicArn ' + $sns",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "schtasks /Create /TN $tn /TR $tr /SC ONCE /ST 23:59 /RU Administrator /IT /RL HIGHEST /F | Out-Null",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not register the Administrator scheduled task' }",
+                  + "$before = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime",
+                  + "schtasks /Run /TN $tn | Out-Null",
+                  + "$startDeadline = (Get-Date).AddSeconds(90)",
+                  + "do { Start-Sleep -Seconds 5; $st = (Get-ScheduledTask -TaskName $tn).State; $now = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime } while ($st -ne 'Running' -and $now -eq $before -and (Get-Date) -lt $startDeadline)",
+                  + "if ($st -ne 'Running' -and $now -eq $before) { throw \"FATAL: scheduled task $tn NEVER STARTED. An /IT (interactive) task requires the Administrator console session to be logged on. A no-run must never be read as a clean run.\" }",
+                  + "$runDeadline = (Get-Date).AddMinutes(50)",
+                  + "do { Start-Sleep -Seconds 15; $st = (Get-ScheduledTask -TaskName $tn).State } while ($st -eq 'Running' -and (Get-Date) -lt $runDeadline)",
+                  + "$rc = (Get-ScheduledTaskInfo -TaskName $tn).LastTaskResult",
+                  + "Get-Content C:\\schwab-sdd\\daily\\08480305\\daily-pull.log -Tail 25 -ErrorAction SilentlyContinue",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "if ($st -eq 'Running') { throw \"FATAL: pull for 08480305 still Running after the 50-minute deadline -- treating as hung.\" }",
+                  + "if ($rc -ne 0) { throw \"FATAL: sdd-daily-pull.ps1 for 08480305 exited rc=$rc (see the log tail above; the puller also SNS-paged).\" }",
+                  + "Write-Output ('OK: daily pull for 08480305 completed as Administrator, rc=' + $rc)",
+                  + "exit 0",
+                ]
+              + executionTimeout = [
+                  + "3600",
+                ]
+            }
+        )
+      + role_arn       = (known after apply)
+      + rule           = "schwab-08480305-si2-pull-daily"
+      + target_id      = (known after apply)
+
+      + run_command_targets {
+          + key    = "InstanceIds"
+          + values = (known after apply)
+        }
+    }
+
+  # aws_cloudwatch_event_target.alongside_daily["08719286"] will be created
+  + resource "aws_cloudwatch_event_target" "alongside_daily" {
+      + arn            = "arn:aws:ssm:us-east-1::document/AWS-RunPowerShellScript"
+      + event_bus_name = "default"
+      + force_destroy  = false
+      + id             = (known after apply)
+      + input          = jsonencode(
+            {
+              + commands         = [
+                  + "$ErrorActionPreference='Continue'",
+                  + "$ProgressPreference='SilentlyContinue'",
+                  + "$aws='C:\\Program Files\\Amazon\\AWSCLIV2\\aws.exe'",
+                  + "$s3='s3://opal-data-assets/code/alongside-schwab-si2/sdd-daily-pull.ps1'",
+                  + "$local='C:\\schwab-sdd\\sdd-daily-pull.ps1'",
+                  + "New-Item -ItemType Directory -Force 'C:\\schwab-sdd' | Out-Null",
+                  + "& $aws s3 cp $s3 $local --only-show-errors",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not pull sdd-daily-pull.ps1 from S3 code/' }",
+                  + "$tn='OpalSddDailyPull-08719286'",
+                  + "$sns='arn:aws:sns:us-east-1:313476888478:opal-critical-surface-alerts'",
+                  + "$tr='powershell.exe -ExecutionPolicy Bypass -File C:\\schwab-sdd\\sdd-daily-pull.ps1 -Master 08719286 -Target monolith -SnsTopicArn ' + $sns",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "schtasks /Create /TN $tn /TR $tr /SC ONCE /ST 23:59 /RU Administrator /IT /RL HIGHEST /F | Out-Null",
+                  + "if ($LASTEXITCODE -ne 0) { throw 'FATAL: could not register the Administrator scheduled task' }",
+                  + "$before = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime",
+                  + "schtasks /Run /TN $tn | Out-Null",
+                  + "$startDeadline = (Get-Date).AddSeconds(90)",
+                  + "do { Start-Sleep -Seconds 5; $st = (Get-ScheduledTask -TaskName $tn).State; $now = (Get-ScheduledTaskInfo -TaskName $tn).LastRunTime } while ($st -ne 'Running' -and $now -eq $before -and (Get-Date) -lt $startDeadline)",
+                  + "if ($st -ne 'Running' -and $now -eq $before) { throw \"FATAL: scheduled task $tn NEVER STARTED. An /IT (interactive) task requires the Administrator console session to be logged on. A no-run must never be read as a clean run.\" }",
+                  + "$runDeadline = (Get-Date).AddMinutes(50)",
+                  + "do { Start-Sleep -Seconds 15; $st = (Get-ScheduledTask -TaskName $tn).State } while ($st -eq 'Running' -and (Get-Date) -lt $runDeadline)",
+                  + "$rc = (Get-ScheduledTaskInfo -TaskName $tn).LastTaskResult",
+                  + "Get-Content C:\\schwab-sdd\\daily\\08719286\\daily-pull.log -Tail 25 -ErrorAction SilentlyContinue",
+                  + "Unregister-ScheduledTask -TaskName $tn -Confirm:$false -ErrorAction SilentlyContinue",
+                  + "if ($st -eq 'Running') { throw \"FATAL: pull for 08719286 still Running after the 50-minute deadline -- treating as hung.\" }",
+                  + "if ($rc -ne 0) { throw \"FATAL: sdd-daily-pull.ps1 for 08719286 exited rc=$rc (see the log tail above; the puller also SNS-paged).\" }",
+                  + "Write-Output ('OK: daily pull for 08719286 completed as Administrator, rc=' + $rc)",
+                  + "exit 0",
+                ]
+              + executionTimeout = [
+                  + "3600",
+                ]
+            }
+        )
+      + role_arn       = (known after apply)
+      + rule           = "schwab-08719286-si2-pull-daily"
+      + target_id      = (known after apply)
+
+      + run_command_targets {
+          + key    = "InstanceIds"
+          + values = (known after apply)
+        }
+    }
+
+  # aws_iam_instance_profile.alongside_box will be created
+  + resource "aws_iam_instance_profile" "alongside_box" {
+      + arn         = (known after apply)
+      + create_date = (known after apply)
+      + id          = (known after apply)
+      + name        = "schwab-alongside-si2-box-profile"
+      + name_prefix = (known after apply)
+      + path        = "/"
+      + role        = "schwab-alongside-si2-box-role"
+      + tags_all    = (known after apply)
+      + unique_id   = (known after apply)
+    }
+
+  # aws_iam_role.alongside_box will be created
+  + resource "aws_iam_role" "alongside_box" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ec2.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + description           = "Alongside Schwab Box (Alongside copy of the 49F Schwab Box, NFRA_SCHWABBF C-ALONGSIDE). Writes its four Cottonwood masters only; write-only on data. TF-managed."
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "schwab-alongside-si2-box-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.alongside_events_ssm will be created
+  + resource "aws_iam_role" "alongside_events_ssm" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "events.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "schwab-alongside-si2-events-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = (known after apply)
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.alongside_events_ssm will be created
+  + resource "aws_iam_role_policy" "alongside_events_ssm" {
+      + id          = (known after apply)
+      + name        = "schwab-alongside-send-daily-pull-policy"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.alongside_inline will be created
+  + resource "aws_iam_role_policy" "alongside_inline" {
+      + id          = (known after apply)
+      + name        = "schwab-alongside-si2-box-policy"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy_attachment.alongside_box_ssm will be created
+  + resource "aws_iam_role_policy_attachment" "alongside_box_ssm" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      + role       = "schwab-alongside-si2-box-role"
+    }
+
+  # aws_instance.alongside_box will be created
+  + resource "aws_instance" "alongside_box" {
+      + ami                                  = (sensitive value)
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = "schwab-alongside-si2-box-profile"
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.large"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = (known after apply)
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = "subnet-039d04cfaee66a5f6"
+      + tags                                 = {
+          + "Device"  = "Alongside Schwab Box"
+          + "Name"    = "schwab-alongside-si2-box-runner"
+          + "Project" = "NFRA_SCHWABBF"
+          + "Scope"   = "alongside"
+          + "System"  = "schwab"
+        }
+      + tags_all                             = {
+          + "Device"  = "Alongside Schwab Box"
+          + "Name"    = "schwab-alongside-si2-box-runner"
+          + "Project" = "NFRA_SCHWABBF"
+          + "Scope"   = "alongside"
+          + "System"  = "schwab"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 100
+          + volume_type           = "gp3"
+        }
+    }
+
+  # aws_secretsmanager_secret.alongside_ec2_credentials will be created
+  + resource "aws_secretsmanager_secret" "alongside_ec2_credentials" {
+      + arn                            = (known after apply)
+      + description                    = "Alongside Schwab Box Windows Administrator login, generated on the box by bootstrap; never in repo/chat"
+      + force_overwrite_replica_secret = false
+      + id                             = (known after apply)
+      + name                           = "schwab/alongside/ec2-credentials"
+      + name_prefix                    = (known after apply)
+      + policy                         = (known after apply)
+      + recovery_window_in_days        = 30
+      + tags_all                       = (known after apply)
+
+      + replica (known after apply)
+    }
+
+  # aws_secretsmanager_secret.alongside_sdd_credentials will be imported
+    resource "aws_secretsmanager_secret" "alongside_sdd_credentials" {
+        arn         = "arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/sdd-credentials-9IP0UA"
+        description = "Alongside Schwab Credentials: Schwab login (JSON keys username, password) for the Alongside-specific Schwab EC2 daily puller (Cottonwood masters). Human-supplied on Andrew-direct 2026-10-20; never in repo, chat or Terraform state."
+        id          = "schwab/alongside/sdd-credentials"
+        kms_key_id  = null
+        name        = "schwab/alongside/sdd-credentials"
+        name_prefix = null
+        policy      = null
+        tags        = {
+            "owner"   = "1.0.0_SA_CTO"
+            "project" = "NFRA_SCHWABBF"
+        }
+        tags_all    = {
+            "owner"   = "1.0.0_SA_CTO"
+            "project" = "NFRA_SCHWABBF"
+        }
+    }
+
+  # aws_security_group.alongside_box will be created
+  + resource "aws_security_group" "alongside_box" {
+      + arn                    = (known after apply)
+      + description            = "Alongside Schwab Box: no standing ingress; RDP via SSM port forwarding"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "all outbound"
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "schwab-alongside-si2-box-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags_all               = (known after apply)
+      + vpc_id                 = "vpc-0cc0c6a75e54605e3"
+    }
+
+Plan: 1 to import, 17 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + alongside_box_instance_id       = (known after apply)
+  + alongside_box_role_arn          = (known after apply)
+  + alongside_box_security_group_id = (known after apply)
+  + alongside_daily_rule_arns       = {
+      + "08134043" = (known after apply)
+      + "08165601" = (known after apply)
+      + "08480305" = (known after apply)
+      + "08719286" = (known after apply)
+    }
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: C:/Users/AndrewBerman/AppData/Local/Temp/tfdata-al/al.plan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/Users/AndrewBerman/AppData/Local/Temp/tfdata-al/al.plan"
