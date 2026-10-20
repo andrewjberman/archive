@@ -35,6 +35,10 @@ TEST_FILES = {
         "test_probe_switches_current_g_once_and_back", "test_probe_never_sets_default",
         "test_probe_restores_starting_g_even_on_error", "test_probe_compares_before_after_counts",
         "test_probe_prints_no_account_numbers_or_g_values"]),
+    "fu2t": ("%s/tests/test_login_trace.py" % CF, [
+        "test_trace_records_step_outline_without_values", "test_trace_stops_at_first_failing_step",
+        "test_trace_never_records_secret_or_code", "test_locators_found_by_type_not_by_assumed_name",
+        "test_trace_mode_stops_after_sms_request"]),
     "fu3": ("%s/tests/test_fetch.py" % CF, [
         "test_lists_then_downloads_six", "test_sends_xsrf_header",
         "test_only_completed_rows_of_the_six_names", "test_missing_file_reported_not_silent",
@@ -480,11 +484,28 @@ def automation_no_stop():
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
 
 
+def automation_role_describe_status():
+    tag = "R1-FU8P"
+    try:
+        import boto3
+        rc, arn = _tf_out("automation_role_arn")
+        if rc != 0 or not arn.startswith("arn:aws:iam::"):
+            return out("%s-FAIL no automation_role_arn output (rc=%s)" % (tag, rc))
+        iam = boto3.client("iam", region_name="us-east-1")
+        res = iam.simulate_principal_policy(PolicySourceArn=arn, ActionNames=["ec2:DescribeInstanceStatus"], ResourceArns=["*"])
+        dec = [r["EvalDecision"] for r in res["EvaluationResults"]]
+        if dec != ["allowed"]:
+            return out("%s-FAIL ec2:DescribeInstanceStatus decision=%s" % (tag, dec))
+        return out("%s-OK the automation role is allowed ec2:DescribeInstanceStatus" % tag)
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
 CHECKS = {
-    "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"),
+    "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
