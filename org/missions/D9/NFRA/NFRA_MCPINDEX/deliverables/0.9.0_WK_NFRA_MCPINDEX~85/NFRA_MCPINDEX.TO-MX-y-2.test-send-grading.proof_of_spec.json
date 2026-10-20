@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-y-2.test-send-grading",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "62604a82b8c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round25-GATEWAY.md",
+    "vintage_commit": "62604a82b8c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-y-2.test-send-grading.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~85",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/tool_battery.py",
+      "kind": "script",
+      "commit_or_etag": "4ea645f8afb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 4ea645f8afb on wk-NFRA_MCPINDEX-85 (LOCAL, not pushed). Grades a sent result on readback.agrees (PASS when true, else FAIL send_unconfirmed), keeps send_chat_message PREVIEW-ONLY when it has no result or an unsent preview, validates and refuses a readback, and does not route a sent PASS. No deploy in scope: the face's bounds allow no deploy, push, upload or send.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_tool_battery_send.py",
+      "kind": "test",
+      "commit_or_etag": "4ea645f8afb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file committed in 4ea645f8afb: 24 test items (parametrized cases included) on small inputs under tmp_path, the script run in-process by path. Not deployed: a local test file.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_tool_battery.py",
+      "kind": "test",
+      "commit_or_etag": "4ea645f8afb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One assertion changed in 4ea645f8afb: test_a_send_is_a_fail_even_on_the_preview_case now asserts send_unconfirmed in the tool row and in doc[\"fails\"]. The other 11 tests are unchanged and pass. Not deployed.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4ea645f8afb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended in 4ea645f8afb: NFRA_MCPINDEX-Z-W85-S1 (plant of a sending tool grades PASS; OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~MI). Passed the surprise-row gate at that commit.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~85/y2_session_log.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The verbatim output and exit codes of y2.AC1, y2.AC2 and y2.AC3 run on HEAD 4ea645f8afb under timeout 120. Committed in this commit with the instance, so the pin is PENDING-THIS-COMMIT.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; on the fixture the sends with an agreeing read-back are PASS and the two unsent previews are PREVIEW-ONLY, the GRADE line reads PASS=3 PREVIEW-ONLY=2 FAIL=0 and the PREVIEW-ONLY TOOLS line names send_chat_message; a sent result with no, null, false or null-agrees read-back is FAIL send_unconfirmed; the chat tool with no result is still PREVIEW-ONLY while another tool with no result is not_run; a chat send without a read-back is send_unconfirmed; a sent PASS is not routed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: fixture y2 -- 5 tools in one native channel: send_email and create_draft each with a sent result carrying a read-back (S1, S2), reply_email and send_chat_message each with an unsent preview result (S3, S4), whoami a plain read (S5); 8 variants of the green results planted from that data | ok   green: send_email and create_draft are PASS on their agreeing read-back; reply_email and send_chat_message are PREVIEW-ONLY; no FAIL; rc 0 | ok   green: the GRADE line reads PASS=3 PREVIEW-ONLY=2 FAIL=0 and the REALIZED line names send_chat_message | ok   green: the graded file lists send_chat_message in preview_only and the sent case row reads PASS with no fail class | ok   planted: a sent result with NO readback is FAIL send_unconfirmed | ok   planted: a sent result with readback null is FAIL send_unconfirmed | ok   planted: a readback that does not agree (false) is FAIL send_unconfirmed | ok   planted: a readback that could not be read (agrees null) is FAIL send_unconfirmed | ok   planted: the chat tool with NO result is still PREVIEW-ONLY, not not_run | ok   planted: ... and that tool reads PREVIEW-ONLY | ok   planted: a chat SEND without a readback is FAIL send_unconfirmed (no longer a preview) | ok   planted: another tool with no result (reply_email) is still FAIL not_run | ok   with --routing a sent PASS is not routed (route null) and still PASS; the plain read is routed | ARMS: 12 ok, 0 failed | RESULT: PASS | exit=0",
+      "denominator": "12 of 12 arms ok (3 green, 7 planted variant grades, 1 PREVIEW-ONLY read of a planted variant, 1 routing arm)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; the round-22 and round-23 h6 fixtures grade byte-identically (graded file and stdout) to the unchanged script's baselines; the round-22 planted send is FAIL rc 1 class send_unconfirmed; four malformed or misplaced read-backs are refused rc 2 with no output file; two runs give the same bytes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: the round-22 fixtures (expected_census, cases_min, results_min) and the round-23 h6 fixtures graded by the script and compared byte for byte with baselines taken from the unchanged script (y2_base_*), 4 refusals, determinism, and the planted send of round 22 now classed send_unconfirmed | ok   g22 fixtures: the graded file is byte-identical to the unchanged script's | ok   g22 fixtures: the stdout is identical to the unchanged script's | ok   h6 fixtures: the graded file is byte-identical to the unchanged script's | ok   h6 fixtures: the stdout is identical to the unchanged script's | ok   the round-22 planted send (C8 sent, no readback) is still FAIL with rc 1, class send_unconfirmed (it was `sent`) | ok   refused (rc 2, REFUSED, no output file): a readback on a result that was not sent | ok   refused: a readback whose agrees is not a boolean or null | ok   refused: a readback without an instrument | ok   refused: a readback that is not an object | ok   two runs on the same input give the same bytes | ARMS: 10 ok, 0 failed | RESULT: PASS | exit=0",
+      "denominator": "10 of 10 arms ok (4 byte comparisons against the unchanged baselines, 1 round-22 planted send, 4 refusals, 1 determinism)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 28 passed) for test_tool_battery.py, test_tool_battery_route.py and test_tool_battery_send.py -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=46 (minimum 28) files=test_tool_battery.py, test_tool_battery_route.py, test_tool_battery_send.py | ok   pytest on the three battery test files passes with at least 28 tests | ARMS: 1 ok, 0 failed | RESULT: PASS | exit=0",
+      "denominator": "46 passed of 46 collected across the three files (minimum 28): 12 round-22 tests, 10 route tests, 24 new test items",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 planted arms are the mutants: a sent result with no, null, false or null-agrees readback; a chat send without a readback; the chat tool with no result; reply_email with no result; a sent PASS under --routing.",
+      "expected": "each planted variant grades the verdict and class its arm names (send_unconfirmed, PREVIEW-ONLY, not_run, route null)",
+      "observed": "all 7 planted variant grades, the PREVIEW-ONLY read and the routing arm read as named; ARMS: 12 ok, 0 failed on HEAD 4ea645f8afb",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: the AC2 arm 'two runs on the same input give the same bytes' grades the round-25 fixture twice and compares the graded document and stdout",
+      "observed": "ok two runs on the same input give the same bytes (AC2 arm; ARMS: 10 ok, 0 failed)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a plant of a sending tool through the plant subcommand as a control",
+      "reason": "the contract is silent on plant and the face bounds widening the output; the planted sender reads PASS after MX-y-2, which is filed as surprise NFRA_MCPINDEX-Z-W85-S1 and not repaired here."
+    },
+    {
+      "item": "the round-22 check round22/checks/g_check.py arm G4 (a send is a FAIL, class sent)",
+      "reason": "SUPERSEDED by the ruling, as the face states. The arm will print FAIL on the class sent; the face forbids editing it, and AC2 covers the same planted send as send_unconfirmed. Not run as a criterion of this order."
+    },
+    {
+      "item": "push of commit 4ea645f8afb or of this commit",
+      "reason": "the face's bounds allow no push; both commits are LOCAL on wk-NFRA_MCPINDEX-85."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W85-S1: the battery's plant subcommand writes a planted broken tool by setting status to error only, so a planted sending tool whose recorded send carries an agreeing readback grades PASS after MX-y-2 (plant of send_email then grade: PASS, rc 0).",
+    "NFRA_MCPINDEX-Z-W85-S2: the commit gate's naming gate printed NAMING ERROR for infra/aws/lambda/ci/function-map/ (absent from this sparse worktree) on both MX-y-2 commits; both returned rc 0 and landed, so the naming gate's verdict on them was not a pass."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~85/y2_session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest workflows/gateway_battery/tests/test_tool_battery.py workflows/gateway_battery/tests/test_tool_battery_route.py workflows/gateway_battery/tests/test_tool_battery_send.py -q -p no:cacheprovider --color=no",
+      "result": "46 passed in 1.96s"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "python -m ruff check --target-version py39 --no-cache workflows/gateway_battery/tool_battery.py workflows/gateway_battery/tests/test_tool_battery_send.py workflows/gateway_battery/tests/test_tool_battery.py",
+      "result": "All checks passed!"
+    }
+  ]
+}

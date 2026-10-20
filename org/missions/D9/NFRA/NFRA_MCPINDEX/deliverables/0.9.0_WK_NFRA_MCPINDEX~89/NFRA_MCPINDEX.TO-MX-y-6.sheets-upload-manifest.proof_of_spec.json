@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-y-6.sheets-upload-manifest",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "62604a82b8c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round25-GATEWAY.md",
+    "vintage_commit": "62604a82b8c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-y-6.sheets-upload-manifest.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~89",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/cheatsheet.py",
+      "kind": "script",
+      "commit_or_etag": "8535d9443566e8b0040893bd1a132d61092a5ad8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local workflow script, committed on wk-NFRA_MCPINDEX-89 (LOCAL). Not deployed: gen-all writes local files only; the issuer makes the upload calls with the gateway tool from the manifest.",
+      "introduces": ["upload_manifest_text"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_cheatsheet_upload.py",
+      "kind": "test",
+      "commit_or_etag": "8535d9443566e8b0040893bd1a132d61092a5ad8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local test file, committed on wk-NFRA_MCPINDEX-89 (LOCAL). Not deployed.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; gen-all without the option is unchanged; with --upload-manifest it exits 0 and prints exactly SHEETS people=4 written=4 legacy=3 placeholder=1; the manifest has exactly the keys schema, site, folder and files with the contract values, 8 entries (a sheet and an examples file per person) sorted by filename, each with exactly filename, content and bytes, content verbatim the file written under --out-dir and bytes its UTF-8 length; every filename matches the pattern, every content is ASCII, every file is under 200000 bytes; the manifest lists exactly the files under --out-dir; each listed sheet carries exactly the tools its person is admitted to; the sheets are byte-identical with and without the option -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: gen-all over the round-24 w7 fixture roster (4 people: 1 profile, 3 legacy, 1 placeholder; 12 tool census) with and without --upload-manifest; 8 files expected (a sheet and an examples file per person)\n  ok   control: gen-all without the option is unchanged (SHEETS line, 8 files)\n  ok   gen-all with --upload-manifest exits 0 and prints exactly the SHEETS line\n  ok   the manifest file is written\n  ok   the manifest has exactly the keys schema, site, folder and files, with the contract values\n  ok   it lists one entry per sheet and per examples file, sorted by filename\n  ok   every entry has exactly the keys filename, content and bytes\n  ok   every entry's content is the file written under --out-dir, verbatim, and bytes is its UTF-8 length\n  ok   every filename matches [A-Za-z0-9._-]+.(md|json), every content is ASCII and every file is under 200000 bytes\n  ok   the manifest lists exactly the files written under --out-dir (no more, no fewer)\n  ok   each listed sheet carries exactly the tools its person is admitted to (access unchanged by the manifest)\n  ok   the sheets written with the option are byte-identical to those written without it\nARMS: 11 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "expect": "RESULT: PASS[\\s\\S]*exit=0",
+      "denominator": "11 of 11 arms ok; 8 of 8 files expected in the manifest (4 people x 2 files); 4 of 4 roster people in SHEETS line",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; two runs give byte-identical manifests and sheets; nothing is written outside --out-dir and the manifest path; the script holds no network or upload word and carries the folder name; an unsafe filename, a non-ASCII character, a file of 200000 bytes or more and a manifest folder that does not exist each exit 2 with one ERROR line and nothing written, and (except the last) the same inputs succeed without the option -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y6.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: guards, determinism, write set and no-network over the same 4 person fixture; 4 refusals each with a control run without the option (an unsafe file name, a non-ASCII character, an oversize file, a missing manifest folder)\n  ok   the fixture run succeeds and writes the manifest\n  ok   two runs give byte-identical manifests and sheets\n  ok   nothing is written outside --out-dir and the manifest path (every other file under the work folder is byte-identical before and after the run)\n  ok   the script never uploads, sends or reads a network: none of socket, urllib, http.client, requests, boto3, ftplib, smtplib, subprocess, upload_text_to_site( appears in it\n  ok   the script carries the folder name 'Opal Gateway Cheat Sheets'\n  ok   refusal: an unsafe file name (a roster local part with a plus sign) -> rc 2, one ERROR line, nothing written (the same inputs without the option succeed)\n  ok   refusal: a non-ASCII character in a sheet -> rc 2, one ERROR line, nothing written (the same inputs without the option succeed)\n  ok   refusal: a file of 200000 bytes or more -> rc 2, one ERROR line, nothing written (the same inputs without the option succeed)\n  ok   refusal: a manifest folder that does not exist -> rc 2, one ERROR line, nothing written\nARMS: 9 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "expect": "RESULT: PASS[\\s\\S]*exit=0",
+      "denominator": "9 of 9 arms ok; 4 of 4 refusals each exit 2 with one ERROR line and nothing written, each with a control run without the option (the manifest-folder refusal has no control, as the order states)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 5 passed) for test_cheatsheet_upload.py -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y6.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=7 (minimum 5) file=workflows\\gateway_battery\\tests\\test_cheatsheet_upload.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "expect": "RESULT: PASS[\\s\\S]*exit=0",
+      "denominator": "7 of 7 tests passed (minimum 5); pytest rc=0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's planted defects, run through the issuer's refusal arms (y6.AC2) and repeated in test_cheatsheet_upload.py: a roster local part with a plus sign, a non-ASCII character in a sheet, a file of 250000 bytes, and a manifest folder that does not exist.",
+      "expected": "Each planted defect exits 2 with exactly one ERROR line and writes nothing, and the same inputs without --upload-manifest succeed.",
+      "observed": "y6.AC2 printed the four refusal arms as ok (9 of 9 arms ok); the parametrized test_guard_refusal_exits_2_with_one_error_line_and_writes_nothing (3 cases) and test_missing_manifest_folder_exits_2_and_writes_nothing passed (7 passed).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two gen-all runs with --upload-manifest into two out dirs and two manifest paths, compared byte for byte (y6.AC2 arm 'two runs give byte-identical manifests and sheets'; test_two_runs_give_byte_identical_manifests_and_sheets).",
+      "observed": "The manifests and every sheet and examples file were byte-identical across the two runs; the manifest carries no clock and no path.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The upload calls to the gateway tool (upload_text_to_site) for the 8 manifest files.",
+      "reason": "Issuer's act by the order's ruling (c). This cell makes the script write the manifest; no AWS call, network call, grant, deploy or upload was made by this worker (EGRESS CLASS NONE)."
+    },
+    {
+      "item": "A test at exactly 199999 and 200000 bytes.",
+      "reason": "Not built as a separate boundary test: the 200000-byte refusal is tested with a 200000-byte question (refused), and the check's arm plants 250000 bytes. The 199999-byte success side is not separately exercised."
+    },
+    {
+      "item": "The commit-time naming-gate grading of the work commit.",
+      "reason": "The naming gate printed NAMING ERROR for a function-map folder outside this sparse worktree and the commit landed; not graded. Filed as NFRA_MCPINDEX-Z-W89-S2."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W89-S1: the worker definition's row id form <CODE>-W<n>-S<k> differs from the site-Z form <CODE>-Z-W<n>-S<k> the row gate requires; the row was minted in the Z form.",
+    "NFRA_MCPINDEX-Z-W89-S2: the naming gate reported NAMING ERROR for a function-map folder outside this sparse worktree on the work commit; the commit landed without a graded naming check."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-y-6.sheets-upload-manifest.md",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~89 <0.9.0_WK_NFRA_MCPINDEX~89@opal.agent>\" -F .scratch/msg_work_y6.txt -- workflows/gateway_battery/cheatsheet.py workflows/gateway_battery/tests/test_cheatsheet_upload.py",
+      "result": "rc=0; [commit-gate] OK pre-commit gate clean for 2 of 2 files; commit 8535d9443566e8b0040893bd1a132d61092a5ad8 landed (LOCAL on wk-NFRA_MCPINDEX-89)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest workflows/gateway_battery/tests/test_cheatsheet.py workflows/gateway_battery/tests/test_cheatsheet_batch.py workflows/gateway_battery/tests/test_cheatsheet_upload.py -q -p no:cacheprovider",
+      "result": "30 passed (23 existing unchanged, 7 new)"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 workflows/gateway_battery/cheatsheet.py workflows/gateway_battery/tests/test_cheatsheet_upload.py",
+      "result": "All checks passed!"
+    }
+  ]
+}

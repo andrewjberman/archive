@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """NFRA_FIDUPL round 1 -- the mechanical checks the task orders name (2.0.0_SA_COO~P1, 2026-10-19).
 
-Usage (from the repo or worktree root):  python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py <check>
+Usage (from the repo or worktree root):  python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py <check>
 
 Each check prints exactly one line: R1-<ID>-OK ... or R1-<ID>-FAIL <reason>. Only that line is the verdict.
 Checks never write outside a temp dir, never print a secret and never print file contents. Python 3.9 syntax.
@@ -46,7 +46,12 @@ TEST_FILES = {
         "test_user_agent_matches_installed_chromium_version", "test_trace_records_failed_request_shape_without_values",
         "test_trace_records_response_error_text", "test_trace_records_third_party_failures",
         "test_trace_notes_cookie_names_before_password_post", "test_preflow_runs_only_when_att_absent",
-        "test_preflow_skipped_when_att_present"]),
+        "test_preflow_skipped_when_att_present",
+        "test_launch_is_headed_under_a_started_xvfb", "test_launch_reuses_an_existing_display",
+        "test_launch_fails_loud_when_xvfb_is_missing", "test_no_request_is_routed_or_blocked",
+        "test_text_me_the_code_button_sends_the_sms", "test_call_me_button_is_never_clicked",
+        "test_display_waits_for_the_x_socket", "test_launch_args_disable_extensions",
+        "test_display_is_set_before_the_playwright_driver_starts"]),
     "fr1a": ("%s/tests/test_gswitch.py" % CF, [
         "test_parses_current_default_and_options", "test_switch_posts_form_without_isdefault",
         "test_switch_asserts_current_equals_requested", "test_switch_failure_raises_and_names_no_value"]),
@@ -480,6 +485,68 @@ def box_live():
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
 
 
+def box_headed():
+    tag = "R1-FU10X"
+    try:
+        import time
+
+        import boto3
+        rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "output", "-raw", "instance_id"], 60)
+        iid = o.strip()
+        if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
+            return out("%s-FAIL no instance_id output (rc=%s)" % (tag, rc))
+        py = ("from playwright.sync_api import sync_playwright as sp; p = sp().start(); "
+              "b = p.chromium.launch(channel='chrome', headless=False, args=['--no-sandbox']); b.close(); p.stop(); print('FIDUPL-BOX-OK headed=launched')")
+        cmd = ("command -v Xvfb >/dev/null || { echo FIDUPL-BOX-NO-XVFB; exit 3; }; "
+               "Xvfb :97 -screen 0 1440x900x24 >/dev/null 2>&1 & XP=$!; sleep 2; "
+               "DISPLAY=:97 /opt/fidelity-uploader/venv/bin/python -c \"%s\"; RC=$?; kill $XP; exit $RC" % py)
+        ssm = boto3.client("ssm", region_name="us-east-1")
+        cid = ssm.send_command(InstanceIds=[iid], DocumentName="AWS-RunShellScript", Parameters={"commands": [cmd]})["Command"]["CommandId"]
+        inv = {"Status": "Pending"}
+        for _ in range(40):
+            time.sleep(3)
+            try:
+                inv = ssm.get_command_invocation(CommandId=cid, InstanceId=iid)
+            except Exception:  # noqa: BLE001 -- not registered yet
+                continue
+            if inv["Status"] in ("Success", "Failed", "TimedOut", "Cancelled"):
+                break
+        so = inv.get("StandardOutputContent", "")
+        if inv["Status"] != "Success" or "FIDUPL-BOX-OK headed=launched" not in so:
+            return out("%s-FAIL ssm status=%s%s" % (tag, inv["Status"], " (Xvfb not installed)" if "NO-XVFB" in so else ""))
+        return out("%s-OK Xvfb present and a headed Google Chrome launches under it" % tag)
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
+def chrome_fallback_records():
+    tag = "R1-FU11"
+    d = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/"
+    feas = d + "FU-s-11_feasibility.md"
+    if not os.path.isfile(feas):
+        return out("%s-FAIL absent %s" % (tag, feas))
+    text = open(feas, encoding="utf-8").read()
+    need = ["plugin_installable=", "claude_session_runs=", "display=", "needs="]
+    miss = [k for k in need if k not in text]
+    if miss:
+        return out("%s-FAIL feasibility record lacks %s" % (tag, ",".join(miss)))
+    return out("%s-OK feasibility record carries %d facts" % (tag, len(need)))
+
+
+def chrome_fallback_signin():
+    tag = "R1-FU11S"
+    d = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/"
+    rec = d + "FU-s-11_agent_signin_record.md"
+    if not os.path.isfile(rec):
+        return out("%s-FAIL absent %s" % (tag, rec))
+    text = open(rec, encoding="utf-8").read()
+    if "outcome=SIGNED_IN" not in text or "driver=claude-in-chrome" not in text or "headful=true" not in text:
+        return out("%s-FAIL record does not show an agent-driven headful sign-in (outcome=SIGNED_IN, driver=claude-in-chrome, headful=true)" % tag)
+    if re.search(r"G\d{8}", text):
+        return out("%s-FAIL the record carries a G number" % tag)
+    return out("%s-OK agent-driven headful sign-in recorded values-free" % tag)
+
+
 def _tf_out(name):
     rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "output", "-raw", name], 60)
     return rc, o.strip()
@@ -637,12 +704,12 @@ def tf_plan_perg():
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
-    "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
+    "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu10x": box_headed, "fu11f": chrome_fallback_records, "fu11s": chrome_fallback_signin, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
     "fu7a": tf_nochange, "fr1a": lambda: tests("fr1a"), "fr1b": lambda: tests("fr1b"), "fr2": lambda: tests("fr2"), "fr3": lambda: tests("fr3"), "fr4": lambda: tests("fr4"), "fr6": lambda: tests("fr6"), "fr5p": tf_plan_perg, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in CHECKS:
-        print("usage: r1_checks.py <%s>" % "|".join(sorted(CHECKS)))
+        print("usage: fidupl_round_checks.py <%s>" % "|".join(sorted(CHECKS)))
         sys.exit(2)
     CHECKS[sys.argv[1]]()
