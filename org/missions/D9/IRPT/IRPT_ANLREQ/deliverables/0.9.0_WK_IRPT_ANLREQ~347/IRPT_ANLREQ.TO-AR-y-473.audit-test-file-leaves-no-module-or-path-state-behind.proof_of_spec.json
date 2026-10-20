@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-473.audit-test-file-leaves-no-module-or-path-state-behind",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "9a013a245e3",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-473.audit-test-file-leaves-no-module-or-path-state-behind.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-473.audit-test-file-leaves-no-module-or-path-state-behind.md",
+    "group": "OTHER",
+    "vintage_commit": "9a013a245e3"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~347",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py",
+      "kind": "config_data",
+      "commit_or_etag": "9466bacb675",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One test file. Its module-level imports (analysis_audit, keys, opal_packager) run inside a context manager that restores sys.path on exit, so importing the file leaves the sys.path it found. The modules stay in sys.modules: opal_packager imports keys lazily from the cache (surprise IRPT_ANLREQ-D2-W347-S1). Committed LOCAL on wk-IRPT_ANLREQ-347. No AWS, no network, no push.",
+      "artifact_covered_by": [
+        "AR473-y-AC1",
+        "AR473-y-AC2",
+        "AR473-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~347/MUTANT_REPORT.txt",
+      "kind": "doc",
+      "commit_or_etag": "9466bacb675",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The combined run on the trunk file at 9a013a245e3 before the change (rc=2, collection error at test_generate_installed.py:32), and after the change for the three orderings and the determinism control.",
+      "artifact_covered_by": [
+        "AR473-y-AC1",
+        "AR473-y-AC2",
+        "AR473-y-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR473-y-AC1",
+      "criterion_verbatim": "AR473-y-AC1: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py reports/tests/test_generate_installed.py reports/tests/test_generate_installed_custody.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py reports/tests/test_generate_installed.py reports/tests/test_generate_installed_custody.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "45 passed in 2.16s",
+      "denominator": "45 passed of 45 collected; 0 failed, 0 errors (the combined run of the three files, in this order)",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the output line matches ^[0-9]+ passed in exactly; the collection error of the pre-change run (MUTANT_REPORT.txt) is gone."
+    },
+    {
+      "criterion_id": "AR473-y-AC2",
+      "criterion_verbatim": "AR473-y-AC2: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py reports/tests/test_generate_installed_custody.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py reports/tests/test_generate_installed_custody.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "45 passed in 2.21s",
+      "denominator": "45 passed of 45 collected; 0 failed, 0 errors (the same three files, with the audit file last)",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the output line matches ^[0-9]+ passed in exactly; the generate files pass in the order that failed before the change."
+    },
+    {
+      "criterion_id": "AR473-y-AC3",
+      "criterion_verbatim": "AR473-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "25 passed in 1.42s",
+      "denominator": "25 passed of 25 collected; 0 failed, 0 errors (every test of the audit file stays)",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the output line matches ^[0-9]+ passed in exactly, and the count is the 25 the cell requires."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The combined run of the audit file and test_generate_installed.py on the trunk file at 9a013a245e3, before the change. The collection error is the mutant the fix must remove.",
+      "expected": "A collection error at test_generate_installed.py:32 (sys.modules['entry'] is ops/entry.py, not ycharts/generate/entry.py); no passes.",
+      "observed": "ERROR reports\\tests\\test_generate_installed.py - AssertionError: assert WindowsPath('.../ops/entry.py') == WindowsPath('.../ycharts/generate/entry.py'); 1 error in 0.32s; pytest rc=2.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 combined run twice; each stdout kept in the worker scratch (not committed), with the elapsed time masked by sed 's/in [0-9.]+s/in Xs/' and compared with diff.",
+      "observed": "diff rc=0; both runs 45 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "removing the repo-local modules (keys, opal_packager, analysis_audit, opal_producer) from sys.modules at the end of the import, as the cell's wording asks",
+      "reason": "measured: the audit file alone then fails 6 of 25 tests, because opal_packager imports keys lazily from the cache. The module-removal limb is not done; the sys.path restore alone makes all three orderings pass. Filed as IRPT_ANLREQ-D2-W347-S1."
+    },
+    {
+      "item": "the whole reports/tests directory run (the S216B failure in another directory)",
+      "reason": "out of this cell (the preflight declares it G2's and out of scope); not run."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W347-S1: the cell asks the audit file to remove the modules it imported; doing so fails 6 of 25 tests (keys imported lazily by opal_packager). Only sys.path is restored; modules stay cached (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W347-S2: the cell says collecting the audit file binds entry to ops/entry.py; the audit file binds no entry, and the collision is the ycharts/generate sys.path entry it leaves behind (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (investor-reporting, Windows Python, no network)",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider",
+      "result": "25 passed in 1.42s; .tools/commit-gate.sh on the test file printed 'All checks passed!' (ruff 0.15.11) and rc=0."
+    }
+  ]
+}
