@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e4bb46835e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "17b1275217",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-6.adapters.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/adapters.py",
+      "kind": "script",
+      "commit_or_etag": "90dcea05eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Not wired into the live run: the wiring target is box/run.py, outside the grant (surprise NFRA_FIDUPL-D1-W5-S3).",
+      "artifact_covered_by": ["FR6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
+      "kind": "test",
+      "commit_or_etag": "90dcea05eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Five of six tests pass; test_daily_real_deps_use_adapters fails because box/run.py still refuses.",
+      "artifact_covered_by": ["FR6-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "90dcea05eb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_FIDUPL-D1-W5-S3 appended; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR6-AC1",
+      "criterion_verbatim": "the six named adapter tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
+      "output_evidence": "R1-FR6-FAIL pytest rc=1 1 failed, 5 passed in 1.03s",
+      "denominator": "5 passed of 6 named adapter tests; the failing one is test_daily_real_deps_use_adapters",
+      "status": "FAIL",
+      "status_reason": "test_daily_real_deps_use_adapters fails: box/run.py _real_daily_deps (line 270) still raises the attribute refusal (line 279). The order's named edit target, box/daily.py, holds no _real_daily_deps, and box/run.py is outside the grant. Surprise NFRA_FIDUPL-D1-W5-S3, class BLOCKING. A scratch wiring of run.py passes all six tests (recorded in the session log).",
+      "expect": "R1-FR6-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FR6-AC2",
+      "criterion_verbatim": "the five daily-orchestration tests still pass after the wiring edit.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
+      "output_evidence": "R1-FR4-OK passed=5",
+      "denominator": "5 passed of 5 daily-orchestration tests (no wiring edit was made, so the regression guard runs on unchanged daily.py and run.py)",
+      "status": "PASS",
+      "expect": "R1-FR4-OK passed=\\d+"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The one wiring edit in box/daily.py _real_daily_deps",
+      "reason": "The function is in box/run.py, outside this order's paths; no edit was made. Surprise NFRA_FIDUPL-D1-W5-S3 (BLOCKING) asks for the grant or a ruling on the location."
+    },
+    {
+      "item": "A live request to Wealthscape, accountList.json or the G-switch form",
+      "reason": "Fakes only, by order. The accountList response shape is unmeasured; extract_accounts finds rows by structure and names only keys and types when it fails."
+    },
+    {
+      "item": "The page offset field start past 2,000 rows",
+      "reason": "Unmeasured assumption carried from FR-s-1; the lister sends it from the second page only."
+    },
+    {
+      "item": "An empty account book under one G",
+      "reason": "extract_accounts raises AdapterShapeError on an empty container rather than returning zero rows, because an empty list cannot be told apart from a wrong container; the empty case is unmeasured."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target is in box/run.py, outside the FR-s-6 paths; the refusal that W5-S2 names cannot be removed under this grant. Class BLOCKING."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FR-s-6.adapters.session.log",
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of adapters.py with _find_rows no longer requiring account_key in each item (all(isinstance(item, dict) ...)).",
+      "expected": "test_extract_failure_names_only_keys fails",
+      "observed": "2 failed, 4 passed: test_extract_failure_names_only_keys (assert 'zeta=list' in message) and test_daily_real_deps_use_adapters (the existing refusal, not the mutant)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice on tests/test_adapters.py at 90dcea05eb (two same-input runs compared)",
+      "observed": "run 1: 1 failed, 5 passed; run 2: 1 failed, 5 passed (the same blocked test)",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "r1_checks.py fr6 (main tree)",
+      "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
+      "result": "R1-FR6-FAIL pytest rc=1 1 failed, 5 passed in 1.03s (checker exit 0; the verdict is the line)"
+    },
+    {
+      "tool": "r1_checks.py fr4 (main tree)",
+      "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
+      "result": "R1-FR4-OK passed=5 (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check infra/aws/ec2/canonical-fidelity/adapters.py infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
