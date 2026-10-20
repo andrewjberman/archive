@@ -1,0 +1,19 @@
+MUTANT_REPORT -- IRPT_ANLREQ.TO-AR-y-473 -- 0.9.0_WK_IRPT_ANLREQ~347
+
+== BEFORE the change (trunk file at HEAD 9a013a245e3): combined run, collection error
+command: cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_analysis_audit.py reports/tests/test_generate_installed.py -q --color=no -p no:cacheprovider
+pytest rc=2
+--- last lines of output:
+=========================== short test summary info ===========================
+ERROR reports\tests\test_generate_installed.py - AssertionError: assert Windo...
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.32s
+--- the decisive assertion, line 32 of test_generate_installed.py, sys.modules['entry'] is ops/entry.py:
+E   AssertionError: assert WindowsPath('C:/dev/wk-irpt-anlreq-347/infra/aws/lambda/investor-reporting/ops/entry.py') == WindowsPath('C:/dev/wk-irpt-anlreq-347/infra/aws/lambda/investor-reporting/ycharts/generate/entry.py')
+
+== AFTER the change: the three acceptance orderings
+AC1 (analysis_audit, generate_installed, generate_installed_custody): rc=0 -- 45 passed in 2.39s
+AC2 (generate_installed, generate_installed_custody, analysis_audit): rc=0 -- 45 passed in 2.28s (see run output)
+AC3 (analysis_audit alone): rc=0 -- 25 passed in 1.44s
+
+== DETERMINISM: AC1 combined run twice; stdout identical after masking the elapsed time (diff rc=0): 45 passed in 2.46s
