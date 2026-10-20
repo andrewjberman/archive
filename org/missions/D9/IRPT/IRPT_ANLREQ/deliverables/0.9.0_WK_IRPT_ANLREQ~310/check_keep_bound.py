@@ -28,7 +28,9 @@ def git(cwd, *args):
 def main():
     workspace = git(HERE, 'rev-parse', '--show-toplevel').strip()
     portal = os.path.join(workspace, 'portal')
-    base = git(portal, 'log', '--format=%H', '--grep=AR-y-419', '-1').strip()
+    # The AR-y-419 commit is the one whose subject opens with its cell id. A bare --grep=AR-y-419 also matches later commits that
+    # name the cell (the AR-y-425 commit does), so the anchored form is the one that finds the base.
+    base = git(portal, 'log', '--format=%H', '--grep=^IRPT_ANLREQ AR-y-419 (', '-1').strip()
     if not base:
         print('KEEP-BOUND-BAD no portal commit carries AR-y-419')
         sys.exit(1)
