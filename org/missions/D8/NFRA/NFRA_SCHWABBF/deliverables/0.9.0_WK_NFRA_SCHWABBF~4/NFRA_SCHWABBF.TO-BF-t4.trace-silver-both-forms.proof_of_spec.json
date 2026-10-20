@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-t4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R4.md",
+    "vintage_commit": "0429204ae71",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-t4.trace-silver-both-forms.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/thread_trace.py",
+      "kind": "script",
+      "commit_or_etag": "0f92b86fe32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only trace tool; no deploy and no schedule. Committed LOCAL on wk-NFRA_SCHWABBF-4 at 0f92b86fe32 (silver located by the --form rule)."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_thread_trace.py",
+      "kind": "test",
+      "commit_or_etag": "0f92b86fe32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fake-store suite, no live AWS. Committed LOCAL on wk-NFRA_SCHWABBF-4 at 0f92b86fe32."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF4-t4-AC1",
+      "criterion_verbatim": "the round-3 arms (22 passed at the base) and the silver-form arms.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "................................                                         [100%]\n32 passed in 0.62s",
+      "denominator": "32 of 32 tests passed (0 failed, 0 errors): the 22 round-3 arms unchanged in assertion and 10 silver-form arms",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF4-t4-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: the real day 2026-10-16, still entirely in the old forms, traces under --form any and its silver is read from the old key. Read-only.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08403355 --day 2026-10-16 --form any",
+      "output_evidence": "TRACE master=08403355 day=2026-10-16 form=any\nHOP bronze: HELD n=1 prefix=s3://opal-data-assets/schwab/08403355/bronze/acc/20261016 form=legacy\nHOP second-form: NONE\nHOP silver: READ rows=30 table=dim_balance form=legacy\nBALANCES column=net_credit_debit non_null=30 sum=-753761.16\nBALANCES column=margin_balance non_null=30 sum=890656.18\nBALANCES column=available_to_pay non_null=30 sum=8751885.27\nBALANCES column=mrgn_buying_pwr non_null=30 sum=9884740.56\nBALANCES column=money_mkt_funds non_null=30 sum=0.00\nBALANCES column=mtd_margin_int non_null=30 sum=27217.30\nBALANCES column=daily_margin_int non_null=30 sum=4654.90\nBALANCES column=eqty_excl_option non_null=30 sum=4388425.24\nBALANCES column=eqty_percentage non_null=30 sum=6.27\nBALANCES column=mkt_value_long non_null=30 sum=32067874.73\nBALANCES column=mkt_value_short non_null=30 sum=-12641177.21\nBALANCES column=eqty_incl_option non_null=30 sum=19544350.45\nBALANCES column=option_rqrmnts non_null=30 sum=0.00\nBALANCES column=mnth_end_div_pay non_null=30 sum=0.00\nBALANCES column=maintenance_call non_null=30 sum=11194196.00\nBALANCES column=mvl_cash_ex_optn non_null=30 sum=24220880.34\nBALANCES column=net_mv_positions non_null=30 sum=43647577.86\nBALANCES column=net_mv_plus_cash non_null=30 sum=42893816.70\nBALANCES column=cash_balance_settled_only non_null=30 sum=-753761.16\nBALANCES column=cash_margin_bal_settled non_null=30 sum=-11750521.03\nBALANCES column=bank_sweep_ibf non_null=30 sum=19316.27\nBALANCES column=bank_cash non_null=30 sum=19316.27\nHOP silver-second-form: NONE\nTHREAD-OK master=08403355 day=2026-10-16 form=legacy",
+      "denominator": "1 of 1 real days traced (rc 0); silver READ rows=30 from the legacy key; second-form NONE on both hops",
+      "status": "PASS",
+      "expect": "^THREAD-OK master=08403355 day=2026-10-16",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF4-t4-AC3",
+      "criterion_verbatim": "the negative arm on the real store: before the cutover the strict firm-form trace of the same real day FAILS (bronze and silver are not at the firm addresses yet). Read-only.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08403355 --day 2026-10-16 --form builder",
+      "output_evidence": "TRACE master=08403355 day=2026-10-16 form=builder\nHOP bronze: NOT-HELD form=builder\nHOP second-form: FOUND n=1 prefix=s3://opal-data-assets/schwab/08403355/bronze/acc/20261016 layout=legacy\nHOP silver: ABSENT table=dim_balance\nHOP silver-second-form: FOUND form=legacy\nTHREAD-FAIL reason=bronze-not-held-form-builder;second-form-found-legacy;silver-absent;silver-second-form-found-legacy master=08403355 day=2026-10-16",
+      "denominator": "1 of 1 real days traced; verdict THREAD-FAIL with rc 1 as the face predicts, but the anchored expect does not match the reason-first verdict line",
+      "status": "FAIL",
+      "status_reason": "The expect ^THREAD-FAIL master=08403355 day=2026-10-16 cannot match the verdict as the tool prints it (THREAD-FAIL reason=... master=...; the round-3 format the round-3 arms assert). Recorded as surprise NFRA_SCHWABBF-W4-S8 (BLOCKING). The expect is not weakened; the order stays open until the issuer rules it.",
+      "expect": "^THREAD-FAIL master=08403355 day=2026-10-16",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Under --form builder, silver is read from the old master key (the round-3 read) instead of the firm key: one line of trace() replaced in an in-memory copy of the real source (.scratch/mutant_check.py). The firm-form silver arm must then FAIL.",
+      "expected": "GOOD rc=0 THREAD-OK form=builder; MUTANT rc=1 THREAD-FAIL reason=silver-absent",
+      "observed": "GOOD   rc=0 last=THREAD-OK master=08403355 day=2026-10-16 form=builder | MUTANT rc=1 last=THREAD-FAIL reason=silver-absent master=08403355 day=2026-10-16 | MUTANT fired=True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two runs of the real trace() over one in-memory fake store (.scratch/mutant_check.py, python -I), outputs compared line for line",
+      "observed": "DETERMINISM identical=True lines=7",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A firm-form silver READ on the real store",
+      "reason": "No firm-form silver exists yet for 08403355 on 2026-10-16 (AC3 reads the firm key as absent), so the builder READ arm is proven on a fake store only. The cutover run is out of this order."
+    },
+    {
+      "item": "A live probe of a cottonwood master",
+      "reason": "Not probed live. The cottonwood firm-key arm is the fake-store test test_cottonwood_silver_is_read_under_its_firm_silver_folder."
+    },
+    {
+      "item": "A second real-store read for determinism",
+      "reason": "Determinism is measured on the fake store; the only AWS calls are the read-only AC2 and AC3 runs, per the bound."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W4-S8: BF4-t4-AC3 expects ^THREAD-FAIL master=08403355 day=2026-10-16, but the verdict prints THREAD-FAIL reason=... master=... (the round-3 format). The criterion cannot be met as written; recorded FAIL, not weakened. Class BLOCKING, hazard INERT."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~4/NFRA_SCHWABBF.TO-BF-t4.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "result": "32 passed in 0.62s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 data/canonical/schwab/keyform/thread_trace.py data/canonical/schwab/tests/test_thread_trace.py",
+      "result": "All checks passed! rc 0"
+    }
+  ]
+}
