@@ -17,30 +17,32 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/signin.py",
       "kind": "script",
-      "commit_or_etag": "ccd25ab7db5e601d1665b14e8bd7abf32462c88d",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "round-1 sign-in module committed on wk-NFRA_FIDUPL-1; not deployed to the box (no AWS or box write in this order); the live sign-in is FU-x-1",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
       "artifact_covered_by": [
-        "FU2-AC1"
+        "FU2-AC1",
+        "FU2-AC4"
       ]
     },
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/signin_recon.py",
       "kind": "script",
-      "commit_or_etag": "ccd25ab7db5e601d1665b14e8bd7abf32462c88d",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "round-1 live-read module committed on wk-NFRA_FIDUPL-1; --run-live is FU-x-1's act, not run here",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
       "artifact_covered_by": [
         "FU2-AC2",
-        "FU2-AC3"
+        "FU2-AC3",
+        "FU2-AC4"
       ]
     },
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_signin.py",
       "kind": "test",
-      "commit_or_etag": "ccd25ab7db5e601d1665b14e8bd7abf32462c88d",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "fake-driver test file (synthetic data, no network, no browser) committed with the module",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
       "artifact_covered_by": [
         "FU2-AC1"
       ]
@@ -48,9 +50,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_signin_recon.py",
       "kind": "test",
-      "commit_or_etag": "ccd25ab7db5e601d1665b14e8bd7abf32462c88d",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "synthetic-CSV test file committed with the module",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
       "artifact_covered_by": [
         "FU2-AC2"
       ]
@@ -58,11 +60,21 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_gprobe.py",
       "kind": "test",
-      "commit_or_etag": "ccd25ab7db5e601d1665b14e8bd7abf32462c88d",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "fake session and UI test file for the G-switch probe, committed with the module",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
       "artifact_covered_by": [
         "FU2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_login_trace.py",
+      "kind": "test",
+      "commit_or_etag": "6cbf7508073495f973852c8fdde5e0056abce4a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round-1 sign-in code committed on wk-NFRA_FIDUPL-1 (repair commit 6cbf750807); not deployed; the live trace-login run is FU-x-1's",
+      "artifact_covered_by": [
+        "FU2-AC4"
       ]
     }
   ],
@@ -96,45 +108,55 @@
       "denominator": "5 passed of 5 named G-switch probe tests required",
       "status": "PASS",
       "expect": "R1-FU2C-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FU2-AC4",
+      "criterion_verbatim": "the five login-trace tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t",
+      "output_evidence": "R1-FU2T-OK passed=5",
+      "denominator": "5 passed of 5 named login-trace tests required",
+      "status": "PASS",
+      "expect": "R1-FU2T-OK passed=\\d+"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "OTPSMS factor-presence check removed from sign_in in a scratch copy of signin.py",
-      "expected": "test_selects_otpsms_factor fails",
-      "observed": "1 failed, 7 passed of 8 in test_signin.py; the failure is test_selects_otpsms_factor (DID NOT RAISE)",
+      "description": "outline redaction of password and code rows disabled in a scratch copy of signin.py (repair)",
+      "expected": "test_trace_never_records_secret_or_code fails",
+      "observed": "2 failed, 3 passed of 5 in test_login_trace.py; test_trace_never_records_secret_or_code fired",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two same-input runs of pytest over test_signin.py, test_signin_recon.py and test_gprobe.py compared",
-      "observed": "run 1: 17 passed in 0.06s; run 2: 17 passed in 0.07s",
+      "method": "two same-input runs of pytest over test_login_trace.py compared",
+      "observed": "run 1: 5 passed in 0.05s; run 2: 5 passed in 0.05s",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "the live Wealthscape sign-in, the live selectors of PlaywrightDriver and PlaywrightGUI, and the live --run-live reads",
-      "reason": "FU-x-1 proves them; the selectors and request field names are listed in NFRA_FIDUPL-D1-W1-S3 and the request shape in NFRA_FIDUPL-D1-W1-S4"
+      "item": "the live Wealthscape sign-in through the repaired locators, and the page-3 factor option",
+      "reason": "FU-x-1 proves them with --trace-login (at most one text message per attempt); the unmeasured parts are in NFRA_FIDUPL-D1-W1-S10"
     },
     {
       "item": "fetch.PlaywrightSession, the shared session adapter",
-      "reason": "owned by FU-s-3; signin_recon.ContextSession is a stand-in with the same surface until that adapter lands (NFRA_FIDUPL-D1-W1-S4)"
+      "reason": "owned by FU-s-3; signin_recon.ContextSession is a stand-in (NFRA_FIDUPL-D1-W1-S7)"
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W1-S3: every unmeasured selector and request field name in PlaywrightDriver, PlaywrightGUI and ContextSession is listed for FU-x-1 to prove live (BLOCKING no; OBSERVATION, INERT).",
-    "NFRA_FIDUPL-D1-W1-S4: the HAR accountList.json carries an accountNumber form field the probe does not send, the HAR holds no status.json or downloadExport.do entry, and ContextSession is a stand-in for FU-s-3's adapter (OBSERVATION, INERT)."
+    "NFRA_FIDUPL-D1-W1-S3: the original guessed selectors; retired from the driver by the repair (superseded, see W1-S10).",
+    "NFRA_FIDUPL-D1-W1-S10: the measured selectors are tried first; the factor option, shadow-root openness and the 20 s budget are unproven until the trace-login run (OBSERVATION, INERT)."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~1/NFRA_FIDUPL.TO-FU-s-2.session.log",
   "compiler_tools": [
     {
       "tool": "python -m pytest",
-      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_signin.py infra/aws/ec2/canonical-fidelity/tests/test_signin_recon.py infra/aws/ec2/canonical-fidelity/tests/test_gprobe.py",
-      "result": "17 passed"
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_login_trace.py infra/aws/ec2/canonical-fidelity/tests/test_signin.py infra/aws/ec2/canonical-fidelity/tests/test_signin_recon.py infra/aws/ec2/canonical-fidelity/tests/test_gprobe.py",
+      "result": "22 passed"
     },
     {
       "tool": "ruff",
-      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/signin.py infra/aws/ec2/canonical-fidelity/signin_recon.py infra/aws/ec2/canonical-fidelity/tests/test_signin.py infra/aws/ec2/canonical-fidelity/tests/test_signin_recon.py infra/aws/ec2/canonical-fidelity/tests/test_gprobe.py",
+      "invocation": "ruff check --target-version py39 signin.py signin_recon.py tests/test_login_trace.py (and the three older test files)",
       "result": "All checks passed!"
     }
   ]
