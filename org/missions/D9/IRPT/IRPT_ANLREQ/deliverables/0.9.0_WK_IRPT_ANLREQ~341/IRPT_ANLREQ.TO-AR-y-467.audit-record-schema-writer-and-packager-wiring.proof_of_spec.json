@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-467.audit-record-schema-writer-and-packager-wiring",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "6e36e3dcc29",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-467.audit-record-schema-writer-and-packager-wiring.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/prd/IRPT_ANLREQ_PRD.md",
+    "group": "C-AUDIT-RECORD",
+    "vintage_commit": "6e36e3dcc29"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~341",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/AnalysisAudit.v1.schema.json",
+      "kind": "schema",
+      "commit_or_etag": "8feed742676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "JSON Schema Draft 2020-12, additionalProperties false at every level; filer by principal_id and user_type only; pdf_ref and commentary_ref nullable, report_ref and original_ref non-null. Committed LOCAL on wk-IRPT_ANLREQ-341. Nothing deployed.",
+      "artifact_covered_by": ["AR467-y-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/analysis_audit.py",
+      "kind": "script",
+      "commit_or_etag": "8feed742676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_audit_record, validate (ValidationUnavailable when jsonschema is not importable), audit_address through lib/opal_naming address() (irpt, the firm scope, platinum, analysis_audit, request=<id>, analysis-audit.json), write_audit (validate first, one put through the injected port). Committed LOCAL. Nothing run against AWS.",
+      "artifact_covered_by": ["AR467-y-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_packager.py",
+      "kind": "script",
+      "commit_or_etag": "8feed742676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "handle_commentary_ready attaches exactly as before (the body is _attach_commentary, unchanged in behaviour) and then calls _write_audit once; the audit outcome rides in the result's audit field and an audit failure never raises. The audit ports are OPTIONAL and absent in every existing caller (AUDIT_PORTS_UNWIRED). Committed LOCAL.",
+      "artifact_covered_by": ["AR467-y-AC2", "AR467-y-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py",
+      "kind": "test",
+      "commit_or_etag": "8feed742676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests (good record, four missing linkages, jsonschema unavailable, email refused, commentary-null admitted and report null refused, one write from the packager, audit failure leaves the attach, unwired ports, replace attach keeps one key). Committed LOCAL.",
+      "artifact_covered_by": ["AR467-y-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_schema.py",
+      "kind": "script",
+      "commit_or_etag": "see the deliverables commit on wk-IRPT_ANLREQ-341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC1 checker: meta-validates the schema, admits the good sample, rejects the four one-linkage-missing samples. jsonschema imported under python -I here (measured), so no minimal checker was needed.",
+      "artifact_covered_by": ["AR467-y-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_wired.py",
+      "kind": "script",
+      "commit_or_etag": "see the deliverables commit on wk-IRPT_ANLREQ-341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC3 checker: reads opal_packager.py by AST (no import, no side effect); counts the writer call sites (must be 1), requires the audit helper to be called once in handle_commentary_ready and after the attach call.",
+      "artifact_covered_by": ["AR467-y-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/control_audit_wired.py",
+      "kind": "script",
+      "commit_or_etag": "see the deliverables commit on wk-IRPT_ANLREQ-341",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Mutant control for AC3: three in-memory mutants of the packager text (audit helper twice; audit helper before the attach; writer twice) each read BAD, the real text reads OK.",
+      "artifact_covered_by": ["AR467-y-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR467-y-AC1",
+      "criterion_verbatim": "AR467-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_schema.py -- expect ^AUDIT-SCHEMA-OK good=1 bad_rejected=4$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_schema.py",
+      "output_evidence": "AUDIT-SCHEMA-OK good=1 bad_rejected=4\nrc=0. A second run was byte-identical (diff rc=0).",
+      "denominator": "1 of 1 output line; 4 of 4 one-linkage-missing samples rejected; 1 of 1 good sample admitted",
+      "expect": "^AUDIT-SCHEMA-OK good=1 bad_rejected=4$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect exactly."
+    },
+    {
+      "criterion_id": "AR467-y-AC2",
+      "criterion_verbatim": "AR467-y-AC2: python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py -q 2>&1 | tail -1 -- expect ^[0-9]+ passed",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py -q 2>&1 | tail -1",
+      "output_evidence": "\u001b[32m\u001b[32m\u001b[1m14 passed\u001b[0m\u001b[32m in 1.43s\u001b[0m\u001b[0m\n(the literal invocation, run in this worker environment where FORCE_COLOR=3 is set; the tail line begins with the ESC sequences shown and no line starts with a digit). With FORCE_COLOR unset, the same invocation printed: 14 passed in 1.30s (rc=0).",
+      "denominator": "14 of 14 tests passed in the file (0 failed, 0 errors)",
+      "expect": "^[0-9]+ passed",
+      "status": "FAIL",
+      "status_reason": "AS WRITTEN, the literal invocation does not match: FORCE_COLOR=3 in this worker environment colours pytest's summary, so the tail line begins with an ESC sequence, not a digit. The 14 tests pass; the criterion's anchor and this box's colour setting disagree. Recorded as FAIL, not PASS; surprise IRPT_ANLREQ-D2-W341-S1 (BLOCKING). The order stays open until the issuer rules on the environment or the invocation."
+    },
+    {
+      "criterion_id": "AR467-y-AC3",
+      "criterion_verbatim": "AR467-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_wired.py -- expect ^AUDIT-WIRED-OK calls=1 after_attach=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_wired.py",
+      "output_evidence": "AUDIT-WIRED-OK calls=1 after_attach=yes\nrc=0. A second run was byte-identical (diff rc=0).",
+      "denominator": "1 of 1 output line; 1 writer call site of 1 expected; the audit helper is called once in handle_commentary_ready, after the attach call",
+      "expect": "^AUDIT-WIRED-OK calls=1 after_attach=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect exactly."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR467-y-AC3 control (control_audit_wired.py): three in-memory mutants of opal_packager.py -- m1 the audit helper called twice in the commentary path, m2 the audit helper placed before the attach, m3 the writer called twice inside the audit helper. Each must read AUDIT-WIRED-BAD; the real text must read AUDIT-WIRED-OK.",
+      "expected": "CONTROL-FIRED m1=BAD m2=BAD m3=BAD real=OK",
+      "observed": "CONTROL-FIRED m1=BAD m2=BAD m3=BAD real=OK (rc=0; the control run twice, diff rc=0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC3 and the mutant control each run twice from the worktree root; the two stdouts compared with diff.",
+      "observed": "AC1 diff rc=0; AC3 diff rc=0; control diff rc=0. Each output is one line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live packager caller (ycharts/generate/resident_worker.py) setting audit_source and audit_put, and the ticket read they need",
+      "reason": "outside <paths>; the packager holds no ticket and no port reads one (AR-g-32). Recorded as surprise IRPT_ANLREQ-D2-W341-S2 (BLOCKING). A live attach therefore records AUDIT_PORTS_UNWIRED until ruled."
+    },
+    {
+      "item": "the registry row for the ANALYSIS_AUDIT family in infra/logic/registry/reporting_policies.json",
+      "reason": "outside <paths>; address() does not read it. Recorded as surprise IRPT_ANLREQ-D2-W341-S7 (OBSERVATION)."
+    },
+    {
+      "item": "any AWS call, Terraform plan or apply, deploy, network call and push",
+      "reason": "out of this cell: no AWS, no network, no push, no deploy; Terraform is not installed on this box."
+    },
+    {
+      "item": "the custody request audit (original_ref null by design)",
+      "reason": "the schema refuses it under the cell's exactly-two-nulls rule; recorded as surprise IRPT_ANLREQ-D2-W341-S4 (BLOCKING) for the CTO's ruling. No custody case is claimed."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W341-S1: AR467-y-AC2's literal invocation is colour-wrapped in this environment (FORCE_COLOR=3), so its expect does not match; the 14 tests pass (BLOCKING).",
+    "IRPT_ANLREQ-D2-W341-S2: the packager holds no ticket, so the form as filed, the filer's user type and the filing time are unsourced; the ticket side is the optional audit_source port, unwired by the live caller (BLOCKING).",
+    "IRPT_ANLREQ-D2-W341-S3: the audit put is an optional audit_put port, because putting it through stores['objects'] would break an existing packager test outside the grant (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W341-S4: the exactly-two-nulls schema rule refuses custody audits, whose original_ref is null by design (BLOCKING).",
+    "IRPT_ANLREQ-D2-W341-S5: a READY request with no commentary_ref gets no audit record; the null-pair case (e) has no packager path (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W341-S6: the resident builder lists _contracts/ as a directory, so the schema ships without a builder edit (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W341-S7: no registry row for the ANALYSIS_AUDIT family exists; address() does not need one (OBSERVATION).",
+    "IRPT_ANLREQ-D2-W341-S8: the cell names deliverables ~330 for the checks; this tree has no ~330, and the invocations name ~341 (OBSERVATION)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (the new test file, 14 tests) and python -I (AC1, AC3, control)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~341/check_audit_schema.py",
+      "result": "jsonschema importable under python -I (measured); the schema meta-validates under Draft 2020-12; ruff clean via .tools/commit-gate.sh on every .py added or changed."
+    }
+  ]
+}
