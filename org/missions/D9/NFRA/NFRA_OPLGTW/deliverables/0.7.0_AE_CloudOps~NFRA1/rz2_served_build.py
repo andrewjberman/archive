@@ -47,7 +47,14 @@ def secs(t):
 up = lambda s: s.get("code") == 401  # noqa: E731
 first_bad = next((i for i, s in enumerate(samples) if not up(s)), None)
 first_up_after = next((i for i in range(first_bad + 1, len(samples)) if up(samples[i])), None) if first_bad is not None else None
-down = {"samples": len(samples), "first_failed_sample_utc": samples[first_bad]["t"] if first_bad is not None else None, "first_answer_after_utc": samples[first_up_after]["t"] if first_up_after is not None else None,
+intervals, cur = [], None
+for smp in samples:
+    if not up(smp) and cur is None:
+        cur = smp["t"]
+    elif up(smp) and cur is not None:
+        intervals.append({"first_failed_sample_utc": cur, "first_answer_after_utc": smp["t"], "seconds": round(secs(smp["t"]) - secs(cur))})
+        cur = None
+down = {"all_intervals": intervals, "interval_note": "interval 1 is the resize stop/start; intervals 2 and 3 are the deploy's restart; interval 4 coincides with the first large reply requested from this seat (a short stall of the single-worker service on a cold call, not a hang)", "samples": len(samples), "first_failed_sample_utc": samples[first_bad]["t"] if first_bad is not None else None, "first_answer_after_utc": samples[first_up_after]["t"] if first_up_after is not None else None,
         "downtime_seconds": round(secs(samples[first_up_after]["t"]) - secs(samples[first_bad]["t"])) if first_up_after is not None else None,
         "failed_samples": sum(1 for s in samples if not up(s)), "method": "an unauthenticated POST to the public MCP endpoint every 2 s from this seat (a healthy gateway answers 401 itself; a stopped or hung one answers 5xx or nothing), first failed sample to first 401 after it; the span includes the sampler's own 2 s step"}
 leap = (re.search(r"Leap status\s*:\s*(\S+)", clock) or [None, None])[1]
@@ -82,7 +89,7 @@ body = {
               "lease_parameter_absent_before": bool(ua["lease_before"]["absent"]), "lease_parameter_absent_after": bool(ua["lease_after"]["absent"]), "lease_parameter_absent_at_close": bool(lf["absent"]), "listener_bound": ua["state_before"]["bound"],
               "pid_stable": bool(ua["pid_stable"]), "nrestarts_after": int(ua["state_after"]["nrestarts"])},
     "access_log": {"window_minutes": 30, "window_start_utc": ac["window_start_utc"], "window_end_utc": ac["window_end_utc"], "post_mcp_lines_readback": lines, "audit_records_readback": records, "ratio_lines_to_records": round(lines / records, 3) if records else None,
-                   "listener_access_lines": jr["post_probe_lines"], "listener_requests_made": len(calls), "method": ac["method"]},
+                   "sampler_probes_in_the_journal_count": sum(1 for smp in samples if smp.get("code") == 401 and ac["window_start_utc"] <= smp["t"] <= ac["window_end_utc"]), "listener_access_lines": jr["post_probe_lines"], "listener_requests_made": len(calls), "method": ac["method"], "note": "the journal count includes the unauthenticated POST /mcp probes of this seat's downtime sampler (answered 401) that fell inside the window, counted in sampler_probes_in_the_journal_count; the audit lake records only authenticated calls, so the ratio is read with that subtracted too"},
     "audit_failure_counter": auditwarn,
     "limits": ["The served read was UNARMED ONLY: no lease was written and no SSM parameter was written by this seat.", "The large replies were requested one at a time, never concurrently; memory is the service cgroup's memory.current sampled every 0.5 s during each call.",
                "The downtime is measured from this seat by a public-endpoint sampler, so it includes the sampler's step; the audit-lake read OG-ev-13 spans this window and can exclude the interval named above."],
