@@ -17,9 +17,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/adapters.py",
       "kind": "script",
-      "commit_or_etag": "90dcea05eb",
+      "commit_or_etag": "11e0570e5d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Wired into the daily attribute stage by box/run.py at c5442ea482.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at the measured-shape repair: rows accountListResponse.accounts, key number, paging by pageResponse.available; personal fields dropped.",
       "artifact_covered_by": [
         "FR6-AC1"
       ]
@@ -38,9 +38,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
       "kind": "test",
-      "commit_or_etag": "90dcea05eb",
+      "commit_or_etag": "11e0570e5d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Six fake-only tests pass at c5442ea482.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at the measured-shape repair. Ten fake-only tests pass; no live call.",
       "artifact_covered_by": [
         "FR6-AC1"
       ]
@@ -48,9 +48,9 @@
     {
       "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "90dcea05eb",
+      "commit_or_etag": "11e0570e5d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Row NFRA_FIDUPL-D1-W5-S3 appended; no existing row edited."
+      "deploy_evidence": "Row NFRA_FIDUPL-D1-W5-S4 appended; no existing row edited."
     }
   ],
   "acceptance": [
@@ -59,8 +59,8 @@
       "criterion_verbatim": "the six named adapter tests exist and pass.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
-      "output_evidence": "R1-FR6-OK passed=6",
-      "denominator": "6 passed of 6 named adapter tests (test_get_text_follows_redirect_and_returns_text, test_post_form_sends_urlencoded_body_without_logging_values, test_account_lister_pages_until_short_page, test_extract_accounts_finds_list_by_key_not_by_container_name, test_extract_failure_names_only_keys, test_daily_real_deps_use_adapters)",
+      "output_evidence": "R1-FR6-OK passed=10",
+      "denominator": "10 passed of 10 named adapter tests (six built, four of the REPAIR: test_get_text_follows_redirect_and_returns_text, test_post_form_sends_urlencoded_body_without_logging_values, test_account_lister_pages_until_short_page, test_extract_accounts_finds_list_by_key_not_by_container_name, test_extract_failure_names_only_keys, test_daily_real_deps_use_adapters, test_extract_accounts_uses_measured_container_and_number_key, test_lister_stops_at_available_total, test_lister_sends_session_cache_id_on_later_pages, test_lister_fails_loud_when_short_of_available)",
       "status": "PASS",
       "expect": "R1-FR6-OK passed=\\d+"
     },
@@ -70,23 +70,23 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
       "output_evidence": "R1-FR4-OK passed=5",
-      "denominator": "5 passed of 5 daily-orchestration tests, run after the box/run.py wiring edit (c5442ea482)",
+      "denominator": "5 passed of 5 daily-orchestration tests, run unchanged after the measured-shape repair",
       "status": "PASS",
       "expect": "R1-FR4-OK passed=\\d+"
     }
   ],
   "declared_exclusions": [
     {
-      "item": "A live request to Wealthscape, accountList.json or the G-switch form",
-      "reason": "Fakes only, by order. The accountList response shape is unmeasured; extract_accounts finds rows by structure and names only keys and types when it fails."
+      "item": "A live request to Wealthscape or accountList.json",
+      "reason": "Fakes only, by order. The first live multi-page pull is the issuer's check on the box."
     },
     {
-      "item": "The page offset field start past 2,000 rows",
-      "reason": "Unmeasured assumption carried from FR-s-1; the lister sends it from the second page only."
+      "item": "The request-side paging names start and sessionCacheId",
+      "reason": "Unmeasured: the CRO measured the response only. Assumption filed as NFRA_FIDUPL-D1-W5-S4 (INFERRED)."
     },
     {
-      "item": "An empty account book under one G",
-      "reason": "extract_accounts raises AdapterShapeError on an empty container rather than returning zero rows, because an empty list cannot be told apart from a wrong container; the empty case is unmeasured."
+      "item": "A book larger than 50 pages of 2,000 rows",
+      "reason": "Capped at 50 pages by order; a book that needs more fails loud with the two counts."
     },
     {
       "item": "The attribute stage against the live site",
@@ -94,24 +94,30 @@
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W5-S2: the daily attribute stage had no documented request adapter or account lister; the wiring in box/run.py now supplies them and the refusal is deleted (c5442ea482).",
-    "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target was in box/run.py, outside the first paths block; the issuer amendment added box/run.py to the paths and the edit is committed on this branch."
+    "NFRA_FIDUPL-D1-W5-S2: the daily attribute stage had no documented request adapter or account lister; the wiring in box/run.py supplies them (c5442ea482).",
+    "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target was in box/run.py, outside the first paths block; the issuer amendment added box/run.py and the edit is committed.",
+    "NFRA_FIDUPL-D1-W5-S4: the request-side paging field names (start, sessionCacheId) are assumed from the response names; unmeasured until the first live multi-page pull."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FR-s-6.adapters.session.log",
   "controls": {
     "mutant": {
-      "description": "Scratch copy of adapters.py with _find_rows no longer requiring account_key in each item (all(isinstance(item, dict) ...)).",
-      "expected": "test_extract_failure_names_only_keys fails",
-      "observed": "2 failed, 4 passed: test_extract_failure_names_only_keys (assert 'zeta=list' in message) and test_daily_real_deps_use_adapters (the existing refusal, not the mutant)",
+      "description": "Scratch copy of adapters.py with the short-of-available check disabled (if False in place of len(distinct) < available).",
+      "expected": "test_lister_fails_loud_when_short_of_available fails",
+      "observed": "1 failed, 9 passed: test_lister_fails_loud_when_short_of_available (Failed: DID NOT RAISE AdapterShapeError)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "pytest run twice on test_adapters.py, test_box_daily.py and test_box_run.py at c5442ea482 (two same-input runs compared)",
-      "observed": "run 1: 16 passed; run 2: 16 passed",
+      "method": "pytest run twice on test_adapters.py, test_box_daily.py and test_box_run.py at 11e0570e5d (two same-input runs compared)",
+      "observed": "run 1: 20 passed; run 2: 20 passed",
       "status": "STABLE"
     }
   },
   "compiler_tools": [
+    {
+      "tool": "r1_checks.py fr6 (main tree)",
+      "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
+      "result": "R1-FR6-OK passed=10 (rc=0)"
+    },
     {
       "tool": "r1_checks.py fr6 (main tree)",
       "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
