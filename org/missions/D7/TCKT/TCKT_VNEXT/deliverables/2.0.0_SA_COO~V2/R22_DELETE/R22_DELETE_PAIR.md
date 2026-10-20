@@ -9,15 +9,17 @@
 - Nothing is read or deleted by listing; the applier never lists a prefix to decide what to delete.
 
 ## 2. The mechanism, exactly (Terraform, `safe-apply`; no hand IAM)
-A new file `infra/aws/terraform/ticket-center/tckt_residue_delete_r22.tf` and a copy of the manifest beside it, `tckt_residue_delete_r22.manifest.json` (byte-equal to the signed blob):
+A new file `infra/aws/terraform/ticket-center/tckt_residue_delete_r22.tf` ONLY (no copy of the manifest is placed in the Terraform tree: the naming gate refuses a hand-kept carrier of firm names there, and `org/` is outside its declaration domain). The manifest is read from its repository path through a variable the applier passes identically to the plan, the apply and the destroy (the absolute path of `R22_DELETE_MANIFEST.json` in the workspace, byte-equal to the signed blob):
 ```
-locals {
-  residue = jsondecode(file("${path.module}/tckt_residue_delete_r22.manifest.json")).objects
-  chunks  = { for i, c in chunklist(local.residue, 12) : tostring(i) => c }
+variable "residue_manifest_path" {
+  type = string
 }
-resource "aws_iam_role" "tckt_residue_delete_r22" {
-  for_each             = local.chunks
-  name                 = "tckt-residue-delete-r22-${each.key}"
+locals {
+  residue = jsondecode(file(var.residue_manifest_path)).objects
+  chunks  = chunklist(local.residue, 12)
+}
+resource "aws_iam_role" "residue_delete_0" {
+  name                 = "opal-ticket-residue-delete-0-role"
   max_session_duration = 3600
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -25,23 +27,90 @@ resource "aws_iam_role" "tckt_residue_delete_r22" {
                    Principal = { AWS = "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user" } }]
   })
 }
-resource "aws_iam_role_policy" "tckt_residue_delete_r22" {
-  for_each = local.chunks
-  name     = "tckt-residue-delete-r22-${each.key}"
-  role     = aws_iam_role.tckt_residue_delete_r22[each.key].id
+resource "aws_iam_role_policy" "residue_delete_0" {
+  name = "opal-ticket-residue-delete-0-policy"
+  role = aws_iam_role.residue_delete_0.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
       Action    = ["s3:DeleteObjectVersion"]
-      Resource  = [for o in each.value : "arn:aws:s3:::${o.bucket}/${o.key}"]
-      Condition = { StringEquals = { "s3:VersionId" = [for o in each.value : o.version_id] } }
+      Resource  = [for o in local.chunks[0] : "arn:aws:s3:::${o.bucket}/${o.key}"]
+      Condition = { StringEquals = { "s3:VersionId" = [for o in local.chunks[0] : o.version_id] } }
+    }]
+  })
+}
+resource "aws_iam_role" "residue_delete_1" {
+  name                 = "opal-ticket-residue-delete-1-role"
+  max_session_duration = 3600
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{ Effect = "Allow", Action = "sts:AssumeRole",
+                   Principal = { AWS = "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user" } }]
+  })
+}
+resource "aws_iam_role_policy" "residue_delete_1" {
+  name = "opal-ticket-residue-delete-1-policy"
+  role = aws_iam_role.residue_delete_1.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Action    = ["s3:DeleteObjectVersion"]
+      Resource  = [for o in local.chunks[1] : "arn:aws:s3:::${o.bucket}/${o.key}"]
+      Condition = { StringEquals = { "s3:VersionId" = [for o in local.chunks[1] : o.version_id] } }
+    }]
+  })
+}
+resource "aws_iam_role" "residue_delete_2" {
+  name                 = "opal-ticket-residue-delete-2-role"
+  max_session_duration = 3600
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{ Effect = "Allow", Action = "sts:AssumeRole",
+                   Principal = { AWS = "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user" } }]
+  })
+}
+resource "aws_iam_role_policy" "residue_delete_2" {
+  name = "opal-ticket-residue-delete-2-policy"
+  role = aws_iam_role.residue_delete_2.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Action    = ["s3:DeleteObjectVersion"]
+      Resource  = [for o in local.chunks[2] : "arn:aws:s3:::${o.bucket}/${o.key}"]
+      Condition = { StringEquals = { "s3:VersionId" = [for o in local.chunks[2] : o.version_id] } }
+    }]
+  })
+}
+resource "aws_iam_role" "residue_delete_3" {
+  name                 = "opal-ticket-residue-delete-3-role"
+  max_session_duration = 3600
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{ Effect = "Allow", Action = "sts:AssumeRole",
+                   Principal = { AWS = "arn:aws:iam::313476888478:user/cloudops-dell2-agent-user" } }]
+  })
+}
+resource "aws_iam_role_policy" "residue_delete_3" {
+  name = "opal-ticket-residue-delete-3-policy"
+  role = aws_iam_role.residue_delete_3.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Action    = ["s3:DeleteObjectVersion"]
+      Resource  = [for o in local.chunks[3] : "arn:aws:s3:::${o.bucket}/${o.key}"]
+      Condition = { StringEquals = { "s3:VersionId" = [for o in local.chunks[3] : o.version_id] } }
     }]
   })
 }
 ```
+- Names are the naming gate's own form (a role ends `-role`, a policy `-policy`; four explicit chunk blocks, since a templated name raises "the tokeniser cannot place a character"): `opal-ticket-residue-delete-0-role` to `-3-role` and the policies `-0-policy` to `-3-policy`. Tested against `naming-gate.py --diff --enforce` before this pair: `NAMING-GATE: PASS 8 graded`, every name CONFORMANT, no registry row needed (TV2's first STOP, `stop_at_precondition5.md`, was the names `tckt-residue-delete-r22-{x}` and a manifest copy inside the Terraform tree).
+- The 46 entries fill chunks 0 to 3 (12, 12, 12, 10). A manifest of more than 48 entries is not this pair.
 - The manifest is cut into chunks of 12 objects, one role per chunk (IAM limits a role's inline policies to 10,240 characters in all; the draft's 28 IRPT keys alone are about 7,100). Each role allows ONLY `s3:DeleteObjectVersion`, ONLY on its chunk's exact object ARNs, ONLY for its chunk's version ids, and is assumable ONLY by `cloudops-dell2-agent-user`. (A version id is unique to one object, so the any-of condition names no pair the manifest does not carry.)
-- The assume is `aws sts assume-role --role-arn arn:aws:iam::313476888478:role/tckt-residue-delete-r22-<i> --duration-seconds 900` (15 minutes), once per chunk; the temporary credentials are never printed or written to a file; each chunk's deletes run in its own session only.
+- The assume is `aws sts assume-role --role-arn arn:aws:iam::313476888478:role/opal-ticket-residue-delete-<i>-role --duration-seconds 900` (15 minutes), once per chunk; the temporary credentials are never printed or written to a file; each chunk's deletes run in its own session only.
 - **The Deny is untouched.** `DenyS3DeletesOnProductionData` in `cloudops-dell-agent-deploy-policy` (v7 at the draft) is not edited, detached or worked around by any grant to the agent user: an assumed-role session is the role's permissions, which carry only the exact-version delete above.
 
 ## 3. Preconditions (each read by the applier before the apply; a failed one is a STOP, reported first)
@@ -64,5 +133,5 @@ Apply; assume the role (900 s); delete each manifest version by `aws s3api delet
 ## 6. The act's evidence
 `R22_DELETE_RESULT.json` under `org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r22_delete/` and `r22_residue_delete_check.py` printing `RUN-OK (residuedelete)` beside its self-test `R22-RESIDUEDELETE-SELFTEST-OK`; a change-management ledger opened at the start and closed after the read-back.
 
-## COO half -- SIGNED 2026-10-20 by `2.0.0_SA_COO~V2`
+## COO half -- SIGNED 2026-10-20 by `2.0.0_SA_COO~V2`, RE-SIGNED 2026-10-20 on the naming amendment (section 2: gate-conformant names, no manifest copy in the Terraform tree; the CTO re-signs his half on this blob)
 I read the four chunks' policy sizes (the IRPT chunks stay far under the 10,240-character limit), re-read every manifest key live (one version, no delete marker each; the 14 run 7c and 7d keys on 2026-10-20 ~22:1xZ, the 7b keys 2026-10-20 ~17:3xZ, my four earlier), read the Deny in `cloudops-dell-agent-deploy-policy` v7 and the census that no role holds a delete on these keys, and drafted the check (self-test OK). The CTO half is owed; the GO to `TO-R22-DL1` is an amendment citing this file's blob.

@@ -36,3 +36,16 @@ HEAD). The manifest is `R22_DELETE_MANIFEST.json` (blob 7f07b0b6d8). The COO hal
 ## Signature
 
 SIGNED, CTO half, bound to the packet blob and sha256 above.
+
+## Re-sign on the naming-gate amendment (~23:2xZ)
+
+- **Why:** TV2 stopped TO-R22-DL1 at precondition 5, because the LGIC naming gate refused the hand-typed role names. Nothing was
+  applied.
+- **Amended pair:** @901daf7108, blob 21fa71920020d432f6aa5ac4159386de96005eef, sha256
+  7280a5e6a0cbcecba284ec6a89e2850e057080bda7d63f0453346d6bae78cb30 (measured at HEAD).
+- **Roles and policies:** `opal-ticket-residue-delete-{0..3}-role` and `-policy`, four explicit blocks. The issuer reports
+  `naming-gate.py --diff --enforce` PASS, 8 graded, all CONFORMANT, with no registry row needed.
+- **The manifest is unchanged:** blob 7f07b0b6d8, read here at HEAD, 46 entries. Terraform reads it through a variable.
+- **Blast radius and rollback** are as above. Only the resource names changed.
+
+SIGNED, CTO half, bound to the amended blob and sha256 above. The f38bc409cb binding is superseded.
