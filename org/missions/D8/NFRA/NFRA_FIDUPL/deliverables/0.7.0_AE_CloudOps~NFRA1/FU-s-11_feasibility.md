@@ -68,6 +68,52 @@ Not tested end to end: the Session Manager plugin is not installed on this seat'
 box side (bind, banner, refusal on the NIC) was measured on the box. The instance role carries AmazonSSMManagedInstanceCore, which includes
 the session channel permissions.
 
+## CDP (TO-FU-s-11 re-cut, CTO ruling 8750): a Chrome a dell1 agent can attach to, not started
+
+The plugin plan above (Claude account, Claude Code login, extension policy) is WITHDRAWN; its lines stay as a record. The browser stays on the box,
+the controller is a dell1 agent that attaches by Playwright connect_over_cdp through an SSM port forward, the way the VNC screen is reached.
+
+cdp_unit=installed_not_started
+  Reason (M): /etc/systemd/system/fidelity-agent-chrome.service is on the box (md5 bef9f0bfd0cc6d7e57057f3a62830ed5). systemctl reads it
+  is-active=inactive and is-enabled=static (the unit has no [Install] section, so it cannot be enabled at boot at all; it starts only by
+  name). Nothing listens on 9222 and no Chrome runs on the agent profile. /opt/fidelity-uploader/profile-agent does not exist yet; the unit's
+  ExecStartPre creates it at the first START. The puller's /opt/fidelity-uploader/profile is never named by this unit. No extension policy,
+  no credential, no password anywhere. The unit text, verbatim:
+
+    [Unit]
+    Description=Fidelity agent Chrome (headful on display :1, CDP on 127.0.0.1:9222 only, own profile). Started only on the issuer's START.
+    After=network.target fidelity-vnc.service
+    Wants=fidelity-vnc.service
+
+    [Service]
+    Type=simple
+    Environment=DISPLAY=:1
+    ExecStartPre=/usr/bin/mkdir -p /opt/fidelity-uploader/profile-agent
+    ExecStart=/opt/google/chrome/chrome --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 --user-data-dir=/opt/fidelity-uploader/profile-agent --no-sandbox --no-first-run --no-default-browser-check
+    Restart=no
+
+  Display :1 is the VNC screen, so a person can watch. Wants=fidelity-vnc.service starts the VNC unit if it is not running and does nothing if it
+  is; unlike Requires= it does not tie the two lifetimes together. Note the consequence: if the VNC unit is stopped, Chrome loses its display and
+  exits on its own.
+
+The exact commands (nothing has been run; the issuer's START and STOP gate them):
+
+  start the unit, from any machine with the AWS CLI and credentials that may call ssm:SendCommand:
+    aws ssm send-command --region us-east-1 --instance-ids i-028e830f7226cc685 --document-name AWS-RunShellScript --parameters 'commands=["systemctl start fidelity-agent-chrome.service"]'
+
+  the SSM port forward of the CDP port (the same shape as the VNC one; leave it open while the agent drives; ssm:StartSession permission):
+    aws ssm start-session --region us-east-1 --target i-028e830f7226cc685 --document-name AWS-StartPortForwardingSession --parameters "portNumber=9222,localPortNumber=9222"
+
+  then the agent attaches to http://127.0.0.1:9222 on the forwarding machine (Playwright connect_over_cdp). To stop (on the issuer's STOP):
+    aws ssm send-command --region us-east-1 --instance-ids i-028e830f7226cc685 --document-name AWS-RunShellScript --parameters 'commands=["systemctl stop fidelity-agent-chrome.service"]'
+
+Risks to read before START (not measured, because the unit has not been started):
+  - A CDP endpoint gives full control of a signed-in browser. The unit asks for 127.0.0.1 only and the security group has 0 inbound rules, but
+    whether this Chrome build (155) honors --remote-debugging-address for a headful run is verified only at START by FU11-AC1 (it checks the bind).
+  - Anyone with ssm:StartSession on the instance can open the forward and drive the browser; that permission is the whole access control.
+  - The unit runs Chrome as root with --no-sandbox, as the order specifies, on a box that holds a Quo key and a Wealthscape secret grant.
+  - The Claude Code CLI (2.1.197) and nodejs installed in Part 1 are still on the box, unused, no login. Not removed: the re-cut does not order it.
+
 ## Reachability from the box (HTTP status only, curl)
 
 chromewebstore.google.com 200; clients2.google.com/service/update2/crx 200; registry.npmjs.org 200; dl.google.com 302; api.anthropic.com 404
