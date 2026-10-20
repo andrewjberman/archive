@@ -29,9 +29,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
       "kind": "script",
-      "commit_or_etag": "f3433662bb79207673dd847945644a6afc1ea9f6",
+      "commit_or_etag": "7079ce423aef862eae296bd306602c84f4101e19",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib, offline check. Loads lib/opal_naming.py by path, runs validate(), resolves one address() per enabled client firm (AC1) and runs the AMENDED --selftest control (AC2: variant A tier state with null lifetime, variant B accepted_ceiling_days 3000; AMENDMENT 1, trunk f6b63a00ac). Committed LOCAL at 505dc4c0dd and f3433662bb; commit-gate clean.",
+      "deploy_evidence": "Stdlib, offline check. Loads lib/opal_naming.py by path and runs validate() (AC1). AC1 resolves each enabled client firm with reporting_destination(firm, ANALYSIS_AUDIT, ART-<hex64>, <sha256>, policy_revision=irpt-anlreq-x10-v1) and requires the irpt PRODUCT bucket (AMENDMENT 2, trunk a71b17d96d). The --selftest control (AC2) is AMENDMENT 1 (trunk f6b63a00ac). Committed LOCAL at 505dc4c0dd, f3433662bb and 7079ce423a; commit-gate clean.",
       "artifact_covered_by": [
         "AR466-y-AC1",
         "AR466-y-AC2"
@@ -61,11 +61,11 @@
       "criterion_verbatim": "AR466-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py -- expect ^AUDIT-FAMILY-OK firms=[0-9]+ addresses=[0-9]+ validator=pass$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
-      "output_evidence": "ADDRESS firm=49financial bucket=opal-data-49financial key=irpt/49financial/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nADDRESS firm=inflection bucket=opal-data-inflection key=irpt/inflection/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nADDRESS firm=cottonwood bucket=opal-data-cottonwood key=irpt/cottonwood/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nAUDIT-FAMILY-OK firms=3 addresses=3 validator=pass\nrc=0 (the closing line is the last line of stdout).",
-      "denominator": "3 of 3 enabled client firms in data/firm_registry.json (kind client, enabled true) resolved to a builder address; 3 of 3 addresses carry the scope bucket; 1 closing line",
+      "output_evidence": "ADDRESS firm=49financial bucket=opal-data-irpt key=irpt/49financial/platinum/analysis_audit/ART-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210.json\nADDRESS firm=inflection bucket=opal-data-irpt key=irpt/inflection/platinum/analysis_audit/ART-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210.json\nADDRESS firm=cottonwood bucket=opal-data-irpt key=irpt/cottonwood/platinum/analysis_audit/ART-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210.json\nAUDIT-FAMILY-OK firms=3 addresses=3 validator=pass\nrc=0 (the closing line is the last line of stdout).",
+      "denominator": "3 of 3 enabled client firms in data/firm_registry.json (kind client, enabled true) resolved by reporting_destination(); 3 of 3 buckets equal the irpt PRODUCT bucket opal-data-irpt of scopes.json; 3 of 3 keys begin irpt/<firm>/platinum/analysis_audit/ART-; 1 closing line",
       "expect": "^AUDIT-FAMILY-OK firms=[0-9]+ addresses=[0-9]+ validator=pass$",
       "status": "PASS",
-      "status_reason": "rc=0 and the closing line matches the expect regex exactly. Run twice, the stdout is identical (controls.determinism)."
+      "status_reason": "rc=0 and the closing line matches the expect regex exactly. Resolved under AMENDMENT 2 (trunk a71b17d96d) with reporting_destination() and the irpt PRODUCT bucket, not address() with a firm scope. Run twice, the stdout is identical (controls.determinism)."
     },
     {
       "criterion_id": "AR466-y-AC2",
@@ -76,7 +76,7 @@
       "denominator": "2 of 2 amended control variants read BAD (variant A and variant B); 2 of 2 needed for CONTROL-FIRES",
       "expect": "^CONTROL-FIRES$",
       "status": "PASS",
-      "status_reason": "rc=0 and the closing line matches the expect regex exactly. The control was amended by AMENDMENT 1 of this order (trunk f6b63a00ac): the first variant (platinum with unreferenced_days 30) read OK because the validator accepts it; the issuer took surprise IRPT_ANLREQ-D2-W340-S1 as its own error. The validator itself is not edited; the amended variants are refused by it."
+      "status_reason": "rc=0 and the closing line matches the expect regex exactly. The control is AMENDMENT 1 (trunk f6b63a00ac): variant A is tier state with unreferenced_days null, variant B is platinum with accepted_ceiling_days 3000; both read BAD. The original first variant (platinum with unreferenced_days 30) read OK, because the validator accepts it; the issuer took surprise IRPT_ANLREQ-D2-W340-S1 as its own error. The validator itself is not edited."
     },
     {
       "criterion_id": "AR466-y-AC3",
