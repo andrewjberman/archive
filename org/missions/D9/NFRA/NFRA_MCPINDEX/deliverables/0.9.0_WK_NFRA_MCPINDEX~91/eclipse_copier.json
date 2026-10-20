@@ -1,0 +1,36 @@
+{
+ "schema": "gateway_eclipse_copier/1",
+ "producer": {
+  "bucket": "opal-data-inf",
+  "prefix": "silver/eclipse/",
+  "owner_project": "ADVI_ECLDAT"
+ },
+ "copy": {
+  "bucket": "opal-data-assets",
+  "prefix": "eclipse/inflection/silver/"
+ },
+ "copier": {
+  "kind": "lambda",
+  "name": "opal-assets-ingest-mirror (bronze mirror) feeding opal-assets-silver-eclipse (silver converter)",
+  "cite": "infra/aws/lambda/opal-assets/opal-assets-silver-eclipse/mirror_conversion.py:401"
+ },
+ "schedule": {
+  "expression": "mirror polls cron(5 13 * * ? *) and cron(5 17 * * ? *); converter fires on S3 ObjectCreated under eclipse/inflection/bronze/ and on sweep cron(0 16 * * ? *)",
+  "cite": "infra/aws/terraform/opal-assets/mirror.tf:106"
+ },
+ "lag": {
+  "trading_days": 1,
+  "cause": "From the schedule, the first mirror poll at 13:05Z precedes the producer landing near 14:48Z, so the copy depends on the 17:05Z second poll, and the 16:00Z silver sweep runs before that poll and cannot convert bronze the monolith does not yet hold."
+ },
+ "owner": "OPAL_ASSETS",
+ "evidence": [
+  "infra/aws/terraform/opal-assets/mirror.tf:98",
+  "infra/aws/terraform/opal-assets/mirror.tf:230",
+  "infra/aws/terraform/opal-assets/silver.tf:246",
+  "infra/aws/terraform/opal-assets/silver.tf:292",
+  "infra/aws/lambda/opal-assets/opal-assets-ingest-mirror/lambda_function.py:123",
+  "infra/aws/lambda/opal-assets/opal-assets-silver-eclipse/mirror_conversion.py:777",
+  "data/inf/scripts/silver/convert_eclipse_portfolios_to_silver.py:4",
+  "workflows/atom_decomposition/catalog_entries/opal_data_assets_silver_eclipse_inflection_fact_models.yaml:57"
+ ]
+}
