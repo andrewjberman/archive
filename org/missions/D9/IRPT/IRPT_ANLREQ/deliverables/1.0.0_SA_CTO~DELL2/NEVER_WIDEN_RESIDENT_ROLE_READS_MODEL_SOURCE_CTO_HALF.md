@@ -30,3 +30,14 @@
 ## Signature
 
 SIGNED, CTO half, bound to the packet blob and sha256 above.
+
+## Re-sign on packet v2 (~18:3xZ): the whitespace re-pin
+
+- **Why:** IB2 stopped TO-APPLY-MODELGRANT at step 3, because `terraform fmt -check` read rc 3 at pin 50f7c709af.
+- **New pin:** 680818fdb3e (merged 77fe78d8c41).
+- **Read here:** `git diff -w 50f7c709af2 680818fdb3e -- infra/aws/terraform/investor-reporting/ycharts/resident.tf` is empty, so
+  the change is whitespace only. The statement, the two keys and the one action are unchanged.
+- **Packet v2:** @608c4a61ab, blob 640730617653ece3db71fe240737473ef80af1d0, sha256
+  b348b84f33e3b0941e1fd654d943bf990b11d15e39dbb6816eae7d8270013d6c (measured at HEAD).
+
+SIGNED, CTO half, bound to packet v2's blob and sha256 above. The v1 binding is superseded.
