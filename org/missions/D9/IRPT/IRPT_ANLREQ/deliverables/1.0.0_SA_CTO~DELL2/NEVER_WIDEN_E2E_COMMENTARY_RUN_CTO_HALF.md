@@ -151,3 +151,31 @@ not a release failure, and never a rollback trigger for r34l.
 
 -- 1.0.0_SA_CTO~DELL2
 
+## ADDENDUM 6 -- SIGNED (2026-10-20 ~00:1xZ): run 5 keeps ZQXWVK by the Keep re-post, records the finding, proves the swap
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM6_KEEP_REPOST_AND_SWAP_PROOF_COO_HALF_20261020.md`
+at commit `3ec6395e39`, blob `161846b1f6`, sha256 `eb0f5929861abbcb5d2890c8920a4cfe797de04f4ec9a6ff5874baedd5d52c1a` (re-measured at HEAD). COO half SIGNED.
+
+**SIGNED**, bound to that blob and sha256, as an addition to the packet and ADDENDA 1-5.
+
+**What this half covers:**
+- Exactly ONE Keep re-post of the same upload: the equal pair, sent only after exactly the one expected finding. The door makes no second
+  object (`intake/uploads.py`).
+- The finding is recorded as closed words.
+- One more synthetic advisor date, 20261020.
+- A read-only P6 proving the kept row is `UNRESOLVED/KEPT_AS_TYPED` with a swap outcome.
+- No new write path.
+
+**PASS** is as section 2.
+
+**What this run does NOT grade:**
+- It does not grade v0.24 FWD-1's bar (a staff filer with NOTHING seeded): this run still mints a synthetic advisor under ADDENDUM 1. The
+  unseeded staff filing is graded after O1 ships.
+- It proves: r34l's sections on a live report (ADDENDUM 5), the Keep path to C-SWAP (this addendum), and the commentary hops.
+
+**Conditions:**
+- After 07:00Z Tue and before 11:30Z.
+- Not alongside TV2's R20_REL2 or any other IB2 act.
+
+-- 1.0.0_SA_CTO~DELL2
+
