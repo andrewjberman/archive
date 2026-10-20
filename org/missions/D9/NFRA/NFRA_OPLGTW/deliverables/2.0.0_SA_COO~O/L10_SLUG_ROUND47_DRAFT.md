@@ -12,9 +12,9 @@
 | `OG-gc-1` | `client_*` tools for Alyssa and Menachem: facts first | complete on Phase A facts (row Z-S432: no `person_access` record can admit the tools; the cell is round 48, the CTO's msg 36202) |
 | `OG-gm-1` | Menachem's Schwab grant | SUPERSEDED for round 47 (row Z-S433: no verified identity record, gate G-E) |
 | `OG-gv-1` | Andrew's Schwab grant to `accounts ["*"]` | OPEN: Phase A done, three halves SIGNED at ask `637db69736ab`; Phase B only after `OG-rl-18` AND the `/callback` exemption release are live |
-| `OG-ed-1` | master-admin exemption on the legacy `/callback` consent branch (the CTO half of `OG-gv-1`, option 2) | OPEN: worker `~175` |
-| `OG-rl-17` | batch16 release | OPEN: re-cut at the cap 26 by `~NFRA1`, halves re-sign, window 2026-10-21 06:00Z |
-| `OG-rl-18` | batch17 release (master-wide scope; gains the exemption files) | OPEN: staged, not before 2026-10-22 06:00Z |
+| `OG-ed-1` | master-admin exemption on the legacy `/callback` consent branch (the CTO half of `OG-gv-1`, option 2) | complete (worker `~175`, drained `17c53cdd2cb`; my `ed1.AC1`, `AC2`, `AC3` PASS on the merged tree; rows Z-S437) |
+| `OG-rl-17` | batch16 release | OPEN: re-cut at the cap 26 (release `8e3eddf959`, ask `291ffc35747a`), all three halves SIGNED, Phase B GO sent for window 2026-10-21 06:00Z |
+| `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption: nine files) | OPEN: staged, not before 2026-10-22 06:00Z |
 
 ## 2. What the round delivered against the endpoint -- OPEN
 
@@ -22,7 +22,7 @@ To fill from the live read-backs after `OG-rl-17` and `OG-rl-18` close.
 
 ## 3. Rows
 
-- **Rulings this round (mine):** `Z-S429`, `Z-S430`, `Z-S434` (adjudicates `Z-S431`, `Z-S432`, `Z-S433`), `Z-S435` (worker rows `W174-S1`, `W174-S2`).
+- **Rulings this round (mine):** `Z-S429`, `Z-S430`, `Z-S434` (adjudicates `Z-S431`, `Z-S432`, `Z-S433`), `Z-S435` (worker rows `W174-S1`, `W174-S2`), `Z-S437` (`W175-S1`). Filed, not ruled: `Z-S436` (relayed, see section 4).
 - **Carried ARMED:** `Z-W169-S2` (Teams-poll cursor tie at a page cut), `Z-S420`, `Z-S410` (disarm on the live proofs if `OG-rl-17` closes).
 
 ## 4. The enrichment list this seat proposes for round 48
