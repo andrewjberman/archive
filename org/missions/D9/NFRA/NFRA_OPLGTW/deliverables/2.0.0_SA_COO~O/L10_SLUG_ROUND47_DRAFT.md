@@ -31,6 +31,7 @@ To fill from the live read-backs after `OG-rl-17` and `OG-rl-18` close.
 - **Menachem's identity (gate G-E)** and then `OG-gm-1` re-cut.
 - **A call start or duration field in the audit record** (the CTO's C1 ruling): without it true overlap is not computable.
 - **Alyssa's grant to `accounts ["*"]`** (the CVO's note, msg 36209), after `OG-gv-1` reads back.
+- **`portal_get_security_scan` AccessDenied on an absent-universe request** (row Z-S436, relayed by `2.0.0_SA_COO~MI`, round 24 case K2-31; NOT reproduced by this seat; test first whether `OG-ls-1`'s ListBucket narrowing removed the portal prefix's listing).
 - The CVO's test that the hand-typed IAM source list equals the silver families; the Teams-poll cursor tie (`Z-W169-S2`); the extra S3 read cost of `news_for_security`.
 
 ## 5. For other seats -- OPEN
