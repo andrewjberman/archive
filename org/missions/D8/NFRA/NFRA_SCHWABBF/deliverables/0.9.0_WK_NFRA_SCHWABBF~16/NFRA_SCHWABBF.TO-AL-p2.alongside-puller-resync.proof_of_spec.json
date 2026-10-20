@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-p2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "5af57b99d0b",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-p2.alongside-puller-resync.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "6984014a86f3ec16c8c880b3b06c43ffdcec245c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob sha of the on-disk file in worktree C:/Users/AndrewBerman/Desktop/wt-al-16 (branch wk-NFRA_SCHWABBF-16). Rebuilt as a fresh copy of the 49F source at base 5af57b99d0b (796 lines = 794 source + 2 header comment lines); the only other difference is the $Master ValidateSet line. Nothing uploaded, run or sent to Schwab or AWS.",
+      "artifact_covered_by": ["AL2-p2-AC1", "AL2-p2-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_puller.py",
+      "kind": "test",
+      "commit_or_etag": "a16344c412bc1e6dd610d3ff3ce41c8b8d7603ab",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob sha of the on-disk test file. The four existing tests are unchanged; three state_tier tests are added (test_state_tier_functions_present_and_cottonwood_bucket_mapped, test_state_tier_cottonwood_masters_are_firm_form). Text-only; runs nothing against Schwab, S3 or AWS.",
+      "artifact_covered_by": ["AL2-p2-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~16/check_copy_diff.py",
+      "kind": "test",
+      "commit_or_etag": "56a204ec6d7adcd760e45484a05398b4f4c4fe4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One-time copy check in this deliverables folder only (copied from the AL-p-1 worker's ~13 file; not a standing comparator, not under tests/). Blob sha shown.",
+      "artifact_covered_by": ["AL2-p2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL2-p2-AC1",
+      "criterion_verbatim": "the copy still accepts exactly the four Cottonwood masters, parses, and carries the state-tier functions.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax or state_tier\"",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 0.64s\n(rc=0). Control run before the copy was rebuilt (state_tier arm written first): 2 failed, 5 passed in 0.79s, rc=1; the failures were test_state_tier_functions_present_and_cottonwood_bucket_mapped (no function Get-StateBucket in the stale copy) and test_state_tier_cottonwood_masters_are_firm_form (no function Test-FirmForm). Syntax selection re-run with -rs printed '2 passed, 5 deselected' with no SKIP, so the PowerShell parser test ran.",
+      "denominator": "7 passed of 7 collected in the file (-k master_set or syntax or state_tier selects 7; 0 deselected); 0 failed. The full file also reports 7 passed, rc=0.",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL2-p2-AC2",
+      "criterion_verbatim": "the one-time proof that the Alongside puller is again the 49F puller with only the master list and a header comment changed.",
+      "method": "command",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~16/check_copy_diff.py",
+      "output_evidence": "COPY-DIFF-OK changed_non_comment_lines=1\n(rc=0). Verbose hunks (-v): insert src[0:0] copy[0:2] (the two header comment lines, copied from the stale copy's lines 1-2); replace src[37:38] copy[39:40] (the $Master ValidateSet line, now the four Cottonwood masters). Control before the rebuild: the check script did not exist at base (rc 2).",
+      "denominator": "2 hunks of the difflib diff of 794 source lines against 796 copy lines; 1 non-comment changed line; 0 changes outside the header block other than the ValidateSet line; 0 delete hunks.",
+      "expect": "^COPY-DIFF-OK changed_non_comment_lines=1$",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for AL-p-2; the worker ran the state_tier arm as a control against the stale copy instead (see AL2-p2-AC1 output_evidence).",
+      "expected": "N/A",
+      "observed": "Stale copy: 2 state_tier tests fail, 5 existing tests pass; rebuilt copy: 7 pass.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Both acceptance invocations run on the same tree; summary counts and the COPY-DIFF line compared across runs.",
+      "observed": "AC1: 7 passed (selection and full file, two runs). AC2: COPY-DIFF-OK changed_non_comment_lines=1 rc=0 (two runs, one with -v).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the puller, uploading to S3, contacting Schwab, any AWS call",
+      "reason": "WORLD floor in the order: nothing is uploaded, run or sent. The copy is text only."
+    },
+    {
+      "item": "A committed standing parity comparator between the two pullers",
+      "reason": "Vetoed by Andrew (no standing parity comparator). The check script lives in the deliverables folder only and is one-time."
+    },
+    {
+      "item": "Editing the 49F source puller",
+      "reason": "Outside the write grant: the source is READ only; it is owned by ~SB."
+    }
+  ],
+  "surprises": [],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax or state_tier\"",
+      "result": "7 passed in 0.64s, rc=0"
+    },
+    {
+      "tool": "difflib copy check",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~16/check_copy_diff.py",
+      "result": "COPY-DIFF-OK changed_non_comment_lines=1, rc=0"
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-34.bd49f-dim-convert-memory-3008-and-one-invoke",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/task_orders/NFRA_CTLPLN.TO-APPLY-34.bd49f-dim-convert-memory-3008-and-one-invoke.md",
+    "group": "OTHER",
+    "vintage_commit": "bb84de952056aede4e679a05af5bc270bbae674f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "41584d28e0e2a7ee2b964efe68a64dedd0a4e298",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/task_orders/NFRA_CTLPLN.TO-APPLY-34.bd49f-dim-convert-memory-3008-and-one-invoke.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~NFRA2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "module.bd49f_convert.aws_lambda_function.this (opal-assets-bd49f-dim-convert)",
+      "kind": "aws_resource",
+      "commit_or_etag": "238a386d1b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply -target of a saved targeted plan (1 change), 0 added 1 changed 0 destroyed; get-function-configuration after: MemorySize 3008, Timeout 900, CodeSha256 Iosob5LmSTxT+Z5PdEViWyVTNNO/U6ZB0ENgut2uuks= (equal to before), LastModified 2026-07-17T16:27:58Z before -> 2026-10-20T19:19:02Z after; targeted replan: No changes",
+      "artifact_covered_by": [
+        "CTck1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49f/silver/dim_account_xref/date=2026-10-19/data.parquet",
+      "kind": "aws_resource",
+      "commit_or_etag": "67790b0726a51bf923c1101a31298d13",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "written by the one invoke (request 8853aeb4-2e72-4fd5-823e-9f8061e48b49); listing after: 54 objects, before 53; rows=6200 bytes=228232 in the converter log",
+      "artifact_covered_by": [
+        "CTck1-AC2",
+        "CTck1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-10-19/data.parquet",
+      "kind": "aws_resource",
+      "commit_or_etag": "3e49077a0041996328ca5702d3484bf8",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "written by the same invoke; listing after: 54 objects, before 53; rows=288194 bytes=313799",
+      "artifact_covered_by": [
+        "CTck1-AC2",
+        "CTck1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49f/meta/conversions/bd49f-dims-2026-10-19-20261020T192210Z-59b51cd6.json",
+      "kind": "aws_resource",
+      "commit_or_etag": "d04ae477be58100c53bc29f261d37762",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the conversion manifest of the same invoke; meta listing after: 57 objects, before 56",
+      "artifact_covered_by": [
+        "CTck1-AC2",
+        "CTck1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/deliverables/TO-APPLY-34_bd49f_dim_convert_memory_3008_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "carries the three criteria, the -target ruling, the CLI v1 slip and the notes for the issuer and CTO; ledger bd49f-dim-convert-memory-3008 CLOSED",
+      "artifact_covered_by": [
+        "CTck1-AC1",
+        "CTck1-AC2",
+        "CTck1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTck1-AC1",
+      "criterion_verbatim": "aws lambda get-function-configuration --function-name opal-assets-bd49f-dim-convert --region us-east-1 --query '{m:MemorySize,t:Timeout,s:CodeSha256}'; expect: m 3008, t 900, s equal to the value read before the apply (Iosob5LmSTxT+Z5PdEViWyVTNNO/U6ZB0ENgut2uuks=)",
+      "method": "live_read",
+      "invocation": "aws lambda get-function-configuration --function-name opal-assets-bd49f-dim-convert --region us-east-1 --query '{m:MemorySize,t:Timeout,s:CodeSha256}'",
+      "output_evidence": "before (18:5xZ): m 1024, t 900, s Iosob5LmSTxT+Z5PdEViWyVTNNO/U6ZB0ENgut2uuks=; after (19:19Z): m 3008, t 900, s Iosob5LmSTxT+Z5PdEViWyVTNNO/U6ZB0ENgut2uuks=, LastUpdateStatus Successful. EQUAL on s.",
+      "denominator": "1 function, 2 reads (before and after the apply)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTck1-AC2",
+      "criterion_verbatim": "the one aws lambda invoke of step 5 with its REPORT line from the log group (request id stated); expect: StatusCode 200, no FunctionError, payload rc 0 with the date stated, and Max Memory Used below 3008 MB",
+      "method": "live_read",
+      "invocation": "the one aws lambda invoke of step 5 with its REPORT line from the log group (request id stated)",
+      "output_evidence": "request 8853aeb4-2e72-4fd5-823e-9f8061e48b49 at 2026-10-20T19:21:37Z: StatusCode 200, FunctionError None, payload {\"date\": \"2026-10-19\", \"rc\": 0}; REPORT Duration 33615.62 ms, Memory Size 3008 MB, Max Memory Used 1177 MB; converter lines 'dim rows total 288194 (current 5339) | xref rows 6200' and 'OK: landed + listing-verified'. The REPORT line is the --log-type Tail of the invoke itself, not the log group read.",
+      "denominator": "1 invoke (a first attempt was refused by the CLI v1 on --cli-binary-format before any API call and ran nothing)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTck1-AC3",
+      "criterion_verbatim": "aws s3api list-objects-v2 of s3://opal-data-assets/blackdiamond/49f/silver/dim_account_xref/ before and after (counts printed); expect: a date= partition newer than 2026-09-28 present and every pre-existing object present with an equal ETag",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 of s3://opal-data-assets/blackdiamond/49f/silver/dim_account_xref/ before and after (counts printed)",
+      "output_evidence": "before 53 objects (newest date=2026-09-28, ETag ccce741afdf9b77e27c1496d246b5626); after 54 objects; new: date=2026-10-19/data.parquet ETag 67790b0726a51bf923c1101a31298d13; comm of the sorted key+ETag lists: 0 of 53 before-rows missing or changed. Same result for dim_advisor_fee_role (53 -> 54, 0 of 53) and meta (56 -> 57, 0 of 56).",
+      "denominator": "53 xref objects before, 54 after; 3 prefixes compared, 162 pre-existing objects in all",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "code_unchanged_by_memory_change": {
+      "description": "a memory change must not redeploy code: CodeSha256 read before and after",
+      "expected_landed": "m 3008 with s equal to the before value",
+      "expected_not_landed": "m 1024, or s different from the before value",
+      "observed": "m 3008, s Iosob5LmSTxT+Z5PdEViWyVTNNO/U6ZB0ENgut2uuks= equal to before",
+      "status": "PASS"
+    },
+    "targeted_apply_left_schwabbf_pending": {
+      "description": "the -target apply touched only the one function: the untargeted plan before and after",
+      "expected_landed": "untargeted plan after reads 2 add + 1 change (the three SCHWABBF resources) with the memory change gone",
+      "expected_not_landed": "untargeted plan after reads 2 add + 2 change (memory change still pending), or a SCHWABBF resource gone from the plan",
+      "observed": "before 2 add + 2 change (4 addresses); after 2 add + 1 change (aws_iam_role_policy.silver_read_schwab_firm_prefix, silver_write_schwab_firm_silver, aws_s3_bucket_notification.monolith_bronze); targeted replan No changes",
+      "status": "PASS"
+    },
+    "new_partition_only": {
+      "description": "the invoke wrote new date partitions and touched no existing object",
+      "expected_landed": "54/54/57 objects after with all 53/53/56 earlier ETags equal",
+      "expected_not_landed": "an earlier ETag changed or missing, or the counts unchanged at 53/53/56",
+      "observed": "54/54/57; 0 earlier rows missing or changed",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "the order's preflight carries the COO half of the blast radius: this one function's configuration only, rollback memory_size = 1024 through safe-apply; amendment 1 (step 3a, @bb84de9520) narrows the apply to -target on that one resource",
+    "cto_half": "the CTO's record org/tier1_exec/1.0.0_SA_CTO/deliverables/DIAG_BD49F_DIM_CONVERT_OOM_XREF_STALE_20261020.md @e99ca8caa4, section 'The fix': blast radius this one function's configuration; the next run writes new date partitions and touches no existing partition"
+  },
+  "risk_class": "WORLD",
+  "rollback": "memory_size = 1024 in bd49f_convert.tf and the function map, applied through safe-apply -target=module.bd49f_convert.aws_lambda_function.this. Not used. The partitions the invoke wrote (date=2026-10-19 under xref, dim and the meta manifest) are not deleted by the seat; any delete waits for Andrew.",
+  "scope": "ONE in-place memory_size change on opal-assets-bd49f-dim-convert by a targeted safe-apply, and ONE invoke with an empty event. No IAM, schedule or code change; the SCHWABBF resources in the same root were not applied.",
+  "declared_exclusions": [
+    {
+      "item": "the cause of the growth (false SCD2 change on flat_fee)",
+      "reason": "cell CT-cl-1 and its apply leg; this order is headroom only"
+    },
+    {
+      "item": "the 15 missed trading days 2026-09-29 to 2026-10-19",
+      "reason": "stay missing as partitions per the CTO record; the dims are SCD2 and the newest xref is a full snapshot"
+    },
+    {
+      "item": "the three NFRA_SCHWABBF TO-BF-i2 resources in the opal-assets root",
+      "reason": "another project's unapplied change (71495f3448e); left pending for its owner"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/deliverables/TO-APPLY-34_bd49f_dim_convert_memory_3008_REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "none run; the rail denied one blind shell grep for the source of the extra plan changes and git log -S on the path answered instead",
+      "result": "the extra changes traced to 71495f3448e (NFRA_SCHWABBF TO-BF-i2)"
+    }
+  ]
+}

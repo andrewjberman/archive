@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-v5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R5.md",
+    "vintage_commit": "1f47565def0a8007eb91eba217ca6da1831ea561",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-v5.puller-state-tier.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f88e911af8e9e315aecc820124fd15"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "d623c674e1429e9eeff6a25f689f5309f56098fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only (d623c674e1). Nothing deployed to the SI2 host, nothing run, no AWS or Schwab contact. Adds Get-StateBucket, Get-StateKey, Get-RunDateIso and Get-RunRecordDests; the three run-manifest writes (rolling last_run, runs/RUNID, meta/pulls) take the state keys for firm-form masters on the monolith target. The pre-round and staging writes keep their pre-change cp lines.",
+      "artifact_covered_by": [
+        "BF5-v5-AC1",
+        "BF5-v5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_sdd_daily_pull_state.py",
+      "kind": "test",
+      "commit_or_etag": "d623c674e1429e9eeff6a25f689f5309f56098fe",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, LOCAL on wk-NFRA_SCHWABBF-2 only. Functions are extracted from the script by the PowerShell AST and run in Windows PowerShell 5.1; the script is never executed and nothing contacts Schwab or AWS.",
+      "artifact_covered_by": [
+        "BF5-v5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF5-v5-AC1",
+      "criterion_verbatim": "the three run-record destinations for the five firm-form masters against the builder and the registry, the unchanged destinations for 0824 and 0833, and the rolling-date rule.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_state.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "6 passed in 7.71s (rc=0); second run: 6 passed in 7.00s (rc=0)",
+      "denominator": "6 of 6 collected tests passed (0 failed). Destinations checked: 5 firm-form masters x 3 run ids x 2 write days = 30 cases, 90 destination comparisons against lib/opal_naming.py address() and the registry bucket; state bucket map 5 of 5 equal to the registry; pre-round write lines 5 of 5 identical to commit 0429204ae7; rolling partitions 5 of 5 distinct per write day",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF5-v5-AC2",
+      "criterion_verbatim": "the control: the bronze key tests of the same script still pass (13 passed at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "13 passed in 18.05s (rc=0)",
+      "denominator": "13 of 13 collected tests passed (0 failed), the same count as at the base",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control: the same state suite run against the PRE-CHANGE script bytes (git show 0429204ae7:infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1, copied to .scratch/sdd-pre.ps1), with only _REPO and _SCRIPT repointed in a scratch copy of the test file (.scratch/test_mutant_pre_change.py).",
+      "expected": "The state tests FAIL against the pre-change bytes, because the state functions do not exist there; the pre-round line-identity test PASSES, because those lines are unchanged.",
+      "observed": "5 failed, 1 passed in 2.19s (rc=1). Failed: state bucket map, state destinations, pre-round no state tier, rolling partitions, unknown master. Passed: pre-round write lines identical to 0429204ae7.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 6 passed in 7.71s; run 2: 6 passed in 7.00s. AC2 run 1: 13 passed in 18.05s; the 13-test control was run once in full, and its landing_guard and only_asof subset was re-run: 8 passed, 5 deselected in 11.21s. Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the edited puller to the SI2 host, and any scheduled run of it",
+      "reason": "WORLD floor (TO bounds): nothing is deployed, uploaded or run; the fire times 09:45, 10:15, 10:45, 21:45, 22:15, 22:45Z are unchanged."
+    },
+    {
+      "item": "The box role's IAM write grant on the firm bucket's state prefix (cell BF-g-5)",
+      "reason": "Not in this order's paths. Until BF-g-5 lands, the state-tier writes for 08403355 and the Cottonwood masters would be refused; the script logs each refusal as a WARN and does not fail the pull, as the pre-change _ops writes do."
+    },
+    {
+      "item": "The rolling last_run readers (freshness and ligament readers that read _ops/daily_pull/last_run.json)",
+      "reason": "Read-side cells are other orders in the round; the readers keep reading their current paths until those cells land."
+    },
+    {
+      "item": "The 08242234 and 08335338 writes and the staging target",
+      "reason": "Kept byte for byte by the TO's rule; they are not changed by this order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-v5.puller-state-tier.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_state.py -q -p no:cacheprovider --color=no",
+      "result": "6 passed in 7.71s; second run 6 passed in 7.00s"
+    },
+    {
+      "tool": "pytest control (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "13 passed in 18.05s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, AST undefined-name scan, ruff, comp-constants, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/canonical/schwab/tests/test_sdd_daily_pull_state.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder, read-only oracle for the state keys)",
+      "invocation": "address('schwab', firm, 'state', table, 'date=YYYY-MM-DD') via the test's destination cases",
+      "result": "s3://opal-data-49financial/schwab/49financial/state/daily_pull/date=2026-10-20 (and the cottonwood equivalent); the script's keys equal the builder output with the bucket stripped"
+    }
+  ]
+}

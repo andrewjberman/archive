@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-h5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R5.md",
+    "vintage_commit": "7e6d83b9410",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-h5.fence-exemption-rows-state.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "7e6d83b9410"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/exemptions.json",
+      "kind": "config_data",
+      "commit_or_etag": "38e7c5ff1cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-NFRA_SCHWABBF-4. Three scoped rows appended (two on opal-data-49financial, one on opal-data-cottonwood). Nothing applied: the fence apply is the NFRA CloudOps lane's act after the never-widen pair."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_fence_state_rows.py",
+      "kind": "test",
+      "commit_or_etag": "38e7c5ff1cb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on wk-NFRA_SCHWABBF-4. 5 tests, 5 passed at the time of this proof."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF5-h5-AC1",
+      "criterion_verbatim": "the three scoped exemption rows exist as fixed, built from the builder, covered by the identity grants, existing rows untouched.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_fence_state_rows.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".....                                                                    [100%]\n5 passed in 0.09s",
+      "denominator": "5 of 5 tests passed (the three rows, their derived prefixes, closed sets, identity-grant coverage, HEAD equality, scopes bucket)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF5-h5-AC2",
+      "criterion_verbatim": "the registry validator (`lib/opal_naming.py validate`) accepts the registry with the new rows (it refuses a malformed scoped row).",
+      "method": "command",
+      "invocation": "python lib/opal_naming.py validate",
+      "output_evidence": "VALIDATE: OK 56 system row(s), 25 scope row(s), 0 warning(s) at registry@837f3bc8b63c1dbf over all 17 registry file(s)",
+      "denominator": "1 validator run over 17 registry files with the three new rows present (registry hash moved 94c3a84b838d2f23 to 837f3bc8b63c1dbf); 0 warnings",
+      "status": "PASS",
+      "expect": "^VALIDATE: OK "
+    },
+    {
+      "criterion_id": "BF5-h5-AC3",
+      "criterion_verbatim": "the naming module's own `terraform test` (95 passed at the base) still passes with the new rows (its plan-time preconditions refuse a half-scoped or malformed row).",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/modules/opal_name test -no-color",
+      "output_evidence": "Success! 95 passed, 0 failed.",
+      "denominator": "95 passed, 0 failed of 95 module tests (fifo.tftest.hcl and opal_name.tftest.hcl)",
+      "status": "PASS",
+      "expect": "^Success! [0-9]+ passed, 0 failed\\.$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-h-5; none was run.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 pytest run twice on the same tree (two identical 5-passed outputs); AC2 run twice on the same registry (identical VALIDATE line, rc=0 each).",
+      "observed": "AC1 run 1 and run 2: '5 passed in 0.09s', rc=0. AC2 run 1 and run 2: identical VALIDATE: OK line, rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and any write aws command",
+      "reason": "WORLD floor in the order: the apply is the NFRA CloudOps lane's release act under safe-apply after the never-widen pair."
+    },
+    {
+      "item": "infra/aws/terraform/shared-infra/ and the identity-side files (silver.tf, monolith-iam.tf) and the renderer (modules/opal_name/main.tf)",
+      "reason": "Read only, per the order's bounds. The test reads them as text; none was edited."
+    },
+    {
+      "item": "The CTO half of the never-widen pair",
+      "reason": "Named by the order as owed by the CTO; the worker writes neither half. The signoff_ref names the CTO half at @4b0036c6cb as the coordinator amended it."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W4-S12: BLOCKING, INERT. The worktree was a sparse checkout that omitted infra/aws/ and data/, so AC1 and AC3 could not run at the first attempt. The coordinator widened the sparse set; this re-run ran against the widened tree. The row is left as filed.",
+    "NFRA_SCHWABBF-W4-S13: OBSERVATION, INERT. Appending to non-empty JSON arrays adds a comma to each list's closing brace. The coordinator accepted the wording (at most 2 changed lines). Measured this run: git diff --numstat exemptions.json = 24 added, 0 deleted; the 'about 36' figure in the order does not match the file's single-line row format (8 lines per row x 3 rows)."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~4/NFRA_SCHWABBF.TO-BF-h5.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python lib/opal_naming.py validate",
+      "invocation": "timeout 120 python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 56 system row(s), 25 scope row(s), 0 warning(s) at registry@837f3bc8b63c1dbf over all 17 registry file(s) rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_fence_state_rows.py -q -p no:cacheprovider --color=no",
+      "result": "5 passed in 0.09s, rc=0"
+    },
+    {
+      "tool": "terraform test",
+      "invocation": "timeout 120 terraform -chdir=infra/aws/terraform/modules/opal_name test -no-color",
+      "result": "Success! 95 passed, 0 failed., rc=0"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-g5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R5.md",
+    "vintage_commit": "1f47565def0",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-g5.iam-state-tier-firm-bucket.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9c6c758ba57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-NFRA_SCHWABBF-4. Not applied: no terraform init, plan or apply, no aws command. Adds statement MonolithSchwabStateWrite (PutObject only, two resources on opal-data-49financial for 08403355 pulls and daily_pull) beside the unchanged old grants. The apply is the NFRA CloudOps lane's act under safe-apply after the never-widen pair. The firm bucket policy refuses these writes until the exemption rows land (surprise NFRA_SCHWABBF-W4-S9).",
+      "artifact_covered_by": ["BF5-g5-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9c6c758ba57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-NFRA_SCHWABBF-4. Not applied. Adds inline policy silver_state_write_schwab_firm on aws_iam_role.silver[schwab]: PutObject and GetObject on 15 per-(master, table) object resources across opal-data-49financial and opal-data-cottonwood, and two ListBucket statements under s3:prefix. No DeleteObject. Existing grants and silver_source_scopes are unchanged (additions only, numstat 64 insertions and 0 deletions).",
+      "artifact_covered_by": ["BF5-g5-AC1"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "kind": "test",
+      "commit_or_etag": "9c6c758ba57",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch (105 insertions, one import added). Five state_write arms read the .tf files as text, and the bucket-name arm reads infra/logic/registry/scopes.json. Run by the two acceptance invocations.",
+      "artifact_covered_by": ["BF5-g5-AC1", "BF5-g5-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF5-g5-AC1",
+      "criterion_verbatim": "the state-tier write entries per master in the right bucket, PutObject-only on the box, no folder wildcard, no delete.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k state_write",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 18 deselected in 0.09s\n(rerun: 5 passed, 18 deselected in 0.05s; both runs rc=0)",
+      "denominator": "5 passed of 23 collected in the file (-k state_write selects 5; 18 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF5-g5-AC2",
+      "criterion_verbatim": "the control: the round-2 to round-4 arms still pass (17 selected at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k \"silver_write or iam_grants or event_rules\"",
+      "output_evidence": "..................                                                       [100%]\n18 passed, 5 deselected in 0.07s\n(first run: 18 passed, 5 deselected in 0.05s; both runs rc=0)",
+      "denominator": "18 passed of 23 collected in the file (the -k expression selects 18; 5 deselected); 0 failed. The order counted 17 at the base; the 18th selected arm is the new MonolithSchwabStateWrite test, whose name carries iam_grants.",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-g-5; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each acceptance invocation run twice on the same tree, and the full file run once more; the summary counts were compared.",
+      "observed": "AC1: 5 passed in both runs. AC2: 18 passed in both runs. Full file: 23 passed in both runs (rc=0 each).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and any aws command",
+      "reason": "WORLD floor in the order: the apply is the NFRA CloudOps lane's release act under safe-apply after the never-widen pair."
+    },
+    {
+      "item": "Bucket policy exemption rows for the box and converter roles on opal-data-49financial and opal-data-cottonwood (infra/logic/registry/exemptions.json)",
+      "reason": "Outside this order's paths and a never-widen registry edit. The DenyForeignFirmPrincipals statement refuses every state read and write until these rows land. Filed as NFRA_SCHWABBF-W4-S9 with disarm_owner named."
+    },
+    {
+      "item": "Cottonwood state write on the box role",
+      "reason": "PRD C-ONEWRITER: those masters belong to the Alongside box's own role, a separate workstream. Stated as a comment at the converter statement and asserted absent from the box statement."
+    },
+    {
+      "item": "Firm-bucket Terraform (shared-infra s3-49financial.tf, s3-lgic-firm-buckets.tf) on disk",
+      "reason": "Absent from this sparse worktree. Read at HEAD through git show, read only. Filed as NFRA_SCHWABBF-W4-S10."
+    },
+    {
+      "item": "Old-prefix state grants and the monolith bucket for the state tier",
+      "reason": "The state tier of the 49financial and Cottonwood masters lives in the firm buckets only (C-TIERS); no monolith state grant was added. local.monolith_bucket is not in the canonical-schwab-ec2 root (surprise NFRA_SCHWABBF-W4-S11)."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W4-S9: the state-tier IAM grants are necessary but not sufficient; each firm bucket policy's DenyForeignFirmPrincipals denies every s3:* to the box and converter roles, which match neither the fence pattern nor an exemption row (BLOCKING, ARMED).",
+    "NFRA_SCHWABBF-W4-S10: the firm-bucket Terraform named by the face is tracked at HEAD but absent from the sparse worktree on disk; read via git show HEAD (OBSERVATION, INERT).",
+    "NFRA_SCHWABBF-W4-S11: the face names local.monolith_bucket, which the canonical-schwab-ec2 root does not define; the firm-bucket grants use literal names as both roots do (OBSERVATION, INERT)."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no",
+      "result": "23 passed in 0.34s, rc=0 (includes the terraform fmt arm, which ran and passed)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -no-color infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf",
+      "result": "rc=0 (monolith-iam.tf fmt-clean)"
+    },
+    {
+      "tool": "terraform fmt -diff",
+      "invocation": "terraform fmt -diff -no-color infra/aws/terraform/opal-assets/silver.tf",
+      "result": "rc=0, 0 lines rewritten (silver.tf fmt-clean)"
+    },
+    {
+      "tool": "git diff --numstat",
+      "invocation": "git diff --numstat -- infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf infra/aws/terraform/opal-assets/silver.tf data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "result": "15/0 monolith-iam.tf, 64/0 silver.tf, 105/0 test file: additions only, 0 deletions"
+    }
+  ]
+}
