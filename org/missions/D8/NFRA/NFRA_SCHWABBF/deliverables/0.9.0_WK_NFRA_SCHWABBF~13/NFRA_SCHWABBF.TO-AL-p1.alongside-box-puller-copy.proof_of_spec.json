@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-p1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "ae487c67689",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-p1.alongside-box-puller-copy.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "ae487c67689"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "fff6a90d099ada001abab408571f3a6e99948c2d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT COMMITTED. On disk in worktree C:/Users/AndrewBerman/Desktop/wt-al-13 only; commit_or_etag is the git blob sha of the on-disk file. Blocked by NFRA_SCHWABBF-W13-S3: the worktree sparse cone omits infra/aws/ec2/alongside-schwab-si2, so safe-commit cannot stage it. Nothing uploaded, run or sent to Schwab or AWS.",
+      "artifact_covered_by": ["AL1-p1-AC1", "AL1-p1-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_puller.py",
+      "kind": "test",
+      "commit_or_etag": "82e53fb373e7bd44fbde4cf50a80b6103d1e32ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT COMMITTED. On-disk test file reads text only and runs by the AC1 invocation; blob sha shown. Blocked with the copy (S3).",
+      "artifact_covered_by": ["AL1-p1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~13/check_copy_diff.py",
+      "kind": "test",
+      "commit_or_etag": "56a204ec6d7adcd760e45484a05398b4f4c4fe4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT COMMITTED. One-time copy check in this deliverables folder only (not a standing comparator, not under tests/). Run by the AC2 invocation; blob sha shown.",
+      "artifact_covered_by": ["AL1-p1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL1-p1-AC1",
+      "criterion_verbatim": "the copy accepts exactly the four Cottonwood masters (matching the registry both ways), keeps the firm map, and parses.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax\"",
+      "output_evidence": ".....                                                                    [100%]\n5 passed in 0.52s\n(rc=0). Dry-run at the base before the copy existed: 5 failed (FileNotFoundError on the copy path), rc=1.",
+      "denominator": "5 passed of 5 collected in the file (-k master_set or syntax selects 5; 0 deselected); 0 failed. The syntax test ran the PowerShell parser (no SKIP line): parse errors 0, negative control reports errors > 0.",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL1-p1-AC2",
+      "criterion_verbatim": "the one-time proof that the Alongside puller is the 49F puller with only the master list and a header comment changed.",
+      "method": "command",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~13/check_copy_diff.py",
+      "output_evidence": "COPY-DIFF-OK changed_non_comment_lines=1\n(rc=0). Verbose hunks: insert src[0:0] copy[0:2] (two header comment lines); replace src[34:35] copy[36:37] (the $Master ValidateSet line). Dry-run at the base before the copy existed: rc=1.",
+      "denominator": "2 hunks of the difflib diff of 696 source lines against 698 copy lines; 1 non-comment changed line; 0 changes outside the header block other than the ValidateSet line.",
+      "expect": "^COPY-DIFF-OK changed_non_comment_lines=1$",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for AL-p-1; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Both acceptance invocations run on the same tree; the summary counts and the COPY-DIFF line were compared.",
+      "observed": "AC1: 5 passed (two runs). AC2: COPY-DIFF-OK changed_non_comment_lines=1 rc=0 (two runs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Committing the copy, the test, the check script and the TO flip to complete",
+      "reason": "Blocked by NFRA_SCHWABBF-W13-S3 (BLOCKING): the worktree's sparse cone omits the granted copy path. The worker did not widen the cone, git add, or reconstruct the tree. The order stays open."
+    },
+    {
+      "item": "Running the puller, uploading to S3, contacting Schwab, any AWS call",
+      "reason": "WORLD floor in the order: nothing is uploaded, run or sent. The copy is text only."
+    },
+    {
+      "item": "A committed standing parity comparator between the two pullers",
+      "reason": "Vetoed by Andrew (no standing parity comparator). The check script lives in the deliverables folder only and is one-time."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W13-S1: the order names the Cottonwood masters as the masters field of the registry rows with firm cottonwood and vendor schwab; the masters list sits on the cottonwood FIRM row (with z09). The four schwab MASTER rows carry key only. The set is identical either way.",
+    "NFRA_SCHWABBF-W13-S2: the worktree's sparse checkout keeps org/surprise_channel off disk while the folder is tracked at HEAD; the row schema is read via git show.",
+    "NFRA_SCHWABBF-W13-S3: BLOCKING. The sparse cone omits infra/aws/ec2/alongside-schwab-si2, the granted copy path; safe-commit cannot stage the copy, so the order's flip to complete is withheld."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax\"",
+      "result": "5 passed in 0.52s, rc=0"
+    },
+    {
+      "tool": "difflib copy check",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~13/check_copy_diff.py",
+      "result": "COPY-DIFF-OK changed_non_comment_lines=1, rc=0"
+    }
+  ]
+}
