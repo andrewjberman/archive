@@ -1,0 +1,13 @@
+DENOMINATOR: fixture w6 -- 6 tools over 3 catalog rows of 3 vendors in 2 buckets: a coarse prefix over a two-vendor bucket (tW1, tW5), an exact prefix (tW2), a coarse prefix that carries the other vendor (tW3), no matching row (tW4), a source vendor no matched row has (tW6)
+  ok   the emitter runs (rc 0 or 1, never 2 or a crash) and writes gateway_serves/1 for the six traced tools, and the SERVES line reads changed=5
+  ok   tW1 (coarse prefix over a two-vendor bucket, source vendor va): serves only va/fa; the catalog's vb/fb is REMOVED
+  ok   tW2 (exact prefix, matching vendor) is unchanged: serves va/fa, nothing added or removed
+  ok   tW3 (coarse prefix, source vendor vb): serves only vb/fb, ADDS vb/fb and REMOVES va/fa
+  ok   tW4 (no catalog row matches): the unresolved rule is unchanged, serves vd/unresolved
+  ok   tW5 (two sources): the union of the two traced sets, va/fa and vc/fc, with vb/fb REMOVED
+  ok   tW6 (the matched row's vendor is not the source's vendor, and a row matched): contributes NOTHING, not an unresolved pair; the catalog's va/fa is REMOVED
+  ok   counts tools=6 changed=5
+  ok   two runs give the same bytes
+ARMS: 9 ok, 0 failed
+RESULT: PASS
+exit=0

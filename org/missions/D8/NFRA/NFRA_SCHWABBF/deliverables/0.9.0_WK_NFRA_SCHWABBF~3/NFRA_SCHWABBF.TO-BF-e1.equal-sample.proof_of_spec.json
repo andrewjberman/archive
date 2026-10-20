@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-e1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP.md",
+    "vintage_commit": "5f1ad506a444",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-e1.equal-sample.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5f1ad506a444"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/equal_sample.py",
+      "kind": "script",
+      "commit_or_etag": "62331d34c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One-shot instrument run by hand; no deploy and no schedule. Committed LOCAL on wk-NFRA_SCHWABBF-3 at 62331d34c6 (issuer ruling on _source_file; first cut at f5a165e7c1)."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_equal_sample.py",
+      "kind": "test",
+      "commit_or_etag": "62331d34c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fake-store suite, no live AWS. Committed LOCAL on wk-NFRA_SCHWABBF-3 at 62331d34c6."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF1-e1-AC1",
+      "criterion_verbatim": "capture and compare on a fake store, including the failure arms (a changed figure, a vanished day, a day that appeared) and the absence of any standing-comparator construct.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_equal_sample.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "...............                                                          [100%]\n15 passed in 1.53s",
+      "denominator": "15 of 15 tests passed (0 failed, 0 errors)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF1-e1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only capture of the real dim_balance partition for 0840 on 2026-10-16. It writes only the scratch file named in the invocation.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/equal_sample.py capture --master 08403355 --days 2026-10-16 --tables dim_balance --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_e1_capture_probe.json",
+      "output_evidence": "CAPTURED cells=1 missing=0\nEXCLUDED columns=_source_file (rc 0; one read-only GetObject on s3://opal-data-assets/schwab/08403355/silver/dim_balance/date=2026-10-16/data.parquet; probe shape: 30 rows, 39 columns including _source_file, numeric_sums empty, source_file_values_sha256 recorded)",
+      "denominator": "1 of 1 cells captured, 0 missing",
+      "status": "PASS",
+      "expect": "^CAPTURED cells=1 missing=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Change one numeric cell (market_value 200.25 -> 201.25) in the fake store after capture; compare must print EQUAL-DIFF field=numeric_sums and return rc 1.",
+      "expected": "EQUAL-DIFF table=dim_balance day=2026-10-16 field=numeric_sums, EQUAL-FAIL, rc 1",
+      "observed": "test_changed_numeric_cell_is_numeric_sums_diff passed inside the 15 passed run (AC1); the test asserts the field=numeric_sums line and EQUAL-FAIL diffs=count of the diff lines",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two capture runs over the same fake store (.scratch/determinism_check.py, python -I), then compare on the first file",
+      "observed": "capture rc 0 and 0; cells identical across two runs (source_file_values_sha256 included): True; compare rc 0 (EQUAL-OK cells=2)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live GetObject beyond the one AC2 read",
+      "reason": "The order bounds the live AWS use to the single read-only capture; no second read was made, so the probe's content hash is not re-measured."
+    },
+    {
+      "item": "Numeric typing of string-typed silver columns (numeric_sums)",
+      "reason": "The instrument follows the cell text; the probe partition has no numeric-typed column. Recorded as surprise NFRA_SCHWABBF-W3-S1; the issuer accepted the empty numeric arm as is."
+    },
+    {
+      "item": "_source_file from content_sha256",
+      "reason": "Issuer ruling on NFRA_SCHWABBF-W3-S2: _source_file names the bronze key and must change on the move. It is recorded as source_file_values_sha256 per cell and not compared. Every other column stays in the hash."
+    },
+    {
+      "item": "The cutover compare (run after the move) and any scheduler or standing comparator",
+      "reason": "Out of this order: the issuer runs capture before the change and compare after it; Andrew's standing veto forbids a scheduled or looped comparator."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W3-S1: On the real dim_balance partition for 0840 on 2026-10-16 all 39 columns are non-numeric, so numeric_sums is empty and content_sha256 is the only check on figure values for this table. Issuer ruling: accepted as is.",
+    "NFRA_SCHWABBF-W3-S2: content_sha256 covered the provenance columns, so a moved _source_file key would read as DIFF. Issuer ruling: _source_file alone is excluded from content_sha256; _source_as_of, _master_observed, _section and _schema_version stay in the hash, and the instrument implements this with its own test arms."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~3/TO-BF-e1_session_log_r2.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_equal_sample.py -q -p no:cacheprovider --color=no",
+      "result": "15 passed in 1.53s"
+    },
+    {
+      "tool": "ruff 0.15.11",
+      "invocation": "python -m ruff check --target-version py39 data/canonical/schwab/keyform/equal_sample.py data/canonical/schwab/tests/test_equal_sample.py",
+      "result": "All checks passed! rc 0"
+    }
+  ]
+}
