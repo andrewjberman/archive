@@ -109,6 +109,8 @@ def arm_tree(tar_path, pin):
     fails = []
     if not re.fullmatch(r"[0-9a-f]{40}", pin or ""):
         return ["the pin is not 40-hex"]
+    if not os.path.isfile(tar_path):
+        return ["tarball absent: %s" % tar_path]
     new, old = read_tar(tar_path), read_tar(R34N_TAR)
     if sha(open(R34N_TAR, "rb").read()) != R34N_SHA:
         fails.append("the r34n base tarball is not the running one")
