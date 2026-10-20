@@ -1,0 +1,28 @@
+NFRA_SCHWABBF.TO-BF-k2 -- session log -- worker 0.9.0_WK_NFRA_SCHWABBF~2 -- branch wk-NFRA_SCHWABBF-2 -- 2026-10-20
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-2 ; test -d org && test -d .tools -> TREE-OK ; HEAD 87d44e203b at entry.
+
+BASE DRY-RUN (before any change), pre-round bytes of both key-function files, round-1 master-form test file:
+  AC1 python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no
+      -> "241 failed, 2 passed in 4.01s", rc=1 (expected FAIL; the "passed" count does not start the line)
+  AC2 ... -k converter_seam
+      -> "1 failed, 242 deselected", rc=1 (expected FAIL; the seam asserted the master-form key)
+
+CHANGE:
+  data/black_diamond/scripts/bronze/_monolith_bronze.py  and  data/canonical/schwab/silver/_canonical_silver_lib.py
+    BRONZE KEY FORM block inserted byte-equal in both (8742 bytes, checked by the splice script: BLOCK BYTE-EQUAL).
+    Block: MASTER_FIRM, firm_of, _checked_compact, _checked_feed, _iso_of, bronze_partition_prefix,
+    bronze_key_for_file, monolith_bronze_key, parse_bronze_key, parse_legacy_bronze_key,
+    _scan_bronze_partitions, _bronze_dates_or_refuse.
+    list_bronze_dates (BD) and latest_bronze_date (silver) reduced to wrappers over _bronze_dates_or_refuse.
+    Module docstrings carry the supersession paragraph. Imports: datetime, re added to both.
+  data/canonical/schwab/tests/test_bronze_key_form.py  rewritten for the firm form.
+  commit-gate: "OK: pre-commit gate clean for 3 of 3 file(s)".
+  commit 60781d2d86 (LOCAL on wk-NFRA_SCHWABBF-2): feat(NFRA_SCHWABBF TO-BF-k2) -- 3 files, 496 insertions, 93 deletions.
+
+POST-CHANGE RUNS:
+  AC1 run 1: "550 passed in 2.47s", rc=0.   run 2: "550 passed in 2.18s", rc=0.
+  AC2 run 1: "1 passed, 549 deselected in 1.12s", rc=0.   run 2: "1 passed, 549 deselected in 0.94s", rc=0.
+
+NO SURPRISE ROWS FILED. The order's premises held at the base (pre-round bytes; round-1 master-form test present; AC1 and AC2 fail).
+Round-1 w1 commit b62305e442 is ancestor history on this branch (worktree reused); it does not touch the criteria.
