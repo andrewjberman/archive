@@ -1,0 +1,79 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "three reads, once each; the ticket log group was counted in the same window as a control (it is live)",
+   "observed": "3 of 3 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-PACKAGER-CLIENTERROR.which-aws-call-failed-and-did-the-ready-attach-reach-the-ticket-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-CLIENTERROR.which-aws-call-failed-and-did-the-ready-attach-reach-the-ticket-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "ab48e14b83"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-CLIENTERROR.which-aws-call-failed-and-did-the-ready-attach-reach-the-ticket-ib2.md",
+  "vintage_commit": "ab48e14b83"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "three reads: the resident journal's packager lines of the window, the ticket service log group for /package requests, and policy simulations of the resident host's role (one resource per call)",
+   "artifact_covered_by": [
+    "PKGCE-AC1",
+    "PKGCE-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "PKGCE-AC1",
+   "invocation": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+   "expect": "^[4-9]|[1-9][0-9]$",
+   "output_evidence": "17\nexit code: 0\n(run 2026-10-20 from the repo root)",
+   "denominator": "1 record file of 22 lines: 17 answer lines plus 4 NOTE lines the pattern does not match",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "PKGCE-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit code: 1\n(run 2026-10-20 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
+   "denominator": "22 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "which AWS call raised the ClientError",
+   "reason": "the journal carries the class only and the ticket service log holds no /package line; the role simulation points at S3 under analysis_commentaries/, an inference stated in the record"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_clienterror/A_PACKAGER_CLIENTERROR.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 ssm, logs, iam simulate-principal-policy reads (packager_clienterror.py)",
+   "invocation": "python packager_clienterror.py",
+   "result": "READS-DONE 3 of 3 answered; PKGCE-AC1 17, PKGCE-AC2 0"
+  }
+ ]
+}
