@@ -19,16 +19,31 @@
       "kind": "script",
       "commit_or_etag": "90dcea05eb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Not wired into the live run: the wiring target is box/run.py, outside the grant (surprise NFRA_FIDUPL-D1-W5-S3).",
-      "artifact_covered_by": ["FR6-AC1"]
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Wired into the daily attribute stage by box/run.py at c5442ea482.",
+      "artifact_covered_by": [
+        "FR6-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/run.py",
+      "kind": "script",
+      "commit_or_etag": "c5442ea482",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). _real_daily_deps attribute_day now builds the adapters; the refusal is deleted. run_once and the daily hookup are unchanged.",
+      "artifact_covered_by": [
+        "FR6-AC1",
+        "FR6-AC2"
+      ]
     },
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
       "kind": "test",
       "commit_or_etag": "90dcea05eb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Five of six tests pass; test_daily_real_deps_use_adapters fails because box/run.py still refuses.",
-      "artifact_covered_by": ["FR6-AC1"]
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Six fake-only tests pass at c5442ea482.",
+      "artifact_covered_by": [
+        "FR6-AC1"
+      ]
     },
     {
       "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
@@ -44,10 +59,9 @@
       "criterion_verbatim": "the six named adapter tests exist and pass.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
-      "output_evidence": "R1-FR6-FAIL pytest rc=1 1 failed, 5 passed in 1.03s",
-      "denominator": "5 passed of 6 named adapter tests; the failing one is test_daily_real_deps_use_adapters",
-      "status": "FAIL",
-      "status_reason": "test_daily_real_deps_use_adapters fails: box/run.py _real_daily_deps (line 270) still raises the attribute refusal (line 279). The order's named edit target, box/daily.py, holds no _real_daily_deps, and box/run.py is outside the grant. Surprise NFRA_FIDUPL-D1-W5-S3, class BLOCKING. A scratch wiring of run.py passes all six tests (recorded in the session log).",
+      "output_evidence": "R1-FR6-OK passed=6",
+      "denominator": "6 passed of 6 named adapter tests (test_get_text_follows_redirect_and_returns_text, test_post_form_sends_urlencoded_body_without_logging_values, test_account_lister_pages_until_short_page, test_extract_accounts_finds_list_by_key_not_by_container_name, test_extract_failure_names_only_keys, test_daily_real_deps_use_adapters)",
+      "status": "PASS",
       "expect": "R1-FR6-OK passed=\\d+"
     },
     {
@@ -56,16 +70,12 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
       "output_evidence": "R1-FR4-OK passed=5",
-      "denominator": "5 passed of 5 daily-orchestration tests (no wiring edit was made, so the regression guard runs on unchanged daily.py and run.py)",
+      "denominator": "5 passed of 5 daily-orchestration tests, run after the box/run.py wiring edit (c5442ea482)",
       "status": "PASS",
       "expect": "R1-FR4-OK passed=\\d+"
     }
   ],
   "declared_exclusions": [
-    {
-      "item": "The one wiring edit in box/daily.py _real_daily_deps",
-      "reason": "The function is in box/run.py, outside this order's paths; no edit was made. Surprise NFRA_FIDUPL-D1-W5-S3 (BLOCKING) asks for the grant or a ruling on the location."
-    },
     {
       "item": "A live request to Wealthscape, accountList.json or the G-switch form",
       "reason": "Fakes only, by order. The accountList response shape is unmeasured; extract_accounts finds rows by structure and names only keys and types when it fails."
@@ -77,10 +87,15 @@
     {
       "item": "An empty account book under one G",
       "reason": "extract_accounts raises AdapterShapeError on an empty container rather than returning zero rows, because an empty list cannot be told apart from a wrong container; the empty case is unmeasured."
+    },
+    {
+      "item": "The attribute stage against the live site",
+      "reason": "Built and tested on fakes; the first live run is the issuer's check on the box."
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target is in box/run.py, outside the FR-s-6 paths; the refusal that W5-S2 names cannot be removed under this grant. Class BLOCKING."
+    "NFRA_FIDUPL-D1-W5-S2: the daily attribute stage had no documented request adapter or account lister; the wiring in box/run.py now supplies them and the refusal is deleted (c5442ea482).",
+    "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target was in box/run.py, outside the first paths block; the issuer amendment added box/run.py to the paths and the edit is committed on this branch."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FR-s-6.adapters.session.log",
   "controls": {
@@ -91,12 +106,17 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "pytest run twice on tests/test_adapters.py at 90dcea05eb (two same-input runs compared)",
-      "observed": "run 1: 1 failed, 5 passed; run 2: 1 failed, 5 passed (the same blocked test)",
+      "method": "pytest run twice on test_adapters.py, test_box_daily.py and test_box_run.py at c5442ea482 (two same-input runs compared)",
+      "observed": "run 1: 16 passed; run 2: 16 passed",
       "status": "STABLE"
     }
   },
   "compiler_tools": [
+    {
+      "tool": "r1_checks.py fr6 (main tree)",
+      "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
+      "result": "R1-FR6-OK passed=6 (rc=0)"
+    },
     {
       "tool": "r1_checks.py fr6 (main tree)",
       "invocation": "python /c/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
