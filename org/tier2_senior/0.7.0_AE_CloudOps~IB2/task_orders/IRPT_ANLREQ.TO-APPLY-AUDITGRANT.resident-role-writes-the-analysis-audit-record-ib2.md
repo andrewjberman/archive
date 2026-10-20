@@ -4,10 +4,10 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-20</date>
-    <status>staged</status>
+    <status>superseded</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
-<risk>WORLD</risk>
+<risk>WORLD</risk><!-- SUPERSEDED 2026-10-20 by IRPT_ANLREQ.TO-APPLY-AUDITPOLICY.resident-audit-write-managed-policy-ib2: the apply stopped at the 10240-byte inline cap (A_AFTER_AUDITGRANT.txt), CTO msg 11566 -->
 <proof_genre>DEPLOY</proof_genre>
 <round>43</round>
 <workstream>ZZ136</workstream>
