@@ -3,7 +3,7 @@
 (it writes nothing), an in-process decide(). COUNTS, ROLES, KEYS AND HASHES ONLY in the repo: no account id, tid, oid or e-mail is written or printed. The candidate (which holds the tid and oid) lives off-repo in
 X = %LOCALAPPDATA%/opal/og-salt/gv1/.
   python gv1_phasea.py        (repository root)
-Writes W/GV1_BEFORE.json, W/GV1_DIFF.json, W/GV1_PREFLIGHT_DECIDE.json, W/GV1_DENY.json (facts) and X/andrew_candidate.json."""
+Writes W/GV1_BEFORE.json, W/GV1_DIFF.json, W/GV1_PREFLIGHT_DECIDE.json (download = the two booleans, ruling Z-S431 (a), order amended), W/GV1_DENY.json (facts) and X/andrew_candidate.json."""
 from __future__ import annotations
 
 import datetime as dt
@@ -111,7 +111,9 @@ acc = de.Access(True, prof, gr, de.allowed_tools(prof, gr))
 admit = {t: de.decide(t, acc) is None for t in TOOLS4}
 refuse = {"schwab_prepare_download": de.decide("schwab_prepare_download", acc) is not None}
 wide = all(de.is_master_wide(cscope, m) for m in masters)
-save("GV1_PREFLIGHT_DECIDE.json", {"andrew": {"admit": admit, "refuse": refuse, "master_wide_parsed": bool(wide)}})
+stored_dl = "download_filtered" in grant.scope.operations
+save("GV1_PREFLIGHT_DECIDE.json", {"andrew": {"admit": admit, "download": {"stored_operations_include_download_filtered": bool(stored_dl), "prepare_download_admitted": not refuse["schwab_prepare_download"]},
+                                              "master_wide_parsed": bool(wide)}})
 
 # the email_deny finding: FACTS (read from the store and from the code)
 deny_now = [store.get(acs.email_deny_key(e)) is not None for e in plan.deny_emails]
