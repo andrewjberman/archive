@@ -1,0 +1,34 @@
+cn-7 STAGE 6 -- the first scheduled fire, read (read only; nothing was written or applied by this seat)
+seat 0.7.0_AE_CloudOps~SC1, dell1, read 2026-10-20 15:5xZ-16:2xZ
+
+--- THE FIRE (ECS, cluster amgt-dossier-refresh-cluster, task bc80a834255049eb89c1731792eef625, task definition amgt-dossier-refresh-task:1 by digest)
+createdAt 2026-10-20T10:00:18.858-04:00 (14:00:18Z); startedAt 10:00:57.492-04:00 (14:00:57Z); stoppedAt 11:57:02.873-04:00 (15:57:02Z)
+stoppedReason "Essential container in task exited", stopCode EssentialContainerExited, container exit code 0 (NOT the oracle: the driver exits 0 whatever the census says)
+WALL TIME startedAt to stoppedAt = 6965.381 s (1 h 56 m 5 s). The order's line is 6 h (21600 s): not exceeded; no row owed to the CTO on wall time.
+schedule amgt-dossier-refresh-daily read ENABLED, cron(0 10 ? * MON-FRI *) America/New_York, lastModified 2026-10-19T12:57:12.895-04:00 (stage 5), at the time of the fire.
+
+--- THE CENSUS (the log's final REFRESH-CENSUS line, from cn7_s6_task_log.txt: 207 events, stream dossier-refresh/dossier-refresh/bc80a834..., the whole stream read by filter-log-events)
+REFRESH-CENSUS names=95 written=92 would_write=0 unchanged=0 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=3 errors=0 mode=write
+per-name REFRESH lines counted by status: WRITTEN 92, SKIPPED_GUARD 3, total 95 (equals names=95).
+skipped_guard (a guard stop is reported, not a failure; each line is guard=STOP moved=model_rows inputs_differ=model_block):
+  BZLFY_US_Equity  valued rows built 55 lower than stored 56
+  PBR_US_Equity    valued rows built 55 lower than stored 56   (the order names PBR as expected)
+  TSM_US_Equity    valued rows built 53 lower than stored 54
+NOT NAMED IN THE ORDER, STATED PLAINLY AND NOT SELF-GRADED BY ME: BZLFY_US_Equity and TSM_US_Equity are guard stops too; the order's "expected and not a failure" list names only PBR_US_Equity. The order's own text says a guard stop is reported, not a failure, and these two nothing was written. The issuer rules whether they are a row.
+
+--- THE EXPECTED COUNT, COMPUTED (cn7_s6_independent.out, script cn7_s6_census.py, boto3 on the dell1 profile, read only)
+For each of the 95 names the newest derived/model_block/<slash-safe key>/<stamp>/model_block.json in s3://opal-data-harvest was listed; the boundary is 09:00 America/New_York of 2026-10-20 = 2026-10-20T13:00:00Z (EDT, UTC-4).
+Names whose newest model block stamp is later than the boundary: 95 of 95. Names with no block today: none.
+written (92) + skipped_guard (3) = 95: every name whose block moved today is accounted for; written (92) is NOT equal to 95 only by the three guard stops above.
+Every one of the 92 written names has a newest block later than the boundary; the three not written are the three guard stops.
+
+--- THE SAMPLES (all 92 written names, not only 10; BP/_LN_Equity included)
+Each written object was read back by key (the key the log prints on the REFRESH line), parsed as JSON, and its as_of partition checked, then the gateway's pick rule was applied to the name's dossier prefix (the driver's COPY of harvest_research.py _pick_dossier: the greatest as_of stamp, then the latest LastModified, over .json and .json.gz) and compared with the new key.
+samples_ok=92 of 92 (parses, as_of=2026-10-20, pick == the object the fire wrote).
+BP/_LN_Equity: object security_key=BP-SLASH-_LN_Equity/as_of=2026-10-20.a3d9781d8e44f6f3.json, newest block 20261020T130313Z, parses, as_of 2026-10-20, the pick names it.
+LIMIT: the pick is the gateway's RULE applied to the live S3 listing; I did not call the live gateway endpoint (harvest_get_research) for these names in this read. cn-3 did that for UNH and BP; the issuer may.
+
+--- RESULT 2026-10-20 (stated; the grading is the issuer's)
+mode=write: yes. errors=0: yes. written 92 against 95 names with a block today, the 3 difference names being the 3 guard stops, each reported with its reason. samples_ok 92 of 92 (order asks 10 plus BP). Wall 6965 s, under the 6 h line.
+Not measured: bytes and requests of the run (the driver prints them only on REFRESH-STOPPED budget-exceeded, which did not happen); the dossier objects' content beyond parse, as_of and pick.
+Rollback: none needed. Add-only dossiers; the response to a wrong fire is -var dossier_refresh_schedule_state=DISABLED (an apply), not taken.
