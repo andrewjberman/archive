@@ -1,0 +1,83 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "three reads, once each; the authorizer log group was counted in each window as a control (it is live: 12 and 6 events)",
+   "observed": "3 of 3 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-PACKAGER-403.why-the-package-post-is-refused-403-token-claims-and-gateway-reason-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-403.why-the-package-post-is-refused-403-token-claims-and-gateway-reason-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "8a6c993ca2"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-403.why-the-package-post-is-refused-403-token-claims-and-gateway-reason-ib2.md",
+  "vintage_commit": "8a6c993ca2"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R1: host_r1.sh (SSM command 3194c36d-7b99-487d-b8b2-71397394f868, service environment, claim names and times only); R2 and R3: packager_403.py (apigatewayv2 describe, authorizer Lambda log group, DynamoDB reads)",
+   "artifact_covered_by": [
+    "PKG403-AC1",
+    "PKG403-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "PKG403-AC1",
+   "invocation": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+   "expect": "^[4-9]$",
+   "output_evidence": "7\nexit code: 0\n(run 2026-10-20 from the repo root)",
+   "denominator": "1 record file of 11 lines: 7 answer lines plus 4 NOTE lines the pattern does not match",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(R1 |R2 |R3 |READS-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "PKG403-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit code: 1\n(run 2026-10-20 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
+   "denominator": "11 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "which authorizer line belongs to which package call",
+   "reason": "the authorizer logs print no path; the two refusal lines are tied to the calls by time only (08:02:53Z and 08:58:06Z)"
+  },
+  {
+   "item": "the ticket Lambda's own 403 branches",
+   "reason": "not reached: the refusal is in the gateway authorizer, before the Lambda (the Lambda log holds no /package line, per A_PACKAGER_CLIENTERROR.txt R2)"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_403/A_PACKAGER_403.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 apigatewayv2, logs, lambda, dynamodb reads (packager_403.py) and one SSM host read (host_r1.sh)",
+   "invocation": "python packager_403.py",
+   "result": "READS-DONE 3 of 3 answered; PKG403-AC1 7, PKG403-AC2 0"
+  }
+ ]
+}
