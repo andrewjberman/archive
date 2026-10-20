@@ -224,22 +224,24 @@ def k2_inputs():
     return portfolio_full, comps, bench, rfree, full
 
 
-def expected_rows(full, bench, rfree, start="2024-04-14", years=2):
+def expected_rows(full, bench, rfree, start="2024-04-14", years=2, end=None):
     rows = {}
     for name, series in full.items():
         path = rebase(series, start)
+        if end is not None:  # R60 AMENDMENT 1: every path ends at the common window's END, so every statistic ends there too
+            path = [(d, v) for d, v in path if d <= end]
         rows[name] = {"path": path, "returns": {k: total_return(path, k) for k in PERIODS}, "risk": risk(path, bench, rfree, years)}
     return rows
 
 
-def check_record(rec, comps, full, bench, rfree, tag, fails):
-    want = expected_rows(full, bench, rfree)
+def check_record(rec, comps, full, bench, rfree, tag, fails, end="2026-10-14", years=2.5):
+    want = expected_rows(full, bench, rfree, end=end)
     w = rec.get("window") or {}
-    if (w.get("start"), w.get("end")) != ("2024-04-14", "2026-10-14"):
-        fails.append("%s window is %r..%r, want 2024-04-14..2026-10-14 (the latest first date and the earliest last date)" % (
-            tag, w.get("start"), w.get("end")))
-    if not close(w.get("years"), 2.5):
-        fails.append("%s window years is %r, want 2.5" % (tag, w.get("years")))
+    if (w.get("start"), w.get("end")) != ("2024-04-14", end):
+        fails.append("%s window is %r..%r, want 2024-04-14..%s (the latest first date and the earliest last date)" % (
+            tag, w.get("start"), w.get("end"), end))
+    if not close(w.get("years"), years):
+        fails.append("%s window years is %r, want %r" % (tag, w.get("years"), years))
     if not (isinstance(w.get("rule"), str) and len(w["rule"]) > 20):
         fails.append("%s window rule is not a sentence" % tag)
     rows = rec.get("rows") or []
@@ -256,6 +258,9 @@ def check_record(rec, comps, full, bench, rfree, tag, fails):
                 fails.append("%s row %s status is %r" % (tag, key, r.get("status")))
             continue
         path = r.get("path") or []
+        if path and pts_ms([(end, 0)])[0][0] < path[-1][0]:
+            fails.append("%s row %s path runs past the window end %s (last point %s): cut every path at the window end" % (
+                tag, key, end, path[-1][0]))
         if len(path) != len(exp["path"]) or not close(path[0][1], 100.0) or not close(path[-1][1], exp["path"][-1][1]):
             fails.append("%s row %s path: %d points, first %r, last %r; want %d points, 100.0, %r" % (
                 tag, key, len(path), path[0][1] if path else None, path[-1][1] if path else None, len(exp["path"]), exp["path"][-1][1]))
@@ -370,6 +375,13 @@ def arms_build_173():
     if rec2.get("window") != rec.get("window"):
         fails.append("a series-less comparable moved the common window: %r vs %r" % (rec2.get("window"), rec.get("window")))
     check_record({**rec2, "rows": rec2["rows"][:-1]}, comps, full, bench, rfree, "with a gap row", fails)
+    # series that end on DIFFERENT dates (the real model series run days past a monthly price series): every row ends at the
+    # earliest last date, so every statistic is measured to that one date (R60 AMENDMENT 1)
+    etf_cut = [(d, v) for d, v in full["iShares Russell 2000 ETF"] if d <= "2026-08-14"]
+    comps_cut = comps[:2] + [{"key": "IWM", "name": "iShares Russell 2000 ETF", "kind": "ticker", "series": pts_ms(etf_cut), "reason": None}]
+    rec_cut = cmp_.build_compare({"name": "Your portfolio", "series": pts_ms(port_full)}, comps_cut, pts_ms(bench), pts_ms(rfree))
+    check_record(rec_cut, comps_cut, {**full, "iShares Russell 2000 ETF": etf_cut}, bench, rfree, "ragged ends", fails,
+                 end="2026-08-14", years=28 / 12.0)
     # no benchmark / risk-free: alpha, beta, Sharpe, Sortino are None, std dev and drawdown stay
     rec3 = cmp_.build_compare({"name": "Your portfolio", "series": pts_ms(port_full)}, comps, None, None)
     rk = (rec3.get("rows") or [{}])[0].get("risk") or {}
