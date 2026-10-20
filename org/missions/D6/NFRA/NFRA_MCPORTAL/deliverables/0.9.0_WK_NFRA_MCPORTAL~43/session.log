@@ -1,0 +1,10 @@
+0.9.0_WK_NFRA_MCPORTAL~43 on NFRA_MCPORTAL.TO-MP-zo-3 -- session log (worktree C:/tmp/mp-ogw-43, branch wk-NFRA_MCPORTAL-43)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-43; test -d org && test -d .tools -> TREE-OK.
+2. Base suite (d0ece5fe139): python -m pytest infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests -> 1 failed (test_person_access_refused_when_record_kind_not_live: WRITTEN, expected REFUSED RECORD-KIND-NOT-LIVE), 35 passed, 44.44s. Matches the face.
+3. Premise check: the widening rule is defined against the prior record. The writer reads the prior only through st.get (lambda_function.py:398). FakeStore records get (tests/test_person_access.py:41-43). The face requires store.calls == [] for the WIDEN-NO-CONFIRM refusal. The two requirements cannot both hold. Surprise row NFRA_MCPORTAL-Z-W43-S1 filed (commit 9a367e600d). The widening rule and tests 2-5 were NOT built.
+4. Stale test repaired in place (commit ba8cfc3ef39): monkeypatch narrows acs.POLICY_RECORD_TYPES to exclude person_access for this test only; asserts it absent; keeps REFUSED RECORD-KIND-NOT-LIVE and zero store calls.
+5. Suite after repair: 36 passed, 0 failed, rc=0, 70.47s.
+6. AC1 (issuer's zo3.AC1.sh, run as `timeout 120 bash ...` by the worker bound; the recorded invocation is the criterion's text without the bound): pytest rc=0; named tests present in sources 1 of 5; passed=36 (min 40); failed=0; RESULT: FAIL; exit=1. Second run of the same check: 36 passed in 51.55s, same verdict (determinism).
+7. Mutant (base test body restored, observed in step 2): WRITTEN where REFUSED expected, 1 failed. The test discriminates the stale state.
+8. Proof instance written and validated; see the proof_of_spec.json in this folder.
