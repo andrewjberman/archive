@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-r2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R2.md",
+    "vintage_commit": "67998aecd30142be89611fa02a5e1762669a8afe",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-r2.readers-firm.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "159c2a410fe08f2956d84033b971242a0046a1b3"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/build_canonical_daily.py",
+      "kind": "script",
+      "commit_or_etag": "9b2c50bb85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The header names no deploy target. Its date axis now reads the firm-form RPS folder through the shared listing.",
+      "artifact_covered_by": [
+        "BF2-r2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/silver/build_fact_tax_1099div.py",
+      "kind": "script",
+      "commit_or_etag": "9b2c50bb85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The header's Output line names an opal-data-bd canonical silver path (an output, not a deploy target). min_size is refused loudly.",
+      "artifact_covered_by": [
+        "BF2-r2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_canonical_daily_date_axis.py",
+      "kind": "test",
+      "commit_or_etag": "9b2c50bb85",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; stdlib plus mock, no live AWS. 17 tests; the tnn_listing test is the AC2 selection.",
+      "artifact_covered_by": [
+        "BF2-r2-AC1",
+        "BF2-r2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF2-r2-AC1",
+      "criterion_verbatim": "the daily builder's date axis on the firm layout with two masters in one folder, including the old-form-only refusal; report the skipped count.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "17 passed in 1.00s (rc=0); second run: 17 passed in 1.07s (rc=0); skipped count 0 (-rs printed no skip lines)",
+      "denominator": "17 of 17 collected tests passed; 0 skipped; 0 deselected",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF2-r2-AC2",
+      "criterion_verbatim": "the 1099 reader's listing on the firm layout, master-filtered.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no -k tnn_listing",
+      "output_evidence": "1 passed, 16 deselected in 0.95s (rc=0)",
+      "denominator": "1 of 1 selected test passed (16 deselected by -k)",
+      "status": "PASS",
+      "expect": "^1 passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant control: a scratch copy of the silver contract (.scratch/mut2, not committed) with the master-name filter removed from _scan_bronze_partitions, so the sum across masters of the firm folder is listed. Run against the same daily test file.",
+      "expected": "the catch-up, broken-name and 1099 listing tests fail",
+      "observed": "python -m pytest tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no on the mutant -> '3 failed, 14 passed in 1.58s' (rc=1): test_catches_up_every_new_bronze_date_when_canonical_is_behind, test_broken_name_partition_is_not_on_the_firm_axis, test_tnn_listing_returns_master_own_dates_from_firm_layout",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 17 passed in 1.00s; run 2: 17 passed in 1.07s. AC2 run 1: 1 passed, 16 deselected in 0.95s; run 2: 1 passed, 16 deselected in 1.35s (rc=0 both). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A public all-dates lister in _canonical_silver_lib.py",
+      "reason": "Not added: the file is TO-BF-k2's and read-only for this cell. The two readers import the private _bronze_dates_or_refuse by name; the surprise row NFRA_SCHWABBF-W2-S6 records it."
+    },
+    {
+      "item": "The ~719 broken-name partitions and their remedy",
+      "reason": "Recorded in row NFRA_SCHWABBF-W2-S7; the re-land/alias ruling is not made here. Bronze is not touched (Rule 17a)."
+    },
+    {
+      "item": "Deploy of the two readers",
+      "reason": "No deploy target is named in either header; any deployment is the issuer's release act. Not performed."
+    },
+    {
+      "item": "min_size on the 1099 listing",
+      "reason": "Refused loudly (ValueError), not honored: the shared listing carries no object sizes and no caller passes a positive value."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W2-S6",
+    "NFRA_SCHWABBF-W2-S7"
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-r2.readers-firm.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no",
+      "result": "17 passed in 1.00s; -k tnn_listing: 1 passed, 16 deselected in 0.95s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, AST undefined-name scan, ruff, comp-constants, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/canonical/schwab/build_canonical_daily.py data/canonical/schwab/silver/build_fact_tax_1099div.py data/canonical/schwab/tests/test_canonical_daily_date_axis.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    }
+  ]
+}

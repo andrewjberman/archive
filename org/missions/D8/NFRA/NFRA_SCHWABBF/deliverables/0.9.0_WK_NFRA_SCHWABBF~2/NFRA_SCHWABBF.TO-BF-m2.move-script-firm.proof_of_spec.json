@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-m2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R2.md",
+    "vintage_commit": "67998aecd30142be89611fa02a5e1762669a8afe",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-m2.move-script-firm.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "159c2a410fe08f2956d84033b971242a0046a1b3"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/move_bronze_key_form.py",
+      "kind": "script",
+      "commit_or_etag": "436d8b7731",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The tool is run by the issuer's release act R2 against the real bucket; it was not run with --apply here (LOCAL bound). Its only AWS call in this order is the read-only listing in AC3.",
+      "artifact_covered_by": [
+        "BF2-m2-AC1",
+        "BF2-m2-AC2",
+        "BF2-m2-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "436d8b7731",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; fake S3, no network. 19 tests.",
+      "artifact_covered_by": [
+        "BF2-m2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/fixtures/move_listing.json",
+      "kind": "doc",
+      "commit_or_etag": "1528fd7e6a1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Synthetic listing, unchanged from round 1 (13 keys). Read by the test and by AC2.",
+      "artifact_covered_by": [
+        "BF2-m2-AC1",
+        "BF2-m2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF2-m2-AC1",
+      "criterion_verbatim": "plan, copy, verify and the absence of any delete path, on the synthetic listing and fake S3, firm form.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "19 passed in 1.07s (rc=0); second run: 19 passed in 1.10s (rc=0)",
+      "denominator": "19 of 19 collected tests passed (0 failed, 0 deselected)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF2-m2-AC2",
+      "criterion_verbatim": "the CLI on the fixture prints the first planned copy with its FIRM-form destination (the plan line itself is graded by AC1's tests; the only write is the scratch file named in the invocation).",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --listing-file data/canonical/schwab/tests/fixtures/move_listing.json --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_m2_plan_probe.json",
+      "output_evidence": "MOVE-SAMPLE src=schwab/08242234/bronze/acc/20231017/08242234.CRS20231017.ACC.zip dst=schwab/49financial/bronze/acc/date=2023-10-17/08242234.CRS20231017.ACC.zip",
+      "denominator": "1 of 1 MOVE-SAMPLE line matched the expectation; the fixture plans 12 copies, the sample is the first by sorted source",
+      "status": "PASS",
+      "expect": "^MOVE-SAMPLE src=schwab/08242234/bronze/acc/20231017/08242234\\.CRS20231017\\.ACC\\.zip dst=schwab/49financial/bronze/acc/date=2023-10-17/08242234\\.CRS20231017\\.ACC\\.zip$"
+    },
+    {
+      "criterion_id": "BF2-m2-AC3",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only listing of the real old-form schwab/08403355/bronze/acc/ prefix plans into the firm form (it wrote 516 keys in round 1). It writes nothing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --master 08403355 --type acc",
+      "output_evidence": "MOVE-PLAN in_scope=516 foreign=0 copy=516 already=0 events=516 (rc=0; preceded by MOVE-LISTED keys=516; second run identical; MOVE-SAMPLE src=schwab/08403355/bronze/acc/20240930/08403355.CRS20240930.ACC.zip dst=schwab/49financial/bronze/acc/date=2024-09-30/08403355.CRS20240930.ACC.zip; MOVE-COUNT master=08403355 type=acc n=516)",
+      "denominator": "516 keys listed under the old-form prefix; 516 of 516 planned, foreign=0",
+      "status": "PASS",
+      "expect": "^MOVE-PLAN in_scope=[0-9]+ foreign=0 copy=[0-9]+ already=[0-9]+ events=[0-9]+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant control: a scratch copy of the tool and tests (.scratch/mut, not committed) with the destination set to the source key, so nothing moves. Run against the same test file.",
+      "expected": "the destination-equality, events, same-partition and idempotence tests fail",
+      "observed": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no on the mutant -> '11 failed, 8 passed in 1.74s' (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 19 passed in 1.07s; run 2: 19 passed in 1.10s. AC2 run 1 and run 2: the same MOVE-SAMPLE line. AC3 run 1 and run 2: the same MOVE-PLAN line (in_scope=516 foreign=0 copy=516 already=0 events=516). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "copy --apply against any bucket, and the verify run against real objects",
+      "reason": "LOCAL bound: the only AWS call is the AC3 read-only listing. The issuer's release act R2 runs the copy."
+    },
+    {
+      "item": "The old-key removal",
+      "reason": "Not in this tool and not in this order; the module text is checked by a test to hold no removal verb."
+    },
+    {
+      "item": "The firm event rule (silver.tf) and the converter re-conversion count",
+      "reason": "Another cell; this tool prints the planned events count (events=516 for 08403355 acc) for the release act to read."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W2-S5"
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-m2.move-script-firm.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "19 passed in 1.07s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc=0)"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder, parity oracle in the test)",
+      "invocation": "address('schwab', firm, 'bronze', feed, 'date=YYYY-MM-DD') via test_destinations_equal_builder_firm_keys",
+      "result": "every fixture destination equals the builder key with the bucket removed"
+    }
+  ]
+}
