@@ -54,7 +54,7 @@ rec=$(printf '%s' "$rec" | tr -d '\r')
 halves=$(python3 -I - "$(native "$ASK")" <<'PYEOF'
 import re, sys
 t = open(sys.argv[1], encoding="utf-8").read()
-print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) else "no")
+print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) and re.search(r"owner_gate\.owner_only", t) and re.search(r"(?i)GET", t) and re.search(r"(?i)POST", t) else "no")
 PYEOF
 )
 halves=$(printf '%s' "$halves" | tr -d '\r')
