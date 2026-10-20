@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""IRPT_ANLREQ AR-y-468: the Terraform edit is the only infra/ change since the cut.
+"""IRPT_ANLREQ AR-y-468: the bound of this order's Terraform edits, measured from the trunk commit merged in.
 
-Prints AUDIT-WRITE-BOUND-OK numstat=<add>/<del> files=1 only when git diff --numstat from the cut commit to
-HEAD, restricted to infra/, lists exactly one path, infra/aws/terraform/investor-reporting/ycharts/resident.tf,
-with 0 deletions. Otherwise prints AUDIT-WRITE-BOUND-BAD <paths> and exits 1.
-The cut is the commit that added the task order (git log --diff-filter=A on the order file path; the
-commit message does not carry the id). Stdlib only, offline. ASCII only.
+AMENDMENT 2 (trunk 00f56f44ba): the bound is git diff --numstat 5143b9b2565 <last Terraform edit commit> over
+infra/. It must list exactly one path, infra/aws/terraform/investor-reporting/ycharts/resident.tf, with exactly
+one deleted line, and that deleted line must be, by text, the old KMS encryption-context line; the added line
+must be the same line with ", local.resident_audit_write_prefixes" inserted inside its concat and nothing else.
+Prints AUDIT-WRITE-BOUND-OK numstat=<add>/1 files=1 only then; otherwise AUDIT-WRITE-BOUND-BAD <detail> (rc 1).
+Stdlib only, offline (git is read). ASCII only.
 """
 
 import os
@@ -13,9 +14,12 @@ import subprocess
 import sys
 
 TF_PATH = "infra/aws/terraform/investor-reporting/ycharts/resident.tf"
-TASK_ORDER = ("org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/"
-              "IRPT_ANLREQ.TO-AR-y-468.resident-role-writes-the-analysis-audit-terraform-statement.md")
+TRUNK_BASE = "5143b9b2565"
 NAMING_REL = "lib/opal_naming.py"
+OLD_KMS = ('StringLike   = { "kms:EncryptionContext:aws:s3:arn" = concat(local.resident_write_prefixes, '
+           'local.resident_read_prefixes, local.ycdgen_opal_report_prefixes) }')
+NEW_KMS = OLD_KMS.replace("local.ycdgen_opal_report_prefixes)",
+                          "local.ycdgen_opal_report_prefixes, local.resident_audit_write_prefixes)")
 
 
 def find_root(start):
@@ -39,19 +43,31 @@ def git(root, args):
 def main():
     sys.dont_write_bytecode = True
     root = find_root(os.path.dirname(os.path.abspath(__file__)))
-    anchor = git(root, ["log", "--format=%H", "-1", "--diff-filter=A", "--", TASK_ORDER])
-    anchor = anchor.strip()
-    if not anchor:
-        print("AUDIT-WRITE-BOUND-BAD no cut commit found for TO-AR-y-468")
+    last = git(root, ["log", "--format=%H", "-1", "--", TF_PATH]).strip()
+    if not last:
+        print("AUDIT-WRITE-BOUND-BAD no Terraform edit commit found for %s" % TF_PATH)
         return 1
     rows = []
-    for line in git(root, ["diff", "--numstat", anchor + "..HEAD", "--", "infra/"]).splitlines():
+    for line in git(root, ["diff", "--numstat", TRUNK_BASE, last, "--", "infra/"]).splitlines():
         if line.strip():
             add, dele, path = line.split("\t", 2)
             rows.append((add, dele, path))
-    ok = len(rows) == 1 and rows[0][2] == TF_PATH and rows[0][1] == "0" and rows[0][0].isdigit()
-    if not ok:
+    if len(rows) != 1 or rows[0][2] != TF_PATH or rows[0][1] != "1" or not rows[0][0].isdigit():
         print("AUDIT-WRITE-BOUND-BAD " + " ".join("%s(+%s,-%s)" % (p, a, d) for a, d, p in rows))
+        return 1
+    removed, added = [], []
+    for line in git(root, ["diff", "-U0", TRUNK_BASE, last, "--", TF_PATH]).splitlines():
+        if line.startswith("---") or line.startswith("+++"):
+            continue
+        if line.startswith("-"):
+            removed.append(line[1:])
+        elif line.startswith("+"):
+            added.append(line[1:])
+    if len(removed) != 1 or removed[0].strip() != OLD_KMS:
+        print("AUDIT-WRITE-BOUND-BAD the deleted line is not the old KMS line (%d deleted line(s))" % len(removed))
+        return 1
+    if [line.strip() for line in added].count(NEW_KMS) != 1:
+        print("AUDIT-WRITE-BOUND-BAD no added line is the old KMS line with the audit prefixes appended")
         return 1
     print("AUDIT-WRITE-BOUND-OK numstat=%s/%s files=1" % (rows[0][0], rows[0][1]))
     return 0
