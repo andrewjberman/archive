@@ -439,11 +439,52 @@ def box_live():
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
 
 
+def _tf_out(name):
+    rc, o = run(["terraform", "-chdir=%s" % TF_ROOT, "output", "-raw", name], 60)
+    return rc, o.strip()
+
+
+def autoshutdown_tag():
+    tag = "R1-FU8T"
+    try:
+        import boto3
+        rc, iid = _tf_out("instance_id")
+        if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
+            return out("%s-FAIL no instance_id output (rc=%s)" % (tag, rc))
+        ec2 = boto3.client("ec2", region_name="us-east-1")
+        tags = ec2.describe_instances(InstanceIds=[iid])["Reservations"][0]["Instances"][0].get("Tags", [])
+        val = dict((t["Key"], t["Value"]) for t in tags).get("AutoShutdown")
+        if val != "disabled":
+            return out("%s-FAIL tag AutoShutdown=%s on %s" % (tag, val, iid))
+        return out("%s-OK AutoShutdown=disabled on the instance" % tag)
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
+def automation_no_stop():
+    tag = "R1-FU8D"
+    try:
+        import boto3
+        rc, name = _tf_out("document_name")
+        if rc != 0 or not name:
+            return out("%s-FAIL no document_name output (rc=%s)" % (tag, rc))
+        ssm = boto3.client("ssm", region_name="us-east-1")
+        doc = ssm.get_document(Name=name)
+        content = doc.get("Content", "")
+        if "stopInstance" in content or '"stopped"' in content or "'stopped'" in content or re.search(r"DesiredState\W+stopped", content):
+            return out("%s-FAIL the live document version %s still has a stop step" % (tag, doc.get("DocumentVersion")))
+        if "changeInstanceState" not in content or "running" not in content:
+            return out("%s-FAIL the live document lost its start step" % tag)
+        return out("%s-OK no stop step in live document version %s" % (tag, doc.get("DocumentVersion")))
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
