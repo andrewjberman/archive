@@ -204,7 +204,7 @@ as `"Space Names"` / mixed case, matching the source.
 - **WRONG (label only).** Of 998 assignment rows, 484 strategies join the roster and **all 514 misses are the placeholder
   `"--"`** (0 real join misses). `client_adapter_bdcottonwood.py:487-488` reports them as `model_not_in_roster`, and returns a
   `model_assignment` whose `model_key` is `"--"`. They are accounts with **no model**, which should read
-  `no_model_assignment`. EXERCISED: the live answer for z0926628531 shows `model_key: "--"`, `absent_reason:
+  `no_model_assignment`. EXERCISED: the live answer for the sampled z09 account shows `model_key: "--"`, `absent_reason:
   model_not_in_roster`. The join itself is correct.
 - `_s2` twins are xlsx headers and are correctly not read.
 
