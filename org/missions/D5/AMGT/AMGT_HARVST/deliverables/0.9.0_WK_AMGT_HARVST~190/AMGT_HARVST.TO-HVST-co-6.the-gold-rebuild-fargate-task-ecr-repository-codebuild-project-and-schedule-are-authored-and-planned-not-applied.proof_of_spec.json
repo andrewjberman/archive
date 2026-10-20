@@ -10,7 +10,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-6.the-gold-rebuild-fargate-task-ecr-repository-codebuild-project-and-schedule-are-authored-and-planned-not-applied.md",
     "group": "OTHER",
-    "vintage_commit": "94ffc82717e"
+    "vintage_commit": "6064dc4ddf3"
   },
   "assignee": "0.9.0_WK_AMGT_HARVST~190",
   "artifacts_produced": [
@@ -82,14 +82,13 @@
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~190/co6_plan.out expect (?s)DEFAULT-PLAN[^\\n]*\\n.*?No changes\\. Your infrastructure matches the configuration\\..*?BUILD-PLAN[^\\n]*\\n.*?Plan: 5 to add, 0 to change, 0 to destroy\\..*?RUN-PLAN[^\\n]*\\n.*?Plan: 11 to add, 0 to change, 0 to destroy\\..*?BOTH-PLAN[^\\n]*\\n.*?Plan: 16 to add, 0 to change, 0 to destroy\\.",
+      "criterion_verbatim": "AC3 cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~190/co6_plan.out expect (?s)DEFAULT-PLAN[^\\n]*\\n.*?No changes\\. Your infrastructure matches the configuration\\..*?BUILD-PLAN[^\\n]*\\n.*?Plan: 5 to add, 0 to change, 0 to destroy\\..*?RUN-PLAN[^\\n]*\\n.*?Error: Resource precondition failed.*?gold_refresh_run_enabled = true requires gold_refresh_build_enabled = true.*?BOTH-PLAN[^\\n]*\\n.*?Plan: 16 to add, 0 to change, 0 to destroy\\.",
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~190/co6_plan.out",
-      "output_evidence": "PROVISIONAL: the image digest is a plan placeholder, nothing is applied\nDEFAULT-PLAN (no -var: the file must plan nothing)\nNo changes. Your infrastructure matches the configuration.\nBUILD-PLAN (-var gold_refresh_build_enabled=true)\nPlan: 5 to add, 0 to change, 0 to destroy.\nRUN-PLAN (-var gold_refresh_run_enabled=true -var gold_refresh_image_digest=sha256:0000000000000000000000000000000000000000000000000000000000000000)\nPlan: 9 to add, 0 to change, 0 to destroy.\nError: Resource precondition failed\nBOTH-PLAN (both flags and the digest placeholder)\nPlan: 16 to add, 0 to change, 0 to destroy.\nCommentary (not the matched lines): the RUN-PLAN section is refused by the build-half precondition on aws_ecs_cluster.gold_refresh (gold-refresh.tf line 285): the partial summary 'Plan: 9 to add' precedes the Error, and no 'Plan: 11 to add' line exists in the file. The face's expectation for this section was not edited, and the Terraform was not changed to match (surprise AMGT_HARVST-D1-W190-S1). DEFAULT, BUILD and BOTH read as specified; no plan proposes a change or a destroy.",
-      "denominator": "2 of 4 labelled plans read as specified (DEFAULT No changes; BUILD 5 to add), 1 refused (RUN-PLAN: precondition error after Plan: 9), 1 read as specified (BOTH 16 to add); 0 changes and 0 destroys in any section; the regex's RUN clause (Plan: 11) has no matching line in the 1379-line co6_plan.out",
-      "status": "FAIL",
-      "status_reason": "The RUN-PLAN section of co6_plan.out is refused by the build-half precondition (gold-refresh.tf line 285, Error: Resource precondition failed) and prints Plan: 9 to add, not Plan: 11 to add, so the regex's RUN clause cannot match. The expectation and the Terraform were not edited to match. Surprise AMGT_HARVST-D1-W190-S1 (BLOCKING) is filed; the order stays open on this criterion.",
-      "expect": "(?s)DEFAULT-PLAN[^\\n]*\\n.*?No changes\\. Your infrastructure matches the configuration\\..*?BUILD-PLAN[^\\n]*\\n.*?Plan: 5 to add, 0 to change, 0 to destroy\\..*?RUN-PLAN[^\\n]*\\n.*?Plan: 11 to add, 0 to change, 0 to destroy\\..*?BOTH-PLAN[^\\n]*\\n.*?Plan: 16 to add, 0 to change, 0 to destroy\\.",
+      "output_evidence": "DEFAULT-PLAN (no -var: the file must plan nothing)\nNo changes. Your infrastructure matches the configuration.\nBUILD-PLAN (-var gold_refresh_build_enabled=true)\nPlan: 5 to add, 0 to change, 0 to destroy.\nRUN-PLAN (-var gold_refresh_run_enabled=true -var gold_refresh_image_digest=sha256:0*64)\nError: Resource precondition failed\ngold_refresh_run_enabled = true requires gold_refresh_build_enabled = true:\nBOTH-PLAN (both flags and the digest placeholder)\nPlan: 16 to add, 0 to change, 0 to destroy.\nCommentary (not the matched lines): the amended AC3 (issuer amendment 1, commit 6064dc4ddf3) expects the run-only plan to be REFUSED by the build-half guard. The RUN-PLAN section prints a partial 'Plan: 9 to add, 0 to change, 0 to destroy.' (line 735) before the precondition Error (line 740), which is the refusal the expectation names; no change or destroy in any section. Surprise AMGT_HARVST-D1-W190-S1 stays filed (BLOCKING) as the amendment directs.",
+      "denominator": "4 of 4 expectation clauses matched in order in the 1379-line co6_plan.out: DEFAULT No changes (line 81), BUILD Plan: 5 to add (line 325), RUN Error: Resource precondition failed with the guard message (lines 740-747), BOTH Plan: 16 to add (line 1369); 0 changes and 0 destroys in any section",
+      "status": "PASS",
+      "expect": "(?s)DEFAULT-PLAN[^\\n]*\\n.*?No changes\\. Your infrastructure matches the configuration\\..*?BUILD-PLAN[^\\n]*\\n.*?Plan: 5 to add, 0 to change, 0 to destroy\\..*?RUN-PLAN[^\\n]*\\n.*?Error: Resource precondition failed.*?gold_refresh_run_enabled = true requires gold_refresh_build_enabled = true.*?BOTH-PLAN[^\\n]*\\n.*?Plan: 16 to add, 0 to change, 0 to destroy\\.",
       "judgment": false
     }
   ],
