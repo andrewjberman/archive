@@ -32,6 +32,7 @@ To fill from the live read-backs after `OG-rl-17` and `OG-rl-18` close.
 - **A call start or duration field in the audit record** (the CTO's C1 ruling): without it true overlap is not computable.
 - **Alyssa's grant to `accounts ["*"]`** (the CVO's note, msg 36209), after `OG-gv-1` reads back.
 - **`portal_get_security_scan` AccessDenied on an absent-universe request** (row Z-S436, relayed by `2.0.0_SA_COO~MI`, round 24 case K2-31; NOT reproduced by this seat; test first whether `OG-ls-1`'s ListBucket narrowing removed the portal prefix's listing).
+- **The gateway edit for the Schwab move to `schwab/49financial/` (Andrew-direct ~17:0xZ via the laptop; the CTO~Z ferry 17:13Z names this seat owner, `~NFRA1` applies it under its own never-widen pair in the cutover window):** the contract's `data_prefixes` and `completion_prefixes` in both copies, `app/refs/DATA_CATALOG.yaml`, `client_adapter_schwab.py`, the reader IAM `.tf`, tests; master-level fencing inside the firm folder must hold; read back Alyssa's 0840 grant and `OG-gv-1`'s `["*"]` resolution after the cutover. BLOCKED on COO~SB's date and the SILVER and META key form (asked 17:25Z by ferry; PRD C-KEYFORM only fixes the bronze form).
 - The CVO's test that the hand-typed IAM source list equals the silver families; the Teams-poll cursor tie (`Z-W169-S2`); the extra S3 read cost of `news_for_security`.
 
 ## 5. For other seats -- OPEN

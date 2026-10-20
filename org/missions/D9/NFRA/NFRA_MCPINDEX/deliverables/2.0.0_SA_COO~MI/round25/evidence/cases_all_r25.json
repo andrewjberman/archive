@@ -1,0 +1,1893 @@
+{
+ "schema": "gateway_battery_cases/1",
+ "cases": [
+  {
+   "case_id": "K4-01",
+   "tool": "graph_cypher",
+   "question": "How many nodes does the estate graph hold right now?",
+   "args": {
+    "statement": "MATCH (n) RETURN count(n) AS nodes"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second run of the same count, read against the vintage in graph_status [app/integrations/globgrph/integration.py:66]"
+  },
+  {
+   "case_id": "K4-02",
+   "tool": "graph_status",
+   "question": "How old is the estate graph answer I am about to quote?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the served vintage and last swap time read again from the projection health endpoint [app/integrations/globgrph/integration.py:67]"
+  },
+  {
+   "case_id": "K4-03",
+   "tool": "mdpf_get_security_classification",
+   "question": "What asset class does the classification table give SPY?",
+   "args": {
+    "ticker": "SPY"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:etf-classifications",
+   "source_hint": "a second get_item of the SPY key in etf-classifications, compared on asset_class"
+  },
+  {
+   "case_id": "K4-04",
+   "tool": "mdpf_get_security_classification",
+   "question": "What was SPY classified as on a past date?",
+   "args": {
+    "ticker": "SPY",
+    "as_of": "2026-10-01"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses any as_of other than latest, because the table holds one value per ticker"
+  },
+  {
+   "case_id": "K4-05",
+   "tool": "news_search_articles",
+   "question": "Which articles mentioned tariffs over the last few days?",
+   "args": {
+    "text": "tariffs",
+    "date_from": "2026-10-16",
+    "date_to": "2026-10-18"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-news-articles",
+   "source_hint": "a second Query of the same article_date window on opal-news-articles, with the row count compared"
+  },
+  {
+   "case_id": "K4-06",
+   "tool": "news_search_articles",
+   "question": "Show every article about tariffs from the past six months",
+   "args": {
+    "text": "tariffs",
+    "date_from": "2026-04-01",
+    "date_to": "2026-10-18"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a window of fourteen days or more, so the request never reaches the table"
+  },
+  {
+   "case_id": "K4-07",
+   "tool": "news_keyword_intelligence",
+   "question": "Why is sentiment on the tariff story bearish?",
+   "args": {
+    "keyword": "tariffs"
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-keyword-intelligence",
+   "source_hint": "a second get_item of the tariffs keyword in opal-keyword-intelligence, compared on generated_date"
+  },
+  {
+   "case_id": "K4-08",
+   "tool": "news_trending_topics",
+   "question": "What themes were trending in the news on October 16?",
+   "args": {
+    "date": "2026-10-16",
+    "side": "all",
+    "days": 1
+   },
+   "expect": "nonempty",
+   "expect_source": "dynamodb:opal-news-trending-daily",
+   "source_hint": "a count of the ranked rows for that date in opal-news-trending-daily"
+  },
+  {
+   "case_id": "K4-09",
+   "tool": "opal_data_refresh_status",
+   "question": "Has the last data refresh run finished yet?",
+   "args": {
+    "execution_id": "example-run-20261018"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same execution_id read again from the status endpoint [app/integrations/opal_portal/integration.py:405]"
+  },
+  {
+   "case_id": "K4-10",
+   "tool": "opal_data_refresh_upload",
+   "question": "What would the data refresh send for October 16, without sending anything?",
+   "args": {
+    "date": "20261016",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "the confirm_required answer names the vintage, and no upload or trigger happens"
+  },
+  {
+   "case_id": "K4-11",
+   "tool": "opal_describe",
+   "question": "Describe the news articles table in the Opal catalog",
+   "args": {
+    "dataset": "dynamodb_dynamodb_opal_news_articles"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same catalog row read again at its entity key in DATA_CATALOG.yaml [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-12",
+   "tool": "opal_describe",
+   "question": "Describe a catalog entry that does not exist",
+   "args": {
+    "dataset": "no_such_catalog_key_20261018"
+   },
+   "expect": "empty",
+   "source_hint": "no catalog row carries this key, so no dataset is named [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-13",
+   "tool": "opal_discover",
+   "question": "Where does tariff news live in Opal's data?",
+   "args": {
+    "subject": "tariff news"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same subject searched again by text in DATA_CATALOG.yaml [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K4-14",
+   "tool": "opal_discover",
+   "question": "Where do zebra crossing traffic counts live in Opal's data?",
+   "args": {
+    "subject": "zebra crossing traffic counts"
+   },
+   "expect": "empty",
+   "source_hint": "the catalog holds no row for the subject, so no dataset is named [app/integrations/opal_discover/integration.py:104]"
+  },
+  {
+   "case_id": "K5-01",
+   "tool": "ycharts_freshness",
+   "question": "Is the shared YCharts session live right now?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "a second authenticated GET of the same probe; its ok flag must agree [app/integrations/ycharts/integration.py:125]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-02",
+   "tool": "ycharts_snapshot_metrics",
+   "question": "What was the year to date total return of the S&P 500?",
+   "args": {
+    "symbols": [
+     "^SPX"
+    ],
+    "columns": [
+     "ytd_total_return"
+    ]
+   },
+   "expect": "nonempty",
+   "source_hint": "the same column for ^SPX read again from the YCharts indices table; the two values must agree [app/integrations/ycharts/integration.py:134]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-03",
+   "tool": "ycharts_snapshot_metrics",
+   "question": "What are the price and P/E ratio of the S&P 500 today?",
+   "args": {
+    "symbols": [
+     "^SPX"
+    ],
+    "columns": [
+     "price",
+     "pe_ratio"
+    ]
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same two columns on the YCharts indices table for ^SPX [app/integrations/ycharts/integration.py:134]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-04",
+   "tool": "ycharts_time_series",
+   "question": "Show the daily price history of the S&P 500 for the first half of 2026",
+   "args": {
+    "symbol": "^SPX",
+    "metric": "price",
+    "start_date": "2026-01-01",
+    "end_date": "2026-06-30"
+   },
+   "expect": "nonempty",
+   "source_hint": "the point count against the trading days in that window, which the answer's points field states [app/integrations/ycharts/integration.py:147]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-05",
+   "tool": "ycharts_fund_series",
+   "question": "Give me the daily closing price history of the SPY fund",
+   "args": {
+    "symbol": "SPY",
+    "calc": "price"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the returned points against the trading days of the last year [app/integrations/ycharts/integration.py:160]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-06",
+   "tool": "ycharts_risk_return_scatter",
+   "question": "How do volatility and total return compare across SPY, QQQ and IWM?",
+   "args": {
+    "symbols": [
+     "SPY",
+     "QQQ",
+     "IWM"
+    ],
+    "x_metric": "annualized_volatility",
+    "y_metric": "annualized_total_return"
+   },
+   "expect": "nonempty",
+   "source_hint": "the series count must equal the three symbols sent; a second scatter read of the same tickers [app/integrations/ycharts/integration.py:173]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K5-07",
+   "tool": "ycharts_search",
+   "question": "What is the YCharts symbol for the S&P 500 index?",
+   "args": {
+    "query": "S&P 500"
+   },
+   "expect": "nonempty",
+   "source_hint": "the caret symbol the answer cites must appear in a second search for the same query [app/integrations/ycharts/integration.py:187]",
+   "expect_source": "ycharts"
+  },
+  {
+   "case_id": "K1-01",
+   "tool": "etfs_compare_peers",
+   "question": "Which sectors have IDVZ's rivals been buying year to date",
+   "args": {
+    "home_ticker": "IDVZ",
+    "period": "YTD",
+    "axis": "sector"
+   },
+   "expect": "nonempty",
+   "source_hint": "count the buying_trend rows of the newest part for the home group, period YTD, axis sector",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/buying_trend/"
+  },
+  {
+   "case_id": "K1-02",
+   "tool": "etfs_compare_peers",
+   "question": "What did PFOE's rivals buy over a period the table never reported",
+   "args": {
+    "home_ticker": "PFOE",
+    "period": "NO_SUCH_PERIOD",
+    "axis": "sector"
+   },
+   "expect": "empty",
+   "source_hint": "the section reason names the period and the answer lists the period values the newest part holds",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/buying_trend/"
+  },
+  {
+   "case_id": "K1-03",
+   "tool": "etfs_get_coverage",
+   "question": "How current is the holdings data for the rival fund BIDD",
+   "args": {
+    "fund_ticker": "BIDD"
+   },
+   "expect": "nonempty",
+   "source_hint": "the latest report date equals the newest canonical_shape partition report_date for BIDD",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/"
+  },
+  {
+   "case_id": "K1-04",
+   "tool": "etfs_get_coverage",
+   "question": "Show the coverage check for fund ticker idvz typed in lower case",
+   "args": {
+    "fund_ticker": "idvz"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the ticker rule of 2 to 6 uppercase letters"
+  },
+  {
+   "case_id": "K1-05",
+   "tool": "etfs_get_fund_bloomberg_characteristics",
+   "question": "What does Bloomberg show for DIVZ's NAV and yield yesterday",
+   "args": {
+    "fund_ticker": "DIVZ"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of the newest bbg fund_daily.parquet for DIVZ; the NAV field equals the answer",
+   "expect_source": "opal-data-etfs/bbg/"
+  },
+  {
+   "case_id": "K1-06",
+   "tool": "etfs_get_fund_bloomberg_characteristics",
+   "question": "What does Bloomberg show for the SPY fund characteristics",
+   "args": {
+    "fund_ticker": "SPY"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the four Opal fund tickers"
+  },
+  {
+   "case_id": "K1-07",
+   "tool": "etfs_get_fund_flows",
+   "question": "Did BIDD have net flows in early October 2026",
+   "args": {
+    "fund_ticker": "BIDD",
+    "from_date": "2026-10-01",
+    "to_date": "2026-10-13"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of flow_reconciliation rows for BIDD in the window equals the row count of the answer",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/flow_reconciliation/"
+  },
+  {
+   "case_id": "K1-08",
+   "tool": "etfs_get_fund_flows",
+   "question": "Show BIDD flows from 10/01/2026 onward",
+   "args": {
+    "fund_ticker": "BIDD",
+    "from_date": "10/01/2026"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the YYYY-MM-DD date rule"
+  },
+  {
+   "case_id": "K1-09",
+   "tool": "etfs_get_fund_holdings",
+   "question": "What are the holdings of DIVZ on the latest date",
+   "args": {
+    "fund_ticker": "DIVZ"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of gold holding rows for DIVZ in the newest holding.parquet partition equals the answer count",
+   "expect_source": "opal-data-etfs/gold/holding/"
+  },
+  {
+   "case_id": "K1-10",
+   "tool": "etfs_get_fund_holdings",
+   "question": "What are the holdings of the rival fund BIDD",
+   "args": {
+    "fund_ticker": "BIDD"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the four Opal fund tickers"
+  },
+  {
+   "case_id": "K1-11",
+   "tool": "etfs_get_fund_nav_history",
+   "question": "Give me DIVZ daily net assets since July 2026",
+   "args": {
+    "fund_ticker": "DIVZ",
+    "start": "2026-07-01",
+    "end": "2026-10-13"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of netassets_daily rows for DIVZ between the two dates equals the series length in the answer",
+   "expect_source": "opal-data-etfs/silver/netassets_daily.parquet"
+  },
+  {
+   "case_id": "K1-12",
+   "tool": "etfs_get_fund_nav_history",
+   "question": "Give me SPY daily net assets for the last month",
+   "args": {
+    "fund_ticker": "SPY"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the four Opal fund tickers"
+  },
+  {
+   "case_id": "K1-13",
+   "tool": "etfs_get_fund_snapshot",
+   "question": "What was PFDE's NAV and net assets on the last run",
+   "args": {
+    "fund_ticker": "PFDE"
+   },
+   "expect": "nonempty",
+   "source_hint": "the newest snapshots/snapshot_<date>.json lists PFDE with the same NAV as the answer",
+   "expect_source": "opal-data-etfs/snapshots/"
+  },
+  {
+   "case_id": "K1-14",
+   "tool": "etfs_get_fund_trades",
+   "question": "What did the PFOE rivals buy or sell this week",
+   "args": {
+    "peer_group": "PFOE",
+    "from_date": "2026-10-05",
+    "to_date": "2026-10-13"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of trade_schedule rows for the PFOE peer funds in the window equals the trade count of the answer",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/"
+  },
+  {
+   "case_id": "K1-15",
+   "tool": "etfs_get_fund_trades",
+   "question": "Which BIDD trades carried an action label nobody has recorded",
+   "args": {
+    "fund_ticker": "BIDD",
+    "action": "no_such_action"
+   },
+   "expect": "empty",
+   "source_hint": "a count of trade_schedule rows by action shows no row carries that action",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/trade_schedule/"
+  },
+  {
+   "case_id": "K1-16",
+   "tool": "etfs_get_monthly_report",
+   "question": "Did the September 2026 ETF ownership report go out with all its files",
+   "args": {
+    "month": "2026-09"
+   },
+   "expect": "nonempty",
+   "source_hint": "the object list of platinum/reports/2026-09/ equals a s3api list of the same prefix",
+   "expect_source": "opal-data-etfs/platinum/reports/"
+  },
+  {
+   "case_id": "K1-17",
+   "tool": "etfs_get_monthly_report",
+   "question": "Show the ETF ownership report for September 2026 written out in words",
+   "args": {
+    "month": "September 2026"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the YYYY-MM month rule"
+  },
+  {
+   "case_id": "K1-18",
+   "tool": "etfs_get_new_securities",
+   "question": "Which new stocks entered the ETFs on the latest run",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "count of entries in the newest new_securities.json equals the count in the answer",
+   "expect_source": "opal-data-etfs/mdpf/etfs/gold/new_securities/"
+  },
+  {
+   "case_id": "K1-19",
+   "tool": "etfs_get_ownership_rollup",
+   "question": "What is total Opal ETF ownership across partners today",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the dashboard total equals the sum of the partner files for the same date",
+   "expect_source": "opal-data-etfs/platinum/etf_ownership_dashboard.json"
+  },
+  {
+   "case_id": "K1-20",
+   "tool": "etfs_get_partner_ownership",
+   "question": "How much DIVZ did 49 Financial hold on 2026-10-12",
+   "args": {
+    "firm": "49financial",
+    "as_of": "2026-10-12",
+    "etf_ticker": "DIVZ"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of daily/49financial/2026-10-12.json; its DIVZ row equals the answer",
+   "expect_source": "opal-data-etfs/daily/"
+  },
+  {
+   "case_id": "K1-21",
+   "tool": "etfs_get_partner_ownership",
+   "question": "Show how much DIVZ the firm unknownfirm holds",
+   "args": {
+    "firm": "unknownfirm",
+    "etf_ticker": "DIVZ"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the partner key segments it accepts"
+  },
+  {
+   "case_id": "K1-22",
+   "tool": "etfs_get_peer_group_members",
+   "question": "Who are PFOE's rivals",
+   "args": {
+    "home_ticker": "PFOE"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of peer_group_map rows for home PFOE in the newest part equals the member count",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/peer_group_map/"
+  },
+  {
+   "case_id": "K1-23",
+   "tool": "etfs_get_research_notes",
+   "question": "What unusual activity did the model flag for TXUE",
+   "args": {
+    "fund_ticker": "TXUE"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of research_hypotheses rows for TXUE in the newest part equals the note count",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/research_hypotheses/"
+  },
+  {
+   "case_id": "K1-24",
+   "tool": "etfs_get_rival_fund_holdings",
+   "question": "What does BIDD hold today according to the canonical table",
+   "args": {
+    "fund_ticker": "BIDD"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of canonical_shape rows for BIDD at its newest report date equals the holding count",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/"
+  },
+  {
+   "case_id": "K1-25",
+   "tool": "etfs_get_rival_page_status",
+   "question": "Show me today's rival funds page status",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the manifest of the newest page day lists the same fund count as the page index",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/platinum/page/"
+  },
+  {
+   "case_id": "K1-26",
+   "tool": "etfs_get_rival_page_status",
+   "question": "Show the rival funds page for January 2020",
+   "args": {
+    "page_day": "2020-01-02"
+   },
+   "expect": "empty",
+   "source_hint": "a s3api list of the page prefix holds no manifest for that day",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/platinum/page/"
+  },
+  {
+   "case_id": "K1-27",
+   "tool": "etfs_get_security_reference",
+   "question": "What GICS industry is AMD in, and what was its close",
+   "args": {
+    "security": "AMD"
+   },
+   "expect": "nonempty",
+   "source_hint": "the security_market row for AMD in the newest part equals the GICS field of the answer",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/security_market/"
+  },
+  {
+   "case_id": "K1-28",
+   "tool": "etfs_get_security_reference",
+   "question": "Give me the reference record for no security at all",
+   "args": {
+    "security": ""
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the security rule of a ticker, Bloomberg id, CUSIP or ISIN"
+  },
+  {
+   "case_id": "K1-29",
+   "tool": "etfs_who_holds",
+   "question": "Which funds have ever held 000270 KS",
+   "args": {
+    "security": "000270_KS_Equity"
+   },
+   "expect": "nonempty",
+   "source_hint": "count of canonical_shape rows for the resolved ticker at the newest date equals the holder count",
+   "expect_source": "opal-data-etfs/rivalfunds/etfs/gold/canonical_shape/"
+  },
+  {
+   "case_id": "K6-01",
+   "tool": "whoami",
+   "question": "Who am I signed in as in Microsoft 365",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the displayName and mail of the answer equal the signed-in profile on a second read of GET /me"
+  },
+  {
+   "case_id": "K6-02",
+   "tool": "list_recent_email",
+   "question": "Show my three most recent emails",
+   "args": {
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of rows equals 3 and the newest receivedDateTime is the first row"
+  },
+  {
+   "case_id": "K6-03",
+   "tool": "list_recent_email",
+   "question": "Show my emails received after the year 2099",
+   "args": {
+    "top": 3,
+    "since_iso": "2099-01-01T00:00:00Z"
+   },
+   "expect": "empty",
+   "source_hint": "no mailbox item carries a receivedDateTime after 2099, so the count is 0"
+  },
+  {
+   "case_id": "K6-04",
+   "tool": "list_email_filtered",
+   "question": "List my newest emails received since the first of October 2026",
+   "args": {
+    "received_from": "2026-10-01",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of messages with receivedDateTime ge 2026-10-01 in the mailbox equals the rows returned, up to 3"
+  },
+  {
+   "case_id": "K6-05",
+   "tool": "list_email_filtered",
+   "question": "List my emails from September 2026 that carry attachments",
+   "args": {
+    "received_from": "2026-09-01",
+    "received_to": "2026-10-01",
+    "has_attachments": true,
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of messages with hasAttachments true in September 2026 is at least one"
+  },
+  {
+   "case_id": "K6-06",
+   "tool": "list_email_filtered",
+   "question": "List the emails I got yesterday using the word yesterday",
+   "args": {
+    "received_from": "yesterday"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid received_from error, since the value is not an ISO8601 date"
+  },
+  {
+   "case_id": "K6-07",
+   "tool": "search_email",
+   "question": "Find my emails that mention Opal",
+   "args": {
+    "query": "Opal",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the same $search query in Outlook web returns at least one message"
+  },
+  {
+   "case_id": "K6-08",
+   "tool": "list_email_attachments",
+   "question": "List the attachments on the first email that has one",
+   "args": {
+    "message_id": "<id from K6-05>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the attachment count equals the hasAttachments message's attachment count in Outlook web",
+   "depends_on": [
+    "K6-05"
+   ]
+  },
+  {
+   "case_id": "K6-09",
+   "tool": "inspect_email_attachment",
+   "question": "Identify the first attachment on that email without downloading it to me",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte count equals the size field of the attachment listed by list_email_attachments",
+   "depends_on": [
+    "K6-05",
+    "K6-08"
+   ]
+  },
+  {
+   "case_id": "K6-10",
+   "tool": "read_email",
+   "question": "Read the body of my most recent email",
+   "args": {
+    "message_id": "<id from K6-02>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the subject equals the subject of the first row of list_recent_email",
+   "depends_on": [
+    "K6-02"
+   ]
+  },
+  {
+   "case_id": "K6-11",
+   "tool": "validate_ssavail_attachment",
+   "question": "Check an SSAVAIL attachment against the content contract before saving",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the verdict is PASS or FLAG and the sha256 equals a second read of the same attachment",
+   "depends_on": [
+    "K6-05",
+    "K6-08"
+   ]
+  },
+  {
+   "case_id": "K6-12",
+   "tool": "list_calendar",
+   "question": "What is on my calendar for the next seven days",
+   "args": {
+    "days": 7
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of calendarView rows for the seven-day window equals the count in the answer"
+  },
+  {
+   "case_id": "K6-13",
+   "tool": "list_calendar",
+   "question": "What was on my calendar on the fourth of January 1999",
+   "args": {
+    "days": 1,
+    "start_date": "1999-01-04"
+   },
+   "expect": "empty",
+   "source_hint": "a calendarView count for that one-day window in 1999 is 0"
+  },
+  {
+   "case_id": "K6-14",
+   "tool": "find_online_meeting",
+   "question": "Find the Teams meeting for the first calendar event with a join link",
+   "args": {
+    "join_url": "<joinUrl from K6-12>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of matches equals the number of calendar events carrying that join URL",
+   "depends_on": [
+    "K6-12"
+   ]
+  },
+  {
+   "case_id": "K6-15",
+   "tool": "find_online_meeting",
+   "question": "Which Teams meeting has this made up join link",
+   "args": {
+    "join_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_k6nonexistent/0"
+   },
+   "expect": "empty",
+   "source_hint": "the count of meetings for a join URL that no meeting carries is 0"
+  },
+  {
+   "case_id": "K6-16",
+   "tool": "find_online_meeting",
+   "question": "Look up a Teams meeting with a blank join link",
+   "args": {
+    "join_url": "   "
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid join_url error before any Graph call"
+  },
+  {
+   "case_id": "K6-17",
+   "tool": "list_meeting_transcripts",
+   "question": "List every transcript of the first Teams meeting found",
+   "args": {
+    "meeting_id": "<id from K6-14>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of transcripts the meeting has in Teams, when it was recorded",
+   "depends_on": [
+    "K6-14"
+   ]
+  },
+  {
+   "case_id": "K6-18",
+   "tool": "read_meeting_transcript",
+   "question": "Read the first two thousand bytes of a meeting transcript",
+   "args": {
+    "meeting_id": "<id from K6-14>",
+    "transcript_id": "<id from K6-17>",
+    "offset": 0,
+    "limit": 2000
+   },
+   "expect": "nonempty",
+   "source_hint": "total_bytes equals the byte size the transcript listing reports, and sha256 is stable on a second read",
+   "depends_on": [
+    "K6-14",
+    "K6-17"
+   ]
+  },
+  {
+   "case_id": "K6-19",
+   "tool": "read_meeting_transcript",
+   "question": "Read a transcript using a meeting id that holds a slash",
+   "args": {
+    "meeting_id": "a/b",
+    "transcript_id": "x1"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid meeting_id error before any Graph call"
+  },
+  {
+   "case_id": "K6-20",
+   "tool": "list_teams",
+   "question": "Which Microsoft Teams am I a member of",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count equals the count of joined teams in the Teams client"
+  },
+  {
+   "case_id": "K6-21",
+   "tool": "list_channels",
+   "question": "Which channels does my first team have",
+   "args": {
+    "team_id": "<id from K6-20>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the channel count equals the count shown for that team in the Teams client; every team has a General channel",
+   "depends_on": [
+    "K6-20"
+   ]
+  },
+  {
+   "case_id": "K6-22",
+   "tool": "read_channel_messages",
+   "question": "Show the three newest messages in the first channel",
+   "args": {
+    "team_id": "<id from K6-20>",
+    "channel_id": "<id from K6-21>",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of top-level messages shown in the channel, up to 3",
+   "depends_on": [
+    "K6-20",
+    "K6-21"
+   ]
+  },
+  {
+   "case_id": "K6-23",
+   "tool": "list_chats",
+   "question": "Show my three most recently active Teams chats",
+   "args": {
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of chat rows equals the chats listed in the Teams client, up to 3"
+  },
+  {
+   "case_id": "K6-24",
+   "tool": "read_chat_messages",
+   "question": "Read the three newest messages in my most active chat",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "top": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the count of messages shown in that chat, up to 3",
+   "depends_on": [
+    "K6-23"
+   ]
+  },
+  {
+   "case_id": "K6-25",
+   "tool": "read_chat_message_images",
+   "question": "Show any pasted images in the newest message of my most active chat",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "message_id": "<id from K6-24>"
+   },
+   "expect": "empty",
+   "source_hint": "the image count is 0 because a typical chat message carries no hostedContents; the count is printed, never the image bytes",
+   "depends_on": [
+    "K6-23",
+    "K6-24"
+   ]
+  },
+  {
+   "case_id": "K6-26",
+   "tool": "read_teams_attachment",
+   "question": "Read a Teams file through a non web link",
+   "args": {
+    "content_url": "ftp://example.invalid/attachment"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns the content_url must be an http or https URL error before any Graph call"
+  },
+  {
+   "case_id": "K6-27",
+   "tool": "read_teams_attachment",
+   "question": "Read the file attached to the newest message in my most active chat",
+   "args": {
+    "content_url": "<contentUrl from K6-24>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size fields equal the attachment entry of the message read by read_chat_messages",
+   "depends_on": [
+    "K6-24"
+   ]
+  },
+  {
+   "case_id": "K6-28",
+   "tool": "poll_addressed_teams_messages",
+   "question": "Show Teams chats that got a new message after 2099",
+   "args": {
+    "since_iso": "2099-01-01T00:00:00Z",
+    "top": 5
+   },
+   "expect": "empty",
+   "source_hint": "no chat has a latest message after 2099, so new_messages count is 0"
+  },
+  {
+   "case_id": "K6-29",
+   "tool": "list_onedrive",
+   "question": "List the top level of my OneDrive",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count of root children equals the count shown in the OneDrive web root"
+  },
+  {
+   "case_id": "K6-30",
+   "tool": "search_files",
+   "question": "Search my OneDrive for files named Opal",
+   "args": {
+    "query": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of hits equals the count of the same search in the OneDrive web search box"
+  },
+  {
+   "case_id": "K6-31",
+   "tool": "get_item",
+   "question": "Show the type and size of the first OneDrive file found",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size equal the hit's name and size in the search result",
+   "depends_on": [
+    "K6-30"
+   ]
+  },
+  {
+   "case_id": "K6-32",
+   "tool": "read_file",
+   "question": "Read the text of the first OneDrive file found",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte count of the content equals the size field from get_item, or a binary hint is returned",
+   "depends_on": [
+    "K6-30"
+   ]
+  },
+  {
+   "case_id": "K6-33",
+   "tool": "read_workbook",
+   "question": "Read the first sheet of the first workbook in my OneDrive",
+   "args": {
+    "item_id": "<id from K6-30>",
+    "max_rows": 50
+   },
+   "expect": "nonempty",
+   "source_hint": "the rowCount of the used range equals a second read of the same worksheet",
+   "depends_on": [
+    "K6-30"
+   ]
+  },
+  {
+   "case_id": "K6-34",
+   "tool": "read_document",
+   "question": "Render the first OneDrive document as a PDF",
+   "args": {
+    "item_id": "<id from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the byte_size of the rendition is greater than 0, or the tool returns a format error for a non document file",
+   "depends_on": [
+    "K6-30"
+   ]
+  },
+  {
+   "case_id": "K6-35",
+   "tool": "list_shared_folder",
+   "question": "List a shared folder from a non web address",
+   "args": {
+    "url": "ftp://example.invalid/share"
+   },
+   "expect": "refused",
+   "source_hint": "the tool returns an invalid_url error before any Graph call"
+  },
+  {
+   "case_id": "K6-36",
+   "tool": "list_shared_folder",
+   "question": "List the folder shared at the link of the first OneDrive file found",
+   "args": {
+    "url": "<webUrl from K6-30>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the child count equals the count in the OneDrive web view of the same link, or the file metadata is returned",
+   "depends_on": [
+    "K6-30"
+   ]
+  },
+  {
+   "case_id": "K6-37",
+   "tool": "find_sharepoint_site",
+   "question": "Find SharePoint sites named Opal",
+   "args": {
+    "name": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of sites equals the count returned by the SharePoint admin site search for the same name"
+  },
+  {
+   "case_id": "K6-38",
+   "tool": "list_site_drives",
+   "question": "Which document libraries does the first Opal site hold",
+   "args": {
+    "site_id": "<id from K6-37>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the library count equals the count shown on the site's contents page; a site has at least one",
+   "depends_on": [
+    "K6-37"
+   ]
+  },
+  {
+   "case_id": "K6-39",
+   "tool": "list_site_files",
+   "question": "List the top folder of the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of root children equals the count shown in the site's default library",
+   "depends_on": [
+    "K6-37"
+   ]
+  },
+  {
+   "case_id": "K6-40",
+   "tool": "get_site_item",
+   "question": "Show the metadata of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the name and size equal the same item's entry in list_site_files",
+   "depends_on": [
+    "K6-37",
+    "K6-39"
+   ]
+  },
+  {
+   "case_id": "K6-41",
+   "tool": "read_site_file",
+   "question": "Read the text of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the content length equals the size from get_site_item, or a binary hint is returned",
+   "depends_on": [
+    "K6-37",
+    "K6-39"
+   ]
+  },
+  {
+   "case_id": "K6-42",
+   "tool": "profile_site_file",
+   "question": "Profile the layout of a file on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the bytes and sha256 equal a second read of the same item's content",
+   "depends_on": [
+    "K6-37",
+    "K6-39"
+   ]
+  },
+  {
+   "case_id": "K6-43",
+   "tool": "read_site_workbook",
+   "question": "Read the first sheet of a workbook on the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the rowCount of the used range equals a second read of the same worksheet",
+   "depends_on": [
+    "K6-37",
+    "K6-39"
+   ]
+  },
+  {
+   "case_id": "K6-44",
+   "tool": "search_site_files",
+   "question": "Search the first Opal site for files named Opal",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "query": "Opal"
+   },
+   "expect": "nonempty",
+   "source_hint": "the count of hits equals the count of the same search in the site's document library",
+   "depends_on": [
+    "K6-37"
+   ]
+  },
+  {
+   "case_id": "K6-45",
+   "tool": "copy_site_file_to_s3",
+   "question": "Copy a site file to the S3 bronze area with an extension it does not admit",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "item_id": "<id from K6-39>",
+    "quarter": "2026Q3",
+    "extension": ".exe"
+   },
+   "expect": "preview",
+   "source_hint": "the extension is refused before any read or write (site_to_s3 _pair check), so the answer is refused true and nothing is written; no confirm or dry-run path exists in the definition",
+   "depends_on": [
+    "K6-37",
+    "K6-39"
+   ]
+  },
+  {
+   "case_id": "K6-46",
+   "tool": "create_draft",
+   "question": "Draft an email with no recipients named",
+   "args": {
+    "subject": "Preview only",
+    "body": "Preview only, nothing to save."
+   },
+   "expect": "preview",
+   "source_hint": "the required to argument is absent, so the call is refused before the function runs and no draft is written; the definition has no confirm or dry-run path"
+  },
+  {
+   "case_id": "K6-47",
+   "tool": "reply_email",
+   "question": "Draft a reply to my latest email and hold it until I confirm",
+   "args": {
+    "message_id": "<id from K6-02>",
+    "comment": "Thanks, I will review this today.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required before any Graph send (IRREVERSIBLE_SEND, uncountable blast); the answer is confirm_required true",
+   "depends_on": [
+    "K6-02"
+   ]
+  },
+  {
+   "case_id": "K6-48",
+   "tool": "save_email_attachment_to_site",
+   "question": "Save an email attachment to a site folder with no folder named",
+   "args": {
+    "message_id": "<id from K6-05>",
+    "attachment_id": "<attachment id from K6-08>",
+    "site_id": "<id from K6-37>",
+    "folder_path": "",
+    "filename": "preview.txt"
+   },
+   "expect": "preview",
+   "source_hint": "an empty folder_path returns invalid folder_path before any Graph call or write (tools.py:380-382)",
+   "depends_on": [
+    "K6-05",
+    "K6-08",
+    "K6-37"
+   ]
+  },
+  {
+   "case_id": "K6-49",
+   "tool": "send_channel_message",
+   "question": "Post a status note to the first team channel, held until I confirm",
+   "args": {
+    "team_id": "<id from K6-20>",
+    "channel_id": "<id from K6-21>",
+    "message": "Status check, no action needed.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required after the opal-users send gate and before any POST (IRREVERSIBLE_SEND, uncountable)",
+   "depends_on": [
+    "K6-20",
+    "K6-21"
+   ]
+  },
+  {
+   "case_id": "K6-50",
+   "tool": "send_chat_message",
+   "question": "Post a short status note to my most active chat, held until I confirm",
+   "args": {
+    "chat_id": "<id from K6-23>",
+    "message": "Status check, no action needed.",
+    "confirm": false
+   },
+   "expect": "preview",
+   "source_hint": "confirm=false returns confirm_required after the opal-users send gate and before any POST (IRREVERSIBLE_SEND, uncountable)",
+   "depends_on": [
+    "K6-23"
+   ]
+  },
+  {
+   "case_id": "K6-51",
+   "tool": "send_email",
+   "question": "Send an email with no recipient named",
+   "args": {
+    "subject": "Preview only",
+    "body": "Preview only, nothing to send."
+   },
+   "expect": "preview",
+   "source_hint": "the required to argument is absent, so the call is refused before the function runs and nothing is sent; confirm=false is NOT a preview for send_email under the blast cap (see the surprise row)"
+  },
+  {
+   "case_id": "K6-52",
+   "tool": "upload_text_to_site",
+   "question": "Upload a text file with a slash in its name to the first Opal site",
+   "args": {
+    "site_id": "<id from K6-37>",
+    "folder_path": "Reports",
+    "filename": "bad/name.txt",
+    "content": "preview"
+   },
+   "expect": "preview",
+   "source_hint": "a filename with a slash raises unsafe filename before the call and nothing is written (tools.py:826-827)",
+   "depends_on": [
+    "K6-37"
+   ]
+  },
+  {
+   "case_id": "K2-01",
+   "tool": "etfs_get_positioning",
+   "question": "What does PFDE hold, and what is its AUM?",
+   "args": {
+    "fund_ticker": "PFDE"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of the positioning key; the PFDE block equals its entry in the whole object [app/integrations/portal_index/integration.py:501]",
+   "expect_source": "opal-data-portal-v2/platinum/etfs/positioning_data.json"
+  },
+  {
+   "case_id": "K2-02",
+   "tool": "etfs_get_positioning",
+   "question": "Show the whole Opal ETF positioning table with each fund's own as-of date.",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "head-object of the same key; the answer's as_of equals the object's own data_as_of [app/integrations/portal_index/integration.py:501]",
+   "expect_source": "opal-data-portal-v2/platinum/etfs/positioning_data.json"
+  },
+  {
+   "case_id": "K2-03",
+   "tool": "gateway_query_catalog",
+   "question": "Give me the model portfolio return series from the catalog.",
+   "args": {
+    "key": "json/benchmarks/model_portfolio_timeseries.json"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second get of the same catalog key; the row count equals the denominator of the answer",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-04",
+   "tool": "gateway_query_catalog",
+   "question": "Fetch a dataset key that the catalog does not list at all.",
+   "args": {
+    "key": "json/no-such-dataset/unlisted.json"
+   },
+   "expect": "refused",
+   "source_hint": "the catalog gate refuses an off-catalog key before any read"
+  },
+  {
+   "case_id": "K2-05",
+   "tool": "mdpf_get_account_distribution",
+   "question": "How is 49 Financial AUM distributed across account-size buckets?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the account-size buckets in the object against the answer's denominator [app/integrations/portal_index/integration.py:465]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/account-distribution.json"
+  },
+  {
+   "case_id": "K2-06",
+   "tool": "mdpf_get_account_distribution",
+   "question": "How is AUM distributed across account sizes for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:465]"
+  },
+  {
+   "case_id": "K2-07",
+   "tool": "mdpf_get_aggregate_aua",
+   "question": "How has Cottonwood's assets under advisement moved over time?",
+   "args": {
+    "scope": "cottonwood"
+   },
+   "expect": "nonempty",
+   "source_hint": "as_of_last of a second head-object read equals the newest point of the series [app/integrations/portal_index/integration.py:470]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/cottonwood/aggregate-aua-timeseries.json"
+  },
+  {
+   "case_id": "K2-08",
+   "tool": "mdpf_get_aggregate_aua",
+   "question": "What is the AUA trend over time for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:470]"
+  },
+  {
+   "case_id": "K2-09",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is total AUM for 49 Financial as of the latest period?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same object and its own as-of date [app/integrations/portal_index/integration.py:460]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/aum-metrics.json"
+  },
+  {
+   "case_id": "K2-10",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is the enterprise total AUM as of the latest period?",
+   "args": {
+    "scope": "global"
+   },
+   "expect": "nonempty",
+   "source_hint": "a second read of the same object and its own as-of date [app/integrations/portal_index/integration.py:460]",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/global/aum-metrics.json"
+  },
+  {
+   "case_id": "K2-11",
+   "tool": "mdpf_get_aum_metrics",
+   "question": "What is total AUM for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the resolver refuses a scope that is not a member of the catalog row [app/integrations/portal_index/integration.py:460]"
+  },
+  {
+   "case_id": "K2-12",
+   "tool": "mdpf_get_model_benchmarks",
+   "question": "Did each model beat its index benchmark since inception?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the first benchmark row equals the same row in a second read of the object [app/integrations/portal_index/integration.py:478]",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_benchmarks.json"
+  },
+  {
+   "case_id": "K2-13",
+   "tool": "mdpf_get_category_views",
+   "question": "How is 49 Financial AUA split between Models, SMA and Client assets?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of the five category nodes in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/platinum/mdpf/49financial/category-views.json"
+  },
+  {
+   "case_id": "K2-14",
+   "tool": "mdpf_get_category_views",
+   "question": "How is AUA split by category for a firm the catalog does not hold?",
+   "args": {
+    "scope": "nobody"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a scope outside the firm scopes the catalog row enumerates"
+  },
+  {
+   "case_id": "K2-15",
+   "tool": "mdpf_get_model_composition",
+   "question": "What does each 49 Financial model hold, and at what weights?",
+   "args": {
+    "scope": "49financial"
+   },
+   "expect": "nonempty",
+   "source_hint": "a count of rows in the newest daily partition against the rows_newest_partition figure of the catalog contract",
+   "expect_source": "opal-data-mdpf/mdpf/feeds/model_composition/49financial/"
+  },
+  {
+   "case_id": "K2-16",
+   "tool": "mdpf_get_model_composition",
+   "question": "What does each Cottonwood model hold, and at what weights?",
+   "args": {
+    "scope": "cottonwood"
+   },
+   "expect": "refused",
+   "source_hint": "the tool refuses a scope the catalog row does not declare as a firm dimension"
+  },
+  {
+   "case_id": "K2-17",
+   "tool": "news_market_mood",
+   "question": "What is the market mood and the fear and greed index today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "generated_at of the fear-greed singleton equals the answer's as_of in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/sentiment/"
+  },
+  {
+   "case_id": "K2-18",
+   "tool": "opal_asker_query",
+   "question": "Ask the catalog for the model portfolio return series from a Teams message.",
+   "args": {
+    "chat_id": "<chat id of a recent Teams message from a profiled asker>",
+    "message_id": "<message id of that message>",
+    "key": "json/benchmarks/model_portfolio_timeseries.json"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same catalog key read by gateway_query_catalog under the asker's own grant; needs the ids of a live recent Teams message",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-19",
+   "tool": "portal_get_cma_assumptions",
+   "question": "What are the capital-markets assumptions for each asset class?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the row count of the assumptions list in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/capital-markets/assumptions.json"
+  },
+  {
+   "case_id": "K2-20",
+   "tool": "portal_get_correlations",
+   "question": "Which correlation windows and tickers does the portal hold?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the window names equal those in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/correlations/correlation_data.json"
+  },
+  {
+   "case_id": "K2-21",
+   "tool": "portal_get_etf_returns",
+   "question": "What did the ETF benchmarks return this quarter?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the data_as_of date equals the one in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/etf_returns.json"
+  },
+  {
+   "case_id": "K2-22",
+   "tool": "portal_get_factor_tilts",
+   "question": "Show the current factor tilt snapshot for the book.",
+   "args": {
+    "part": "tier1-snapshot"
+   },
+   "expect": "nonempty",
+   "source_hint": "the as_of of the tier1-snapshot part equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/factor-tilts/tier1-snapshot.json"
+  },
+  {
+   "case_id": "K2-23",
+   "tool": "portal_get_macro",
+   "question": "Show the macro indicators and their latest readings.",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the macro group count equals the count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/macro/macro_data.json"
+  },
+  {
+   "case_id": "K2-24",
+   "tool": "portal_get_market_regime",
+   "question": "What market regime are we in and why?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the as_of date equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/market/market-regime.json"
+  },
+  {
+   "case_id": "K2-25",
+   "tool": "portal_get_market_returns",
+   "question": "What were the index and sector returns for the year to date?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the count of index and sector rows equals the count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json-tiered/market-overview/summary/all-returns.json"
+  },
+  {
+   "case_id": "K2-26",
+   "tool": "portal_get_model_attribution",
+   "question": "What were the QTD, YTD and since-inception attribution totals per model?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the per-model totals equal those in a second read of the holdings attribution object",
+   "expect_source": "opal-data-portal-v2/json/positioning/"
+  },
+  {
+   "case_id": "K2-27",
+   "tool": "portal_get_model_portfolio_timeseries",
+   "question": "What are the latest daily model and benchmark returns?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the newest date in the series equals the one in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json"
+  },
+  {
+   "case_id": "K2-28",
+   "tool": "portal_get_model_positioning",
+   "question": "How is each model positioned versus its benchmark today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the model count equals the count in a second read of the positioning object",
+   "expect_source": "opal-data-portal-v2/json/positioning/"
+  },
+  {
+   "case_id": "K2-29",
+   "tool": "portal_get_peer_performance",
+   "question": "How does each model rank against peers over one year?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the model count equals the models key count in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/peers/peer_performance.json"
+  },
+  {
+   "case_id": "K2-30",
+   "tool": "portal_get_pipeline_freshness",
+   "question": "As of what date is the portal model data, and when did the last refresh run?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the manifest run date equals the one in a second head-object read",
+   "expect_source": "opal-data-portal-v2/json/latest/manifest.json"
+  },
+  {
+   "case_id": "K2-31",
+   "tool": "portal_get_security_scan",
+   "question": "Which names in a universe that is not served score highest on quality?",
+   "args": {
+    "universe": "k2-no-such-universe",
+    "factor": "quality"
+   },
+   "expect": "empty",
+   "source_hint": "the universe folder is absent, so the answer has empty lists and an absent_reason; s3api list of the universes prefix",
+   "expect_source": "opal-data-portal-v2/json/security_scanner/latest/universes/"
+  },
+  {
+   "case_id": "K2-32",
+   "tool": "portal_get_trending",
+   "question": "What are today's top bullish and bearish news themes?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the bullish and bearish topic counts equal those in a second read of the same object",
+   "expect_source": "opal-data-portal-v2/json/trending/latest.json"
+  },
+  {
+   "case_id": "K2-33",
+   "tool": "portal_get_valuation",
+   "question": "What are the valuation multiples and the equity risk premium today?",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the index count equals the count in a second read of valuation_data.json",
+   "expect_source": "opal-data-portal-v2/json/valuation/"
+  },
+  {
+   "case_id": "K3-01",
+   "tool": "client_resolve_account",
+   "question": "Which 49 Financial accounts match the last four digits I type",
+   "args": {
+    "firm": "49financial",
+    "account_last4": "<last four digits of a 49 Financial Black Diamond account, typed by the staff member>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the candidate count equals the dim_account_xref rows for the same last four digits [app/client_adapter_bd49f.py:468]",
+   "expect_source": "blackdiamond/49f/silver/dim_account_xref/"
+  },
+  {
+   "case_id": "K3-02",
+   "tool": "client_get_holdings",
+   "question": "What does this 49 Financial Black Diamond account hold today",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the position count equals the unrealized lot rows of the newest opal-data-bd partition",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/unrealized/"
+  },
+  {
+   "case_id": "K3-03",
+   "tool": "client_get_transactions",
+   "question": "What trades did this 49 Financial account make in early October",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>",
+    "from_date": "2026-10-01",
+    "to_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the transaction lines of the same window in the opal-data-bd silver partitions",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/transactions/"
+  },
+  {
+   "case_id": "K3-04",
+   "tool": "client_get_allocation",
+   "question": "What is the current allocation of this 49 Financial account",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>"
+   },
+   "expect": "nonempty",
+   "source_hint": "the weight rows equal the newest opal-data-bd allocations partition for the account",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/allocations/"
+  },
+  {
+   "case_id": "K3-05",
+   "tool": "client_get_fees",
+   "question": "What fees were charged to this 49 Financial account in early October",
+   "args": {
+    "firm": "49financial",
+    "account": "<blackdiamond account_ref from K3-01>",
+    "from_date": "2026-10-01",
+    "to_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the fee rows equal the non-null fee amount lines of the same window in the opal-data-bd fees partitions",
+   "depends_on": [
+    "K3-01"
+   ],
+   "expect_source": "silver/fees/"
+  },
+  {
+   "case_id": "K3-06",
+   "tool": "blackdiamond_list_fees",
+   "question": "What fees were charged on 49 Financial Black Diamond trades in early October",
+   "args": {
+    "scope": "49financial",
+    "date_from": "2026-10-01",
+    "date_to": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the fee lines of the same trade dates in the silver/fees partition objects",
+   "expect_source": "opal-data-bd/silver/fees"
+  },
+  {
+   "case_id": "K3-07",
+   "tool": "schwab_get_access",
+   "question": "Which Schwab dates can I download right now",
+   "args": {},
+   "expect": "nonempty",
+   "source_hint": "the available dates equal the complete markers under the completion prefix [app/integrations/schwab/integration.py:423]",
+   "expect_source": "schwab/08242234/meta/complete/"
+  },
+  {
+   "case_id": "K3-08",
+   "tool": "schwab_list_files",
+   "question": "Which Schwab security files exist for early October",
+   "args": {
+    "master": "08242234",
+    "dataset": "dim_asset",
+    "start_date": "2026-10-01",
+    "end_date": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "the file count equals the dim_asset objects listed under that prefix for the same window [app/integrations/schwab/integration.py:460]",
+   "expect_source": "schwab/08242234/silver/dim_asset/"
+  },
+  {
+   "case_id": "K3-09",
+   "tool": "schwab_describe_dataset",
+   "question": "What fields and units does the Schwab position dataset have",
+   "args": {
+    "master": "08242234",
+    "dataset": "dim_position"
+   },
+   "expect": "nonempty",
+   "source_hint": "the field count equals the dim_position fields granted in datasets.json [app/integrations/schwab/integration.py:504]",
+   "expect_source": "data/assets/scripts/silver/schwab_schemas.py"
+  },
+  {
+   "case_id": "K3-10",
+   "tool": "schwab_query",
+   "question": "Show three Schwab positions held on a business day",
+   "args": {
+    "query": {
+     "master": "08242234",
+     "dataset": "dim_position",
+     "business_date": "2026-10-16",
+     "mode": "rows",
+     "columns": [
+      "cusip",
+      "ticker_symbol",
+      "quantity_settled"
+     ],
+     "page_size": 3
+    }
+   },
+   "expect": "nonempty",
+   "source_hint": "the row count equals the dim_position rows of that business date in the pinned object [app/integrations/schwab/integration.py:596]",
+   "expect_source": "schwab/08242234/silver/dim_position/"
+  },
+  {
+   "case_id": "K3-11",
+   "tool": "schwab_prepare_download",
+   "question": "Prepare a filtered CSV download of one Schwab listing",
+   "args": {
+    "catalog_id": "not-a-file-id"
+   },
+   "expect": "preview",
+   "source_hint": "refused by the catalog_id format check before any ticket is written; the ticket write it would make is at [app/integrations/schwab/export.py:122]"
+  },
+  {
+   "case_id": "H1",
+   "tool": "harvest_list",
+   "question": "List the tables the harvest bucket holds in its gold layer",
+   "args": {
+    "prefix": "amgt/harvest/gold/"
+   },
+   "expect": "nonempty",
+   "source_hint": "s3api list-objects-v2 with a delimiter on the same prefix"
+  },
+  {
+   "case_id": "H2",
+   "tool": "harvest_list",
+   "question": "List a folder the harvest bucket does not serve",
+   "args": {
+    "prefix": "not/a/served/prefix/"
+   },
+   "expect": "refused",
+   "source_hint": "the tool names the served prefixes"
+  },
+  {
+   "case_id": "H3",
+   "tool": "harvest_resolve_security",
+   "question": "What is the harvest security key for AAPL",
+   "args": {
+    "query": "AAPL"
+   },
+   "expect": "nonempty",
+   "source_hint": "the crosswalk object the answer cites"
+  },
+  {
+   "case_id": "H4",
+   "tool": "harvest_search_articles",
+   "question": "Show the latest three articles that mention Apple",
+   "args": {
+    "security_key": "AAPL_US_Equity",
+    "limit": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of the gold mention part the answer cites"
+  },
+  {
+   "case_id": "H5",
+   "tool": "harvest_get_chatter",
+   "question": "How much press chatter was there on Apple in early October",
+   "args": {
+    "security_key": "AAPL_US_Equity",
+    "from_day": "2026-10-01",
+    "to_day": "2026-10-14"
+   },
+   "expect": "nonempty",
+   "source_hint": "harvest_query_columns row counts and head-object of the cited part"
+  },
+  {
+   "case_id": "H6",
+   "tool": "harvest_get_filing_analysis",
+   "question": "Show the latest analysed filing for Apple",
+   "args": {
+    "security_key": "AAPL_US_Equity"
+   },
+   "expect": "empty",
+   "source_hint": "s3api list of the filings prefix for the security"
+  },
+  {
+   "case_id": "H7",
+   "tool": "harvest_get_fundamentals",
+   "question": "Show Apple's reference fundamentals",
+   "args": {
+    "security_key": "AAPL_US_Equity",
+    "kind": "reference"
+   },
+   "expect": "empty",
+   "source_hint": "s3api list of the refdata prefix for the security, with a covered-security control"
+  },
+  {
+   "case_id": "H8",
+   "tool": "harvest_get_peers_and_scores",
+   "question": "Who are Apple's closest peers",
+   "args": {
+    "security_key": "AAPL_US_Equity"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object of the peers object the answer cites"
+  },
+  {
+   "case_id": "H9",
+   "tool": "harvest_get_published_analysis",
+   "question": "Show the published overlay for Apple",
+   "args": {
+    "security_key": "AAPL_US_Equity"
+   },
+   "expect": "nonempty",
+   "source_hint": "the first feed item equals the first article of harvest_search_articles"
+  },
+  {
+   "case_id": "H10",
+   "tool": "harvest_get_research",
+   "question": "Show our research dossier on Apple",
+   "args": {
+    "security_key": "AAPL_US_Equity"
+   },
+   "expect": "empty",
+   "source_hint": "s3api list of the dossier prefix, with a covered-security control"
+  },
+  {
+   "case_id": "H11",
+   "tool": "harvest_security_coverage",
+   "question": "What does the harvest bucket hold on Apple and how fresh is it",
+   "args": {
+    "security_key": "AAPL_US_Equity"
+   },
+   "expect": "nonempty",
+   "source_hint": "s3api object count of the peers prefix equals the coverage row"
+  },
+  {
+   "case_id": "H12",
+   "tool": "news_for_security",
+   "question": "Show the last week of news on Apple",
+   "args": {
+    "ticker": "AAPL",
+    "window_days": 7
+   },
+   "expect": "empty",
+   "source_hint": "the newest Apple article date is before the window start"
+  },
+  {
+   "case_id": "H13",
+   "tool": "harvest_read",
+   "question": "Read one harvest object by its key",
+   "args": {
+    "key": "filings/v1/AAPL_US_Equity/UNRESOLVED-SOURCE.source.json"
+   },
+   "expect": "nonempty",
+   "source_hint": "head-object ContentLength equals the bytes returned"
+  },
+  {
+   "case_id": "H14",
+   "tool": "harvest_get_article",
+   "question": "Show one article by its key",
+   "args": {
+    "article_key": "bbg:TMDYW1VTTCZL00",
+    "publisher": "bbg"
+   },
+   "expect": "nonempty",
+   "source_hint": "the same article and title in harvest_search_articles"
+  },
+  {
+   "case_id": "H15",
+   "tool": "harvest_query_columns",
+   "question": "Show three daily chatter rows for Apple",
+   "args": {
+    "dataset": "chatter_daily",
+    "columns": [
+     "security_key",
+     "day",
+     "articles_total"
+    ],
+    "security_keys": [
+     "AAPL_US_Equity"
+    ],
+    "limit": 3
+   },
+   "expect": "nonempty",
+   "source_hint": "rows_after_filter equals rows_for_key of harvest_get_chatter"
+  },
+  {
+   "case_id": "H16",
+   "tool": "harvest_query_columns",
+   "question": "Ask the harvest query for a dataset it does not allow",
+   "args": {
+    "dataset": "no_such_dataset",
+    "columns": [
+     "x"
+    ]
+   },
+   "expect": "refused",
+   "source_hint": "the tool names its allow-list"
+  }
+ ]
+}
