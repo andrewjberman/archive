@@ -15,6 +15,8 @@
 | `OG-ed-1` | master-admin exemption on the legacy `/callback` consent branch (the CTO half of `OG-gv-1`, option 2) | complete (worker `~175`, drained `17c53cdd2cb`; my `ed1.AC1`, `AC2`, `AC3` PASS on the merged tree; rows Z-S437) |
 | `OG-rl-17` | batch16 release | OPEN: re-cut at the cap 26 (release `8e3eddf959`, ask `291ffc35747a`), all three halves SIGNED, Phase B GO sent for window 2026-10-21 06:00Z |
 | `OG-mp-1` | mount `admin_people_access.routes` in `app/admin_api.py` (the CTO's ferry 17:30Z, NFRA_MCPORTAL v0.10) | complete (worker `~176`, drained `a4197b93aed`; my `mp1.AC1`, `AC2`, `AC3` PASS on the merged tree; no rows) |
+| `OG-sk-1`, `OG-sk-2`, `OG-sk-3` | the Schwab 0840 move: the gateway census, the catalog DUAL READ (new first, old second, file-name fence) and the reader IAM text | complete (`OG-sk-1` `9bcbf580a33`, `OG-sk-2` `bed56db150e`, `OG-sk-3` `a4c6ecfd30c`; my checks PASS on the merged tree; rows Z-S439, Z-S440, Z-S441) |
+| `OG-rl-19` | release R3c: the two reader-IAM policies (targeted `safe-apply`) and four code files, gated by the laptop's R3a (bucket exemption) and a gate read as the catalog role | OPEN: staged; 2026-10-21 07:00Z-11:30Z after batch16 |
 | `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount: ten files) | OPEN: staged, not before 2026-10-22 06:00Z |
 
 ## 2. What the round delivered against the endpoint -- OPEN
