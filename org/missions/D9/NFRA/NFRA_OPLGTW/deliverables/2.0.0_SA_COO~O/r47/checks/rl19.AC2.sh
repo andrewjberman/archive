@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-19 AC2 (round 47, R3c, PHASE B): the order of acts held and the dual read is live. The ledger nfra-oplgtw-gateway-release-r3c is CLOSED; the sentinel is gone; the manifest's deployed_commit is the release (or was and is superseded).
 # Record W/R3C_SERVED.json (field names fixed here):
-#  {"body": {"health_after": 200, "marker_sha": <release sha>, "marker_equals_release": true, "tools_list": 103, "tools_list_before": 103, "registry_count": 103, "env_key_count": 65, "nrestarts_after_deploy": 0,
+#  {"body": {"base_reread_on_host_equals_base_sha": true, "health_after": 200, "marker_sha": <release sha>, "marker_equals_release": true, "tools_list": 103, "tools_list_before": 103, "registry_count": 103, "env_key_count": 65, "nrestarts_after_deploy": 0,
 #   "host_md5": {"differ": 0, "missing_on_host": 0}, "systemd_failed_units": 0, "clock_read_before_close": true, "host_clock": {"leap_status": "Normal", "synchronised": true},
 #   "readback": {"minutes": >= 15, "triggers_fired": 0, "nrestarts_during_readback": 0},
 #   "order": {"r3a_confirmation_ref": "<the laptop MSTR's relay, a file name under org/mcp/inbox/...>", "r3a_confirmation_read_before_terraform_apply": true, "terraform_applied_before_gate_read": true, "gate_read_before_code_deploy": true},
@@ -40,8 +40,9 @@ gr_ok = gr.get("as_role") == "gateway-schwab-catalog-read-role" and gr.get("get_
 dr_ok = (dr.get("master") == "08403355" and isn(dr.get("dates_before")) and dr["dates_before"] >= 1 and isn(dr.get("dates_after")) and dr["dates_after"] >= dr["dates_before"]
          and isinstance(dr.get("newest_before"), str) and isinstance(dr.get("newest_after"), str) and dr["newest_after"] >= dr["newest_before"] and dr.get("marker_location") == "old"
          and dr.get("snapshot_status_before") == dr.get("snapshot_status_after") and dr.get("snapshot_status_before") and dr.get("other_masters_unchanged") is True and dr.get("planted_second_master_ignored") is True)
-ok = (d.get("health_after") == 200 and d.get("env_key_count") == 65 and d.get("registry_count") == 103 and d.get("tools_list") == 103 and d.get("tools_list_before") == 103 and marker and md5.get("differ") == 0
+ok = (d.get("base_reread_on_host_equals_base_sha") is True and d.get("health_after") == 200 and d.get("env_key_count") == 65 and d.get("registry_count") == 103 and d.get("tools_list") == 103 and d.get("tools_list_before") == 103 and marker and md5.get("differ") == 0
       and md5.get("missing_on_host") == 0 and clk_ok and rb_ok and od_ok and tf_ok and gr_ok and dr_ok and d.get("nrestarts_after_deploy") == 0)
+print("base re-read on the host at the start of Phase B equals base_sha: %s" % ("yes" if d.get("base_reread_on_host_equals_base_sha") is True else "NO"))
 print("tools/list %s before %s (want 103 and 103); marker equals the release sha %s; health %s; registry %s (want 103); env keys %s (want 65); host md5 differ %s, missing %s (want 0, 0); restarts after deploy %s (want 0)" % (
       d.get("tools_list"), d.get("tools_list_before"), "yes" if marker else "no", d.get("health_after"), d.get("registry_count"), d.get("env_key_count"), md5.get("differ"), md5.get("missing_on_host"), d.get("nrestarts_after_deploy")))
 print("host clock %s synchronised %s, failed units %s, read BEFORE the ledger closed %s: %s; read-back %s minutes, triggers %s, restarts %s: %s" % (

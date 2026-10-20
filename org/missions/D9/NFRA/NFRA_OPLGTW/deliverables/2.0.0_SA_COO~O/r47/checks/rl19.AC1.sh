@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-19 AC1 (round 47, the gateway release R3c: the Schwab 0840 DUAL READ; PHASE A). The release tree is exactly four files over the base, the hybrid integration.py is exactly base + the OG-sk-2 hunk, the plan is two in-place IAM policy changes, the ask is complete.
-#  - W/rl19_release.json {base_sha, release_sha, trunk_sha, live_ref_host}; base_sha IS the live ref read on the host (at Phase A: batch16's release 8e3eddf959, re-read at Phase B); dell1's harvest release 6575999df5 is an ancestor of base.
+#  - W/rl19_release.json {base_sha, release_sha, trunk_sha, live_ref_host}; base_sha IS the live ref read on the host, OR (Phase A before batch16 is live) batch16's release 8e3eddf959 PREDICTED while the host still reads the pre-batch16 ref 13917ef993; either way Phase B re-reads the host and AC2 requires it to equal base_sha; dell1's harvest release 6575999df5 is an ancestor of base.
 #  - base..release differs ONLY in these four files under infra/aws/ec2/opal-gateway/: app/integrations/schwab/catalog.py, deploy/NFRA_OPLGTW_CONTRACT.json, tests/test_og_sk2.py (each byte-equal to its blob at trunk_sha) and
 #    app/integrations/schwab/integration.py = the BASE blob with the OG-sk-2 hunk applied (the diff of trunk between c0a0ee2e9c2 and the OG-sk-2 drain, applied onto the base blob): NOT trunk's blob, which carries OG-rt-1's hunks (batch17's).
 #    No deploy script, no deploy/ file other than the contract, no EC2_MANIFEST.json, no .tf, no unit in the diff.
@@ -15,6 +15,8 @@ REC="${RL19_REC_OVERRIDE:-$W/rl19_release.json}"; PA="${RL19_PA_OVERRIDE:-$W/PHA
 read -r base rel trunk hostlive <<<"$(python3 -I -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('base_sha',''),d.get('release_sha',''),d.get('trunk_sha',''),d.get('live_ref_host',''))" "$(native "$REC")" | tr -d '\r')"
 git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git cat-file -e "${trunk}^{commit}" || { echo "base, release or trunk sha is not a commit here"; echo "RESULT: FAIL"; exit 1; }
 live=${RL19_LIVE_OVERRIDE:-$hostlive}
+B16=8e3eddf95916e430e4e9bbf615ca4fd91f9e852f; P0=13917ef993207bee6b8df0124eec5444da4d62cd
+if [ -n "$live" ] && [ "$base" = "$live" ]; then base_ok=yes; elif [ "$base" = "$B16" ] && [ "$live" = "$P0" ]; then base_ok=predicted; else base_ok=no; fi
 DELL=6575999df5d22c0123abfc0c88cd1c6f1efe8c96
 git merge-base --is-ancestor "$DELL" "$base" && dellanc=yes || dellanc=no
 TRUNK_WHOLE="app/integrations/schwab/catalog.py deploy/NFRA_OPLGTW_CONTRACT.json tests/test_og_sk2.py"
@@ -69,10 +71,10 @@ print("yes" if need else "no")
 PYEOF
 )
 halves=$(printf '%s' "$halves" | tr -d '\r')
-echo "base ${base:0:10} is the live ref read on the host: $([ "$base" = "$live" ] && [ -n "$live" ] && echo yes || echo no); dell1 harvest release ${DELL:0:10} is an ancestor of base: $dellanc; release ${rel:0:10}; trunk ${trunk:0:10}"
+echo "base ${base:0:10} is the live ref read on the host, or batch16's release predicted while the host still reads the pre-batch16 ref: $base_ok; dell1 harvest release ${DELL:0:10} is an ancestor of base: $dellanc; release ${rel:0:10}; trunk ${trunk:0:10}"
 echo "files differing $n (want 4); outside the four 0 expected: $outside; the four missing $missing (want 0); the three trunk-whole files not byte-equal to trunk's $neq (want 0); barred files (deploy script, unit, manifest, .tf) $barred (want 0)"
 echo "integration.py is the BASE blob plus the OG-sk-2 hunk only (not trunk's blob): $hyb_ok"
 printf '%s\n' "$rec" | sed '$d'
 echo "ask has the three halves, the process-wide state line, the first grant on opal-data-49financial, the ABSENT-only fallback and R3a $halves"
-[ "$dellanc" = yes ] && [ -n "$live" ] && [ "$base" = "$live" ] && [ "$n" = 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$hyb_ok" = yes ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ "$dellanc" = yes ] && [ "$base_ok" != no ] && [ "$n" = 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$hyb_ok" = yes ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
