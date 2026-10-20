@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-sk-1",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-1.round-47-census-of-every-gateway-path-that-builds-a-schwab-key-from-the-master.md",
+    "group": "OTHER",
+    "vintage_commit": "d6dd7671848"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~177",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "d6dd7671848",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-1.round-47-census-of-every-gateway-path-that-builds-a-schwab-key-from-the-master.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~177/SK_CENSUS.json",
+      "kind": "doc",
+      "commit_or_etag": "a14436f409f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only census in the worker's deliverables folder on branch wk-NFRA_OPLGTW-177; no release, no deploy, no AWS call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a14436f409f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "five rows appended (NFRA_OPLGTW-Z-W177-S1..S5) in the channel the task order names.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the census covers every file an independent sweep finds.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "independent sweep: 369 files swept under the gateway folder, 54 hold a Schwab prefix token; census names 60 files in 120 entries\nhit files missing from the census: 0 (want 0)\ncensus scanned counts stated: gateway_files 369 (sweep 369), contract_copies 2 (want 2); every entry carries kind, line, master_dependent, edit and a reason: ok\nRESULT: PASS\nexit=0",
+      "denominator": "54 of 369 swept files hold a Schwab prefix token; 0 of 54 missing from the census (60 files, 120 entries)",
+      "status": "PASS",
+      "expect": "(?s)independent sweep: \\d+ files swept under the gateway folder, \\d+ hold a Schwab prefix token; census names \\d+ files in \\d+ entries.*hit files missing from the census: 0 \\(want 0\\).*contract_copies 2 \\(want 2\\); every entry carries kind, line, master_dependent, edit and a reason: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the cited lines are true (read by the check, not taken from the census) and the census names what the dual-read cell needs: the reader IAM file, two or more fence points, the two contract copies.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "entry citations: 120 of 120 cited lines exist and hold a Schwab token (want all): ok\nreader IAM .tf infra/aws/terraform/opal-gateway/schwab_reader_iam.tf exists True; statements_naming_schwab 109 equals the count of schwab lines read here 109: ok\nfence points: 5 listed (want 2 or more), each citation true and described: ok\nedit entries 50 (want 3 or more); contract entry in the deploy copy True and in the standards copy True; an iam entry True: ok\nRESULT: PASS\nexit=0",
+      "denominator": "120 of 120 cited lines hold a Schwab token; 109 of 109 schwab lines in the reader IAM file; 5 fence points (2 required); 50 edit entries (3 required); 2 of 2 contract copies",
+      "status": "PASS",
+      "expect": "(?s)entry citations: (\\d+) of \\1 cited lines exist and hold a Schwab token \\(want all\\): ok.*reader IAM \\.tf \\S+ exists True; statements_naming_schwab (\\d+) equals the count of schwab lines read here \\2: ok.*fence points: [2-9]\\d* listed \\(want 2 or more\\), each citation true and described: ok.*contract entry in the deploy copy True and in the standards copy True; an iam entry True: ok.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Moved one census citation (the catalog.py entry at line 603) to line 1 of the same file in a temporary copy of W/SK_CENSUS.json, ran sk1.AC2.sh on it, then restored the file and confirmed it byte-identical (cmp).",
+      "expected": "AC2 reads the line-1 citation as not holding a Schwab token and prints RESULT: FAIL",
+      "observed": "entry citations: 119 of 120 cited lines exist and hold a Schwab token (want all): NOT OK (first: infra/aws/ec2/opal-gateway/app/integrations/schwab/catalog.py:1) | reader IAM .tf infra/aws/terraform/opal-gateway/schwab_reader_iam.tf exists True; statements_naming_schwab 109 equals the count of schwab lines read here 109: ok | fence points: 5 listed (want 2 or more), each citation true and described: ok | edit entries 50 (want 3 or more); contract entry in the deploy copy True and in the standards copy True; an iam entry True: ok | RESULT: FAIL | exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of sk1.AC1.sh and sk1.AC2.sh on the committed census, compared",
+      "observed": "AC1 run 1 and run 2 identical (369 swept, 54 hit, 0 missing, 120 entries, RESULT: PASS exit=0); AC2 run 1 and run 2 identical (120 of 120, 109 of 109, 5 fence points, RESULT: PASS exit=0)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The DUAL READ build (OG-sk-2) and any edit to a product file, test, Terraform file or contract",
+      "reason": "bounds: read-only census; W/ and the channel only. OG-sk-2 is cut from this census by the issuer."
+    },
+    {
+      "item": "The <status> flip of the task order",
+      "reason": "the task order states the flip is the issuer's; this seat reports once."
+    },
+    {
+      "item": "A census of the Terraform outside the gateway folder beyond the two named IAM files",
+      "reason": "the task order names schwab_reader_iam.tf and family_depth_read_iam.tf; other IAM files were checked only for the regex and carry no Schwab key."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W177-S1: the task order's 144 DATA_CATALOG.yaml lines naming the 0840 master measure 150 at HEAD d6dd7671848.",
+    "NFRA_OPLGTW-Z-W177-S2: _master_accounts is in app/integrations/schwab/integration.py:364 and reads the request business date, not a newest dim_position snapshot; data_entitlement.py:357 is a different helper.",
+    "NFRA_OPLGTW-Z-W177-S3: the relayed layout names no bronze destination; catalog.py:456-459 still checks closure bronze keys against the old bronze prefix.",
+    "NFRA_OPLGTW-Z-W177-S4: the gateway's fences are folder-prefix tests and parse_contract refuses non-master folder shapes with one source bucket, so the file-name fence is not expressible in the contract alone.",
+    "NFRA_OPLGTW-Z-W177-S5: ARMED (disarm 2.0.0_SA_COO~O): if the move lands before a dual-read release, the old-form reads of that master find nothing; the move's effect is relayed, not measured."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~177/ac_runs.txt",
+  "compiler_tools": [
+    {
+      "tool": "sk1.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk1.AC1.sh",
+      "result": "RESULT: PASS (369 swept, 54 hit, 0 missing, 120 entries)"
+    },
+    {
+      "tool": "sk1.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk1.AC2.sh",
+      "result": "RESULT: PASS (120 of 120 citations; 109 of 109 schwab lines; 5 fence points)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python3 -I .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~177/NFRA_OPLGTW.TO-OG-sk-1.round-47-census-of-every-gateway-path-that-builds-a-schwab-key-from-the-master.proof_of_spec.json AC1,AC2 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-1.round-47-census-of-every-gateway-path-that-builds-a-schwab-key-from-the-master.md",
+      "result": "run after the final commit; see the worker report"
+    }
+  ]
+}
