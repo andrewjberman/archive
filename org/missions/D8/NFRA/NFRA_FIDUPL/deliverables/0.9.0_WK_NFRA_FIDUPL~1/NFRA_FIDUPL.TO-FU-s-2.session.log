@@ -58,3 +58,29 @@ E. Post-commit criteria (worktree, after 54abf2d9db):
    python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=10 (rc 0)
    Note: the checker's fu2t name list still names the original five; all ten test names are defined in the file.
 No AWS call and no live call were made in REPAIR 2. The live trace is FU-x-1's.
+
+REPAIR 3 (issuer, 2026-10-20 ~14:40Z) -- the G switch, measured from HAR 4 (CRO research section 2b)
+A. Code: signin_recon.py probe_g_switch rewritten to the legacy JSP recipe on www2: GET the change form, read the
+   Current: G and the option values; read accountList.json (length=2000, accountNumber empty, sourceCode=BROK,
+   custodianCode=FID); POST gnumClientNm=<G>&process=change with isDefault never sent, to the first option that differs
+   from the starting G, asserting the answer's Current: equals the request; read accountList.json again; switch back
+   in a finally and assert. The dialog class is removed. Commit 8dd866294f.
+B. Tests: tests/test_gprobe.py has 8 tests (the five and the three of REPAIR 3). 8 passed, twice.
+   Mutant (isDefault sent in a scratch copy): 2 failed, 6 passed.
+C. Values: no G number, account number or label appears in any return value, log or output of the probe.
+
+REPAIR 4 (issuer, 2026-10-20 ~14:50Z) -- the attempt-3 trace (SSM command 26f743ae-6205-43ca-951d-78140ea38701)
+   showed a false-positive error after Next (an empty hidden element won the race) and fingerprint tells
+   (window_chrome=false; a Chrome/124 user agent over an installed Chromium 156).
+A. Code (commit 4ca0e7ae15): an error after Next counts only when the element is visible with non-empty trimmed text;
+   the init script defines window.chrome with a runtime object, navigator.languages ['en-US','en'] and a non-empty
+   navigator.plugins, and keeps navigator.webdriver hidden; the user agent is built from the installed browser's
+   browser.version (one short launch, then closed) in the Windows Chrome form.
+B. Tests: tests/test_login_trace.py has 13 tests (the ten and the three of REPAIR 4). tests/test_signin.py fakes gained
+   a launch method. 13 passed, twice. Mutant (visible-only error check): 1 failed, 12 passed.
+C. Post-commit criteria (worktree, after 4ca0e7ae15):
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=13 (rc 0)
+No AWS call and no live call were made in REPAIR 3 or REPAIR 4.
