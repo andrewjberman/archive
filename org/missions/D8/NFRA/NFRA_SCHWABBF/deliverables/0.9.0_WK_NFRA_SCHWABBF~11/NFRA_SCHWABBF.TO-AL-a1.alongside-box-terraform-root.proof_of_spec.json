@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-a1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "ae487c676890b37699a259e2f85c83871844c49c",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-a1.alongside-box-terraform-root.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ae487c676890b37699a259e2f85c83871844c49c"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied: no terraform init, plan or apply ran. The apply is a later release act of the NFRA CloudOps lane (WORLD floor)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/masters.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied; the four-master map and five opal_name module blocks are read by the test, never planned."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied. The live IAM plane was not read (BLIND per the order preflight); the grants are proven as text only."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/secrets.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied. Metadata only: no secret_version resource; the existing secret is named for import and never read."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/box.tf",
+      "kind": "terraform",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied; no instance was launched and no security group was created."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_box_tf.py",
+      "kind": "test",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only. It reads the .tf files as text, lib/opal_naming.py and scopes.json; it runs no terraform except terraform fmt when on PATH, and touches no network and no AWS."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6feb749ef40a144ee3346e71f64dd83205918799",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise row NFRA_SCHWABBF-W11-S1 appended in the same commit (the surprise-row gate ran at commit). No existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL1-a1-AC1",
+      "criterion_verbatim": "every name is builder output, and the role's grants are per master, write-only, with the deny planes.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py -q -p no:cacheprovider --color=no -k \"builder_names or iam_grants\"",
+      "output_evidence": "8 passed, 5 deselected in 0.06s",
+      "denominator": "8 of 8 selected tests passed (5 of 13 deselected by -k). Selected: test_builder_names_modules_recompute_through_name (5 module blocks, name() equals the five TO outputs); test_builder_names_resources_take_module_names_only (every resource name is a module output or one of the two secret literals); test_iam_grants_statement_set_and_trust; test_iam_grants_monolith_write_per_master_expands_to_registry (4 of 4 per-master resources, equal to the 4 registry masters); test_iam_grants_ops_and_meta_per_master_expand_to_registry (4 of 4 each); test_iam_grants_list_is_schwab_prefix_only_and_write_only_elsewhere (s3:GetObject once, inside AlongsideCodeRead); test_iam_grants_secret_statements_one_arn_each_and_no_schwab_wildcard; test_iam_grants_deny_planes_present (3 of 3 Deny planes)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL1-a1-AC2",
+      "criterion_verbatim": "two metadata-only secrets (one adopted by import), and a labeled instance with no standing ingress.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py -q -p no:cacheprovider --color=no -k \"secrets or box_instance\"",
+      "output_evidence": "3 passed, 10 deselected in 0.15s",
+      "denominator": "3 of 3 selected tests passed (10 of 13 deselected by -k). Selected: test_secrets_two_metadata_only_resources_with_import_and_prevent_destroy (2 secret resources; 1 import block for schwab/alongside/sdd-credentials; prevent_destroy on both; 0 aws_secretsmanager_secret_version); test_box_instance_no_ingress_labeled_imdsv2_lifecycle_and_ami_path (0 ingress blocks in the root; 1 egress; http_tokens required; Device tag; prevent_destroy; ignore_changes [ami, user_data]; AMI parameter path); test_box_instance_fmt_terraform_or_skip (terraform fmt -check -recursive on the root, rc 0)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL1-a1-AC3",
+      "criterion_verbatim": "the four Cottonwood masters only, matching the registry both ways.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py -q -p no:cacheprovider --color=no -k \"one_writer or registry\"",
+      "output_evidence": "4 passed, 9 deselected in 0.06s",
+      "denominator": "4 of 4 selected tests passed (9 of 13 deselected by -k). Selected: test_iam_grants_monolith_write_per_master_expands_to_registry (the master set equals the registry, 4 of 4); test_iam_grants_ops_and_meta_per_master_expand_to_registry (4 of 4 each); test_one_writer_no_forbidden_master_text_in_any_tf_file (0 hits for the four forbidden strings across every .tf file in the root); test_registry_masters_match_scopes_both_ways (map keys equal the 4 registry rows of class MASTER, firm cottonwood, vendor schwab, both ways; 0 extra 8-digit masters in the root)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three planted violations in a scratch copy of the root (.scratch/mutant, not committed, the committed files untouched). M1: an ingress block added to aws_security_group.alongside_box in box.tf. M2: the MonolithSchwabWrite template replaced by the bare folder wildcard schwab/cottonwood/bronze/*. M3: an aws_secretsmanager_secret_version resource added to secrets.tf. Each copy is run against its named test with the test's root pointed at the copy.",
+      "expected": "each planted violation fails its named test",
+      "observed": "M1 -> test_box_instance_no_ingress_labeled_imdsv2_lifecycle_and_ami_path raised AssertionError. M2 -> test_iam_grants_monolith_write_per_master_expands_to_registry raised AssertionError. M3 -> test_secrets_two_metadata_only_resources_with_import_and_prevent_destroy raised AssertionError.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection and of the full file, pass count, deselected count and rc compared",
+      "observed": "AC1 run 1: 8 passed, 5 deselected in 0.06s rc=0; run 2: 8 passed, 5 deselected in 0.07s rc=0. AC2 run 1: 3 passed, 10 deselected in 0.15s rc=0; run 2: 3 passed, 10 deselected in 0.20s rc=0. AC3 run 1: 4 passed, 9 deselected in 0.06s rc=0; run 2: 4 passed, 9 deselected in 0.06s rc=0. Full file: 13 passed rc=0. Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, validate, plan and apply of the root; any aws command; any read of the live IAM plane, the live roles or the live secrets",
+      "reason": "WORLD floor for this order: nothing applied, nothing read from AWS. The apply is a later release act of the NFRA CloudOps lane. The live IAM plane was not read (BLIND per the order preflight)."
+    },
+    {
+      "item": "The 0-diff claim for the import of schwab/alongside/sdd-credentials (the adopted secret carries no description in secrets.tf)",
+      "reason": "The live description was not read, so the import's plan-time 0-diff is unmeasured. It belongs to the apply act, not to this text cell."
+    },
+    {
+      "item": "schedule.tf, the per-master scheduler and its cron values as a schedule",
+      "reason": "Owned by cell AL-s-1, which reads the addresses this root fixes. The cron strings are carried in alongside_masters as data only."
+    },
+    {
+      "item": "A narrower egress rule than allow-all-outbound on the security group",
+      "reason": "The order specifies one egress allowing all outbound. A narrower egress is a later decision, not part of this cell."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W11-S1: the worktree's sparse-checkout cone omitted the granted folder infra/aws/terraform/alongside-schwab-ec2/, so git refused to index the new root and safe-commit refused the commit; the one granted path was added to this worktree's cone and the commit landed."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~11/NFRA_SCHWABBF.TO-AL-a1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (repo interpreter), test_alongside_box_tf.py",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_tf.py -q -p no:cacheprovider --color=no",
+      "result": "13 passed in 0.19s (rc 0)"
+    },
+    {
+      "tool": "terraform fmt -check -recursive (local formatting only; no init)",
+      "invocation": "cd infra/aws/terraform/alongside-schwab-ec2 && terraform fmt -check -recursive",
+      "result": "rc 0, no files listed"
+    },
+    {
+      "tool": "lib/opal_naming.py name() (the builder the test calls)",
+      "invocation": "name(\"schwab\", \"alongside\", \"si2-box\", kind) for kind in role, profile, sg, runner, policy",
+      "result": "schwab-alongside-si2-box-role, -profile, -sg, -runner, -policy: equal to the five outputs the TO measured on 2026-10-20"
+    },
+    {
+      "tool": "git add -n on the granted folder (sparse-cone check)",
+      "invocation": "git add -n infra/aws/terraform/alongside-schwab-ec2/main.tf (before and after git sparse-checkout add of that one path)",
+      "result": "before: outside sparse-checkout, not indexed; after: all seven granted paths accepted; the commit 6feb749ef40 landed"
+    }
+  ]
+}
