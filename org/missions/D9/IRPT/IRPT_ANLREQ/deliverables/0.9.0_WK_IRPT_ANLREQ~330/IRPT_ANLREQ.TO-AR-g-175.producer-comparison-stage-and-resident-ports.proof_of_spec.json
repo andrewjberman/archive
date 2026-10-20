@@ -19,7 +19,10 @@
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
       "kind": "script",
       "commit_or_etag": "1c700aee586d0c2ced88adadb660883837c69d61",
-      "artifact_covered_by": ["AR175-g-AC1", "AR175-g-AC2"],
+      "artifact_covered_by": [
+        "AR175-g-AC1",
+        "AR175-g-AC2"
+      ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Local commit 1c700aee586 on wk-IRPT_ANLREQ-330 only (LOCAL). Adds the comparison stage: _LAYOUT_HAS_COMPARE, _compare_kwargs, _compare_elements, _with_compare_elements, _field, _portfolio_pairs and _compare_stage (lazy imports of comparables and model_source; one resolve_prices call for the ETF comparables; model series and allocation through model_bytes; gaps in words). produce and produce_package run it after the price stage and pass compare= to compute_all. No vendor call, no AWS call, nothing deployed."
     },
@@ -27,7 +30,9 @@
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
       "kind": "script",
       "commit_or_etag": "1b00c8dafbd98c7fc3900863328d36f2e1ee4c1f",
-      "artifact_covered_by": ["AR175-g-AC3"],
+      "artifact_covered_by": [
+        "AR175-g-AC3"
+      ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Local commit 1b00c8dafbd on wk-IRPT_ANLREQ-330 only (LOCAL). OPAL_COMPARISON_VARIANTS; run_opal adds the request's comparables through the frozen worker's guarded prepare() for a comparison or multicomp record, kept to key, label and ticker. An overview adds nothing."
     },
@@ -35,7 +40,9 @@
       "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
       "kind": "script",
       "commit_or_etag": "1b00c8dafbd98c7fc3900863328d36f2e1ee4c1f",
-      "artifact_covered_by": ["AR175-g-AC3"],
+      "artifact_covered_by": [
+        "AR175-g-AC3"
+      ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Local commit 1b00c8dafbd on wk-IRPT_ANLREQ-330 only (LOCAL). make_opal_stores takes model_extras; _model_extras(s3) builds model_bytes over the host role's S3 client, answering only model_source.SERIES_KEY and POSITIONING_KEY in model_source.BUCKET and refusing any other key before a read; wired in build_resident_runtime beside pricing_extras and swap_extras; model_source imported lazily. No AWS call, no policy change (grant AR-g-172)."
     },
@@ -54,11 +61,21 @@
       "deploy_evidence": "4 offline tests, 4 passed at 05f9a402c68 (python -m pytest, run from the reports folder, rc=0). model_bytes reads the two model keys from the bucket and refuses every other key before any read; run_opal hands the producer the request's comparables for a comparison or multicomp record and nothing (and no frozen read) for an overview. Fake S3 client, fake frozen worker, fake producer that records its stores."
     },
     {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_source.py",
+      "kind": "test",
+      "commit_or_etag": "640ee394e4a",
+      "artifact_covered_by": [
+        "AR175-g-AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 640ee394e4 on wk-IRPT_ANLREQ-330 only (LOCAL), AMENDMENT 2 Part D: one literal changed, the pinned Overview map sha256 21a8f6d6...3310f to 661adac1...2143b (the sha256 of org/missions/D9/IRPT/IRPT_YCDGEN/deliverables/maps/overview_map.json). The one test test_the_bindings_carry_the_opal_map_member_pinned_by_content passes (1 passed, rc=0, python -m pytest)."
+    },
+    {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "538f1492298303463c53ef5389af09df65b59068",
+      "commit_or_etag": "1d624484a89",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W330-S6 to S9 appended at 538f149229 (S6 read_allocation refusal names no reason; S7 no buy-and-hold path names no outcome; S8 an entry with neither key nor ticker has no treatment; S9 the sparse worktree lacks infra/aws/ec2 and docs/contracts). Row gate: OK, 0 new of 1069 checked by the gate's own staged read; the rows carry their step fields."
+      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W330-S6 to S9 appended at 538f149229; row S10 appended at 1d624484a8 (AMENDMENT 2 grants the r31 test file, but the checker's OWN[175] omits it, so the regress scope check refuses it). Row gate: OK, rc=0, 1073 total checked (pre-existing not re-graded)."
     }
   ],
   "acceptance": [
@@ -67,7 +84,7 @@
       "criterion_verbatim": "AC1: a Multi-Comp run through the SHIPPED producer on the REAL multi map (two models and one ETF) lists the five compare elements as VALUE with the numbers the checker computes itself, the page prints every name and the window, an unpriced comparable is stated in words, the Comparison map works with one comparable, and an Overview or a pricing-off run lists none. At base it FAILs.",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 175 build",
-      "output_evidence": "AR-CMP-175-OK build: all arms (rc=0 at 05f9a402c68, run under timeout 400; the RESULT line is the first line of the output and the run printed nothing else). Base, measured by the issuer: 175 build FAIL (compare elements absent).",
+      "output_evidence": "AR-CMP-175-OK build: all arms (rc=0 at 1d624484a8, run under timeout 600; the RESULT line is the first line of the output and the run printed nothing else). Base, measured by the issuer: 175 build FAIL (compare elements absent).",
       "denominator": "1 arm-set, the checker's arms_build_175: five element statuses in the run record; the window, chart, returns, risk and allocation values against the checker's own arithmetic; the page names, the window and the dates; the vendor check on the rendered page; the unpriced ZZZZ gap line; the one-comparable Comparison map; the Overview and pricing-off runs. The arm prints no count: 0 failing by the rc=0 OK line.",
       "expect": "^AR-CMP-175-OK",
       "status": "PASS",
@@ -78,7 +95,7 @@
       "criterion_verbatim": "AC2: no existing element of the Overview, Multi or Comparison report moves when no comparable is given. At base it PASSes.",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 175 guard",
-      "output_evidence": "AR-CMP-175-OK guard: all arms (rc=0 at 05f9a402c68, run under timeout 400; the RESULT line is the first line of the output). Base, measured by the issuer: 175 guard PASS.",
+      "output_evidence": "AR-CMP-175-OK guard: all arms (rc=0 at 1d624484a8, run under timeout 600; the RESULT line is the first line of the output). Base, measured by the issuer: 175 guard PASS.",
       "denominator": "4 render arms (overview_on, overview_off, multi_on, comparison_on) compared element by element against compare_base_status.json, the same base file as cell 174's guard: 1522 base entries (258 + 258 + 428 + 578, as recorded in the AR-g-174 instance). The checker prints no per-element count; 0 entries moved and no new element, by the rc=0 OK line.",
       "expect": "^AR-CMP-175-OK",
       "status": "PASS",
@@ -89,11 +106,11 @@
       "criterion_verbatim": "AC3: the existing test files plus your own pass, and the branch changed only the files of the cells so far. At base it PASSes.",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 175 regress",
-      "output_evidence": "AR-CMP-175-REGRESS-OK  (rc=0 at 538f1492298, run under timeout 400; the scope check passed on the committed branch against box/dell2: every changed path is in the write set of cells 171, 173, 174 and 175, the channel, or the issuer's and the worker's own prefixes). Own files: test_compare_producer.py 7 passed and test_compare_ports.py 4 passed at 05f9a402c68; the research and reports suites named by the arm ran with pytest in their folders, rc=0 for the arm.",
-      "denominator": "The ten TEST_FILES of the arm (the research producer, price and layout test files) plus the own test files of cells 171, 173, 174 and 175 (test_model_source.py, test_comparables.py, test_compare_elements.py, test_compare_producer.py, test_compare_ports.py). The arm prints no pytest count; 0 failing by rc=0. Named separately: the reports-side suites test_resident_installed.py, test_opal_pricing_binding.py and test_opal_variant_binding.py are NOT in the arm and error in this sparse worktree on absent paths (surprise S9).",
+      "output_evidence": "AR-CMP-175-REGRESS-FAIL outside the cell's write set: infra/aws/lambda/investor-reporting/reports/tests/test_resident_r31_source.py (rc=1 at 1d624484a8, run under timeout 600). The pytest limb of the arm returned no failure; the failing limb is the scope check. Surprise IRPT_ANLREQ-D2-W330-S10 files the premise failure.",
+      "denominator": "Scope limb: 23 paths changed between merge-base a5b0ef4b5cd and HEAD 1d624484a8; 22 are in the checker's OWN table for cells 171, 173, 174 and 175, the channel, or the issuer's and worker's own prefixes; 1 is outside it (test_resident_r31_source.py, granted by AMENDMENT 2 but absent from OWN[175]). Pytest limb: the ten TEST_FILES plus the own test files of cells 171, 173, 174 and 175; the arm prints no pytest count; 0 failing by its rc.",
       "expect": "^AR-CMP-175-REGRESS-OK",
-      "status": "PASS",
-      "status_reason": "rc=0 and the RESULT line begins AR-CMP-175-REGRESS-OK, matching the expectation."
+      "status": "FAIL",
+      "status_reason": "rc=1 and the RESULT line begins AR-CMP-175-REGRESS-FAIL, not the expected AR-CMP-175-REGRESS-OK. The checker's write-set table does not list the granted file; the checker is read-only to this worker, so the table was not edited and the scope check was not weakened. The order stays open."
     }
   ],
   "controls": {
@@ -127,9 +144,10 @@
     "IRPT_ANLREQ-D2-W330-S6: the order names no reason when read_allocation refuses; the producer makes that model's allocation row a gap with the reason 'the Opal model allocation could not be read' and keeps the series; OBSERVATION, INERT, UNDER_INVESTIGATION.",
     "IRPT_ANLREQ-D2-W330-S7: the order names no outcome for a run whose portfolio has no buy-and-hold path (or no holding carries an amount); the stage is skipped and the run completes as one without comparables; OBSERVATION, INERT, UNDER_INVESTIGATION.",
     "IRPT_ANLREQ-D2-W330-S8: the order defines a model entry and an ETF entry and no third kind; an entry with neither is kept as a gap line with the layout's default reason; OBSERVATION, INERT, UNDER_INVESTIGATION.",
-    "IRPT_ANLREQ-D2-W330-S9: the sparse worktree lacks infra/aws/ec2 and docs/contracts, so the installed-package and validator suites error on paths HEAD holds; OBSERVATION, INERT, UNDER_INVESTIGATION."
+    "IRPT_ANLREQ-D2-W330-S9: the sparse worktree lacks infra/aws/ec2 and docs/contracts, so the installed-package and validator suites error on paths HEAD holds; OBSERVATION, INERT, UNDER_INVESTIGATION.",
+    "IRPT_ANLREQ-D2-W330-S10: AMENDMENT 2 grants reports/tests/test_resident_r31_source.py, but the checker's write-set table OWN[175] does not list it, so the regress scope check refuses the Part D commit as outside the cell's write set; AR175-g-AC3 FAIL on that scope limb alone; BLOCKING, INERT, UNDER_INVESTIGATION."
   ],
-  "session_log": "Re-grounded: git rev-parse gave wk-IRPT_ANLREQ-330; test -d org and test -d .tools gave TREE-OK. Read the order's worker face, the checker (arms_build_175, run_producer, arms_guard, regress), comparables.py, model_source.py, the layout's COMPARE methods and the producer. Edited opal_producer.py (the stage, the elements, the compare keyword at both call sites), resident_worker.py (run_opal comparables), resident_installed.py (model_extras and _model_extras). Wrote the two test files; fixed an unused import and a lambda assignment that ruff flagged; a test assertion on a key order was corrected to a key-set comparison because section values are dumped with sort_keys. Checker build, guard and regress passed on the final content. Commits: producer 1c700aee586, ports 1b00c8dafbd, tests 05f9a402c68, channel rows 538f149229. The commit gate passed each commit; the risk reflex printed PARTIAL_OR_BLIND (danger map stale), the instrument already filed as S2.",
+  "session_log": "Re-grounded: git rev-parse gave wk-IRPT_ANLREQ-330; test -d org and test -d .tools gave TREE-OK. Read the order's worker face, the checker (arms_build_175, run_producer, arms_guard, regress), comparables.py, model_source.py, the layout's COMPARE methods and the producer. Edited opal_producer.py (the stage, the elements, the compare keyword at both call sites), resident_worker.py (run_opal comparables), resident_installed.py (model_extras and _model_extras). Wrote the two test files; fixed an unused import and a lambda assignment that ruff flagged; a test assertion on a key order was corrected to a key-set comparison because section values are dumped with sort_keys. Checker build, guard and regress passed on the final content. Commits: producer 1c700aee586, ports 1b00c8dafbd, tests 05f9a402c68, channel rows 538f149229. The commit gate passed each commit; the risk reflex printed PARTIAL_OR_BLIND (danger map stale), the instrument already filed as S2. Part D (AMENDMENT 2): re-grounded at 1c700... no; re-grounded at HEAD 3427fc97d18 (TREE-OK). Computed the map sha256 661adac1...2143b, changed the one literal, ran the one test (1 passed), committed 640ee394e4. Re-ran build and guard at 1d624484a8: AR-CMP-175-OK both. Re-ran regress at 1d624484a8: AR-CMP-175-REGRESS-FAIL on the scope limb (the file is absent from OWN[175]). Filed S10 and committed 1d624484a8. Order status left pending: AC3 is not PASS.",
   "compiler_tools": [
     {
       "tool": "python -m pytest (research suite as named by the order and the arm)",
@@ -149,12 +167,17 @@
     {
       "tool": "surprise-row-gate",
       "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (rc=0 at 538f149229)"
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (rc=0 at 1d624484a8, S10 row)"
     },
     {
       "tool": "commit-gate (py_compile, ds-precommit, ruff py39), via safe-commit",
       "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
       "result": "All checks passed! for each of the four code and test commits; committed 1c700aee586, 1b00c8dafbd, 05f9a402c68, 538f149229"
+    },
+    {
+      "tool": "ar_compare_checks.py (the three criteria, Part D)",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 175 build|guard|regress",
+      "result": "build rc=0 AR-CMP-175-OK; guard rc=0 AR-CMP-175-OK; regress rc=1 AR-CMP-175-REGRESS-FAIL outside the cell's write set (test_resident_r31_source.py); all at 1d624484a8"
     }
   ]
 }
