@@ -5,12 +5,13 @@ Stdlib only, offline, no AWS. Loads lib/opal_naming.py BY PATH and:
   2. reads the one policy whose policy_revision is irpt-anlreq-x10-v1 and checks its ANALYSIS_AUDIT row
      is exactly the row the order names;
   3. for each enabled client firm in data/firm_registry.json, resolves the firm's LONG scope through the
-     module's lookup() and calls the builder address() with source irpt, that scope, tier platinum, table
-     analysis_audit, a sample partition and a sample object.
+     module's lookup() and calls reporting_destination(firm, ANALYSIS_AUDIT, ART-<hex64>, <sha256 hex64>,
+     policy_revision=irpt-anlreq-x10-v1) (AMENDMENT 2 of AR-y-466, trunk a71b17d96d). The bucket must equal the
+     irpt PRODUCT bucket of infra/logic/registry/scopes.json, and the key must begin
+     irpt/<firm>/platinum/analysis_audit/ART-.
 
-Partition grammar, read from org/standards/NAMING_SCHEMA.json key.partition: "date=YYYY-MM-DD", "a named
-leaf", or "{entity}={id}". The sample is date=2026-10-20, the first form. address() checks the partition
-only as a non-empty ASCII segment with no slash, and the sample passes that test.
+The artifact id and the digest are sample values of the grammar the builder accepts (ART- plus 64 lowercase hex;
+64 lowercase hex). The builder checks only that shape, so the sample passes it.
 
 --selftest (AMENDMENT 1 of AR-y-466, trunk f6b63a00ac) runs the same policy validation on two in-memory copies
 of the registry. Variant A is the new row with tier state and unreferenced_days null. Variant B is the new row
@@ -27,8 +28,9 @@ import sys
 POLICY_REVISION = "irpt-anlreq-x10-v1"
 FAMILY = "ANALYSIS_AUDIT"
 TABLE = "analysis_audit"
-SAMPLE_PARTITION = "date=2026-10-20"
-SAMPLE_OBJECT = "REQ-SAMPLE.json"
+PRODUCT_KEY = "irpt"
+ART_SAMPLE = "ART-" + "0123456789abcdef" * 4
+SHA_SAMPLE = "fedcba9876543210" * 4
 EXPECTED_ROW = {"tier": "platinum", "table": "analysis_audit", "extension": "json",
                 "unreferenced_days": None, "accepted_ceiling_days": 2555}
 LIB_REL = os.path.join("lib", "opal_naming.py")
@@ -125,6 +127,14 @@ def main(argv):
         print("AUDIT-FAMILY-BAD no enabled client firm in data/firm_registry.json")
         return 1
 
+    with open(os.path.join(root, "infra", "logic", "registry", "scopes.json"), encoding="utf-8") as fh:
+        scope_rows = json.load(fh)["scopes"]
+    products = [s for s in scope_rows if s.get("key") == PRODUCT_KEY and s.get("class") == "PRODUCT"]
+    if len(products) != 1 or not products[0].get("bucket"):
+        print("AUDIT-FAMILY-BAD scopes.json has no single PRODUCT row %s with a bucket" % PRODUCT_KEY)
+        return 1
+    product_bucket = products[0]["bucket"]
+
     addresses = 0
     for firm in clients:
         try:
@@ -137,16 +147,18 @@ def main(argv):
             return 1
         scope = row["long"]
         try:
-            addr = mod.address("irpt", scope, "platinum", TABLE, SAMPLE_PARTITION, SAMPLE_OBJECT)
+            bucket, key = mod.reporting_destination(scope, FAMILY, ART_SAMPLE, SHA_SAMPLE,
+                                                    policy_revision=POLICY_REVISION)
         except (ValueError, KeyError) as exc:
-            print("AUDIT-FAMILY-BAD builder refused %s: %s" % (scope, exc))
+            print("AUDIT-FAMILY-BAD reporting_destination refused %s: %s" % (scope, exc))
             return 1
-        want = "s3://%s/irpt/%s/platinum/%s/%s/%s" % (row["bucket"], scope, TABLE, SAMPLE_PARTITION, SAMPLE_OBJECT)
-        if addr != want:
-            print("AUDIT-FAMILY-BAD %s address %s does not match the grammar %s" % (scope, addr, want))
+        if bucket != product_bucket:
+            print("AUDIT-FAMILY-BAD %s bucket %s is not the irpt PRODUCT bucket %s" % (scope, bucket, product_bucket))
             return 1
-        print("ADDRESS firm=%s bucket=%s key=%s" % (
-            scope, row["bucket"], addr[len("s3://%s/" % row["bucket"]):]))
+        if not key.startswith("irpt/%s/platinum/%s/ART-" % (scope, TABLE)):
+            print("AUDIT-FAMILY-BAD %s key %s does not begin irpt/%s/platinum/%s/ART-" % (scope, key, scope, TABLE))
+            return 1
+        print("ADDRESS firm=%s bucket=%s key=%s" % (scope, bucket, key))
         addresses += 1
 
     print("AUDIT-FAMILY-OK firms=%d addresses=%d validator=pass" % (len(clients), addresses))
