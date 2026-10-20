@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-468.resident-role-writes-the-analysis-audit-terraform-statement",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-468.resident-role-writes-the-analysis-audit-terraform-statement.md",
+    "group": "OTHER",
+    "vintage_commit": "6e36e3dcc29"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "6e36e3dcc29",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-468.resident-role-writes-the-analysis-audit-terraform-statement.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~342",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ebd5c881a24",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Additions only against the trunk commit 5143b9b2565 (the bound, AMENDMENT 2: numstat 19/1; the one deleted line is the old KMS encryption-context line, replaced by the same line with local.resident_audit_write_prefixes as its fourth argument). Commits 6f38e71fc3e (statement and list), 3f0b44d5b11 (list on the product bucket), ebd5c881a24 (KMS line). No KMS statement added; no other statement text changed. Terraform is not installed: nothing planned, applied or run.",
+      "artifact_covered_by": [
+        "AR468-y-AC1",
+        "AR468-y-AC2",
+        "AR468-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py",
+      "kind": "script",
+      "commit_or_etag": "30c45d6f820",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib offline check: HCL shape; prefixes compared with reporting_destination (product bucket); KMS line includes the audit prefixes; no other statement text changed against 5143b9b2565. --selftest has three mutants (table, Action, KMS drop) and prints CONTROL-FIRES only when all three read BAD. Passes commit-gate.sh.",
+      "artifact_covered_by": [
+        "AR468-y-AC1",
+        "AR468-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_bound.py",
+      "kind": "script",
+      "commit_or_etag": "30c45d6f820",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib check: git diff --numstat 5143b9b2565 <last Terraform edit commit> over infra/ lists exactly resident.tf with one deletion, which is the old KMS line, and an added line equal to it with the audit prefixes appended. Passes commit-gate.sh.",
+      "artifact_covered_by": [
+        "AR468-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ec6b5bd864",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows appended (0 deletions): W342-S1 (BLOCKING, ARMED; cleared by the issuer, the family row is on trunk 5143b9b2565), S2 (BLOCKING, INERT; ruled by AMENDMENT 1), S3 (OBSERVATION, INERT), S4 (OBSERVATION, INERT), S5 (OBSERVATION, INERT: KMS encryption-context gap on the product bucket), S6 (BLOCKING, INERT: the cumulative bound).",
+      "artifact_covered_by": [
+        "AR468-y-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR468-y-AC1",
+      "criterion_verbatim": "AR468-y-AC1 (cell AR-y-468): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py -- expect ^AUDIT-WRITE-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py",
+      "output_evidence": "AUDIT-WRITE-GRANT-OK firms=3 prefixes=3 builder_equal=yes put_only=yes\nrc=0. Two runs printed identical output (diff rc=0).",
+      "denominator": "3 of 3 enabled client firm prefixes equal the reporting_destination writer prefix; the KMS line carries the audit prefixes; no other statement changed against 5143b9b2565",
+      "expect": "^AUDIT-WRITE-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect pattern (AMENDMENT 1 product bucket; AMENDMENT 2 KMS argument checked by the same check)."
+    },
+    {
+      "criterion_id": "AR468-y-AC2",
+      "criterion_verbatim": "AR468-y-AC2 (cell AR-y-468): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_grant.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0. Two runs printed the same line.",
+      "denominator": "3 of 3 mutants read BAD for their own reason (A: table name analysis_audit_x differs from the writer prefix; B: Action gains s3:GetObject; C: the audit prefixes dropped from the KMS line)",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches ^CONTROL-FIRES$ exactly. All three mutants fire in memory."
+    },
+    {
+      "criterion_id": "AR468-y-AC3",
+      "criterion_verbatim": "AR468-y-AC3 (cell AR-y-468, AMENDMENT 2): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_bound.py -- expect ^AUDIT-WRITE-BOUND-OK numstat=[0-9]+/1 files=1$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~342/check_audit_write_bound.py",
+      "output_evidence": "AUDIT-WRITE-BOUND-OK numstat=19/1 files=1\nrc=0",
+      "denominator": "1 of 1 path changed under infra/ between 5143b9b2565 and the last Terraform edit commit; 1 deleted line of 19 added (the old KMS line, replaced by the same line plus the audit prefixes)",
+      "expect": "^AUDIT-WRITE-BOUND-OK numstat=[0-9]+/1 files=1$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the amended expect pattern."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR468-y-AC2 control: --selftest mutates in memory (A) the family table name, (B) the WriteTheAnalysisAudit Action, and (C) the audit prefixes dropped from the KMS line. CONTROL-FIRES only when all three read BAD for their own reason.",
+      "expected": "CONTROL-FIRES",
+      "observed": "CONTROL-FIRES rc=0 (two runs)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice with its output written to .scratch and compared with diff; AC2 run twice; AC3 run once after the commit.",
+      "observed": "AC1 diff rc=0 (two identical OK lines); AC2 two CONTROL-FIRES lines; AC3 one run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate and terraform plan of the ycharts resident stack",
+      "reason": "Terraform is not installed on this box, and no AWS or network call is permitted. Consequence recorded in surprise IRPT_ANLREQ-D2-W342-S1: a plan on a branch without the AR-y-466 row fails on the families lookup."
+    },
+    {
+      "item": "the live bucket fence (shared-infra s3-lgic-firm-buckets.tf) and the default encryption of the firm buckets",
+      "reason": "not read by this worker. The fence and SSE-S3 claims rest on the comments in resident.tf (lines 231-237 and 310); the grant's reach on the firm buckets is surprise IRPT_ANLREQ-D2-W342-S2."
+    },
+    {
+      "item": "KMS coverage of the new prefixes",
+      "reason": "no KMS statement added, per the cell. The existing ReportEncryptionViaS3ForResidentFamiliesOnly statement lists the older prefixes only; the firm bucket's encryption is read from the resident.tf comment, not live."
+    },
+    {
+      "item": "the cumulative bound's trunk-merged infra paths",
+      "reason": "measured by AC3 as printed; not narrowed by this worker (surprise IRPT_ANLREQ-D2-W342-S6)."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W342-S1: the family row was AR-y-466's, now on trunk 5143b9b2565 and merged; cleared by the issuer.",
+    "IRPT_ANLREQ-D2-W342-S2: firm-bucket grant versus fence and X10 writer; ruled by AMENDMENT 1 (product bucket).",
+    "IRPT_ANLREQ-D2-W342-S3: the cell's ~331 folder versus the ~342 paths (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W342-S4: the bound check anchored on the order file path; superseded by AMENDMENT 2's anchor (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W342-S5: KMS encryption-context gap for the audit prefixes; ruled by AMENDMENT 2 (the KMS line carries the audit prefixes).",
+    "IRPT_ANLREQ-D2-W342-S6: the cumulative bound against the cut; ruled by AMENDMENT 2 (the bound is measured from 5143b9b2565)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform (not installed on this box)",
+      "invocation": "none: no terraform validate, fmt or plan was run",
+      "result": "NOT RUN. The HCL is checked by check_audit_write_grant.py (regex shape and registry evaluation in Python), not by a Terraform parser; see declared_exclusions."
+    }
+  ]
+}
