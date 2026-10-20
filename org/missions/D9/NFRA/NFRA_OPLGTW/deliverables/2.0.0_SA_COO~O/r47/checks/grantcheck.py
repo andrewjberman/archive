@@ -24,6 +24,23 @@ def Y(x):
     return "yes" if x else "no"
 
 
+if who == "andrew":
+    DL_TEXT = "leaves schwab_prepare_download as his stored operations say"
+    DL_TEXT_B = "leaves prepare_download as his stored operations say"
+else:
+    DL_TEXT = "refuses schwab_prepare_download"
+    DL_TEXT_B = "refuses prepare_download"
+
+
+def download_ok(dec):
+    """Andrew: prepare_download is UNCHANGED (admitted iff his stored operations include download_filtered; the two booleans are equal). Menachem: refused (Alyssa's template has no download)."""
+    if who == "andrew":
+        dl = dec.get("download") or {}
+        a, b = dl.get("stored_operations_include_download_filtered"), dl.get("prepare_download_admitted")
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    return (dec.get("refuse") or {}).get("schwab_prepare_download") is True
+
+
 def load(name):
     try:
         return json.load(open(os.path.join(W, name), encoding="utf-8"))
@@ -42,7 +59,7 @@ def phase_a():
     ok_d = (df.get("changed_keys") == want_keys and sorted(df.get("masters_after") or []) == sorted(MASTERS)
             and all((df.get("accounts_after") or {}).get(m) == ["*"] for m in MASTERS) and df.get("rest_of_scope_matches_template") is True)
     dec = (p or {}).get(who) or {}
-    ok_p = bool(p) and all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and (dec.get("refuse") or {}).get("schwab_prepare_download") is True and dec.get("master_wide_parsed") is True
+    ok_p = bool(p) and all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and download_ok(dec) and dec.get("master_wide_parsed") is True
     de = dn or {}
     ok_dn = (isinstance(de.get("deny_record_present_before"), bool) and isinstance(de.get("activate_writes_deny"), bool) and isinstance(de.get("options"), list) and len(de["options"]) >= 2
              and isinstance(de.get("effect"), str) and len(de["effect"]) >= 40 and de.get("delete_proposed") is False)
@@ -57,7 +74,7 @@ def phase_a():
     digits = len(re.findall(r"\d{9,}", ask))
     print("before-record: %s with pk_hash, scope hash and a printed denominator%s: %s" % (who, " (a first grant)" if first else ", per-master counts", Y(ok_b)))
     print("diff keys %s, masters after == the two original masters, every master's accounts == ['*'], the rest of the scope equals its template: %s" % (want_keys, Y(ok_d)))
-    print("decide() pre-flight on the candidate (master-wide parser) admits the 4 read tools and refuses schwab_prepare_download: %s" % Y(ok_p))
+    print("decide() pre-flight on the candidate (master-wide parser) admits the 4 read tools and %s: %s" % (DL_TEXT, Y(ok_p)))
     print("email_deny finding: present before %s, activation writes it %s, options named %s, effect stated, no delete proposed: %s" % (
         de.get("deny_record_present_before"), de.get("activate_writes_deny"), len(de.get("options") or []), Y(ok_dn)))
     print("ask: three halves %s; process-wide state line %s; states OG-rl-18 live before the activation %s; e-mail-shaped strings %d (want 0); runs of 9+ digits %d (want 0)" % (Y(halves), Y(pws), Y(order_sentence), emails, digits))
@@ -128,14 +145,14 @@ def phase_b():
     rb = load(P + "_READBACK.json") or {}
     mk = (load("rl18_release.json") or {}).get("release_sha", "")
     dec = rb.get("decide") or {}
-    dec_ok = (all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and (dec.get("refuse") or {}).get("schwab_prepare_download") is True
+    dec_ok = (all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and download_ok(dec)
               and rb.get("tree") == "deployed" and bool(mk) and rb.get("code_sha") == mk)
     sv = rb.get("served") or {}
     served_ok = sv.get("account_count_all_masters") == "all" and isinstance(sv.get("query_rows"), int) and sv["query_rows"] >= 1 and sv.get("as_principal") == who
     print("%s: active %s; newer grant revision %s; masters equal the two originals %s; accounts == ['*'] for every master %s; rest of scope unchanged %s" % (
         who, Y(who in prof), Y(newer), Y(masters_ok), Y(wide_ok), Y(rest_ok)))
     print("%s's grant revision as before: %s" % (other, Y(other_ok)))
-    print("decide() on the LIVE grant against the DEPLOYED tree at the batch17 release: admits 4 read tools and refuses prepare_download: %s" % Y(dec_ok))
+    print("decide() on the LIVE grant against the DEPLOYED tree at the batch17 release: admits 4 read tools and %s: %s" % (DL_TEXT_B, Y(dec_ok)))
     print("served read as %s through the gateway: schwab_get_access account_count 'all' for every master and one bounded schwab_query answered %s row(s): %s" % (who, sv.get("query_rows"), Y(served_ok)))
     print("OK" if all((who in prof, newer, masters_ok, wide_ok, rest_ok, other_ok, dec_ok, served_ok)) else "NO")
 
