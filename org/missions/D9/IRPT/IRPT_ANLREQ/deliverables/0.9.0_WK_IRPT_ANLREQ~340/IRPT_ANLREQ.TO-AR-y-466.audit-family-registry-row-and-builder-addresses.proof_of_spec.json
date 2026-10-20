@@ -29,9 +29,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
       "kind": "script",
-      "commit_or_etag": "505dc4c0dd",
+      "commit_or_etag": "f3433662bb79207673dd847945644a6afc1ea9f6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib, offline check. Loads lib/opal_naming.py by path, runs validate(), resolves one address() per enabled client firm (AC1) and runs the --selftest control (AC2). Committed LOCAL; commit-gate clean.",
+      "deploy_evidence": "Stdlib, offline check. Loads lib/opal_naming.py by path, runs validate(), resolves one address() per enabled client firm (AC1) and runs the AMENDED --selftest control (AC2: variant A tier state with null lifetime, variant B accepted_ceiling_days 3000; AMENDMENT 1, trunk f6b63a00ac). Committed LOCAL at 505dc4c0dd and f3433662bb; commit-gate clean.",
       "artifact_covered_by": [
         "AR466-y-AC1",
         "AR466-y-AC2"
@@ -72,11 +72,11 @@
       "criterion_verbatim": "AR466-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py --selftest -- expect ^CONTROL-FIRES$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py --selftest",
-      "output_evidence": "CONTROL-VARIANT-A platinum with unreferenced_days 30 -> OK (validator accepts)\nCONTROL-VARIANT-B tier state with unreferenced_days null -> BAD: only accepted-only platinum may omit an unreferenced lifetime\nCONTROL-DOES-NOT-FIRE: the control fires only when both variants read BAD (variant A read BAD=False, variant B read BAD=True)\nrc=1",
-      "denominator": "2 of 2 control variants; 1 of 2 read BAD as the cell requires (variant B); 0 of 2 needed for CONTROL-FIRES on variant A",
+      "output_evidence": "CONTROL-VARIANT-A tier state with unreferenced_days null -> BAD: only accepted-only platinum may omit an unreferenced lifetime\nCONTROL-VARIANT-B accepted_ceiling_days 3000 -> BAD: reporting accepted ceiling must be finite\nCONTROL-FIRES\nrc=0",
+      "denominator": "2 of 2 amended control variants read BAD (variant A and variant B); 2 of 2 needed for CONTROL-FIRES",
       "expect": "^CONTROL-FIRES$",
-      "status": "FAIL",
-      "status_reason": "The cell's premise is false: lib/opal_naming.py _validate_reporting_policies (lines 2629-2636) refuses a None lifetime only for a non-platinum tier. A platinum family with unreferenced_days 30 passes (30 <= min(30, 2555)), so variant A reads OK and CONTROL-FIRES cannot print. The validator is outside this order's grant and was not edited. Filed as IRPT_ANLREQ-D2-W340-S1 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~Y2)."
+      "status": "PASS",
+      "status_reason": "rc=0 and the closing line matches the expect regex exactly. The control was amended by AMENDMENT 1 of this order (trunk f6b63a00ac): the first variant (platinum with unreferenced_days 30) read OK because the validator accepts it; the issuer took surprise IRPT_ANLREQ-D2-W340-S1 as its own error. The validator itself is not edited; the amended variants are refused by it."
     },
     {
       "criterion_id": "AR466-y-AC3",
@@ -92,14 +92,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AR466-y-AC2 control: the --selftest reads two mutated copies of the ANALYSIS_AUDIT row in memory. Variant A is platinum with unreferenced_days 30; variant B is tier state with unreferenced_days null. The control fires only when both read BAD.",
+      "description": "AR466-y-AC2 control, AMENDED by AMENDMENT 1 (trunk f6b63a00ac): --selftest reads two in-memory copies of the ANALYSIS_AUDIT row. Variant A is tier state with unreferenced_days null; variant B is platinum with accepted_ceiling_days 3000. The control fires only when both read BAD.",
       "expected": "both variants read BAD; the composite prints CONTROL-FIRES; rc 0",
-      "observed": "variant B read BAD (only accepted-only platinum may omit an unreferenced lifetime); variant A read OK (validator accepts); the composite printed CONTROL-DOES-NOT-FIRE and rc 1.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "observed": "variant A read BAD (only accepted-only platinum may omit an unreferenced lifetime); variant B read BAD (reporting accepted ceiling must be finite); the composite printed CONTROL-FIRES and rc 0.",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "the AR466-y-AC1 command run twice from the worktree root, stdout written to .scratch/ac1_run1.txt and .scratch/ac1_run2.txt (scratch, not committed), compared with diff.",
-      "observed": "diff rc=0; 4 lines identical in both runs (3 ADDRESS lines and the AUDIT-FAMILY-OK line); each run rc=0.",
+      "observed": "AC1 command run twice on the final tree (HEAD f3433662bb): diff rc=0; 4 lines identical in both runs (3 ADDRESS lines and the AUDIT-FAMILY-OK line); each run rc=0.",
       "status": "STABLE"
     }
   },
