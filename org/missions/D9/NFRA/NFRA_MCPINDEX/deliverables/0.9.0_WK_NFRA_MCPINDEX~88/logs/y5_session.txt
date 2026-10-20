@@ -1,0 +1,10 @@
+MX-y-5 harvest date attribution -- worker session record (0.9.0_WK_NFRA_MCPINDEX~88), worktree C:/tmp/wk-mcpindex-88, branch wk-NFRA_MCPINDEX-88
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-88; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded at HEAD 62604a82b8c: sparse folders infra/aws/ec2/opal-gateway, workflows/gateway_battery present (no sparse change made); SOURCE_COMPARE_20261020.json entry harvest_query_columns: answer_as_of 2026-10-09T10:34:23Z, source_dates end 2026-10-08, agrees false; results_all_20261020.json H15 as_of 2026-10-09T10:34:23Z; cases_all_20261019.json H15 tool harvest_query_columns, prefix amgt/harvest/gold/chatter_daily/.
+3. Code read (worktree): harvest_figures.py:89 _STAMP_RE, :90 _DATE_RE; :166-173 _stamp_of tests _STAMP_RE first (168) and returns the stamp as a clock time (171); :176-178 _as_of = max of stamps; :623 envelope as_of=_as_of(srcs). harvest_typed.py:233-241 newest_part = max by (date partition, part name). source_compare.py:56 lists with Delimiter "/" (CommonPrefixes = date= folders), :187 compares the day token of the answer to those folder dates.
+4. Catalog: DATA_CATALOG.yaml:21870 newest_part date=2026-10-08/part-20261009T103423Z.parquet; :21873 latest_partition 2026-10-08; :21874 newest_write_utc 2026-10-09T10:41:19Z; :21878 derived_from date= partition in the key.
+5. Decision: the answer's as_of is the part-name write stamp (a UTC clock time), not the data partition the tool read; the answer is dated after its source, which the CTO ruling forbids. cause code, owner 2.0.0_SA_COO~O.
+6. Deliverable written: harvest_date_attribution.json (ASCII, indent 1). Evidence lines re-read after writing: harvest_figures.py:168, :171; DATA_CATALOG.yaml:21878; results_all_20261020.json#H15.
+7. y5.AC1.sh and y5.AC2.sh run; each prints RESULT: PASS, exit 0. Determinism: each run twice, outputs compared with cmp (identical).
+8. Commit (i) e6dc31419e455985055cf462d6a2f5a9c30feb9a via .tools/safe-commit.sh. The naming gate printed NAMING ERROR for the absent function-map folder; the commit landed rc=0 (surprise row NFRA_MCPINDEX-Z-W88-S1).
