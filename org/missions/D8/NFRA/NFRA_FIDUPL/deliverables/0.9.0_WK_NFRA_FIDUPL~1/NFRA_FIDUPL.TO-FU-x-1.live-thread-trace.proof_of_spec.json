@@ -17,10 +17,14 @@
     {
       "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~1/NFRA_FIDUPL.TO-FU-x-1.session.log",
       "kind": "doc",
-      "commit_or_etag": "dbee80810f1ed9eb58bfb2747507e690ee14c078",
+      "commit_or_etag": "87598a6b780a5a6a92b999a4933851c3893808c2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "the live record of this order: one automation execution that failed before the wrapper, one recon sign-in that timed out before any text; no landing and no probe block were produced",
-      "artifact_covered_by": ["FX1-AC1", "FX1-AC2", "FX1-AC3"]
+      "deploy_evidence": "the live record of attempt 2: step 0 trace-login stopped at submit_password (TRACE-LOGIN-FAIL LoginStepError:submit_password); steps 1 and 3 not run; no landing and no probe block",
+      "artifact_covered_by": [
+        "FX1-AC1",
+        "FX1-AC2",
+        "FX1-AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -30,9 +34,9 @@
       "method": "live_read",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1r",
       "output_evidence": "R1-X1R-FAIL no run record under s3://opal-data-assets/fidelity/alongside/bronze/_runs/",
-      "denominator": "0 run records under the _runs prefix (0 of 1 required); the automation execution b065d07e-53e7-47b6-9c07-476c21f1d6df ended Failed before the wrapper ran",
+      "denominator": "0 run records under the _runs prefix (0 of 1 required); no automation execution was started in attempt 2",
       "status": "FAIL",
-      "status_reason": "the automation's startInstance and stopInstance steps lacked ec2:DescribeInstanceStatus (row NFRA_FIDUPL-D1-W1-S8, BLOCKING, ARMED); the one run never reached the wrapper, so no run record was written",
+      "status_reason": "step 0 of attempt 2 (trace-login, SSM command e0b78633-eb35-4e48-8efa-a20709672470) stopped at submit_password, so steps 1 and 3 were not run and the automation never ran (row NFRA_FIDUPL-D1-W1-S11, BLOCKING)",
       "expect": "R1-X1R-OK source=automated landed=6"
     },
     {
@@ -41,9 +45,9 @@
       "method": "live_read",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1g",
       "output_evidence": "R1-X1G-FAIL no FU-x-1_account_gnumber_read.md under org/missions/D8/NFRA/NFRA_FIDUPL/deliverables",
-      "denominator": "0 of 1 required probe-block files on file; the recon's one attempt printed no block",
+      "denominator": "0 of 1 required probe-block files on file; the --run-live recon was not run in attempt 2",
       "status": "FAIL",
-      "status_reason": "the one --run-live recon (SSM command 91fa5057-3f37-4551-937e-0fab48001569) ended RECON_RC=1 with ERROR: live read failed: TimeoutError before any text was sent (row NFRA_FIDUPL-D1-W1-S9, BLOCKING); no retry under the issuer's one-attempt bound",
+      "status_reason": "the recon was not run: step 0 stopped at the sign-in (row NFRA_FIDUPL-D1-W1-S11); no value was made up",
       "expect": "R1-X1G-OK columns=\\d+ g_number_columns="
     },
     {
@@ -52,9 +56,9 @@
       "method": "live_read",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1p",
       "output_evidence": "R1-X1P-FAIL no FU-x-1_g_selector_probe.md under org/missions/D8/NFRA/NFRA_FIDUPL/deliverables",
-      "denominator": "0 of 1 required probe-block files on file; the probe never ran (the sign-in did not reach it)",
+      "denominator": "0 of 1 required probe-block files on file; the G-switch probe never ran",
       "status": "FAIL",
-      "status_reason": "the G-switch probe runs inside the same recon, which ended at the sign-in (row NFRA_FIDUPL-D1-W1-S9); no switch was made, so no restore is in question and no G number was touched",
+      "status_reason": "the G-switch probe runs inside the recon, which was not run (row NFRA_FIDUPL-D1-W1-S11); no switch was made, so no G number was touched",
       "expect": "R1-X1P-OK list_narrows=(yes|no) options=\\d+ restored_starting_g=yes"
     }
   ],
@@ -66,24 +70,25 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "N/A: a live run is not repeatable under the issuer's one-attempt bound; the two live attempts are recorded once each",
-      "observed": "automation execution b065d07e (Failed); recon command 91fa5057 (RECON_RC=1)",
+      "method": "N/A: a live run is not repeatable under the issuer's bounds; each live step is recorded once",
+      "observed": "trace-login command e0b78633 (TRACE-LOGIN-FAIL); attempt-1 automation b065d07e (Failed); attempt-1 recon 91fa5057 (RECON_RC=1)",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
       "item": "FWD-1 closing pass: the run record, the six landed files and the analyst destination addresses",
-      "reason": "not produced: the automation failed before the wrapper ran (NFRA_FIDUPL-D1-W1-S8); FWD-1 stays open"
+      "reason": "not produced: the sign-in step 0 stopped before the text request (NFRA_FIDUPL-D1-W1-S11); FWD-1 stays open"
     },
     {
       "item": "the account.txt G-number read and the G-switch probe blocks",
-      "reason": "not produced: the one recon sign-in timed out before any text was sent (NFRA_FIDUPL-D1-W1-S9); no value was made up"
+      "reason": "not produced: steps 1 and 3 were not run after the step 0 failure"
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W1-S8: the run automation lacks ec2:DescribeInstanceStatus, so its one execution failed before the wrapper ran and the stop call stopped the box anyway (BLOCKING, ARMED, disarm owner 0.7.0_AE_CloudOps~NFRA1).",
-    "NFRA_FIDUPL-D1-W1-S9: the one live recon sign-in timed out before any text message was sent; the failing login step is unknown (BLOCKING, INERT)."
+    "NFRA_FIDUPL-D1-W1-S8: attempt 1 automation lacked ec2:DescribeInstanceStatus (repaired by the issuer; recorded here for the attempt history).",
+    "NFRA_FIDUPL-D1-W1-S9: attempt 1 recon timed out before any text was sent (superseded by the repair, recorded for the attempt history).",
+    "NFRA_FIDUPL-D1-W1-S11: attempt 2 trace-login stopped at submit_password; the username step did not advance the page (BLOCKING, INERT)."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~1/NFRA_FIDUPL.TO-FU-x-1.session.log",
   "compiler_tools": [
@@ -93,9 +98,9 @@
       "result": "R1-X1R-FAIL, R1-X1G-FAIL, R1-X1P-FAIL"
     },
     {
-      "tool": ".tools/aws ssm / ec2",
-      "invocation": "aws ssm start-automation-execution, aws ssm send-command (preflight and recon), aws ec2 start-instances",
-      "result": "execution b065d07e-53e7-47b6-9c07-476c21f1d6df Failed; command 91fa5057-3f37-4551-937e-0fab48001569 RECON_RC=1"
+      "tool": ".tools/aws ssm",
+      "invocation": "aws ssm send-command (trace-login)",
+      "result": "command e0b78633-eb35-4e48-8efa-a20709672470 Success; TRACE-LOGIN-FAIL LoginStepError:submit_password"
     }
   ]
 }
