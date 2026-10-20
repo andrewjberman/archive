@@ -159,7 +159,7 @@
       "criterion_verbatim": "AR454-y-AC3: cat PAGE_NOTES.md OFFLINE_STDOUT.txt | grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer ' -- expect ^0$.",
       "method": "command",
       "invocation": "cat org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~323/PAGE_NOTES.md org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~323/OFFLINE_STDOUT.txt | grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer '",
-      "output_evidence": "The pipeline 'cat PAGE_NOTES.md OFFLINE_STDOUT.txt | grep -c -E eyJ-token|https-URL|Bearer-string' printed the single line '0' (rc of grep 1 = no match; the count is the printed 0). Over 131 lines (PAGE_NOTES.md 105, OFFLINE_STDOUT.txt 26); the OFFLINE_NOREPORT_STDOUT.txt (26 lines) and the script carry the same check: 0 and 1 (the script's one match is its dist origin, which it never prints).",
+      "output_evidence": "0\nThe pipeline cat PAGE_NOTES.md OFFLINE_STDOUT.txt | grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer ' printed the single line 0 (grep rc 1 = no match, the count is the printed 0). Over 131 lines (PAGE_NOTES.md 105, OFFLINE_STDOUT.txt 26); OFFLINE_NOREPORT_STDOUT.txt (26 lines) also holds 0 matches.",
       "denominator": "2 files, 131 lines (PAGE_NOTES.md 105 lines, OFFLINE_STDOUT.txt 26 lines); 0 matches",
       "expect": "^0$",
       "status": "PASS",
@@ -168,10 +168,10 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AR454-y-AC2 control: fixtures_offline_noreport.json (the sections read removed, so the Open report control reaches no report face) run through B3 standalone with --phase b3 --ticket TCK-20261020-deadbeef, and through the composite AC2 command.",
-      "expected": "standalone B3 prints B3 report face=no and B-LEG-BAD b3 face=no with rc 1 on the no-report fixture, and face=yes with rc 0 on the positive fixture; the composite prints B-LEG-OFFLINE-BAD b3 (as the cell expects).",
+      "description": "AR454-y-AC2 control, the B3 detector: the no-report fixture (fixtures_offline_noreport.json, the sections read removed so the Open report control reaches no report face) driven through B3 on its own (--phase b3 --ticket TCK-20261020-deadbeef). The composite AC2 run reaches b2 before b3 (surprise IRPT_ANLREQ-D2-W323-S1), so this control exercises the b3 detector directly; the composite AC2 stays a FAIL row.",
+      "expected": "B3 standalone on the no-report fixture prints 'B3 report face=no' and 'B-LEG-BAD b3 face=no' with rc 1; on the positive fixture it prints face=yes with rc 0.",
       "observed": "standalone no-report (the B3 detector on its own): 'B3 report face=no headings=0 value=no', 'B-LEG-BAD b3 face=no', rc=1 (the detector fires). standalone positive (fixtures_offline.json): 'B3 report face=yes headings=1 value=yes', rc=0. Composite AC2 (the mutant as the cell names it): 'B-LEG-OFFLINE-BAD b2 ...analysis request was not sent...', rc=1, so the composite never printed b3: the composite-level mutant DID NOT FIRE at b3 (surprise IRPT_ANLREQ-D2-W323-S1 blocks the run at B2).",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "method": "the AC1 composite command run twice; each stdout masked with sed 's/at=[0-9:]+Z/at=HH:MM:SSZ/' (the B2 time is the only field that differs), then diff.",
