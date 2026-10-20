@@ -1,0 +1,11 @@
+0.9.0_WK_NFRA_SCHWABBF~3 on NFRA_SCHWABBF.TO-BF-e1 (cell BF-e-1). Branch wk-NFRA_SCHWABBF-3.
+
+1. Tree check: rev-parse HEAD -> wk-NFRA_SCHWABBF-3; org and .tools present -> TREE-OK.
+2. Premises: lib/opal_naming.py address('schwab','08403355','silver','dim_balance','date=2026-10-16') resolves to s3://opal-data-assets/schwab/08403355/silver/dim_balance/date=2026-10-16 (+ /data.parquet).
+3. Write slip: the first Write landed under a literal C:\cygdrive\c\... tree; the two files were moved into the worktree (mv), the empty dirs under that tree that this worktree's write created were removed with rmdir only. Nothing else was touched.
+4. pytest data/canonical/schwab/tests/test_equal_sample.py -q: "12 passed in 1.29s" (AC1 method).
+5. ruff check --target-version py39 on both files: "All checks passed!" rc 0.
+6. AC2 (timeout 120): python data/canonical/schwab/keyform/equal_sample.py capture --master 08403355 --days 2026-10-16 --tables dim_balance --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_e1_capture_probe.json -> "CAPTURED cells=1 missing=0", rc 0. One read-only GetObject.
+7. Probe shape (names and types only): dim_balance, 30 rows, 40 columns, all non-numeric on read (numeric_sums empty). Provenance columns present: _source_file, _source_as_of, _master_observed (see surprise rows W3-S1, W3-S2).
+8. Determinism (fake store, python -I .scratch/determinism_check.py): two capture runs cells identical True; compare rc 0 EQUAL-OK cells=2.
+9. Commit f5a165e7c1 on wk-NFRA_SCHWABBF-3 (LOCAL): instrument, tests, two surprise rows.
