@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-436.offline-repro-of-closed-composition-required-for-kept-rows",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-436.offline-repro-of-closed-composition-required-for-kept-rows.md",
+    "group": "OTHER",
+    "vintage_commit": "b8e0e961034"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "b8e0e961034",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-436.offline-repro-of-closed-composition-required-for-kept-rows.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~316",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "kind": "script",
+      "commit_or_etag": "93e97560b55",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline reproduction script (stdlib plus the repository's own modules and jsonschema). Committed LOCAL as 93e97560b55 on wk-IRPT_ANLREQ-316. bash .tools/commit-gate.sh passed (ruff clean, ASCII). No AWS call, no network, no push, no deploy."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/REPRO_NOTES.md",
+      "kind": "doc",
+      "commit_or_etag": "93e97560b55",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Diagnosis and proposal (not applied). Committed LOCAL as 93e97560b55 with the script. States that neither kept-row composition is refused at HEAD and that the live refusal cause is not reproduced."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR436-y-AC1",
+      "criterion_verbatim": "`AR436-y-AC1`: invocation `python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py`, expect a line matching `^REPRO-A step=(none|[1-5]) class=\\S+$`.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "output_evidence": "REPRO-A step=none class=none",
+      "denominator": "1 of 1 REPRO-A line matches ^REPRO-A step=(none|[1-5]) class=\\S+$",
+      "expect": "^REPRO-A step=(none|[1-5]) class=\\S+$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the REPRO-A line matches the expected pattern (step=none: the three-KEPT_BY_HISTORY composition is admitted at HEAD)."
+    },
+    {
+      "criterion_id": "AR436-y-AC2",
+      "criterion_verbatim": "`AR436-y-AC2`: the same invocation, expect a line matching `^REPRO-B step=(none|[1-5]) class=\\S+ detail=\\S+$`.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "output_evidence": "REPRO-B step=none class=none detail=-",
+      "denominator": "1 of 1 REPRO-B line matches ^REPRO-B step=(none|[1-5]) class=\\S+ detail=\\S+$",
+      "expect": "^REPRO-B step=(none|[1-5]) class=\\S+ detail=\\S+$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the REPRO-B line matches the expected pattern (step=none: the four-row composition with one UNRESOLVED/KEPT_AS_TYPED row is admitted at HEAD; detail=- because nothing refused)."
+    },
+    {
+      "criterion_id": "AR436-y-AC3",
+      "criterion_verbatim": "`AR436-y-AC3`: the same invocation, expect a line matching `^REPRO-C step=2 class=ValidationError$`.",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "output_evidence": "REPRO-C step=2 class=ValidationError",
+      "denominator": "1 of 1 REPRO-C line matches ^REPRO-C step=2 class=ValidationError$",
+      "expect": "^REPRO-C step=2 class=ValidationError$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the control refuses at the schema step with ValidationError, so the script can see a refusal."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR436-y-AC3 control (REPRO-C): the accepted baseline composition with the required top-level key recipe_version deleted, admitted through the same CompositionAdmission.validate. Expected to refuse at the schema step.",
+      "expected": "REPRO-C step=2 class=ValidationError (validate refuses at step 2 with the ValidationError class)",
+      "observed": "REPRO-C step=2 class=ValidationError in both runs; the mutant fires",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two consecutive runs of repro_composition.py, stdout captured to files and compared with diff.",
+      "observed": "run1 and run2 produced three identical lines (REPRO-A step=none class=none; REPRO-B step=none class=none detail=-; REPRO-C step=2 class=ValidationError); diff exit 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live resident, its journal and the live 5B request composition",
+      "reason": "no AWS call, no network and no push in this order. The live refusal cause is therefore not measured and is filed as surprise IRPT_ANLREQ-D2-W316-S1."
+    },
+    {
+      "item": "product tree (infra/, docs/, portal/)",
+      "reason": "a READ and REPRODUCE cell. Nothing in the product tree was written; the one fix candidate is a proposal in REPRO_NOTES.md only, and none is needed for the admissions measured here."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W316-S1: the offline replica of the 5B request composition is admitted by CompositionAdmission.validate at HEAD, both with three KEPT_BY_HISTORY rows and with the fourth UNRESOLVED/KEPT_AS_TYPED row; the inferred cause of CLOSED_COMPOSITION_REQUIRED is not reproduced by this code path (BLOCKING, INERT).",
+    "IRPT_ANLREQ-D2-W316-S2: the accepted-composition test world is reachable from a plain script only through a pytest-internal call, FixtureFunctionDefinition._get_wrapped_function (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "repro_composition.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "result": "rc=0; REPRO-A step=none class=none; REPRO-B step=none class=none detail=-; REPRO-C step=2 class=ValidationError"
+    },
+    {
+      "tool": "commit-gate",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~316/repro_composition.py",
+      "result": "All checks passed (ruff clean); ASCII grep found 0 non-ASCII lines"
+    },
+    {
+      "tool": "git diff --quiet (pin C vs HEAD)",
+      "invocation": "git diff --quiet 2a3aaa2815874f8efaed622065676332ec41808d HEAD -- <five composition files>",
+      "result": "rc=0 (identical)"
+    }
+  ]
+}
