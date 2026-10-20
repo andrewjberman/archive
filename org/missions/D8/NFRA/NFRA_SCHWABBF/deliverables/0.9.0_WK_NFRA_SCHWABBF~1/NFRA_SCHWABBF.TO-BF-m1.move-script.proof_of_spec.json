@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-m1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP.md",
+    "vintage_commit": "ba5640ad8d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-m1.move-script.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "5f1ad506a4"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/move_bronze_key_form.py",
+      "kind": "script",
+      "commit_or_etag": "1528fd7e6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL tool on the worker branch. Not run against the bucket: the copy --apply is the issuer's release act R4 and the old-key removal is R7, both outside this order."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/keyform/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "1528fd7e6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL empty package marker on the worker branch.",
+      "artifact_covered_by": ["BF1-m1-AC1"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "1528fd7e6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch; run by the BF1-m1-AC1 invocation."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/fixtures/move_listing.json",
+      "kind": "test",
+      "commit_or_etag": "1528fd7e6a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL synthetic fixture (invented sizes and ETags; real key shapes) on the worker branch; read by the BF1-m1-AC2 invocation."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF1-m1-AC1",
+      "criterion_verbatim": "plan, copy, verify and the absence of any delete path, on the synthetic listing and fake S3.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "13 passed in 1.77s\n(second run of the same command: 13 passed in 1.28s)",
+      "denominator": "13 passed of 13 collected; 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF1-m1-AC2",
+      "criterion_verbatim": "the CLI itself on the fixture: the exact plan line.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --listing-file data/canonical/schwab/tests/fixtures/move_listing.json",
+      "output_evidence": "MOVE-PLAN in_scope=12 foreign=1 copy=12 already=0 events=12\n(full output: MOVE-LISTED keys=13; MOVE-OTHER unrecognized=0; six MOVE-COUNT lines, two per master and type)",
+      "denominator": "12 in scope of 13 listed (1 foreign, 0 unrecognized)",
+      "expect": "MOVE-PLAN in_scope=12 foreign=1 copy=12 already=0 events=12",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF1-m1-AC3",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only listing of the real schwab/08403355/bronze/acc/ prefix parses as old-form keys (the real prefix holds partitions such as 20261016/). It writes nothing.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --master 08403355 --type acc",
+      "output_evidence": "MOVE-PLAN in_scope=516 foreign=0 copy=516 already=0 events=516\n(full output: MOVE-LISTED keys=516; MOVE-OTHER unrecognized=0; MOVE-COUNT master=08403355 type=acc n=516). Read-only ListObjectsV2 under schwab/08403355/bronze/acc/; no write call in the plan verb.",
+      "denominator": "516 of 516 listed keys parse as old-form (0 unrecognized, 0 foreign)",
+      "expect": "^MOVE-PLAN in_scope=[0-9]+ foreign=0 copy=[0-9]+ already=[0-9]+ events=[0-9]+",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-m-1; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The AC1 pytest invocation run twice on the same tree; the summary lines were compared.",
+      "observed": "Run 1: '13 passed in 1.77s'. Run 2: '13 passed in 1.28s'. Counts identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Server-side copy against the real bucket (copy --apply)",
+      "reason": "The copy is the issuer's release act R4 under a change record and never-widen pair. The worker ran only the dry-run and the read-only plan."
+    },
+    {
+      "item": "Verify against the real bucket",
+      "reason": "Runs after the copy, under R4. Not run by this order."
+    },
+    {
+      "item": "Removal of the old keys",
+      "reason": "Issuer's confirmed act R7, outside this tool. The module contains no removal verb (tested by BF1-m1-AC1)."
+    },
+    {
+      "item": "Deploy of the bd-tree mirror to s3://opal-data-bd/code/",
+      "reason": "Issuer release act R5. This order is LOCAL."
+    }
+  ],
+  "surprises": [],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "13 passed (two identical runs)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 data/canonical/schwab/tests/test_move_bronze_key_form.py data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/keyform/__init__.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
