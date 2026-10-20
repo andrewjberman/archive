@@ -153,3 +153,20 @@ C. Post-commit criteria, the main tree's checker run by absolute path from the w
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=25 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made.
+
+REPAIR 9 (issuer, 2026-10-20 ~17:05Z) -- the first live launch closed before any page: headed Chrome found no X server
+   (SSM command b4e13269-5001-47d2-9981-2a5f981cf284, TargetClosedError).
+A. Code (commit f8d95bb0d9): _ensure_display polls the X socket file (X_SOCKET_DIR/X<n>, X_SOCKET_DIR default /tmp/.X11-unix)
+   every XVFB_POLL_S (0.1 s) for up to XVFB_READY_S (15 s) and returns only when it exists. If the child exits or the socket
+   never appears, the child is terminated and DisplayError is raised naming only the display and the seconds. XVFB_WAIT_S is
+   removed. --disable-extensions is added to LAUNCH_ARGS.
+B. Tests: tests/test_login_trace.py has 27 tests (the 25 and the 2 of REPAIR 9). test_launch_is_headed patches the socket
+   directory and the poll interval. 47 passed across the sign-in files; 27 passed twice. Mutant (no socket check, scratch
+   copy): 1 failed, 26 passed. ruff py39: All checks passed. Non-ASCII bytes: 0.
+C. Post-commit criteria, the main tree's checker run by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=27 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 9.

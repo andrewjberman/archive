@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-co-4.the-gateway-batch-16-release-test-list-is-read-for-the-slash-key-equality-test",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "7997ac0b53",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-4.the-gateway-batch-16-release-test-list-is-read-for-the-slash-key-equality-test.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-4.the-gateway-batch-16-release-test-list-is-read-for-the-slash-key-equality-test.md",
+    "group": "OTHER",
+    "vintage_commit": "7997ac0b53"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~188",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.sh",
+      "kind": "script",
+      "commit_or_etag": "b9e3bcc3c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only check script (no AWS call, no write, one git ls-remote); not a deploy; run once in the foreground"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.out",
+      "kind": "doc",
+      "commit_or_etag": "b9e3bcc3c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdout of the one foreground run of co4_batch16.sh; the record the acceptance rows read"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b9e3bcc3c1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one OBSERVATION row AMGT_HARVST-D1-W188-S1 appended by bytes (23 insertions, 0 deletions); row gate rc 0"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 holds the controls (the finder sees a test the order names and does not see one it does not)",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.out",
+      "output_evidence": "CONTROL-POSITIVE named_test=test_og_mg3 order_mentions=2\nCONTROL-NEGATIVE named_test=test_zz_not_a_test order_mentions=0",
+      "denominator": "2 of 2 control lines read as expected (order = NFRA_OPLGTW.TO-OG-rl-17, 1 file read)",
+      "status": "PASS",
+      "expect": "(?ms)^CONTROL-POSITIVE named_test=test_og_mg3 order_mentions=[1-9]\\d*$.*^CONTROL-NEGATIVE named_test=test_zz_not_a_test order_mentions=0$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 is the finding (the verdict word is the finding)",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.out",
+      "output_evidence": "CJ2-IN-BATCH16 named_in_order=no named_in_checks=no in_base_tree=yes full_suite_run_stated=yes release_branch_at_origin=no verdict=PARTIAL",
+      "denominator": "1 verdict line; 89 check files searched (r47/checks and r38/checks, named on NOTE lines) and 1 order file read; order names the test 0 times; checks name it 0 times",
+      "status": "PASS",
+      "expect": "(?m)^CJ2-IN-BATCH16 named_in_order=(yes|no) named_in_checks=(yes|no) in_base_tree=(yes|no|unread) full_suite_run_stated=(yes|no) release_branch_at_origin=(yes|no) verdict=(IN|PARTIAL|ABSENT)$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "a finder that counts any name as named would read a planted absent name above 0; the planted name test_zz_not_a_test must read 0",
+      "expected": "order_mentions=0 for test_zz_not_a_test",
+      "observed": "CONTROL-NEGATIVE named_test=test_zz_not_a_test order_mentions=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A: the face fixes one foreground run of co4_batch16.sh and forbids a second write, so no same-input comparison is made",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the site Z release tree C:/tmp/og-rel-batch16 on branch rel-nfra-oplgtw-batch16 and its test list",
+      "reason": "on site Z's host, not on this box; the release does not exist yet, and the cell is read-only"
+    },
+    {
+      "item": "a full-suite run on any release tree",
+      "reason": "the cell reads the order and the check folders only; the face grants no test run"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W188-S1: batch 16 (OG-rl-17) does not NAME tests/test_cj2_slash_key_one_form.py in its test list and no rl-17 check names it; the test reaches batch 16 only inside the Phase A full-suite comparison; verdict PARTIAL, not IN (OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.out",
+  "compiler_tools": [
+    {
+      "tool": "co4_batch16.sh",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.sh > org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~188/co4_batch16.out",
+      "result": "rc=0; 101 output lines; final line CJ2-IN-BATCH16 ... verdict=PARTIAL"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md (at commit b9e3bcc3c1)",
+      "result": "OK: 1 new row(s) of 607 total checked; all new rows carry their step-7/step-10 fields; rc 0, no override used"
+    }
+  ]
+}
