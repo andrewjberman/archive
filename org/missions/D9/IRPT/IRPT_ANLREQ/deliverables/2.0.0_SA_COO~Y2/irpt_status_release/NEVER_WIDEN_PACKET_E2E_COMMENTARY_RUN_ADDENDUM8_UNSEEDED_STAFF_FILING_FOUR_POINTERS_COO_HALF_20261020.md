@@ -2,7 +2,7 @@
 
 **For:** `1.0.0_SA_CTO~DELL2` (CTO half). **Author:** `2.0.0_SA_COO~Y2`, 2026-10-20. **Operator:** `0.7.0_AE_CloudOps~IB2`.
 **Amends:** the packet `NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_20261017.md` and ADDENDUMS 1 to 7 (ADDENDUM 7 CTO half signed @9b7d4f55c9). **Ledger:** `irpt-commentary-e2e-6-20261020`. **Authority:** Andrew's relayed word via the CTO (msg 11152: "an unseeded staff filing for any firm reaches four attachments on the open ticket", read live on PROD); PRD IRPT_ANLREQ v0.24 FWD-1, O1 and O5.
-**Starts only after** the r37 apply (`irpt-ycdgen-o1-r37-20261020`, the upload door) and the r34m install (`irpt-resident-r34m-20261020`, the resident) are both CLOSED, and on my GO.
+**Starts only after** the r37 version 2 apply (`irpt-ycdgen-o1-r37-20261020`, the upload door) and the r34m install (`irpt-resident-r34m-20261020`, the resident) are both CLOSED, and on my GO.
 
 ## 1. Why
 
@@ -12,7 +12,7 @@ Runs 1 to 5 each minted a synthetic advisor and named it in the upload, so none 
 
 | step | change |
 |---|---|
-| A, A2 | the synthetic staff user is `fwd1-commentary-e2e6-20261020@opal.invalid` (the existing mint, a new address). NO advisor is minted and NONE is named: A2 reads `A2 advisor none-by-design`. R0 reads the user ABSENT first and the resident root `0485393f3a-r34m` (the install proof) and the door's CodeSha256 `UdwyPNNUzxnm/nFntYdK8co65gnmkrFMpH2xVWmwUpw=` |
+| A, A2 | the synthetic staff user is `fwd1-commentary-e2e6-20261020@opal.invalid` (the existing mint, a new address). NO advisor is minted and NONE is named: A2 reads `A2 advisor none-by-design`. The staff user is NOT on the resident's Opal allow list: the request must take the Opal producer through the ticket stamp (the staff user's own `/tickets` analysis_request, `created_by` equal to the principal), which is the routing this run grades; R0 reads `OPAL_PRODUCER_PRINCIPALS` unchanged (two names) in the installed resident. R0 reads the user ABSENT first and the resident root `0485393f3a-r34m` (the install proof) and the door's CodeSha256 `PlCjNms/RRLRB/c15zW8Sdzl7w3ptodi3o8sSxnWjYA=` (r37 version 2: the O1 owner fallback AND the ticket confirmation of a `/tickets` analysis_request by its creator) |
 | R0 | the holdings bytes are the three-row file: `Ticker,Dollars,Acct Market Value` / `SPY,104,26000000` / `AGG,200,32000000` / `TIMXX,50,5000000` (ASCII, LF, a trailing newline): no unknown row, so no Keep. A fresh upload token; sha256 printed and compared with every earlier receipt's |
 | U | the POST carries NO `advisor_email` query parameter. The ladder of ADDENDUM 4 stands. The expected answer is `NORMALIZED` (the three findings of run 5 for these tickers were notices). A `NEEDS_CORRECTION` is a STOP at U naming the findings (no Keep in this run); a refusal `NOT_AUTHORIZED` is a STOP naming the code: it is the defect r37 exists to remove |
 | S | `commentary_requested` is OMITTED from the analysis body (the form no longer sends it; the CTO half of ADDENDUM 1 accepted `true` for the earlier runs only). Two comparison keys as before |
