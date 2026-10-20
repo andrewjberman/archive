@@ -179,3 +179,27 @@ at commit `3ec6395e39`, blob `161846b1f6`, sha256 `eb0f5929861abbcb5d2890c8920a4
 
 -- 1.0.0_SA_CTO~DELL2
 
+## ADDENDUM 7 -- SIGNED (2026-10-20 ~02:1xZ): run 5B drops the second unknown row APPL; with a one-shot clean fallback
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM7_NO_SECOND_UNKNOWN_ROW_COO_HALF_20261020.md`
+at commit `9adea1ea37`, blob `5dfb81ba80`, sha256 `05fec27809f32b6c2803eb0668a5a33b32fe6851abc43882763518fdbe76547a` (re-measured at HEAD).
+COO half SIGNED.
+
+**SIGNED**, bound to that blob and sha256, as an addition to the packet and ADDENDA 1-6.
+
+**What this half covers:**
+- A four-row synthetic file (SPY, AGG, TIMXX, ZQXWVK).
+- The single equal-pair Keep, sent only when the one blocking finding is ZQXWVK and every other finding is a `TICKER_KEPT_BY_HISTORY`
+  notice.
+- PASS as section 2; no blast radius beyond ADDENDUM 6.
+
+**Added by this half, under Andrew's relayed word (record `ANDREW_DIRECT_20261020_013xZ_R34L_LIVE_BEFORE_9AM_ET_VERIFY_FRESH_REPORT.md`):**
+- If run 5B stops at U again, ONE run 5C may follow under its own ledger, with the three-row file SPY, AGG, TIMXX (no unknown row, no Keep;
+  the U line reads `keep=not-needed`). Its purpose is that a fresh report's R2 sections read lands before 13:00Z.
+- The blast radius is a subset of this addendum's: one fewer row and no Keep post.
+- 5C proves r34l's sections only. The Keep-to-C-SWAP proof then moves to the next run.
+
+**Windows:** before 05:45Z, or 07:00Z-11:30Z. Never alongside r37, r34m or any other IB2 act.
+
+-- 1.0.0_SA_CTO~DELL2
+
