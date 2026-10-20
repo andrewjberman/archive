@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-s1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "05b95a2aca45a00164f55e66aa51b47c9e9f8456",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-s1.alongside-box-daily-schedule.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "05b95a2aca45a00164f55e66aa51b47c9e9f8456"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/alongside-schwab-ec2/schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Text committed on wk-NFRA_SCHWABBF-11 only. Not applied: no terraform command ran except terraform fmt (local formatting). The four rules ship DISABLED (var.alongside_schedule_state default); enabling is a later release act. No SSM command was sent and no instance was touched (WORLD floor)."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_schedule_tf.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only. It reads schedule.tf, masters.tf and lib/opal_naming.py as text; it runs no terraform, no network and no AWS. The six 49F fire times are a literal list in the file, not read from the 49F Terraform."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL1-s1-AC1",
+      "criterion_verbatim": "the four fires keep the 30-minute stagger against each other and the six 49F fires, and ship DISABLED.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_schedule_tf.py -q -p no:cacheprovider --color=no -k \"fire_times or disabled\"",
+      "output_evidence": "2 passed, 4 deselected in 0.02s",
+      "denominator": "2 of 2 selected tests passed (4 of 6 deselected by -k). Selected: test_fire_times_alongside_stagger_and_against_49f (8 Alongside fire times, all 28 pairs at circular gap >= 30 min, all 8 against the 6 literal 49F fires at >= 30 min, minimum gap 30 min); test_disabled_default_validation_and_rule_state (default DISABLED, validation list exactly ENABLED and DISABLED, rule state = var.alongside_schedule_state)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL1-s1-AC2",
+      "criterion_verbatim": "the SSM command keeps every fail-loud step of the 49F hand-off and names no 49F resource.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_schedule_tf.py -q -p no:cacheprovider --color=no -k \"ssm_command\"",
+      "output_evidence": "1 passed, 5 deselected in 0.01s",
+      "denominator": "1 of 1 selected test passed (5 of 6 deselected by -k). Selected: test_ssm_command_fail_loud_and_no_49f_resource (the command block carries the Alongside code path, the $ErrorActionPreference Continue line, the OpalSddDailyPull-${each.key} task, Unregister-ScheduledTask, /RU Administrator /IT /RL HIGHEST, NEVER STARTED, LastTaskResult, -Master ${each.key} -Target monolith -SnsTopicArn, the S3 and register throws; at least 5 throws; 0 eight-digit master literals; 0 of the 3 forbidden 49F strings in the block and in the file)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "AL1-s1-AC3",
+      "criterion_verbatim": "the events role reaches one document and one instance; every name is builder output.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_schedule_tf.py -q -p no:cacheprovider --color=no -k \"role_scope or builder_names\"",
+      "output_evidence": "3 passed, 3 deselected in 0.03s",
+      "denominator": "3 of 3 selected tests passed (3 of 6 deselected by -k). Selected: test_role_scope_one_document_one_instance_no_star (exactly one Sid, Action ssm:SendCommand, Resource list = [the RunPowerShellScript document, aws_instance.alongside_box.arn], no star); test_builder_names_modules_and_resource_names (3 module blocks; name() gives schwab-{m}-si2-pull-daily for each of the 4 masters, schwab-alongside-si2-events-role, schwab-alongside-send-daily-pull-policy; every name line is a module output); test_builder_names_rule_and_role_use_module_outputs (rule, role and policy take module names)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four planted violations in a scratch copy of the root (.scratch/mutant, not committed, the committed files untouched). S_M1: a typed master number in place of ${each.key} in the command. S_M2: the events policy Resource list carries a star in place of the instance ARN. S_M3: masters.tf in the copy carries a cron that puts an Alongside fire on 22:15, a 49F fire time. S_M4: the variable default is ENABLED. Each is run against its named test with the test's root pointed at the copy.",
+      "expected": "each planted violation fails its named test",
+      "observed": "S_M1 -> test_ssm_command_fail_loud_and_no_49f_resource raised AssertionError (the command block lacks the -Master ${each.key} line). S_M2 -> test_role_scope_one_document_one_instance_no_star raised AssertionError (the Resource list is the document and a star). S_M3 -> test_fire_times_alongside_stagger_and_against_49f raised AssertionError at its first assertion (the masters map no longer equals the four-master literal); the stagger arm was not the one that fired. S_M4 -> test_disabled_default_validation_and_rule_state raised AssertionError.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass count, deselected count and rc compared",
+      "observed": "AC1 run 1: 2 passed, 4 deselected in 0.02s rc=0; run 2: 2 passed, 4 deselected in 0.02s rc=0. AC2 run 1: 1 passed, 5 deselected in 0.01s rc=0; run 2: 1 passed, 5 deselected in 0.01s rc=0. AC3 run 1: 3 passed, 3 deselected in 0.03s rc=0; run 2: 3 passed, 3 deselected in 0.02s rc=0. Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, validate, plan and apply of the root; any aws command; any SSM SendCommand; any enable of the rules",
+      "reason": "WORLD floor for this order: nothing applied, nothing sent, nothing enabled. The rules ship DISABLED; enabling is a later release act."
+    },
+    {
+      "item": "The live behaviour of the Administrator scheduled-task hand-off on the Alongside box",
+      "reason": "Text only. The hand-off is copied from the 49F pattern and proven as text (the throws, the registration flags, the propagation), never exercised on a box."
+    },
+    {
+      "item": "The 49F fire times read from the 49F Terraform",
+      "reason": "Declared by the order as a literal list in the test; the 49F file was read as prior art for the command only, not for the fire times."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~11/NFRA_SCHWABBF.TO-AL-s1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (repo interpreter), test_alongside_schedule_tf.py",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_schedule_tf.py -q -p no:cacheprovider --color=no",
+      "result": "6 passed in 0.03s (rc 0)"
+    },
+    {
+      "tool": "terraform fmt (local formatting only; no init)",
+      "invocation": "cd infra/aws/terraform/alongside-schwab-ec2 && terraform fmt schedule.tf && terraform fmt -check -recursive",
+      "result": "fmt check rc 0 after formatting schedule.tf"
+    },
+    {
+      "tool": "lib/opal_naming.py name() (the builder the test calls)",
+      "invocation": "name(\"schwab\", m, \"si2-pull\", \"daily\") for each of the four masters; name(\"schwab\", \"alongside\", \"si2-events\", \"role\"); name(\"schwab\", \"alongside\", \"send-daily-pull\", \"policy\")",
+      "result": "schwab-{m}-si2-pull-daily for each master, schwab-alongside-si2-events-role, schwab-alongside-send-daily-pull-policy"
+    }
+  ]
+}

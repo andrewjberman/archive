@@ -1,0 +1,26 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~4 on NFRA_SCHWABBF.TO-BF-t4 (cell BF-t-4), worktree C:\Users\AndrewBerman\Desktop\wt-bf-4, branch wk-NFRA_SCHWABBF-4
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-4; test -d org && test -d .tools -> TREE-OK.
+2. Dry run at base 998fe826317 (before any edit):
+   - pytest test_thread_trace.py -> 22 passed in 0.87s (rc 0)
+   - --form any, 08403355, 2026-10-16 -> THREAD-OK master=08403355 day=2026-10-16 form=legacy (rc 0)
+   - --form builder, 08403355, 2026-10-16 -> THREAD-FAIL reason=bronze-not-held-form-builder;second-form-found-legacy master=08403355 day=2026-10-16 (rc 1)
+3. Build: thread_trace.py silver located by the --form rule (builder = firm key, legacy = old key, any = both, firm preferred);
+   HOP silver line carries form=; new HOP silver-second-form line; builder FAILs a silver object at the old key.
+   test_thread_trace.py: silver helpers spell both keys from opal_naming; 10 silver-form arms added; round-3 arms kept.
+4. Unit tests after the build -> 32 passed in 0.62s (rc 0). ruff --target-version py39 on both files -> All checks passed! (rc 0).
+5. Commit 0f92b86fe32 (build, two paths) via safe-commit.sh, LOCAL on wk-NFRA_SCHWABBF-4.
+6. Controls (scratch, python -I, in-memory fake store, no AWS): mutant and determinism, recorded in the instance.
+7. Real-store probes, read-only (list and get only):
+   - AC2 -> THREAD-OK master=08403355 day=2026-10-16 form=legacy, rc 0 (silver read from the old key, 30 rows)
+   - AC3 -> THREAD-FAIL reason=bronze-not-held-form-builder;second-form-found-legacy;silver-absent;silver-second-form-found-legacy master=08403355 day=2026-10-16, rc 1
+   The AC3 expect ^THREAD-FAIL master=08403355 day=2026-10-16 does not match this line (re.M): the verdict prints reason= first.
+8. Surprise row NFRA_SCHWABBF-W4-S8 (BLOCKING, INERT) appended to the channel. A first commit (364c41ca22e) converted the file's CRLF
+   lines to LF; corrected by 7f0e6d78c15, which restores the parent bytes and appends only the row (22 insertions, 0 deletions).
+9. AC3 recorded FAIL. The expectation was not weakened. The order stays pending; no status flip.
+
+10. Issuer ruling on W4-S8 (commit 81c1eba37d): the trace prints THREAD-FAIL reason=... master=M day=D. AC3 expect amended to
+    ^THREAD-FAIL reason=.* master=08403355 day=2026-10-16$. The order amendment is committed path-only at 7480d3084d (status pending).
+11. Re-run after the amendment: AC1 32 passed in 0.70s (rc 0); AC2 THREAD-OK master=08403355 day=2026-10-16 form=legacy (rc 0);
+    AC3 THREAD-FAIL reason=bronze-not-held-form-builder;second-form-found-legacy;silver-absent;silver-second-form-found-legacy master=08403355 day=2026-10-16 (rc 1),
+    amended expect matches. The row W4-S8 stays as filed.

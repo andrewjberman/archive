@@ -1,0 +1,22 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~5 on NFRA_SCHWABBF.TO-BF-i3 (cell BF-i-3, PRD v0.7 C-SCOPE / C-ONEWRITER)
+worktree: C:\Users\AndrewBerman\Desktop\wt-bf-5 (branch wk-NFRA_SCHWABBF-5)
+
+1. TREE-OK check: branch wk-NFRA_SCHWABBF-5; org/ and .tools/ present.
+2. Baseline, unchanged Terraform and unchanged test:
+   python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k iam_grants
+     -> 6 passed, 6 deselected in 0.04s (rc 0)
+   python -m pytest ... -k event_rules
+     -> 5 passed, 7 deselected in 0.05s (rc 0)
+3. Test rewritten first (test_iam_grants_box_write_per_master_firm_entries replaced by
+   test_iam_grants_box_write_firm_entry_0840_only: firm write list must equal exactly the 0840 entry).
+   Run against the UNEDITED three-master Terraform (the mutant arm):
+     -> F..... ; "1 failed, 5 passed, 6 deselected in 0.26s" (rc 1)
+     -> AssertionError: firm-prefix write entries must be exactly the 0840 entry: [...08242234.*, ...08335338.*, ...08403355.*]
+4. Terraform edit: monolith-iam.tf MonolithSchwabWrite drops the 08242234 and 08335338 firm-prefix entries;
+   keeps the 08403355 firm-prefix entry; comment updated to BF-i-3. Commit 28645d847c (LOCAL, safe-commit rc 0).
+5. AC1 after edit: python -m pytest ... -k iam_grants -> 6 passed, 6 deselected in 0.06s (rc 0)
+   AC2 after edit: python -m pytest ... -k event_rules -> 5 passed, 7 deselected in 0.04s (rc 0)
+6. Determinism: the AC1 invocation run twice, outputs diffed. Verdict line identical ("6 passed, 6 deselected");
+   only the wall-clock field differs (0.04s / 0.03s). rc 0 on both.
+7. No terraform init, plan or apply; no aws command; no network. terraform not invoked (fmt test not in this cell's criteria).
+8. No surprise rows filed; INVESTIGATION_v1.md not edited.
