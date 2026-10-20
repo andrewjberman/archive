@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-cw-5",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "66ac649890"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "66ac649890",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-cw-5.the-refresh-lambda-guard-counts-a-rekeyed-previous-key-as-retained.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~461",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A source change in the worker's one commit: rekeyed_keys added, disappeared_entries and compute_delta read it. Nothing is deployed, uploaded to Lambda, written to AWS or S3, or invoked.",
+      "artifact_covered_by": [
+        "IBCW5-AC1",
+        "IBCW5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_retained_key.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new test file of eight tests, invented keys and account ids only, no AWS call. Run by the check's AC1 pytest invocation; nothing deployed.",
+      "artifact_covered_by": [
+        "IBCW5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBCW5-AC1",
+      "criterion_verbatim": "the eight named tests exist in tests/test_refresh_retained_key.py and ALL pass",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py\" . IBCW5-AC1",
+      "output_evidence": "OK: the eight named tests exist and all pass / IBCW5-AC1 PASS (run before the commit, rc=0; recorded in IBcw5_criteria_output.txt)",
+      "denominator": "1 of 1 check invocation PASS; 8 of 8 named tests PASSED",
+      "status": "PASS",
+      "expect": "IBCW5-AC1 PASS"
+    },
+    {
+      "criterion_id": "IBCW5-AC2",
+      "criterion_verbatim": "a differential and scenarios over base (HEAD~1) versus the new module: unchanged paths byte-identical, the re-key fixture not a disappearance and neither held nor carried (also with an unknown source), the delta carries no new key, split, account-less and mixed fixtures fail closed, rekeyed_keys lists exactly the retained keys, refresh.py actually changed",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py\" . IBCW5-AC2",
+      "output_evidence": "NOT RUN PASS BEFORE THE COMMIT: AC2 reads git show HEAD:refresh.py and HEAD~1:refresh.py, so before the commit it exits 1 with 'refresh.py is identical to the base' (IBcw5_criteria_output.txt). The post-commit run is in the worker report.",
+      "denominator": "0 of 1 run to PASS before the commit (the check reads the commit that carries this file)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "AC2 is graded by the post-commit run of p261_cells.py IBCW5-AC2 over HEAD~1 and HEAD, which the worker reports after the one commit; the issuer re-runs it.",
+      "expect": "IBCW5-AC2 PASS"
+    },
+    {
+      "criterion_id": "IBCW5-AC3",
+      "criterion_verbatim": "the worker's ONE commit (HEAD~1..HEAD) touches only refresh.py, the new test file and this order's paths, and both code files are in it",
+      "method": "command",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py\" . IBCW5-AC3",
+      "output_evidence": "NOT RUN BEFORE THE COMMIT: AC3 reads HEAD~1..HEAD, and this instance is itself in that commit. Its post-commit result is in the worker report, not in this file.",
+      "denominator": "0 of 1 run before the commit (the check reads the commit that carries this file)",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "AC3 is graded by the post-commit run of p261_cells.py IBCW5-AC3 over HEAD~1..HEAD, which the worker reports after the one commit; the issuer re-runs it.",
+      "expect": "IBCW5-AC3 PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant control is named by the order: the order names three criteria and no mutation.",
+      "expected": "N/A (the order names no mutant)",
+      "observed": "not run by this worker",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run once before the commit; AC2 run once before the commit (it fails there by construction); AC2 and AC3 run once after the commit. The lines are recorded verbatim in IBcw5_criteria_output.txt and the worker report.",
+      "observed": "AC1 rc=0 before the commit; AC2 rc=1 before the commit (by construction); AC2 and AC3 are reported in the worker report",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any AWS, S3, Lambda or SSM call, and any deploy or upload of refresh.py",
+      "reason": "forbidden by the order's bounds: NO AWS call, NO S3 read or write, NO deploy, NO push."
+    },
+    {
+      "item": "the task order's status flip to complete",
+      "reason": "the order's worker face says flip nothing in it; the issuer flips status."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-D2-W461-S1: org/surprise_channel is tracked at HEAD but absent on disk in this sparse worktree; the row schema was read from the base checkout for form only.",
+    "IRPT_BCKEND-D2-W461-S2: AC2 compares HEAD with HEAD~1, so it fails by construction before the commit; the pre-commit record is a FAIL, not a PASS, and the post-commit run is in the report."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~461/IBcw5_notes.md",
+  "compiler_tools": [
+    {
+      "tool": "p261_cells.py (r261 check, issuer's, read-only)",
+      "invocation": "python \"org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py\" . IBCW5-AC1|IBCW5-AC2|IBCW5-AC3",
+      "result": "before the commit: AC1 rc=0; AC2 rc=1 by construction; AC2 and AC3 run after the one commit and reported in the worker report"
+    }
+  ]
+}
