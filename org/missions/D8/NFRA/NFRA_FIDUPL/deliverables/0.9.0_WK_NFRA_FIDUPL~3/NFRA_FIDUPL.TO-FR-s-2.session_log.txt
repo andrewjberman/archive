@@ -1,17 +1,24 @@
 NFRA_FIDUPL.TO-FR-s-2 -- session log of 0.9.0_WK_NFRA_FIDUPL~3 (worktree C:/tmp/fidupl-w3, branch wk-NFRA_FIDUPL-3)
-Synthetic data and fakes only. No G number, account number or firm label was printed, logged or committed.
+Synthetic data and fakes only. No G number, account number or firm label was printed, logged or committed by a check.
+The repaired record carries account-number strings in conflicts and unplaced, in the S3 record only (issuer REPAIR).
 
+FIRST PASS (round 2, cut 4ca02b2119 lineage)
 1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-3 ; test -d org && test -d .tools -> TREE-OK
 2. Order read whole (worker face); reference sections 1, 5, 5a, 6 and 11 read; land.py read for the content-date reader only.
 3. Premises: lib/opal_naming.py address('fidelity','cottonwood','bronze','account','20261016','account.txt')
    resolves for a registered firm scope; address() refuses an unregistered scope (ValueError) -- exercised by the test.
-4. Code written: infra/aws/ec2/canonical-fidelity/split.py and tests/test_split.py (10 tests; 9 named + 1 CLI).
-5. Pytest: 10 passed (python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_split.py).
-6. Mutant 1 (line bytes normalised CRLF -> LF): test_raw_line_bytes_preserved FAILED; file restored (cmp).
-7. Mutant 2 (account under two firms lands under the first firm): test_account_under_two_firms_listed_not_landed FAILED; file restored (cmp).
-8. Ruff py39: All checks passed!  ASCII: 0 non-ASCII bytes in both files.
-9. Determinism: two CLI dry runs on a synthetic handoff (.scratch/synth_split), outputs compared with cmp: identical.
-   Leak check on that output: 0 synthetic account, label or G values present.
-10. Commit 7500236c81 (split.py, test_split.py) via safe-commit.sh.
-11. Post-commit criterion: R1-FR2-OK passed=10 (rc 0).
-12. Surprise rows W3-S5..S8 committed (b7422335f4); the surprise-row gate reported 4 new rows OK.
+4. Code written: split.py and tests/test_split.py (10 tests; 9 named + 1 CLI). Commit 7500236c81.
+5. Pytest: 10 passed. Mutants (CRLF normalised; two-firm account landed under the first firm) each FAILED one test; files restored (cmp).
+6. Ruff py39 clean; 0 non-ASCII bytes. Determinism: two CLI dry runs identical; 0 synthetic values in the output.
+7. Criterion R1-FR2-OK passed=10 (rc 0). Surprise rows W3-S5..S8 committed (b7422335f4).
+
+REPAIR (issuer, row NFRA_FIDUPL-D1-W3-S5; fresh worktree cut from box/dell1 head c8aa40c577)
+8. First act: branch wk-NFRA_FIDUPL-3, TREE-OK, split.py and tests present from 7500236c81.
+9. split.py: conflicts and unplaced hold the account strings in the S3 record; label ids unchanged; the CLI stays counts-only.
+10. tests/test_split.py: test_record_has_counts_and_lists follows the new contract; new test
+    test_record_lists_unplaced_and_conflict_accounts (record holds the strings; stdout, stderr and logs do not).
+11. Pytest: 11 passed. Mutants on the repaired record: (1) unplaced reverted to ids -> the new test FAILED;
+    (2) the first conflict account printed -> the new test FAILED; both restored (cmp).
+12. Ruff py39 clean; 0 non-ASCII bytes. Determinism re-run on the repaired CLI: identical; 0 synthetic values in the output.
+13. Commit 348abec156 (split.py, test_split.py) via safe-commit.sh, rc=0.
+14. Criterion, main-tree checker by absolute path, cwd the worktree: R1-FR2-OK passed=11 (rc 0), before and after the commit.
