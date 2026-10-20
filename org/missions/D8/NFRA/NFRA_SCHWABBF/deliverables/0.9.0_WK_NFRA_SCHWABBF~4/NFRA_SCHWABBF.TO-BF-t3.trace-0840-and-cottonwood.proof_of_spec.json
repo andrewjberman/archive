@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-t3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-t3.trace-0840-and-cottonwood.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8d796975f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/thread_trace.py",
+      "kind": "script",
+      "commit_or_etag": "f76106a0c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only trace tool, no deploy and no schedule. Committed LOCAL on wk-NFRA_SCHWABBF-4 at f76106a0c5: IN_SCOPE literal of the five masters and the TRACE-REFUSED refusal before the registry read and the S3 client."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_thread_trace.py",
+      "kind": "test",
+      "commit_or_etag": "f76106a0c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fake-store suite, no live AWS. Committed LOCAL on wk-NFRA_SCHWABBF-4 at f76106a0c5: 22 tests, including the refusal arms and the contract-equality arm."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-t3-AC1",
+      "criterion_verbatim": "BF3-t3-AC1 -- the trace on a fake store for the five masters, and the refusal for the others.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "......................                                                   [100%]\n22 passed in 0.69s\nrc=0",
+      "denominator": "22 of 22 tests passed (0 failed, 0 errors)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF3-t3-AC2",
+      "criterion_verbatim": "BF3-t3-AC2 -- the refusal on the real tool for a master that stays on today's key.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08335338 --day 2026-10-16 --form any",
+      "output_evidence": "TRACE-REFUSED master=08335338 out of scope (PRD v0.7 C-SCOPE)\nrc=3",
+      "denominator": "1 of 1 out-of-scope probe lines matches the refusal; exit code 3 is the refusal code; no S3 call was made",
+      "status": "PASS",
+      "expect": "^TRACE-REFUSED master=08335338 out of scope",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF3-t3-AC3",
+      "criterion_verbatim": "BF3-t3-AC3 -- the seam probe against the REAL neighbor: the real 0840 day 2026-10-16 (bronze still in the old master layout, silver present) still traces under --form any. Read-only.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08403355 --day 2026-10-16 --form any",
+      "output_evidence": "TRACE master=08403355 day=2026-10-16 form=any\nHOP bronze: HELD n=1 prefix=s3://opal-data-assets/schwab/08403355/bronze/acc/20261016 form=legacy\nHOP second-form: NONE\nHOP silver: READ rows=30 table=dim_balance\nBALANCES column=net_credit_debit non_null=30 sum=-753761.16\nBALANCES column=margin_balance non_null=30 sum=890656.18\nBALANCES column=available_to_pay non_null=30 sum=8751885.27\nBALANCES column=mrgn_buying_pwr non_null=30 sum=9884740.56\nBALANCES column=money_mkt_funds non_null=30 sum=0.00\nBALANCES column=mtd_margin_int non_null=30 sum=27217.30\nBALANCES column=daily_margin_int non_null=30 sum=4654.90\nBALANCES column=eqty_excl_option non_null=30 sum=4388425.24\nBALANCES column=eqty_percentage non_null=30 sum=6.27\nBALANCES column=mkt_value_long non_null=30 sum=32067874.73\nBALANCES column=mkt_value_short non_null=30 sum=-12641177.21\nBALANCES column=eqty_incl_option non_null=30 sum=19544350.45\nBALANCES column=option_rqrmnts non_null=30 sum=0.00\nBALANCES column=mnth_end_div_pay non_null=30 sum=0.00\nBALANCES column=maintenance_call non_null=30 sum=11194196.00\nBALANCES column=mvl_cash_ex_optn non_null=30 sum=24220880.34\nBALANCES column=net_mv_positions non_null=30 sum=43647577.86\nBALANCES column=net_mv_plus_cash non_null=30 sum=42893816.70\nBALANCES column=cash_balance_settled_only non_null=30 sum=-753761.16\nBALANCES column=cash_margin_bal_settled non_null=30 sum=-11750521.03\nBALANCES column=bank_sweep_ibf non_null=30 sum=19316.27\nBALANCES column=bank_cash non_null=30 sum=19316.27\nTHREAD-OK master=08403355 day=2026-10-16 form=legacy\nrc=0",
+      "denominator": "1 of 1 bronze hop HELD (legacy master layout, n=1); 30 of 30 silver rows read; 22 of 22 balance columns summed (no identifier column summed); THREAD-OK on the final line",
+      "status": "PASS",
+      "expect": "^THREAD-OK master=08403355 day=2026-10-16",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Remove the IN_SCOPE refusal so that 08335338 is traced; the refusal arms and the AC2 probe must then fail.",
+      "expected": "the refusal arms fail and the probe prints a THREAD line rather than TRACE-REFUSED",
+      "observed": "NOT RUN. The order names no mutant. The refusal arms assert rc 3 and the exact TRACE-REFUSED line, so a removed refusal would fail them by construction; no mutant was executed in this order.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 probe run twice on f76106a0c5 with the same input; output lines and exit code compared. The AC1 suite run twice (22 passed on both runs).",
+      "observed": "AC2 run 1 and run 2: TRACE-REFUSED master=08335338 out of scope (PRD v0.7 C-SCOPE), rc=3, identical. AC1: 22 passed on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live AWS reads beyond the one AC3 trace",
+      "reason": "AC3 names a single read-only trace; no second live read was made, so the AC3 figures are not re-measured."
+    },
+    {
+      "item": "The client-data-check of commit f76106a0c5 (hashed account-id list)",
+      "reason": "The hashed account-id list is absent at the default profile path, so safe-commit printed WARN and did not check the commit. The tool prints no account identifier (test_no_row_identifier_reaches_the_output)."
+    },
+    {
+      "item": "A live probe of z09 for the TRACE-REFUSED line",
+      "reason": "Not a criterion. The real run prints ERROR: --master must be 8 digits and exits 3 with no S3 call; filed as NFRA_SCHWABBF-W4-S7 for the issuer, and the code was not changed."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W4-S6: the pre-existing 99999999 registry-error arm now reads the refusal, because the C-SCOPE refusal runs before the registry read; the arm was rewritten and an in-scope registry-error arm was added under mock.patch of IN_SCOPE. The order names no such arm.",
+    "NFRA_SCHWABBF-W4-S7: z09 (cottonwood) prints ERROR: --master must be 8 digits, exit 3, not TRACE-REFUSED, because the eight-digit format check runs before the scope check; no S3 call is made; the issuer decides."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~4/NFRA_SCHWABBF.TO-BF-t3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "result": "22 passed in 0.69s (pre-edit control at 998fe826317: 18 passed in 0.74s)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 data/canonical/schwab/keyform/thread_trace.py data/canonical/schwab/tests/test_thread_trace.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/canonical/schwab/keyform/thread_trace.py data/canonical/schwab/tests/test_thread_trace.py",
+      "result": "COMPILE-OK"
+    }
+  ]
+}
