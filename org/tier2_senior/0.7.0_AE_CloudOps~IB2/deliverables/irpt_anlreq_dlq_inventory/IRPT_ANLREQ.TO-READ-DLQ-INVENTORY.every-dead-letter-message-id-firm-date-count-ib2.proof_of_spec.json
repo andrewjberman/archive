@@ -10,8 +10,8 @@
    "status": "N/A-SPEC-NAMES-NONE"
   },
   "determinism": {
-   "method": "four receives with visibility timeout 0, stopped at the first receive with nothing new; the leak regex was run as DLQI-AC2",
-   "observed": "5 of 8 messages returned (complete=no, shortfall named); 0 leak-shaped lines",
+   "method": "two passes, 4 then 2 receives with visibility timeout 0, each stopped at the first receive with nothing new; the leak regex was run as DLQI-AC2",
+   "observed": "6 of 8 messages seen (complete=no, unseen=2); 0 leak-shaped lines",
    "status": "N/A-WITH-REASON"
   }
  },
@@ -20,19 +20,19 @@
  "spec_ref": {
   "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-INVENTORY.every-dead-letter-message-id-firm-date-count-ib2.md",
   "group": "OTHER",
-  "vintage_commit": "3f8271892f"
+  "vintage_commit": "c0efafa6ae"
  },
  "decomp_ref": {
   "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
   "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-DLQ-INVENTORY.every-dead-letter-message-id-firm-date-count-ib2.md",
-  "vintage_commit": "3f8271892f"
+  "vintage_commit": "c0efafa6ae"
  },
  "artifacts_produced": [
   {
    "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
    "kind": "doc",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "repeated zero-visibility receives (4 of at most 8) over the generation dead letter: 5 distinct messages of depth 8; nothing consumed",
+   "deploy_evidence": "two passes of zero-visibility receives (6 of at most 16 used): the union holds 6 distinct messages of depth 8 and 7 distinct requests; nothing consumed",
    "artifact_covered_by": [
     "DLQI-AC1",
     "DLQI-AC2"
@@ -43,12 +43,12 @@
  "acceptance": [
   {
    "criterion_id": "DLQI-AC1",
-   "invocation": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "invocation": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+ unseen=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
    "expect": "^2$",
    "output_evidence": "2\nexit code: 0\n(run 2026-10-19 from the repo root)",
-   "denominator": "1 record file, 5 M rows, 5 Q rows, the counts line and the closing line",
+   "denominator": "1 record file of 19 lines: 6 M rows, 7 Q rows, the counts line and the closing line, NOTE lines the pattern does not match",
    "status": "PASS",
-   "criterion_verbatim": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
+   "criterion_verbatim": "grep -c -E '^(COUNTS depth=[0-9]+ distinct_messages=[0-9]+ distinct_requests=[0-9]+ receives=[0-9]+ unseen=[0-9]+|INVENTORY-DONE complete=(yes|no))' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
    "method": "command"
   },
   {
@@ -56,7 +56,7 @@
    "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
    "expect": "^0$",
    "output_evidence": "0\nexit code: 1\n(run 2026-10-19 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
-   "denominator": "13 lines scanned",
+   "denominator": "19 lines scanned",
    "status": "PASS",
    "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
    "method": "command"
@@ -64,8 +64,8 @@
  ],
  "declared_exclusions": [
   {
-   "item": "three dead-letter messages the reads did not return (complete=no)",
-   "reason": "the order stops at the first receive that returns nothing new; the shortfall is named in the record"
+   "item": "two dead-letter messages never returned (unseen=2), one likely the Cottonwood request REQ-8966d24ffefa seen only by the earlier reads",
+   "reason": "the order caps the reads at two passes of 8; the amended order stops a pass when a receive adds nothing"
   }
  ],
  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_dlq_inventory/A_DLQ_INVENTORY.txt",
