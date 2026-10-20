@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-w-1.source-compare",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7c42c0c743"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round24-GATEWAY.md",
+    "vintage_commit": "277ad324045",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-w-1.source-compare.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~77",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/source_compare.py",
+      "kind": "script",
+      "commit_or_etag": "30de010db74",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local script, no deploy in scope (no AWS call, no grant, no push). Committed at 30de010db74 on branch wk-NFRA_MCPINDEX-77.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_source_compare.py",
+      "kind": "test",
+      "commit_or_etag": "30de010db74",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local test file, run by path with pytest. Committed at 30de010db74 on branch wk-NFRA_MCPINDEX-77.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line; on the fixtures the stdout line reads SOURCE tools=10 agrees=2 disagrees=1 unreadable=7 and the exit is 1; the output holds one entry per tool with an ok result, sorted, with an error-only tool and a tool with no result absent; the date found across two listing pages reads true, a date off the listing reads false, undated keys, a store, an integration, a graph source, a missing as_of, an empty listing and an empty source set read null with their reasons; the source named by the answer_source string is chosen over the first -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round24/checks/w1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: 12 fixture census tools; 12 cases and 12 results (tF has an error result, tI has no case); 10 tools reach the output (tA tB tC tD tE tG tH tJ tK tN); expected counts agrees=2 disagrees=1 unreadable=7\n[direct run on the fixtures] SOURCE tools=10 agrees=2 disagrees=1 unreadable=7 (exit=1)\n  ok   a disagreement makes rc 1 and the file is written\n  ok   stdout line\n  ok   schema and counts\n  ok   one entry per tool with an ok result, sorted by name; an error-only tool and a tool with no result are absent\n  ok   every entry has exactly the contract keys\n  ok   every entry has an instrument and a reason that are strings\n  ok   tA: the first ok result with an as_of, both listing pages read, the date found\n  ok   tB: the answer date is not among the listed dates -> false\n  ok   tC: keys with no date token -> null with an undated reason\n  ok   tD, tE, tJ: a store, an integration and a graph source are not read here -> null naming the kind\n  ok   tG: the source whose bucket and prefix the answer_source string names is chosen (not the first), a YYYYMMDD key counts as a date\n  ok   tH: a result with no as_of -> null with a reason that names as_of\n  ok   tK: an empty listing -> null with an empty reason\n  ok   tN: a routing entry with no source -> source null, null, reason names the missing source\nARMS: 14 ok, 0 failed\nRESULT: PASS",
+      "denominator": "14 arms, 0 failed; 10 of 12 census tools reach the output; 12 results, 10 ok-tools",
+      "expect": "DENOMINATOR: 12 fixture census tools[\\s\\S]*SOURCE tools=10 agrees=2 disagrees=1 unreadable=7[\\s\\S]*RESULT: PASS",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; a planted answer date moves tA from true to false and the counts follow; a planted dated listing moves tC from null to true; no disagreement exits 0; a result for a tool outside the census, a missing routing entry, a missing --fake file and an unreadable results file each exit 2 with no output file; two runs give the same bytes; the script text holds no object read or write call -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round24/checks/w1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: 3 planted inputs (a shifted answer date, a dated listing, a dropped disagreement), 4 refusals (unknown tool, missing routing entry, missing fake file, unreadable results), determinism over 2 runs, no object read or write in the script\n  ok   planted: tA's answer date moved off the listing reads false, and the counts follow\n  ok   planted: a dated listing under tC turns null into true\n  ok   no disagreement -> exit 0 and the stdout line says so\n  ok   a result for a tool that is not in the census exits 2 and writes nothing\n  ok   a tool with results but no routing entry exits 2 and writes nothing\n  ok   a --fake file that does not exist exits 2\n  ok   an unreadable results file exits 2\n  ok   two runs on the same input give the same bytes and the same stdout\n  ok   the script holds no object read or write call (listing only)\nARMS: 9 ok, 0 failed\nRESULT: PASS",
+      "denominator": "9 arms, 0 failed; 3 planted inputs; 4 refusals; 2 determinism runs",
+      "expect": "DENOMINATOR: 3 planted inputs[\\s\\S]*RESULT: PASS",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 6 passed) for `test_source_compare.py` -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round24/checks/w1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=9 (minimum 6) file=workflows\\gateway_battery\\tests\\test_source_compare.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS",
+      "denominator": "9 tests passed of 9 collected in test_source_compare.py; minimum 6",
+      "expect": "DENOMINATOR: pytest rc=0 passed=9 \\(minimum 6\\)[\\s\\S]*RESULT: PASS",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted negatives applied by the AC2 arms to the fixture inputs: tA's answer date moved off its listing, a dated key planted under tC, the disagreement removed, and four refusal inputs (out-of-census tool, missing routing entry, missing fake file, unreadable results). Each must move the verdict as its arm names.",
+      "expected": "tA reads false with rc 1; tC reads true; no disagreement gives rc 0; each refusal gives rc 2 with no output file",
+      "observed": "ok   planted: tA's answer date moved off the listing reads false, and the counts follow; ok   planted: a dated listing under tC turns null into true; ok   no disagreement -> exit 0; ok   four refusals exit 2 and write nothing",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of source_compare.py on the fixture inputs, compared byte for byte and by stdout (AC2 arm 'two runs on the same input give the same bytes and the same stdout'); test_same_input_gives_the_same_bytes repeats it",
+      "observed": "ok   two runs on the same input give the same bytes and the same stdout",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live S3 listing path (pw.build_client with no --fake, a boto3 client) was never run by this worker.",
+      "reason": "Task order section 2 item 1: no AWS call; the listing was exercised with --fake only. The issuer runs the live path at the drain."
+    },
+    {
+      "item": "partition_windows.list_row is not called for the key listing.",
+      "reason": "list_row returns date partitions and drops the Contents keys, so the Contents-key date tokens cannot be read through it (surprise NFRA_MCPINDEX-Z-W77-S2). Its paging loop is mirrored in source_compare.list_source; partition_windows.py is not edited."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W77-S1: the face's premise that the worktree already carries workflows/gateway_battery failed (the sparse cone lacked it); git sparse-checkout add workflows/gateway_battery was the one sparse change made. OBSERVATION, INERT.",
+    "NFRA_MCPINDEX-Z-W77-S2: partition_windows.list_row returns no key names, so the Contents-key date tokens were read through a mirrored paging loop that imports the client and input helpers. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~77/source-compare.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python 3.14.8 (this device) and pytest, via the w1 check scripts",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round24/checks/w1.AC1.sh (and w1.AC2.sh, w1.AC3.sh)",
+      "result": "RESULT: PASS for AC1, AC2 and AC3, each exit 0; pytest passed=9"
+    },
+    {
+      "tool": "ruff 0.15.11 with target py39",
+      "invocation": "ruff check --target-version py39 workflows/gateway_battery/source_compare.py workflows/gateway_battery/tests/test_source_compare.py",
+      "result": "All checks passed! (rc 0)"
+    }
+  ]
+}
