@@ -1,0 +1,143 @@
+# AFTER reads 2026-10-20T21:43:23Z pin a51bd5cad5f
+## live policy
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-assets/code/alongside-schwab-si2/*"
+            ],
+            "Sid": "AlongsideCodeRead"
+        },
+        {
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/sdd-credentials-9IP0UA"
+            ],
+            "Sid": "AlongsideSddCredentialsRead"
+        },
+        {
+            "Action": [
+                "secretsmanager:PutSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/ec2-credentials-5lZi8L",
+                "arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/vnc-credentials-m8tNqb"
+            ],
+            "Sid": "AlongsideBoxSecretsWrite"
+        },
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "schwab/cottonwood/bronze/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-assets"
+            ],
+            "Sid": "MonolithSchwabList"
+        },
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-assets/schwab/cottonwood/bronze/*/date=*/08134043.*",
+                "arn:aws:s3:::opal-data-assets/schwab/cottonwood/bronze/*/date=*/08165601.*",
+                "arn:aws:s3:::opal-data-assets/schwab/cottonwood/bronze/*/date=*/08480305.*",
+                "arn:aws:s3:::opal-data-assets/schwab/cottonwood/bronze/*/date=*/08719286.*"
+            ],
+            "Sid": "MonolithSchwabWrite"
+        },
+        {
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/pulls/date=*/08134043.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/daily_pull/date=*/08134043.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/pulls/date=*/08165601.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/daily_pull/date=*/08165601.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/pulls/date=*/08480305.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/daily_pull/date=*/08480305.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/pulls/date=*/08719286.*",
+                "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/daily_pull/date=*/08719286.*"
+            ],
+            "Sid": "StateTierWrite"
+        },
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Effect": "Deny",
+            "Resource": [
+                "arn:aws:s3:::opal-data-bd",
+                "arn:aws:s3:::opal-data-bd/*"
+            ],
+            "Sid": "DenyBdPlane"
+        },
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Effect": "Deny",
+            "Resource": [
+                "arn:aws:s3:::opal-data-cot",
+                "arn:aws:s3:::opal-data-cot/*"
+            ],
+            "Sid": "DenyCotPlane"
+        },
+        {
+            "Action": [
+                "s3:*"
+            ],
+            "Effect": "Deny",
+            "Resource": [
+                "arn:aws:s3:::opal-data-inf",
+                "arn:aws:s3:::opal-data-inf/*"
+            ],
+            "Sid": "DenyInfPlane"
+        }
+    ]
+}
+## describe-secret vnc-credentials (metadata only)
+{
+    "Name": "schwab/alongside/vnc-credentials",
+    "ARN": "arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/vnc-credentials-m8tNqb",
+    "Description": "Alongside Schwab Box TigerVNC server password, generated on the box by install-tigervnc.ps1; never in repo/chat",
+    "Stages": null,
+    "LastChangedDate": 1792532544.488
+}
+## terraform plan -detailed-exitcode
+No changes. Your infrastructure matches the configuration.
+plan_exit=0
+## simulate-principal-policy (IDENTITY policy only; the bucket fence is NOT in it). One action, one resource per call.
+s3:PutObject | arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/pulls/date=2026-10-20/08719286.test.json -> allowed
+s3:PutObject | arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/complete/date=2026-10-20/08719286.test.json -> implicitDeny
+s3:PutObject | arn:aws:s3:::opal-data-assets/schwab/49financial/bronze/acc/date=2026-10-20/08403355.test.zip -> implicitDeny
+secretsmanager:PutSecretValue | arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/vnc-credentials-m8tNqb -> allowed
+secretsmanager:GetSecretValue | arn:aws:secretsmanager:us-east-1:313476888478:secret:schwab/alongside/vnc-credentials-m8tNqb -> implicitDeny
+## existence of the exact resources simulated
+schwab/alongside/vnc-credentials
+{
+    "BucketArn": "arn:aws:s3:::opal-data-cottonwood",
+    "BucketRegion": "us-east-1",
+    "AccessPointAlias": false
+}
+bucket opal-data-cottonwood exists
