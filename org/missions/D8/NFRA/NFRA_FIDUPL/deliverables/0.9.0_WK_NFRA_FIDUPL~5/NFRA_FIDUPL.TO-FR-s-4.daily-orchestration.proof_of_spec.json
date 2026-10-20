@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e4bb46835e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "4ca02b2119",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-4.daily-orchestration.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/daily.py",
+      "kind": "script",
+      "commit_or_etag": "a83ded8ad1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Not deployed to the box; no live call was made.",
+      "artifact_covered_by": ["FR4-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/run.py",
+      "kind": "script",
+      "commit_or_etag": "a83ded8ad1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). run_once is unchanged; the daily hookup and the new pointer keys are added.",
+      "artifact_covered_by": ["FR4-AC1", "FR4-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_box_daily.py",
+      "kind": "test",
+      "commit_or_etag": "a83ded8ad1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). Fake-only; 5 tests pass at this commit.",
+      "artifact_covered_by": ["FR4-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a83ded8ad1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_FIDUPL-D1-W5-S1 and S2 appended; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR4-AC1",
+      "criterion_verbatim": "the five named daily-orchestration tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
+      "output_evidence": "R1-FR4-OK passed=5",
+      "denominator": "5 passed of 5 named tests (test_daily_sequence_signin_fetch_land_attribute_split_record, test_attribution_failure_still_records_and_exits_nonzero, test_split_failure_exits_nonzero_after_land, test_config_pointers_accept_firm_labels_and_account_columns, test_main_chooses_daily_mode_from_config)",
+      "status": "PASS",
+      "expect": "R1-FR4-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FR4-AC2",
+      "criterion_verbatim": "the five round-1 box tests still pass (run_once is unchanged).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5",
+      "output_evidence": "R1-FU5-OK passed=5",
+      "denominator": "5 passed of 5 round-1 box tests (test_calls_signin_fetch_land_in_order, test_stage_failure_exits_nonzero, test_failure_still_writes_record_via_lander, test_no_secret_in_environment, test_reads_config_pointers_only)",
+      "status": "PASS",
+      "expect": "R1-FU5-OK passed=\\d+"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Live sign-in, Secrets Manager read, Wealthscape session, G-switch and any real export",
+      "reason": "Built against fakes by order; FU-x-1 and the round-2 live cells own the live path."
+    },
+    {
+      "item": "The real attribute stage",
+      "reason": "No documented request adapter or account lister reaches it; the wrapper refuses loudly (surprise NFRA_FIDUPL-D1-W5-S2)."
+    },
+    {
+      "item": "attribute.py, gswitch.py and split.py as modules",
+      "reason": "Not on this branch; the split wrapper imports split lazily and the daily tests use fakes (surprise NFRA_FIDUPL-D1-W5-S1)."
+    },
+    {
+      "item": "attribution.json mode 0600 on the Windows test host",
+      "reason": "The mode assertion runs only off Windows (os.name check); the box is Linux, where it is asserted."
+    },
+    {
+      "item": "A schedule for the daily mode",
+      "reason": "Outside FR-s-4; owned by the schedule cell of round 2."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W5-S1: attribute.py, gswitch.py and split.py are absent from the branch at c5ff6eaad5; the daily wiring references their documented names and fails only its own stage when they are missing.",
+    "NFRA_FIDUPL-D1-W5-S2: no documented path gives the attribute stage its request object or account lister; the wrapper refuses loudly, so every daily run reports partial until the owner rules."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FR-s-4.session.log",
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of box/daily.py with the exit code no longer counting the stopped attribute or split stages (rc = 1 if failed_step or listing_failure or land_failure or close_failed).",
+      "expected": "test_attribution_failure_still_records_and_exits_nonzero and test_split_failure_exits_nonzero_after_land fail",
+      "observed": "2 failed, 3 passed: test_attribution_failure_still_records_and_exits_nonzero (assert 0 == 1) and test_split_failure_exits_nonzero_after_land (assert 0 == 1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice on the committed daily tests at a83ded8ad1 (two same-input runs compared)",
+      "observed": "run 1: 5 passed; run 2: 5 passed",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "r1_checks.py fr4",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
+      "result": "R1-FR4-OK passed=5 (rc=0)"
+    },
+    {
+      "tool": "r1_checks.py fu5",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5",
+      "result": "R1-FU5-OK passed=5 (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check infra/aws/ec2/canonical-fidelity/box/run.py infra/aws/ec2/canonical-fidelity/box/daily.py infra/aws/ec2/canonical-fidelity/tests/test_box_daily.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
