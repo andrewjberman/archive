@@ -56,7 +56,11 @@ TEST_FILES = {
         "test_account_under_two_firms_listed_not_landed", "test_unplaced_accounts_listed",
         "test_unregistered_firm_scope_listed_not_landed", "test_raw_line_bytes_preserved",
         "test_dry_run_writes_nothing", "test_record_has_counts_and_lists",
-        "test_unmapped_label_listed_not_landed"]),
+        "test_unmapped_label_listed_not_landed", "test_record_lists_unplaced_and_conflict_accounts"]),
+    "fr6": ("%s/tests/test_adapters.py" % CF, [
+        "test_get_text_follows_redirect_and_returns_text", "test_post_form_sends_urlencoded_body_without_logging_values",
+        "test_account_lister_pages_until_short_page", "test_extract_accounts_finds_list_by_key_not_by_container_name",
+        "test_extract_failure_names_only_keys", "test_daily_real_deps_use_adapters"]),
     "fr3": ("%s/tests/test_backfill.py" % CF, [
         "test_windows_walk_backward_in_chunks", "test_stops_on_entitlement_refusal_and_names_it",
         "test_stops_on_retention_limit_and_names_it", "test_stops_at_account_open_date",
@@ -629,7 +633,7 @@ CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fr1a": lambda: tests("fr1a"), "fr1b": lambda: tests("fr1b"), "fr2": lambda: tests("fr2"), "fr3": lambda: tests("fr3"), "fr4": lambda: tests("fr4"), "fr5p": tf_plan_perg, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fr1a": lambda: tests("fr1a"), "fr1b": lambda: tests("fr1b"), "fr2": lambda: tests("fr2"), "fr3": lambda: tests("fr3"), "fr4": lambda: tests("fr4"), "fr6": lambda: tests("fr6"), "fr5p": tf_plan_perg, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
