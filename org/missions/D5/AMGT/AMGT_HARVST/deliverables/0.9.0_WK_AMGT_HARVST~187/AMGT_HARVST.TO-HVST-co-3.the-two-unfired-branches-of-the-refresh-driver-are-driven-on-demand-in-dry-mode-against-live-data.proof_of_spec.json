@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-co-3.the-two-unfired-branches-of-the-refresh-driver-are-driven-on-demand-in-dry-mode-against-live-data",
+  "phase": "INVESTIGATION",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "f34c0d28eb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-3.the-two-unfired-branches-of-the-refresh-driver-are-driven-on-demand-in-dry-mode-against-live-data.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-3.the-two-unfired-branches-of-the-refresh-driver-are-driven-on-demand-in-dry-mode-against-live-data.md",
+    "group": "OTHER",
+    "vintage_commit": "f34c0d28eb"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~187",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.py",
+      "kind": "script",
+      "commit_or_etag": "a92834eb31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only dry-mode driver harness; no deploy act in this cell, so nothing is deployed"
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
+      "kind": "doc",
+      "commit_or_etag": "a92834eb31",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "captured stdout of the dry-mode run (the record of the two branches); a record, not a deploy"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 is the two branches driven (the skip before any read, and the no-today-block census with the stored dossier untouched).",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
+      "expect": "(?ms)^BRANCH-NONTRADING now=2026-10-24T14:00:00Z skipped=yes exit=0 s3_gets=0 s3_puts=0$.*^BRANCH-NOTODAY REFRESH-CENSUS names=1 written=0 would_write=0 unchanged=0 no_new_model_block=0 no_today_model_block=1 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run$.*^BRANCH-NOTODAY-STORED before_after_equal=yes objects=\\d+$",
+      "output_evidence": "BRANCH-NONTRADING now=2026-10-24T14:00:00Z skipped=yes exit=0 s3_gets=0 s3_puts=0\nBRANCH-NOTODAY REFRESH-CENSUS names=1 written=0 would_write=0 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run\nBRANCH-NOTODAY-STORED before_after_equal=yes objects=18\nCOMMENT (not matched): the skip branch matched; the no-today census did not: the driver returned UNCHANGED for UNH_US_Equity (its build equals the served dossier, reason 'build equals the served dossier in fields and inputs'), so no_today_model_block is 0 and unchanged is 1. Surprise AMGT_HARVST-D1-W187-S1.",
+      "denominator": "3 expected pattern lines; 2 of 3 matched (BRANCH-NONTRADING and BRANCH-NOTODAY-STORED); the BRANCH-NOTODAY census line did not match (its no_today_model_block read 0 of 1 expected)",
+      "status": "FAIL",
+      "status_reason": "The no-today census read UNCHANGED (unchanged=1 no_today_model_block=0) for UNH_US_Equity on 2026-11-02, not NO_TODAY_MODEL_BLOCK; the driver checks UNCHANGED before the today-block branch. Surprise AMGT_HARVST-D1-W187-S1. Left open; the face's expectation was not edited to match."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 holds the controls (the same name on a real day does not hit either branch) and the totals.",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
+      "expect": "(?ms)^CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity no_today_model_block=0 skipped=no$.*^CONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no$.*^BRANCHES gets=\\d+ bytes=\\d+$",
+      "output_evidence": "CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity no_today_model_block=0 skipped=no\nCONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no\nBRANCHES gets=1490 bytes=269825852\nCOMMENT (not matched): the POSITIVE and NEGATIVE controls are one driver call (identical argv and now). BRANCHES bytes counts GetObject and HeadObject Content-Length only; ListObjectsV2 responses carry no Content-Length and are counted as unknown (20 responses, NOTE line).",
+      "denominator": "3 expected pattern lines; 3 of 3 matched (CONTROL-POSITIVE, CONTROL-NEGATIVE, BRANCHES totals)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant for this cell: it asserts the two driver branches and their controls, not a mutated driver.",
+      "expected": "N/A -- the spec names no mutant",
+      "observed": "No mutant was run. The controls are the same-name real-day read (CONTROL-POSITIVE) and the gate read (CONTROL-NEGATIVE) in co3_branches.out.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: run 1 at timeout 120 returned rc=124 during call 3 with partial output; run 2 at timeout 500 completed rc=0. The two runs are not two complete same-input outputs.",
+      "observed": "run 2 rc=0; the stored-prefix listing read before_after_equal=yes objects=18 within the same run",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC1 census line with no_today_model_block=1 (the face's expected status for UNH_US_Equity on 2026-11-02)",
+      "reason": "not produced: the driver returned UNCHANGED for UNH_US_Equity (surprise AMGT_HARVST-D1-W187-S1); the cell was dry, no source edited, no S3 write"
+    },
+    {
+      "item": "BRANCHES bytes for ListObjectsV2 responses",
+      "reason": "list responses carry no Content-Length; BRANCHES bytes is the GetObject and HeadObject Content-Length total only (20 unknown-length responses noted in co3_branches.out); the two listing calls the script made are outside BRANCHES"
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W187-S1: the no-today census for UNH_US_Equity on 2026-11-02 read UNCHANGED (build equals the served dossier), not no_today_model_block; the driver checks UNCHANGED before the today-block branch.",
+    "AMGT_HARVST-D1-W187-S2: org/surprise_channel/schemas/investigation_item.schema.json is absent from the worktree, so the rows were shaped from the rows already in the channel file."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
+  "compiler_tools": [
+    {
+      "tool": "co3_branches.py (dossier_refresh.main, dry mode, live data)",
+      "invocation": "timeout 500 python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.py",
+      "result": "rc=0 on run 2; run 1 at timeout 120 returned rc=124 during call 3 (partial output, overwritten by run 2)"
+    },
+    {
+      "tool": "surprise-row-gate (inside bash .tools/safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh -F msg -- deliverables + INVESTIGATION_v1.md, no override",
+      "result": "OK: 2 new row(s) of 608 total checked; commit a92834eb31 landed without the Z-S106 override"
+    }
+  ]
+}
