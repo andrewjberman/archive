@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-x5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R5.md",
+    "vintage_commit": "1f47565def0a8007eb91eba217ca6da1831ea561",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-x5.move-tool-state-tier.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f88e911af8e9e315aecc820124fd15"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/move_bronze_key_form.py",
+      "kind": "script",
+      "commit_or_etag": "09839fddaaaf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-3 only. The state tier is run by the issuer's release act against the real buckets; it was not run with --apply here. Its only AWS calls in this order are the read-only listings in AC3.",
+      "artifact_covered_by": [
+        "BF5-x5-AC1",
+        "BF5-x5-AC2",
+        "BF5-x5-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "09839fddaaaf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; fake S3 with two buckets, no network. 45 tests: the 31 existing tests unchanged and 14 new (1 bronze destination listing, 13 state tier).",
+      "artifact_covered_by": [
+        "BF5-x5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/fixtures/move_listing_state.json",
+      "kind": "doc",
+      "commit_or_etag": "09839fddaaaf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Synthetic state listing (8 keys: one object of each of the six shapes, with LastModified on the two rolling ones; one odd meta/ key; one 08335338 foreign key). Read by the tests and by AC2.",
+      "artifact_covered_by": [
+        "BF5-x5-AC1",
+        "BF5-x5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "fef20053cc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended byte-level, 22 added lines and 0 deleted lines: NFRA_SCHWABBF-W3-S7."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF5-x5-AC1",
+      "criterion_verbatim": "the bronze and silver behavior unchanged (31 passed at the base) and the state-tier and destination-listing arms.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "45 passed in 1.25s (rc=0). Repeat run: 45 passed in 0.99s (rc=0). Base at HEAD before the edit: 31 passed in 1.00s (rc=0).",
+      "denominator": "45 of 45 collected tests passed (0 failed): 31 existing tests unchanged, 14 new (1 bronze destination listing, 13 state tier).",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF5-x5-AC2",
+      "criterion_verbatim": "the CLI on the synthetic state listing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier state --listing-file data/canonical/schwab/tests/fixtures/move_listing_state.json",
+      "output_evidence": "MOVE-PLAN tier=state in_scope=6 foreign=1 copy=6 already=0 events=0\nMOVE-SAMPLE src=s3://opal-data-assets/schwab/08403355/_ops/daily_pull/last_run.json dst=s3://opal-data-49financial/schwab/49financial/state/daily_pull/date=2026-10-09/08403355.last_run.json\nMOVE-COUNT tier=state table=backfill_status n=1\nMOVE-COUNT tier=state table=complete n=1\nMOVE-COUNT tier=state table=conversions n=1\nMOVE-COUNT tier=state table=daily_pull n=2\nMOVE-COUNT tier=state table=pulls n=1\nMOVE-OTHER unrecognized=1 (rc=0; two runs identical)",
+      "denominator": "8 synthetic listed keys: 6 in scope (one per shape), 1 foreign (08335338 meta/), 1 unrecognized (meta/weird/odd-note.txt). copy=6 of 6 in scope; already=0 (the fixture lists no destination keys).",
+      "status": "PASS",
+      "expect": "^MOVE-PLAN tier=state in_scope=6 foreign=1 copy=6 already=0 events=0$"
+    },
+    {
+      "criterion_id": "BF5-x5-AC3",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only listing of the real schwab/08403355/meta/ and _ops/ trees (about 6,930 objects) plans into the firm bucket's state tier, with a read-only listing of the destination. It writes nothing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier state --master 08403355",
+      "output_evidence": "MOVE-PLAN tier=state in_scope=6930 foreign=0 copy=6930 already=0 events=0\nMOVE-SAMPLE src=s3://opal-data-assets/schwab/08403355/_ops/daily_pull/last_run.json dst=s3://opal-data-49financial/schwab/49financial/state/daily_pull/date=2026-10-20/08403355.last_run.json\nMOVE-COUNT tier=state table=backfill_status n=1\nMOVE-COUNT tier=state table=complete n=765\nMOVE-COUNT tier=state table=conversions n=6101\nMOVE-COUNT tier=state table=daily_pull n=32\nMOVE-COUNT tier=state table=pulls n=31\nMOVE-OTHER unrecognized=0 (rc=0; two runs: the MOVE-PLAN line identical)",
+      "denominator": "6930 keys listed under schwab/08403355/meta/ and schwab/08403355/_ops/ in opal-data-assets; 6930 of 6930 qualify as in scope; unrecognized=0; foreign=0. Per-table counts sum to 6930 (1 + 765 + 6101 + 32 + 31). The firm state prefix in opal-data-49financial was listed without refusal (no MOVE-WARN line), so already=0 is a measured zero. Read-only: nothing written.",
+      "status": "PASS",
+      "expect": "^MOVE-PLAN tier=state in_scope=[0-9]+ foreign=0 copy=[0-9]+ already=[0-9]+ events=0$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant: the state plan's entries set dst_bucket to the source bucket (one line, applied in place to the worktree tool file). Run against the same test file, then the file restored from .scratch/move_bronze_key_form.good.py and compared byte-identical.",
+      "expected": "the cross-bucket destination tests fail: the destination bucket, the fixture plan line and the copy, idempotence and verify tests",
+      "observed": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no on the mutant -> '5 failed, 40 passed in 1.98s' (rc=1); failures: test_state_fixture_plan_line_counts_and_sample, test_state_destinations_equal_builder_address_and_bucket, test_state_odd_meta_and_foreign_keys_never_planned, test_state_copy_then_idempotent_replan_and_verify, test_state_verify_catches_a_flipped_byte_across_buckets. Restored file: cmp byte-identical.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection; the pass/fail summary and the deciding line compared",
+      "observed": "AC1: 45 passed on both runs. AC2: the same MOVE-PLAN line on both runs (in_scope=6 foreign=1 copy=6 already=0 events=0). AC3: the same MOVE-PLAN line on both runs (in_scope=6930 foreign=0 copy=6930 already=0 events=0). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "copy --apply against any real bucket, and verify against real objects",
+      "reason": "LOCAL bound: the only AWS calls are the AC3 read-only listings. The issuer's release act runs the state copy and its verify."
+    },
+    {
+      "item": "A delete verb or any removal path",
+      "reason": "Not in this tool and not in this order; test_module_text_has_no_removal_verb holds on the module text."
+    },
+    {
+      "item": "A non-empty firm state prefix on the real bucket (a re-plan that reports already greater than zero against real objects)",
+      "reason": "The live AC3 measured already=0 on an unmoved prefix. The already arm is proven on the fake S3 only (test_state_copy_then_idempotent_replan_and_verify); no real re-plan was run after a copy."
+    },
+    {
+      "item": "A refused BRONZE firm-prefix listing",
+      "reason": "The bronze live listing raises on refusal and is not tested; only the state tier reports already=-1 on a refused destination listing (test_state_refused_destination_listing_reports_already_unknown)."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W3-S7: the pre-commit naming gate and risk reflex read nothing in the sparse worktree (commit 09839fddaaaf); recorded per commit, no action taken"
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~3/NFRA_SCHWABBF.TO-BF-x5.move-tool-state-tier.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12.10)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "45 passed in 1.25s (rc=0)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (rc=0)"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder; every state destination and bucket is built through it)",
+      "invocation": "address('schwab', '49financial', 'state', table, 'date=YYYY-MM-DD', object=...) via state_destination and test_state_destinations_equal_builder_address_and_bucket",
+      "result": "every planned state destination equals the builder key, and the bucket is the one the builder returns (opal-data-49financial)"
+    }
+  ]
+}

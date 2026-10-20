@@ -1,0 +1,26 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~3 on NFRA_SCHWABBF.TO-BF-x5 (cell BF-x-5, round 5)
+Worktree: C:\Users\AndrewBerman\Desktop\wt-bf-3  branch wk-NFRA_SCHWABBF-3
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-3; test -d org && test -d .tools -> TREE-OK.
+2. Premises re-grounded: round-4 merge f6078a5d99 is an ancestor of HEAD; the tool and its fixture
+   move_listing.json exist; lib/opal_naming.address('schwab','49financial','state',T,'date=D',object=...) returns
+   opal-data-49financial for all six state tables; firm_of('08403355') = 49financial.
+3. Baseline: python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider
+   --color=no -> 31 passed in 1.00s (rc=0).
+4. Build: move_bronze_key_form.py gains the state tier, per-entry src_bucket/dst_bucket in copy and verify, and
+   list_live_firm_bronze for the live bronze destination listing. Fixture move_listing_state.json (synthetic) added.
+   Test file gains 14 arms (13 state-tier, 1 bronze destination listing); the 31 existing tests are unchanged.
+5. Tests: python -m pytest ... -> 45 passed in 1.25s (rc=0).
+6. AC2: python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier state --listing-file
+   data/canonical/schwab/tests/fixtures/move_listing_state.json -> MOVE-PLAN tier=state in_scope=6 foreign=1
+   copy=6 already=0 events=0 (rc=0).
+7. AC3 (read-only live listing): python data/canonical/schwab/keyform/move_bronze_key_form.py plan --tier state
+   --master 08403355 -> MOVE-PLAN tier=state in_scope=6930 foreign=0 copy=6930 already=0 events=0 (rc=0);
+   MOVE-COUNT complete 765, conversions 6101, daily_pull 32, pulls 31, backfill_status 1; unrecognized=0.
+   No MOVE-WARN: the firm state prefix listing was not refused. Nothing written.
+8. Mutant control: state entries dst_bucket forced to the source bucket, in place; pytest -> 5 failed, 40 passed
+   (rc=1); the file restored from .scratch/move_bronze_key_form.good.py and compared byte-identical.
+9. Determinism: AC1, AC2 and AC3 repeated once each with identical verdicts and deciding lines.
+10. Commit gate: bash .tools/commit-gate.sh on the two .py files -> OK, rc=0.
+11. Commits (LOCAL on wk-NFRA_SCHWABBF-3): 09839fddaaaf code (3 files); fef20053cc surprise row W3-S7.
+12. Not done, by design: no copy --apply, no verify against real objects, no delete verb anywhere.
