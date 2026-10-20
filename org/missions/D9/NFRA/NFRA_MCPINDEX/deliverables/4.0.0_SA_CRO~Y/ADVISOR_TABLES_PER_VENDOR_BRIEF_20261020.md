@@ -183,11 +183,20 @@ and 12/12 present (`account_id, market_value_settled_unsettled, ...`); `currency
 
 Columns: 3/3, 9/9, 9/9, 8/8, 8/8 and 8/8 present; `currency` is used but absent on three tables.
 
-- **STALE -- the resolve bridge.** The live unrealized partition holds **8,032 distinct z08 accounts; 2,362 (29.4%) are not in
-  the 2026-09-28 `dim_account_xref`**. Those accounts get `no_candidate_for_last4` from resolve
-  (`client_adapter_bd49f.py:474-485`), so every other tool is unreachable for them. Fence check: all 114,064 unrealized rows
-  are z08, so the fence excludes nothing there. Fix: restore the xref producer's cadence. The **producer** is the owner, not
-  the adapter.
+- **WRONG SOURCE (coverage) -- the resolve bridge.** As first measured, the live unrealized partition held **8,032 distinct z08
+  accounts, and 2,362 (29.4%) were not in the 2026-09-28 `dim_account_xref`**. Those accounts get `no_candidate_for_last4`
+  from resolve (`client_adapter_bd49f.py:474-485`), so every other tool is unreachable for them. Fence check: all 114,064
+  unrealized rows are z08, so the fence excludes nothing there.
+- **CORRECTION, 2026-10-20 ~19:50Z -- the cause is coverage, not staleness.** The producer was fixed (MemorySize 3008, read
+  live) and wrote `date=2026-10-19` (6,200 rows). Re-measured against that partition, **2,364 live z08 accounts are still
+  absent** (5,668 of 8,032 present). They hold **35.6% of live unrealized market value**, and 1,590 of them are also in the
+  live allocations table.
+  - The xref is a Schwab match table: its columns are `schwab_account_id`, `match_method`, `in_0833_universe`. An account that
+    is not matched to Schwab is never in it. No refresh closes the gap.
+  - A BD-native source exists: the live `opal-data-bd` `silver/unrealized` and `silver/allocations` both carry `account_id`
+    and `account_number`.
+  - The fix is a **resolve-source change**, which overrides CTO ruling 4356f15f16. The producer fix was needed, but it is not
+    sufficient. My earlier "fix: restore the cadence" was wrong.
 - **STALE -- the profile.** `fact_bd_allocation` has one partition, 2026-08-18 (`:642-645`). Any `as_of` before it answers
   `no_partition_at_as_of` for the whole allocation, weights included, because `:644` requires both.
 - Holdings are tax lots, not positions (`:551`), with quantity absent (`:537-538`). The answer says so; that is correct.
