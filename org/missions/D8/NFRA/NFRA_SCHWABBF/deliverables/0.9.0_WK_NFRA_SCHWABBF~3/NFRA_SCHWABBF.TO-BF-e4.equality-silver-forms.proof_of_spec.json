@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-e4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R4.md",
+    "vintage_commit": "0429204ae71",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-e4.equality-silver-forms.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/equal_sample.py",
+      "kind": "script",
+      "commit_or_etag": "bda8aded72",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One-shot instrument run by hand; no deploy and no schedule. Committed LOCAL on wk-NFRA_SCHWABBF-3 at bda8aded72: --form old|firm on capture and compare, FORM line in compare output, EQUAL-REFUSED rc 3 for a master with no firm form."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_equal_sample.py",
+      "kind": "test",
+      "commit_or_etag": "bda8aded72",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fake-store suite, no live AWS: 15 round-1 arms (four gained the FORM line in their exact expectations) plus 10 cross-form arms. Committed LOCAL on wk-NFRA_SCHWABBF-3 at bda8aded72."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF4-e4-AC1",
+      "criterion_verbatim": "the round-1 arms (15 passed at the base) and the cross-form arms.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_equal_sample.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".........................                                                [100%]\n25 passed in 1.53s",
+      "denominator": "25 of 25 tests passed (0 failed, 0 errors); 15 round-1 arms and 10 cross-form arms",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF4-e4-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: the live, read-only capture of the real old-form dim_balance partition. The only write is the scratch file named in the invocation.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/equal_sample.py capture --master 08403355 --days 2026-10-16 --tables dim_balance --form old --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_e4_capture_probe.json",
+      "output_evidence": "CAPTURED cells=1 missing=0\nEXCLUDED columns=_source_file (rc 0; one read-only GetObject on s3://opal-data-assets/schwab/08403355/silver/dim_balance/date=2026-10-16/data.parquet)",
+      "denominator": "1 of 1 cells captured, 0 missing",
+      "status": "PASS",
+      "expect": "^CAPTURED cells=1 missing=0$",
+      "judgment": false
+    },
+    {
+      "criterion_id": "BF4-e4-AC3",
+      "criterion_verbatim": "the negative arm on the real store: before the cutover the firm-form object does not exist, so the same capture in the firm form records the typed absence (missing=1), not a failure and not a pass. Read-only.",
+      "method": "live_read",
+      "invocation": "python data/canonical/schwab/keyform/equal_sample.py capture --master 08403355 --days 2026-10-16 --tables dim_balance --form firm --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_e4_capture_firm_probe.json",
+      "output_evidence": "CAPTURED cells=1 missing=1\nEXCLUDED columns=_source_file (rc 0; one read-only GetObject on s3://opal-data-assets/schwab/49financial/silver/dim_balance/date=2026-10-16/08403355.parquet, absent)",
+      "denominator": "1 of 1 cells read, 1 missing (typed absence), 0 errors",
+      "status": "PASS",
+      "expect": "^CAPTURED cells=1 missing=1$",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Change one numeric cell (market_value 200.25 -> 201.25) in the firm-form fake store after an old-form capture; compare --form firm must print EQUAL-DIFF field=numeric_sums and EQUAL-FAIL, rc 1.",
+      "expected": "EQUAL-DIFF table=dim_balance day=2026-10-16 field=numeric_sums, EQUAL-FAIL, rc 1",
+      "observed": "test_cross_form_changed_figure_is_diff passed inside the 25 passed run (AC1); the test asserts the field=numeric_sums line, the FORM before=old after=firm line, and EQUAL-FAIL diffs=count.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: the only live reads are the single GetObject of AC2 and the single GetObject of AC3, which the order bounds to one read each; a second live read is outside the bound, and the fake-store arms are exact-value assertions.",
+      "observed": "not measured",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live cross-form EQUAL on the real store (old capture, firm compare after the move)",
+      "reason": "The move has not run; AC3 records the typed absence before the cutover. The cross-form EQUAL is proven on the fake store only (AC1)."
+    },
+    {
+      "item": "Numeric typing of string-typed silver columns (numeric_sums)",
+      "reason": "Recorded as surprise NFRA_SCHWABBF-W3-S1 by an earlier order; the instrument follows the cell text and this order does not change it."
+    },
+    {
+      "item": "Live GetObject beyond the AC2 and AC3 reads",
+      "reason": "The order bounds the live AWS use to two read-only captures; no other read was made."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W3-S5: The face takes firm-form membership from the scopes.json row whose masters list names a master, but scopes.json lists 08335338 under 49financial with no firm-form field, so that lookup alone cannot refuse 08335338. The worker used the five-master literal mirror for membership and scopes.json for the firm; 08335338 is refused rc 3 before any S3 call.",
+    "NFRA_SCHWABBF-W3-S6: The face orders compare output unchanged plus a FORM line and every round-1 arm green, but four round-1 arms asserted the full compare line list exactly. The worker added the FORM line to those four expectations and left every verdict and diff assertion as written."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~3/NFRA_SCHWABBF.TO-BF-e4.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (python -m pytest)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_equal_sample.py -q -p no:cacheprovider --color=no",
+      "result": "25 passed in 1.53s, rc 0"
+    },
+    {
+      "tool": "ruff 0.15.11",
+      "invocation": "python -m ruff check --target-version py39 data/canonical/schwab/keyform/equal_sample.py data/canonical/schwab/tests/test_equal_sample.py",
+      "result": "All checks passed! rc 0"
+    }
+  ]
+}
