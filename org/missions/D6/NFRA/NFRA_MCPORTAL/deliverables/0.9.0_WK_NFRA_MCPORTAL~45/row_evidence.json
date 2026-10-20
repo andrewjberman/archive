@@ -1,0 +1,116 @@
+{
+  "rows": [
+    {
+      "id": "NFRA_MCPORTAL-Z-W3-S2",
+      "proposal": "DISARM",
+      "owner": "2.0.0_SA_COO~MP",
+      "date": "2026-10-20",
+      "evidence": [
+        {
+          "claim": "MEASURED",
+          "command": ".tools/aws lambda get-function-configuration --function-name mcportal-grant-writer-lambda --query \"Environment.Variables.keys(@)\" --output json",
+          "output": "[\"MCPORTAL_OWNER_KEY\", \"MCPORTAL_OWNER_KEY_CLAIM\", \"MCPORTAL_CHANGES_TABLE\"] -- names only, rc=0; no value read, printed or recorded"
+        },
+        {
+          "claim": "MEASURED",
+          "command": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC2.sh; echo exit=$?",
+          "output": "lambda=mcportal-grant-writer-lambda invoke status=200 verdict_reason=[REFUSED NO-OWNER-HEADER] / RESULT: PASS / exit=0"
+        },
+        {
+          "claim": "RECORDED",
+          "command": "cat org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC2.sh (header comment, lines 2-5)",
+          "output": "The check states that handle() tests the writer's owner configuration before the owner header (REFUSED OWNER-CONFIG-MISSING otherwise), so NO-OWNER-HEADER shows the owner key is set. This is the check's stated design, read from source."
+        },
+        {
+          "claim": "ABSENT",
+          "command": "none (no variable value is read by rule)",
+          "output": "Equality of the configured owner key with Andrew's Entra object id is not measured by this seat. The W3-S2 question, whether the deployed writer carries an owner key, is answered; whether that key is his oid is not."
+        }
+      ]
+    },
+    {
+      "id": "NFRA_MCPORTAL-Z-W2-S8",
+      "proposal": "OWNER_DATE",
+      "owner": "2.0.0_SA_COO~O",
+      "date": "2026-10-21",
+      "evidence": [
+        {
+          "claim": "MEASURED",
+          "command": "Read infra/aws/ec2/safe-ec2-deploy.sh lines 163-178; grep -n -i rollback infra/aws/ec2/safe-ec2-deploy.sh; git log -1 --format='%h %ci' -- infra/aws/ec2/safe-ec2-deploy.sh",
+          "output": "L167 HALT_GATE=\"$WORKSPACE_ROOT/.tools/halt-gate-check.sh\"; L168 if [ -f \"$HALT_GATE\" ]; then; L170 . \"$HALT_GATE\"; L171 halt_gate_check \"safe-ec2-deploy:$SERVICE_NAME\" || exit $?; L178 if ! bash \"$DEPLOY_SCRIPT\" $DEPLOY_ARGS; then (host step). The gate call precedes the host step with no rollback flag to skip it (grep rollback: no match). Last commit b739bbc9f9e 2026-10-13 11:54:59 -0400. The script itself carries no message scan; it sources and calls the module."
+        },
+        {
+          "claim": "MEASURED",
+          "command": "Read .tools/halt-gate-check.sh lines 456-521",
+          "output": "The per-message loop at L456-475 (halt_gate_unread_for, halt_gate_recipient, halt_gate_is_stop_class) runs before Verdict 1 (L478) and Verdict 2 (L506-520). HALT_ACK is read only at L515, after the scan, so HALT_ACK=1 does not skip the scan. Last commit c03b8021f03 2026-10-07 03:41:31 -0400."
+        },
+        {
+          "claim": "RECORDED",
+          "command": "NFRA_MCPORTAL-Z-W2-S8 row, investigations/INVESTIGATION_v1.Z.md (grounding, runs of 2026-09-25)",
+          "output": "The 12 min 17 s gate duration and the 186 pending messages are the row's own 2026-09-25 runs. Not re-measured here: the script is not run by rule."
+        },
+        {
+          "claim": "ABSENT",
+          "command": "none (script not run by rule)",
+          "output": "Present scan duration and pending count are not measured. Source settles the ordering (the scan precedes the host step at every invocation); it does not settle today's cost."
+        }
+      ]
+    },
+    {
+      "id": "NFRA_MCPORTAL-Z-C-S3",
+      "proposal": "DISARM",
+      "owner": "1.0.0_SA_CTO",
+      "date": "2026-10-20",
+      "evidence": [
+        {
+          "claim": "MEASURED",
+          "command": "sed -n 405,418p .tools/owned-paths-validate.py; git log -1 --format=%h%x20%ci -- .tools/owned-paths-validate.py",
+          "output": "check_agent (def at L408): L415 lane_name = resolve_lane(...); L416 if lane_name is None:; L418 return _owns_task_order_paths(agent, path, grant, root, cache) -- the unmapped-path branch returns the task-order grant, with a comment citing NFRA_MCPORTAL-Z-W1-S1. Last commit: c45003275a9 2026-10-16 15:14:08 -0400."
+        },
+        {
+          "claim": "MEASURED",
+          "command": "python .tools/owned-paths-validate.py --self-test (filtered to UNMAPPED lines and RESULT; rc=0)",
+          "output": "PASS  UNMAPPED path (no lane rule): worker ~2 whose order names it -> admitted by check_agent / PASS  UNMAPPED path MUTANT: worker ~3 with no such order, and a seat serial -> both refused / RESULT: 0 arm(s) failed of 28 (+ live census)"
+        },
+        {
+          "claim": "MEASURED",
+          "command": "printf 'zz_probe_new_top_level/x.txt\\n' | python .tools/owned-paths-validate.py --check-agent 0.9.0_WK_NFRA_MCPORTAL~45 .owned-paths.yaml; echo exit=$?",
+          "output": "VIOLATION: zz_probe_new_top_level/x.txt -- UNDEFINED (no matching path rule; agent=0.9.0_WK_NFRA_MCPORTAL~45) / exit=1. Negative control: an unmapped path that no order names is still refused UNDEFINED."
+        },
+        {
+          "claim": "MEASURED",
+          "command": "sed -n 44,46p .owned-paths.yaml; git log -1 --format='%h %ci' -S_owns_task_order_paths -- .tools/owned-paths-validate.py",
+          "output": "worker_grant: serial_glob [\"0.9.0_WK_*\", \"0.7.0_AE_CloudOps*\"], source: task-order-paths (registry switch live). The grant clause on unmapped paths was introduced at 6bc980ad5d7, 2026-09-25 01:05:46 -0400 (05:05Z), subject naming the disarm of NFRA_MCPORTAL-Z-W1-S1 under ruling R-6, 1.0.0_SA_CTO~O."
+        }
+      ]
+    },
+    {
+      "id": "NFRA_MCPORTAL-Z-C-S8",
+      "proposal": "DISARM",
+      "owner": "2.0.0_SA_COO~O",
+      "date": "2026-10-20",
+      "evidence": [
+        {
+          "claim": "MEASURED",
+          "command": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC2.sh; echo exit=$?",
+          "output": "lambda=mcportal-grant-writer-lambda invoke status=200 verdict_reason=[REFUSED NO-OWNER-HEADER] / RESULT: PASS / exit=0. A verdict came back from the deployed handler; its module-level imports (lambda_function.py L66-67) run at load, so a failed import would have returned an init error. The /var/task path itself is not printed by this check."
+        },
+        {
+          "claim": "MEASURED",
+          "command": ".tools/aws lambda get-function --function-name mcportal-grant-writer-lambda --query Code.Location --output text; curl into zipcheck/zo5-20261020T232129Z/function.zip; python -I zipfile namelist (no extraction, no code run)",
+          "output": "members=65. lambda_function.py at zip root: PRESENT. Gateway members PRESENT: infra/aws/ec2/opal-gateway/app/__init__.py, app/access_state.py (imported at L66), ops/__init__.py, ops/schwab_entitlement_admin.py (imported at L67), org/standards/NFRA_OPLGTW_CONTRACT.json. Top-level entries: infra, org, lambda_function.py."
+        },
+        {
+          "claim": "MEASURED",
+          "command": ".tools/aws lambda get-function-configuration --function-name mcportal-grant-writer-lambda --query CodeSha256 --output text; python -I hashlib sha256 base64 of the downloaded zip",
+          "output": "deployed CodeSha256 RUGwtI9t8UKV8VpyCeArffZFwHeuUm4QhOIJU+nAJjg= equals the computed digest of the downloaded zip, so the zip inspected is the deployed code."
+        },
+        {
+          "claim": "MEASURED",
+          "command": "grep -n \"parents\\[\" infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py; sha256sum of that file; sed -n 61,67p of the same file",
+          "output": "parents[ grep: no match (rc=1). Deployed member lambda_function.py sha256 6f00b088efe44f9d1c71abc6d4457cbe3d9ab8024b36a5eef7dc7c3f3acf1f00 equals the HEAD file sha256 (same value). L61-64 insert the mirrored gateway directory on sys.path; L66-67 import app.access_state and ops.schwab_entitlement_admin."
+        }
+      ]
+    }
+  ]
+}

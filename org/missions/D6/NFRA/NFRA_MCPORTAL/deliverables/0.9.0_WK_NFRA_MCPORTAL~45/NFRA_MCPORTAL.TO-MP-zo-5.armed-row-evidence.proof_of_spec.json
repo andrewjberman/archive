@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-zo-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "22f59b0d89b",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-zo-5.armed-row-evidence.md"
+  },
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-zo-5.armed-row-evidence.md",
+    "group": "OTHER",
+    "vintage_commit": "22f59b0d89b"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~45",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~45/row_evidence.json",
+      "kind": "doc",
+      "commit_or_etag": "ee6c5e47805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-45, not pushed. Four rows: W3-S2 DISARM, C-S8 DISARM, C-S3 DISARM, W2-S8 OWNER_DATE (2.0.0_SA_COO~O, 2026-10-21 per the issuer ruling).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "ee6c5e47805",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-45, not pushed. Three rows appended (NFRA_MCPORTAL-Z-W45-S1..S3); diff against the parent is 74 insertions, 0 deletions.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~45/session.log",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Command and output log for this TO, names and outputs only.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "evidence=read rows=4 ids_match=yes rows_with_valid_proposal=4 of 4.*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "cd C:/tmp/mp-ogw-45 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "evidence=read rows=4 ids_match=yes rows_with_valid_proposal=4 of 4\nRESULT: PASS\nexit=0",
+      "denominator": "rows 4 of 4 with a valid proposal; ids match the four named rows exactly",
+      "status": "PASS",
+      "expect": "evidence=read rows=4 ids_match=yes rows_with_valid_proposal=4 of 4.*RESULT: PASS.*exit=0",
+      "status_reason": "Run after commit ee6c5e47805: four rows, ids match, each row carries a valid proposal, RESULT PASS, exit 0. Bounded run, no timeout."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "invoke status=200 verdict_reason=\\[REFUSED NO-OWNER-HEADER\\].*RESULT: PASS.*exit=0",
+      "method": "command",
+      "invocation": "cd C:/tmp/mp-ogw-45 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "lambda=mcportal-grant-writer-lambda invoke status=200 verdict_reason=[REFUSED NO-OWNER-HEADER]\nRESULT: PASS\nexit=0",
+      "denominator": "one no-header invoke of the deployed writer; one verdict returned",
+      "status": "PASS",
+      "expect": "invoke status=200 verdict_reason=\\[REFUSED NO-OWNER-HEADER\\].*RESULT: PASS.*exit=0",
+      "status_reason": "Live invoke on Opal's own plane with no owner header; status 200 and REFUSED NO-OWNER-HEADER; RESULT PASS, exit 0. Bounded run, no timeout."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A copy of row_evidence.json in .scratch with the W3-S2 row's MEASURED items removed (leaving a DISARM row with no MEASURED item), run through zo5.AC1.sh via its MP_ZO5_RUN override. The repository file is not touched.",
+      "expected": "AC1 FAILS: rows_with_valid_proposal drops below 4 of 4 and RESULT is FAIL",
+      "observed": "evidence=read rows=4 ids_match=yes rows_with_valid_proposal=3 of 4 / RESULT: FAIL / rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "zo5.AC1.sh run twice on the committed row_evidence.json, outputs compared with cmp",
+      "observed": "run 1 and run 2 both rc=0 with identical output (evidence=read rows=4 ids_match=yes rows_with_valid_proposal=4 of 4; RESULT: PASS)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Order <status> flip",
+      "reason": "Forbidden by the TO's bounds (section 2, item 4). Not made."
+    },
+    {
+      "item": "Any write, deploy, push, or vendor call",
+      "reason": "Forbidden by the TO's bounds. The only AWS calls were the named reads and the no-header invoke that AC2 issues."
+    },
+    {
+      "item": "Lambda zip contents",
+      "reason": "Downloaded to zipcheck/ (scratch, not committed). Listed by name only, not extracted, not run."
+    },
+    {
+      "item": "Owner key value and the Entra object id",
+      "reason": "Never read, printed or recorded. The name-only read and the no-owner-header refusal are the only evidence."
+    },
+    {
+      "item": "safe-ec2-deploy.sh",
+      "reason": "Read, never run (TO bounds). The 12 min 17 s and 186 pending figures are the row's own 2026-09-25 runs, recorded as RECORDED."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W45-S1: C-S3's premise is stale. The task-order grant clause runs before the UNDEFINED refusal at HEAD, and the validator self-test admits an order-named unmapped path. Row proposed DISARM on MEASURED items; the row stays ARMED under 1.0.0_SA_CTO until disarmed.",
+    "NFRA_MCPORTAL-Z-W45-S2: the halt-gate message scan cited for W2-S8 is in .tools/halt-gate-check.sh L456-475, not in safe-ec2-deploy.sh, which only sources and calls it. The ordering finding stands; the row is unchanged.",
+    "NFRA_MCPORTAL-Z-W45-S3: zo5.AC2.sh's header says its answer proves the handler imported from /var/task. Its output carries status and verdict only, so the path is inferred and not measured by the check."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~45/session.log",
+  "compiler_tools": [
+    {
+      "tool": "zo5.AC1.sh and zo5.AC2.sh (issuer checks, run unmodified)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo5.AC1.sh; bash .../zo5.AC2.sh",
+      "result": "both RESULT: PASS, exit 0"
+    },
+    {
+      "tool": ".tools/owned-paths-validate.py --self-test and --check-agent",
+      "invocation": "python .tools/owned-paths-validate.py --self-test; printf '<path>\\n' | python .tools/owned-paths-validate.py --check-agent 0.9.0_WK_NFRA_MCPORTAL~45 .owned-paths.yaml",
+      "result": "self-test rc=0, 0 arms failed of 28; UNMAPPED arms PASS; unnamed unmapped probe rc=1 UNDEFINED"
+    },
+    {
+      "tool": ".tools/aws lambda get-function-configuration / get-function (read) and python -I zipfile, hashlib",
+      "invocation": "named in session.log items 3 to 5",
+      "result": "names only; 65 zip members listed; CodeSha256 match"
+    }
+  ]
+}
