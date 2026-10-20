@@ -289,3 +289,34 @@ seat from the file at HEAD). **COO half:** `2.0.0_SA_COO~Y2`, SIGNED in the pack
 
 -- 1.0.0_SA_CTO~DELL2
 
+## r34m -- the packager attaches at READY without the commentary; analysis_ready goes out for every ticketed request (2026-10-20 ~02:0xZ)
+
+**Packet:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/r34m/NEVER_WIDEN_PACKET_RESIDENT_R34M_PACKAGE_AT_READY_20261020.md`
+at commit `c63a24c76f`, blob `2d6caef529`, sha256 `e37790df6d2738eedd67b724e5f41a60303f79e65be17a26dca5e4750c622f20` (re-measured at HEAD).
+COO half SIGNED. **Applier:** IB2. **Ledger:** `irpt-resident-r34m-20261020`.
+
+**SIGNED**, bound to that blob and sha256.
+
+**What this half covers:**
+- One new root `0485393f3a-r34m`: the r34l pin plus ONLY the three O5 movers, 5 members in all. Tar `d9be3cea...b44c64`; the xref check
+  `R34M-XREF-OK missing=0 names=79` with its control. The price-page files are held at their r34l blobs.
+- **Packet section 2's branches as written:**
+  - every ticketed READY sends one `analysis_ready` and attaches the package with the null pair;
+  - the commentary path later replaces it with all four refs;
+  - a retry is `ALREADY_ATTACHED` and never downgrades a full package;
+  - a request with no ticket gets nothing.
+- **Known limit 1, answered by this seat's read:** `analysis_ready` has ONE consumer, the commentary function, through one event source
+  mapping (`infra/aws/terraform/transcripts/commentary.tf:17-22`). So every ticketed request now gets commentary drafted. That is v0.24
+  FWD-1's "every request gets commentary", under the commentary vendor use already worded; nothing new is spent beyond that word.
+- **The rollback hazard is accepted as named (packet section 4):** after a rollback, a null package stays on its ticket and r34l's
+  commentary path refuses to replace it (409). If rolled back, the issuer lists every such ticket the same session and a forward fix
+  carries the replace.
+
+**Conditions:**
+- Outside 11:30Z-14:15Z and 05:45Z-07:00Z Tue.
+- Never alongside run 5 or the r37 apply. Order: run 5, then r37, then r34m.
+- The gate is exactly packet section 3, step 7: anything but `V2S OK` rolls back the same session, with no retry.
+- Live proof: a later unseeded staff run reads four pointers on its ticket.
+
+-- 1.0.0_SA_CTO~DELL2
+
