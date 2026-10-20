@@ -18,23 +18,23 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/comparables.py",
       "kind": "script",
-      "commit_or_etag": "4ec6bad212b",
+      "commit_or_etag": "0c9dcbf044",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-330 only; nothing deployed and no AWS call made. Pure arithmetic, no network, no clock: build_compare (one common window, rebased paths, returns, risk over floor(window years) capped at five, NOT_AVAILABLE rows left out of the window) and build_allocation (canonical class order, zero-fill, model / ETF / gap rows). Statistics are the layout's helpers, imported as lo; layout_overview.py untouched. Build arm AR-CMP-173-OK at 9545da97c0e."
+      "deploy_evidence": "Local commit 0c9dcbf044 on wk-IRPT_ANLREQ-330 only (AMENDMENT 1: _rebased takes the window end and keeps the points from the start THROUGH the end inclusive, so every path, return and risk figure is measured to the one common end). Nothing deployed and no AWS call made. Pure arithmetic, no network, no clock. Build arm AR-CMP-173-OK at 0c9dcbf044."
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_comparables.py",
       "kind": "test",
-      "commit_or_etag": "4ec6bad212b",
+      "commit_or_etag": "0c9dcbf044",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "14 offline tests with hand-computed figures; 14 passed at 4ec6bad212b (timeout 120, rc=0). Unchanged at 9545da97c0e."
+      "deploy_evidence": "16 offline tests, 16 passed at 0c9dcbf044 (timeout 120, rc=0); the two new ragged-ends cases are test_paths_are_cut_at_the_common_window_end_when_series_end_on_different_dates and test_every_row_ends_at_the_earliest_last_observation_when_a_comparable_ends_first."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "9545da97c0e",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W330-S3 (layout engine has no 2-year std dev or max drawdown; OBSERVATION, INERT) and IRPT_ANLREQ-D2-W330-S4 (path not cut at the window end; OBSERVATION, INERT) appended. safe-commit surprise-row-gate: 2 new row(s) graded OK."
+      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W330-S3 (layout engine has no 2-year std dev or max drawdown; OBSERVATION, INERT) and IRPT_ANLREQ-D2-W330-S4 (path not cut at the window end; OBSERVATION, INERT, answered by AMENDMENT 1 of the order). No new row was filed in this re-seating."
     }
   ],
   "acceptance": [
@@ -43,8 +43,8 @@
       "criterion_verbatim": "build_compare and build_allocation return the record the checker computes itself from its own fixtures (window 2024-04-14 to 2026-10-14, 2.5 years, risk over 2 years). At base it FAILs (the module does not exist).",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 173 build",
-      "output_evidence": "AR-CMP-173-OK build: all arms (rc=0 at 9545da97c0e, run under timeout 120; the same OK at 4ec6bad212 before the row commit). Base, measured by the issuer: 173 build FAIL (no module). Control: the checker's calibrate arm reads AR-CMP-CALIBRATE-OK (rc=0), so its independent formulas agree with statistic_of over the shipped layout.",
-      "denominator": "The build arm checks every named arm (3 comparables and the gap row; the no-benchmark risk block; the under-one-year block; the allocation classes, weights, dates and the unclassified row). The arm prints no count: 1 arm-set, 0 failing.",
+      "output_evidence": "AR-CMP-173-OK build: all arms (rc=0 at 0c9dcbf044, run under timeout 120; the checker's ragged-ends arm, ETF series ending 2026-08-14, is inside this run and passes). Base, measured by the issuer: 173 build FAIL (no module). The first delivery at 9545da97c0e FAILED the ragged-ends arm after AMENDMENT 1 (expected, the path was not cut); the amended code passes it.",
+      "denominator": "The build arm checks every named arm: 3 comparables and the gap row, the no-benchmark risk block, the under-one-year block, the allocation classes, weights, dates and the unclassified row, and the ragged-ends arm (end 2026-08-14). The arm prints no count: 1 arm-set, 0 failing.",
       "expect": "^AR-CMP-173-OK",
       "status": "PASS",
       "status_reason": "rc=0 and the RESULT line begins AR-CMP-173-OK, matching the expectation."
@@ -54,7 +54,7 @@
       "criterion_verbatim": "no existing element of the Overview, Multi or Comparison report moves. At base it PASSes.",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 173 guard",
-      "output_evidence": "AR-CMP-173-OK guard: all arms (rc=0 at 9545da97c0e, run under timeout 120). Base: the guard arm PASSes at the base (the order's measurement).",
+      "output_evidence": "AR-CMP-173-OK guard: all arms (rc=0 at 0c9dcbf044, run under timeout 120). The change touches only comparables.py and its tests; no render module is edited.",
       "denominator": "4 render arms (overview_on, overview_off, multi_on, comparison_on) compared element by element against compare_base_status.json; 0 elements moved. The checker prints no per-element count.",
       "expect": "^AR-CMP-173-OK",
       "status": "PASS",
@@ -65,8 +65,8 @@
       "criterion_verbatim": "the existing test files plus your own pass, and the branch changed only the files of the cells so far. At base it PASSes.",
       "method": "command",
       "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_compare_checks.py 173 regress",
-      "output_evidence": "AR-CMP-173-REGRESS-OK  (rc=0 at 9545da97c0e, run under timeout 600; scope check passed: no committed path outside the write set of cells 171 to 173). The own file test_comparables.py: 14 passed in the same tree (timeout 120, rc=0). The arm prints no pytest count.",
-      "denominator": "The ten existing producer and layout test files plus test_model_source.py (cell 171) and test_comparables.py (14 of 14 passed). The arm prints no count of the existing files; 0 failing.",
+      "output_evidence": "AR-CMP-173-REGRESS-OK  (rc=0 at 0c9dcbf044, run under timeout 120; scope check passed: no committed path outside the write set of cells 171 to 173). The own file test_comparables.py: 16 passed in the same tree (timeout 120, rc=0). The arm prints no pytest count.",
+      "denominator": "The ten existing producer and layout test files plus test_model_source.py (cell 171) and test_comparables.py (16 of 16 passed). The arm prints no count of the existing files; 0 failing.",
       "expect": "^AR-CMP-173-REGRESS-OK",
       "status": "PASS",
       "status_reason": "rc=0 and the RESULT line begins AR-CMP-173-REGRESS-OK, matching the expectation."
@@ -74,13 +74,13 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The spec names no mutant. The discriminating control is the base: the build arm FAILs before the module exists and PASSes after, so the arm grades the module. The checker's calibrate arm is the second control: its own formulas agree with the layout's statistic_of.",
+      "description": "The spec names no mutant. The discriminating controls are the base (the build arm FAILs before the module exists and PASSes after) and the first delivery (the build arm FAILED the ragged-ends arm before the path cut, and PASSes after it). The checker's calibrate arm is a further control: its own formulas agree with the layout's statistic_of.",
       "expected": "N/A",
-      "observed": "calibrate: AR-CMP-CALIBRATE-OK (rc=0). Base build FAIL is the issuer's measurement; not re-measured here since the module now exists.",
+      "observed": "First delivery at 9545da97c0e: build FAIL on the ragged-ends arm (path not cut at the window end), per the order's expectation. Amended at 0c9dcbf044: build AR-CMP-173-OK.",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "N/A -- no two-run comparison was made as a control; the build arm was run at 4ec6bad212 and again at 9545da97c0e, both AR-CMP-173-OK.",
+      "method": "N/A -- no two-run comparison was made as a control; the build arm was run at 0c9dcbf044 once.",
       "observed": "N/A",
       "status": "N/A-WITH-REASON"
     }
@@ -89,32 +89,28 @@
     {
       "item": "The 2-year std dev and max drawdown through statistic_of, and any edit of layout_overview.py",
       "reason": "statistic_of has no 2-year std_dev or max_drawdown period (surprise IRPT_ANLREQ-D2-W330-S3). The cell's risk figures use the engine's own helpers with the same arithmetic; layout_overview.py is outside this grant."
-    },
-    {
-      "item": "Whether a path stops at the window end",
-      "reason": "The cell is silent (surprise IRPT_ANLREQ-D2-W330-S4). Built as the literal reading: each path runs from the window start to its own last observation. Every checker fixture ends on 2026-10-14, so no criterion grades it."
     }
   ],
   "surprises": [
     "IRPT_ANLREQ-D2-W330-S3: statistic_of has no 2-year std_dev or max_drawdown period; the 2-year risk is computed with the layout's helpers (_month_returns, _sample_var, _window_start, _risk_stat). OBSERVATION, INERT.",
-    "IRPT_ANLREQ-D2-W330-S4: the cell cuts the window at the earliest last observation but no clause cuts a path at it; built as the literal reading. OBSERVATION, INERT."
+    "IRPT_ANLREQ-D2-W330-S4: the cell cuts the window at the earliest last observation but no clause cuts a path at it; answered by AMENDMENT 1 (every path ends at the common window's end, implemented at 0c9dcbf044). OBSERVATION, INERT."
   ],
-  "session_log": "Bash: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-330; test -d org && test -d .tools -> TREE-OK. Read the order and the checker (ar_compare_checks.py, cell 173 arms and calibrate); read layout_overview helpers (_STATS, _risk_stat, _month_returns, _window_start, statistic_of). Write: comparables.py and tests/test_comparables.py. Own tests: 14 passed (timeout 120). Criteria at 4ec6bad212: build OK, guard OK, regress OK; calibrate OK. Commit 4ec6bad212 via safe-commit (commit-gate passed for 2 of 2 .py-or-text files; the risk reflex printed PARTIAL_OR_BLIND, danger map STALE, 0 of 2 scanned, the same instrument as IRPT_ANLREQ-D2-W330-S2; not filed again). Rows S3 and S4 appended; commit 9545da97c0 (surprise-row-gate: 2 new rows graded OK). Criteria re-run at 9545da97c0e: build, guard, regress all rc=0 OK. This proof and the status flip are the two later commits.",
+  "session_log": "Re-seated amendment run. Bash: git rev-parse --abbrev-ref HEAD -> wk-IRPT_ANLREQ-330; test -d org && test -d .tools -> TREE-OK. Read the order (AMENDMENT 1), the checker (ragged-ends arm, check_record end parameter) and comparables.py. Change: _rebased(pts, start_ms, end_ms) keeps start < t <= end; build_compare passes end_ms to both the portfolio and the comparables. Tests: two ragged-ends cases added; test_comparables.py 16 passed (timeout 120, rc=0). Criteria at 0c9dcbf044 under timeout 120: 173 build rc=0 AR-CMP-173-OK; 173 guard rc=0 AR-CMP-173-OK; 173 regress rc=0 AR-CMP-173-REGRESS-OK. Commit 0c9dcbf044 via safe-commit: commit-gate passed for 2 of 2 files; the risk reflex printed PARTIAL_OR_BLIND (danger map STALE, 0 of 2 scanned, the same instrument as IRPT_ANLREQ-D2-W330-S2; not filed again). No new surprise row.",
   "compiler_tools": [
     {
       "tool": "python -m pytest",
-      "invocation": "cd infra/aws/lambda/investor-reporting/ycharts/research && python -m pytest --color=no -q -p no:cacheprovider tests/test_comparables.py",
-      "result": "14 passed in 0.14s (rc=0 at 4ec6bad212)"
+      "invocation": "python -m pytest --color=no -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/research/tests/test_comparables.py",
+      "result": "16 passed in 0.14s (rc=0 at 0c9dcbf044)"
     },
     {
       "tool": "surprise-row-gate",
       "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; 0 new row(s) of 1066 total checked before the commit (rc=0); at the commit 2 new row(s) of 1068 graded OK (9545da97c0)"
+      "result": "No new row filed in this re-seating; the rows S3 and S4 were graded at 9545da97c0e."
     },
     {
       "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
       "invocation": "bash .tools/safe-commit.sh ... -- infra/aws/lambda/investor-reporting/ycharts/research/comparables.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_comparables.py",
-      "result": "All checks passed! for 2 of 2 file(s); committed 4ec6bad212"
+      "result": "All checks passed! for 2 of 2 file(s); committed 0c9dcbf044"
     }
   ]
 }
