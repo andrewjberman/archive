@@ -1,0 +1,16 @@
+PART 1 -- the parser against stubbed Open body shapes
+  R21 shape {expires_in, filename, url}  key names ['expires_in', 'filename', 'url']                -> READ (expected READ) OK
+  earlier: data.url                      key names ['data', 'data.expires_in', 'data.filename', 'data.url'] -> READ (expected READ) OK
+  earlier: attachment.url                key names ['attachment', 'attachment.url']                 -> READ (expected READ) OK
+  earlier: items[].download_url          key names ['items', 'items.[].download_url']               -> READ (expected READ) OK
+  no url                                 key names ['filename', 'ok']                               -> REFUSED (expected REFUSED) OK
+  non-S3 url                             key names ['url']                                          -> REFUSED (expected REFUSED) OK
+  url of another bucket                  key names ['url']                                          -> REFUSED (expected REFUSED) OK
+PART 2 -- one read-only GET of an existing residue object at its version
+  residue GET (own read rights, version U2wA9rMN...): 31 bytes, sha256 f3e8bf44f4d910ebc27f49354d326787056293ff66a405b2c35c8bad3d31fa42; known file sha256 f3e8bf44f4d910ebc27f49354d326787056293ff66a405b2c35c8bad3d31fa42; equal=True
+PART 3 -- the response waiter registered BEFORE the Open press
+  script line order: line 369 `with page.expect_response(is_open, timeout=timeout_ms) as ri`  <  line 371 `click_locator.click()`
+  the run's call site is line 462 `status, names, url = open_and_capture(pg, openbtn)`
+2026-10-20T10:36:57Z Open route answered 200; body key names (names only, no values): ['expires_in', 'filename', 'url']
+  stubbed page, the stub route answers at once: captured status 200, key names ['expires_in', 'filename', 'url'], url read=True
+OFFLINE-PROOF OK (parser=True residue_get=True listener_before_press=True); nothing was written
