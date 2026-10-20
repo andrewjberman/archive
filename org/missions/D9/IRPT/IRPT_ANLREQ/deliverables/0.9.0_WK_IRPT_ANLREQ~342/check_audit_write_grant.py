@@ -7,17 +7,17 @@ Stdlib only, offline, no AWS call. Three checks over this worktree:
       irpt-anlreq-x10-v1 (no arn:aws:s3:::opal literal), and the statement WriteTheAnalysisAudit has
       Effect Allow, Action exactly ["s3:PutObject"], Resource local.resident_audit_write_prefixes, and sits
       right after ReadTheAnalysisCommentaryDraft inside aws_iam_role_policy.runner_resident.
-  (b) the prefixes are evaluated in Python from scopes.json and reporting_policies.json (family
-      ANALYSIS_AUDIT of irpt-anlreq-x10-v1). For each enabled client firm the Terraform prefix is compared
-      with lib/opal_naming.py address() (loaded BY PATH) by EXACT string equality of the whole bucket and
-      key: "arn:aws:s3:::" + the bucket of address() + "/" + the key of address() without its partition
-      segment + "/*". The partition is the placeholder PARTITION on the builder side (the key grammar
-      takes any partition token; the prefix ends before it).
-  (c) the family row must exist in the policy row; if it is absent the prefixes are evaluated with the
-      tier and table the cell names (platinum, analysis_audit) and the check reports the absence.
+  (b) AMENDMENT 1 (TO-AR-y-468, trunk a71b17d96d): for each enabled client firm the Terraform prefix
+      "arn:aws:s3:::BUCKET/<source>/<firm>/<tier>/<table>/*" (BUCKET stands for local.resident_bucket, remote
+      state, not read here) is compared with lib/opal_naming.py reporting_destination(firm, ANALYSIS_AUDIT,
+      ART_SAMPLE, SHA_SAMPLE, policy_revision=irpt-anlreq-x10-v1) (loaded BY PATH): the key minus its last
+      two parts (artifact id and sha256 file) plus /*. The writer's bucket must equal the product scope's
+      bucket in scopes.json (the product_scope of the policy row), which is the bucket the reporting
+      bucket is derived from (core/reporting_storage.tf). The firm buckets are not compared.
+  (c) the family row must exist in the policy row; if it is absent the report says so.
 
 Usage: python -I check_audit_write_grant.py [--selftest]
-  --selftest mutates in memory (A) the table name of the family, compared with the builder, and (B) the
+  --selftest mutates in memory (A) the table name of the family, compared with the writer, and (B) the
   statement Action by adding s3:GetObject. It prints CONTROL-FIRES only when both read BAD, each for
   its own reason. ASCII only.
 """
@@ -33,10 +33,11 @@ import sys
 POLICY_REVISION = "irpt-anlreq-x10-v1"
 FAMILY = "ANALYSIS_AUDIT"
 EXPECT_TIER = "platinum"
-EXPECT_TABLE = "analysis_audit"
 SID = "WriteTheAnalysisAudit"
 PREV_SID = "ReadTheAnalysisCommentaryDraft"
-PARTITION = "PARTITION"
+BUCKET = "BUCKET"
+ART_SAMPLE = "ART-" + "a" * 64
+SHA_SAMPLE = "b" * 64
 TF_REL = "infra/aws/terraform/investor-reporting/ycharts/resident.tf"
 SCOPES_REL = "infra/logic/registry/scopes.json"
 POLICIES_REL = "infra/logic/registry/reporting_policies.json"
@@ -49,7 +50,7 @@ POLICY_LINE = (
 LIST_HEAD = "resident_audit_write_prefixes = ["
 LIST_BODY = (
     'for scope_key in keys(local.resident_scopes) : '
-    '"arn:aws:s3:::${local.resident_scopes[scope_key].bucket}/${local.resident_commentary_policy.source}/'
+    '"arn:aws:s3:::${local.resident_bucket}/${local.resident_commentary_policy.source}/'
     '${local.resident_scopes[scope_key].long}/'
     '${local.resident_commentary_policy.families["ANALYSIS_AUDIT"].tier}/'
     '${local.resident_commentary_policy.families["ANALYSIS_AUDIT"].table}/*"'
@@ -141,45 +142,49 @@ def policy_row(policies_doc):
     return rows[0]
 
 
-def family_tier_table(policy):
-    fam = policy["families"].get(FAMILY)
-    if fam is None:
-        return EXPECT_TIER, EXPECT_TABLE
-    return fam["tier"], fam["table"]
-
-
 def tf_prefix(policy, scope):
+    # The Terraform bucket is local.resident_bucket (remote state), so its side carries the placeholder BUCKET.
     fam = policy["families"].get(FAMILY)
     if fam is None:
         return None
-    return "arn:aws:s3:::%s/%s/%s/%s/%s/*" % (scope["bucket"], policy["source"], scope["long"],
-                                              fam["tier"], fam["table"])
+    return "arn:aws:s3:::%s/%s/%s/%s/%s/*" % (BUCKET, policy["source"], scope["long"], fam["tier"], fam["table"])
 
 
-def builder_prefix(naming, policy, scope):
-    tier, table = family_tier_table(policy)
-    addr = naming.address(policy["source"], scope["long"], tier, table, PARTITION)
-    if not addr.startswith("s3://"):
-        raise SystemExit("AUDIT-WRITE-GRANT-BAD address() returned %r" % addr)
-    return "arn:aws:s3:::%s/*" % addr[len("s3://"):].rsplit("/", 1)[0]
+def product_bucket(scopes_doc, policy):
+    rows = [r for r in scopes_doc["scopes"] if r.get("key") == policy["product_scope"]]
+    if len(rows) != 1:
+        raise SystemExit("AUDIT-WRITE-GRANT-BAD product scope %s found %d times" % (policy["product_scope"], len(rows)))
+    return rows[0]["bucket"]
 
 
-def grant_reasons(naming, scopes, builder_policy, tf_policy):
+def builder_prefix(naming, builder_policy, firm):
+    # AMENDMENT 1 (TO-AR-y-468): the writer's own destination. reporting_destination returns the bucket and the
+    # key of one object; the prefix is the key minus its last two parts (the artifact id and the sha256 file),
+    # plus /*. The bucket is returned too and is compared with the product scope bucket by the caller.
+    bucket, path = naming.reporting_destination(firm, FAMILY, ART_SAMPLE, SHA_SAMPLE, policy_revision=POLICY_REVISION)
+    parts = path.split("/")
+    prefix_key = "/".join(parts[:-2])
+    return bucket, "arn:aws:s3:::%s/%s/*" % (BUCKET, prefix_key)
+
+
+def grant_reasons(naming, scopes, builder_policy, tf_policy, scopes_doc):
     why = []
     if not scopes:
         why.append("no FIRM client enabled scope in scopes.json")
     if FAMILY not in tf_policy["families"]:
         why.append("family %s absent from policy %s in reporting_policies.json at this HEAD" % (FAMILY, POLICY_REVISION))
+    expect_bucket = product_bucket(scopes_doc, builder_policy)
     tf_map = {}
     for key in sorted(scopes):
-        scope = scopes[key]
-        got = tf_prefix(tf_policy, scope)
+        got = tf_prefix(tf_policy, scopes[key])
         if got is None:
             got = "(no family row)"
-        want = builder_prefix(naming, builder_policy, scope)
+        built_bucket, want = builder_prefix(naming, builder_policy, key)
         tf_map[key] = got
+        if built_bucket != expect_bucket:
+            why.append("firm %s: writer bucket %s is not the product bucket %s" % (key, built_bucket, expect_bucket))
         if got != want:
-            why.append("firm %s: prefix %s %s; builder address gives %s" % (key, got, REASON_TABLE, want))
+            why.append("firm %s: prefix %s %s; reporting_destination gives %s" % (key, got, REASON_TABLE, want))
     return why, len(scopes), len(tf_map)
 
 
@@ -192,13 +197,14 @@ def main(argv=None):
     naming = load_naming(root)
     with open(os.path.join(root, TF_REL), encoding="utf-8") as handle:
         text = handle.read()
-    scopes = firm_scopes(load_json(root, SCOPES_REL))
+    scopes_doc = load_json(root, SCOPES_REL)
+    scopes = firm_scopes(scopes_doc)
     disk_policy = policy_row(load_json(root, POLICIES_REL))
     if args.selftest:
         mutant_a = copy.deepcopy(disk_policy)
         mutant_a["families"][FAMILY] = {"tier": EXPECT_TIER, "table": "analysis_audit_x", "extension": "json",
                                         "unreferenced_days": None, "accepted_ceiling_days": 2555}
-        why_a, _, _ = grant_reasons(naming, scopes, disk_policy, mutant_a)
+        why_a, _, _ = grant_reasons(naming, scopes, disk_policy, mutant_a, scopes_doc)
         mutant_b = re.sub(r'(Sid\s*=\s*"%s".*?Action\s*=\s*)\["s3:PutObject"\]' % SID,
                           r'\1["s3:PutObject", "s3:GetObject"]', text, count=1, flags=re.S)
         why_b = hcl_reasons(mutant_b) if mutant_b != text else []
@@ -210,7 +216,7 @@ def main(argv=None):
         print("CONTROL-DID-NOT-FIRE a=%s b=%s" % (fires_a, fires_b))
         return 1
     why = hcl_reasons(text)
-    grant_why, firms, prefixes = grant_reasons(naming, scopes, disk_policy, disk_policy)
+    grant_why, firms, prefixes = grant_reasons(naming, scopes, disk_policy, disk_policy, scopes_doc)
     why = why + grant_why
     if why:
         print("AUDIT-WRITE-GRANT-BAD " + "; ".join(why))
