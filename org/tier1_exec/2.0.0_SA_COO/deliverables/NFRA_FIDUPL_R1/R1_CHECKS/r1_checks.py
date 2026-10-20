@@ -34,7 +34,8 @@ TEST_FILES = {
     "fu2c": ("%s/tests/test_gprobe.py" % CF, [
         "test_probe_switches_current_g_once_and_back", "test_probe_never_sets_default",
         "test_probe_restores_starting_g_even_on_error", "test_probe_compares_before_after_counts",
-        "test_probe_prints_no_account_numbers_or_g_values"]),
+        "test_probe_prints_no_account_numbers_or_g_values", "test_probe_posts_form_without_isdefault",
+        "test_probe_asserts_current_cell_equals_requested", "test_probe_uses_www2_jsp_endpoint"]),
     "fu2t": ("%s/tests/test_login_trace.py" % CF, [
         "test_trace_records_step_outline_without_values", "test_trace_stops_at_first_failing_step",
         "test_trace_never_records_secret_or_code", "test_locators_found_by_type_not_by_assumed_name",
