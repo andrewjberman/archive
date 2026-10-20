@@ -17,16 +17,16 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.py",
       "kind": "script",
-      "commit_or_etag": "a92834eb31",
+      "commit_or_etag": "b5db6b593f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "read-only dry-mode driver harness; no deploy act in this cell, so nothing is deployed"
+      "deploy_evidence": "read-only dry-mode driver harness (amended: older served side for the no-today branch); no deploy act in this cell, so nothing is deployed"
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
       "kind": "doc",
-      "commit_or_etag": "a92834eb31",
+      "commit_or_etag": "b5db6b593f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "captured stdout of the dry-mode run (the record of the two branches); a record, not a deploy"
+      "deploy_evidence": "captured stdout of the amended dry-mode run (the record of the two branches); a record, not a deploy"
     }
   ],
   "acceptance": [
@@ -36,18 +36,17 @@
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
       "expect": "(?ms)^BRANCH-NONTRADING now=2026-10-24T14:00:00Z skipped=yes exit=0 s3_gets=0 s3_puts=0$.*^BRANCH-NOTODAY REFRESH-CENSUS names=1 written=0 would_write=0 unchanged=0 no_new_model_block=0 no_today_model_block=1 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run$.*^BRANCH-NOTODAY-STORED before_after_equal=yes objects=\\d+$",
-      "output_evidence": "BRANCH-NONTRADING now=2026-10-24T14:00:00Z skipped=yes exit=0 s3_gets=0 s3_puts=0\nBRANCH-NOTODAY REFRESH-CENSUS names=1 written=0 would_write=0 unchanged=1 no_new_model_block=0 no_today_model_block=0 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run\nBRANCH-NOTODAY-STORED before_after_equal=yes objects=18\nCOMMENT (not matched): the skip branch matched; the no-today census did not: the driver returned UNCHANGED for UNH_US_Equity (its build equals the served dossier, reason 'build equals the served dossier in fields and inputs'), so no_today_model_block is 0 and unchanged is 1. Surprise AMGT_HARVST-D1-W187-S1.",
-      "denominator": "3 expected pattern lines; 2 of 3 matched (BRANCH-NONTRADING and BRANCH-NOTODAY-STORED); the BRANCH-NOTODAY census line did not match (its no_today_model_block read 0 of 1 expected)",
-      "status": "FAIL",
-      "status_reason": "The no-today census read UNCHANGED (unchanged=1 no_today_model_block=0) for UNH_US_Equity on 2026-11-02, not NO_TODAY_MODEL_BLOCK; the driver checks UNCHANGED before the today-block branch. Surprise AMGT_HARVST-D1-W187-S1. Left open; the face's expectation was not edited to match."
+      "output_evidence": "BRANCH-NONTRADING now=2026-10-24T14:00:00Z skipped=yes exit=0 s3_gets=0 s3_puts=0\nBRANCH-NOTODAY REFRESH-CENSUS names=1 written=0 would_write=0 unchanged=0 no_new_model_block=0 no_today_model_block=1 skipped_allowed=0 skipped_guard=0 errors=0 mode=dry-run\nBRANCH-NOTODAY-STORED before_after_equal=yes objects=18\nCOMMENT (not matched): the no-today census ran with the real older served dossier (as_of=2026-10-18, key ...as_of=2026-10-18.4ae133face25334f.json) as the served side; the driver reported NO_TODAY_MODEL_BLOCK (reason: newest model block 20261020T131215Z is older than 09:00 America/New_York of 2026-11-02).",
+      "denominator": "3 expected pattern lines; 3 of 3 matched (BRANCH-NONTRADING, BRANCH-NOTODAY census, BRANCH-NOTODAY-STORED)",
+      "status": "PASS"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "AC2 holds the controls (the same name on a real day does not hit either branch) and the totals.",
       "method": "command",
       "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
-      "expect": "(?ms)^CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity no_today_model_block=0 skipped=no$.*^CONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no$.*^BRANCHES gets=\\d+ bytes=\\d+$",
-      "output_evidence": "CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity no_today_model_block=0 skipped=no\nCONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no\nBRANCHES gets=1490 bytes=269825852\nCOMMENT (not matched): the POSITIVE and NEGATIVE controls are one driver call (identical argv and now). BRANCHES bytes counts GetObject and HeadObject Content-Length only; ListObjectsV2 responses carry no Content-Length and are counted as unknown (20 responses, NOTE line).",
+      "expect": "(?ms)^CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity served=older no_today_model_block=0 would_write=1 skipped=no$.*^CONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no$.*^BRANCHES gets=\\d+ bytes=\\d+$",
+      "output_evidence": "CONTROL-POSITIVE now=2026-10-20T20:00:00Z only=UNH_US_Equity served=older no_today_model_block=0 would_write=1 skipped=no\nCONTROL-NEGATIVE now=2026-10-20T20:00:00Z require_trading_day skipped=no\nBRANCHES gets=2231 bytes=404484340\nCOMMENT (not matched): the positive control is the same older served side on a real day (would_write=1, the build differs from the older dossier); the negative control is the gate call with the real served side (census unchanged=1, no skip). BRANCHES bytes counts GetObject and HeadObject Content-Length only; ListObjectsV2 responses carry no Content-Length and are counted as unknown (28 responses, NOTE line).",
       "denominator": "3 expected pattern lines; 3 of 3 matched (CONTROL-POSITIVE, CONTROL-NEGATIVE, BRANCHES totals)",
       "status": "PASS"
     }
@@ -56,35 +55,36 @@
     "mutant": {
       "description": "The spec names no mutant for this cell: it asserts the two driver branches and their controls, not a mutated driver.",
       "expected": "N/A -- the spec names no mutant",
-      "observed": "No mutant was run. The controls are the same-name real-day read (CONTROL-POSITIVE) and the gate read (CONTROL-NEGATIVE) in co3_branches.out.",
+      "observed": "No mutant was run. The controls are the same-name real-day read with the older served side (CONTROL-POSITIVE) and the gate read (CONTROL-NEGATIVE) in co3_branches.out.",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "N/A: run 1 at timeout 120 returned rc=124 during call 3 with partial output; run 2 at timeout 500 completed rc=0. The two runs are not two complete same-input outputs.",
-      "observed": "run 2 rc=0; the stored-prefix listing read before_after_equal=yes objects=18 within the same run",
+      "method": "N/A: the amended run is one complete run; the first pass (commit a92834eb31) used the newest served side, a different served configuration, so it is not a same-input rerun.",
+      "observed": "amended run rc=0; the stored-prefix listing read before_after_equal=yes objects=18 within the same run",
       "status": "N/A-WITH-REASON"
     }
   },
   "declared_exclusions": [
     {
-      "item": "AC1 census line with no_today_model_block=1 (the face's expected status for UNH_US_Equity on 2026-11-02)",
-      "reason": "not produced: the driver returned UNCHANGED for UNH_US_Equity (surprise AMGT_HARVST-D1-W187-S1); the cell was dry, no source edited, no S3 write"
+      "item": "a fresh re-run of the level name's first-pass call (main with --only UNH_US_Equity, served = newest)",
+      "reason": "carried verbatim as the NOTE direct-UNH-2026-11-02 line, as the amended item requires; not re-run in this pass (it returned UNCHANGED, surprise AMGT_HARVST-D1-W187-S1)"
     },
     {
       "item": "BRANCHES bytes for ListObjectsV2 responses",
-      "reason": "list responses carry no Content-Length; BRANCHES bytes is the GetObject and HeadObject Content-Length total only (20 unknown-length responses noted in co3_branches.out); the two listing calls the script made are outside BRANCHES"
+      "reason": "list responses carry no Content-Length; BRANCHES bytes is the GetObject and HeadObject Content-Length total only (28 unknown-length responses noted in co3_branches.out); the listing calls and the older-served read the script made are outside BRANCHES (NOTE non_driver_requests_not_in_BRANCHES=4)"
     }
   ],
   "surprises": [
-    "AMGT_HARVST-D1-W187-S1: the no-today census for UNH_US_Equity on 2026-11-02 read UNCHANGED (build equals the served dossier), not no_today_model_block; the driver checks UNCHANGED before the today-block branch.",
-    "AMGT_HARVST-D1-W187-S2: org/surprise_channel/schemas/investigation_item.schema.json is absent from the worktree, so the rows were shaped from the rows already in the channel file."
+    "AMGT_HARVST-D1-W187-S1: the no-today census for UNH_US_Equity on 2026-11-02 read UNCHANGED with the newest served side (build equals the served dossier), not no_today_model_block; the driver checks UNCHANGED before the today-block branch. Reached with the real older served side (amended): NO_TODAY_MODEL_BLOCK.",
+    "AMGT_HARVST-D1-W187-S2: org/surprise_channel/schemas/investigation_item.schema.json is absent from the worktree, so the rows were shaped from the rows already in the channel file.",
+    "AMGT_HARVST-D1-W187-S3: proof-of-spec-check count-bar raises VIOLATION on a PASS row whose verbatim census line reads 'no_today_model_block=1 skipped_allowed=0' (it takes '1 skipped_allowed' as a nonzero count); the instance is INVALID rc=1 from that alone."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.out",
   "compiler_tools": [
     {
-      "tool": "co3_branches.py (dossier_refresh.main, dry mode, live data)",
-      "invocation": "timeout 500 python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.py",
-      "result": "rc=0 on run 2; run 1 at timeout 120 returned rc=124 during call 3 (partial output, overwritten by run 2)"
+      "tool": "co3_branches.py (dossier_refresh.main and run_names, dry mode, live data, amended)",
+      "invocation": "timeout 580 python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~187/co3_branches.py",
+      "result": "rc=0 on the amended run (single run, no timeout)"
     },
     {
       "tool": "surprise-row-gate (inside bash .tools/safe-commit.sh)",
