@@ -1,0 +1,38 @@
+MUTANT REPORT -- AR-y-470 (0.9.0_WK_IRPT_ANLREQ~344)
+
+Proof that the new test fails on the code as it stood at the cut commit.
+
+Cut commit (the route as it was before the edit): 01eef4397d0 (issue(IRPT_ANLREQ AR-y-470, 2.0.0_SA_COO~Y2)).
+Cut route guard: infra/aws/lambda/investor-reporting/ops/owned_report.py lines 369-371, which read
+    if (retained.get("sha256") != sha or retained.get("family") != COMMENTARY_FAMILY
+            or type(length) is not int or length <= 0):
+    raise RequestReadRefused("COMMENTARY_PDF_BINDING")
+
+Method: git archive of the cut commit's infra/aws/lambda/investor-reporting and docs/contracts/investor-reporting extracted
+into a scratch copy (.scratch/mutant of the worktree, not committed); the new test file copied in unchanged; pytest run there.
+
+Invocation (run from the scratch copy root):
+    python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider --tb=line
+
+Output, verbatim:
+    F...F..                                                                  [100%]
+    E   owned_requests.RequestReadRefused: COMMENTARY_PDF_BINDING
+    ...ops\owned_report.py:371: owned_requests.RequestReadRefused: COMMENTARY_PDF_BINDING
+    E   owned_requests.RequestReadRefused: COMMENTARY_PDF_BINDING
+    ...ops\owned_report.py:371: owned_requests.RequestReadRefused: COMMENTARY_PDF_BINDING
+    FAILED ...test_commentary_pdf_binding.py::test_production_shape_signs_the_retained_pdf_sha_and_answers_it_not_the_draft
+    FAILED ...test_commentary_pdf_binding.py::test_a_retained_artifact_with_no_storage_key_refuses_as_not_retained
+    2 failed, 5 passed in 2.77s
+    rc=1
+
+Denominator: 2 of 7 tests fail on the cut code.
+
+Reading the result:
+- The production-shape test (AC-a) fails at the cut guard: the retained sha P is not the draft sha D, so the cut route refuses
+  COMMENTARY_PDF_BINDING and never signs. This is the defect of run 7c.
+- The no-storage-key test fails on the cut code for the same reason: the cut guard refuses before the storage-key check is reached.
+- The wrong-family, zero-length and non-64-hex cases pass on the cut code too: the cut comparison refuses every mismatched sha, so
+  they guard the refusal names, not the fix. The fix is proven by the production-shape test and the AC2 static check.
+
+Positive control for the static check (AC2 logic) on the cut source: COMMENTARY-BINDING-BAD missing or failing:
+sha_hex,signs_own_sha,draft_sha_compare_gone (run in-process, rc 0 from the caller).
