@@ -1,7 +1,8 @@
-"""IRPT_ANLREQ AR-y-469 AC2: does the resident worker's packager call supply both audit ports from make_audit_source?
+"""IRPT_ANLREQ AR-y-469 AC2: does the packager build (make_packager) supply both audit ports from make_audit_source?
 
-Stdlib only, offline, no AWS call. Reads ycharts/generate/resident_worker.py by AST (never by text search).
-A port counts as supplied when the module passes it as a dict key, a keyword argument or a subscript assignment:
+Stdlib only, offline, no AWS call. Reads reports/resident_installed.py by AST (never by text search) and looks inside the
+function make_packager only: the packager's ports are built there (AMENDMENT 1; the wiring site is not resident_worker.py).
+A port counts as supplied when the function passes it as a dict key, a keyword argument or a subscript assignment:
   audit_source  must be a call of make_audit_source (or a name bound to one), and make_audit_source must be imported;
   audit_put     must be a lambda whose body calls a put (put_object) or a name/attribute whose identifier contains "put".
 
@@ -18,7 +19,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[7]
-WORKER = ROOT / "infra" / "aws" / "lambda" / "investor-reporting" / "ycharts" / "generate" / "resident_worker.py"
+WORKER = ROOT / "infra" / "aws" / "lambda" / "investor-reporting" / "reports" / "resident_installed.py"
+BUILDER = "make_packager"
 PORTS = ("audit_source", "audit_put")
 SOURCE_MAKER = "make_audit_source"
 PUT_NAME = re.compile(r"put", re.IGNORECASE)
@@ -71,11 +73,22 @@ def _imports_source_maker(tree):
                for node in ast.walk(tree))
 
 
+def _builder(tree):
+    """The make_packager FunctionDef of the module, or None."""
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == BUILDER:
+            return node
+    return None
+
+
 def _check(tree):
     """-> (ok, source_flag, put_flag, why)."""
-    supplied = _supplied(tree)
-    bound = _bound_to_source_maker(tree)
-    imported = _imports_source_maker(tree)
+    scope = _builder(tree)
+    if scope is None:
+        return (False, False, False, "no %s function in resident_installed.py" % BUILDER)
+    supplied = _supplied(scope)
+    bound = _bound_to_source_maker(scope)
+    imported = _imports_source_maker(scope)
     value = supplied.get("audit_source")
     source_ok = (value is not None and imported
                  and ((isinstance(value, ast.Call) and _name_of(value.func) == SOURCE_MAKER)

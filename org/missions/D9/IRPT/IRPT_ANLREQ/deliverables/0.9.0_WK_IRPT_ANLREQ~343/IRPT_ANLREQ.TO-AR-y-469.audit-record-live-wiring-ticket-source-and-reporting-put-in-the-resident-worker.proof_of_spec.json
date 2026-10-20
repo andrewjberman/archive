@@ -18,20 +18,61 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/ticket_audit_source.py",
       "kind": "script",
-      "commit_or_etag": "9599863f2f6",
+      "commit_or_etag": "32e6fd51c2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "make_audit_source(dynamodb, table_name, clock=None) returns the packager's audit_source(tenant, ticket_id). One consistent GetItem on the ticket table; answers as filed; created_at as filed_at in whole-second Z; no filer_user_type (the ticket writer stores no user type); no e-mail or display name in any value. Committed LOCAL on wk-IRPT_ANLREQ-343. Not wired into any live site: the packager ports are built in reports/resident_installed.py (IRPT_ANLREQ-D2-W343-S1). Nothing was run against AWS or the network.",
+      "deploy_evidence": "make_audit_source(dynamodb, table_name, clock=None) returns the packager's audit_source(tenant, ticket_id). One consistent GetItem on the ticket table; answers as filed; created_at as filed_at in whole-second Z; filer_user_type from the item only when it carries one, else None; no e-mail or display name in any value. Committed LOCAL on wk-IRPT_ANLREQ-343. Nothing was run against AWS or the network.",
       "artifact_covered_by": [
         "AR469-y-AC1",
         "AR469-y-AC3"
       ]
     },
     {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "32e6fd51c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "make_packager supplies audit_source (make_audit_source over the factory's DynamoDB client and the table named by IRPT_TICKETS_TABLE) and audit_put (the factory's S3 client, put_object to the bucket and key the audit writer computes). Unset table: no audit ports (AUDIT_PORTS_UNWIRED). resident_worker.py is not edited. Surprise rows S5 to S7 record the table-name source, the function-map and the put options.",
+      "artifact_covered_by": [
+        "AR469-y-AC1",
+        "AR469-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_contracts/AnalysisAudit.v1.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "32e6fd51c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "filer.user_type is string or null; the key stays required (issuer ruling on IRPT_ANLREQ-D2-W343-S2).",
+      "artifact_covered_by": [
+        "AR469-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/analysis_audit.py",
+      "kind": "script",
+      "commit_or_etag": "32e6fd51c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "filer.user_type comes from the audit source's filer_user_type, else null; the principal is still required for a filer.",
+      "artifact_covered_by": [
+        "AR469-y-AC1"
+      ]
+    },
+    {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_audit_live_wiring.py",
       "kind": "test",
-      "commit_or_etag": "9599863f2f6",
+      "commit_or_etag": "32e6fd51c2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "10 offline tests (python -m pytest, 10 passed). Covers the source's shape, no e-mail or name in output, miss, exception, non-analysis ticket, another firm's ticket, malformed id refused before any read, unknown typed value, no output, table name required, and the schema gap (the source output is refused for filer only). The packager-call and one-put tests named in the cell are NOT in this file: their site is outside the grant (IRPT_ANLREQ-D2-W343-S1).",
+      "deploy_evidence": "13 offline tests (python -m pytest, 13 passed). Covers the source's shape and its refusals, the packager call passing both ports through make_packager, and one attach ending in exactly one put to opal-data-irpt at irpt/cottonwood/platinum/analysis_audit/ (recording fakes for DynamoDB and S3).",
+      "artifact_covered_by": [
+        "AR469-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py",
+      "kind": "test",
+      "commit_or_etag": "32e6fd51c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "25 passed: the 24 existing tests unchanged, plus one test for the nullable user_type and the required key (surprise row S8).",
       "artifact_covered_by": [
         "AR469-y-AC1"
       ]
@@ -41,7 +82,7 @@
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib, AST-based, offline. Reads resident_worker.py and prints AUDIT-LIVE-WIRED-OK source=yes put=yes or AUDIT-LIVE-WIRED-BAD <why>. Measured now: BAD (no packager call in resident_worker.py supplies either port). The OK path was exercised on an in-memory sample wiring (OK; each removal BAD).",
+      "deploy_evidence": "Stdlib, AST-based, offline. Reads reports/resident_installed.py, inside make_packager only, and prints AUDIT-LIVE-WIRED-OK source=yes put=yes or AUDIT-LIVE-WIRED-BAD <why>. The --selftest removes each port in turn and fires only on a baseline OK.",
       "artifact_covered_by": [
         "AR469-y-AC2"
       ]
@@ -49,7 +90,7 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~343/check_audit_source_clean.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "13b83285dfa",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Stdlib, offline. Runs make_audit_source against a fake item carrying an e-mail address and a display name and prints AUDIT-SOURCE-CLEAN-OK no_email=yes no_name=yes only when a value was returned and no string in it contains either.",
       "artifact_covered_by": [
@@ -63,22 +104,22 @@
       "criterion_verbatim": "AR469-y-AC1: python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_audit_live_wiring.py -q --color=no -p no:cacheprovider 2>&1 | tail -1 -- expect ^[0-9]+ passed",
       "method": "command",
       "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_audit_live_wiring.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
-      "output_evidence": "10 passed in 1.32s",
-      "denominator": "10 of 10 tests passed in the file",
+      "output_evidence": "13 passed in 1.26s",
+      "denominator": "13 of 13 tests passed in the file",
       "expect": "^[0-9]+ passed",
       "status": "PASS",
-      "status_reason": "The printed line matches ^[0-9]+ passed. The file does not contain the cell's two wiring tests (a recording packager call with both ports; one put to opal-data-irpt at irpt/<firm>/platinum/analysis_audit/) because their site is outside the grant (IRPT_ANLREQ-D2-W343-S1). AC2 remains FAIL, so the order stays open."
+      "status_reason": "The printed line matches ^[0-9]+ passed. The file now carries the cell's packager-call test and one-put test (AMENDMENT 1)."
     },
     {
       "criterion_id": "AR469-y-AC2",
       "criterion_verbatim": "AR469-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~343/check_audit_live_wired.py -- expect ^AUDIT-LIVE-WIRED-OK source=yes put=yes$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~343/check_audit_live_wired.py",
-      "output_evidence": "AUDIT-LIVE-WIRED-BAD audit_source is not supplied by the packager call; audit_put is not supplied by the packager call",
-      "denominator": "0 of 2 ports supplied by the packager call in resident_worker.py",
+      "output_evidence": "AUDIT-LIVE-WIRED-OK source=yes put=yes",
+      "denominator": "2 of 2 ports supplied inside make_packager (reports/resident_installed.py)",
       "expect": "^AUDIT-LIVE-WIRED-OK source=yes put=yes$",
-      "status": "FAIL",
-      "status_reason": "resident_worker.py has no packager call that builds the ports; the live packager ports are built in reports/resident_installed.py make_packager, which is outside <paths> (IRPT_ANLREQ-D2-W343-S1, BLOCKING). The check cannot pass from the granted file without a wiring the live packager never calls. The ticket writer also stores no user type, so the live record would be refused by the schema even when wired (IRPT_ANLREQ-D2-W343-S2, BLOCKING)."
+      "status": "PASS",
+      "status_reason": "The printed line matches the expect exactly (rc=0, same on repeat)."
     },
     {
       "criterion_id": "AR469-y-AC3",
@@ -94,43 +135,43 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The --selftest of check_audit_live_wired.py: removes each packager port in memory in turn; CONTROL-FIRES only when the unmodified module reads OK and both removals read BAD.",
+      "description": "The --selftest of check_audit_live_wired.py: removes each packager port in memory in turn; CONTROL-FIRES only when the unmodified make_packager reads OK and both removals read BAD.",
       "expected": "CONTROL-FIRES removed=audit_source,audit_put",
-      "observed": "AUDIT-LIVE-WIRED-BAD audit_source is not supplied by the packager call; audit_put is not supplied by the packager call / CONTROL-DOES-NOT-FIRE baseline=BAD (rc=1). The control did not fire: its baseline is the unmodified resident_worker.py, which reads BAD, so no removal is a control.",
-      "status": "DID-NOT-FIRE (deliverable INVALID)"
+      "observed": "AUDIT-LIVE-WIRED-OK source=yes put=yes / REMOVED audit_source -> AUDIT-LIVE-WIRED-BAD audit_source is not supplied by the packager call / REMOVED audit_put -> AUDIT-LIVE-WIRED-BAD audit_put is not supplied by the packager call / CONTROL-FIRES removed=audit_source,audit_put (rc=0)",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC2 and AC3 checks each run twice from the worktree root and the two outputs compared with diff; AC1 run twice (pytest summary line compared by eye: 10 passed both times).",
-      "observed": "AC2 two runs identical (rc=1 both); AC3 two runs identical (rc=0 both); AC1 10 passed both runs.",
+      "method": "AC2 and AC3 checks each run twice from the worktree root and the two outputs compared with diff; AC1 run twice and the summary compared (the timing field differs between runs and is not part of the count).",
+      "observed": "AC2 two runs identical (rc=0 both); AC3 two runs identical (rc=0 both); AC1 13 passed both runs.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "the packager-call wiring in reports/resident_installed.py make_packager and the reporting put through the resident's S3 client",
-      "reason": "outside this order's <paths> (IRPT_ANLREQ-D2-W343-S1, BLOCKING): the cell's wiring site is not the granted file. Not built, not faked."
-    },
-    {
-      "item": "filer.user_type for the audit record",
-      "reason": "the ticket writer stores no user type on the item (IRPT_ANLREQ-D2-W343-S2, BLOCKING). No value is invented; the record is refused by the schema until a stored or declared field exists."
+      "item": "the live resident host's IRPT_TICKETS_TABLE value and the resident release's packaging of ticket_audit_source.py",
+      "reason": "not measured here (surprise rows S5 and S6): the order is BUILD OFFLINE and nothing is released or deployed."
     },
     {
       "item": "any live DynamoDB read, S3 put, deploy or network call",
-      "reason": "the order is BUILD OFFLINE: no AWS call, no network, no push, no deploy. The fake DynamoDB client is the only read path exercised."
+      "reason": "the order is BUILD OFFLINE: no AWS call, no network, no push, no deploy. The fake DynamoDB client and the recording S3 client are the only paths exercised."
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W343-S1: the live packager ports are built in reports/resident_installed.py make_packager, not in resident_worker.py; AC2 cannot pass from the granted file (BLOCKING).",
-    "IRPT_ANLREQ-D2-W343-S2: the ticket writer stores no user type, so filer.user_type (required by AnalysisAudit.v1) has no source attribute (BLOCKING).",
-    "IRPT_ANLREQ-D2-W343-S3: the source takes (tenant, ticket_id) and an injected clock for written_at, and refuses a firm mismatch; the cell's wording is audit_source(ticket_id), pure (OBSERVATION, INERT).",
-    "IRPT_ANLREQ-D2-W343-S4: created_at is written with milliseconds; the source returns the schema's whole-second Z form (OBSERVATION, INERT)."
+    "IRPT_ANLREQ-D2-W343-S1: the packager's ports are built in reports/resident_installed.py make_packager; TAKEN by the issuer (AMENDMENT 1), wired in commit 32e6fd51c2.",
+    "IRPT_ANLREQ-D2-W343-S2: the ticket writer stores no user type; filer.user_type is nullable in the schema; TAKEN by the issuer, implemented in commit 32e6fd51c2.",
+    "IRPT_ANLREQ-D2-W343-S3: the source signature is (tenant, ticket_id) with an injected clock and a firm guard; ACCEPTED by the issuer (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W343-S4: created_at is truncated to the schema's whole-second Z form; ACCEPTED by the issuer (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W343-S5: the ticket table name comes from IRPT_TICKETS_TABLE, which make_packager did not carry; the resident host's value is unmeasured (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W343-S6: ticket_audit_source.py is not listed in the generate function-map; a deploy that sets the variable without packaging the module fails at build time (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W343-S7: audit_put writes without IfNoneMatch (a replace attach must overwrite the same key) and with ContentType application/json (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W343-S8: no existing test asserted filer.user_type required; one new test was added and no existing test was changed (25 passed, the 24 green) (OBSERVATION, INERT)."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "python -m pytest (worktree root) and python -I (stdlib checks)",
       "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_audit_live_wiring.py -q --color=no -p no:cacheprovider",
-      "result": "10 passed; commit-gate.sh clean on ticket_audit_source.py and test_audit_live_wiring.py (ruff: All checks passed)"
+      "result": "13 passed; reports/tests/test_analysis_audit.py 25 passed; the packager and installed-resident tests 95 passed; commit-gate.sh clean on every changed .py (ruff: All checks passed)"
     }
   ]
 }
