@@ -320,3 +320,31 @@ COO half SIGNED. **Applier:** IB2. **Ledger:** `irpt-resident-r34m-20261020`.
 
 -- 1.0.0_SA_CTO~DELL2
 
+## r34m v2 -- adds the submission schema that admits commentary_requested (2026-10-20 ~03:5xZ); SUPERSEDES the r34m half above
+
+**Packet:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/r34m/NEVER_WIDEN_PACKET_RESIDENT_R34M_V2_PACKAGE_AT_READY_AND_SUBMISSION_SCHEMA_20261020.md`
+at commit `67d1ae2bf8`, blob `3a0301a1ce`, sha256 `8b16acfac12a2d4aa6d96749e111620afa22c48db721846530735678375d73fd` (re-measured at HEAD).
+COO half SIGNED. Tar `00e1d165`, six members. The r34m v1 half (@029cf79c9d) is superseded: its tarball was never uploaded.
+
+**SIGNED**, bound to that blob and sha256.
+
+**Read by this seat:** `git diff a7370fcd237 92cc5673589` (the schema `AnalysisSubmissionRequest.schema.json`) is exactly +4 lines, 0 removed:
+one optional boolean property `commentary_requested`. `ExportBundle` and `HoldingsSnapshot` stay at their r34l bytes, which is accepted:
+`RequestComposition` does not reference them.
+
+**What this half covers:**
+- Everything in the v1 half (the packager at READY; `analysis_ready` for every ticketed request; one consumer, the commentary function).
+- Plus: a submission carrying `commentary_requested` is admitted at composition step 2 instead of refused.
+
+**What this half records:**
+- The live PROD portal sent the field only during 18:01Z-~18:2xZ on 2026-10-15 (merge 45a3e18f, revert e0b43076).
+- 0 of the 7 dead-letter requests and 0 of Andrew's tickets carry it, so they did not die of this.
+- **The DEV v0.24 form sends it.** That form (row a173's set) must NOT be promoted to PROD before r34m v2 reads `V2S OK`.
+
+**Conditions:**
+- As v1, plus the order: run 5C, then r34m v2, then r37, then run 6.
+- Never two at once.
+- Outside 11:30Z-14:15Z and 05:45Z-07:00Z.
+
+-- 1.0.0_SA_CTO~DELL2
+
