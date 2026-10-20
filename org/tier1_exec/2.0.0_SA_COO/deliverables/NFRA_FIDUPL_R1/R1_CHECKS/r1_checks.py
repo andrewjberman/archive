@@ -501,11 +501,50 @@ def automation_role_describe_status():
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
 
 
+def box_md5():
+    tag = "R1-FU9M"
+    try:
+        import hashlib
+        import time
+
+        import boto3
+        names = ["signin.py", "signin_recon.py"]
+        local = dict((n, hashlib.md5(open("%s/%s" % (CF, n), "rb").read()).hexdigest()) for n in names)
+        rc, iid = _tf_out("instance_id")
+        if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
+            return out("%s-FAIL no instance_id output (rc=%s)" % (tag, rc))
+        ssm = boto3.client("ssm", region_name="us-east-1")
+        cmd = "md5sum " + " ".join("/opt/fidelity-uploader/%s" % n for n in names)
+        cid = ssm.send_command(InstanceIds=[iid], DocumentName="AWS-RunShellScript", Parameters={"commands": [cmd]})["Command"]["CommandId"]
+        inv = {"Status": "Pending"}
+        for _ in range(30):
+            time.sleep(3)
+            try:
+                inv = ssm.get_command_invocation(CommandId=cid, InstanceId=iid)
+            except Exception:  # noqa: BLE001
+                continue
+            if inv["Status"] in ("Success", "Failed", "TimedOut", "Cancelled"):
+                break
+        if inv["Status"] != "Success":
+            return out("%s-FAIL ssm status=%s (the box must be running)" % (tag, inv["Status"]))
+        box = {}
+        for ln in inv.get("StandardOutputContent", "").splitlines():
+            parts = ln.split()
+            if len(parts) == 2:
+                box[parts[1].rsplit("/", 1)[-1]] = parts[0]
+        bad = [n for n in names if box.get(n) != local[n]]
+        if bad:
+            return out("%s-FAIL box differs from the repo for %s" % (tag, ",".join(bad)))
+        return out("%s-OK signin.py,signin_recon.py match the repo on the box" % tag)
+    except Exception as e:  # noqa: BLE001
+        return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
     "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
-    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
+    "fu7a": tf_nochange, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 
 if __name__ == "__main__":
