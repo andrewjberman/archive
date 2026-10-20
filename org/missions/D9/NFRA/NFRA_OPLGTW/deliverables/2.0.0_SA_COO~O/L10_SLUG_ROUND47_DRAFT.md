@@ -14,7 +14,7 @@
 | `OG-gv-1` | Andrew's Schwab grant to `accounts ["*"]` | OPEN: Phase A done, three halves SIGNED at ask `637db69736ab`; Phase B only after `OG-rl-18` AND the `/callback` exemption release are live |
 | `OG-ed-1` | master-admin exemption on the legacy `/callback` consent branch (the CTO half of `OG-gv-1`, option 2) | complete (worker `~175`, drained `17c53cdd2cb`; my `ed1.AC1`, `AC2`, `AC3` PASS on the merged tree; rows Z-S437) |
 | `OG-rl-17` | batch16 release | OPEN: re-cut at the cap 26 (release `8e3eddf959`, ask `291ffc35747a`), all three halves SIGNED, Phase B GO sent for window 2026-10-21 06:00Z |
-| `OG-mp-1` | mount `admin_people_access.routes` in `app/admin_api.py` (the CTO's ferry 17:30Z, NFRA_MCPORTAL v0.10) | OPEN: worker `~176`; rides `OG-rl-18` |
+| `OG-mp-1` | mount `admin_people_access.routes` in `app/admin_api.py` (the CTO's ferry 17:30Z, NFRA_MCPORTAL v0.10) | complete (worker `~176`, drained `a4197b93aed`; my `mp1.AC1`, `AC2`, `AC3` PASS on the merged tree; no rows) |
 | `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount: ten files) | OPEN: staged, not before 2026-10-22 06:00Z |
 
 ## 2. What the round delivered against the endpoint -- OPEN
