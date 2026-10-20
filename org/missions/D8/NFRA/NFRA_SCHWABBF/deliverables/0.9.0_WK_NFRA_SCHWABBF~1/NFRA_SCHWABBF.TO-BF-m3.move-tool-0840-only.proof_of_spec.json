@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-m3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-m3.move-tool-0840-only.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "e8d796975f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/move_bronze_key_form.py",
+      "kind": "script",
+      "commit_or_etag": "f8a89ef039",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit f8a89ef039 on branch wk-NFRA_SCHWABBF-1. The tool is run by the issuer's copy act, not by this order; this order runs no copy --apply.",
+      "artifact_covered_by": ["BF3-m3-AC1", "BF3-m3-AC2", "BF3-m3-AC3"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "f8a89ef039",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch, reworked to the 0840-only scope first; it was run against the three-master tool (15 failed, 5 passed) before the tool changed.",
+      "artifact_covered_by": ["BF3-m3-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-m3-AC1",
+      "criterion_verbatim": "plan, copy, verify, the refusal and the absence of any delete path, on the synthetic listing and fake S3, 0840 only.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "20 passed in 0.77s\n(second run of the same command, same tree: 20 passed in 0.82s)\nDRY-RUN CONTROL, before the tool changed, same command against the three-master tool: 15 failed, 5 passed.\nOUT-OF-SCOPE REFUSAL, CLI on the real tool: MOVE-REFUSED master=08719286 out of scope (PRD v0.7 C-SCOPE) rc=2; MOVE-REFUSED master=08242234 out of scope (PRD v0.7 C-SCOPE) rc=2.",
+      "denominator": "20 passed of 20 collected; 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF3-m3-AC2",
+      "criterion_verbatim": "the CLI on the fixture: only 0840's four keys are planned; the other masters are foreign.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --listing-file data/canonical/schwab/tests/fixtures/move_listing.json",
+      "output_evidence": "MOVE-PLAN in_scope=4 foreign=9 copy=4 already=0 events=4\nMOVE-LISTED keys=13\nMOVE-SAMPLE src=schwab/08403355/bronze/acc/20231017/08403355.CRS20231017.ACC.zip dst=schwab/49financial/bronze/acc/date=2023-10-17/08403355.CRS20231017.ACC.zip\nMOVE-OTHER unrecognized=0",
+      "denominator": "4 in-scope keys planned of 13 listed; 9 foreign; 0 unrecognized",
+      "expect": "^MOVE-PLAN in_scope=4 foreign=9 copy=4 already=0 events=4$",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF3-m3-AC3",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: a live, read-only listing of the whole real schwab/08403355/bronze/ prefix plans into the firm form. It writes nothing.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/move_bronze_key_form.py plan --master 08403355",
+      "output_evidence": "MOVE-PLAN in_scope=6074 foreign=0 copy=6074 already=0 events=6074\nMOVE-LISTED keys=6074\nMOVE-SAMPLE src=schwab/08403355/bronze/acc/20240930/08403355.CRS20240930.ACC.zip dst=schwab/49financial/bronze/acc/date=2024-09-30/08403355.CRS20240930.ACC.zip\nMOVE-OTHER unrecognized=0\n(read-only; no --out, no copy, no verify; run 2026-10-20)",
+      "denominator": "6074 keys listed of the live prefix; 6074 in scope; 0 foreign; 0 unrecognized",
+      "expect": "^MOVE-PLAN in_scope=[0-9]+ foreign=0 copy=[0-9]+ already=[0-9]+ events=[0-9]+$",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-m-3; the worker ran none. The order's dry-run control is recorded in acceptance BF3-m3-AC1 output_evidence.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The AC1 pytest invocation run twice on the same tree; the summary lines were compared.",
+      "observed": "Run 1: '20 passed in 0.77s'. Run 2: '20 passed in 0.82s'. Counts identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "copy --apply against the real bucket",
+      "reason": "Forbidden by the order's Bounds; the copy path was exercised only on the fake S3. The live prefix was read once, by plan, with no write."
+    },
+    {
+      "item": "Deleting or moving any old-form key",
+      "reason": "The module has no removal path and the test asserts that. The old-key removal is the issuer's sanctioned act outside this tool."
+    },
+    {
+      "item": "Changes to the fixture data/canonical/schwab/tests/fixtures/move_listing.json",
+      "reason": "The order says the fixture stays at 13 keys; it was not edited."
+    },
+    {
+      "item": "Edits to the TO-BF-k3 key contract in the silver helper and the bd-tree mirror",
+      "reason": "Outside the write grant; the tool loads the contract as TO-BF-k3 committed it."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W1-S2: filed under TO-BF-k3 (the move script and its test still encode the all-firm grammar). The move-script part is what this order closes, at commit f8a89ef039; the row itself is append-only and stays UNDER_INVESTIGATION for the CVO to graduate."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "result": "rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --select E9,F data/canonical/schwab/keyform/move_bronze_key_form.py data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "result": "All checks passed! rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "20 passed (two identical-count runs)"
+    }
+  ]
+}
