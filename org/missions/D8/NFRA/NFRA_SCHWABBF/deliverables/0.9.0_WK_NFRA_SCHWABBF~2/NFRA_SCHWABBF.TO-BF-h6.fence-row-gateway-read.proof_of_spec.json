@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-h6",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R6.md",
+    "vintage_commit": "b7bb47b7a09dc10116ed1350b9f9ae2ef7534108",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-h6.fence-row-gateway-read.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-h6.fence-row-gateway-read.md",
+    "group": "OTHER",
+    "vintage_commit": "b7bb47b7a09dc10116ed1350b9f9ae2ef7534108"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/exemptions.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registry row only: one row appended to opal-data-49financial (gateway-schwab-catalog-read-role, GetObject and ListBucket, prefix schwab/49financial/state/complete/). No terraform init, plan or apply was run; the apply is the NFRA CloudOps lane's act BF-r-2 under the signed pair."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_fence_state_rows.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only: three fence_state_gateway arms appended (row exists as fixed, read-only with no wildcard or write action, prefix equals the opal_naming address() derived complete prefix). No AWS call."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-h6-AC1",
+      "criterion_verbatim": "the fourth row exists as fixed (read only, one table); the whole file is run once too and its line reported",
+      "method": "command",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_fence_state_rows.py -q -p no:cacheprovider --color=no -k fence_state_gateway",
+      "output_evidence": "3 passed, 5 deselected in 0.08s\nrc=0\nwhole file (no -k): 8 passed in 0.08s, rc=0",
+      "denominator": "3 of 3 fence_state_gateway arms passed (3 selected of 8 in the file, 5 deselected); whole file 8 of 8 passed",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF6-h6-AC2",
+      "criterion_verbatim": "the registry validator accepts the registry with the fourth row (seam probe against the real neighbor)",
+      "method": "command",
+      "invocation": "python lib/opal_naming.py validate",
+      "output_evidence": "VALIDATE: OK 56 system row(s), 25 scope row(s), 0 warning(s) at registry@374dc71300b86cbe over all 17 registry file(s)\nrc=0",
+      "denominator": "0 warning(s) across 56 system row(s), 25 scope row(s) and 17 registry file(s)",
+      "status": "PASS",
+      "expect": "^VALIDATE: OK "
+    },
+    {
+      "criterion_id": "BF6-h6-AC3",
+      "criterion_verbatim": "the naming module's terraform test (95 passed at the base) still passes (the control)",
+      "method": "command",
+      "invocation": "terraform -chdir=infra/aws/terraform/modules/opal_name test -no-color",
+      "output_evidence": "Success! 95 passed, 0 failed.\nrc=0",
+      "denominator": "95 passed of 95 test runs, 0 failed",
+      "status": "PASS",
+      "expect": "^Success! [0-9]+ passed, 0 failed\\.$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant is named by the task order; its only negative arm is the base dry-run, which was not re-run here.",
+      "expected": "N/A: the order names no mutant",
+      "observed": "The fence_state_gateway arms are discriminating by construction: at the base there is no gateway row, so the row-count assertion in the first arm fails (the order's dry-run expectation for AC1 is no test named fence_state_gateway, rc 5). That base run was not executed in this session.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Single run per criterion; the order asks for no repeat run and none was made.",
+      "observed": "No repeat run performed; each invocation was run once with rc recorded.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan or apply of the gateway identity, and any AWS call",
+      "reason": "WORLD floor: the order grants no apply. The apply is the NFRA CloudOps lane's act BF-r-2 under the signed COO and CTO halves."
+    },
+    {
+      "item": "The gateway's identity-side IAM policy",
+      "reason": "Lives in the gateway's own Terraform, not in this repo. The test arm for identity-side coverage applies to the box row and the two converter rows only, as the order requires."
+    }
+  ],
+  "surprises": [],
+  "session_log": "NONE: no session log committed by this worker; the worker report is the final message.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_fence_state_rows.py -q -p no:cacheprovider --color=no",
+      "result": "8 passed in 0.08s, rc=0"
+    },
+    {
+      "tool": "opal_naming validate",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 56 system row(s), 25 scope row(s), 0 warning(s), rc=0"
+    },
+    {
+      "tool": "terraform test",
+      "invocation": "terraform -chdir=infra/aws/terraform/modules/opal_name test -no-color",
+      "result": "Success! 95 passed, 0 failed., rc=0"
+    }
+  ]
+}
