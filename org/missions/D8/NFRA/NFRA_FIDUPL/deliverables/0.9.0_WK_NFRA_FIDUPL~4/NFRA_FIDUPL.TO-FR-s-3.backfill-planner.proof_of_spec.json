@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-3",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "4ca02b2119",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-3.backfill-planner.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-3.backfill-planner.md",
+    "group": "OTHER",
+    "vintage_commit": "c5ff6eaad5"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill.py",
+      "kind": "script",
+      "commit_or_etag": "c48857331c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-4. Planner, stop detection and per-G per-kind record against an injected ExportClient and lander. No AWS call, no S3 write, no address() call: the lander owns landing."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_backfill.py",
+      "kind": "test",
+      "commit_or_etag": "c48857331c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-4. Nine tests: the seven named plus test_stops_at_cap_years and test_lander_failure_stops_kind_without_retry. Fakes only; synthetic data; made-up G numbers."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR3-AC1",
+      "criterion_verbatim": "the seven named backfill tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr3",
+      "output_evidence": "R1-FR3-OK passed=9 (two runs, rc 0 each; pytest -v lists all nine tests PASSED, including the seven named)",
+      "denominator": "9 of 9 collected tests pass; 7 of 7 named tests present; 1 check line, rc 0",
+      "status": "PASS",
+      "expect": "R1-FR3-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the order names no spec name whose mutation is a defined test here; FR3-AC1 reads the test run only.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the same check invocation run twice on the same tree at the same commit",
+      "observed": "run 1: R1-FR3-OK passed=9 rc 0; run 2: R1-FR3-OK passed=9 rc 0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real export-request adapter (the on-demand Fidelity export client)",
+      "reason": "Not built here: its calls are not yet captured (Andrew's capture pending). The task order names this cell as the planner, the stop logic and the record, against fakes."
+    },
+    {
+      "item": "Any live Fidelity, AWS or network call, and any run of backfill_g against a real account",
+      "reason": "Fixtures only, per the order's bounds. Nothing here runs live."
+    },
+    {
+      "item": "Schedule, IAM and box wiring of the backfill",
+      "reason": "No schedule, IAM statement or box runner is touched; denominator 0. The daily run and its hookup belong to FR-s-4 and the box cells."
+    },
+    {
+      "item": "Retry of a failed lander window",
+      "reason": "Per the order, a lander failure stops that kind and nothing is retried."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W4-S9: the order's planner bound (plan_windows covers today back to floor_date) and its account-open-date stop (an EMPTY window older than floor_date) cannot both hold on one walk; backfill_g walks plan_windows to today minus cap_years and tests floor_date only at each EMPTY window. FR3-AC1 passes on this reading; the issuer may rule on it."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~4/NFRA_FIDUPL.TO-FR-s-3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "python (3.14.7) with pytest 9.1.1",
+      "invocation": "timeout 120 python -m pytest -v -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_backfill.py",
+      "result": "9 passed in 0.06s, rc 0"
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr3",
+      "result": "R1-FR3-OK passed=9 (rc 0, twice)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff at the repo's pinned version)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/canonical-fidelity/backfill.py infra/aws/ec2/canonical-fidelity/tests/test_backfill.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s); rc 0"
+    }
+  ]
+}
