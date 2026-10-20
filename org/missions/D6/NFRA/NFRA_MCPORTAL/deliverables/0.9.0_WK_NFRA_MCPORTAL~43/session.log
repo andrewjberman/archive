@@ -1,0 +1,15 @@
+0.9.0_WK_NFRA_MCPORTAL~43 on NFRA_MCPORTAL.TO-MP-zo-3 -- session log (worktree C:/tmp/mp-ogw-43, branch wk-NFRA_MCPORTAL-43)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPORTAL-43; test -d org && test -d .tools -> TREE-OK.
+2. Base suite (d0ece5fe139): python -m pytest infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests -> 1 failed (test_person_access_refused_when_record_kind_not_live: WRITTEN, expected REFUSED RECORD-KIND-NOT-LIVE), 35 passed, 44.44s. Matches the face.
+3. Premise check: the widening rule is defined against the prior record. The writer reads the prior only through st.get (lambda_function.py:398). FakeStore records get (tests/test_person_access.py:41-43). The face requires store.calls == [] for the WIDEN-NO-CONFIRM refusal. The two requirements cannot both hold. Surprise row NFRA_MCPORTAL-Z-W43-S1 filed (commit 9a367e600d). The widening rule and tests 2-5 were NOT built.
+4. Stale test repaired in place (commit ba8cfc3ef39): monkeypatch narrows acs.POLICY_RECORD_TYPES to exclude person_access for this test only; asserts it absent; keeps REFUSED RECORD-KIND-NOT-LIVE and zero store calls.
+5. Suite after repair: 36 passed, 0 failed, rc=0, 70.47s.
+6. AC1 (issuer's zo3.AC1.sh, run as `timeout 120 bash ...` by the worker bound; the recorded invocation is the criterion's text without the bound): pytest rc=0; named tests present in sources 1 of 5; passed=36 (min 40); failed=0; RESULT: FAIL; exit=1. Second run of the same check: 36 passed in 51.55s, same verdict (determinism).
+7. Mutant (base test body restored, observed in step 2): WRITTEN where REFUSED expected, 1 failed. The test discriminates the stale state.
+8. Proof instance first written and validated (rc=0) with AC1 FAIL; its recorded invocation was corrected to the criterion's text (the checker had reported the bound as a violation), then re-validated rc=0.
+9. Issuer AMENDMENT 1 carried onto the branch at c52cb0ceb1 (order lines 1-70 and zo3.AC1.sh re-read). Widening rule built in lambda_function.py at f3774ac1df: _widens() against the one strong read; WIDEN-NO-CONFIRM refusal after the read and before any write unless widening_confirm is exactly True; a widening write carries widening_signoff on the record and the audit item. Four new tests added (test_widening_without_confirm_is_refused_before_any_store_write, test_widening_with_the_verified_owners_confirm_is_written_and_recorded, test_subtract_restore_and_stop_need_no_widening_confirm, test_widening_confirm_from_a_non_owner_master_admin_is_refused_before_any_store_call).
+10. Suite after the rule: 40 passed, 0 failed, rc=0 (65.94s direct; 47.47s through zo3.AC1.sh).
+11. AC1 (amended check, timeout 120): named tests present in sources 5 of 5; passed=40 (min 40); failed=0; RESULT: PASS; exit=0.
+12. Mutant on the rule: refusal replaced by `if False:`; widening-no-confirm test run alone: FAILED, 1 failed, 15 deselected, rc=1; file restored byte-equal (cmp), git status clean.
+13. Proof instance rewritten and validated with proof-of-spec-check.py (see the instance in this folder).
