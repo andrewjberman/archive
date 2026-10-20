@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_CTLPLN.TO-CT-cl-1.bd49f-dim-convert-scd2-dtype-fix",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cl-1.bd49f-dim-convert-scd2-dtype-fix.md",
+    "group": "OTHER",
+    "vintage_commit": "41584d28e0e"
+  },
+  "assignee": "0.9.0_WK_NFRA_CTLPLN~153",
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "41584d28e0e",
+    "to_ref": "org/missions/D0/NFRA/NFRA_CTLPLN/task-orders/NFRA_CTLPLN.TO-CT-cl-1.bd49f-dim-convert-scd2-dtype-fix.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/bd49f_dim_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "61850841c0d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_tuple_frame in scd2_fold casts each SCD2_TUPLE column to its DIM_SCHEMA type (float64 / boolean / object) before the <NA> fill and the string compare. sha256 bc3019570d49ac1ee10d7cd7668dfdc23a09e938d14dece7abd7c662cf00d503. No deploy from this cell; the zip build and apply are the issuer's and CT-cm-1's.",
+      "artifact_covered_by": ["CTcl1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-bd49f-dim-convert/bd49f_dim_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "61850841c0d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Vendored copy, byte-identical to the repo file at 61850841c0d (cp, then cmp rc=0; sha256 bc3019570d49ac1ee10d7cd7668dfdc23a09e938d14dece7abd7c662cf00d503).",
+      "artifact_covered_by": ["CTcl1-AC1"]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py",
+      "kind": "test",
+      "commit_or_etag": "61850841c0d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three tests added after test_scd2_duplicate_open_rows_raise: test_scd2_dtype_float_zero_vs_int_zero_is_unchanged, test_scd2_dtype_real_flat_fee_change_still_closes_and_opens, test_scd2_dtype_vendored_copy_is_byte_identical. NEVER EXECUTED in this worktree: the module fails at collection (see surprises).",
+      "artifact_covered_by": ["CTcl1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/opal-assets/opal-assets-bd49f-dim-convert/BUILD_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "61850841c0d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "vendor_sha256[bd49f_dim_conversion.py] set to bc3019570d49ac1ee10d7cd7668dfdc23a09e938d14dece7abd7c662cf00d503; memory_mb 1024 -> 3008. No other field changed.",
+      "artifact_covered_by": ["CTcl1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D0/NFRA/NFRA_CTLPLN/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1b16fb35990",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended, none edited: NFRA_CTLPLN-W153-S1 (BLOCKING, INERT). The worktree is a sparse checkout; data/assets/scripts/lib/ is skip-worktree and absent on disk, so stream_parquet cannot import.",
+      "artifact_covered_by": ["CTcl1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTcl1-AC1",
+      "criterion_verbatim": "the three new tests pass beside the 26 existing ones: the float-zero versus int-zero tuple is unchanged, a real flat_fee change still closes and opens (the difference control), and the vendored copy is byte-identical (base: 26 passed, so this reads FAIL at the base as expected). Report the whole last line.",
+      "method": "command",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
+      "output_evidence": "Run from the worktree root under timeout 120, after the edits at 61850841c0d. Result: collection ERROR, no test executed. Last line verbatim: '1 error in 1.43s' (rc=2). Deciding lines: 'ERROR data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py' / 'E   ModuleNotFoundError: No module named stream_parquet' / 'Interrupted: 1 error during collection'. The plain invocation at the base, before any edit, gave the same collection error (last line '1 error in 7.71s', rc=2). Cause: the worktree is a sparse checkout; data/assets/scripts/lib/ is skip-worktree and absent on disk (surprise NFRA_CTLPLN-W153-S1). The lib folder was NOT copied into the worktree.",
+      "denominator": "0 of 29 expected tests executed (the base reads 26 passed; the three new tests are not exercised)",
+      "status": "FAIL",
+      "status_reason": "The expected last line is '29 passed'. The actual last line is '1 error in 1.43s' with rc=2. The module cannot import stream_parquet in this worktree. The fix and the three tests are committed but unverified here; the order stays open.",
+      "expect": "29 passed",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Not run. The base-failure of test_scd2_dtype_float_zero_vs_int_zero_is_unchanged is unverified, because no test executes in this worktree. The issuer's re-run of the new tests against the base file as the mutant is the pending control.",
+      "expected": "The float-zero vs int-zero test FAILS on the base converter (two rows: one closed, one open).",
+      "observed": "NOT OBSERVED: collection stops at the stream_parquet import before any test runs, so the mutant never fired in this worktree. The issuer's re-run of the new tests against the base file is the pending control.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: no test executed. Two collection runs (once at the base before any edit, once after the edits) gave the identical ModuleNotFoundError, rc=2, but their inputs differ, so no same-input determinism is claimed.",
+      "observed": "Both runs: the identical ModuleNotFoundError at data/assets/scripts/silver/bd49f_dim_conversion.py line 61, rc=2. An environment failure, not a test verdict.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The stream_parquet dependency (data/assets/scripts/lib/) in the worktree",
+      "reason": "Sparse checkout, skip-worktree on the whole folder. Not named in this order's paths. Restoring it would reconstruct the tree, which the worker rules forbid; it is the issuer's call (surprise NFRA_CTLPLN-W153-S1)."
+    },
+    {
+      "item": "The zip build, the apply, the Lambda invocation and the real run against the stored dim",
+      "reason": "WORLD-class cell: no terraform, no aws, no deploy, no zip. These are the issuer's and CT-cm-1's."
+    },
+    {
+      "item": "The status flip of NFRA_CTLPLN.TO-CT-cl-1 to complete",
+      "reason": "The criterion FAILs, so the order stays pending. The flip is not made."
+    },
+    {
+      "item": "The portal gitlink (portal) shown modified in the worktree",
+      "reason": "Pre-existing in the worktree status before any edit; not part of this order's paths and not committed."
+    }
+  ],
+  "surprises": [
+    "NFRA_CTLPLN-W153-S1: the worktree is a sparse checkout; data/assets/scripts/lib/ (stream_parquet, imported by the converter at line 61 and by the test path at line 20) is in HEAD and skip-worktree, absent on disk; the module fails at collection, rc=2, so AC1 cannot reach 29 passed (BLOCKING, INERT)."
+  ],
+  "session_log": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/0.9.0_WK_NFRA_CTLPLN~153/NFRA_CTLPLN.TO-CT-cl-1.bd49f-dim-convert-scd2-dtype-fix.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python -m pytest data/assets/scripts/silver/tests/test_bd49f_dim_conversion.py -q",
+      "result": "rc=2, collection ERROR (ModuleNotFoundError: stream_parquet), no test executed; see AC1 output_evidence"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msg> -- <paths> at 61850841c0d",
+      "result": "'All checks passed!' on the converter, the test file and the vendored copy; commit-gate reports 'OK: pre-commit gate clean for 3 of 4 file(s)'; the naming gate reports the function-map folder missing from the sparse worktree (not graded)"
+    }
+  ]
+}
