@@ -580,7 +580,8 @@ def box_md5_all():
         import time
 
         import boto3
-        names = ["quo_otp.py", "signin.py", "signin_recon.py", "fetch.py", "land.py", "box/run.py", "box/bootstrap.sh"]
+        names = sorted([f for f in os.listdir(CF) if f.endswith(".py")]
+                       + ["box/" + f for f in os.listdir(CF + "/box") if f.endswith((".py", ".sh"))])
         local = dict((n, hashlib.md5(open("%s/%s" % (CF, n), "rb").read()).hexdigest()) for n in names)
         rc, iid = _tf_out("instance_id")
         if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
