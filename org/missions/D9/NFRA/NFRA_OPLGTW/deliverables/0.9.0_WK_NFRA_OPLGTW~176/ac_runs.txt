@@ -1,0 +1,43 @@
+OG-mp-1 worker session log, 0.9.0_WK_NFRA_OPLGTW~176, worktree C:/tmp/wk-og-176, branch wk-NFRA_OPLGTW-176
+code commit: 9852f4dc7f5 (app/admin_api.py, tests/test_og_mp1.py)
+
+== branch and tree check (first act)
+wk-NFRA_OPLGTW-176
+TREE-OK
+== pins
+git cat-file -t 2fb26985d9b6982f2118c391fc3ad8a458a4a068 -> blob
+git hash-object app/admin_api.py (pre-edit HEAD) -> 2fb26985d9b6982f2118c391fc3ad8a458a4a068
+
+== python -m pytest tests/test_og_mp1.py (run 1 and run 2, same input)
+3 passed, 1 warning in 0.63s rc=0
+3 passed, 1 warning in 0.35s rc=0
+
+== mutant: admin_api.py copy under .scratch/mutant with the line "    *admin_people_access.routes," deleted
+FAILED tests/test_og_mp1.py::test_ogmp1_ac01 - AssertionError: Not Found   (assert 404 == 401)
+FAILED tests/test_og_mp1.py::test_ogmp1_ac02 - AssertionError: []          (assert 0 == 2)
+FAILED tests/test_og_mp1.py::test_ogmp1_ac03 - AssertionError: Not Found   (assert 404 == 200)
+3 failed, 1 warning in 0.57s rc=1
+
+== issuer AC1: bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mp1.AC1.sh; echo "exit=$?"
+the new GET and POST answer 401 no verified identity with no owner header: ok (GET 401 POST 401)
+controls: /whoami 401, /people 401, an unmounted path 404: ok
+the route table holds the two new routes exactly once each; count 18 (want 16 + 2 = 18): ok
+every Route object of admin_people_access.routes is the one mounted: ok
+RESULT: PASS
+exit=0
+
+== issuer AC2: bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mp1.AC2.sh; echo "exit=$?"
+new file tests/test_og_mp1.py: 3 passed, 0 failed
+neighbours (5): 31 passed, failed names [] (allowed: test_ogz1_ac08 only)
+RESULT: PASS
+exit=0
+
+== issuer AC3: bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mp1.AC3.sh; echo "exit=$?"
+app/admin_api.py against the pin: 0 removed, 2 added (want 0 removed, 2 to 4 added, each naming admin_people_access, the import and the routes entry): ok
+app/admin_people_access.py byte-equal to HEAD: ok
+tests/test_og_mp1.py: 3 test functions (want 3 or more): ok
+RESULT: PASS
+exit=0
+
+== out of scope, observed and not touched
+git diff --stat in the worktree lists a modified gitlink "portal" (pre-existing worktree state; not staged, not committed by this order).
