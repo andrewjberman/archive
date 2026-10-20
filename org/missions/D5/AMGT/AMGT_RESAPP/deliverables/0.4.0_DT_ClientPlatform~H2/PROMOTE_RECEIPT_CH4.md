@@ -69,4 +69,41 @@ Prepared only, per step 7; nothing registered, `portal-merge-forward.sh` not run
 - Overlap: `git rev-list origin/PROD..origin/DEV`, measured after the promote and a fetch (DEV `7d5ba57ec6`, PROD `e890aaa94f`): 153 shas, written to `FOLDBACK_OVERLAP_SHAS_R126.txt` in this folder.
 - AC4 (`git rev-list --count origin/DEV..origin/PROD`) reads `3` after the promote: not yet met, as the amendment records, until the fold-back lands.
 
-STOPPED here as ordered: awaiting the issuer's step-8 amendment with the CTO's named waiver.
+STOPPED here as ordered: awaiting the issuer's step-8 amendment with the CTO's named waiver. (Step 8 followed; see below.)
+
+## Fold-back (landed)
+
+Step 8 of AMENDMENT 2 (bf2a23b34d, GO msg 8592), under the CTO's one-time named waiver `org/missions/D5/AMGT/AMGT_RESAPP/ledger/CTO_WAIVER_FOLDBACK_DEV_OVERLAP_R126_20261020.md` (@b6328c50dd). Ledger entry: `amgt-resapp-ch4-prod-into-dev-fold-20261020`.
+
+(a) Re-measured after a fetch, before registering: overlap `git rev-list origin/PROD..origin/DEV | wc -l` = 153, DEV `7d5ba57e`, PROD `e890aaa9`; the sorted set equals `FOLDBACK_OVERLAP_SHAS_R126.txt`.
+
+(b) Register, `--check-only` first:
+
+    APPROVAL-REGISTER result=OK row=- head_sha=8de015fca648fc6edceec2fd2a5c3a2719683738 commits=154 check-only=yes waived=153
+
+then once, without it:
+
+    APPROVAL-REGISTER result=OK row=dell1-20261020T025056Z-cefb head_sha=8de015fca648fc6edceec2fd2a5c3a2719683738 commits=154 waived=153
+    ADDED id=dell1-20261020T025056Z-cefb kind=approval
+
+Row id: `dell1-20261020T025056Z-cefb`.
+
+(c) Approval, as read by `python .tools/open-calls.py approval-status --branch cand/dell1/prod-into-dev-fold-r126`:
+
+    APPROVAL branch=cand/dell1/prod-into-dev-fold-r126 state=APPROVED valid=yes row=dell1-20261020T025056Z-cefb by=1.0.0_SA_CTO~DELL1 head_sha=8de015fca648fc6edceec2fd2a5c3a2719683738 commits=154 class=opal-internal box=dell1 pages=none
+
+(d) Immediately before the merge-forward, after a fetch (DEV `7d5ba57e`, PROD `e890aaa9`, overlap 153): `git diff --quiet origin/DEV cand/dell1/prod-into-dev-fold-r126 && echo TREE-EQUALS-DEV` printed
+
+    TREE-EQUALS-DEV
+
+(e) `bash .tools/portal-merge-forward.sh cand/dell1/prod-into-dev-fold-r126 --push`, run alone, result line:
+
+    MERGE-FORWARD branch=cand/dell1/prod-into-dev-fold-r126 result=MERGED reason=- dev_before=7d5ba57ec6c611e7fa16166a8f05d480578046e6 dev_after=84b680871fbe1542a45fa9babbb94ed15df3ee2d pushed=yes merge=84b680871fbe1542a45fa9babbb94ed15df3ee2d
+
+Gate lines from the same run: `PASS 84b680871f route=A Merge cand/dell1/prod-into-dev-fold-r126 into DEV (approved feature)`; `DEV-PUSH-GATE result=ADMITTED reason=- commits=1`.
+
+DEV head after, as an `ls-remote` read (`git ls-remote origin DEV`):
+
+    84b680871fbe1542a45fa9babbb94ed15df3ee2d	refs/heads/DEV
+
+DEV..PROD count after a fetch (`git rev-list --count origin/DEV..origin/PROD`): `0`. AC4 now reads `0`.

@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ch-4.two-security-analysis-features-promoted-to-prod-as-one-chosen-set-release.md",
     "group": "OTHER",
-    "vintage_commit": "eca0f444b0baa69908b2f58d27d343a1fecd36d8"
+    "vintage_commit": "bf2a23b34d7ddf43d7ffb6304ee02948a60a83a9"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
@@ -46,11 +46,11 @@
       ]
     },
     {
-      "path_or_key": "portal branch cand/dell1/prod-into-dev-fold-r126 @8de015fca648fc6edceec2fd2a5c3a2719683738",
+      "path_or_key": "portal DEV @84b680871fbe1542a45fa9babbb94ed15df3ee2d",
       "kind": "frontend_component",
-      "commit_or_etag": "8de015fca648fc6edceec2fd2a5c3a2719683738",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "step 7 preparation only: local branch cut from origin/DEV 7d5ba57ec6, git merge --no-ff origin/PROD clean; git diff --quiet origin/DEV HEAD printed TREE-EQUALS-DEV; git rev-list --count origin/DEV..HEAD printed 4. Not on origin, no approval row registered, portal-merge-forward.sh not run, DEV not written.",
+      "commit_or_etag": "84b680871fbe1542a45fa9babbb94ed15df3ee2d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "step 8, the fold-back under the CTO's one-time waiver b6328c50dd: fold branch cand/dell1/prod-into-dev-fold-r126 (merge 8de015fca6, cut from origin/DEV 7d5ba57ec6, TREE-EQUALS-DEV printed immediately before); row dell1-20261020T025056Z-cefb registered once and APPROVED valid=yes by 1.0.0_SA_CTO~DELL1; MERGE-FORWARD result=MERGED dev_before=7d5ba57ec6 dev_after=84b680871fbe1542a45fa9babbb94ed15df3ee2d pushed=yes, DEV-PUSH-GATE ADMITTED; ls-remote origin DEV read 84b680871fbe1542a45fa9babbb94ed15df3ee2d; git rev-list --count origin/DEV..origin/PROD read 0.",
       "artifact_covered_by": [
         "AC4"
       ]
@@ -98,10 +98,10 @@
       "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != ba2c3412 ] && git rev-list --count origin/DEV..origin/PROD -- expect: the single number `0` (PROD has moved off `ba2c3412` AND DEV contains PROD, so the fold-back has landed; recorded as not yet met until the issuer's step-8 amendment lands the fold-back)",
       "method": "command",
       "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV PROD -q && [ \"$(git rev-parse --short=8 origin/PROD)\" != ba2c3412 ] && git rev-list --count origin/DEV..origin/PROD",
-      "output_evidence": "3\nthe guard passed: PROD is e890aaa94f, off ba2c3412; the 3 commits are e890aaa9 and 713ae4cb (this release's feature merges) and ba2c3412 (the dell2 release merge)\nfold-back prepared, not landed: cand/dell1/prod-into-dev-fold-r126 8de015fca6, TREE-EQUALS-DEV, rev-list DEV..HEAD 4; 153 overlap shas in FOLDBACK_OVERLAP_SHAS_R126.txt",
-      "denominator": "1 count read (3); expected 0 only after the fold-back lands",
-      "status": "FAIL",
-      "status_reason": "NOT YET MET, as AMENDMENT 1 records: step 7 prepares the fold-back and stops before any approval row or merge-forward (the CTO's named waiver comes later), so DEV does not yet contain PROD (count 3)",
+      "output_evidence": "0\nthe guard passed: PROD is e890aaa94f, off ba2c3412\nbase reading in the first stage (after the promote, before the fold-back), same command: 3 (e890aaa9, 713ae4cb, ba2c3412)\nls-remote origin DEV: 84b680871fbe1542a45fa9babbb94ed15df3ee2d refs/heads/DEV (was 7d5ba57ec6); fold merge landed by portal-merge-forward.sh on approved row dell1-20261020T025056Z-cefb",
+      "denominator": "1 count read (0); 153 overlap shas were waived by name under the CTO's waiver, all already on DEV",
+      "status": "PASS",
+      "status_reason": "DEV now contains PROD: the fold merge landed by the approved route under the CTO's waiver; PROD e890aaa9 is off ba2c3412 so the guard passes",
       "expect": "(?s)\\A\\s*0\\s*\\n",
       "judgment": false
     }
@@ -130,11 +130,11 @@
     },
     {
       "item": "A mutant control for AC4",
-      "reason": "AC4 is a count; its reading here (3) is the not-yet-met base state, measured with the order's own command. No separate mutant run."
+      "reason": "AC4 is a count; its first-stage reading (3) was measured with the same command before the fold-back and is recorded in the output. No separate mutant run."
     }
   ],
   "surprises": [],
-  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-ch-4 (GO msg 8585, acked; AMENDMENT 1 msg 8588 at eca0f444b0 read before the PROD push). Step 1: approval-status APPROVED valid=yes for both branches (rows dell1-20261019T224555Z-fbb9 and dell1-20261020T013211Z-07df), ls-remote of both heads equal. Step 2: origin/PROD ba2c341279 as predicted. Ledger amgt-resapp-ch4-sa-promote-20261020 opened (3 legs) before the build. Step 3: portal-release-build.sh READY release/20261020T023043Z, unapproved=0, PROMOTE-CLIENT-FACING count=0. Step 4 (/prod-deploy): local PROD re-asserted from origin; ephemeral worktree; bun install foreground; ff-only merge of the release, parity diff 0 lines; typecheck rc=0; PROD pushed alone from the worktree, ba2c3412 -> e890aaa9, VALGATE PASS, pre-push typecheck passed; ls-remote PROD = e890aaa94f. Step 5: run 39359584436 Deploy to Production completed success, the only workflow for the sha; tag portal-v2.1.246 peels to the PROD head. Step 6: receipt bb7678a264. Step 7: fold branch cand/dell1/prod-into-dev-fold-r126 cut from origin/DEV 7d5ba57ec6, clean no-ff merge of origin/PROD = 8de015fca6, TREE-EQUALS-DEV, count 4, 153 overlap shas; stopped before any approval row or merge-forward. Worktrees removed and pruned, main portal tree on DEV. Ledger L1-L3 closed and committed as 9eb736e8e2. Workspace portal pointer not committed (not in the order's paths).",
+  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-ch-4 (GO msg 8585, acked; AMENDMENT 1 msg 8588 at eca0f444b0 read before the PROD push). Step 1: approval-status APPROVED valid=yes for both branches (rows dell1-20261019T224555Z-fbb9 and dell1-20261020T013211Z-07df), ls-remote of both heads equal. Step 2: origin/PROD ba2c341279 as predicted. Ledger amgt-resapp-ch4-sa-promote-20261020 opened (3 legs) before the build. Step 3: portal-release-build.sh READY release/20261020T023043Z, unapproved=0, PROMOTE-CLIENT-FACING count=0. Step 4 (/prod-deploy): local PROD re-asserted from origin; ephemeral worktree; bun install foreground; ff-only merge of the release, parity diff 0 lines; typecheck rc=0; PROD pushed alone from the worktree, ba2c3412 -> e890aaa9, VALGATE PASS, pre-push typecheck passed; ls-remote PROD = e890aaa94f. Step 5: run 39359584436 Deploy to Production completed success, the only workflow for the sha; tag portal-v2.1.246 peels to the PROD head. Step 6: receipt bb7678a264. Step 7: fold branch cand/dell1/prod-into-dev-fold-r126 cut from origin/DEV 7d5ba57ec6, clean no-ff merge of origin/PROD = 8de015fca6, TREE-EQUALS-DEV, count 4, 153 overlap shas; stopped. AMENDMENT 2 at bf2a23b34d (GO msg 8592) then added step 8 under the CTO's waiver b6328c50dd: heads re-measured (DEV 7d5ba57e, PROD e890aaa9, overlap 153, set equal to the committed file); ledger amgt-resapp-ch4-prod-into-dev-fold-20261020 opened; register --check-only OK waived=153, then once: row dell1-20261020T025056Z-cefb; approved by 1.0.0_SA_CTO~DELL1 on sight; TREE-EQUALS-DEV re-printed immediately before; portal-merge-forward.sh run alone MERGED DEV 7d5ba57e -> 84b68087, pushed; ls-remote DEV 84b68087; DEV..PROD = 0; ledger closed (3 legs). open_calls.json (device register, holds other seats' uncommitted rows) not committed by this lane. Worktrees removed and pruned, main portal tree on DEV. Ledger L1-L3 closed and committed as 9eb736e8e2. Workspace portal pointer not committed (not in the order's paths).",
   "compiler_tools": [
     {
       "tool": "open-calls.py approval-status",
@@ -149,7 +149,17 @@
     {
       "tool": "deploy_ledger.py",
       "invocation": "open, close-leg L1-L3, close",
-      "result": "3 legs proven (see ledger entry amgt-resapp-ch4-sa-promote-20261020)"
+      "result": "3 legs proven (see ledger entry amgt-resapp-ch4-sa-promote-20261020); 3 legs proven for the fold-back entry amgt-resapp-ch4-prod-into-dev-fold-20261020"
+    },
+    {
+      "tool": "open-calls.py add",
+      "invocation": "python .tools/open-calls.py add --kind approval --project NFRA_DEVPLN --box dell1 --branch cand/dell1/prod-into-dev-fold-r126 ... --waive-overlap <153 shas> --waiver-ref <waiver file> --asked-by 0.4.0_DT_ClientPlatform~H2 [--check-only first]",
+      "result": "check-only OK waived=153; row dell1-20261020T025056Z-cefb APPROVED valid=yes"
+    },
+    {
+      "tool": "portal-merge-forward.sh",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/dell1/prod-into-dev-fold-r126 --push",
+      "result": "MERGE-FORWARD result=MERGED dev_after=84b680871fbe1542a45fa9babbb94ed15df3ee2d pushed=yes"
     }
   ]
 }
