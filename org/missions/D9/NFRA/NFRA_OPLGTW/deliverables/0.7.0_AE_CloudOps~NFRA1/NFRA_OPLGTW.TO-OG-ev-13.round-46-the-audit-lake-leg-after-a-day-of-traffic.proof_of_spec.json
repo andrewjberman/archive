@@ -1,0 +1,92 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-ev-13",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "c6b133f62db",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ev-13.round-46-the-audit-lake-leg-after-a-day-of-traffic.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/AUDIT_LEG_24H.json",
+   "kind": "doc",
+   "commit_or_etag": "9c7514e9b83",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Read-only record: window 2026-10-19T07:44:53Z to 2026-10-20T07:48:00Z, 25 hourly rows (25 busy), 0 audit-lake WARN lines, verdict HOLDS, anomaly hour 2896 of 2896 bodies read with 0 read errors. Counts only.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/ev13_run.py",
+   "kind": "script",
+   "commit_or_etag": "9c7514e9b83",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The reader: journalctl over SSM (per-hour POST /mcp lines, WARN lines), a LIST of s3://opal-mcp-audit keys per hour, a threaded read of the anomaly hour's bodies (histogram by tool or event name); no write, no gateway request.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the window runs at least 24 hours from the OG-ap-48 close, the journal and the hourly lake counts are present and read without error, the anomaly hour's bodies are all read and its histogram accounts for them, the throttle constant is read at the pinned sha and equals the record, the verdict equals what the rule returns from those counts, and the record holds no email, no principal and no long digit run.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r46/checks/ev13.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)window \\S+ to \\S+ \\(at least 24 hours, from the OG-ap-48 close\\): ok; journal: audit-lake WARN lines \\d+ \\(last count \\d+, classes \\[.*?\\]\\): ok.*24 or 25 consecutive hourly rows ok, busy hours \\(20 or more POST /mcp lines\\) \\d+, the lake keeps pace in every busy hour (yes|no); the throttle constant at the pinned sha reads [0-9.]+ and the record says [0-9.]+: ok.*anomaly hour 2026-10-19T02:00Z: \\d+ objects, \\d+ read, errors 0, tool rows \\d+, histogram covers at least 95 percent of the bodies read: ok; verdict by the rule fixed before the run: (HOLDS|FAILS_SEEN|UNDETERMINED), the record says \\2: consistent.*email-shaped strings 0 \\(want 0\\); digit runs of 9 or more 0 \\(want 0\\).*RESULT: PASS.*exit=0",
+   "output_evidence": "window 2026-10-19T07:44:53Z to 2026-10-20T07:48:00Z (at least 24 hours, from the OG-ap-48 close): ok; journal: audit-lake WARN lines 0 (last count 0, classes []): ok\n24 or 25 consecutive hourly rows ok, busy hours (20 or more POST /mcp lines) 25, the lake keeps pace in every busy hour yes; the throttle constant at the pinned sha reads 60.0 and the record says 60.0: ok\nanomaly hour 2026-10-19T02:00Z: 2896 objects, 2896 read, errors 0, tool rows 7, histogram covers at least 95 percent of the bodies read: ok; verdict by the rule fixed before the run: HOLDS, the record says HOLDS: consistent\nevidence strings 5 (want >= 2); email-shaped strings 0 (want 0); digit runs of 9 or more 0 (want 0)\nRESULT: PASS\nexit=0",
+   "denominator": "25 hourly buckets; 25 busy hours; 2896 anomaly-hour objects read of 2896",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same record, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant; the issuer's synthetic arms (clean day, WARN lines, lagging hour, contradicting verdict, short window, partial read, wrong constant) are the discriminating arms.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the code_sha the order expected",
+   "reason": "The live ref is 13917ef993 (batch15), not 6b1a9bd292; the record pins the live ref and the check reads the throttle constant at it (60.0), as the issuer's GO directed."
+  },
+  {
+   "item": "the named downtime intervals",
+   "reason": "06:22:51Z-06:23:35Z resize, 06:28:33Z-06:28:49Z deploy restart and 06:33:33Z-06:33:40Z stall, all inside the 2026-10-20T06:00Z hour, are named in the evidence and not subtracted from any count."
+  },
+  {
+   "item": "the sampler probes of this seat",
+   "reason": "468 unauthenticated POST /mcp probes (06:19Z-06:37Z, 192 of them in 06:30Z-07:00Z) sit in that hour's journal count; stated in the evidence, not subtracted."
+  },
+  {
+   "item": "a push",
+   "reason": "The order forbids it; the issuer drains the branch."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-ev-13, GO msg 36162 (window_end 2026-10-20T07:48:00Z). Read at 08:18Z: the host journal (first line 2026-08-26T11:50:22Z), the lake listing for two days, and all 2896 bodies of the 2026-10-19T02:00Z hour; wrote AUDIT_LEG_24H.json; ev13.AC1 PASS; verdict HOLDS.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 / ssm / s3",
+   "invocation": "ev13_run.py journal|lake|anomaly|build (Rule 12 not needed: the host command is a read of the journal, no script pulled)",
+   "result": "PASS",
+   "note": "Counts only; no value from any lake body was printed or kept."
+  }
+ ]
+}
