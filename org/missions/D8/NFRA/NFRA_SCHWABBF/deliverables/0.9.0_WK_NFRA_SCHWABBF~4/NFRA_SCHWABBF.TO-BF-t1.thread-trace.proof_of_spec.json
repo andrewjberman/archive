@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-t1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP.md",
+    "vintage_commit": "ba5640ad8d2e0d8bbde1aeaed677f39f2fff0912",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-t1.thread-trace.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ebad019c125a3107d3b7c58308a57e4e4ba557e0"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/canonical/schwab/keyform/thread_trace.py",
+      "kind": "script",
+      "commit_or_etag": "a620a5a34c7dbca6848eae88339f81a98fb437ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk: a read-only trace tool run by file path; no deploy is in this order's grant. Live reads at AC2 and AC3 are the evidence of its behaviour."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_thread_trace.py",
+      "kind": "test",
+      "commit_or_etag": "a620a5a34c7dbca6848eae88339f81a98fb437ac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL risk: a fake-store test suite; nothing deploys."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "f9fd9f0b3e42a2eac476f6a596248f5fc395b744",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows NFRA_SCHWABBF-W4-S1..S3 appended to the project channel; a document, nothing deploys."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF1-t1-AC1",
+      "criterion_verbatim": "BF1-t1-AC1 -- the trace on a fake store: success, wrong form, second form, typed absence, and no identifier in the output.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "............                                                             [100%]\n12 passed in 0.73s",
+      "denominator": "12 of 12 tests collected passed (0 failed, 0 errors); covers builder held, legacy under builder (fail), legacy under any (ok), both forms under builder (fail), legacy form second-form check, no bronze and no silver (rc 2), silver without bronze, silver with zero rows, store failure (rc 3), bad day (rc 3), no row identifier in output",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF1-t1-AC2",
+      "criterion_verbatim": "BF1-t1-AC2 -- the seam probe against the REAL neighbor: the real 0840 day 2026-10-16 (bronze still in the old layout, silver present) traces end to end under --form any.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08403355 --day 2026-10-16 --form any",
+      "output_evidence": "TRACE master=08403355 day=2026-10-16 form=any\nHOP bronze: HELD n=1 prefix=s3://opal-data-assets/schwab/08403355/bronze/acc/20261016 form=legacy\nHOP second-form: NONE\nHOP silver: READ rows=30 table=dim_balance\nBALANCES column=net_credit_debit non_null=30 sum=-753761.16\nBALANCES column=margin_balance non_null=30 sum=890656.18\nBALANCES column=available_to_pay non_null=30 sum=8751885.27\nBALANCES column=mrgn_buying_pwr non_null=30 sum=9884740.56\nBALANCES column=money_mkt_funds non_null=30 sum=0.00\nBALANCES column=mtd_margin_int non_null=30 sum=27217.30\nBALANCES column=daily_margin_int non_null=30 sum=4654.90\nBALANCES column=eqty_excl_option non_null=30 sum=4388425.24\nBALANCES column=eqty_percentage non_null=30 sum=6.27\nBALANCES column=mkt_value_long non_null=30 sum=32067874.73\nBALANCES column=mkt_value_short non_null=30 sum=-12641177.21\nBALANCES column=eqty_incl_option non_null=30 sum=19544350.45\nBALANCES column=option_rqrmnts non_null=30 sum=0.00\nBALANCES column=mnth_end_div_pay non_null=30 sum=0.00\nBALANCES column=maintenance_call non_null=30 sum=11194196.00\nBALANCES column=mvl_cash_ex_optn non_null=30 sum=24220880.34\nBALANCES column=net_mv_positions non_null=30 sum=43647577.86\nBALANCES column=net_mv_plus_cash non_null=30 sum=42893816.70\nBALANCES column=cash_balance_settled_only non_null=30 sum=-753761.16\nBALANCES column=cash_margin_bal_settled non_null=30 sum=-11750521.03\nBALANCES column=bank_sweep_ibf non_null=30 sum=19316.27\nBALANCES column=bank_cash non_null=30 sum=19316.27\nTHREAD-OK master=08403355 day=2026-10-16 form=legacy",
+      "denominator": "1 verdict line of 1 expected (THREAD-OK, rc 0); 3 of 3 hops printed; silver rows 30 read; 22 of 22 non-identifier numeric columns of dim_balance printed with non_null=30 each; the 0840 day holds 1 bronze object in the old layout and 0 in the builder layout",
+      "status": "PASS",
+      "expect": "^THREAD-OK master=08403355 day=2026-10-16"
+    },
+    {
+      "criterion_id": "BF1-t1-AC3",
+      "criterion_verbatim": "BF1-t1-AC3 -- the negative arm on a real Saturday (no bronze, no silver): the typed absence, not a failure and not a pass.",
+      "method": "command",
+      "invocation": "python data/canonical/schwab/keyform/thread_trace.py --master 08403355 --day 2026-10-17 --form any",
+      "output_evidence": "TRACE master=08403355 day=2026-10-17 form=any\nHOP bronze: NOT-HELD form=builder\nHOP bronze: NOT-HELD form=legacy\nHOP second-form: NONE\nHOP silver: ABSENT table=dim_balance\nNOT-HELD master=08403355 day=2026-10-17 cause=no-bronze-no-silver",
+      "denominator": "1 verdict line of 1 expected (NOT-HELD, rc 2); 2 of 2 bronze layouts checked and empty; silver partition absent; 0 THREAD-FAIL and 0 THREAD-OK lines printed",
+      "status": "PASS",
+      "expect": "^NOT-HELD master=08403355 day=2026-10-17 cause=no-bronze-no-silver"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Disabled the second-form check (form != any) in a scratch copy of thread_trace.py under .scratch and re-ran the unchanged test file against it.",
+      "expected": "the two second-form tests fail",
+      "observed": "2 failed, 10 passed: test_both_forms_under_builder_form_fails_naming_the_second_form and test_legacy_form_flags_a_builder_copy_as_the_second_form; pytest rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC2 invocation run twice and the two outputs diffed",
+      "observed": "identical output, 27 lines, rc 0 on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real 0840 day holding both layouts (the FWD-4 FAIL on real data)",
+      "reason": "No such day was read: the real neighbor 2026-10-16 holds only the old layout. The second-form FAIL is proven on the fake store only."
+    },
+    {
+      "item": "The live oldest-day trace after the real pull and the issuer's cutover (release act R8)",
+      "reason": "R8 belongs to the issuer after the cutover; this order runs the tool against the neighbor day only."
+    },
+    {
+      "item": "Masters 08242234 and 08335338",
+      "reason": "Not named in the criteria; the tool accepts any 8-digit master but none was traced."
+    },
+    {
+      "item": "Balance-column selection narrower than all numeric columns",
+      "reason": "The order says the real balance column(s); the tool prints every non-identifier numeric column (22 on the neighbor day) so no balance is silently dropped. Naming which of them are balances is left to the reader."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W4-S1: rc 3 chosen for store, input and usage errors; the order names rc 0, 1 and 2 only.",
+    "NFRA_SCHWABBF-W4-S2: the worker face's schema path is in HEAD but absent from this sparse worktree; row shape copied from the existing row.",
+    "NFRA_SCHWABBF-W4-S3: the old-layout prefix is read in the builder's bucket (opal-data-assets); no other bucket was checked."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~4/NFRA_SCHWABBF.TO-BF-t1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (python 3.12.10)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_thread_trace.py -q -p no:cacheprovider --color=no",
+      "result": "12 passed in 0.73s"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile, ruff, ds-precommit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_SCHWABBF~4 <0.9.0_WK_NFRA_SCHWABBF~4@opal.agent>\" -F <msg> -- <paths>",
+      "result": "rc 0 on a620a5a34c after two ruff fixes (unused variable, unused import); rc 0 on f9fd9f0b3e"
+    }
+  ]
+}
