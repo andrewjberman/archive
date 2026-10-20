@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """NFRA_FIDUPL round 1 -- the mechanical checks the task orders name (2.0.0_SA_COO~P1, 2026-10-19).
 
-Usage (from the repo or worktree root):  python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py <check>
+Usage (from the repo or worktree root):  python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py <check>
 
 Each check prints exactly one line: R1-<ID>-OK ... or R1-<ID>-FAIL <reason>. Only that line is the verdict.
 Checks never write outside a temp dir, never print a secret and never print file contents. Python 3.9 syntax.
@@ -709,6 +709,6 @@ CHECKS = {
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in CHECKS:
-        print("usage: r1_checks.py <%s>" % "|".join(sorted(CHECKS)))
+        print("usage: fidupl_round_checks.py <%s>" % "|".join(sorted(CHECKS)))
         sys.exit(2)
     CHECKS[sys.argv[1]]()
