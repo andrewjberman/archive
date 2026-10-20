@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-sk-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-3.round-47-the-schwab-reader-iam-text-for-the-firm-folder-and-the-state-bucket.md",
+    "group": "OTHER",
+    "vintage_commit": "d7d029bd188"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~179",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "d7d029bd188",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-3.round-47-the-schwab-reader-iam-text-for-the-firm-folder-and-the-state-bucket.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/schwab_reader_iam.tf",
+      "kind": "doc",
+      "commit_or_etag": "6b853afa689",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform text only, committed on branch wk-NFRA_OPLGTW-179; nothing applied; no terraform init, plan or apply in the gateway root; terraform fmt -check accepts the file.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~179/SK3_BUCKET_POLICY.json",
+      "kind": "doc",
+      "commit_or_etag": "6b853afa689",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only bucket-side fact; the bucket policy it describes is not edited (outside this order); needs_change true, routed by BLOCKING row NFRA_OPLGTW-Z-W179-S1.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "a8061667e1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "three rows appended (NFRA_OPLGTW-Z-W179-S1..S3) in the channel the task order names; append-only, no existing row edited.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the locals evaluated by terraform console (the issuer's script).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "terraform console evaluated all ten locals (a name that does not evaluate reads null): ok\nstate bucket and its ARN: ok\nfirm silver object ARNs: four, the master in the FILE NAME (date=*/08403355.parquet), no folder wildcard: ok\nfirm silver listing forms: the four table prefixes: ok\nstate completion: one object ARN naming 08403355.complete.json, one listing form: ok\ndata role: the OLD 12 object ARNs unchanged and in order, then the 4 firm ARNs; the listing forms the same: ok\ncatalog role: the OLD 3 completion ARNs then the 1 state ARN; the listing form for the OLD bucket is UNCHANGED (3): ok\nno bucket-wide or folder-wide grant on the new bucket or the firm folder (no ARN ends in /*, or in 49financial/*, on opal-data-49financial; none names another master's file): ok\nRESULT: PASS\nexit=0",
+      "denominator": "10 of 10 locals evaluated by terraform console; 4 of 4 firm silver object ARNs; 12 of 12 OLD data ARNs and 3 of 3 OLD catalog ARNs unchanged in order; 1 state object ARN",
+      "status": "PASS",
+      "expect": "(?s)terraform console evaluated all ten locals.*: ok.*firm silver object ARNs: four, the master in the FILE NAME.*: ok.*state completion: one object ARN naming 08403355\\.complete\\.json, one listing form: ok.*data role: the OLD 12 object ARNs unchanged and in order, then the 4 firm ARNs.*: ok.*catalog role: the OLD 3 completion ARNs then the 1 state ARN.*: ok.*no bucket-wide or folder-wide grant.*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the statements and the size of the diff.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "terraform fmt -check accepts the file: ok\ncatalog policy: 8 statements (6 old + 2 new), the new Deny and Allow on the state bucket's prefix form, DenyListingOtherBuckets names both bucket ARNs: ok (statements 8, deny True, allow True, both True)\ndata policy: still 6 statements and no mention of the state bucket: ok (statements 6)\nadded lines carry no write, delete, wildcard-action or sts action, and no bare \"*\" Resource: ok\ndiff against the pin: 38 added, 4 removed (want 1 to 70 and at most 12): ok\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 catalog policy statements (6 old + 2 new); 6 of 6 data policy statements; 38 added and 4 removed lines against blob 95427d8edc (limits 70 and 12)",
+      "status": "PASS",
+      "expect": "(?s)terraform fmt -check accepts the file: ok.*catalog policy: 8 statements.*: ok.*data policy: still 6 statements and no mention of the state bucket: ok.*no write, delete, wildcard-action or sts action.*: ok.*diff against the pin: \\d+ added, \\d+ removed.*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the bucket-side fact, read against the files it cites.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "bucket named opal-data-49financial; owner_file infra/aws/terraform/shared-infra/s3-49financial.tf is a .tf that holds the bucket name (read here): ok\npolicy_file infra/aws/terraform/shared-infra/s3-49financial.tf is null or a .tf that holds the bucket name (read here): ok\nneeds_change True is consistent with denies_unlisted True and names_catalog_role False (a missing policy file means no denial and no change): ok\nreason stated: ok\nRESULT: PASS\nexit=0",
+      "denominator": "1 bucket fact (opal-data-49financial, needs_change true); 2 of 2 cited .tf references hold the bucket name; 4 of 4 checks ok",
+      "status": "PASS",
+      "expect": "(?s)bucket named opal-data-49financial; owner_file \\S+ is a \\.tf that holds the bucket name \\(read here\\): ok.*policy_file \\S+ is null or a \\.tf that holds the bucket name \\(read here\\): ok.*needs_change \\S+ is consistent with.*: ok.*reason stated: ok.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In place in schwab_reader_iam.tf, the NotResource of DenyListingOtherBuckets (catalog policy) was reduced from [local.schwab_bucket_arn, local.schwab_state_bucket_arn] to local.schwab_bucket_arn, sk3.AC2.sh was run, then the file was restored from a byte copy and cmp confirmed it identical.",
+      "expected": "AC2 reads the catalog policy as not naming both bucket ARNs and prints RESULT: FAIL",
+      "observed": "catalog policy: 8 statements (6 old + 2 new), the new Deny and Allow on the state bucket's prefix form, DenyListingOtherBuckets names both bucket ARNs: NOT OK (statements 8, deny True, allow True, both False) | RESULT: FAIL | exit=1; file restored byte-identical (cmp)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of sk3.AC2.sh on the committed text, outputs compared (ac2_run1.txt, ac2_run2.txt in this folder)",
+      "observed": "run 1 and run 2 identical (RESULT: PASS, exit=0 each)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any terraform init, plan or apply in infra/aws/terraform/opal-gateway/, and any AWS call",
+      "reason": "bounds of the order: Terraform text only, nothing applied; apply is the NFRA1 cutover's under safe-apply."
+    },
+    {
+      "item": "The bucket policy of opal-data-49financial (aws_s3_bucket_policy.opal_data_49financial in infra/aws/terraform/shared-infra/s3-49financial.tf)",
+      "reason": "outside this order; needs_change true is routed to the issuer as BLOCKING row NFRA_OPLGTW-Z-W179-S1, not edited."
+    },
+    {
+      "item": "The DATA role policy block and the OLD grants",
+      "reason": "the order keeps them byte-for-byte (the old form is the fallback); the data policy is built from the locals and is not edited."
+    },
+    {
+      "item": "Converting the 49financial literals to lookup('49financial') against the naming gate",
+      "reason": "the order fixes these names exactly; the gate's verdicts are filed as BLOCKING row NFRA_OPLGTW-Z-W179-S3 for the issuer to rule."
+    },
+    {
+      "item": "The <status> flip of the task order",
+      "reason": "the task order states the flip is the issuer's; this seat reports once."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W179-S1: BLOCKING (ARMED, disarm 2.0.0_SA_COO~O): the bucket policy of opal-data-49financial denies s3:* to principals outside the -49f- pattern and the registry exemptions; gateway-schwab-catalog-read-role is outside both.",
+    "NFRA_OPLGTW-Z-W179-S2: OBSERVATION (INERT): the site-Z checkout is sparse, so the opal_name module that derives the fence patterns is absent on disk and was read from HEAD.",
+    "NFRA_OPLGTW-Z-W179-S3: BLOCKING (ARMED, disarm 2.0.0_SA_COO~O): the naming gate graded seven REFUSE verdicts on the new 49financial names; it read its enforce file as absent in this checkout and printed WARN, while the enforce file is committed at HEAD."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~179/ac_runs.txt",
+  "compiler_tools": [
+    {
+      "tool": "sk3.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC1.sh",
+      "result": "RESULT: PASS (10 of 10 locals evaluated by terraform console; exit=0)"
+    },
+    {
+      "tool": "sk3.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC2.sh",
+      "result": "RESULT: PASS (fmt accepted; 8 catalog statements; 6 data statements; 38 added, 4 removed; exit=0)"
+    },
+    {
+      "tool": "sk3.AC3.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/sk3.AC3.sh",
+      "result": "RESULT: PASS (needs_change true, consistent with the policy read; exit=0)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python3 -I .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~179/NFRA_OPLGTW.TO-OG-sk-3.round-47-the-schwab-reader-iam-text-for-the-firm-folder-and-the-state-bucket.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-sk-3.round-47-the-schwab-reader-iam-text-for-the-firm-folder-and-the-state-bucket.md",
+      "result": "run after the final commit; see the worker report"
+    }
+  ]
+}
