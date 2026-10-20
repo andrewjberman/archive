@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ix-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "6f2ddfd58e0",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ix-1.round-47-the-breakdown-handler-supplies-the-vendor-and-firm-of-each-index.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "group": "OTHER",
+    "vintage_commit": "6f2ddfd58e0"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~171",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_gateway_breakdown.py",
+      "kind": "script",
+      "commit_or_etag": "aa3103bcc15fdeb28bccd3b4de18126d331ce5b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A code change committed on the worktree branch wk-NFRA_OPLGTW-171. No release, deploy or EC2_MANIFEST pin is in this order: the mcportal_commit pin is the applier's (round-list item 18).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ix1.py",
+      "kind": "test",
+      "commit_or_etag": "aa3103bcc15fdeb28bccd3b4de18126d331ce5b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test file committed on the worktree branch wk-NFRA_OPLGTW-171. Tests are not deployed.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "In _compute, for a tool placed in a channel whose id is in SEGMENTED_BUCKETS, the tool entry appended to THAT channel carries index_pairs: a list with one {\"index\": <id>, \"vendor\": ..., \"firm\": ...} per id of the entry's own indexes, in the same order as indexes. A tool in any other channel carries NO index_pairs key. (Order section 4, AC1: the real tool inventory and the real catalog, graded against an independent read of the catalog YAML.)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ix1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "segmented channels hold tools: ok (5 tool entries)\nevery tool in a segmented channel carries an index_pairs list: ok (missing [])\nevery element is exactly {index, vendor, firm}: ok (bad [])\nindex_pairs cover the tool's indexes one for one, in the same order: ok (mismatch [])\neach pair equals the first two components of the catalog row's prefix (else unresolved): ok (wrong [])\nsome pair resolves to a real vendor and firm: ok (43 of 43 resolved)\ntools in other channels carry no index_pairs key: ok (leak [])\nthe body serialises: ok\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 checks ok; 5 segmented tool entries, each carrying index_pairs (missing 0 of 5); 43 of 43 index pairs resolved to a real vendor and firm; 0 of 0 leaks into other channels.",
+      "status": "PASS",
+      "expect": "(?s)segmented channels hold tools: ok.*every tool in a segmented channel carries an index_pairs list: ok.*every element is exactly \\{index, vendor, firm\\}: ok.*one for one, in the same order: ok.*first two components of the catalog row's prefix \\(else unresolved\\): ok.*some pair resolves to a real vendor and firm: ok.*tools in other channels carry no index_pairs key: ok.*the body serialises: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: your test file and the four existing files for the breakdown, the people view and the route. (Order section 4, AC2; the new file is tests/test_og_ix1.py with the five named tests of section 1 item 4.)",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ix1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "new file tests/test_og_ix1.py: 5 passed, 0 failed\nneighbours (4): 49 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 new tests pass (0 failed); 49 passed across the four neighbour files (tests/test_admin_gateway_breakdown.py, tests/test_admin_people.py, tests/test_og_cd2.py, tests/test_og_cd1.py), 0 failed names, 0 run errors.",
+      "status": "PASS",
+      "expect": "(?s)new file tests/test_og_ix1.py: [1-9]\\d* passed, 0 failed.*neighbours \\(\\d+\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The pair rule in _index_pair forced to (unresolved, unresolved) by a one-line sed on the worktree file; the file restored from a byte backup afterwards (cmp equal, git diff clean).",
+      "expected": "The pair-rule tests fail: test_ogix1_pairs_from_prefix, test_ogix1_order_follows_indexes and test_ogix1_tool_in_two_channels.",
+      "observed": "python3 -I -m pytest tests/test_og_ix1.py: 3 failed, 2 passed; FAILED test_ogix1_pairs_from_prefix, test_ogix1_order_follows_indexes, test_ogix1_tool_in_two_channels.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two _compute runs over the real tool inventory and the real catalog; sha256 (16-char prefix) of the sorted index_pairs payload compared across the two runs; read_at excluded.",
+      "observed": "run1 sha=efc5c160256b6c55 tools=5 pairs=43; run2 sha=efc5c160256b6c55 tools=5 pairs=43; STABLE",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Release, deploy and the EC2_MANIFEST mcportal_commit pin of app/admin_gateway_breakdown.py",
+      "reason": "Outside the order's BOUNDS (no release, deploy, Terraform or AWS call); the applier pins it (round-list item 18)."
+    },
+    {
+      "item": "The owner page and its consumers: admin_api.py, admin_people.py and the page cells MP-z-7 and MP-z-8 of NFRA_MCPORTAL",
+      "reason": "Outside the <paths> grant; the page cells are NFRA_MCPORTAL's and consume the field under GWZ1.1."
+    },
+    {
+      "item": "The task order's <status> flip to complete",
+      "reason": "The task-order file is outside the granted <paths>; filed as BLOCKING surprise row NFRA_OPLGTW-Z-W171-S1 (ARMED, disarm owner 2.0.0_SA_COO~O). Both criteria PASS; the flip is not made by this worker."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W171-S1: the order's <status> flip writes the task-order file, which is outside the granted <paths>; BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-Z-W171-S2: the pair rule takes the second prefix component verbatim, so 12 of 43 index pairs carry an all-digit firm key (3 distinct values); OBSERVATION, INERT.",
+    "NFRA_OPLGTW-Z-W171-S3: the fresh worktree shows the portal gitlink modified before any edit; left unstaged and out of the commits; OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~171/OG-ix-1.session.log.txt",
+  "compiler_tools": [
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python3 -I .tools/proof-of-spec-check.py <this instance> AC1,AC2 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ix-1.round-47-the-breakdown-handler-supplies-the-vendor-and-firm-of-each-index.md",
+      "result": "Run after commit 352d15e22f1; the exit code is recorded in the worker report, not pre-stated here."
+    }
+  ]
+}
