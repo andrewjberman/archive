@@ -1,0 +1,11 @@
+R1 members=exp,minted_by,sub,token parts=3 claims=aud,exp,iat,iss,name,sub,tier,userType iat=2026-10-11T16:43:55Z nbf=- exp=2027-01-09T16:43:55Z expired=no sub=svc-irpt-packager userType=service tier=service
+R2 authorizer name=portal-jwt-authorizer type=REQUEST identity_source=$request.header.Authorization simple_responses=True function=opal-portal-authorizer
+R2 access_logging=off (stages=$default)
+NOTE-R2 window 08:02:30..08:03:30 log group /aws/lambda/opal-portal-authorizer holds 12 events
+R2 08:02:53Z POST /package status=403 reason=ORIGIN_VERIFICATION_FAILED
+NOTE-R2 window 08:57:30..08:59:30 log group /aws/lambda/opal-portal-authorizer holds 6 events
+R2 08:58:06Z POST /package status=403 reason=ORIGIN_VERIFICATION_FAILED
+NOTE-R2 the authorizer logs print no path (path: undefined), so a line is tied to the package call by its time only; the 08:02:32Z line of the same window (a token verified for the run's synthetic login) is NOT a refusal
+R3 row=absent members=- userType=- allowedFirmIds=- (table opal-users-v2: index query for the subject returned 0 PROFILE key(s); get-item on the subject's own PK returned none)
+NOTE-R3 the Lambda's setting PACKAGE_ALLOWED_FIRMS (the source says the package principal needs no PROFILE row and is firm-bound by this setting): 49financial,cottonwood,inflection
+READS-DONE 3 of 3 answered
