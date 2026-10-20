@@ -152,7 +152,7 @@ def arm_tree(tar_path, pin):
                 "import ticket_audit_source, analysis_audit, model_source, comparables\n"
                 "import os\n"
                 "assert os.path.isfile(analysis_audit._schema_path()) if hasattr(analysis_audit, '_schema_path') else True\n"
-                "print(analysis_audit.audit_address('cottonwood', 'REQ-INVENTED01')[:23])\n"
+                "print(analysis_audit.audit_address('cottonwood', 'REQ-INVENTED01')[:30])\n"
                 "print('LAZY-OK')\n" % (dirs,))
         r = subprocess.run([sys.executable, "-I", "-B", "-c", code], capture_output=True, text=True, cwd=tmp)
         if "LAZY-OK" not in r.stdout or "s3://opal-data-irpt/irpt" not in r.stdout:
