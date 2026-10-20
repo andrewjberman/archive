@@ -90,7 +90,7 @@ ONLY32 = sorted(set(n32) - set(n34))
 if ONLY32:
     refuse("members only in the r34m root: %s" % ONLY32)
 DIFF = sorted(n for n in n34 if n in R32 and R34[n] != R32[n])
-for must in (SUMS, BINDINGS, "ycharts/generate/resident_worker.py", "ycharts/research/opal_packager.py", "reports/resident_installed.py"):
+for must in (SUMS, BINDINGS):
     if must not in DIFF:
         refuse("%s does not differ" % must)
 PKG_DIFF = [n for n in DIFF if n not in (SUMS, BINDINGS)]
@@ -108,7 +108,12 @@ LEDGER_R31, LEDGER_OLD, LEDGER_NEW = "irpt-resident-r31-20261014", "irpt-residen
 checks_lines = ['check "%s" %s' % (n, R34[n]) for n in CHECKED]
 
 
+NO_MEMBERS = 'echo "no package member changes in r34n (the bindings member and the package sums only)"'
+
+
 def entries(names, table, indent="  "):
+    if not names:
+        return [NO_MEMBERS]
     out = ["for ent in \\"]
     for i, n in enumerate(names):
         out.append('%s"%s %s"%s' % (indent, n, table[n], "; do" if i == len(names) - 1 else " \\"))
@@ -129,8 +134,7 @@ if any(not lines[i].startswith('check "') for i in range(first_check, last_check
     refuse("the member checks are not one block")
 lines = lines[:first_check] + checks_lines + lines[last_check + 1:]
 HOST_HEADER = [
-    "# Ledger %s: resident root 0485393f3a-r34m -> 0485393f3a-r34n: the r34m member set with the trunk blob of the %d package member(s) that the cells" % (LEDGER_NEW, len(PKG_DIFF)),
-    "# AR-y-417 (resident_worker.py: the analysis_ready signal for every ticketed request) and AR-y-423 (resident_installed.py, resident_worker.py, opal_packager.py: the O5 packager half) change; the package sums replaced, the bindings' provenance package pin changed; base pin 0485393f3a; %d members added." % len(ONLY34),
+    "# Ledger %s: resident root 0485393f3a-r34m -> 0485393f3a-r34n; r34n changes the bindings member (packager.api_base) and the package sums only; base pin 0485393f3a; %d members added." % (LEDGER_NEW, len(ONLY34)),
     "# and the 0485393f3a-r34m root and its library stay on the host for rollback.",
     "# Copy of the r31 script with NEW, OLD, WANT_TAR, the member checks (one per differing or added member, equal to the extracted r34n tarball), the ledger and this header changed;",
     "# written by 0.9.0_WK_IRPT_ANLREQ~315 for 2.0.0_SA_COO~Y2 (build only); operator a CloudOps seat under a signed pair. Authoring this script uploaded, installed and applied nothing.",
@@ -156,7 +160,12 @@ ilines = ins.split("\n")
 start = next(i for i, ln in enumerate(ilines) if ln == "for ent in \\")
 end = next(i for i in range(start, len(ilines)) if ilines[i].endswith("; do"))
 PKG_ALL = sorted(set(PKG_DIFF) | set(ONLY34))
-ilines = ilines[:start] + entries(PKG_ALL, R34) + ilines[end + 1:]
+if PKG_ALL:
+    ilines = ilines[:start] + entries(PKG_ALL, R34) + ilines[end + 1:]
+else:
+    # an empty member list writes the one echo line in place of the whole loop, through its done
+    loop_done = next(i for i in range(end + 1, len(ilines)) if ilines[i] == "done")
+    ilines = ilines[:start] + entries(PKG_ALL, R34) + ilines[loop_done + 1:]
 ins = "\n".join(ilines)
 ins = rep(ins, "V1 P3 held members: the package's own sums (298 entries) checked against the running root:",
           "V1 P3 held members: the package's own sums (%d entries) checked against the running root:" % PKG_COUNT)
@@ -211,6 +220,8 @@ body += ["  set -- $ent",
          "  if [ -f $RUN/$1 ]; then GOT=$(sha256sum $RUN/$1 | cut -d' ' -f1); else GOT=ABSENT; fi",
          '  echo "P1 member $1 sha256 $GOT (want $2) $([ "$GOT" = "$2" ] && echo MATCH || echo MISMATCH)"',
          "done"]
+if not PKG_ALL:
+    body = [NO_MEMBERS]
 pl = pl[:s] + body + pl[e + 1:]
 pre = "\n".join(pl)
 pre = rep_line(pre, 'echo "P1 worker sha256 ', [
@@ -244,6 +255,8 @@ body += ["  set -- $ent",
          "  if [ -f $RUN/$1 ]; then GOT=$(sha256sum $RUN/$1 | cut -d' ' -f1); else GOT=ABSENT; fi",
          '  echo "X1 member $1 sha256 $GOT (want $2) $([ "$GOT" = "$2" ] && echo MATCH || echo MISMATCH)"',
          "done"]
+if not PKG_ALL:
+    body = [NO_MEMBERS]
 rl = rl[:s] + body + rl[e + 1:]
 rb = "\n".join(rl)
 rb = rep(rb, "(want /opt/irpt-resident/$OLD and irpt-resident-r29-20261014)", "(want /opt/irpt-resident/$OLD and %s)" % LEDGER_OLD)
