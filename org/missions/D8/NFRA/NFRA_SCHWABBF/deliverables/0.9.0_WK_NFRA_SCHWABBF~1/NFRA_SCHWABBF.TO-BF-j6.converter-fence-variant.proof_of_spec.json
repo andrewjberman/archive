@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-j6",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R6.md",
+    "vintage_commit": "6e162e86b66",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-j6.converter-fence-variant.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-j6.converter-fence-variant.md",
+    "group": "OTHER",
+    "vintage_commit": "6e162e86b66"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "silver_fence for_each now excludes schwab (line 539); new resource aws_iam_policy.one_way_fan_in_fence_schwab (line 554) with belt 1 NotResource = 2 monolith entries + the 15 schwab firm state objects, belts 2 and 3 unchanged; new attachment silver_fence_schwab (line 611) on aws_iam_role.silver[\"schwab\"]. The k6 pin edit is kept. Text only: no terraform init, plan or apply, no aws command. Apply is the CloudOps act BF-r-3 after the never-widen pair."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_converter_fan_in_fence.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 10 tests, 10 passed on two runs (10 passed in 0.24s; 10 passed in 0.50s)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-j6-AC1",
+      "criterion_verbatim": "the schwab role leaves the shared fence for its own variant, which differs from the shared one by exactly the 15 state resources; nothing else changes.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 0.24s",
+      "denominator": "10 of 10 tests passed: silver_fence excludes schwab and silver_fence_schwab attaches the variant to the schwab role; variant belt 1 NotResource = 2 monolith entries + 15 state objects, equal as a set to silver_state_write_schwab_firm's Resource list; state entries are per-master per-table keys with registry buckets; belts 2 and 3 equal the shared policy's; the shared policy block in router_iam.tf is byte-equal to HEAD; no Allow and no delete grant in the variant; terraform fmt -check on silver.tf rc=0",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF6-j6-AC2",
+      "criterion_verbatim": "the control: the round-2 to round-5 grant arms (23 passed at the base) still pass with the edited `silver.tf`.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no",
+      "output_evidence": ".......................                                                  [100%]\n23 passed in 0.20s",
+      "denominator": "23 of 23 tests passed with the edited silver.tf (the k6 pin and the j6 variant both present); the existing silver_state_write_schwab_firm text is unchanged, so its Resource-list tests read the same entries",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-j-6; none was run.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 pytest run twice on the same tree; AC2 pytest run once on the same tree after the j6 edit.",
+      "observed": "AC1 run 1: 10 passed in 0.24s, rc=0; run 2: 10 passed in 0.50s, rc=0. AC2: 23 passed in 0.20s, rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan, validate and apply, and any aws command",
+      "reason": "WORLD floor in the order: text-only build. Nothing applied. terraform fmt -check is the only terraform call."
+    },
+    {
+      "item": "Hoisting the 15 state resources into a shared locals entry",
+      "reason": "Not done: the order allows copying when hoisting would move the text the control tests read. silver_state_write_schwab_firm is unchanged; the two lists are pinned equal by test instead."
+    }
+  ],
+  "surprises": [],
+  "session_log": "none: no session log file was written; the worker report is the record",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py -q -p no:cacheprovider --color=no",
+      "result": "10 passed in 0.24s, rc=0"
+    },
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no",
+      "result": "23 passed in 0.20s, rc=0"
+    },
+    {
+      "tool": "terraform fmt (inside AC1 and read-only)",
+      "invocation": "timeout 120 terraform fmt -check -no-color infra/aws/terraform/opal-assets/silver.tf",
+      "result": "rc=0"
+    }
+  ]
+}
