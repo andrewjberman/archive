@@ -1,0 +1,30 @@
+SESSION LOG -- 0.9.0_WK_NFRA_FIDUPL~6 on NFRA_FIDUPL.TO-FR-s-5 (2026-10-20, worktree C:/tmp/fidupl-w6, branch wk-NFRA_FIDUPL-6)
+Verbatim outputs of the probes and criterion invocations. No G number, account number, firm label or secret value appears here.
+
+1. git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-6 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK (HEAD c5ff6eaad5 at the cut)
+
+2. Name builder probe (python -I, lib/opal_naming.py, run before any edit at HEAD c5ff6eaad5):
+   name('fidelity','alongside','perg','parameter') -> ValueError: kind 'parameter' is neither a NAMING_SCHEMA.json kind nor a cadence
+   name('fidelity','alongside','perg','param')     -> ValueError: kind 'param' is neither a NAMING_SCHEMA.json kind nor a cadence
+   name('fidelity','alongside','perg','secret')    -> ValueError: kind 'secret' is neither a NAMING_SCHEMA.json kind nor a cadence
+   name('fidelity','alongside','perg','config')    -> ValueError: kind 'config' is neither a NAMING_SCHEMA.json kind nor a cadence
+   name('fidelity','alongside','perg','policy')    -> fidelity-alongside-perg-policy   (accepted; not used: it would mis-state the type)
+   name('fidelity','alongside','perg','document')  -> fidelity-alongside-perg-document (accepted; not used)
+   Outcome: the SSM parameter piece is stopped (surprise NFRA_FIDUPL-D1-W6-S1).
+
+3. Edits: variables.tf (new; schedule_enabled bool, default false); schedule.tf (state = var.schedule_enabled ? "ENABLED" : "DISABLED").
+   terraform fmt on the root.
+
+4. Real-backend plan after the switch edit (read-only; init with the S3 backend, then plan):
+   terraform init -input=false -> rc 0
+   terraform plan -input=false -no-color -> "No changes. Your infrastructure matches the configuration." (rc 0)
+
+5. Commits: fa72c37046 (variables.tf, schedule.tf), 29e3dfe3c8 (surprise row W6-S1).
+
+6. Criteria, on the committed tree (same invocations as the order):
+   R1-FU6V-OK Success! The configuration is valid.                                        (rc 0)   [FR5-AC1]
+   R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK  (rc 0)   [FR5-AC2]
+   R1-FR5P-FAIL plan rc=0 ['No changes. Your infrastructure matches the configuration.']   (rc 0; verdict line)   [FR5-AC3]
+
+7. Not done, by design: the SSM SecureString parameter, the box-role ssm:GetParameter grant, and the perg_parameter_name output
+   (builder refusal, W6-S1). No terraform apply, no safe-apply, no rule enabled, no AWS object changed.

@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-5",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "4ca02b2119",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-5.schedule-and-perg-param.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-5.schedule-and-perg-param.md",
+    "group": "OTHER",
+    "vintage_commit": "4ca02b2119"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/variables.tf",
+      "kind": "terraform",
+      "commit_or_etag": "fa72c37046",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-6. New variable schedule_enabled (bool, default false). Never applied; the real-backend plan reads No changes at the default."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "fa72c37046",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. The three event rules take state = var.schedule_enabled ? ENABLED : DISABLED. Never applied."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "29e3dfe3c8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise row NFRA_FIDUPL-D1-W6-S1 committed LOCAL on wk-NFRA_FIDUPL-6 (no SSM parameter kind in the name builder)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR5-AC1",
+      "criterion_verbatim": "the root still initialises without a backend and validates.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v",
+      "output_evidence": "R1-FU6V-OK Success! The configuration is valid.",
+      "denominator": "1 of 1 validate runs (rc 0)",
+      "status": "PASS",
+      "expect": "R1-FU6V-OK Success! The configuration is valid\\."
+    },
+    {
+      "criterion_id": "FR5-AC2",
+      "criterion_verbatim": "no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star annotated.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6g",
+      "output_evidence": "R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK",
+      "denominator": "0 of 7 guard clauses failing (ingress rule, 0.0.0.0/0 inside an ingress block, secret prefix wildcard, Resource star without STAR-OK, secret version, prevent_destroy, non-ASCII)",
+      "status": "PASS",
+      "expect": "R1-FU6G-OK no ingress"
+    },
+    {
+      "criterion_id": "FR5-AC3",
+      "criterion_verbatim": "the plan adds only the SSM parameter and changes only the box role policy.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr5p",
+      "output_evidence": "R1-FR5P-FAIL plan rc=0 ['No changes. Your infrastructure matches the configuration.']",
+      "denominator": "0 of 1 intended adds planned (the SSM parameter); 0 of 1 intended changes planned (the box role policy)",
+      "status": "FAIL",
+      "status_reason": "The SSM parameter piece is stopped: the name builder has no kind for an SSM parameter (surprise NFRA_FIDUPL-D1-W6-S1), so neither the parameter nor the box role's ssm:GetParameter grant nor the perg_parameter_name output exists in the root. The plan therefore reads No changes, not Plan: 1 to add, 1 to change, 0 to destroy.",
+      "expect": "R1-FR5P-OK Plan: 1 to add, 1 to change, 0 to destroy\\."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the schedule switch was checked by its default plan (No changes) and not by flipping the variable, since a true value is an enable act outside this order.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input plan runs compared: a direct terraform plan after the switch edit, and the fr5p check on the committed tree",
+      "observed": "direct plan: No changes. Your infrastructure matches the configuration.; fr5p: plan rc=0 with the same No changes line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The SSM SecureString parameter for the per-G list, the box-role ssm:GetParameter grant on it, and the perg_parameter_name output",
+      "reason": "Builder refusal: no name kind for an SSM parameter (surprise NFRA_FIDUPL-D1-W6-S1). The refusal clause stops the piece; no typed name was used."
+    },
+    {
+      "item": "Enabling the three schedule rules (schedule_enabled = true), terraform apply, safe-apply, any AWS object created or changed",
+      "reason": "Plan only; the switch is built at its default false, and enabling is a separate act under its own order."
+    },
+    {
+      "item": "A G number, account number or firm label in any file or output",
+      "reason": "Not applicable to this order's output: none is written, and the grep of the edited files and the investigation file returned 0 G-number matches."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W6-S1: the name builder has no kind for an SSM parameter, so the per-G parameter and its box-role read grant are stopped and FR5-AC3 cannot reach its expected plan."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FR-s-5.schedule-and-perg-param.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/canonical-fidelity-ec2 init -input=false; plan -input=false -no-color",
+      "result": "init rc 0; plan rc 0: No changes. Your infrastructure matches the configuration."
+    },
+    {
+      "tool": "lib/opal_naming.py (python -I)",
+      "invocation": "name('fidelity','alongside','perg', <kind>) for kind in parameter, param, secret, config",
+      "result": "all four refused: kind is neither a NAMING_SCHEMA.json kind nor a cadence."
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fr5p",
+      "result": "R1-FU6V-OK; R1-FU6G-OK; R1-FR5P-FAIL (verbatim in the session log)."
+    }
+  ]
+}
