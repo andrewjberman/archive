@@ -1,0 +1,121 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-tp-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~169",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "6f2ddfd58e0",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-tp-1.round-47-result-caps-on-the-two-file-searches-and-the-teams-poll-page-bound.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "doc",
+   "commit_or_etag": "b4d3a8bc191",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "search_files(query, top=25) and search_site_files(site_id, query, top=25): clamp 1..100, Graph's first top items kept, the 50 KB projection applied as served (json indent=2) through _bounded_search; poll_addressed_impl(token, since_iso, top=50): the oldest top messages kept, cursor the last kept timestamp, truncated true. The OG-mg-3 call_tool hunk is unchanged.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_tp1.py",
+   "kind": "doc",
+   "commit_or_etag": "b4d3a8bc191",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Six tests on fakes: test_ogtp1_search_default_top, test_ogtp1_search_top_clamp, test_ogtp1_search_projection_fits, test_ogtp1_search_small_unchanged, test_ogtp1_poll_top_oldest_first_and_cursor, test_ogtp1_poll_three_pages_no_loss. 6 passed, 0 failed.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "b4d3a8bc191",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows NFRA_OPLGTW-Z-W169-S1 (the shared harvest_typed.project measures compact JSON, not the served rendering; ARMED, disarm_owner 2.0.0_SA_COO~O) and NFRA_OPLGTW-Z-W169-S2 (the poll cursor can drop a message that ties the cut timestamp; ARMED, disarm_owner 2.0.0_SA_COO~O).",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the two searches' cap and projection: search_files and search_site_files take a result cap top (default 25, at most 100), and every answer fits 51200 bytes as served (json indent=2).",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/tp1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)search_files default: 25 kept in order, truncated, total 400, returned 25: ok.*search_site_files default: 25 kept in order, truncated, total 400, returned 25: ok.*top=100 keeps 100 \\(both tools\\): ok.*top=500 is capped to 100 \\(both tools\\): ok.*top=0 is capped to 1 \\(both tools\\): ok.*100 large items still fit 51200 bytes indented: ok.*control: 5 items returned equal to Graph's answer, no truncated key: ok.*RESULT: PASS.*exit=0",
+   "output_evidence": "search_files default: 25 kept in order, truncated, total 400, returned 25: ok (kept 25)\nsearch_site_files default: 25 kept in order, truncated, total 400, returned 25: ok (kept 25)\ntop=100 keeps 100 (both tools): ok\ntop=500 is capped to 100 (both tools): ok\ntop=0 is capped to 1 (both tools): ok\n100 large items still fit 51200 bytes indented: ok (sizes 51193 51193 returned 16)\ncontrol: 5 items returned equal to Graph's answer, no truncated key: ok\nRESULT: PASS\nexit=0",
+   "denominator": "2 tools; 400 Graph items per default case; 4 top values (100, 500, 0 and default 25); 100 large items; 5-item control",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the Teams poll's page bound with a cursor that loses nothing: poll_addressed_impl honours top; with top 2 it returns the two oldest new messages with the cursor on the second, three polls of two return all six once in order, the default top returns all six with no truncated key, and a poll with nothing new keeps the cursor it was given.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/tp1.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)top=2: the two oldest new messages, oldest first, count 2: ok.*top=2: cursor is the second message, truncated true: ok.*three polls of 2 return all six once, in order: ok.*the third poll is not truncated: ok.*default top: all six, cursor 10:06, no truncated key: ok.*nothing new: count 0, the given cursor kept: ok.*RESULT: PASS.*exit=0",
+   "output_evidence": "top=2: the two oldest new messages, oldest first, count 2: ok (timestamps ['2026-10-20T10:01:00Z', '2026-10-20T10:02:00Z'] count 2)\ntop=2: cursor is the second message, truncated true: ok (cursor 2026-10-20T10:02:00Z truncated True)\nthree polls of 2 return all six once, in order: ok (seen ['chat1', 'chat2', 'chat3', 'chat4', 'chat5', 'chat6'])\nthe third poll is not truncated: ok (truncated None cursor 2026-10-20T10:06:00Z)\ndefault top: all six, cursor 10:06, no truncated key: ok (count 6)\nnothing new: count 0, the given cursor kept: ok\nRESULT: PASS\nexit=0",
+   "denominator": "6 chat messages; 3 polls of top 2; 1 default-top poll; 1 empty poll",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "your test file and the five existing files that import tools.py's search, poll and gate paths: tests/test_og_tp1.py passes and the neighbouring tests pass.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/tp1.AC3.sh; echo \"exit=$?\"",
+   "expect": "(?s)new file tests/test_og_tp1.py: [1-9]\\d* passed, 0 failed.*neighbours \\(\\d+\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0",
+   "output_evidence": "new file tests/test_og_tp1.py: 6 passed, 0 failed\nneighbours (5): 38 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+   "denominator": "1 new file of 6 tests; 5 neighbour files of 38 tests",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 were each run twice back to back against the same committed tree (commit b4d3a8bc191); the outputs were compared byte for byte.",
+   "observed": "outputs identical (both criteria)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant control; the probes grade the caps and the cursor against fakes, and the test file adds a served-size sweep across item sizes.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a release, a deploy, a server.py edit, a Graph or AWS call",
+   "reason": "The order's bounds forbid them: the change is app/tools.py and one test file; the REST route shares the function and is not edited."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-W169-S1",
+  "NFRA_OPLGTW-Z-W169-S2"
+ ],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~169 on OG-tp-1 (round 47), after OG-mg-3 closed at 1511679e899 on the same branch. Premises re-grounded: the three functions at app/tools.py and harvest_typed.project(out, limit) at its signature. The literal projection call measures compact JSON while the answer is served indented; a sweep showed the served rendering reaching 54716 bytes, so _bounded_search re-projects with the limit cut by the served excess, the envelope keys counted; after the fix the sweep gave worst 51196 over 524 cases. Commit b4d3a8bc191 holds the code, the test file and the two channel rows; the first commit attempt returned before landing and a retry landed it. Criteria run after the commit, each under timeout 120, rc 0 each; AC1 and AC2 repeated byte-identical.",
+ "compiler_tools": [
+  {
+   "tool": "python3 -I -m pytest",
+   "invocation": "python3 -I -m pytest tests/test_og_tp1.py (from infra/aws/ec2/opal-gateway)",
+   "result": "PASS",
+   "note": "6 passed in about 1.1 s."
+  },
+  {
+   "tool": "served-size sweep",
+   "invocation": "tools._bounded_search over item pads 0 to 3400 step 13, 100 and 400 items",
+   "result": "PASS",
+   "note": "524 cases; 0 over 51200 served; worst 51196."
+  }
+ ]
+}

@@ -1,0 +1,135 @@
+{
+ "read_at": "2026-10-20T10:20:33Z",
+ "api": "iam:SimulateCustomPolicy (read-only; nothing created or attached)",
+ "document": "the live policy with only the silver list replaced by the per-source forms of 8 sources parsed from the committed .tf",
+ "results": [
+  {
+   "name": "ALLOWED: silver table list under a source",
+   "action": "s3:ListBucket",
+   "prefix": "schwab/x/silver/t/",
+   "delimiter": null,
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "ALLOWED: silver table list under a source, with delimiter /",
+   "action": "s3:ListBucket",
+   "prefix": "smartx/x/silver/t/",
+   "delimiter": "/",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: silver list under bloomberg",
+   "action": "s3:ListBucket",
+   "prefix": "bloomberg/global/silver/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: silver list under gateway",
+   "action": "s3:ListBucket",
+   "prefix": "gateway/global/silver/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: silver list under yahoo",
+   "action": "s3:ListBucket",
+   "prefix": "yahoo/g/silver/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: silver list under commonwealth",
+   "action": "s3:ListBucket",
+   "prefix": "commonwealth/cottonwood/silver/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: list a source root with NO delimiter",
+   "action": "s3:ListBucket",
+   "prefix": "schwab/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "ALLOWED: list a source root WITH delimiter /",
+   "action": "s3:ListBucket",
+   "prefix": "schwab/",
+   "delimiter": "/",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: bronze-rooted prefix with a /silver/ component",
+   "action": "s3:ListBucket",
+   "prefix": "bronze/x/silver/y/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: gold prefix under a source",
+   "action": "s3:ListBucket",
+   "prefix": "schwab/x/gold/",
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "unchanged: describe a silver sweep rule",
+   "action": "events:DescribeRule",
+   "prefix": null,
+   "delimiter": null,
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: put the same rule",
+   "action": "events:PutRule",
+   "prefix": null,
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "unchanged: get a backfill-status.json",
+   "action": "s3:GetObject",
+   "prefix": null,
+   "delimiter": null,
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "NEGATIVE: put the same key",
+   "action": "s3:PutObject",
+   "prefix": null,
+   "delimiter": null,
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  }
+ ],
+ "all_as_expected": true,
+ "cases": 14
+}
