@@ -12,9 +12,10 @@ Partition grammar, read from org/standards/NAMING_SCHEMA.json key.partition: "da
 leaf", or "{entity}={id}". The sample is date=2026-10-20, the first form. address() checks the partition
 only as a non-empty ASCII segment with no slash, and the sample passes that test.
 
---selftest runs the same policy validation on in-memory copies of the registry. Variant A carries the new row
-with unreferenced_days 30. Variant B carries tier state with unreferenced_days null. CONTROL-FIRES prints only
-when BOTH read BAD. Otherwise it prints CONTROL-DOES-NOT-FIRE and exits 1.
+--selftest (AMENDMENT 1 of AR-y-466, trunk f6b63a00ac) runs the same policy validation on two in-memory copies
+of the registry. Variant A is the new row with tier state and unreferenced_days null. Variant B is the new row
+with accepted_ceiling_days 3000. CONTROL-FIRES prints only when BOTH read BAD. Otherwise it prints
+CONTROL-DOES-NOT-FIRE and exits 1.
 """
 
 import copy
@@ -72,11 +73,11 @@ def policy_check(mod, reg, spec):
 
 def selftest(root, mod):
     base = mod.load_registry()
-    variant_a = dict(EXPECTED_ROW, unreferenced_days=30)
-    variant_b = dict(EXPECTED_ROW, tier="state")
+    variant_a = dict(EXPECTED_ROW, tier="state")
+    variant_b = dict(EXPECTED_ROW, accepted_ceiling_days=3000)
     verdicts = {}
-    for label, desc, spec in (("A", "platinum with unreferenced_days 30", variant_a),
-                              ("B", "tier state with unreferenced_days null", variant_b)):
+    for label, desc, spec in (("A", "tier state with unreferenced_days null", variant_a),
+                              ("B", "accepted_ceiling_days 3000", variant_b)):
         refusal = policy_check(mod, base, spec)
         verdicts[label] = refusal is not None
         if refusal is None:
