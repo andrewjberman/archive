@@ -1,6 +1,6 @@
 """AR-y-440 bound check: the change stays inside the door's confirm module and its new test file.
 
-Lists the committed product paths changed since the cut commit (the commit whose message names worker slot 318).
+Lists the committed product paths changed since the cut commit (the issuer's cut, tagged with workstream ZZ99).
 Paths under org/ are the worker's own record (order, deliverables, surprise channel) and are not product paths.
 Prints CONFIRM-BOUND-OK files=<n> only when every product path is under PREFIX and 2 <= n <= 6; otherwise prints
 CONFIRM-BOUND-BAD <paths> and exits 1. Stdlib only; read-only git.
@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 PREFIX = "infra/aws/lambda/investor-reporting/ycharts/generate/"
-CUT_MESSAGE = "to worker slot 318"
+CUT_MESSAGE = "cut(IRPT_ANLREQ round 43 workstream ZZ99"
 RECORD_PREFIX = "org/"
 MIN_FILES = 2
 MAX_FILES = 6
