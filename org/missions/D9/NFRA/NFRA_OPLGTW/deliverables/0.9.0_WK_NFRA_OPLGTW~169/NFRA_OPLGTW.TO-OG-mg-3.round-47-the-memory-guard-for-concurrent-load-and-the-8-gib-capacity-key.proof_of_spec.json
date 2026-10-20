@@ -1,0 +1,136 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-mg-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~169",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "6f2ddfd58e0",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-mg-3.round-47-the-memory-guard-for-concurrent-load-and-the-8-gib-capacity-key.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/inflight_guard.py",
+   "kind": "doc",
+   "commit_or_etag": "15c1ff78162",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New module: MAX_INFLIGHT 4, QUEUE_WAIT_S 20.0, Busy (code gateway_busy), InflightGuard with an async slot(tool) context manager and snapshot(), process-wide instance guard. Standard library only.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+   "kind": "doc",
+   "commit_or_etag": "15c1ff78162",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One hunk in _PolicyGuardedMCP.call_tool: the import line gains inflight_guard; the allowed call runs inside guard.slot(name) after the entitlement denial; Busy returns the gateway_busy CallToolResult and one denied audit row. No other function touched.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json",
+   "kind": "doc",
+   "commit_or_etag": "15c1ff78162",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "capacity.target_memory_mib 2048 -> 8192; one line changed.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
+   "kind": "doc",
+   "commit_or_etag": "15c1ff78162",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The second contract copy; cmp against the deploy copy reads byte-equal.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_mg3.py",
+   "kind": "doc",
+   "commit_or_etag": "15c1ff78162",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Five tests on fakes: test_ogmg3_limit_and_queue, test_ogmg3_released_on_error, test_ogmg3_call_tool_busy_envelope, test_ogmg3_denied_takes_no_slot, test_ogmg3_contract_capacity. 5 passed, 0 failed.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the guard module's bound, queue and release: app/inflight_guard.py bounds the tool calls running at once to two in the probe, queues the surplus when the wait is long, refuses it when the wait is short, and releases a slot whose body raises.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mg3.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)module constants: ok.*short wait: two ran, three refused, peak 2, inflight 0: ok.*long wait: five ran, none refused, peak 2: ok.*a raising body releases its slot: ok.*RESULT: PASS.*exit=0",
+   "output_evidence": "module constants: ok (limit 4)\nshort wait: two ran, three refused, peak 2, inflight 0: ok (results ['busy', 'busy', 'busy', 'ran', 'ran'] snapshot {'limit': 2, 'inflight': 0, 'waiting': 0, 'refused': 3, 'peak': 2})\nlong wait: five ran, none refused, peak 2: ok (results ['ran', 'ran', 'ran', 'ran', 'ran'] snapshot {'limit': 2, 'inflight': 0, 'waiting': 0, 'refused': 0, 'peak': 2})\na raising body releases its slot: ok (inflight 0 next ['ran'])\nRESULT: PASS\nexit=0",
+   "denominator": "4 checks: module constants, short wait, long wait, raising body; 5 calls per scenario",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the hook at the chokepoint (the order of the denial and the slot, the busy envelope, the audit row), probed with a fake parent: six concurrent calls give two runs and four gateway_busy refusals, at most two run at once, each refusal is audited once, five denied calls take no slot, and a single call after the burst runs.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mg3.AC2.sh; echo \"exit=$?\"",
+   "expect": "(?s)six concurrent calls: 2 ran, 4 refused, no exception: ok.*at most 2 ran at once: ok.*refusals: isError true, code and error gateway_busy, integer retry_after_s: ok.*each refusal audited once: ok.*denied calls: five denials as before, no slot taken: ok.*a single call after the burst runs: ok.*RESULT: PASS.*exit=0",
+   "output_evidence": "six concurrent calls: 2 ran, 4 refused, no exception: ok (ran 2 refused 4 raised [])\nat most 2 ran at once: ok (max 2)\nrefusals: isError true, code and error gateway_busy, integer retry_after_s: ok (first (True, 'gateway_busy', 'gateway_busy', True))\neach refusal audited once: ok (audit rows naming gateway_busy 4)\nslots all released after the burst: ok (snapshot {'limit': 2, 'inflight': 0, 'waiting': 0, 'refused': 4, 'peak': 2})\ndenied calls: five denials as before, no slot taken: ok (denials 5 snapshot {'limit': 1, 'inflight': 0, 'waiting': 0, 'refused': 0, 'peak': 0})\na single call after the burst runs: ok (got [{'ok': True}])\nRESULT: PASS\nexit=0",
+   "denominator": "6 concurrent calls; 5 denied calls; 1 follow-up call; 7 checks",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the contract's capacity block names the real 8 GiB host in both copies (byte-equal), the rest of the block is unchanged, and tests/test_og_mg3.py passes beside the existing neighbours; the denial-envelope test runs alone.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mg3.AC3.sh; echo \"exit=$?\"",
+   "expect": "(?s)contract copies byte-equal: yes.*target_memory_mib 8192 \\(want 8192\\); the other capacity keys unchanged yes.*new file tests/test_og_mg3.py: [1-9]\\d* passed, 0 failed.*neighbours \\(\\d+\\): [1-9]\\d* passed, failed names \\[\\].*denial envelope \\(alone\\): [1-9]\\d* passed.*RESULT: PASS.*exit=0",
+   "output_evidence": "contract copies byte-equal: yes\ntarget_memory_mib 8192 (want 8192); the other capacity keys unchanged yes\nnew file tests/test_og_mg3.py: 5 passed, 0 failed\nneighbours (6): 34 passed, failed names [] (allowed: test_ogz1_ac08 only)\ndenial envelope (alone): 2 passed, 1 warning in 6.32s\nRESULT: PASS\nexit=0",
+   "denominator": "1 key of 7 capacity keys; 2 contract copies; 5 new tests; 6 neighbour files, 34 passed; 2 denial-envelope tests",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 and AC2 were each run twice back to back against the same tree (commit 15c1ff78162); the outputs were compared byte for byte.",
+   "observed": "outputs identical (both criteria)",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant control; the new test file's limit, queue, release, envelope and denial tests grade the guard against fakes.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a release, a deploy, a unit-file change, a Terraform change, an AWS call",
+   "reason": "The order's bounds forbid them: the change is code, contract and test only; deploy/opal-gateway.service is untouched."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worker 0.9.0_WK_NFRA_OPLGTW~169 on OG-mg-3 (round 47). Premises re-grounded at the worktree (branch wk-NFRA_OPLGTW-169, trunk 6f2ddfd58e0): tools.py _PolicyGuardedMCP.call_tool at lines 82-106, the capacity block at deploy/NFRA_OPLGTW_CONTRACT.json lines 356-364 with target_memory_mib 2048, both contract copies byte-equal before the edit. Code commit 15c1ff78162: inflight_guard.py, the one-hunk tools.py edit, the two contract copies, tests/test_og_mg3.py. Self-check before the commit: test_og_mg3.py 5 passed; commit-gate clean. Criteria run after the commit, each under timeout 120, rc 0 each.",
+ "compiler_tools": [
+  {
+   "tool": "python3 -I -m pytest",
+   "invocation": "python3 -I -m pytest tests/test_og_mg3.py (from infra/aws/ec2/opal-gateway)",
+   "result": "PASS",
+   "note": "5 passed in 3.19s before the commit."
+  },
+  {
+   "tool": "ruff check (py39 target)",
+   "invocation": "python3 -I -m ruff check --target-version py39 --select E,F,W --ignore E501 on app/inflight_guard.py and tests/test_og_mg3.py",
+   "result": "PASS",
+   "note": "All checks passed."
+  }
+ ]
+}
