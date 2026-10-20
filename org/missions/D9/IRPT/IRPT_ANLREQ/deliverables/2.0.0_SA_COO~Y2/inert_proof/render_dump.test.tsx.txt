@@ -1,0 +1,52 @@
+/**
+ * INERT PROOF DUMP (issuer 2.0.0_SA_COO~Y2, 2026-10-20; scratch, never committed): renders NativeSections and RetainedSections with
+ * their DEFAULT props over a fixed fixture set and writes the markup to the file named by INERT_OUT, so the same file run in the
+ * origin/DEV tree and in the candidate tree can be compared byte for byte.
+ */
+import { test } from 'bun:test'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { createHash } from 'node:crypto'
+import { writeFileSync } from 'node:fs'
+import { adaptAnalysisReportSlice } from '../contracts/adapt'
+import { NativeSections } from '../tabs/analysis/NativeSections'
+import { RetainedSections } from '../tabs/analysis/OwnedRequestHistory'
+
+const REQUEST_REF = { request_id: 'REQ-a0a0a0a0a0a0a0a0a0a0a0a1', request_revision: 1, attempt_id: 'ATT-1', attempt_number: 1 }
+const vendorSection = (id: string, type: string, units: string, page: number, value: number | string | null = 1.5) => ({
+  section_id: id, section_type: type, value, units, as_of_date: '2026-06-30', page, bbox: [1, 2, 3, 4],
+})
+const vendorWire = (status: string, sections = 2) => ({
+  request_ref: REQUEST_REF,
+  sections: Array.from({ length: sections }, (_, i) => vendorSection(`S0${i + 3}.metric.c${i}`, `S0${i + 3}`, i % 2 ? 'pct' : 'usd_billions', i + 2, i % 2 ? 0.05 : 1.5)),
+  extraction_validation: { status, checks_run: 10, checks_failed: status === 'CERTIFIED' ? 0 : 2 },
+})
+const opalSection = (i: number) => (i % 3 === 0
+  ? { section_id: `S-${i}`, section_type: 'summary', status: 'NOT_AVAILABLE', reason: 'NO_DATA', value: null, units: 'unitless', as_of_date: null, page: 2, method: 'BUILDER_ONLY', coverage: null }
+  : { section_id: `S-${i}`, section_type: 'annualized_return', status: 'VALUE', value: 0.05 + i / 1000, units: 'DECIMAL_FRACTION', as_of_date: '2026-06-30', page: 2, method: 'TIME_WEIGHTED', coverage: 1 })
+const opalWire = (status: string, n: number) => ({
+  provider: 'OPAL_ENGINE', request_ref: REQUEST_REF,
+  sections: Array.from({ length: n }, (_, i) => opalSection(i + 1)),
+  computation_validation: { status, checks_run: 10, checks_failed: status === 'CERTIFIED' ? 0 : 2 },
+})
+
+const FIXTURES: Record<string, unknown> = {
+  vendorCertified: vendorWire('CERTIFIED'), vendorUncertified: vendorWire('UNCERTIFIED'), vendorFailed: vendorWire('FAILED'),
+  vendorEmpty: vendorWire('CERTIFIED', 0), vendorMany: vendorWire('CERTIFIED', 12),
+  opalCertified: opalWire('CERTIFIED', 6), opalUncertified: opalWire('UNCERTIFIED', 6), opalEmpty: opalWire('CERTIFIED', 0),
+  opalBig: opalWire('CERTIFIED', 147),
+}
+const DISCLOSURES: Record<string, string[]> = { none: [], two: ['Disclosure one', 'Disclosure two'] }
+
+test('dump', () => {
+  const out: Record<string, { sha256: string; length: number; html: string }> = {}
+  const put = (name: string, html: string) => { out[name] = { sha256: createHash('sha256').update(html).digest('hex'), length: html.length, html } }
+  for (const [name, wire] of Object.entries(FIXTURES)) {
+    const slice = adaptAnalysisReportSlice(wire as never)
+    put('Retained:' + name, renderToStaticMarkup(createElement(RetainedSections, { report: slice })))
+    for (const [dname, disclosures] of Object.entries(DISCLOSURES)) {
+      put(`Native:${name}:${dname}`, renderToStaticMarkup(createElement(NativeSections, { report: { ...slice, disclosures } as never })))
+    }
+  }
+  writeFileSync(process.env.INERT_OUT as string, JSON.stringify(out))
+})
