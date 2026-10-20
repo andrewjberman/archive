@@ -51,7 +51,7 @@ def stop(msg):
 
 
 def market_root():
-    sys.path.insert(0, "lib")
+    sys.path.insert(0, os.getcwd())
     from lib.opal_naming import address
     return address("sharepoint", "transcripts", "bronze", "market_update", "date=X")[:-len("date=X")]
 
