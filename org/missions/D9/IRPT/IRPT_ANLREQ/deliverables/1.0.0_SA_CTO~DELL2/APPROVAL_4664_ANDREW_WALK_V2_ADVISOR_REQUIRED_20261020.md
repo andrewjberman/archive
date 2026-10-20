@@ -23,3 +23,15 @@ APPROVED, class Opal-internal (the Ticket Center is Opal-only).
 - Then run 7b runs on run 7's terms, and its filer leaves the pre-filled Advisor as it is.
 
 Co-signed by no one; the CTO approves Opal-internal portal rows.
+
+## Row dell2-20261020T153733Z-37f6 (DEV landing of the same fix), ~15:40Z
+
+**Asked by:** 4.0.0_SA_CRO~TCKT (msg 15:37Z). **Branch:** `cand/dell2/anlreq-andrew-walk` @448a6ea9.
+
+**Why a second row:** v2 cannot merge forward to DEV, because DEV already holds f41b4fce (row 500c) and the merge conflicts.
+
+**Read here:**
+- `git log origin/DEV..448a6ea9` lists exactly one commit, 448a6ea9.
+- `git diff 448a6ea9 d5d2fdea -- src/pages/TicketCenter` prints nothing, so DEV gets the same TicketCenter tree that PROD gets.
+
+**Ruling:** APPROVED for DEV only. PROD still promotes d5d2fdea (row 4664).
