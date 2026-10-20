@@ -1,0 +1,107 @@
+{
+ "read_at": "2026-10-20T10:59:04Z",
+ "policy_name": "gateway-family-depth-read-policy",
+ "policy_sha256_16": "c67f734cffc7b6f9",
+ "shape": {
+  "statements": 4,
+  "all_allow": true,
+  "actions": [
+   "events:DescribeRule",
+   "s3:GetObject",
+   "s3:ListBucket"
+  ],
+  "silver_patterns": 16,
+  "silver_patterns_equal_the_sixteen": true,
+  "any_pattern_starts_with_star": false,
+  "ok": true
+ },
+ "inline_policies_on_role": 25,
+ "samples": {
+  "sample_silver_prefix": "schwab/08242234/silver/dim_asset/",
+  "sample_status_key_exists": true,
+  "sample_status_key_arn": "arn:aws:s3:::opal-data-assets/schwab/08242234/meta/backfill-status.json",
+  "sample_rule_arn": "arn:aws:events:us-east-1:313476888478:rule/opal-assets-silver-blackdiamond-sweep-daily",
+  "sample_root_prefix": "schwab/"
+ },
+ "api": "iam:SimulatePrincipalPolicy on the live role",
+ "results": [
+  {
+   "name": "silver list under a source (real prefix)",
+   "action": "s3:ListBucket",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "silver list under bloomberg",
+   "action": "s3:ListBucket",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "silver list under gateway",
+   "action": "s3:ListBucket",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "silver list under yahoo",
+   "action": "s3:ListBucket",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "silver list under commonwealth",
+   "action": "s3:ListBucket",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "root list WITH delimiter",
+   "action": "s3:ListBucket",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "root list with NO delimiter",
+   "action": "s3:ListBucket",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "DescribeRule on a real sweep rule",
+   "action": "events:DescribeRule",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "GetObject on a real backfill-status key",
+   "action": "s3:GetObject",
+   "decision": "allowed",
+   "expected": "allowed",
+   "ok": true
+  },
+  {
+   "name": "PutRule on the same rule",
+   "action": "events:PutRule",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  },
+  {
+   "name": "PutObject on the same key",
+   "action": "s3:PutObject",
+   "decision": "implicitDeny",
+   "expected": "implicitDeny",
+   "ok": true
+  }
+ ],
+ "all_as_expected": true
+}
