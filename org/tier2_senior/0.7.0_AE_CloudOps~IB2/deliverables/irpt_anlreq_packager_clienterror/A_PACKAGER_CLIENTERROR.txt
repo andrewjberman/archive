@@ -1,0 +1,22 @@
+R1 window=2026-10-20T08:02:22+0000..2026-10-20T08:05:46+0000 scanned=21 lines=2
+R1L 08:02:53 ip-172-31-87-2.ec2.internal python3.12[1280284]: IRPT_RESIDENT_PACKAGE_READY retained_for_retry PackagerRefused
+R1L 08:04:18 ip-172-31-87-2.ec2.internal python3.12[1280284]: IRPT_RESIDENT_PACKAGE retained_for_retry class=ClientError code=-
+NOTE-R2 control: the log group holds 8 events in the same window (so the group is live and a /package line would appear); retention 14 days
+R2 NOT-FOUND no event naming /package in /aws/lambda/opal-ticket-api between 08:02:20Z and 08:06:00Z (looked in the log group of opal-ticket-api)
+R2 count=0
+R3 role irpt-ycharts-runner-role
+R3 bucket opal-data-irpt encryption aws:kms key arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111
+R3 s3:PutObject opal-data-irpt/ycharts_opal_reports allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 s3:GetObject opal-data-irpt/ycharts_opal_reports allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 s3:PutObject opal-data-irpt/analysis_commentaries denied(implicitDeny) matched=-
+R3 s3:GetObject opal-data-irpt/analysis_commentaries denied(implicitDeny) matched=-
+R3 kms:GenerateDataKey bucket-key allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner
+R3 kms:Decrypt bucket-key allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner
+R3 dynamodb:PutItem irpt-requests allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 dynamodb:UpdateItem irpt-requests allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 dynamodb:GetItem irpt-requests allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 dynamodb:Query irpt-requests allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+R3 secretsmanager:GetSecretValue opal/ticketing/svc-irpt-packager allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+NOTE-R1 the READY attach at 08:02:53Z was REFUSED by the packager: the line reads IRPT_RESIDENT_PACKAGE_READY retained_for_retry PackagerRefused, so the attach at READY never reached the ticket service (consistent with R2 count=0 and with the empty package member P7 read at 08:03:02Z); the commentary-time attach at 08:04:18Z then raised ClientError
+NOTE-R3 the resident role (irpt-ycharts-runner-role) is ALLOWED s3:PutObject and s3:GetObject under ycharts_opal_reports/ and DENIED both (implicitDeny, no matching statement) under analysis_commentaries/ of the bucket opal-data-irpt; handle_commentary_ready reads the commentary artifact, which sits under that prefix, so an AccessDenied from S3 would raise exactly a ClientError; the other grants asked for (KMS data key, irpt-requests, the packager secret) read allowed; the simulation evaluates the identity policy only (a bucket policy is not simulated here), and which call raised the error is an inference, not a log line
+READS-DONE 3 of 3 answered
