@@ -1,0 +1,88 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one run; R0 read the live policy; terraform fmt -check read-only at the pin",
+   "observed": "stopped at step 3: fmt -check resident.tf rc 3; nothing applied; live policy sha256 re-read equal to R0",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-APPLY-MODELGRANT.resident-role-reads-the-model-series-and-positioning-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-MODELGRANT.resident-role-reads-the-model-series-and-positioning-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "d7748ab2e13"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-MODELGRANT.resident-role-reads-the-model-series-and-positioning-ib2.md",
+  "vintage_commit": "d7748ab2e13"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_modelgrant/A_AFTER_MODELGRANT.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the receipt: R0 holds, C and G1 to G4 written as FAIL lines (stopped at step 3, fmt -check rc 3); nothing applied; live policy unchanged",
+   "artifact_covered_by": [
+    "MODG-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261020T1755Z_irpt-resident-model-source-read-20261020_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the NEVER-2 ledger, four legs, CLOSED -- STOPPED AT C, NOTHING APPLIED",
+   "artifact_covered_by": [
+    "MODG-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "MODG-AC1",
+   "invocation": "grep -c -E '^(R0 baseline implicitDeny on all four|C plan 0 to add 1 to change 0 to destroy|C policy diff adds exactly ReadTheModelReturnSeriesAndPositioning|G1 other statements byte-equal|G2 get allowed on two keys put and third key implicitDeny|G3 replan No changes|G4 both objects read with the host role)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_modelgrant/A_AFTER_MODELGRANT.txt",
+   "expect": "^7$",
+   "output_evidence": "1\nexit code: 0\n(run 2026-10-20 from the repo root; only the R0 line holds as written, the other six are FAIL lines because the order stopped at step 3)",
+   "denominator": "1 receipt of 13 lines: 7 criterion lines (1 holds, 6 written FAIL) and 6 NOTE lines",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -c -E '^(R0 baseline implicitDeny on all four|C plan 0 to add 1 to change 0 to destroy|C policy diff adds exactly ReadTheModelReturnSeriesAndPositioning|G1 other statements byte-equal|G2 get allowed on two keys put and third key implicitDeny|G3 replan No changes|G4 both objects read with the host role)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_modelgrant/A_AFTER_MODELGRANT.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "MODG-AC2",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-model-source-read-20261020_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- STOPPED AT C, NOTHING APPLIED (terraform fmt -check resident.tf rc 3 at the pin 50f7c709af2: three misaligned lines in the added statement; the live policy is unchanged) -- closed 20261020T180550Z\nexit code: 0\n(run against the one named ledger file; the glob form is denied by the repo search rail from this seat)",
+   "denominator": "1 ledger file, 4 legs",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-model-source-read-20261020_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "steps 4 and 5 (A apply and V after-reads G1 to G4) and the C and G lines as passes",
+   "reason": "the order's step 3 says fmt -check rc 0, else STOP; it read rc 3, so nothing was applied"
+  }
+ ],
+ "session_log": "org/critical_paths/change_management/20261020T1755Z_irpt-resident-model-source-read-20261020_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "modelgrant_reads.py (boto3 iam), terraform fmt -check and plan (read only)",
+   "invocation": "python modelgrant_reads.py before; terraform fmt -check -diff; terraform plan -target=aws_iam_role_policy.runner_resident",
+   "result": "R0 baseline holds; fmt -check rc 3 at the pin; informational plan 0/1/0 with one added statement; no apply"
+  }
+ ]
+}
