@@ -494,7 +494,7 @@ def box_headed():
         if rc != 0 or not re.match(r"^i-[0-9a-f]+$", iid):
             return out("%s-FAIL no instance_id output (rc=%s)" % (tag, rc))
         py = ("from playwright.sync_api import sync_playwright as sp; p = sp().start(); "
-              "b = p.chromium.launch(headless=False, args=['--no-sandbox']); b.close(); p.stop(); print('FIDUPL-BOX-OK headed=launched')")
+              "b = p.chromium.launch(channel='chrome', headless=False, args=['--no-sandbox']); b.close(); p.stop(); print('FIDUPL-BOX-OK headed=launched')")
         cmd = ("command -v Xvfb >/dev/null || { echo FIDUPL-BOX-NO-XVFB; exit 3; }; "
                "Xvfb :97 -screen 0 1440x900x24 >/dev/null 2>&1 & XP=$!; sleep 2; "
                "DISPLAY=:97 /opt/fidelity-uploader/venv/bin/python -c \"%s\"; RC=$?; kill $XP; exit $RC" % py)
@@ -512,9 +512,37 @@ def box_headed():
         so = inv.get("StandardOutputContent", "")
         if inv["Status"] != "Success" or "FIDUPL-BOX-OK headed=launched" not in so:
             return out("%s-FAIL ssm status=%s%s" % (tag, inv["Status"], " (Xvfb not installed)" if "NO-XVFB" in so else ""))
-        return out("%s-OK Xvfb present and a headed Chromium launches under it" % tag)
+        return out("%s-OK Xvfb present and a headed Google Chrome launches under it" % tag)
     except Exception as e:  # noqa: BLE001
         return out("%s-FAIL %s: %s" % (tag, type(e).__name__, str(e)[:120]))
+
+
+def chrome_fallback_records():
+    tag = "R1-FU11"
+    d = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/"
+    feas = d + "FU-s-11_feasibility.md"
+    if not os.path.isfile(feas):
+        return out("%s-FAIL absent %s" % (tag, feas))
+    text = open(feas, encoding="utf-8").read()
+    need = ["plugin_installable=", "claude_session_runs=", "display=", "needs="]
+    miss = [k for k in need if k not in text]
+    if miss:
+        return out("%s-FAIL feasibility record lacks %s" % (tag, ",".join(miss)))
+    return out("%s-OK feasibility record carries %d facts" % (tag, len(need)))
+
+
+def chrome_fallback_signin():
+    tag = "R1-FU11S"
+    d = "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/"
+    rec = d + "FU-s-11_agent_signin_record.md"
+    if not os.path.isfile(rec):
+        return out("%s-FAIL absent %s" % (tag, rec))
+    text = open(rec, encoding="utf-8").read()
+    if "outcome=SIGNED_IN" not in text or "driver=claude-in-chrome" not in text or "headful=true" not in text:
+        return out("%s-FAIL record does not show an agent-driven headful sign-in (outcome=SIGNED_IN, driver=claude-in-chrome, headful=true)" % tag)
+    if re.search(r"G\d{8}", text):
+        return out("%s-FAIL the record carries a G number" % tag)
+    return out("%s-OK agent-driven headful sign-in recorded values-free" % tag)
 
 
 def _tf_out(name):
@@ -674,7 +702,7 @@ def tf_plan_perg():
 CHECKS = {
     "fu1": lambda: tests("fu1"), "fu2a": lambda: tests("fu2a"), "fu2b": lambda: tests("fu2b"), "fu2c": lambda: tests("fu2c"), "fu2t": lambda: tests("fu2t"),
     "fu3": lambda: tests("fu3"), "fu3c": fu3_contract, "fu4": lambda: tests("fu4"), "fu4d": fu4_dry,
-    "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu10x": box_headed, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
+    "fu5": lambda: tests("fu5"), "fu5b": fu5_boot, "fu10x": box_headed, "fu11f": chrome_fallback_records, "fu11s": chrome_fallback_signin, "fu6v": tf_validate, "fu6g": tf_guard, "fu6p": tf_plan,
     "fu7a": tf_nochange, "fr1a": lambda: tests("fr1a"), "fr1b": lambda: tests("fr1b"), "fr2": lambda: tests("fr2"), "fr3": lambda: tests("fr3"), "fr4": lambda: tests("fr4"), "fr6": lambda: tests("fr6"), "fr5p": tf_plan_perg, "fu5c": fu5_static, "fu6c": tf_venv, "fu6p2": tf_plan_doc_only, "fu7b": box_live, "fu8t": autoshutdown_tag, "fu8d": automation_no_stop, "fu8p": automation_role_describe_status, "fu9m": box_md5, "fu10m": box_md5_all, "fu7l": ledger, "x1r": x1_run, "x1g": x1_recon, "x1p": x1_probe,
 }
 

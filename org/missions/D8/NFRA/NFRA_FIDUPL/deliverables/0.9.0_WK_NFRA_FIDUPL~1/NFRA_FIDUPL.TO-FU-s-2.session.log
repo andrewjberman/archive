@@ -118,3 +118,38 @@ C. Post-commit criteria, the main tree's checker run by absolute path from the w
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=19 (rc 0)
 No live call and no sign-in were made. Earlier FU-x-1 live instructions are superseded: nothing runs live.
+
+REPAIR 7 (issuer, 2026-10-20 ~16:35Z; CTO ruling 8704) -- the password 403 is a device-trust verdict; the factor step is two buttons
+   (CRO flow map RESEARCH_20261020_NFRA_FIDUPL_LOGIN_FLOW_HAR5.md, read by absolute path).
+A. Code (commit b69505b814): signin.py launches the persistent context headed (headless=False). If DISPLAY is unset it
+   starts a child Xvfb on config display (default :99, screen 1440x900x24), waits briefly and sets DISPLAY for the browser;
+   _teardown stops that child and unsets only the DISPLAY it set. If DISPLAY is set it starts nothing. If Xvfb is not on
+   the PATH it raises DisplayError naming Xvfb; there is no silent headless fallback. The version probe stays headless.
+   No route or block is installed on any request. request_sms clicks the button whose text starts "Text me the code"
+   under expect_response of the SMS path; "Call me" is never clicked (a fallback send control must not match it). select_factor
+   on the two-button page clicks nothing. The radio-and-send path remains a fallback only.
+   box/bootstrap.sh adds xorg-x11-server-Xvfb to the amzn dnf list as a WARN-on-failure line.
+B. Tests: tests/test_login_trace.py has 25 tests (the 19 and the 6 of REPAIR 7); tests/test_signin.py asserts the headed
+   launch (headless is False) and sets DISPLAY so no Xvfb starts. 45 passed across the sign-in files, and 25 passed twice.
+   Mutant (send clicks Call me, scratch copy): 1 failed, 24 passed. ruff py39: All checks passed. Non-ASCII bytes: 0.
+C. Post-commit criteria, the main tree's checker run by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=25 (rc 0)
+   fu5b (the bootstrap check, the same checker): R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No AWS call, no live call and no sign-in were made. The fakes stand in for the display, the browser and the page.
+
+REPAIR 8 (issuer, 2026-10-20 ~16:50Z) -- the remainder of REPAIR 7: real Google Chrome (CTO ruling @c618ca8c8c)
+A. Code (commit 54659d89db): BROWSER_CHANNEL = "chrome" is passed to the persistent launch (still headed, headless=False) and to the
+   version probe (_installed_version, headless, so the user agent matches the installed Chrome). box/bootstrap.sh amzn branch
+   also runs dnf on the Google Chrome stable RPM (https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm),
+   as a WARN line on failure. The launch test asserts channel "chrome" on both launches. No test is added.
+B. Tests: 25 in tests/test_login_trace.py; 45 passed across the sign-in files; ruff py39 All checks passed; non-ASCII 0.
+C. Post-commit criteria, the main tree's checker run by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=25 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made.
