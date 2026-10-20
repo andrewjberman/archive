@@ -1,0 +1,22 @@
+NFRA_SCHWABBF.TO-BF-w3 -- session log, 0.9.0_WK_NFRA_SCHWABBF~3, branch wk-NFRA_SCHWABBF-3, worktree wt-bf-3
+Base for the build: HEAD 6c4675f585a. Build commit: ebf478c7de8 (LOCAL on wk-NFRA_SCHWABBF-3).
+
+1. First act: branch wk-NFRA_SCHWABBF-3; TREE-OK.
+2. Baseline control, unchanged round-2 file: 9 passed in 6.50s, rc=0.
+3. Dry run, rewritten suite against the UNCHANGED all-firm script (before any script edit):
+   pytest ... -k "key_parity or landing_guard" -> 3 failed, 7 passed, 3 deselected in 9.10s, rc=1
+   failed: test_key_parity_pre_round_masters_keep_todays_key (68 of 68 pre-round keys written as firm form)
+           test_key_parity_listing_roots_per_master (MISSING FUNCTIONS: Get-ListingPrefixes)
+           test_landing_guard_pre_round_masters_match_pre_round_guard (MISSING FUNCTIONS: Get-ListingPrefixes)
+4. Script edit (sdd-daily-pull.ps1): Test-FirmForm, Get-ListingPrefixes added; Get-BronzeKeyDir, monolith roots,
+   Get-ResumeNames, Get-LandedIndex and the resumability listing made per master. Schedule, session lock,
+   vendor-master guard, date quarantine, staging branch and -OnlyAsOf untouched.
+5. AC1: python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k "key_parity or landing_guard"
+   -> 10 passed, 3 deselected in 15.41s (run 1); 10 passed, 3 deselected in 16.42s (run 2, final); rc=0
+6. AC2: ... -k only_asof -> 3 passed, 10 deselected in 2.49s (run 1); 3 passed, 10 deselected in 2.90s (run 2, final); rc=0
+7. Full file: 13 passed in 21.34s, rc=0.
+8. Commit: bash .tools/safe-commit.sh --author "0.9.0_WK_NFRA_SCHWABBF~3 <...@opal.agent>" -F .scratch/msg_bf3_build.txt --
+   script + test + INVESTIGATION_v1.md; commit-gate All checks passed; surprise-row-gate OK 1 new row of 33;
+   msg-verify MATCH. Commit ebf478c7de8.
+9. Surprise row NFRA_SCHWABBF-W3-S4 filed (a W3-S1 id collision was caught before commit and the new row renumbered).
+Not run: the puller, any AWS call, any Schwab contact, any deploy (WORLD floor).
