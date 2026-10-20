@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-k1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP.md",
+    "vintage_commit": "ba5640ad8d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-k1.key-function.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "5f1ad506a4"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/_monolith_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "963b3cc74e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build on the worker branch. The deploy of this mirror to s3://opal-data-bd/code/ is the issuer's release act R5, not this order.",
+      "artifact_covered_by": ["BF1-k1-AC1"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/silver/_canonical_silver_lib.py",
+      "kind": "script",
+      "commit_or_etag": "963b3cc74e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL build on the worker branch. Not deployed; the silver lib is imported by the bronze-to-silver builders, which are other cells.",
+      "artifact_covered_by": ["BF1-k1-AC1"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "963b3cc74e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch; run by the pytest invocations in acceptance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF1-k1-AC1",
+      "criterion_verbatim": "parity of both mirrors with the builder over 3 masters x 17 feeds x 2 dates, the parsers, and the listers including the refusal on a prefix that is only old-form. The bar is a pytest summary line that STARTS with the passed count, so a line that opens with a failed count does not match.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "1 failed, 242 passed in 2.03s\nFAILED data/canonical/schwab/tests/test_bronze_key_form.py::test_converter_seam_new_form_key_read_by_converter_keys\nE   ModuleNotFoundError: No module named 'stream_parquet'   (data\\assets\\scripts\\silver\\schwab_conversion.py:66). First run of the same command: '1 failed, 242 passed in 3.29s', identical counts.",
+      "denominator": "242 passed of 243 collected; 1 failed (the converter seam case)",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "FAIL",
+      "status_reason": "The summary line opens with '1 failed', so the expect pattern does not match. Cause: the converter seam case cannot load data/assets/scripts/silver/schwab_conversion.py by path because its sibling stream_parquet is not beside it. Filed as surprise NFRA_SCHWABBF-W1-S1. The six key functions and the other 242 cases pass."
+    },
+    {
+      "criterion_id": "BF1-k1-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: the silver converter's own key readers accept a new-form key. The bar is pytest -k converter_seam with the summary line starting '1 passed'.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no -k converter_seam",
+      "output_evidence": "1 failed, 242 deselected in 1.61s\nFAILED data/canonical/schwab/tests/test_bronze_key_form.py::test_converter_seam_new_form_key_read_by_converter_keys\nE   ModuleNotFoundError: No module named 'stream_parquet'",
+      "denominator": "0 passed of 1 selected; 1 failed",
+      "expect": "^1 passed[ ,]",
+      "judgment": false,
+      "status": "FAIL",
+      "status_reason": "The summary line opens with '1 failed', not '1 passed'. The same blocker as BF1-k1-AC1: the converter's bare-name sibling import fails before any key reader runs. Filed as surprise NFRA_SCHWABBF-W1-S1. Refusal clause applied: no fallback path, and the assertions are unweakened."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-k-1; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker; the deciding signal is the seam ModuleNotFoundError.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The AC1 pytest invocation run twice on the same tree; the summary lines were compared.",
+      "observed": "Run 1: '1 failed, 242 passed in 3.29s'. Run 2: '1 failed, 242 passed in 2.03s'. Counts identical; failing case identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the bd-tree mirror to s3://opal-data-bd/code/",
+      "reason": "Issuer release act R5. This order is LOCAL and has no S3 access."
+    },
+    {
+      "item": "Any edit to data/assets/scripts/silver/schwab_conversion.py and its deployed twin",
+      "reason": "READ ONLY for this cell per the order."
+    },
+    {
+      "item": "Edits to docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md and docs/architecture/OPAL_ASSETS_PRD.md",
+      "reason": "Outside the write grant. The supersession is recorded in both mirror module docstrings and in the key-function block comment."
+    },
+    {
+      "item": "Caller updates in the converters and build_* scripts",
+      "reason": "Other cells' business per the order. The six names and signatures are kept unchanged for them."
+    },
+    {
+      "item": "Seam case passing (AC2, and AC1 as a whole)",
+      "reason": "BLOCKED by surprise NFRA_SCHWABBF-W1-S1 (sibling stream_parquet not beside the converter source). No fallback taken, per the refusal clause."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W1-S1: the silver converter data/assets/scripts/silver/schwab_conversion.py cannot be loaded by path from its own directory (bare import of stream_parquet at line 66, sibling not beside it), so BF1-k1-AC2 fails and BF1-k1-AC1 cannot pass."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/black_diamond/scripts/bronze/_monolith_bronze.py data/canonical/schwab/silver/_canonical_silver_lib.py",
+      "result": "rc=0, both files compile"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --select E9,F data/black_diamond/scripts/bronze/_monolith_bronze.py data/canonical/schwab/silver/_canonical_silver_lib.py data/canonical/schwab/tests/test_bronze_key_form.py",
+      "result": "All checks passed! rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "1 failed, 242 passed (two identical runs; the failing case is the converter seam)"
+    }
+  ]
+}
