@@ -1,0 +1,21 @@
+0.9.0_WK_NFRA_MCPORTAL~42 -- session log -- NFRA_MCPORTAL.TO-MP-zo-2 (OGW round 1, the audit list on /opalgateway)
+date: 2026-10-20 (UTC session)
+
+1. Tree check: workspace on wk-NFRA_MCPORTAL-42 at 8b11340480 (zo-1 proof); nested mcportal on wk-NFRA_MCPORTAL-42-mcportal at e05fc91 (zo-1 code).
+   node_modules not touched (no bun install / add).
+2. Order read: lines 1-70 of NFRA_MCPORTAL.TO-MP-zo-2.opalgateway-audit-list.md only (head -70), as the coordinator directed.
+3. Baseline: bun test src (mcportal, NO_COLOR=1) at e05fc91 -> 86 pass, 0 fail.
+4. Edits (mcportal worktree only), commit f90f03a on wk-NFRA_MCPORTAL-42-mcportal (LOCAL, not pushed):
+   - src/pages/opalgateway/auditModel.ts: access actions (set_person_access, narrow, widen, revoke), row build, newest first,
+     person naming, unattributed rule, changed fields as before to after.
+   - src/pages/opalgateway/auditRead.ts: sibling reader of GET /api/admin/changes, checked field by field, no cast.
+   - src/pages/opalgateway/AuditList.tsx (container), AuditListView.tsx (pure view), mounted in OpalGatewayView.tsx below the person section.
+   - src/pages/opalgateway/opalgateway.css: audit rules, existing tokens only.
+   - src/pages/opalgateway/auditList.test.tsx: the three named tests.
+   src/api/admin.ts not edited.
+5. Surprise rows filed: NFRA_MCPORTAL-Z-W42-S3 (the exported change reader's type does not carry action; the audit reads the route through its own checked reader).
+6. Mutant: auditModel.ts attribution forced to attributed; bun test src/pages/opalgateway/auditList.test.tsx -> 2 pass, 1 fail, rc=1
+   (the unattributed test fails); restored from a byte copy, cmp equal, git status clean.
+7. Checks: bun test src -> 89 pass, 0 fail, rc=0. tsc --noEmit -p tsconfig.app.json -> rc=0. bun run build -> rc=0.
+   zo2.AC1.sh -> named tests 3 of 3, pass=89, fail=0, RESULT: PASS, exit=0.
+8. No push, no network call, no vendor call, no deploy. The order's status is not flipped (the face's bound).

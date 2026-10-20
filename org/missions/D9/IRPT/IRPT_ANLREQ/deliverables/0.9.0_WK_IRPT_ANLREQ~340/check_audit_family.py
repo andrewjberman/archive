@@ -1,0 +1,169 @@
+"""AR-y-466: the platinum family ANALYSIS_AUDIT in reporting policy irpt-anlreq-x10-v1 (PRD v0.27 C-AUDIT-RECORD).
+
+Stdlib only, offline, no AWS. Loads lib/opal_naming.py BY PATH and:
+  1. runs the module's own registry validation, validate(), on the edited registry;
+  2. reads the one policy whose policy_revision is irpt-anlreq-x10-v1 and checks its ANALYSIS_AUDIT row
+     is exactly the row the order names;
+  3. for each enabled client firm in data/firm_registry.json, resolves the firm's LONG scope through the
+     module's lookup() and calls reporting_destination(firm, ANALYSIS_AUDIT, ART-<hex64>, <sha256 hex64>,
+     policy_revision=irpt-anlreq-x10-v1) (AMENDMENT 2 of AR-y-466, trunk a71b17d96d). The bucket must equal the
+     irpt PRODUCT bucket of infra/logic/registry/scopes.json, and the key must begin
+     irpt/<firm>/platinum/analysis_audit/ART-.
+
+The artifact id and the digest are sample values of the grammar the builder accepts (ART- plus 64 lowercase hex;
+64 lowercase hex). The builder checks only that shape, so the sample passes it.
+
+--selftest (AMENDMENT 1 of AR-y-466, trunk f6b63a00ac) runs the same policy validation on two in-memory copies
+of the registry. Variant A is the new row with tier state and unreferenced_days null. Variant B is the new row
+with accepted_ceiling_days 3000. CONTROL-FIRES prints only when BOTH read BAD. Otherwise it prints
+CONTROL-DOES-NOT-FIRE and exits 1.
+"""
+
+import copy
+import importlib.util
+import json
+import os
+import sys
+
+POLICY_REVISION = "irpt-anlreq-x10-v1"
+FAMILY = "ANALYSIS_AUDIT"
+TABLE = "analysis_audit"
+PRODUCT_KEY = "irpt"
+ART_SAMPLE = "ART-" + "0123456789abcdef" * 4
+SHA_SAMPLE = "fedcba9876543210" * 4
+EXPECTED_ROW = {"tier": "platinum", "table": "analysis_audit", "extension": "json",
+                "unreferenced_days": None, "accepted_ceiling_days": 2555}
+LIB_REL = os.path.join("lib", "opal_naming.py")
+
+
+def find_root(start):
+    cur = start
+    for _ in range(12):
+        if os.path.isfile(os.path.join(cur, LIB_REL)):
+            return cur
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            break
+        cur = parent
+    return None
+
+
+def load_module(root):
+    spec = importlib.util.spec_from_file_location("opal_naming_by_path", os.path.join(root, LIB_REL))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def policy_row(reg):
+    rows = [p for p in reg["reporting_policies"]["policies"] if p["policy_revision"] == POLICY_REVISION]
+    if len(rows) != 1:
+        raise ValueError("policy_revision %s appears %d times" % (POLICY_REVISION, len(rows)))
+    return rows[0]
+
+
+def policy_check(mod, reg, spec):
+    """None when the policy validation accepts the family row, else the refusal text."""
+    variant = copy.deepcopy(reg)
+    policy_row(variant)["families"][FAMILY] = spec
+    try:
+        mod._validate_reporting_policies(variant)
+    except (ValueError, KeyError, TypeError) as exc:
+        return str(exc)
+    return None
+
+
+def selftest(root, mod):
+    base = mod.load_registry()
+    variant_a = dict(EXPECTED_ROW, tier="state")
+    variant_b = dict(EXPECTED_ROW, accepted_ceiling_days=3000)
+    verdicts = {}
+    for label, desc, spec in (("A", "tier state with unreferenced_days null", variant_a),
+                              ("B", "accepted_ceiling_days 3000", variant_b)):
+        refusal = policy_check(mod, base, spec)
+        verdicts[label] = refusal is not None
+        if refusal is None:
+            print("CONTROL-VARIANT-%s %s -> OK (validator accepts)" % (label, desc))
+        else:
+            print("CONTROL-VARIANT-%s %s -> BAD: %s" % (label, desc, refusal))
+    if verdicts["A"] and verdicts["B"]:
+        print("CONTROL-FIRES")
+        return 0
+    print("CONTROL-DOES-NOT-FIRE: the control fires only when both variants read BAD "
+          "(variant A read BAD=%s, variant B read BAD=%s)" % (verdicts["A"], verdicts["B"]))
+    return 1
+
+
+def main(argv):
+    root = find_root(os.path.dirname(os.path.abspath(__file__)))
+    if root is None:
+        print("AUDIT-FAMILY-BAD lib/opal_naming.py not found above this file")
+        return 1
+    mod = load_module(root)
+    if "--selftest" in argv:
+        return selftest(root, mod)
+
+    refusals, _warnings = mod.validate()
+    if refusals:
+        print("AUDIT-FAMILY-BAD validator refused %d item(s): %s" % (
+            len(refusals), "; ".join("%s %s: %s" % r for r in refusals[:5])))
+        return 1
+
+    reg = mod.load_registry()
+    try:
+        policy = policy_row(reg)
+    except ValueError as exc:
+        print("AUDIT-FAMILY-BAD %s" % exc)
+        return 1
+    spec = policy["families"].get(FAMILY)
+    if spec != EXPECTED_ROW:
+        print("AUDIT-FAMILY-BAD %s row is %r, expected %r" % (FAMILY, spec, EXPECTED_ROW))
+        return 1
+
+    with open(os.path.join(root, "data", "firm_registry.json"), encoding="utf-8") as fh:
+        firms = json.load(fh)["firms"]
+    clients = [f for f in firms if f.get("kind") == "client" and f.get("enabled") is True]
+    if not clients:
+        print("AUDIT-FAMILY-BAD no enabled client firm in data/firm_registry.json")
+        return 1
+
+    with open(os.path.join(root, "infra", "logic", "registry", "scopes.json"), encoding="utf-8") as fh:
+        scope_rows = json.load(fh)["scopes"]
+    products = [s for s in scope_rows if s.get("key") == PRODUCT_KEY and s.get("class") == "PRODUCT"]
+    if len(products) != 1 or not products[0].get("bucket"):
+        print("AUDIT-FAMILY-BAD scopes.json has no single PRODUCT row %s with a bucket" % PRODUCT_KEY)
+        return 1
+    product_bucket = products[0]["bucket"]
+
+    addresses = 0
+    for firm in clients:
+        try:
+            row = mod.lookup(firm["firm_id"], reg)
+        except KeyError:
+            print("AUDIT-FAMILY-BAD firm %s resolves to no scopes.json row" % firm["firm_id"])
+            return 1
+        if row.get("class") != "FIRM":
+            print("AUDIT-FAMILY-BAD firm %s is a %s scope" % (firm["firm_id"], row.get("class")))
+            return 1
+        scope = row["long"]
+        try:
+            bucket, key = mod.reporting_destination(scope, FAMILY, ART_SAMPLE, SHA_SAMPLE,
+                                                    policy_revision=POLICY_REVISION)
+        except (ValueError, KeyError) as exc:
+            print("AUDIT-FAMILY-BAD reporting_destination refused %s: %s" % (scope, exc))
+            return 1
+        if bucket != product_bucket:
+            print("AUDIT-FAMILY-BAD %s bucket %s is not the irpt PRODUCT bucket %s" % (scope, bucket, product_bucket))
+            return 1
+        if not key.startswith("irpt/%s/platinum/%s/ART-" % (scope, TABLE)):
+            print("AUDIT-FAMILY-BAD %s key %s does not begin irpt/%s/platinum/%s/ART-" % (scope, key, scope, TABLE))
+            return 1
+        print("ADDRESS firm=%s bucket=%s key=%s" % (scope, bucket, key))
+        addresses += 1
+
+    print("AUDIT-FAMILY-OK firms=%d addresses=%d validator=pass" % (len(clients), addresses))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

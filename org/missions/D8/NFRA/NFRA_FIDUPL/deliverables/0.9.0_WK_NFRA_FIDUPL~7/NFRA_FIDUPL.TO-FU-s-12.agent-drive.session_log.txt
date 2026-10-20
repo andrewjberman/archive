@@ -1,0 +1,27 @@
+NFRA_FIDUPL.TO-FU-s-12 -- session log, worker 0.9.0_WK_NFRA_FIDUPL~7, worktree C:/tmp/fidupl-w7, branch wk-NFRA_FIDUPL-7
+Fakes only: no AWS call, no live call, no sign-in, no browser launch, no real secret, no real code.
+
+[1] first act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-7 ; test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+[2] base read: worker face, WORKER_REFERENCE sections 1, 7, 8, 9; signin.py (PlaywrightDriver, read_wealthscape_credentials,
+    OTP_SMS, submit_password returns bool, request_sms returns the aware UTC send instant);
+    quo_otp.py (QuoOtpReader(api_key_provider).read_code(since) -> CodeResult.status/.code, default_api_key).
+    Premise finding: signin.py:32 imports quo_otp at module top; filed as NFRA_FIDUPL-D1-W7-S1 (OBSERVATION, INERT).
+[3] built: box/agent_fill.py, agent_drive.py, tests/test_agent_fill.py (5 tests), tests/test_agent_drive.py (6 tests).
+[4] fu12d run 1 (before the test fix): R1-FU12D-FAIL pytest rc=1 3 failed, 3 passed. Cause: the test fake's log
+    parser split on " agent_fill.py " (a leading space the fixed command string does not carry). Test-side only; the
+    production command string was correct. Fixed in tests/test_agent_drive.py; no production change.
+[5] fu12h after the fix: R1-FU12H-OK passed=5
+[6] fu12d after the fix: R1-FU12D-OK passed=6
+[7] python -m pytest -q -p no:cacheprovider on both test files: 11 passed in 0.12s
+[8] ruff check --target-version py39 on the four files: All checks passed!
+[9] ast.parse(feature_version=(3,9)) on the four files: OK (nonascii=0 in each)
+[10] python -m py_compile on the four files: COMPILE-OK
+[11] code commit: 3a8498ba066 (LOCAL on wk-NFRA_FIDUPL-7) via .tools/safe-commit.sh; commit-gate, surprise-row-gate and
+     missions-tree-check passed; WARN lines only (client-data hash list absent on this box; one-writer note on the
+     unsuffixed investigation file, WARN until C-QUEUE).
+[12] determinism re-run after the commit: fu12h R1-FU12H-OK passed=5 ; fu12d R1-FU12D-OK passed=6 (same as [5], [6]).
+[13] checker copies: the main-tree checker (C:/Dev/ajb_workspace/...R1_CHECKS/fidupl_round_checks.py) and the worktree
+     copy are byte-identical (md5 4fad18ad431a0ab508201d97f373443f). The order's relative invocation was run from the
+     worktree cwd after the proof check flagged the recorded invocation: R1-FU12H-OK passed=5 rc=0; R1-FU12D-OK passed=6 rc=0.
+[14] proof-of-spec-check (instance, FU12-AC1,FU12-AC2): violations=0, VALID, rc=0 (after adding artifact_covered_by
+     per code file and recording the order's own invocation text).

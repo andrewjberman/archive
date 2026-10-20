@@ -623,6 +623,17 @@ def arms_build_175():
     rec5, _, _ = run_producer("multi_map.json", ENTRIES, pricing=False)
     if any(e["id"] in IDS and e["status"] == "VALUE" for e in rec5["elements"]):
         fails.append("with pricing off a compare element reads VALUE")
+    # AMENDMENT 2 and 3: tests the cell's own change reaches, found by the issuer's broader-suite run: the Overview-map sha256 pin
+    # (stale since the round-57 price pages), the Opal stores key set (now carries model_bytes), and the collection of the sibling
+    # generate-installed file after this cell's resident-ports test (module-level sys.path edits must not leak into it)
+    for targets in ([IR + "reports/tests/test_resident_r31_source.py::test_the_bindings_carry_the_opal_map_member_pinned_by_content"],
+                    [IR + "reports/tests/test_resident_installed.py::test_installer_supplies_opal_stores"],
+                    [IR + "reports/tests/test_compare_ports.py", IR + "reports/tests/test_generate_installed.py"]):
+        out = subprocess.run([sys.executable, "-m", "pytest", "--color=no", "-q", "-p", "no:cacheprovider"] + targets,
+                             capture_output=True, text=True)
+        if out.returncode != 0:
+            fails.append("%s: rc=%d %s" % (" + ".join(x.split("/")[-1] for x in targets), out.returncode,
+                                           ((out.stdout or out.stderr).strip().splitlines() or [""])[-1][:120]))
     return fails
 
 
@@ -636,7 +647,8 @@ OWN = {171: (RES + "/model_source.py", RES + "/model_code_map.json", TESTS + "/t
        173: (RES + "/comparables.py", TESTS + "/test_comparables.py"),
        174: (RES + "/layout_overview.py", TESTS + "/test_compare_elements.py"),
        175: (RES + "/opal_producer.py", GEN + "/resident_worker.py", IR + "reports/resident_installed.py",
-             TESTS + "/test_compare_producer.py", IR + "reports/tests/test_compare_ports.py")}
+             TESTS + "/test_compare_producer.py", IR + "reports/tests/test_compare_ports.py",
+             IR + "reports/tests/test_resident_r31_source.py", IR + "reports/tests/test_resident_installed.py")}
 SLOT = {171: 330, 173: 330, 174: 330, 175: 330}
 ISSUER = ("org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/", "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/",
           "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/", "org/tier1_exec/2.0.0_SA_COO~G2/")
