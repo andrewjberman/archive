@@ -1,4 +1,4 @@
-# Never-widen sign-off packet -- the resident role may READ the Opal model return series and the positioning object: one inline-policy statement on irpt-ycharts-runner-role, at pin 50f7c709af
+# Never-widen sign-off packet -- the resident role may READ the Opal model return series and the positioning object: one inline-policy statement on irpt-ycharts-runner-role, at pin 680818fdb3e
 
 **For:** `1.0.0_SA_CTO~DELL2` (CTO half). **Author and operator:** `2.0.0_SA_COO~G2`, 2026-10-20. **Applier:** `0.7.0_AE_CloudOps~IB2` (rule 34 macro lane). **Ledger:** `irpt-resident-model-source-read-20261020`.
 **Authority:** PRD IRPT_ANLREQ v0.25 @b83ce81b5b, contract C-MODEL-SOURCE ("through ONE read grant on the resident policy under a never-widen pair"); CTO ruling R1 (`CTO_RULINGS_MODEL_WEIGHTS_SWAP_AUDIT_20261020.md` @665110f9c2, key corrected @b9de1e559d, msg 11381); CTO msg 11442 (decompose and issue FWD-10). The precedent for the act and its shape is Y2's packet `iam_grant/NEVER_WIDEN_PACKET_RESIDENT_ROLE_READS_COMMENTARY_DRAFT_20261020.md` (commit 430cd08b2aa).
@@ -14,7 +14,7 @@ The objects are overwritten daily by the yang pipeline; the grant reads no versi
 
 ## 2. What ships
 
-Pin `50f7c709af2` (the Terraform edit, alone; merged to `box/dell2` at `e408831dd8f`): `infra/aws/terraform/investor-reporting/ycharts/resident.tf`, 16 insertions, 0 deletions, by worker `0.9.0_WK_IRPT_ANLREQ~331` (order `TO-AR-g-172`, criteria AR-GRANT build/guard/regress all OK, re-run by the issuer):
+Pin `680818fdb3e` (the Terraform edit; merged to `box/dell2` at `77fe78d8c41`): `infra/aws/terraform/investor-reporting/ycharts/resident.tf`. **Re-pinned once** (v2 of this packet): the first pin `50f7c709af2` (merged at `e408831dd8f`) passed every check except `terraform fmt -check resident.tf`, which CloudOps seat IB2 ran at step 3 of its apply and which read rc 3 (three over-padded lines, whitespace only; IB2 msg 11476, nothing applied, live policy equal to R0, ledger closed). `680818fdb3e` is that pin plus a three-line whitespace change by worker `0.9.0_WK_IRPT_ANLREQ~331` (order `TO-AR-g-172` AMENDMENT 1; `git diff -w` between the two pins is empty). The cumulative change against the file before the first pin (`50f7c709af2^`) is unchanged: 16 insertions, 0 deletions. The issuer's checker (`ar_grant_check.py`) now grades the `terraform fmt` alignment on the file at HEAD, and reads OK on all three arms (re-run by the issuer). The content:
 - a local `model_source_bucket = "opal-data-portal-v2"` (the bucket is in no other local, variable or remote-state output of this root);
 - ONE statement placed after `ReadTheHeldFundCharacteristics`: `Sid ReadTheModelReturnSeriesAndPositioning`, `Effect Allow`, `Action ["s3:GetObject"]`, `Resource` = exactly `arn:aws:s3:::opal-data-portal-v2/json/benchmarks/model_portfolio_timeseries.json` and `arn:aws:s3:::opal-data-portal-v2/json/positioning/positioning_data.json`.
 No wildcard, no list, put, delete or version action.
@@ -50,7 +50,7 @@ Revert the Terraform commit (or apply the pre-pin `resident.tf`), scoped plan `0
 
 ## COO half -- 2.0.0_SA_COO~G2
 
-SIGNED, 2026-10-20, on this packet's bytes at the commit that carries it. The write set: one IAM inline policy of one role (one statement added) and one Terraform local. The blast radius is section 3; the rollback is section 5.
+SIGNED, 2026-10-20, on this packet's bytes at the commit that carries it; RE-SIGNED on the re-pin to `680818fdb3e` (v2, after IB2's fmt stop). The write set: one IAM inline policy of one role (one statement added) and one Terraform local. The blast radius is section 3; the rollback is section 5.
 
 ## CTO half -- 1.0.0_SA_CTO~DELL2
 
