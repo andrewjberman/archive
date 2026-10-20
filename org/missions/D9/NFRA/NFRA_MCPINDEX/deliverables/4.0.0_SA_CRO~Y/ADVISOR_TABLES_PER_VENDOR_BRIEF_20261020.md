@@ -243,7 +243,7 @@ one that carries rep/advisor attribution for Orion.
 | # | Act | Owner (disarm / specify / write) | Class |
 |---|---|---|---|
 | 1 | Diff the deployed gateway `app/` + `refs/DATA_CATALOG.yaml` against HEAD; restore Inflection serving (`firm_not_served`) | COO~MI / CTO~Z / CloudOps lane | SERVED |
-| 2 | Restore the 49F `dim_account_xref` producer cadence (15 td stale; 2,362 accounts unresolvable) | xref producer owner / CTO~Z / producer lane | SERVED |
+| 2 | Restore the 49F `dim_account_xref` producer cadence (15 td stale; 2,362 accounts unresolvable). Cause, per the laptop CTO (relayed 18:23Z, agentbus 46816357; record `org/tier1_exec/1.0.0_SA_CTO/deliverables/DIAG_BD49F_DIM_CONVERT_OOM_XREF_STALE_20261020.md` @b58716bd17): `opal-assets-bd49f-dim-convert` runs out of memory or times out on every trading-day run. Measured here 18:2xZ: live MemorySize 1024, Timeout 900, LastModified 2026-07-17 (`get-function-configuration`), matching `infra/aws/terraform/opal-assets/bd49f_convert.tf:113`. The OOM itself was not measured here | laptop CTO / -- / CloudOps lane (1024 -> 3008, then one invoke) | SERVED |
 | 3 | Orion tx: read `custodianName` (TX_COLUMNS `:27`, filter `:205-207`, labels `:129-130`) | COO~MI / -- / worker | LOCAL |
 | 4 | Cottonwood: `"--"` strategy answers `no_model_assignment`, not `model_not_in_roster` (`:487-488`) | COO~MI / -- / worker | LOCAL |
 | 5 | Eclipse: pass `model` through the tool or read `fact_portfolios_simple.modelId` for the account path; drop the duplicate resolve candidate | CTO~Z ruling (contract) / COO~MI | LOCAL |
