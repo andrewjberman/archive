@@ -49,7 +49,7 @@ def ac1(r):
     pins = g.get("pins_equal_head") or {}
     if pins.get("refresh_py") != REFRESH_BLOB[:12] or pins.get("directory_runner_py") != RUNNER_BLOB[:12]:
         fail("gates.pins_equal_head must read refresh_py %s and directory_runner_py %s (the blobs re-hashed at HEAD)" % (REFRESH_BLOB[:12], RUNNER_BLOB[:12]))
-    for k in ("one_change_at_a_time", "ledger_opened_before_first_write", "outside_the_fire_band", "outside_the_gateway_window", "not_alongside_another_ib2_act"):
+    for k in ("one_change_at_a_time", "hm5_exempt_by_ruling_msg_11137", "hm5_members_equal_head", "ledger_opened_before_first_write", "outside_the_fire_band", "outside_the_gateway_window", "not_alongside_another_ib2_act"):
         if g.get(k) is not True:
             fail("gates.%s must be true" % k)
     b = g.get("branch_b_versions_named_before_write") or {}
