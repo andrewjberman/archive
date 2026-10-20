@@ -1,0 +1,21 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~4 on NFRA_SCHWABBF.TO-BF-t3 (cell BF-t-3, FWD-1, PRD v0.7 C-SCOPE)
+worktree: C:/Users/AndrewBerman/Desktop/wt-bf-4   branch: wk-NFRA_SCHWABBF-4
+
+1. First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-4; test -d org && test -d .tools -> TREE-OK.
+2. Baseline control: pytest data/canonical/schwab/tests/test_thread_trace.py -> 18 passed (pre-edit, HEAD 998fe826317).
+3. Edits: keyform/thread_trace.py (IN_SCOPE literal of five masters, TRACE-REFUSED refusal before the registry read,
+   RC_REFUSED=3); tests/test_thread_trace.py (CONTRACT constant, refusal arms for 08335338 and 08242234 with no S3
+   client built, in-scope registry-error arm under mock.patch of IN_SCOPE, 99999999 arm now asserts the refusal,
+   contract-equality arm, each-in-scope-master arm). Result: 22 passed.
+4. Surprise row NFRA_SCHWABBF-W4-S6 filed (the 99999999 arm rewrite); row NFRA_SCHWABBF-W4-S7 filed (z09 prints
+   the format ERROR, not TRACE-REFUSED).
+5. Commit f76106a0c5 (safe-commit.sh, author 0.9.0_WK_NFRA_SCHWABBF~4): the two .py files and INVESTIGATION_v1.md.
+   safe-commit reported the client-data-check WARN (hashed account-id list absent); no pass was claimed for it.
+6. AC1 verbatim: pytest -> 22 passed in 0.69s, rc 0.
+7. AC2 verbatim: python thread_trace.py --master 08335338 --day 2026-10-16 --form any -> TRACE-REFUSED master=08335338
+   out of scope (PRD v0.7 C-SCOPE), rc 3; run twice, identical.
+8. AC3 verbatim (one live read-only trace, list and get only): python thread_trace.py --master 08403355 --day 2026-10-16
+   --form any -> THREAD-OK master=08403355 day=2026-10-16 form=legacy, rc 0. The bronze for the day is in the old
+   master-form layout; silver 30 rows; 22 balance columns summed.
+9. Probe of z09 (not a criterion): ERROR: --master must be 8 digits, rc 3, no S3 call (row W4-S7).
+10. Proof instance written; validated with python .tools/proof-of-spec-check.py (see instance); TO status flipped.
