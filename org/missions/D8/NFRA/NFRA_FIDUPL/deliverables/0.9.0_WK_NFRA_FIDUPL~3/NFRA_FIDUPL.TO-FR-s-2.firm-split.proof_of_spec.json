@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "4ca02b2119",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-2.firm-split.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e4bb46835e"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/split.py",
+      "kind": "script",
+      "commit_or_etag": "7500236c81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); not deployed to the box or to S3 (the live grant is FU-s-6's and the daily wiring is FR-s-5's)",
+      "artifact_covered_by": ["FR2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_split.py",
+      "kind": "test",
+      "commit_or_etag": "7500236c81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); a test file, not deployed",
+      "artifact_covered_by": ["FR2-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR2-AC1",
+      "criterion_verbatim": "the nine named split tests exist and pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr2",
+      "output_evidence": "R1-FR2-OK passed=10",
+      "denominator": "9 of 9 named tests present in test_split.py; 10 passed (the nine named plus test_cli_prints_counts_only)",
+      "status": "PASS",
+      "expect": "R1-FR2-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, one at a time: (1) the firm object body normalised from CRLF to LF; (2) an account under two firms classed as a firm instead of a conflict.",
+      "expected": "test_raw_line_bytes_preserved fails under (1); test_account_under_two_firms_listed_not_landed fails under (2)",
+      "observed": "(1) 1 failed: test_raw_line_bytes_preserved; (2) 1 failed: test_account_under_two_firms_listed_not_landed; both files restored byte-identical (cmp)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two CLI dry-run calls of split.py on one synthetic handoff with a synthetic attribution; the two outputs compared with cmp",
+      "observed": "identical; rc 0 on both runs; 12 DRYRUN dest= lines each; no synthetic account, label or G value in the output",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live Wealthscape export and any live S3 write",
+      "reason": "built against a recording fake S3 and synthetic data only; the live run belongs to FU-x-1 and the daily wiring to FR-s-5"
+    },
+    {
+      "item": "a trading-calendar check inside split.py",
+      "reason": "the staged day passed the lander's calendar check; recorded as NFRA_FIDUPL-D1-W3-S8"
+    },
+    {
+      "item": "the id-to-value resolution written to the work directory",
+      "reason": "split_day fills a caller's resolution dict in memory only; the work-directory write belongs to the daily orchestration (FR-s-5)"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W3-S5: OBSERVATION, INERT -- the record carries ordinal ids and counts only, against the order's list of conflicts and unplaced accounts; resolution stays in memory.",
+    "NFRA_FIDUPL-D1-W3-S6: OBSERVATION, INERT -- an account under one mapped and one unmapped G is unplaced (fail closed); conflicts and unplaced are judged over attributed accounts.",
+    "NFRA_FIDUPL-D1-W3-S7: OBSERVATION, INERT -- a same-day firm object with different bytes is refused, never overwritten (the lander's rule, NFRA_FIDUPL-D1-W2-S3).",
+    "NFRA_FIDUPL-D1-W3-S8: OBSERVATION, INERT -- the exit code is stricter than the order's rule (missing file, failed write, unkeyed line, listing failure); no calendar check here."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~3/NFRA_FIDUPL.TO-FR-s-2.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_split.py",
+      "result": "10 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/split.py infra/aws/ec2/canonical-fidelity/tests/test_split.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~3 <0.9.0_WK_NFRA_FIDUPL~3@opal.agent>\" -F <msgfile> -- <the two code paths>",
+      "result": "rc=0; committed 7500236c81 on wk-NFRA_FIDUPL-3"
+    }
+  ]
+}
