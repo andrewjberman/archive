@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-y-1.source-compare-classes",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round25-GATEWAY.md",
+    "vintage_commit": "62604a82b8c",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-y-1.source-compare-classes.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "7c42c0c7437"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~84",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/source_compare.py",
+      "kind": "script",
+      "commit_or_etag": "70635dad511203dc819845d048be9925d23685af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local script, committed at 70635dad511 on branch wk-NFRA_MCPINDEX-84 (LOCAL). No deploy in scope: cell bound (list calls only; no AWS call, no network call, no grant, no deploy, no push).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_source_compare_classes.py",
+      "kind": "test",
+      "commit_or_etag": "70635dad511203dc819845d048be9925d23685af",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local pytest file, committed at 70635dad511 on branch wk-NFRA_MCPINDEX-84 (LOCAL). Run by AC3: 13 passed.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line (10 fixture tools); the stdout line SOURCE tools=10 agrees=5 disagrees=3 unreadable=2 with rc 1 and the file written; the graph, integration and store probes read true, false, true and false with the probe's instrument and fact; the graph tool with no probe stays null and not read here; the undated S3 tools read true (key present), false (key absent), null (no key in the answer) and true (key below the listed level); the dated S3 tool is still decided by the date rule -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: 10 fixture tools with an ok result (dA dated s3; gA gB graph, iA integration, sA store, each with a probe; uA uB uC uD undated s3; xA graph with no probe); expected counts agrees=5 disagrees=3 unreadable=2\n  ok   a disagreement makes rc 1 and the file is written\n  ok   stdout line\n  ok   schema and counts\n  ok   one entry per tool with an ok result, sorted by name\n  ok   every entry has exactly the round-24 keys, string instrument and reason\n  ok   gA (graph probe, values equal after trim): true, source is the first source (graph), instrument and reason are the probe's, no source dates\n  ok   gB (graph probe, values differ): false\n  ok   iA (integration probe, equal after case folding): true\n  ok   sA (store probe, values differ): false\n  ok   xA (graph source, no probe): null and the round-24 reason that names the kind and says it is not read here\n  ok   uA (undated s3, the answer's object key is in the listing): true with the reason 'object key present in the listing'\n  ok   uB (undated s3, the answer's object key is not in a non-empty listing): false with a reason\n  ok   uC (undated s3, the answer carries no object key): null with the round-24 undated reason\n  ok   uD (undated s3, the key lies below the listed level, an s3:// answer string): the key's own directory is listed and the key found -> true\n  ok   dA (dated s3): the round-24 date rule still decides\nARMS: 15 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "10 fixture tools with an ok result (dA dated s3; gA gB graph, iA integration, sA store, each with a probe; uA uB uC uD undated s3; xA graph with no probe); expected counts agrees=5 disagrees=3 unreadable=2; 15 of 15 arms ok",
+      "status": "PASS",
+      "expect": "RESULT: PASS\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; without --probes the round-24 fixtures give the same output bytes and stdout as the frozen round-24 run; the two planted flips read false and the counts follow; the eight refusals each exit 2 with REFUSED on stderr and no file; two runs give the same bytes; the script holds no object read or write call and has a --probes option -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: round-24 behavior without --probes on the 12-tool round-24 fixtures (bytes and stdout against the frozen y1_r24_expected files); 2 planted flips (a probe answer value, a removed listing key); 8 refusals (absent probes file, wrong schema, class outside graph|integration|store, unknown tool, class that does not match the tool's first source kind, two probes for one tool, a probe for a tool with no ok result, an empty probe field); determinism over 2 runs; no object read or write in the script\n  ok   without --probes the round-24 fixtures give the same output bytes, the same stdout and rc 1 as the frozen round-24 run\n  ok   planted: gA's answer value moved off the probe value reads false and the counts follow\n  ok   planted: the answer's key removed from a non-empty listing turns uA true -> false\n  ok   a --probes file that does not exist exits 2 and writes nothing\n  ok   a probes file with another schema string exits 2\n  ok   a probe class outside graph, integration, store exits 2\n  ok   a probe for a tool that is not in the census exits 2\n  ok   a probe whose class does not match the tool's first source kind exits 2\n  ok   two probes for one tool exit 2\n  ok   a probe for a tool with no ok result exits 2\n  ok   a probe with an empty field exits 2\n  ok   two runs on the same input give the same bytes and the same stdout\n  ok   the script holds no object read or write call (listing only) and has a --probes option\nARMS: 13 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "round-24 fixtures bytes and stdout (same bytes, same stdout, rc 1); 2 planted flips; 8 refusals; determinism over 2 runs; listing-only check; 13 of 13 arms ok",
+      "status": "PASS",
+      "expect": "RESULT: PASS\\s+exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 8 passed) for `test_source_compare_classes.py` -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round25/checks/y1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=13 (minimum 8) file=workflows\\gateway_battery\\tests\\test_source_compare_classes.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "test_source_compare_classes.py: 13 passed of 13 collected; minimum 8; 1 of 1 arms ok",
+      "status": "PASS",
+      "expect": "DENOMINATOR: pytest rc=0 passed=\\d+ \\(minimum 8\\)[\\s\\S]*RESULT: PASS\\s+exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutants in AC1 and AC2: a probe answer_value moved off its value (gA set to 13); the answer's key removed from a non-empty undated listing (uA); eight probe refusals (absent file, wrong schema, class outside the three, unknown tool, kind mismatch, two probes, no ok result, empty field). Each is run through the script.",
+      "expected": "the two flips read false with the counts following; each of the eight refusals exits 2 with REFUSED on stderr and writes no output file",
+      "observed": "AC2: 13 of 13 arms ok; the two flips read false (SOURCE tools=10 agrees=4 disagrees=4 unreadable=2); the eight refusals each exit 2 with REFUSED and no file",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the script on the y1 fixtures compared byte-for-byte and on stdout (the AC2 arm 'two runs on the same input give the same bytes and the same stdout')",
+      "observed": "the two runs gave the same bytes and the same stdout, rc 1 on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live S3 listing for any probe or by-key tool, and a run of the script on the real gateway census",
+      "reason": "Cell bound: list calls only on fixtures, no AWS call and no network call. The issuer's drain owns any live run."
+    },
+    {
+      "item": "The naming gate's OK grade for the two staged files",
+      "reason": "The naming gate printed NAMING ERROR for the function-map folder, which is outside this worktree's sparse cone; the commit landed rc 0. Filed as NFRA_MCPINDEX-Z-W84-S1, not worked around."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W84-S1",
+    "NFRA_MCPINDEX-Z-W84-S2"
+  ],
+  "session_log": "No session file written (the no-report-file rule). The worker report is the final message of 0.9.0_WK_NFRA_MCPINDEX~84 on NFRA_MCPINDEX.TO-MX-y-1.",
+  "compiler_tools": [
+    {
+      "tool": "pytest (unit tests for source_compare.py, round 25)",
+      "invocation": "python -m pytest workflows/gateway_battery/tests/test_source_compare_classes.py workflows/gateway_battery/tests/test_source_compare.py -q -p no:cacheprovider --color=no",
+      "result": "22 passed in 4.06s (13 new, 9 round-24 in the same run)"
+    },
+    {
+      "tool": "ruff py39 (lint of both committed files)",
+      "invocation": "python -m ruff check --target-version py39 workflows/gateway_battery/source_compare.py workflows/gateway_battery/tests/test_source_compare_classes.py",
+      "result": "All checks passed! (rc 0)"
+    },
+    {
+      "tool": "commit gate via .tools/safe-commit.sh (commit 70635dad511)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~84 <0.9.0_WK_NFRA_MCPINDEX~84@opal.agent>\" -F .scratch/msg_work.txt -- workflows/gateway_battery/source_compare.py workflows/gateway_battery/tests/test_source_compare_classes.py",
+      "result": "[commit-gate] All checks passed for 2 of 2 files; the naming gate printed NAMING ERROR (function-map folder missing, S1) and the risk reflex printed PARTIAL_OR_BLIND (S2); commit landed with rc 0"
+    }
+  ]
+}
