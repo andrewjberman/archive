@@ -1,0 +1,10 @@
+0.9.0_WK_NFRA_SCHWABBF~3 on NFRA_SCHWABBF.TO-BF-e1 -- round 2 (reopened 2026-10-20 by 2.0.0_SA_COO~SB, commit cc69cb4ff8). Branch wk-NFRA_SCHWABBF-3.
+
+1. Read the reopen commit cc69cb4ff8: status in_progress; section 2a added (issuer ruling on rows W3-S1 and W3-S2).
+2. Implemented the ruling in data/canonical/schwab/keyform/equal_sample.py: EXCLUDED_COLUMNS=("_source_file",) left out of content_sha256; source_file_values_sha256 recorded per cell and not compared; excluded_columns in the capture file; EXCLUDED columns=_source_file printed by capture (after CAPTURED) and compare (before the verdict); compare refuses a capture file whose excluded_columns differ (rc 2).
+3. Tests: 3 arms added (_source_file-only change -> EQUAL-OK; _source_as_of change -> EQUAL-DIFF field=content_sha256; excluded_columns mismatch -> rc 2). Base fixtures carry _source_file and _source_as_of.
+4. pytest data/canonical/schwab/tests/test_equal_sample.py -q: "15 passed in 1.53s" (AC1).
+5. ruff check --target-version py39 on both files: "All checks passed!" rc 0.
+6. AC2 re-run (timeout 120): CAPTURED cells=1 missing=0 then EXCLUDED columns=_source_file, rc 0. One read-only GetObject. Probe partition: 30 rows, 39 columns (the round-1 log said 40; the round-1 count was wrong, the names list has 39), numeric_sums empty, source_file_values_sha256 recorded (64 hex).
+7. Determinism (.scratch/determinism_check.py, python -I): two captures identical, compare EQUAL-OK cells=2.
+8. Commit 62331d34c6 (LOCAL on wk-NFRA_SCHWABBF-3): ruling implementation and tests.
