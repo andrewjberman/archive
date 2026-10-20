@@ -1,0 +1,8 @@
+A2 A2_EXC PackagerRefused ATTACH_REFUSED:404 at 10:24:35Z
+R2 10:24:39Z reason=ADMITTED
+T iss=opal-portal-auth aud=opal-portal-api
+PROBES-DONE 3 of 3 answered
+NOTE-A2 one package POST to a bogus ticket id through the portal's CloudFront alias (api_base overridden in memory only; nothing written on the host), run 2026-10-20 as ec2-user in the service's cwd and Environment, interpreter /usr/bin/python3.12, root /opt/irpt-resident/0485393f3a-r34m; the port converted HTTP 404 into ATTACH_REFUSED:404, which per the order means the request passed the edge, the origin gate and the token check (the same call to the direct host read ATTACH_REFUSED:403, A_PACKAGER_PROBE.txt)
+NOTE-R2 the authorizer log group holds 7 events in the 60 s around the call and exactly ONE invocation (INIT_START 10:24:38.6Z, a cold start, then one decision line); the log carries no path, so the line is tied to the call by being the only invocation of the window; its time is about 4 s after the host's stamp of the call (secret read, edge and cold start lie between). The line's content (it prints a login identity) is not copied.
+NOTE-T the token's iss and aud claims read as the two closed words opal-portal-auth and opal-portal-api; no other value printed
+NOTE-SCRIPT host_cfprobe.sh sha256 1774f6b53137c0e67bd30e5b54b0778c8a286714dfe48c0e842977f610176ea8; SSM command 61898ba7-6197-4190-9b16-1910fbab5dbf Success rc=0; output in ssm_cfprobe_out.txt; log read by cfprobe_log.py (r2_lines.txt)
