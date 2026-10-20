@@ -3,6 +3,7 @@
 #  {"principals": {"alyssa": P, "menachem": P}, "write_path": W} where P = {"role", "profile_present": bool, "client_tools": {t: "admitted" | "denied:<gate>"} for the five tools client_resolve_account, client_get_holdings,
 #   client_get_transactions, client_get_allocation, client_get_fees, "gates_read": [names of the gates the applier read, from: tool_denial, identity_scope, person_access, tier, entitlements, admit_scope],
 #   "needs_write": bool, "reason": "<one or two sentences>"}  and  W = {"mechanism": "<how a person_access record is written today>", "needs_owner_session": bool, "writer": "<the component>"}.
+#  Amended 2026-10-20 (row Z-S434): a denied principal with person_access_can_admit false (the gate is entitlements: decide() runs before person_access) needs NO ask, and none may be present.
 #  Consistency: needs_write is true exactly when at least one of the five tools reads "denied:..."; when needs_write is true for a principal, the ask W/NEVER_WIDEN_ASK_OG-gc-1.md has three headed halves, names the exact
 #  tools_allow set (a subset of the five), states that nothing else is widened (no channel, no other tool), and carries the process-wide-state line; when no principal needs a write, the ask is absent and the record says so (needs_write false for both).
 . "$(dirname "$0")/../../trnspt/checks/_root.sh"
@@ -17,6 +18,7 @@ GATES = {"tool_denial", "identity_scope", "person_access", "tier", "entitlements
 pr = d.get("principals") or {}
 ok = True
 need_any = False
+pa_can = []
 for who in ("alyssa", "menachem"):
     p = pr.get(who) or {}
     ct = p.get("client_tools") or {}
@@ -26,6 +28,8 @@ for who in ("alyssa", "menachem"):
     gates_ok = bool(p.get("gates_read")) and set(p["gates_read"]) <= GATES and len(p["gates_read"]) >= 3
     reason_ok = isinstance(p.get("reason"), str) and len(p["reason"]) >= 30
     need_any = need_any or denied
+    if denied and p.get("person_access_can_admit") is not False:
+        pa_can.append(who)
     good = p.get("role") == who and isinstance(p.get("profile_present"), bool) and tools_ok and consistent and gates_ok and reason_ok
     ok = ok and good
     print("%s: five client tools classified %s (denied %s), needs_write %s consistent with them %s, gates read %s, reason stated: %s" % (
@@ -35,7 +39,7 @@ wp_ok = all(isinstance(wp.get(k), str) and wp[k] for k in ("mechanism", "writer"
 print("write path named: mechanism and writer stated, needs_owner_session %s: %s" % (wp.get("needs_owner_session"), "ok" if wp_ok else "NOT OK"))
 ok = ok and wp_ok
 ask_path = os.path.join(W, "NEVER_WIDEN_ASK_OG-gc-1.md")
-if need_any:
+if need_any and pa_can:
     try:
         ask = open(ask_path, encoding="utf-8").read()
     except Exception:
@@ -50,7 +54,8 @@ if need_any:
     ok = ok and ask_ok
 else:
     absent = not os.path.exists(ask_path)
-    print("no write needed for either principal: no ask expected, none present %s: %s" % (absent, "ok" if absent else "NOT OK"))
+    why = "no denial" if not need_any else "a person_access record cannot admit the denied tools (person_access_can_admit false for every denied principal: the denial is decide()'s)"
+    print("no person_access write is effective (%s): no ask expected, none present %s: %s" % (why, absent, "ok" if absent else "NOT OK"))
     ok = ok and absent
 print("OK" if ok else "NO")
 PYEOF
