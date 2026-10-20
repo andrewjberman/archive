@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "to_id": "AMGT_HARVST.TO-HVST-co-2.the-gold-chatter-rebuild-is-measured-its-import-closure-its-newest-partitions-its-roster-and-its-write-rule",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-2.the-gold-chatter-rebuild-is-measured-its-import-closure-its-newest-partitions-its-roster-and-its-write-rule.md",
+    "group": "OTHER",
+    "vintage_commit": "7997ac0b53"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "7997ac0b53",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-co-2.the-gold-chatter-rebuild-is-measured-its-import-closure-its-newest-partitions-its-roster-and-its-write-rule.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~186",
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~186, branch wk-AMGT_HARVST-186, TREE-OK. Ran co2_gold.py once in the foreground (python -u, rc 0, stderr empty, 31 lines). Two defects in my own script were fixed before the run that counts: the repo root was not on sys.path in the parent (ModuleNotFoundError, rerun), and the key template dropped the literal date= (fixed, rerun). Rows AMGT_HARVST-D1-W186-S1 and -S2 appended by bytes (42 insertions, 0 deletions). Commit 25bef7b24d holds the script, the output and the rows. The order file was not edited.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~186/co2_gold.py",
+      "kind": "script",
+      "commit_or_etag": "25bef7b24d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read-only measurement script: closure of lib.research.harvest.publication_gold by the cn4 method, write_gold source lines, S3 listings under amgt/harvest/gold/, one roster object read; no write, no writer, no model call",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~186/co2_gold.out",
+      "kind": "doc",
+      "commit_or_etag": "25bef7b24d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdout of one foreground run of co2_gold.py, rc 0, stderr empty; the AC1 and AC2 expressions match its lines",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "25bef7b24d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two rows appended by bytes, AMGT_HARVST-D1-W186-S1 and AMGT_HARVST-D1-W186-S2; git diff numstat 42 insertions, 0 deletions; the row gate read 2 new rows OK"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: cat co2_gold.out expects the two closure controls and the GOLD-CLOSURE line of the entry; verdict OVER or UNDER against the 250 MB limit",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~186/co2_gold.out",
+      "expect": "(?ms)^CONTROL-POSITIVE target=lib\\.research\\.harvest\\.store pyarrow_in_closure=yes$.*^CONTROL-NEGATIVE target=json third_party_tops=0$.*^GOLD-CLOSURE entry=lib\\.research\\.harvest\\.publication_gold lib_modules=\\d+ third_party_pkgs=\\d+ third_party_mb=[\\d.]+ lib_code_mb=[\\d.]+ total_mb=[\\d.]+ limit_unzipped_mb=250 verdict=(OVER|UNDER) biggest=\\S+ removable_by_lazy=\\S+$",
+      "output_evidence": "CONTROL-POSITIVE target=lib.research.harvest.store pyarrow_in_closure=yes\nCONTROL-NEGATIVE target=json third_party_tops=0\nGOLD-CLOSURE entry=lib.research.harvest.publication_gold lib_modules=9 third_party_pkgs=3 third_party_mb=138.46 lib_code_mb=0.40 total_mb=138.86 limit_unzipped_mb=250 verdict=UNDER biggest=pyarrow:86.40,numpy:51.94,cloudpickle:0.12 removable_by_lazy=none\nCommentary: verdict=UNDER, the entry is 138.86 MB against the 250 MB limit, so the closure does not force a Fargate container task; surprise row AMGT_HARVST-D1-W186-S1.",
+      "denominator": "1 entry measured: 9 lib modules, 3 third-party packages; 2 of 2 closure controls read as designed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: cat co2_gold.out expects the GOLD-WRITE line (key shape, add-only, full snapshot), the GOLD-NEWEST line (newest partitions and trading-day lag) and the GOLD-ROSTER line (roster source and count)",
+      "method": "command",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~186/co2_gold.out",
+      "expect": "(?ms)^GOLD-WRITE key_shape=\\S+ add_only=(yes|no) full_snapshot=(yes|no)$.*^GOLD-NEWEST chatter_daily=\\d{4}-\\d\\d-\\d\\d chatter_event=\\d{4}-\\d\\d-\\d\\d article_security_mention=\\d{4}-\\d\\d-\\d\\d trading_days_behind=\\d+$.*^GOLD-ROSTER source=\\S+ names=[1-9]\\d*$",
+      "output_evidence": "GOLD-WRITE key_shape=amgt/harvest/gold/<table>/date=<date>/part-<run_stamp>.parquet add_only=yes full_snapshot=yes\nGOLD-NEWEST chatter_daily=2026-10-08 chatter_event=2026-10-03 article_security_mention=2026-10-08 trading_days_behind=8\nGOLD-ROSTER source=lib/research/harvest/universe_securities.py:build names=242\nCommentary: write_gold is one conditional put (IfNoneMatch=\"*\") of a full parquet snapshot at a key with the BUILD date partition; chatter_daily is 8 trading days behind the expected frontier 2026-10-20 (NOTE line: trading_days_behind counted from 2026-10-08); the roster is the 242-name file the round-75 rebuild took, written by universe_securities.build(); surprise row AMGT_HARVST-D1-W186-S2 records that covered_universe (95 names) is not the roster.",
+      "denominator": "3 of 3 gold tables listed (11, 7, 11 date partitions); 1 writer rule read (write_gold, 5 source lines of evidence); roster 242 names, 242 distinct security_keys in the newest chatter_daily object",
+      "status": "PASS"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, delete, copy or sync; any call to write_gold, build_mention, build_daily or build_event; any Bloomberg pull; any model call; any live gateway call",
+      "reason": "The order is a read-only cell that builds nothing and grants only list calls under amgt/harvest/gold/ plus one roster object read."
+    },
+    {
+      "item": "A live run of lib.research.harvest.universe_securities.build() to recount the roster",
+      "reason": "The roster count is the 242 entries of securities.universe.r75.json; its W129 signing record states it equals build() at HEAD. A live build would read the pool universe outside the gold prefix the order grants."
+    },
+    {
+      "item": "The task-order status flip",
+      "reason": "The order file says the issuer flips its status (line 54); the worker did not edit it."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-D1-W186-S1: the rebuild entry lib.research.harvest.publication_gold measures UNDER the 250 MB unzipped Lambda limit at 138.86 MB (pyarrow, numpy, cloudpickle), not OVER as the order's container-task premise expected.",
+    "AMGT_HARVST-D1-W186-S2: the gold roster is the 242-name universe_securities.build() list, not the 95-name covered_universe listing the order names as its start point; 147 keys of the newest chatter_daily object are not covered."
+  ],
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~186, branch wk-AMGT_HARVST-186, TREE-OK. Ran co2_gold.py once in the foreground (python -u, rc 0, stderr empty, 31 lines). Two defects in my own script were fixed before the run that counts: the repo root was not on sys.path in the parent (ModuleNotFoundError, rerun), and the key template dropped the literal date= (fixed, rerun). Rows AMGT_HARVST-D1-W186-S1 and -S2 appended by bytes (42 insertions, 0 deletions). Commit 25bef7b24d holds the script, the output and the rows. The order file was not edited.",
+  "compiler_tools": [
+    {
+      "tool": "co2_gold.py (cn4 closure method, entry lib.research.harvest.publication_gold)",
+      "invocation": "timeout 300 python -u org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~186/co2_gold.py > co2_gold.out",
+      "result": "rc 0, stderr empty, 31 stdout lines, GOLD-CLOSURE verdict=UNDER total_mb=138.86"
+    },
+    {
+      "tool": ".tools/safe-commit.sh with the surprise-row gate in its commit chain",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~186 <0.9.0_WK_AMGT_HARVST~186@opal.agent>\" -F .scratch/msg_A.txt -- <deliverables folder files> <investigation file>",
+      "result": "committed 25bef7b24d (LOCAL on wk-AMGT_HARVST-186); surprise-row-gate OK: 2 new row(s) of 608 total checked; the naming-gate line reported the sparse worktree's missing function-map folder and did not refuse"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Closure controls: a positive target known to load pyarrow must report it, and a negative target json must report zero third-party packages.",
+      "expected": "CONTROL-POSITIVE pyarrow_in_closure=yes and CONTROL-NEGATIVE third_party_tops=0",
+      "observed": "CONTROL-POSITIVE target=lib.research.harvest.store pyarrow_in_closure=yes; CONTROL-NEGATIVE target=json third_party_tops=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "single run (the order asks for one run)",
+      "observed": "not re-run; the S3 listings are live, so a rerun may show a newer partition",
+      "status": "N/A-WITH-REASON"
+    }
+  }
+}
