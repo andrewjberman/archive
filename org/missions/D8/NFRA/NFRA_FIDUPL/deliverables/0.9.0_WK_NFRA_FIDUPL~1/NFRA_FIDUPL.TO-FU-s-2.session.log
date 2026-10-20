@@ -170,3 +170,19 @@ C. Post-commit criteria, the main tree's checker run by absolute path from the w
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=27 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made in REPAIR 9.
+
+REPAIR 10 (issuer, 2026-10-20 ~18:30Z) -- the launch still closes: the display was set after the Playwright driver started
+   (SSM command 9a0ccbe4-aa54-49d9-8986-78585514434c, TargetClosedError; the REPAIR 9 socket wait was not the cause).
+A. Code (commit e2d36b36c7): _launch calls _ensure_display before the Playwright driver starts (cm.__enter__), so the driver and
+   the Chrome it spawns inherit DISPLAY. A failure in the driver start stops the child Xvfb and unsets the DISPLAY this process
+   set; every later failure goes through _teardown, which stops the display as well.
+B. Tests: tests/test_login_trace.py has 28 tests (the 27 and test_display_is_set_before_the_playwright_driver_starts, with its
+   driver-start-raises variant). 48 passed across the sign-in files; 28 passed twice. Mutant (display set after the driver
+   starts, scratch copy): 1 failed, 27 passed. ruff py39: All checks passed. Non-ASCII bytes: 0.
+C. Post-commit criteria, the renamed checker by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=28 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 10.
