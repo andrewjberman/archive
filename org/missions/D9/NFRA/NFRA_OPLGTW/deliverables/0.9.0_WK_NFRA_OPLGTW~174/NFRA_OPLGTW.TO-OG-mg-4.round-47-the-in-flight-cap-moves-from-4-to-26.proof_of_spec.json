@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-mg-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "1ed22ed869d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-mg-4.round-47-the-in-flight-cap-moves-from-4-to-26.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1ed22ed869d"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~174",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/inflight_guard.py",
+      "kind": "script",
+      "commit_or_etag": "72bc4026fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; the order has no deploy, release or schedule. The cell changes one constant, MAX_INFLIGHT 4 to 26.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_mg3.py",
+      "kind": "test",
+      "commit_or_etag": "72bc4026fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; the single assertion that names the old cap now names 26.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (the constant, and only the constant, moved): module constants MAX_INFLIGHT 26, QUEUE_WAIT_S 20.0, process-wide guard limit 26, Busy.code unchanged; inflight_guard.py against the pin 1 removed 1 added; test_og_mg3.py against the pin, each added line names 26.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mg4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "module constants: MAX_INFLIGHT 26, QUEUE_WAIT_S 20.0, process-wide guard limit 26, Busy.code unchanged: ok\ninflight_guard.py against the pin: 1 removed, 1 added (want 1 and 1, the constant): ok\ntest_og_mg3.py against the pin: 1 removed, 1 added (want equal, 1 to 3, each added names 26): ok\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 module-level checks ok (MAX_INFLIGHT, QUEUE_WAIT_S, process-wide guard limit) plus Busy.code; 2 of 2 changed files show 1 removed and 1 added line against the pinned blobs; rerun at 72bc4026fb identical",
+      "status": "PASS",
+      "expect": "(?s)module constants: MAX_INFLIGHT 26, QUEUE_WAIT_S 20\\.0, process-wide guard limit 26, Busy\\.code unchanged: ok.*inflight_guard\\.py against the pin: 1 removed, 1 added.*: ok.*test_og_mg3\\.py against the pin: 1 removed, 1 added.*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (a control; it also passes at the base): the guard's tests and its two neighbours pass at the new cap.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/mg4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "new file tests/test_og_mg3.py: 5 passed, 0 failed\nneighbours (2): 11 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 tests in tests/test_og_mg3.py pass; 11 tests in the two neighbours (tests/test_og_tp1.py, tests/test_og_fc1.py) pass with failed names []; identical on rerun at 72bc4026fb",
+      "status": "PASS",
+      "expect": "(?s)new file tests/test_og_mg3\\.py: [1-9]\\d* passed, 0 failed.*neighbours \\(2\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice at code commit 72bc4026fb (the second pair after the surprise-row commit 9830a74202, which touches only the channel)",
+      "observed": "identical output on both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W174-S1",
+    "NFRA_OPLGTW-Z-W174-S2"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python3 -I -m pytest tests/test_og_mg3.py tests/test_og_tp1.py tests/test_og_fc1.py (via mg4.AC2.sh)",
+      "result": "rc=0 per mg4.AC2.sh RESULT: PASS, exit=0; 5 passed in test_og_mg3.py, 11 passed in the neighbours"
+    }
+  ]
+}
