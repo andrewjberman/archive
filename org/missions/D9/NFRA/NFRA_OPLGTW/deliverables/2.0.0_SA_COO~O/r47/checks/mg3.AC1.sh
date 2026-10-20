@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # OPLGTW OG-mg-3 AC1 (round 47, Z-S425 / the CTO's item 3): app/inflight_guard.py bounds the number of MCP tool calls running at once, process-wide.
-# API fixed by the order: MAX_INFLIGHT (4), QUEUE_WAIT_S (20.0), class Busy (attribute code == "gateway_busy"), class InflightGuard(limit, wait_s) with
+# API fixed by the order: MAX_INFLIGHT (26), QUEUE_WAIT_S (20.0), class Busy (attribute code == "gateway_busy"), class InflightGuard(limit, wait_s) with
 # async context manager slot(tool) and snapshot() -> {"limit", "inflight", "waiting", "refused", "peak"}, and the process-wide instance `guard`.
 # Scenarios (limit 2): (a) short wait: five calls hold a slot 0.5 s, wait 0.3 s -> exactly two run, three are refused Busy, peak 2, inflight 0 after;
 # (b) long wait: five calls hold 0.2 s, wait 3 s -> all five complete, none refused, peak 2 (queued, not refused);
@@ -18,7 +18,7 @@ try:
     from app import inflight_guard as ig
 except Exception as exc:
     print("import failed: %s" % type(exc).__name__); print("NO"); sys.exit(0)
-say("module constants", ig.MAX_INFLIGHT == 4 and ig.QUEUE_WAIT_S == 20.0 and getattr(ig.Busy, "code", None) == "gateway_busy" and isinstance(ig.guard, ig.InflightGuard) and ig.guard.snapshot()["limit"] == 4, "limit %r" % ig.guard.snapshot().get("limit"))
+say("module constants", ig.MAX_INFLIGHT == 26 and ig.QUEUE_WAIT_S == 20.0 and getattr(ig.Busy, "code", None) == "gateway_busy" and isinstance(ig.guard, ig.InflightGuard) and ig.guard.snapshot()["limit"] == 26, "limit %r" % ig.guard.snapshot().get("limit"))
 
 async def call(g, hold, results):
     try:
