@@ -36,7 +36,7 @@ fs = t["full_suite"]
 ask = """# NEVER-WIDEN ASK -- `OG-rl-17` -- the round-47 sixteenth batched gateway release (`batch16`): the client fences and resolve envelope, the Cottonwood date parse, the 50 KB projection, the in-flight guard and the 8 GiB capacity key, the search and poll bounds, `index_pairs`, `news_for_security`, the YCharts and data-refresh repairs, the error-text mask; ONE code release plus two manifest keys; no IAM, no Terraform, no env key
 
 Applier: `0.7.0_AE_CloudOps~NFRA1`. Order: `org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-rl-17.round-47-sixteenth-batched-release-the-client-fences-the-size-caps-and-the-in-flight-guard.md` (GO for Phase A: msg 36175; method `OG-ap-50`'s). Source: the CTO's round-46 analysis items 1-5, 7 and 8 and the small items. **Phase A deploys nothing in any form** and writes no SSM parameter and nothing to the audit lake.
-**The release signed:** `release_sha` `%(rel)s`, on branch `rel-nfra-oplgtw-batch16` in the sparse tree `C:/tmp/og-rel-batch16` (LOCAL, not pushed), cut on `base_sha` `%(base)s` = the live ref READ ON THE HOST (`/opt/opal-gateway/.deployed_commit` at %(hostread)s; `W/rl17_pa/step1_before.json`), from `trunk_sha` `%(trunk)s`. dell1's harvest release `6575999df5` is an ancestor of `base_sha`; dell1's four harvest files are byte-equal between base and release (the diff does not touch them).
+**The release signed:** `release_sha` `%(rel)s` (the RE-CUT at the in-flight cap 26: the first cut `ce99b7463b` plus `app/inflight_guard.py` and `tests/test_og_mg3.py` taken whole from trunk `c0a0ee2e9c`), on branch `rel-nfra-oplgtw-batch16` in the sparse tree `C:/tmp/og-rel-batch16` (LOCAL, not pushed), cut on `base_sha` `%(base)s` = the live ref READ ON THE HOST (`/opt/opal-gateway/.deployed_commit` at %(hostread)s; `W/rl17_pa/step1_before.json`), from `trunk_sha` `%(trunk)s`. dell1's harvest release `6575999df5` is an ancestor of `base_sha`; dell1's four harvest files are byte-equal between base and release (the diff does not touch them).
 Records: `W/rl17_release.json`, `W/PHASE_A_OG-rl-17.json`, `W/rl17_pa/{step1_before,host_leg,tests,take,lease_param}.json`, `W/rl17_pa/failed_{release,live}.txt`, and the scripts `W/rl17_take.py`, `W/rl17_host.py`, `W/rl17_tests.py`, `W/rl17_phasea.py`, `W/rl17_ask.py`.
 
 ## 1. The diff, by file (26 files differ from the live ref: 1969 insertions, 75 deletions)
@@ -66,7 +66,7 @@ Twenty-five files taken WHOLE from trunk, each byte-equal to trunk's blob at `tr
 - The `client_*` tools now ANSWER for orion, eclipse and commonwealth. Before this release every such call returned `firm_not_served`. They answer only for principals ALREADY entitled to the client surface, reading the S3 prefixes the gateway role already reads; the fence is per vendor and firm (an unserved pair, such as orion with the cottonwood firm, still returns `firm_not_served`). The Cottonwood transaction and fee reads now return rows (the date parse; the round-46 false zero).
 - `search_files`, `search_site_files`, `poll_addressed_teams_messages`, `mdpf_get_aggregate_aua`, `opal_discover` and the typed tools answer SMALLER (result caps and the 50 KB projection on the bytes served): a behaviour change for any caller that relied on the full reply.
 - `news_for_security` answers more (a name search). The breakdown route (owner only) gains `index_pairs`.
-- A NEW refusal, `gateway_busy`, when more than four tool calls run at once (the fifth waits up to 20 s): a poller treats it as a missed cycle.
+- A NEW refusal, `gateway_busy`, when more than 26 tool calls run at once (the 27th waits up to 20 s and is then refused): a poller treats it as a missed cycle. The cap is 26 by the CTO's ruling on the C1 reading (msg 36195; `OG-mg-4`, drained at `c0a0ee2e9c`): the busiest second of the last 24 hours logged 13 completions, and the cap is twice that.
 - **No new tool, no `tools/list` change (%(reg)d before and after), no env key (the `.env` key count stays 65), no IAM, no Terraform, no unit or deploy-script change, no SSM write.** `app/admin_people_access.py` is inert: unmounted, nothing imports it.
 
 ## 4. The order of acts (Phase B, on a GO that names all three halves signed at `release_sha` and the window)
@@ -80,7 +80,7 @@ Window **2026-10-21 06:00Z-06:45Z**, abort line `/health` 200 by 06:30Z; I tell 
 
 ## 5. Both branches
 
-- **A fifth concurrent call** while four run is refused `gateway_busy` after 20 s; **a single sequential call is never refused** (Phase A burst: the single call after the burst ran).
+- **A 27th concurrent call** while 26 run is refused `gateway_busy` after 20 s; **a single sequential call is never refused** (Phase A burst against a scratch limit of 2: the single call after the burst ran).
 - **An entitled caller's D1 call** answers for orion, eclipse and commonwealth; **a caller outside the client surface** is still refused as before (the entitlement denial comes BEFORE the slot, so a denied call takes none).
 - **If a trigger fires:** redeploy the live ref's tree (section 6) and file an ARMED row naming `2.0.0_SA_COO~O`.
 
@@ -102,7 +102,7 @@ I read: the release diff against the live ref (26 files), `app/inflight_guard.py
 
 ### CTO half (`1.0.0_SA_CTO~Z`)
 
-To be signed on `release_sha` and this ask's sha256, with the widening (section 3), the take list and the `OG-rt-1` hold-back (section 1) and the new `gateway_busy` refusal read.
+To be signed on `release_sha` and this ask's sha256, with the widening (section 3), the take list and the `OG-rt-1` hold-back (section 1) and the new `gateway_busy` refusal and the cap 26 (section 3) read.
 
 ### COO half (`2.0.0_SA_COO~O`)
 

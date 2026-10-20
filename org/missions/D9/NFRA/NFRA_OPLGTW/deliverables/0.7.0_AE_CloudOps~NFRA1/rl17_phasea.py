@@ -28,15 +28,17 @@ bash_n = subprocess.run(["bash", "-n", TREE + "/deploy-to-ec2.sh"], capture_outp
 pf = subprocess.run(["bash", TREE + "/deploy-to-ec2.sh", "--preflight-only"], capture_output=True, text=True)
 preflight = (pf.stdout.strip().splitlines() or [""])[-1]
 imp, gb, fe, ct = hl["imports"], hl["guard_burst"], hl["fences"], hl["contract"]
+MAXIN = gb["module_max_inflight"]            # read on the host from the candidate scratch tree
+assert MAXIN == 26, "the re-cut must carry MAX_INFLIGHT 26 (OG-mg-4)"
 
 PROCESS_WIDE = (
     "The service imports one new module, app/inflight_guard.py, whose module-level instance `guard` is a process-wide object (constants MAX_INFLIGHT %d and QUEUE_WAIT_S 20.0; the asyncio primitives are created lazily inside the running loop, "
     "so import creates no semaphore, task or loop), and app/tools.py's _PolicyGuardedMCP.call_tool, the dispatch chokepoint of EVERY tool, now runs the tool body inside `async with inflight_guard.guard.slot(name)` after the entitlement denial "
-    "(a denied call takes no slot): a fifth concurrent call waits up to 20 s and is then returned as an enveloped gateway_busy refusal, audited as denied/gateway_busy. app/harvest_typed.py's project() (used by every typed tool and the client core) "
+    "(a denied call takes no slot): a call beyond the %d-th concurrent one waits up to 20 s and is then returned as an enveloped gateway_busy refusal, audited as denied/gateway_busy. app/harvest_typed.py's project() (used by every typed tool and the client core) "
     "now measures size as json.dumps(indent=2). READ, not instrumented: I opened app/inflight_guard.py whole (76 lines: imports asyncio, contextlib and typing, two constants, the Busy exception, the InflightGuard class and `guard = InflightGuard()`), "
     "the OG-mg-3 hunks of app/tools.py (the added import and the try/except around call_tool; no other module-level statement) and the OG-sz-1 hunks of app/harvest_typed.py (the _size measure and project()). "
     "No logger, handler, signal, thread, socket, environment read, sys.path change or global-config change happens at import. tools/list does NOT change: the candidate registry counted %d tools on the host against %d at the live ref (no tool is added). "
-    "Nothing arms the probe listener or writes any parameter." % (4, imp["registry_count_in_candidate"], s1["tools"]["tools_list_master_admin"]))
+    "Nothing arms the probe listener or writes any parameter." % (MAXIN, MAXIN, imp["registry_count_in_candidate"], s1["tools"]["tools_list_master_admin"]))
 n_red = len(t["named_new_reds_against_live_ref"])
 body = {
     "release_sha": REL["release_sha"], "base_sha": REL["base_sha"], "trunk_sha": REL["trunk_sha"],

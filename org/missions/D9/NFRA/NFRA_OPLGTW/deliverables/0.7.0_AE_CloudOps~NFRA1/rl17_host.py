@@ -67,7 +67,7 @@ def child_guard(stage):
     single = asyncio.run(burst(1))
     out = {"limit": 2, "ran": len(ran), "refused": len(busy), "raised": len(raised), "code": (sorted(codes)[0] if len(codes) == 1 else "mixed:%s" % sorted(map(str, codes))), "max_concurrent_bodies": state["max"],
            "busy_results_are_errors": all(r.isError is True for r in busy), "audit_rows_denied_gateway_busy": sum(1 for a, _ in logged if a[3:5] == ("denied", "gateway_busy")), "snapshot": g.snapshot(),
-           "single_call_after_burst_runs": single == [{"ok": True}], "vm_hwm_mb": round(m.hwm_mb(), 1)}
+           "single_call_after_burst_runs": single == [{"ok": True}], "module_max_inflight": ig.MAX_INFLIGHT, "module_queue_wait_s": ig.QUEUE_WAIT_S, "vm_hwm_mb": round(m.hwm_mb(), 1)}
     m.emit(out)
 
 
