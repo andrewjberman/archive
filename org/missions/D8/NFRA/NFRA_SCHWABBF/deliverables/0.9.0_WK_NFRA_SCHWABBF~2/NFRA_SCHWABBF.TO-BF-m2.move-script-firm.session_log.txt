@@ -1,0 +1,36 @@
+NFRA_SCHWABBF.TO-BF-m2 -- session log -- worker 0.9.0_WK_NFRA_SCHWABBF~2 -- branch wk-NFRA_SCHWABBF-2 -- 2026-10-20
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-2 ; test -d org && test -d .tools -> TREE-OK ; HEAD 264023be84 at entry.
+
+BASE DRY RUN (round-1 master-form tool and test, on the TO-BF-k2 firm-form library at 264023be84):
+  AC1 python -m pytest data/canonical/schwab/tests/test_move_bronze_key_form.py -q -p no:cacheprovider --color=no
+      -> "13 passed in 1.25s", rc=0. The order predicted FAIL. PREMISE MISMATCH, row NFRA_SCHWABBF-W2-S5.
+  AC2 python data/canonical/schwab/keyform/move_bronze_key_form.py plan --listing-file data/canonical/schwab/tests/fixtures/move_listing.json --out C:/Users/AndrewBerman/AppData/Local/Temp/bf_m2_plan_probe.json
+      -> MOVE-PLAN in_scope=12 foreign=1 copy=12 already=0 events=12 ; NO MOVE-SAMPLE line -> the expectation FAILS (as expected).
+  AC3 python data/canonical/schwab/keyform/move_bronze_key_form.py plan --master 08403355 --type acc
+      -> "MOVE-PLAN in_scope=516 foreign=0 copy=516 already=0 events=516", rc=0. The regex MATCHES at base. PREMISE MISMATCH, row NFRA_SCHWABBF-W2-S5.
+
+CHANGE:
+  data/canonical/schwab/keyform/move_bronze_key_form.py rewritten for the firm form:
+    destination = K.bronze_key_for_file(master, feed, date, filename) (TO-BF-k2 contract, loaded by path);
+    events = destination under schwab/49financial/bronze/ or schwab/cottonwood/bronze/, ending .zip;
+    MOVE-SAMPLE line printed right after MOVE-PLAN (first sorted source);
+    two in-scope sources mapping to one destination -> PlanRefused, CLI prints REFUSED with both keys (rc 2);
+    NO delete verb (module text checked by a test).
+  data/canonical/schwab/tests/test_move_bronze_key_form.py rewritten: 19 tests (plan counts and line, MOVE-SAMPLE
+    position, builder equality of every destination, events, foreign, already, per-type counts, two masters in the
+    SAME partition with different names, collision refusal, CLI plan out and sample, live prefix read,
+    copy dry run, idempotent re-plan, size conflict not overwritten, verify ok / flipped byte / size mismatch,
+    module text has no removal verb, out-of-scope refusal).
+  fixture data/canonical/schwab/tests/fixtures/move_listing.json: unchanged (13 keys).
+
+POST-CHANGE RUNS:
+  AC1 "19 passed in 1.07s" (rc=0).
+  AC2 MOVE-SAMPLE src=schwab/08242234/bronze/acc/20231017/08242234.CRS20231017.ACC.zip dst=schwab/49financial/bronze/acc/date=2023-10-17/08242234.CRS20231017.ACC.zip (rc=0);
+      plan line: MOVE-PLAN in_scope=12 foreign=1 copy=12 already=0 events=12.
+  AC3 live read-only listing of schwab/08403355/bronze/acc/ (AWS read, no write):
+      MOVE-LISTED keys=516 ; MOVE-PLAN in_scope=516 foreign=0 copy=516 already=0 events=516 ;
+      MOVE-COUNT master=08403355 type=acc n=516 (rc=0). Denominator: 516 keys listed.
+  MUTANT CONTROL (scratch copy under .scratch/mut, destination set to the source key, no move):
+      python -m pytest ... -> "11 failed, 8 passed in 1.74s" (rc=1). The mutant is caught.
+  NO copy --apply was run against any bucket. No object was written or deleted.

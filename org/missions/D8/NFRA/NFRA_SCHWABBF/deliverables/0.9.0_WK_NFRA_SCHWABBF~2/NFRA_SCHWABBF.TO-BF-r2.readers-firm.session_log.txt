@@ -1,0 +1,34 @@
+NFRA_SCHWABBF.TO-BF-r2 -- session log -- worker 0.9.0_WK_NFRA_SCHWABBF~2 -- branch wk-NFRA_SCHWABBF-2 -- 2026-10-20
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-2 ; test -d org && test -d .tools -> TREE-OK ; HEAD 71c2de5224 at entry.
+
+BASE DRY RUN (original bytes of the two readers and the daily test, on the firm-form library):
+  AC1 python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no
+      -> "16 passed in 1.00s", rc=0 (PASS at base, as the order predicts: a control that the file runs against the OLD layout)
+  AC2 ... -k tnn_listing
+      -> "16 deselected in 1.24s", rc=5 (FAIL as expected: no tnn_listing test yet)
+
+CHANGE:
+  data/canonical/schwab/build_canonical_daily.py
+    _monolith_partitions() -> _bronze_dates_or_refuse(CANON_FEED, CANON_MASTER) (shared, master-filtered, firm form).
+    MONOLITH_FEED_PREFIX removed (no other user in the tree). MONOLITH_BUCKET import removed (unused now; the test reads sil.MONOLITH_BUCKET).
+    The import of _bronze_dates_or_refuse is PRIVATE to _canonical_silver_lib.py (reported; row NFRA_SCHWABBF-W2-S6).
+    The dates_to_build note describes the master-filtered axis (row NFRA_SCHWABBF-W2-S7 records the behavior change).
+  data/canonical/schwab/silver/build_fact_tax_1099div.py
+    list_tnn_dates(min_size=0) -> _bronze_dates_or_refuse("tnn", MASTER). A positive min_size is REFUSED with ValueError
+    (the shared listing has no object sizes; no caller passes one). The source header names the firm-form folder.
+  data/canonical/schwab/tests/test_canonical_daily_date_axis.py rewritten on the firm layout, two masters in one folder (17 tests).
+
+  commit-gate: "OK: pre-commit gate clean for 3 of 3 file(s)" (after one ruff F401 fixed: MONOLITH_BUCKET unused).
+  code commit 9b2c50bb85 (LOCAL on wk-NFRA_SCHWABBF-2).
+
+POST-CHANGE RUNS:
+  AC1 "17 passed in 1.00s" (rc=0); run 2 "17 passed in 1.07s" (rc=0); 0 skipped (-rs printed no skip lines).
+  AC2 "1 passed, 16 deselected in 0.95s" (rc=0).
+
+MUTANT CONTROL (scratch copy .scratch/mut2, not committed): the master-name filter removed from _scan_bronze_partitions
+  -> "3 failed, 14 passed in 1.58s" (rc=1): test_catches_up_every_new_bronze_date_when_canonical_is_behind,
+  test_broken_name_partition_is_not_on_the_firm_axis, test_tnn_listing_returns_master_own_dates_from_firm_layout.
+
+DEPLOY TARGETS NAMED IN THE HEADERS: none. The 1099 header's Output line names an opal-data-bd canonical silver
+  path (an output, not a deploy target). build_canonical_daily.py names none.

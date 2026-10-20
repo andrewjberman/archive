@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-k2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R2.md",
+    "vintage_commit": "67998aecd30142be89611fa02a5e1762669a8afe",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-k2.key-function-firm.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "159c2a410fe08f2956d84033b971242a0046a1b3"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/_monolith_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "60781d2d86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The bd-tree mirror deploys standalone to s3://opal-data-bd/code/; that copy is the issuer's release act and was not performed here (LOCAL bound).",
+      "artifact_covered_by": [
+        "BF2-k2-AC1",
+        "BF2-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/silver/_canonical_silver_lib.py",
+      "kind": "script",
+      "commit_or_etag": "60781d2d86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_SCHWABBF-2 only. The BRONZE KEY FORM block is byte-equal to the bd-tree mirror (checked by the splice script: BLOCK BYTE-EQUAL 8742 bytes).",
+      "artifact_covered_by": [
+        "BF2-k2-AC1",
+        "BF2-k2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "60781d2d86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; rewritten for the firm form. No network: boto3 is stubbed at load and every listing is an in-memory fake.",
+      "artifact_covered_by": [
+        "BF2-k2-AC1",
+        "BF2-k2-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF2-k2-AC1",
+      "criterion_verbatim": "registry equality of the firm map, parity of both mirrors with the builder over 7 masters x 17 feeds x 2 dates, the guards, the parsers, and the master-filtering listers. The bar is a pytest summary line that STARTS with the passed count.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "550 passed in 2.47s (rc=0); second run: 550 passed in 2.18s (rc=0)",
+      "denominator": "550 of 550 collected tests passed (0 failed, 0 deselected); parity alone covers 7 masters x 17 feeds x 2 dates = 238 cases per mirror pair",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF2-k2-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: the converter's own readers accept a firm-form key.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no -k converter_seam",
+      "output_evidence": "1 passed, 549 deselected in 1.12s (rc=0); second run: 1 passed, 549 deselected in 0.94s (rc=0)",
+      "denominator": "1 of 1 selected test passed (549 deselected by -k); the test loads data/assets/scripts/silver/schwab_conversion.py by path and asserts feed_from_key and date_from_key on firm-form keys (plain and CS form)",
+      "status": "PASS",
+      "expect": "^1 passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Base-run negative control: the same test file run against the PRE-ROUND key-function files (master grammar, no firm form) before any change.",
+      "expected": "AC1 and AC2 each FAIL against the master-form bytes",
+      "observed": "AC1: '241 failed, 2 passed in 4.01s' (rc=1; the 'passed' count does not start the line). AC2: '1 failed, 242 deselected' (rc=1; the seam assertion saw the master-form key).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 550 passed in 2.47s; run 2: 550 passed in 2.18s. AC2 run 1: 1 passed, 549 deselected in 1.12s; run 2: 1 passed, 549 deselected in 0.94s. Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the bd-tree mirror to s3://opal-data-bd/code/",
+      "reason": "Issuer's release act (TO bounds: LOCAL, no S3, no deploy). Not performed."
+    },
+    {
+      "item": "Reader and writer cells that import this contract (TO-BF-m2, TO-BF-r2)",
+      "reason": "Next orders in the queue; the names and signatures here are kept exactly as the contract states them. Not touched by this order."
+    },
+    {
+      "item": "scope_from_key in the converter",
+      "reason": "Changes in another cell (the order says do not assert it here). Not asserted by this test."
+    },
+    {
+      "item": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd and the two OPAL_ASSETS PRDs",
+      "reason": "The order says do not edit those documents; the supersession is recorded in the code blocks and docstrings only."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-k2.key-function-firm.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "550 passed in 2.47s; -k converter_seam: 1 passed in 1.12s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, AST undefined-name scan, ruff, comp-constants, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/black_diamond/scripts/bronze/_monolith_bronze.py data/canonical/schwab/silver/_canonical_silver_lib.py data/canonical/schwab/tests/test_bronze_key_form.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder, read-only oracle for parity)",
+      "invocation": "address('schwab', firm, 'bronze', feed, 'date=YYYY-MM-DD') via the test's parity cases",
+      "result": "s3://opal-data-assets/schwab/<firm>/bronze/<feed>/date=<iso> for all 238 parity cases; the mirrors equal it with the bucket removed"
+    }
+  ]
+}
