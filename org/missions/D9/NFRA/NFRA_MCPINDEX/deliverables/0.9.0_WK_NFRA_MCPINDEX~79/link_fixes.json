@@ -1,0 +1,134 @@
+{
+ "schema": "gateway_link_fixes/1",
+ "fixes": [
+  {
+   "tool": "harvest_get_filing_analysis",
+   "remove": [
+    "harvest_issuer_site_harvest_silver_filing_source"
+   ],
+   "add": [],
+   "keep": [],
+   "basis": "The tool reads the sec/harvest/silver/filing_source prefix for its filing-source row, plus the filings and drafting prefixes. No code path of this tool lists or reads the issuer-site prefix named by the linked row.",
+   "cite": "app/harvest_research.py:602"
+  },
+  {
+   "tool": "harvest_get_fundamentals",
+   "remove": [
+    "harvest_bloomberg_harvest_bronze_exec_officers",
+    "harvest_bloomberg_harvest_bronze_histdata_daily_px",
+    "harvest_bloomberg_harvest_bronze_price_history_tot_return"
+   ],
+   "add": [],
+   "keep": [],
+   "basis": "The tool reads the bestdata, refdata, histdata, segments and price_history_px_last bronze prefixes and the two derived model_block prefixes. The exec_officers, histdata_daily_px and price_history_tot_return prefixes named by the linked rows are not read by any code path of this tool.",
+   "cite": "app/harvest_figures.py:41"
+  },
+  {
+   "tool": "harvest_get_research",
+   "remove": [
+    "harvest_research-dossier"
+   ],
+   "add": [
+    "harvest_bloomberg_harvest_bronze_exec_officers"
+   ],
+   "keep": [
+    {
+     "row": "harvest_amgt_harvest_silver_research_report",
+     "reason": "Hyphen twin of the canonical research_report prefix: app/harvest_research.py:98 lists it as the live spelling when the canonical prefix holds no key, and app/harvest_research.py:410 reads it."
+    },
+    {
+     "row": "harvest_research-continuation",
+     "reason": "Hyphen twin of the canonical research_continuation prefix: app/harvest_research.py:98 lists it as the live spelling when the canonical prefix holds no key, and app/harvest_research.py:379 reads it."
+    }
+   ],
+   "basis": "The tool reads the research_dossier, research_continuation and ai_fill gold prefixes, the research_report silver prefix, the management_v1 prefix and the bloomberg exec_officers prefix, which feeds the management roster. The hyphen spelling of research_dossier is never read by this module, so that linked row is removed.",
+   "cite": "app/harvest_research.py:98"
+  },
+  {
+   "tool": "harvest_resolve_security",
+   "remove": [
+    "harvest_identity_v1"
+   ],
+   "add": [
+    "harvest_research_dossier"
+   ],
+   "keep": [],
+   "basis": "The tool admits and reads the crosswalk/v1, universe/v1, bloomberg bronze identity and research_dossier prefixes. The identity/v1 prefix is not among them, and the research_dossier prefix is the covered-set prefix the tool reads and does not yet link.",
+   "cite": "app/harvest_identity.py:375"
+  },
+  {
+   "tool": "mdpf_get_model_composition",
+   "remove": [],
+   "add": [],
+   "keep": [
+    {
+     "row": "opal_data_mdpf_feeds_model_composition",
+     "reason": "Template row with a firm placeholder: app/portal_served.py:248 expands the placeholder per scope, so the two traced per-firm sources 49financial and inflection are read under this row."
+    }
+   ],
+   "basis": "The tool reads the model composition objects of one firm scope at a time. The linked row is one template whose firm placeholder the traced per-firm sources expand at the cited line, so the s3 link rule cannot grade it but the tool does read it.",
+   "cite": "app/portal_served.py:248"
+  },
+  {
+   "tool": "news_keyword_intelligence",
+   "remove": [],
+   "add": [],
+   "keep": [
+    {
+     "row": "dynamodb_dynamodb_opal_keyword_intelligence",
+     "reason": "Store source: app/news_typed.py:458 queries the DynamoDB table named by NEWS_KEYWORD_TABLE, and the catalog row names table opal-keyword-intelligence with this tool as its read_tool."
+    }
+   ],
+   "basis": "The tool reads one DynamoDB store through the keyword table handle and reads no S3 prefix. The store is the very table the linked catalog row names, which the s3 link rule cannot grade.",
+   "cite": "app/news_typed.py:458"
+  },
+  {
+   "tool": "news_market_mood",
+   "remove": [
+    "opal_data_portal_v2_served_news_trending_and_sentiment"
+   ],
+   "add": [],
+   "keep": [],
+   "basis": "The tool reads only the two sentiment singletons, fear-greed-index.json and keyword-sentiments.json, under the json/sentiment prefix. The combined row names json/trending/latest.json, which no code path of this tool reads.",
+   "cite": "app/news_typed.py:497"
+  },
+  {
+   "tool": "news_search_articles",
+   "remove": [],
+   "add": [],
+   "keep": [
+    {
+     "row": "dynamodb_dynamodb_opal_news_articles",
+     "reason": "Store source: app/news_typed.py:340 queries the DynamoDB table named by NEWS_ARTICLES_TABLE, and the catalog row names table opal-news-articles with this tool as its read_tool."
+    }
+   ],
+   "basis": "The tool reads one DynamoDB store through the articles table handle and reads no S3 prefix. The store is the very table the linked catalog row names, which the s3 link rule cannot grade.",
+   "cite": "app/news_typed.py:340"
+  },
+  {
+   "tool": "news_trending_topics",
+   "remove": [
+    "opal_data_news_v2_gold_trending_reports"
+   ],
+   "add": [],
+   "keep": [
+    {
+     "row": "dynamodb_dynamodb_opal_news_trending_daily",
+     "reason": "Store source: app/news_typed.py:394 queries the DynamoDB table named by NEWS_TRENDING_TABLE, and the catalog row names table opal-news-trending-daily with this tool as its read_tool."
+    }
+   ],
+   "basis": "The tool reads the trending DynamoDB store through the trending table handle. No code path of this tool reads the trending_reports prefix of the opal-data-news-v2 bucket, so that linked row is removed.",
+   "cite": "app/news_typed.py:394"
+  },
+  {
+   "tool": "schwab_describe_dataset",
+   "remove": [
+    "schwab_dim_asset"
+   ],
+   "add": [],
+   "keep": [],
+   "basis": "The describe tool reads the pinned field schema of the dataset the caller names, and the grant, and never reads a bucket object or table. It therefore does not read the schwab_dim_asset row the link names, and the traced integration cite at line 516 is inside list_files.",
+   "cite": "app/integrations/schwab/integration.py:561"
+  }
+ ]
+}
