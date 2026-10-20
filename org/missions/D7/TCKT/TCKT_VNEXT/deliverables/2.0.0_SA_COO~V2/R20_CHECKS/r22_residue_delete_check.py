@@ -15,7 +15,8 @@ import sys
 MANIFEST = "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R22_DELETE/R22_DELETE_MANIFEST.json"
 RES = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r22_delete/R22_DELETE_RESULT.json"
 AWS = os.path.abspath(".tools/aws.cmd")
-ROLE_PREFIX = "tckt-residue-delete-r22-"
+ROLE_PREFIX = "opal-ticket-residue-delete-"
+ROLE_SUFFIX = "-role"
 CHUNK = 12
 BUCKETS = {"opal-data-cottonwood", "opal-data-irpt"}
 DEPLOY_POLICY = "arn:aws:iam::313476888478:policy/cloudops-dell-agent-deploy-policy"
@@ -51,8 +52,8 @@ def result_problem(res, man, blob):
     if res["manifest_blob"] != blob:
         return "the result's manifest blob is not the manifest on disk"
     n_roles = -(-len(man["objects"]) // CHUNK)
-    if res["role_names"] != [ROLE_PREFIX + str(i) for i in range(n_roles)]:
-        return "the role names are not %s0 .. %s%d (one per chunk of %d)" % (ROLE_PREFIX, ROLE_PREFIX, n_roles - 1, CHUNK)
+    if res["role_names"] != [ROLE_PREFIX + str(i) + ROLE_SUFFIX for i in range(n_roles)]:
+        return "the role names are not %s0%s .. %s%d%s (one per chunk of %d)" % (ROLE_PREFIX, ROLE_SUFFIX, ROLE_PREFIX, n_roles - 1, ROLE_SUFFIX, CHUNK)
     if not isinstance(res["assume_duration_seconds"], int) or not (900 <= res["assume_duration_seconds"] <= 900):
         return "the assumed session must be exactly 900 seconds (15 minutes)"
     if not (str(res["role_destroyed_at"]) > str(res["role_created_at"])):
@@ -149,7 +150,7 @@ def good_manifest():
 
 
 def good_result():
-    return {"manifest_blob": "B", "role_names": [ROLE_PREFIX + "0"], "role_created_at": "2026-10-20T20:00:00Z", "role_destroyed_at": "2026-10-20T20:20:00Z", "assume_duration_seconds": 900,
+    return {"manifest_blob": "B", "role_names": [ROLE_PREFIX + "0" + ROLE_SUFFIX], "role_created_at": "2026-10-20T20:00:00Z", "role_destroyed_at": "2026-10-20T20:20:00Z", "assume_duration_seconds": 900,
             "plan_apply_summary": "3 to add, 0 to change, 0 to destroy", "plan_destroy_summary": "0 to add, 0 to change, 3 to destroy",
             "deleted": [{"bucket": "opal-data-cottonwood", "key": "portal/cottonwood/a/x.csv", "version_id": "v1", "deleted_at": "2026-10-20T20:05:00Z", "absent_after": True},
                         {"bucket": "opal-data-irpt", "key": "irpt/f/state/ART-1/y.csv", "version_id": "v2", "deleted_at": "2026-10-20T20:06:00Z", "absent_after": True}],

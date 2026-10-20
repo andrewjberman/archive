@@ -1,4 +1,4 @@
-# NFRA_MCPORTAL task order -- `MP-zo-4` -- WORKSTREAM OGW ROUND 1: the close run on /opalgateway -- one test principal switched off and back on, stopped and restored, read three ways (FWD-24, 25, 27, 28, 29)
+# NFRA_MCPORTAL task order -- `MP-zo-4` -- WORKSTREAM OGW ROUND 2: the close run on /opalgateway -- one test principal switched off and back on, stopped and restored, read three ways (FWD-24, 25, 27, 28, 29)
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
 
@@ -17,7 +17,7 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- each step is read against a source ot
 EGRESS CLASS, declared: AWS reads (DynamoDB read through the operator role, the changes table read) and the test principal's own gateway calls; no write by this cell.
 </preflight>
 
-## 1. THE CELL -- `MP-zo-4` (workstream OGW round 1, decomposition section OGW1.7)
+## 1. THE CELL -- `MP-zo-4` (workstream OGW round 2, decomposition section OGW2.1)
 
 **Do not start before the issuer's GO message.** The GO carries, from its ISSUER LINE: the TEST PRINCIPAL (`tid`, `oid`, and the identity you may call the
 gateway as), the channel and the tool to switch, the exact tool calls to make, the window `t0`..`t1` (ISO Z) in which Andrew, signed in as the owner on
@@ -77,7 +77,10 @@ APPEND ONLY: add your row after the last one and leave every earlier byte untouc
 <proof_of_spec>
   <criterion id="AC1" cell_refs="MP-zo-4"><invocation>bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo4.AC1.sh; echo "exit=$?"</invocation><expect>(?s)run=read ops=ordered store_after_matches=6 of 6 history_before_after=6 of 6 history_attributed=6 of 6 effect_ok=6 of 6.*RESULT: PASS.*exit=0</expect></criterion>
   <criterion id="AC2" cell_refs="MP-zo-4" judgment="true"/>
+  <criterion id="AC3" cell_refs="MP-zo-4"><invocation>bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo4.AC3.sh; echo "exit=$?"</invocation><expect>(?s)deployed_commit=\S+; admin_people_access.py at it: yes; mounted in admin_api.py=[1-9]\d*; @owner_only decorators=([2-9]|\d{2,}).*RESULT: PASS.*exit=0</expect></criterion>
 </proof_of_spec>
+
+AC3 reads git at the live release's commit: the gateway mounts the people-access routes and both handlers sit behind `owner_only` (the CVO's W1' note, gateway side; the writer side is `MP-zo-3`'s fifth test, already drained).
 
 AC2 is a JUDGMENT criterion, graded by `3.0.0_SA_CVO~Z` at L9 on `zo4_andrew_read.md` and the run file, never by you: did Andrew himself switch a channel, a tool and the
 person off and back on from `/opalgateway`, and does his own account say the page showed it, with the audit list listing the six? Record it in your instance under
@@ -89,19 +92,3 @@ Write the instance at `org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_
 Report once, with: the check output; the commit hash; the six steps (op, the history entry's time, `after` summarized as the changed field, admitted or denied with
 the code); `final_record`'s `revision` and `stopped`; the operator-role caller ARN; any row.
 
-<!-- ===================== RECORD FACE -- does NOT travel to the worker ===================== -->
-
-**ISSUER NOTES:** cut STAGED at OGW round 1 (decomposition OGW1.7, amendment 2) so the cut is instant when the gate holds. Gate G-OGW-CLOSE: the mount `OG-mp-1`
-(`2.0.0_SA_COO~O` batch17 `OG-rl-18`, not before 2026-10-22T06:00Z) and the bundle at mcportal f90f03a live on the host; the writer is already live (`MP-pd-7`);
-Andrew has named a test principal with a real calling identity and the sitting is queued as ONE call at the cut (no seat can produce the owner's signed header).
-Supersedes `MP-pd-8` (same six ops and run-file schema; adds the `who` read and the served-agreement framing; the page is `/opalgateway`, not `/people`); `MP-pd-8`
-is cancelled in place when this order is issued. The unattributed arm (a store-direct write in a test tree) is proven by `MP-zo-2`'s test and is not repeated served.
-Check `zo4.AC1.sh` dry-run at base: FAIL (run file absent); green and red arms exercised with synthetic files (see the staging commit).
-
-<status>staged</status>
-<round>1</round>
-<workstream>OGW</workstream>
-<slot>~44</slot>
-<fabric>site-z</fabric>
-<risk>WORLD</risk>
-<worker_class>worker</worker_class>
