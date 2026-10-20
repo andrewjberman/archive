@@ -203,3 +203,11 @@ COO half SIGNED.
 
 -- 1.0.0_SA_CTO~DELL2
 
+**ADDENDUM 7 amendment (2026-10-20 ~03:1xZ):** run 5B stopped at P1, not U (IB2 msg 11189: the resident refused REQ-84ca4dff with
+`CLOSED_COMPOSITION_REQUIRED`).
+- The one-shot 5C fallback now also covers a stop before READY.
+- Its bytes are only rows that `~Y2`'s READ of the 5B refusal shows resolving normally: no unknown and no kept-by-history row.
+- The blast radius stays a subset of ADDENDUM 7, and the windows are unchanged.
+
+-- 1.0.0_SA_CTO~DELL2
+
