@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-i3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a87d86a3c3a88e5aa152efd036722e",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-i3.iam-text-0840-only.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "998fe826317b0bfeec32c9e5fc6b537028925bd3"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "28645d847c8024c80170ceba1a8ba21fbc13077f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit; WORLD risk, nothing applied: no terraform init, plan or apply and no aws command were run. The apply is the NFRA CloudOps lane's act under safe-apply after the never-widen pair. The text is proven by the AC1 test reading it as text."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "kind": "test",
+      "commit_or_etag": "28645d847c8024c80170ceba1a8ba21fbc13077f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL: a text-reading pytest module; nothing deploys."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-i3-AC1",
+      "criterion_verbatim": "BF3-i3-AC1 -- the box role's firm-prefix write entry for 0840 only, the untouched old grants, the absence of a folder wildcard.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k iam_grants",
+      "output_evidence": "......                                                                   [100%]\n6 passed, 6 deselected in 0.06s",
+      "denominator": "6 of 6 selected iam_grants tests passed (0 failed, 0 errors); 6 deselected of 12 in the file. Covers: box_write_firm_entry_0840_only (firm write list equals exactly the 0840 entry), no_bare_firm_folder_wildcard, old_master_grants_untouched, write_only_invariant_box_role, no_cottonwood_on_box_role, converter_firm_read_is_read_only",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF3-i3-AC2",
+      "criterion_verbatim": "BF3-i3-AC2 -- the control: the event rules and the singleton notification are as round 2 left them (5 passed at the base).",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k event_rules",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 7 deselected in 0.04s",
+      "denominator": "5 of 5 selected event_rules tests passed (0 failed, 0 errors); 7 deselected of 12 in the file. Covers: schwab_keys_exact, firm_entries_family_suffix_prefix, other_families_untouched, schwab_prefixes_disjoint, notification_singleton",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The unedited three-master Terraform (firm entries for 08242234, 08335338 and 08403355) run against the rewritten one-master test.",
+      "expected": "the iam_grants firm-entry test fails naming the extra firm entries",
+      "observed": "F..... then '1 failed, 5 passed, 6 deselected in 0.26s' (rc 1); AssertionError: firm-prefix write entries must be exactly the 0840 entry: ['...schwab/49financial/bronze/*/date=*/08242234.*', '...08335338.*', '...08403355.*']",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 invocation run twice on the edited tree and the two outputs diffed",
+      "observed": "verdict line identical in both runs: '6 passed, 6 deselected'; rc 0 on both; only the wall-clock field differs (0.04s / 0.03s)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform fmt -check on monolith-iam.tf and silver.tf (test_fmt_edited_files)",
+      "reason": "Not a criterion of this cell (AC1 and AC2 only). The test skips when terraform is not on PATH; it was not run here."
+    },
+    {
+      "item": "terraform init, plan and apply, and any live IAM read",
+      "reason": "WORLD floor: nothing applied. The apply is the NFRA CloudOps lane's act under safe-apply after the never-widen pair."
+    },
+    {
+      "item": "Removing the old master-prefix grants for 08242234 and 08335338, and any 0824 or 0833 firm-folder decision",
+      "reason": "Out of scope: the old grants stay until Andrew confirms their delete (PRD v0.7 C-SCOPE, Andrew-direct ~16:3xZ). The Cottonwood masters belong to the Alongside box's own role (C-ONEWRITER)."
+    },
+    {
+      "item": "silver.tf and the converter's firm read",
+      "reason": "Not in this cell's <paths> grant; the event rules and the converter read stay as round 2 left them (AC2 is the control)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~5/NFRA_SCHWABBF.TO-BF-i3.session.log",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (python 3.12.10)",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k iam_grants | -k event_rules",
+      "result": "iam_grants 6 passed (rc 0); event_rules 5 passed (rc 0); pre-edit iam_grants 1 failed, 5 passed (rc 1)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile, ds-precommit, naming, to-pipeline, surprise-row gates)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_SCHWABBF~5 <0.9.0_WK_NFRA_SCHWABBF~5@opal.agent>\" -F <msg> -- infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "result": "rc 0 on 28645d847c (commit-gate All checks passed; 2 of 2 files). WARN: client-data-check hashed account-id list ABSENT, so no account-id check ran on this commit."
+    }
+  ]
+}
