@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ch-2.status-words-feature-merged-forward-onto-dev",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ch-2.status-words-feature-merged-forward-onto-dev.md",
+    "group": "OTHER",
+    "vintage_commit": "7e40f6a06599652ab20105b333626bb74404b769"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "5fcdaf84ce1339cbe9615da3a1e4a5d7a44212c5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ch-2.status-words-feature-merged-forward-onto-dev.md"
+  },
+  "assignee": "0.4.0_DT_ClientPlatform~H2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal DEV @5552e2197f95597249da39270c559ed854657e92",
+      "kind": "frontend_component",
+      "commit_or_etag": "5552e2197f95597249da39270c559ed854657e92",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "MERGE-FORWARD branch=cand/dell1/amgt-sa-status-words result=MERGED dev_before=f6f1fe5bafb614a0f9b6ca0a69c2115cf1bd5a41 dev_after=5552e2197f95597249da39270c559ed854657e92 pushed=yes (the order's step 3, the one approved route, DEV-PUSH-GATE ADMITTED); IN-DEV read after a fetch for ebd7b44720f2a9210d91e247072cac21654282a0; ls-remote origin DEV read 5552e2197f95597249da39270c559ed854657e92. DEV only: no release build, no PROD promote, no fold-back.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/MERGE_FORWARD_RECEIPT_CH2.md",
+      "kind": "doc",
+      "commit_or_etag": "66ad406a268782b629791c5f61087a8b31bbbd52",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on box/dell1 @66ad406a26; push state LOCAL at the time of writing (box-sync pushes box/dell1)",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV -q && git merge-base --is-ancestor ebd7b44720f2a9210d91e247072cac21654282a0 origin/DEV && echo IN-DEV -- expect: the single line `IN-DEV` (at the base the head is not an ancestor of `origin/DEV` and nothing prints)",
+      "method": "command",
+      "invocation": "cd C:/dev/ajb_workspace/portal && git fetch origin DEV -q && git merge-base --is-ancestor ebd7b44720f2a9210d91e247072cac21654282a0 origin/DEV && echo IN-DEV",
+      "output_evidence": "IN-DEV\nls-remote origin DEV: 5552e2197f95597249da39270c559ed854657e92 refs/heads/DEV\nbase reading (same command, DEV before the merge-forward): origin/DEV f6f1fe5bafb614a0f9b6ca0a69c2115cf1bd5a41, head not an ancestor, nothing printed (rc=1)\nfeature branch on origin: ebd7b44720f2a9210d91e247072cac21654282a0 refs/heads/cand/dell1/amgt-sa-status-words",
+      "denominator": "1 of 1 line; head ebd7b44720 is an ancestor of origin/DEV 5552e2197f",
+      "status": "PASS",
+      "status_reason": "the approved head is contained in origin/DEV after the merge-forward; at the base (DEV f6f1fe5b) the same command prints nothing",
+      "expect": "(?s)\\A\\s*IN-DEV\\s*\\n",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "grep -c -E \"IN-DEV|merge=|security-analysis|Opal-internal\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/MERGE_FORWARD_RECEIPT_CH2.md\" -- expect: a count of at least 4 (the IN-DEV line, the merge result, the route and the class each present)",
+      "method": "command",
+      "invocation": "grep -c -E \"IN-DEV|merge=|security-analysis|Opal-internal\" \"C:/dev/ajb_workspace/org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.4.0_DT_ClientPlatform~H2/MERGE_FORWARD_RECEIPT_CH2.md\"",
+      "output_evidence": "4\nmatching lines (same pattern, grep -n):\n25:    MERGE-FORWARD branch=cand/dell1/amgt-sa-status-words result=MERGED ... merge=5552e2197f95597249da39270c559ed854657e92\n31:Ancestry (`git merge-base --is-ancestor ebd7b44720... origin/DEV && echo IN-DEV` after a fetch):\n33:    IN-DEV\n39:| Security Analysis | /security-analysis | Opal-internal |",
+      "denominator": "4 matching lines (bar 4)",
+      "status": "PASS",
+      "status_reason": "the receipt carries the merge result, the IN-DEV line, the route and the class, each on its own line; the count meets the bar exactly",
+      "expect": "(?s)\\A\\s*([4-9]|\\d{2,})\\s*\\n",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1 run against the pre-merge DEV head f6f1fe5bafb614a0f9b6ca0a69c2115cf1bd5a41 in place of origin/DEV: the candidate head is not an ancestor there, so AC1 must not print IN-DEV.",
+      "expected": "no IN-DEV line",
+      "observed": "git merge-base --is-ancestor ebd7b44720 f6f1fe5bafb6 returned rc=1 and printed nothing",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice against the same origin/DEV, outputs compared",
+      "observed": "identical; both runs printed the single line IN-DEV",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live render of the Posture tab cite-miss words on a staff session",
+      "reason": "Not an order criterion: the page is staff-only behind a login and the order says the grade on the running page is the issuer's (AMGT-ch-3) after the landing. Not read here."
+    },
+    {
+      "item": "A mutant control for AC2",
+      "reason": "AC2 is a count over a receipt this seat wrote; its bar (4) is met exactly by the four required elements. No separate mutant run."
+    }
+  ],
+  "surprises": [],
+  "session_log": "0.4.0_DT_ClientPlatform~H2 on AMGT-ch-2 (GO msg 8580, acked). Observed at start: the order file was untracked in the shared tree and its on-disk status read complete while the GO said pending; the world was measured instead (DEV f6f1fe5b, head not in DEV, branch not on origin) and the work went ahead on the GO and the approval. The issuer's msg 8581 then recorded that the complete was a template error and that the order is the file at commit 7e40f6a065 (status pending), which is the spec vintage cited above. Step 1: approval-status APPROVED valid=yes row dell1-20261020T013211Z-07df head_sha ebd7b44720; local branch head read the same sha. Step 2: temporary linked worktree on the branch made by a call of its own, push run alone from it admitted, ls-remote ebd7b44720, worktree removed, no override. Step 3: portal-merge-forward.sh --push: PASS route=A, DEV-PUSH-GATE ADMITTED, MERGE-FORWARD result=MERGED dev_before=f6f1fe5b dev_after=5552e2197f pushed=yes; IN-DEV read; ls-remote DEV 5552e2197f. Step 4: receipt MERGE_FORWARD_RECEIPT_CH2.md committed as 66ad406a26, LOCAL on box/dell1. No product file edited; no release build, promote or fold-back.",
+  "compiler_tools": [
+    {
+      "tool": "open-calls.py approval-status",
+      "invocation": "python .tools/open-calls.py approval-status --branch cand/dell1/amgt-sa-status-words",
+      "result": "state=APPROVED valid=yes by=1.0.0_SA_CTO~DELL1 row=dell1-20261020T013211Z-07df head_sha=ebd7b44720f2a9210d91e247072cac21654282a0"
+    },
+    {
+      "tool": "portal-merge-forward.sh",
+      "invocation": "bash .tools/portal-merge-forward.sh cand/dell1/amgt-sa-status-words --push",
+      "result": "MERGE-FORWARD result=MERGED dev_before=f6f1fe5bafb614a0f9b6ca0a69c2115cf1bd5a41 dev_after=5552e2197f95597249da39270c559ed854657e92 pushed=yes"
+    }
+  ]
+}
