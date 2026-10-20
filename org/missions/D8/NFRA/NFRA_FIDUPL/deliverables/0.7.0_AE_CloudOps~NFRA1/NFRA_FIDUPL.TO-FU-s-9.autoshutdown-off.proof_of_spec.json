@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FU-s-9",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP.md",
+    "vintage_commit": "4966a2d44d",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-9.autoshutdown-off.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FU-s-9.autoshutdown-off.md",
+    "group": "OTHER",
+    "vintage_commit": "97764e4a43"
+  },
+  "assignee": "0.7.0_AE_CloudOps~NFRA1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/box.tf",
+      "kind": "terraform",
+      "commit_or_etag": "109bed2f6b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Tag AutoShutdown=disabled added to aws_instance.box; safe-apply rc=0 (0 added, 3 changed, 0 destroyed); live tag read by fu8t.",
+      "artifact_covered_by": [
+        "FU9-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
+      "kind": "terraform",
+      "commit_or_etag": "109bed2f6b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "stopInstance step and its three onFailure references removed; ec2:DescribeInstanceStatus added to ReadBoxStateStar; live document version 3 read by fu8d, role grant read by fu8p; plan No changes (fu7a).",
+      "artifact_covered_by": [
+        "FU9-AC2",
+        "FU9-AC3",
+        "FU9-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/outputs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "109bed2f6b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Output automation_role_arn added; printed by the apply: arn:aws:iam::313476888478:role/fidelity-alongside-automation-role.",
+      "artifact_covered_by": [
+        "FU9-AC4"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/signin.py",
+      "kind": "script",
+      "commit_or_etag": "6cbf750807",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Delivered to /opt/fidelity-uploader over SSM (sha256 HASH-MATCH); box md5 60ba9535f4b1831f96a1a0384886f5e3 equals the repo (fu9m).",
+      "artifact_covered_by": [
+        "FU9-AC5"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/signin_recon.py",
+      "kind": "script",
+      "commit_or_etag": "6cbf750807",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Delivered to /opt/fidelity-uploader over SSM; box md5 59adb2f0caa4964220df8bc963155280 equals the repo (fu9m).",
+      "artifact_covered_by": [
+        "FU9-AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261020T1331Z_nfra-fidupl-autoshutdown-off-20261020_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "96fa5d6001",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ledger entry CLOSED, 5 of 5 legs proven, sentinel removed (fu7l: completion entries=2, open sentinels=0)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FU9-AC1",
+      "criterion_verbatim": "the tag is live on the instance.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu8t",
+      "output_evidence": "R1-FU8T-OK AutoShutdown=disabled on the instance",
+      "denominator": "1 of 1 instances read",
+      "status": "PASS",
+      "expect": "R1-FU8T-OK AutoShutdown=disabled on the instance"
+    },
+    {
+      "criterion_id": "FU9-AC2",
+      "criterion_verbatim": "the live automation document version has no stop step and keeps its start step.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu8d",
+      "output_evidence": "R1-FU8D-OK no stop step in live document version 3",
+      "denominator": "1 of 1 live document versions read",
+      "status": "PASS",
+      "expect": "R1-FU8D-OK no stop step in live document version"
+    },
+    {
+      "criterion_id": "FU9-AC3",
+      "criterion_verbatim": "after the apply, terraform plan reads No changes.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu7a",
+      "output_evidence": "R1-FU7A-OK No changes.",
+      "denominator": "1 of 1 plan runs (rc 0)",
+      "status": "PASS",
+      "expect": "R1-FU7A-OK No changes\\."
+    },
+    {
+      "criterion_id": "FU9-AC4",
+      "criterion_verbatim": "the live automation role is allowed ec2:DescribeInstanceStatus (IAM simulation).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu8p",
+      "output_evidence": "R1-FU8P-OK the automation role is allowed ec2:DescribeInstanceStatus",
+      "denominator": "1 of 1 simulations",
+      "status": "PASS",
+      "expect": "R1-FU8P-OK the automation role is allowed ec2:DescribeInstanceStatus"
+    },
+    {
+      "criterion_id": "FU9-AC5",
+      "criterion_verbatim": "the repaired sign-in files on the box match the repo.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu9m",
+      "output_evidence": "R1-FU9M-OK signin.py,signin_recon.py match the repo on the box",
+      "denominator": "2 of 2 files md5-compared on the box",
+      "status": "PASS",
+      "expect": "R1-FU9M-OK signin.py,signin_recon.py match the repo on the box"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the five checks read a live tag, a live document, a plan, an IAM simulation and two md5s; no spec name has a defined mutation here.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the pre-apply plan was saved and applied as that file; the post-apply fu7a plan was run on the same tree",
+      "observed": "saved plan 0 add 3 change 0 destroy applied as is; post-apply plan No changes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "stopping or starting the instance",
+      "reason": "The order forbids it; the box was running before and after the apply."
+    },
+    {
+      "item": "a Wealthscape sign-in or an automation run",
+      "reason": "Not part of this order; FU-x-1 owns the live run."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-S5: ec2-auto-shutdown-enforcer stopped the box at 2026-10-20T00:51Z; resolved by the AutoShutdown=disabled tag (fu8t).",
+    "NFRA_FIDUPL-D1-W1-S8: the automation role lacked ec2:DescribeInstanceStatus; fixed by edit (c) (fu8p). Disarm evidence sent to the CVO."
+  ],
+  "session_log": "org/critical_paths/change_management/20261020T1331Z_nfra-fidupl-autoshutdown-off-20261020_deploy_completion.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-apply.sh",
+      "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+      "result": "rc=0: 0 added, 3 changed, 0 destroyed."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open; close-leg L1..L5; close",
+      "result": "OK: CLOSED, all 5 legs proven, sentinel removed."
+    },
+    {
+      "tool": "r1_checks.py",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu8t | fu8d | fu7a | fu8p | fu9m | fu7l",
+      "result": "R1-FU8T-OK; R1-FU8D-OK version 3; R1-FU7A-OK No changes.; R1-FU8P-OK; R1-FU9M-OK; R1-FU7L-OK completion entries=2, open sentinels=0"
+    }
+  ]
+}
