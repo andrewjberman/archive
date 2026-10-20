@@ -1,0 +1,39 @@
+== HEAD 4ea645f8afb
+== AC1
+DENOMINATOR: fixture y2 -- 5 tools in one native channel: send_email and create_draft each with a sent result carrying a read-back (S1, S2), reply_email and send_chat_message each with an unsent preview result (S3, S4), whoami a plain read (S5); 8 variants of the green results planted from that data
+  ok   green: send_email and create_draft are PASS on their agreeing read-back; reply_email and send_chat_message are PREVIEW-ONLY; no FAIL; rc 0
+  ok   green: the GRADE line reads PASS=3 PREVIEW-ONLY=2 FAIL=0 and the REALIZED line names send_chat_message
+  ok   green: the graded file lists send_chat_message in preview_only and the sent case row reads PASS with no fail class
+  ok   planted: a sent result with NO readback is FAIL send_unconfirmed
+  ok   planted: a sent result with readback null is FAIL send_unconfirmed
+  ok   planted: a readback that does not agree (false) is FAIL send_unconfirmed
+  ok   planted: a readback that could not be read (agrees null) is FAIL send_unconfirmed
+  ok   planted: the chat tool with NO result is still PREVIEW-ONLY, not not_run
+  ok   planted: ... and that tool reads PREVIEW-ONLY
+  ok   planted: a chat SEND without a readback is FAIL send_unconfirmed (no longer a preview)
+  ok   planted: another tool with no result (reply_email) is still FAIL not_run
+  ok   with --routing a sent PASS is not routed (route null) and still PASS; the plain read is routed
+ARMS: 12 ok, 0 failed
+RESULT: PASS
+exit=0
+== AC2
+DENOMINATOR: the round-22 fixtures (expected_census, cases_min, results_min) and the round-23 h6 fixtures graded by the script and compared byte for byte with baselines taken from the unchanged script (y2_base_*), 4 refusals, determinism, and the planted send of round 22 now classed send_unconfirmed
+  ok   g22 fixtures: the graded file is byte-identical to the unchanged script's
+  ok   g22 fixtures: the stdout is identical to the unchanged script's
+  ok   h6 fixtures: the graded file is byte-identical to the unchanged script's
+  ok   h6 fixtures: the stdout is identical to the unchanged script's
+  ok   the round-22 planted send (C8 sent, no readback) is still FAIL with rc 1, class send_unconfirmed (it was `sent`)
+  ok   refused (rc 2, REFUSED, no output file): a readback on a result that was not sent
+  ok   refused: a readback whose agrees is not a boolean or null
+  ok   refused: a readback without an instrument
+  ok   refused: a readback that is not an object
+  ok   two runs on the same input give the same bytes
+ARMS: 10 ok, 0 failed
+RESULT: PASS
+exit=0
+== AC3
+DENOMINATOR: pytest rc=0 passed=46 (minimum 28) files=test_tool_battery.py, test_tool_battery_route.py, test_tool_battery_send.py
+  ok   pytest on the three battery test files passes with at least 28 tests
+ARMS: 1 ok, 0 failed
+RESULT: PASS
+exit=0
