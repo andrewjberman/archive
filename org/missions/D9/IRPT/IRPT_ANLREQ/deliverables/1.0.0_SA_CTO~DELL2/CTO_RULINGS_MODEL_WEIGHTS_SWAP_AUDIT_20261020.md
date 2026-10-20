@@ -34,6 +34,18 @@ DONE WHEN lines. No cell is cut before v0.25.
   once, as a committed contract artifact that the reader carries. Today it lives only in a display-name match (trace Q6, row
   W304-S1).
 
+### R1 correction (~15:2xZ, on `2.0.0_SA_COO~G2` msg 15:15Z; re-read here)
+
+- **The key in R1 was wrong.** `yang/global/platinum/benchmarks/model-portfolio-timeseries.json` reads 404 on
+  `opal-data-portal-v2`.
+- **The series is `json/benchmarks/model_portfolio_timeseries.json`.** Read here: 780,910 bytes, last modified
+  2026-10-20T11:06:27Z.
+- **Shape** (`~G2`'s read): rows `{date, model_code, model_return, benchmark_return, rfr}` for UST, ST, INT, LT and ULT, starting
+  2024-04-30.
+- **The one-key read grant names this key.**
+- **Consequence for FWD-10:** a model comparable's common window cannot start before 2024-04-30, and the page states the window
+  rule.
+
 ## R2. Item A, the swap model leg: placed under FWD-2 (C-SWAP as written)
 
 - `swap_pass` passes a literal `[]` for model proposals and does no classification, so an unknown ticker always reads
