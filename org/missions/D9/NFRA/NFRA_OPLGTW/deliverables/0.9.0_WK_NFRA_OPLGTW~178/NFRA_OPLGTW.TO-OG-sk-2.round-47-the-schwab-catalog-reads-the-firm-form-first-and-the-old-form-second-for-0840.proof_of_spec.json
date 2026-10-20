@@ -16,28 +16,28 @@
   "artifacts_produced": [
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/catalog.py",
-      "kind": "code",
+      "kind": "script",
       "commit_or_etag": "2f86838dc48",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "read_marker, marker_locations, key_in_data, firm_form_masters, state_bucket, list_dates firm union, parse_silver_key file-name form"
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
-      "kind": "code",
+      "kind": "script",
       "commit_or_etag": "2f86838dc48",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "fetch refusal uses key_in_data"
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/deploy/NFRA_OPLGTW_CONTRACT.json",
-      "kind": "doc",
+      "kind": "config_data",
       "commit_or_etag": "2f86838dc48",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "one additive top-level key firm_form; byte-equal to the standards copy"
     },
     {
       "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
-      "kind": "doc",
+      "kind": "config_data",
       "commit_or_etag": "2f86838dc48",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "byte-equal copy of the deploy contract"
@@ -76,7 +76,8 @@
       "output_evidence": "new file tests/test_og_sk2.py: 8 passed, 0 failed\nneighbours (4): 28 passed, failed names [test_mx_s15_dataset_registered] (allowed: test_ogz1_ac08 only)\nRESULT: FAIL\nexit=1",
       "denominator": "new file 8 of 8 passed; neighbours 28 of 29 passed (1 failed: test_mx_s15_dataset_registered)",
       "status": "FAIL",
-      "expect": "(?s)new file tests/test_og_sk2\\.py: (?:[6-9]|[1-9]\\d+) passed, 0 failed.*neighbours \\(4\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+      "expect": "(?s)new file tests/test_og_sk2\\.py: (?:[6-9]|[1-9]\\d+) passed, 0 failed.*neighbours \\(4\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0",
+      "status_reason": "neighbour test_mx_s15_dataset_registered raises FileNotFoundError on infra/aws/terraform/opal-gateway/schwab_reader_iam.tf: the worktree sparse checkout omits that folder (BLOCKING row NFRA_OPLGTW-Z-W178-S1); the order stays open."
     },
     {
       "criterion_id": "AC3",
@@ -93,12 +94,15 @@
     "mutant": {
       "description": "In-process mutant (no product file edited, W/mutant_control.txt): key_in_data replaced by a FOLDER-ONLY fence, then head_set run on a closure naming the planted 08242234 file in the firm folder.",
       "expected": "the folder-only mutant admits the planted 08242234 file; the real file-name fence drops it",
-      "observed": "mutant: folder-only fence head_set keys = ['schwab/49financial/silver/dim_position/date=2026-10-20/08242234.parquet', 'schwab/49financial/silver/dim_position/date=2026-10-20/08403355.parquet']\nreal: file-name fence head_set keys = ['schwab/49financial/silver/dim_position/date=2026-10-20/08403355.parquet']\nmutant control: planted 08242234 admitted by the folder-only mutant and dropped by the real fence: ok\nRESULT: DETECTED"
+      "observed": "mutant: folder-only fence head_set keys = ['schwab/49financial/silver/dim_position/date=2026-10-20/08242234.parquet', 'schwab/49financial/silver/dim_position/date=2026-10-20/08403355.parquet']\nreal: file-name fence head_set keys = ['schwab/49financial/silver/dim_position/date=2026-10-20/08403355.parquet']\nmutant control: planted 08242234 admitted by the folder-only mutant and dropped by the real fence: ok\nRESULT: DETECTED",
+      "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "description": "AC1 run twice (W/ac_runs.txt and W/ac1_repeat.txt); the output lines are compared.",
       "expected": "identical output on both runs",
-      "observed": "run 2 identical to run 1 (cmp); run 2 tail: RESULT: PASS"
+      "observed": "run 2 identical to run 1 (cmp); run 2 tail: RESULT: PASS",
+      "method": "two same-input runs of sk2.AC1.sh (W/ac_runs.txt and W/ac1_repeat.txt), compared with cmp after stripping the exit line",
+      "status": "STABLE"
     }
   },
   "declared_exclusions": [
