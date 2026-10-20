@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-478.audit-write-grant-as-a-customer-managed-policy-terraform-source",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "56f2b547144",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-478.audit-write-grant-as-a-customer-managed-policy-terraform-source.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-478.audit-write-grant-as-a-customer-managed-policy-terraform-source.md",
+    "group": "OTHER",
+    "vintage_commit": "56f2b547144"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~349",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+      "kind": "config_data",
+      "commit_or_etag": "b7b499b111d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Inline policy irpt-ycharts-runner-resident-policy restored to its applied text: the WriteTheAnalysisAudit statement and the audit argument of the KMS StringLike are removed; the locals definition resident_audit_write_prefixes is kept. git diff --numstat 680818fdb3e b7b499b111d gives 9 additions, 0 deletions. Nothing planned, applied or run.",
+      "artifact_covered_by": [
+        "AR478-y-AC1",
+        "AR478-y-AC2",
+        "AR478-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident_audit_policy.tf",
+      "kind": "config_data",
+      "commit_or_etag": "b7b499b111d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, additions only: module.resident_audit_policy_name (irpt, audit-write, policy; name irpt-audit-write-policy), one aws_iam_policy resident_audit_write with two statements (Put-only WriteTheAnalysisAudit; AuditEncryptionViaS3ForAuditPrefixesOnly on the core kms_key_arn narrowed to the audit prefixes), one aws_iam_role_policy_attachment to aws_iam_role.runner. Compact JSON about 895 bytes against the 6144-byte bound (the checker's estimate with a placeholder KMS ARN). Nothing planned, applied or run.",
+      "artifact_covered_by": [
+        "AR478-y-AC1",
+        "AR478-y-AC2",
+        "AR478-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, offline, no AWS, no Terraform. Reads resident.tf, resident_audit_policy.tf, the base KMS line through git show 680818fdb3e, and the registries through lib/opal_naming.py loaded by path (reporting_destination for each enabled client firm with policy irpt-anlreq-x10-v1, family ANALYSIS_AUDIT). Passes .tools/commit-gate.sh (py_compile, ds-precommit, ruff): All checks passed.",
+      "artifact_covered_by": [
+        "AR478-y-AC1",
+        "AR478-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_bound.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, git read only. Selects this worker's own commits (author 0.9.0_WK_IRPT_ANLREQ~349) between 680818fdb3e and HEAD, and checks the resident.tf numstat, the added files under ycharts, and the other infra files of the own commits. Passes .tools/commit-gate.sh: All checks passed.",
+      "artifact_covered_by": [
+        "AR478-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended (IRPT_ANLREQ-D2-W349-S1, S2, S3; 69 insertions, 0 deletions), class OBSERVATION, hazard INERT, disposition UNDER_INVESTIGATION.",
+      "artifact_covered_by": [
+        "AR478-y-AC1",
+        "AR478-y-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR478-y-AC1",
+      "criterion_verbatim": "AR478-y-AC1 (cell AR-y-478): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py -- expect ^AUDIT-MANAGED-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes inline_restored=yes size=[0-9]+$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py",
+      "output_evidence": "AUDIT-MANAGED-OK firms=3 prefixes=3 builder_equal=yes put_only=yes inline_restored=yes size=895\nrc=0. Two runs gave byte-identical stdout (diff rc=0).",
+      "denominator": "3 of 3 enabled client firms (49financial, cottonwood, inflection) each with one ANALYSIS_AUDIT prefix equal to the reporting_destination builder output (bucket opal-data-irpt); 2 of 2 statements; 1 of 1 aws_iam_policy; 1 of 1 attachment to aws_iam_role.runner",
+      "expect": "^AUDIT-MANAGED-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes put_only=yes inline_restored=yes size=[0-9]+$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the one stdout line matches the expect regex exactly. size=895 is the compact JSON of the policy document below the 6144-byte bound."
+    },
+    {
+      "criterion_id": "AR478-y-AC2",
+      "criterion_verbatim": "AR478-y-AC2 (cell AR-y-478): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0. The three mutants, read on stderr: put-list-given-getobject read BAD (put statement actions are ['s3:GetObject'], want ['s3:PutObject']); inline-kms-given-audit-argument read BAD (resident.tf KMS line differs from its 680818fdb3e text); attachment-removed read BAD (aws_iam_role_policy_attachment count 0 != 1).",
+      "denominator": "3 of 3 in-memory mutants read BAD; the unmutated baseline read OK first",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "The stdout is exactly CONTROL-FIRES and rc=0; the selftest prints it only when all three mutants read BAD and each mutation changed the text."
+    },
+    {
+      "criterion_id": "AR478-y-AC3",
+      "criterion_verbatim": "AR478-y-AC3 (cell AR-y-478): python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_bound.py -- expect ^AUDIT-MANAGED-BOUND-OK resident_tf=[0-9]+/0 new_files=1 others=0$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_bound.py",
+      "output_evidence": "AUDIT-MANAGED-BOUND-OK resident_tf=9/0 new_files=1 others=0\nrc=0.",
+      "denominator": "1 own Terraform commit (b7b499b111d) among the worker's own commits since 680818fdb3e; 2 of 2 Terraform files changed by it are the granted paths; resident.tf 9 additions, 0 deletions; 1 added file under ycharts (resident_audit_policy.tf)",
+      "expect": "^AUDIT-MANAGED-BOUND-OK resident_tf=[0-9]+/0 new_files=1 others=0$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the one stdout line matches the expect regex exactly."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR478-y-AC2 control: --selftest mutates the text in memory three ways (the Put action list given s3:GetObject; the inline KMS line given the audit argument again; the attachment removed). Each mutant must read BAD.",
+      "expected": "CONTROL-FIRES only when all three mutants read BAD and each mutation changed the text.",
+      "observed": "All three mutants read BAD (stderr lines above); stdout CONTROL-FIRES; rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR478-y-AC1 run twice from the worktree root; stdout of the two runs compared with diff.",
+      "observed": "diff rc=0; the one OK line is identical in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate, terraform plan and the apply",
+      "reason": "Terraform is not installed on this box and the order forbids running it. The apply is a later IB2 order under a fresh signed pair (expected plan: 2 to add, 0 to change, 0 to destroy)."
+    },
+    {
+      "item": "the live attached-policy count of irpt-ycharts-runner-role (quota 20) and the live inline-policy byte total (10131 of 10240)",
+      "reason": "No AWS call by the worker. The figures are the issuer's and IB2's measurements, cited from A_AFTER_AUDITGRANT.txt."
+    },
+    {
+      "item": "the real KMS key ARN inside the size estimate",
+      "reason": "The core KMS key ARN is a Terraform data value. The checker estimates the size with a placeholder ARN of the same shape; the policy is far below 6144 bytes for any ARN of that length."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W349-S1: the naming module refuses the product scope irpt (only FIRM, GLOBAL, MASTER are accepted), so the policy is named as a shared resource (irpt-audit-write-policy), not a scoped name (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W349-S2: the commit gate's client-data check did not run on the Terraform commit because the hashed account-id list is absent on this box (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W349-S3: the pre-commit risk reflex answered PARTIAL_OR_BLIND for the Terraform commit (danger map stale; linked worktree; 0 of 2 files scanned) (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I (stdlib) for both checks; bash .tools/commit-gate.sh (py_compile, ds-precommit, ruff) on both .py files",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~349/check_audit_managed_policy.py",
+      "result": "All checks passed! / pre-commit gate clean for 1 of 1 file(s), rc=0 (both files)."
+    }
+  ]
+}
