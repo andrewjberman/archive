@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-466.audit-family-registry-row-and-builder-addresses",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "6e36e3dcc29",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-466.audit-family-registry-row-and-builder-addresses.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-466.audit-family-registry-row-and-builder-addresses.md",
+    "group": "OTHER",
+    "vintage_commit": "6e36e3dcc29"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~340",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/reporting_policies.json",
+      "kind": "config_data",
+      "commit_or_etag": "1c277930e66843d952cee6f5247a49895dbb02d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ANALYSIS_AUDIT row (platinum, analysis_audit, json, unreferenced_days null, accepted_ceiling_days 2555) inserted before ANALYSIS_COMMENTARY in the policy irpt-anlreq-x10-v1. numstat 1 0. Committed LOCAL on wk-IRPT_ANLREQ-340. No deploy, no AWS call.",
+      "artifact_covered_by": [
+        "AR466-y-AC1",
+        "AR466-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
+      "kind": "script",
+      "commit_or_etag": "505dc4c0dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib, offline check. Loads lib/opal_naming.py by path, runs validate(), resolves one address() per enabled client firm (AC1) and runs the --selftest control (AC2). Committed LOCAL; commit-gate clean.",
+      "artifact_covered_by": [
+        "AR466-y-AC1",
+        "AR466-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family_bound.py",
+      "kind": "script",
+      "commit_or_etag": "505dc4c0dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib, offline check. Reads the registry edit commit 1c277930e66 with git and prints AUDIT-FAMILY-BOUND-OK numstat=1/0 files=1 (AC3). Committed LOCAL; commit-gate clean.",
+      "artifact_covered_by": [
+        "AR466-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "2f84bc6b305dc71d3dcc28a3d3c596803a1f66e0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four appended rows IRPT_ANLREQ-D2-W340-S1..S4 (110 insertions, 0 deletions). S1 is the AC2 control failure; S2 to S4 are placement, path and bound-check notes."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR466-y-AC1",
+      "criterion_verbatim": "AR466-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py -- expect ^AUDIT-FAMILY-OK firms=[0-9]+ addresses=[0-9]+ validator=pass$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
+      "output_evidence": "ADDRESS firm=49financial bucket=opal-data-49financial key=irpt/49financial/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nADDRESS firm=inflection bucket=opal-data-inflection key=irpt/inflection/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nADDRESS firm=cottonwood bucket=opal-data-cottonwood key=irpt/cottonwood/platinum/analysis_audit/date=2026-10-20/REQ-SAMPLE.json\nAUDIT-FAMILY-OK firms=3 addresses=3 validator=pass\nrc=0 (the closing line is the last line of stdout).",
+      "denominator": "3 of 3 enabled client firms in data/firm_registry.json (kind client, enabled true) resolved to a builder address; 3 of 3 addresses carry the scope bucket; 1 closing line",
+      "expect": "^AUDIT-FAMILY-OK firms=[0-9]+ addresses=[0-9]+ validator=pass$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the closing line matches the expect regex exactly. Run twice, the stdout is identical (controls.determinism)."
+    },
+    {
+      "criterion_id": "AR466-y-AC2",
+      "criterion_verbatim": "AR466-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py --selftest",
+      "output_evidence": "CONTROL-VARIANT-A platinum with unreferenced_days 30 -> OK (validator accepts)\nCONTROL-VARIANT-B tier state with unreferenced_days null -> BAD: only accepted-only platinum may omit an unreferenced lifetime\nCONTROL-DOES-NOT-FIRE: the control fires only when both variants read BAD (variant A read BAD=False, variant B read BAD=True)\nrc=1",
+      "denominator": "2 of 2 control variants; 1 of 2 read BAD as the cell requires (variant B); 0 of 2 needed for CONTROL-FIRES on variant A",
+      "expect": "^CONTROL-FIRES$",
+      "status": "FAIL",
+      "status_reason": "The cell's premise is false: lib/opal_naming.py _validate_reporting_policies (lines 2629-2636) refuses a None lifetime only for a non-platinum tier. A platinum family with unreferenced_days 30 passes (30 <= min(30, 2555)), so variant A reads OK and CONTROL-FIRES cannot print. The validator is outside this order's grant and was not edited. Filed as IRPT_ANLREQ-D2-W340-S1 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~Y2)."
+    },
+    {
+      "criterion_id": "AR466-y-AC3",
+      "criterion_verbatim": "AR466-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family_bound.py -- expect ^AUDIT-FAMILY-BOUND-OK numstat=[0-9]+/0 files=1$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family_bound.py",
+      "output_evidence": "EDIT-COMMIT 1c277930e66843d952cee6f5247a49895dbb02d6 HEAD=2f84bc6b305dc71d3dcc28a3d3c596803a1f66e0\nSUBJECT registry(IRPT_ANLREQ AR-y-466, 0.9.0_WK_IRPT_ANLREQ~340): add platinum family ANALYSIS_AUDIT to reporting policy irpt-anlreq-x10-v1\nNUMSTAT 1 0 infra/logic/registry/reporting_policies.json\nAUDIT-FAMILY-BOUND-OK numstat=1/0 files=1\nrc=0",
+      "denominator": "1 of 1 registry edit commit; 1 of 1 changed file in that commit; 0 deletions of 1 insertion",
+      "expect": "^AUDIT-FAMILY-BOUND-OK numstat=[0-9]+/0 files=1$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the closing line matches the expect regex exactly. The check reads the newest commit that touched the registry, which is the edit commit 1c277930e66 (the deliverables commit sits on top of it)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR466-y-AC2 control: the --selftest reads two mutated copies of the ANALYSIS_AUDIT row in memory. Variant A is platinum with unreferenced_days 30; variant B is tier state with unreferenced_days null. The control fires only when both read BAD.",
+      "expected": "both variants read BAD; the composite prints CONTROL-FIRES; rc 0",
+      "observed": "variant B read BAD (only accepted-only platinum may omit an unreferenced lifetime); variant A read OK (validator accepts); the composite printed CONTROL-DOES-NOT-FIRE and rc 1.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "the AR466-y-AC1 command run twice from the worktree root, stdout written to .scratch/ac1_run1.txt and .scratch/ac1_run2.txt (scratch, not committed), compared with diff.",
+      "observed": "diff rc=0; 4 lines identical in both runs (3 ADDRESS lines and the AUDIT-FAMILY-OK line); each run rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/opal_naming.py platinum-null rule (the AC2 control premise)",
+      "reason": "outside this order's <paths> grant; filed as IRPT_ANLREQ-D2-W340-S1 (BLOCKING) for the owner to decide, not edited by the worker"
+    },
+    {
+      "item": "terraform plan or apply of the registry-driven resources",
+      "reason": "no AWS call, no network, no deploy by the worker; Terraform is not installed on this box, and the release and apply are later orders under a signed pair"
+    },
+    {
+      "item": "live bucket existence and the platinum prefix in the served buckets",
+      "reason": "the addresses are builder output from the registry, offline; the buckets were not read live"
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W340-S1: AR-y-466 AC2: the validator accepts a platinum family with a non-null unreferenced lifetime, so the --selftest control cannot fire (BLOCKING, ARMED).",
+    "IRPT_ANLREQ-D2-W340-S2: AR-y-466: the family row is placed before ANALYSIS_COMMENTARY because an after-placement needs a deletion and breaks the numstat 0-deletion requirement (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W340-S3: AR-y-466: the cell names deliverables ~329 for the checks; the grant and the invocations name ~340, and the checks were written to ~340 (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W340-S4: AR-y-466: the bound check reads the newest registry-touching commit instead of a literal HEAD~1, because HEAD moves off the edit (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh (py_compile, ds-precommit, ruff py39) on both check scripts",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py ; the same for check_audit_family_bound.py",
+      "result": "OK: pre-commit gate clean for 1 of 1 file(s), each script; All checks passed! (ruff)"
+    },
+    {
+      "tool": "lib/opal_naming.py validate() via the check",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~340/check_audit_family.py",
+      "result": "validate() returned no refusals on the edited registry at 1c277930e66 (validator=pass)"
+    }
+  ]
+}
