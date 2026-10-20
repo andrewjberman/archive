@@ -1,0 +1,83 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one probe, one log read, one claim read, once each; the same probe through the direct host (A_PACKAGER_PROBE.txt) read 403 and this one 404, so the two doors differ",
+   "observed": "3 of 3 answered, 0 leak-shaped lines",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-READ-PACKAGER-CFPROBE.the-package-post-through-the-cloudfront-alias-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-CFPROBE.the-package-post-through-the-cloudfront-alias-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "60f7a8d13f"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-READ-PACKAGER-CFPROBE.the-package-post-through-the-cloudfront-alias-ib2.md",
+  "vintage_commit": "60f7a8d13f"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "host_cfprobe.sh (sha256 1774f6b53137c0e67bd30e5b54b0778c8a286714dfe48c0e842977f610176ea8) run by SSM command 61898ba7-6197-4190-9b16-1910fbab5dbf in the service's environment (A2 and T); cfprobe_log.py read the authorizer log (R2)",
+   "artifact_covered_by": [
+    "PKGCF-AC1",
+    "PKGCF-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "PKGCF-AC1",
+   "invocation": "grep -c -E '^(A2 |R2 |T iss=|PROBES-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+   "expect": "^4$",
+   "output_evidence": "4\nexit code: 0\n(run 2026-10-20 from the repo root)",
+   "denominator": "1 record file of 8 lines: 4 answer lines plus 4 NOTE lines the pattern does not match",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E '^(A2 |R2 |T iss=|PROBES-DONE [0-9]+ of 3 answered)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "PKGCF-AC2",
+   "invocation": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+   "expect": "^0$",
+   "output_evidence": "0\nexit code: 1\n(run 2026-10-20 from the repo root; grep -c prints 0 and exits 1 when no line matches)",
+   "denominator": "8 lines scanned",
+   "status": "PASS",
+   "criterion_verbatim": "grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\\.[a-z]{2,}' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "the viewer-request edge function's own log",
+   "reason": "it lives in other regions and the order does not ask for it; the 404 answer shows the request passed it"
+  },
+  {
+   "item": "which authorizer line belongs to the call",
+   "reason": "the authorizer logs print no path; the line is the only invocation in the 60 s window and sits about 4 s after the host's stamp (cold start)"
+  }
+ ],
+ "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_packager_cfprobe/A_PACKAGER_CFPROBE.txt",
+ "compiler_tools": [
+  {
+   "tool": "boto3 ssm send_command via ssm_root_600.py (host_cfprobe.sh, systemd-run in the service's environment) and a logs filter_log_events read (cfprobe_log.py)",
+   "invocation": "python ssm_root_600.py host_cfprobe.sh <sha256> <comment> ssm_cfprobe_out.txt; python cfprobe_log.py",
+   "result": "PROBES-DONE 3 of 3 answered; PKGCF-AC1 4, PKGCF-AC2 0"
+  }
+ ]
+}
