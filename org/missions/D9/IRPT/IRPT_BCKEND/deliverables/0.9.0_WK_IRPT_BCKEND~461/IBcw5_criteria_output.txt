@@ -1,0 +1,22 @@
+IBCW5 criteria output, worker 0.9.0_WK_IRPT_BCKEND~461, TO IRPT_BCKEND.TO-IB-cw-5
+Run from the worktree root, each under timeout 300, recorded verbatim. Run BEFORE the one commit.
+
+== IBCW5-AC1 (before the commit) ==
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py" . IBCW5-AC1
+OK: the eight named tests exist and all pass
+IBCW5-AC1 PASS
+rc=0
+denominator: 8 of 8 named tests PASSED (the check's own pytest run over tests/test_refresh_retained_key.py)
+
+== IBCW5-AC2 (before the commit) ==
+$ timeout 300 python "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/2.0.0_SA_COO~P2/checks/r261/p261_cells.py" . IBCW5-AC2
+FAIL: refresh.py is identical to the base: a differential over an unchanged file proves nothing
+IBCW5-AC2 FAIL
+rc=1
+reading: AC2 compares `git show HEAD~1:refresh.py` with `git show HEAD:refresh.py`. Before the commit HEAD still holds
+the base bytes, so the check fails by construction here. It is re-run after the commit (the worker report carries the
+post-commit result); this file does not claim a pre-commit PASS.
+
+== IBCW5-AC3 (not run before the commit) ==
+AC3 reads `git diff --name-only HEAD~1 HEAD`, which is the one commit that carries this file. It cannot be computed
+before that commit exists; the post-commit run is reported in the worker report.
