@@ -18,3 +18,21 @@ Sequence, verbatim outputs.
    python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=5 (rc 0)
 
 No live Wealthscape or Quo call was made in this order: the only live read is FU-x-1's --run-live.
+
+REPAIR (reopened 2026-10-20; fresh worktree C:/tmp/fidupl-w1 cut from box/dell1 8b3c47d58e)
+A. Code: signin.py rewritten for the repair; signin_recon.py gained --trace-login and prints the trace on a failed
+   --run-live; tests/test_login_trace.py (5 tests). Commit 6cbf750807 (code), da1e80c105 (row W1-S10).
+   The CRO's measured selectors are tried first (#userInput, #passwordInput input, #submitButton,
+   [formcontrolname='securityCode'] input), then type, role and visible-text fallbacks; 20 s per step.
+   authorize() observes the authorize status that Verify fires (no second click).
+B. Tests: python -m pytest -q tests/test_login_trace.py tests/test_signin.py tests/test_signin_recon.py tests/test_gprobe.py
+   -> 22 passed. ruff check --target-version py39 on the six files -> All checks passed!
+C. Mutant control (scratch copy, outline redaction of password and code rows disabled): 2 failed, 3 passed
+   (test_trace_never_records_secret_or_code fired).
+D. Determinism: test_login_trace.py run twice -> 5 passed, 5 passed.
+E. Post-commit criteria (worktree, after 6cbf750807):
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2c -> R1-FU2C-OK passed=5 (rc 0)
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu2t -> R1-FU2T-OK passed=5 (rc 0)
+No AWS call and no live call were made in the repair. The live proof is FU-x-1's trace-login run.
