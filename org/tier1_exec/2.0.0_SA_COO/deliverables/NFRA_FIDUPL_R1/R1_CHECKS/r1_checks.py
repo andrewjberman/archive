@@ -38,7 +38,9 @@ TEST_FILES = {
     "fu2t": ("%s/tests/test_login_trace.py" % CF, [
         "test_trace_records_step_outline_without_values", "test_trace_stops_at_first_failing_step",
         "test_trace_never_records_secret_or_code", "test_locators_found_by_type_not_by_assumed_name",
-        "test_trace_mode_stops_after_sms_request"]),
+        "test_trace_mode_stops_after_sms_request", "test_trace_records_network_calls_without_bodies",
+        "test_trace_records_form_state_without_values", "test_trace_records_error_text_after_next",
+        "test_trace_records_console_error_count", "test_trace_records_fingerprint_facts"]),
     "fu3": ("%s/tests/test_fetch.py" % CF, [
         "test_lists_then_downloads_six", "test_sends_xsrf_header",
         "test_only_completed_rows_of_the_six_names", "test_missing_file_reported_not_silent",
