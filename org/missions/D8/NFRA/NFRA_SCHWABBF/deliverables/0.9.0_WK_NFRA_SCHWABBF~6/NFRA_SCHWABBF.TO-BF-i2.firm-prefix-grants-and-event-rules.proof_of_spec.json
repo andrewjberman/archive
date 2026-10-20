@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-i2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R2.md",
+    "vintage_commit": "87d44e203b",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-i2.firm-prefix-grants-and-event-rules.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "87d44e203b"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "71495f3448",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-NFRA_SCHWABBF-6. Not applied: no terraform init, plan or apply was run. The apply is the NFRA CloudOps lane's release act under safe-apply after the never-widen pair.",
+      "artifact_covered_by": ["BF2-i2-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "71495f3448",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit on branch wk-NFRA_SCHWABBF-6. Not applied. Carries two event-rule entries and the converter's firm-prefix read policy (silver_read_schwab_firm_prefix). Also contains a whitespace-only realignment of the silver_build_commit block that was present in the worktree on disk when the cell was finished; not authored by this cell and not reverted.",
+      "artifact_covered_by": ["BF2-i2-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_firm_prefix_grants.py",
+      "kind": "test",
+      "commit_or_etag": "71495f3448",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch; reads the .tf files as text; run by the two acceptance invocations."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF2-i2-AC1",
+      "criterion_verbatim": "the box role's per-master firm-prefix write entries, the absence of a folder-wide wildcard, and the untouched old grants.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k iam_grants",
+      "output_evidence": "......                                                                   [100%]\n6 passed, 6 deselected in 0.03s\n(first run: 6 passed, 6 deselected in 0.06s; both runs rc=0)",
+      "denominator": "6 passed of 12 collected in the file (-k iam_grants selects 6; 6 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF2-i2-AC2",
+      "criterion_verbatim": "the event rules for the two firm prefixes beside the three old ones, and the singleton notification.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no -k event_rules",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 7 deselected in 0.06s\n(second run: 5 passed, 7 deselected in 0.06s; both runs rc=0)",
+      "denominator": "5 passed of 12 collected in the file (-k event_rules selects 5; 7 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-i-2; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each acceptance invocation run twice on the same tree; the summary counts were compared.",
+      "observed": "AC1: 6 passed in both runs. AC2: 5 passed in both runs. Full file: 12 passed (rc=0).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan and apply, and any aws command",
+      "reason": "WORLD floor in the order: the apply is the NFRA CloudOps lane's release act under safe-apply."
+    },
+    {
+      "item": "Cottonwood per-master write grant on the box role",
+      "reason": "PRD C-ONEWRITER: those masters belong to the Alongside box's own role, a separate workstream. Stated as a comment at the statement."
+    },
+    {
+      "item": "Converter silver/meta write grant for the firm folders",
+      "reason": "The order scopes step 3 to a minimal READ. The gap is filed as NFRA_SCHWABBF-W6-S1, not widened here."
+    },
+    {
+      "item": "Box _ops and meta/pulls grants for the firm folder",
+      "reason": "The order scopes step 1 to bronze. The gap is filed as NFRA_SCHWABBF-W6-S2, not widened here."
+    },
+    {
+      "item": "terraform fmt on silver.tf as a whole",
+      "reason": "The file carried fmt drift at HEAD (silver_build_commit block). The FMT test checks that no line of this cell is among the lines fmt would rewrite; monolith-iam.tf is fmt-clean outright."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W6-S1: the converter's silver write grant names only the three master scopes, while its scope function returns the first folder segment of a new-form key; firm-folder silver output is unverified. Filed, not widened.",
+    "NFRA_SCHWABBF-W6-S2: the box's _ops and meta/pulls grants enumerate the three old masters only; the cell scoped the new grant to bronze. Filed, not widened."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_firm_prefix_grants.py -q -p no:cacheprovider --color=no",
+      "result": "12 passed in 0.33s, rc=0 (6 iam_grants, 5 event_rules, 1 fmt)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -no-color infra/aws/terraform/canonical-schwab-ec2/monolith-iam.tf",
+      "result": "rc=0 (monolith-iam.tf fmt-clean)"
+    },
+    {
+      "tool": "terraform fmt -diff",
+      "invocation": "terraform fmt -diff -no-color infra/aws/terraform/opal-assets/silver.tf",
+      "result": "no rewritten line carries a cell marker (the FMT test's check)"
+    }
+  ]
+}

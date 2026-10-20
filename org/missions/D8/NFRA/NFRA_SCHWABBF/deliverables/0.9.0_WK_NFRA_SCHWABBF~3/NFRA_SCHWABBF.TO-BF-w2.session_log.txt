@@ -1,0 +1,29 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~3 on NFRA_SCHWABBF.TO-BF-w2 (cell BF-w-2, round 2, puller writer firm form)
+Worktree: C:\Users\AndrewBerman\Desktop\wt-bf-3   branch: wk-NFRA_SCHWABBF-3   build commit: 177cf7d1d9 (LOCAL)
+Base at start: 87d44e203b (CLOUD merged round-1 master form). Tree check: branch printed, TREE-OK.
+
+1. Re-grounded the premises: the script at HEAD carries the round-1 master form (KEYROOT schwab/$Master/bronze);
+   registry scopes.json FIRM rows carry a `masters` list (49financial: 3 masters; cottonwood: 5 incl. z09);
+   lib/opal_naming.py address() returns opal-data-assets/schwab/{firm}/bronze/... for both firms.
+2. Control: the round-1 suite on base = 7 passed (AC1 selection and AC2 selection both pass).
+3. Test rewritten FIRST for the firm form. AC1 selection run against the UNCHANGED master-form script:
+   key_parity FAILED: "writer != builder on 238 of 238" (writer schwab/08242234/... vs builder schwab/49financial/...);
+   landing_guard collisions: landed=3 planned=1 for the shared partitions (sibling files counted).
+4. Script edited (sdd-daily-pull.ps1): Get-FirmOf (literal map, throws on unknown); Get-BronzeKeyDir firm form;
+   MONOLITH ROOTS block (KEYROOT = firm folder, LEGACYROOT = round-1 master folder); Get-ResumeNames (new, pure);
+   Get-LandedIndex takes $Master and filters names to "{Master}."; pre-loop index lists both prefixes (monolith);
+   post-run guard lists the firm prefix only and passes $Master; header and comments follow the firm form.
+   Unchanged: -OnlyAsOf and Select-PlanAsOf, the session lock, QUARANTINE master MISMATCH, date-disagreement
+   quarantine, schedule, staging branch grammar, the ValidateSet (three masters), OPSROOT and meta/pulls paths.
+5. Verbatim criteria, each under timeout 120:
+   AC1  python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k "key_parity or landing_guard"
+        -> "6 passed, 3 deselected in 5.57s" rc=0 (run 2: "6 passed in 5.57s" with the same selection)
+   AC2  python -m pytest ... -k only_asof
+        -> "3 passed, 6 deselected in 3.14s" rc=0 (run 2: "3 passed, 6 deselected in 3.01s")
+   Full file: "9 passed in 7.88s" rc=0.
+6. Commit 177cf7d1d9 via .tools/safe-commit.sh (commit-gate All checks passed; surprise-row-gate OK 1 new row of 12).
+7. Surprise row NFRA_SCHWABBF-W3-S3 filed (OBSERVATION, INERT): legacy-only own file skipped by the index is a
+   post-run guard shortfall (exit 6) until copied to the firm form. Not resolved; reported to the issuer.
+8. Not done (WORLD floor): no deploy, no upload, no run of the puller, no Schwab contact, no AWS call.
+9. The sparse worktree lacks org/surprise_channel/schemas/investigation_item.schema.json and
+   infra/aws/lambda/ci/function-map/; the commit-time gates (surprise-row-gate, naming-gate) are the enforcers.
