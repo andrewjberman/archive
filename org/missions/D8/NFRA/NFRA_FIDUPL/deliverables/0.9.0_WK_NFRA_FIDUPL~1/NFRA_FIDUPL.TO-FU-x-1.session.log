@@ -1,0 +1,36 @@
+NFRA_FIDUPL.TO-FU-x-1 -- worker session log (0.9.0_WK_NFRA_FIDUPL~1, branch wk-NFRA_FIDUPL-1, cut 11e907bb20)
+
+Live order: one automation run, one recon sign-in. No account value, G number, cookie, code or secret value was read,
+printed or written. The secret was checked by describe-secret metadata only.
+
+1. Tree: wk-NFRA_FIDUPL-1, TREE-OK, HEAD 11e907bb20.
+2. Live reads before any act (no sign-in):
+   - Automation document fidelity-alongside-uploader-document: runWrapper runs
+     /opt/fidelity-uploader/venv/bin/python /opt/fidelity-uploader/box/run.py (S3 fix live).
+   - Secret fidelity/alongside/wealthscape-credentials: describe-secret, one version at AWSCURRENT, LastChanged 2026-10-20T08:49:08-04:00.
+   - Instance i-028e830f7226cc685: stopped at the start of the order.
+3. Start: aws ec2 start-instances -> pending (From stopped). SSM ping Online at 12:59:31Z.
+4. Read-only preflight on the box (SSM): box file hashes equal the worktree hashes for box/run.py, box/bootstrap.sh,
+   quo_otp.py, signin.py, signin_recon.py, fetch.py, land.py. venv Python 3.12.14, boto3 1.43.115, playwright 1.64.0.
+   Chromium cache /root/.cache/ms-playwright/chromium-1248 present. config.json keys: profile_dir, quo_line_id,
+   quo_secret_id, quo_sender, region, repo_root, scope, wealthscape_secret_id, work_dir.
+   Compile and import of run.py, fetch.py, land.py, quo_otp.py, signin.py, signin_recon.py: COMPILE-OK, IMPORT-OK.
+   Headless Chromium launch with no site contact: CHROMIUM-LAUNCH-OK 156.0.8078.4.
+5. STEP 1, the automation, ONCE: execution b065d07e-53e7-47b6-9c07-476c21f1d6df, started 13:01:42Z.
+   Status Failed at 13:02:00Z. startInstance and stopInstance failed with 'not authorized to perform:
+   ec2:DescribeInstanceStatus' for fidelity-alongside-automation-role. waitForOnline and runWrapper stayed Pending:
+   no command was sent and no sign-in ran. The stop call still stopped the instance (13:01:44 GMT, User initiated).
+   Not retried. Row NFRA_FIDUPL-D1-W1-S8.
+6. Start again: aws ec2 start-instances -> pending (From stopped, 13:03:46Z). SSM ping Online at 13:04:02Z.
+7. STEP 3, the recon, ONCE: SSM command 91fa5057-3f37-4551-937e-0fab48001569, 13:04:16Z to 13:05:34Z.
+   Output: RECON_RC=1. Stderr: ERROR: live read failed: TimeoutError. No counts block printed.
+   Read-only Quo probe after it (13:05:55Z): QUO-PROBE-OK line=PNEJ5tafLm sender_messages=4 (baseline 4), so no text was sent.
+   Not retried. Row NFRA_FIDUPL-D1-W1-S9.
+8. The box was left RUNNING (no stop by this worker, per the order).
+9. Criteria, run after steps 5 and 7:
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1r -> R1-X1R-FAIL no run record under s3://opal-data-assets/fidelity/alongside/bronze/_runs/
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1g -> R1-X1G-FAIL no FU-x-1_account_gnumber_read.md under org/missions/D8/NFRA/NFRA_FIDUPL/deliverables
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py x1p -> R1-X1P-FAIL no FU-x-1_g_selector_probe.md under org/missions/D8/NFRA/NFRA_FIDUPL/deliverables
+   No probe-block file was written: the recon printed no block, and none was made up.
+
+FWD-1 status: not closed by this order. Analyst destination addresses: none were written (no run record, no landing).
