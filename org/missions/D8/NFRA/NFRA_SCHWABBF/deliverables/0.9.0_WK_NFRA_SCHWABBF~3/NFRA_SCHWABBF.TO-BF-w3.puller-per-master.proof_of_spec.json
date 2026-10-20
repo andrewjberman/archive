@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-w3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a87d86a3c3a88e5aa152efd036722e",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-w3.puller-per-master.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e8d796975fc39485dfa01b60fe868e58734ffc2b"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "ebf478c7de8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-NFRA_SCHWABBF-3 only (LOCAL). Not deployed to the box: deployment is the issuer's release act. WORLD floor, nothing applied: no AWS call, no Schwab contact, no run of the puller. Fire times 09:45, 10:15, 10:45, 21:45, 22:15, 22:45Z not touched."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "ebf478c7de8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; it extracts the functions by the PowerShell AST and reads the pre-round script with git show; it never runs the puller."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ebf478c7de8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One surprise row NFRA_SCHWABBF-W3-S4 appended in the build commit; the commit-time surprise-row gate passed (1 new row of 33, OK)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-w3-AC1",
+      "criterion_verbatim": "the writer's directory per master (firm for the five, today's for 0824 and 0833) and the guard in both shapes.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k \"key_parity or landing_guard\"",
+      "output_evidence": "10 passed, 3 deselected in 16.42s",
+      "denominator": "10 of 10 selected tests passed (3 deselected by -k). key_parity: firm-form Get-BronzeKeyDir equals lib/opal_naming.py address('schwab', firm, 'bronze', type, 'date=...') with the bucket stripped on 170 of 170 cases (5 firm-form masters x 17 types x 2 dates), firm read from infra/logic/registry/scopes.json; pre-round Get-BronzeKeyDir equals the pre-round keyDir expression (git show 5f1ad506a4) on 68 of 68 cases (2 masters x 17 x 2); listing roots per master 7 of 7; the script map equals the registry on 7 of 7; an unknown master throws. landing_guard: the firm folder shared with two sibling masters is ok=True with shortfall/surplus/collision 0/0/0; a missing own file is one shortfall; a legacy-only own file counts in the resumability index; for each pre-round master the verdict equals the pre-round guard code's verdict (run from the pre-round text) on the same old-form lines, 2 of 2; the pre-round resumability index counts every name under the own prefix, 2 of 2.",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF3-w3-AC2",
+      "criterion_verbatim": "the single-day filter still holds after the rework.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k only_asof",
+      "output_evidence": "3 passed, 10 deselected in 2.90s",
+      "denominator": "3 of 3 selected tests passed (10 deselected by -k). The 5-file, 3-day plan keeps 1 file for the chosen day, 5 of 5 when empty, and 0 of 5 for a day with no file or a calendar-impossible day (die_code 9). Select-PlanAsOf is unchanged.",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The UNCHANGED all-firm script (HEAD 6c4675f585a, every master on the firm form) run against the REWRITTEN per-master suite, before any script edit. Same committed path, read at HEAD; no scratch copy.",
+      "expected": "each pre-round arm is caught by a named test",
+      "observed": "AC1 selection on the all-firm script: 3 failed, 7 passed, 3 deselected in 9.10s, rc=1. test_key_parity_pre_round_masters_keep_todays_key FAILED, pre-round key != pre-round keyDir on 68 of 68 (schwab/49financial/bronze/acc/date=2023-10-17 written for 08242234); test_key_parity_listing_roots_per_master FAILED with MISSING FUNCTIONS: Get-ListingPrefixes; test_landing_guard_pre_round_masters_match_pre_round_guard FAILED with MISSING FUNCTIONS: Get-ListingPrefixes. The firm arms passed on the all-firm script, as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 10 passed, 3 deselected (15.41s); run 2: 10 passed, 3 deselected (16.42s). AC2 run 1: 3 passed, 10 deselected (2.49s); run 2: 3 passed, 10 deselected (2.90s). Verdicts identical; timings differ. Full file: 13 passed (21.34s).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deployment of sdd-daily-pull.ps1 to the box and the scheduled runs at 09:45, 10:15, 10:45, 21:45, 22:15, 22:45Z",
+      "reason": "WORLD floor for this order: nothing deployed or run. Deployment is the issuer's release act."
+    },
+    {
+      "item": "The one-day backfill run and any S3 listing or copy of either folder",
+      "reason": "Out of the cell. The puller was not executed and no AWS call was made; the guard was graded on sample listing lines and the pre-round text only."
+    },
+    {
+      "item": "The staging branch of the writer and the OPSROOT and meta/pulls paths",
+      "reason": "Deliberately unchanged: staging keeps its grammar; OPSROOT and meta/pulls stay schwab/{master}/... as the order names only the key directory, the listing roots, the resumability index and the guard."
+    },
+    {
+      "item": "Schema validation of the surprise row against org/surprise_channel/schemas/investigation_item.schema.json",
+      "reason": "That schema path is absent from this sparse worktree. The commit-time surprise-row gate passed (1 new row of 33, OK) and is the enforcer; the JSON array was parsed after the append."
+    },
+    {
+      "item": "Client account-id check and naming gate on the function map at commit",
+      "reason": "The hashed account-id list is absent on this box (WARN at commit, not checked), and infra/aws/lambda/ci/function-map/ is absent from this sparse worktree (naming-gate ERROR at commit). The commit touches no Lambda source and no account data."
+    },
+    {
+      "item": "Risk-reflex check at commit",
+      "reason": "risk-reflex reported the danger map STALE and the diff NOT-DECIDABLE (0 of 3 files scanned). That is not a clean check of this diff."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W3-S4: the order says Get-FirmOf THROWS for a master outside 'the set' of firm-form masters, but also requires the seven-master map to equal the registry and 0824/0833 to take the pre-round key; the build keeps Get-FirmOf as the seven-master map (throws only for an unknown master) and puts firm-form membership in Test-FirmForm."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~3/NFRA_SCHWABBF.TO-BF-w3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12) with Windows PowerShell 5.1 child process",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "13 passed in 21.34s; the PowerShell AST parse of the whole script inside the harness reported no parse errors"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder) and infra/logic/registry/scopes.json (the registry)",
+      "invocation": "the test calls address('schwab', <firm>, 'bronze', <type>, 'date=YYYY-MM-DD') with the firm read from the FIRM rows' masters list",
+      "result": "170 of 170 firm-form cases equal the builder address with the bucket stripped"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, surprise-corpus, to-pipeline-gate, missions-tree-check, one-writer)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_SCHWABBF~3 <0.9.0_WK_NFRA_SCHWABBF~3@opal.agent>\" -F .scratch/msg_bf3_build.txt -- <3 paths>",
+      "result": "commit ebf478c7de8 landed; commit-gate All checks passed; surprise-row-gate OK 1 new row of 33 total; msg-verify MATCH len=1691"
+    }
+  ]
+}
