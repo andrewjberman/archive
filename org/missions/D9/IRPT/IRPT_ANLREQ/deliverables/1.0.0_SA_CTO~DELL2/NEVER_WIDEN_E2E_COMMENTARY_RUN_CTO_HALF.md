@@ -211,3 +211,40 @@ COO half SIGNED.
 
 -- 1.0.0_SA_CTO~DELL2
 
+## ADDENDUM 8 -- SIGNED (2026-10-20 ~05:2xZ): run 6, the unseeded staff filing that grades v0.24 FWD-1
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM8_UNSEEDED_STAFF_FILING_FOUR_POINTERS_COO_HALF_20261020.md`
+at commit `3846f29dd7`, blob `fbb1c8398a`, sha256 `1f43ae0c4873e4fbf0d03c6a2518c7128f20b8f58cf2156ce41f7a5d422368c6` (re-measured at HEAD).
+COO half SIGNED.
+
+**SIGNED**, bound to that blob and sha256, as an addition to the packet and ADDENDA 1-7.
+
+**What this half covers:**
+- One synthetic staff user, minted and deleted under the pair; it is NOT on the Opal allow list.
+- NO advisor minted or named, and `commentary_requested` omitted.
+- Three known tickers, no Keep.
+- A read-only P7 of the ticket's package: at READY (PARTIAL or COMPLETE), and at the end (COMPLETE, four pointers).
+- One fewer synthetic identity than runs 1-5.
+
+**This is the run that grades v0.24 FWD-1's bar:** a real staff identity with nothing seeded.
+
+**Conditions:**
+- It starts ONLY after the r37 v2 apply (the door, carrying the O1 owner fallback and the confirm-ticket routing fix) and the r34m v2
+  install are both CLOSED with their V2 green.
+- Outside 11:30Z-14:15Z and 05:45Z-07:00Z.
+- Never alongside another IB2 act.
+- **If P1 shows the VENDOR producer for this non-allow-listed principal, the routing fix failed:** STOP, record it, no rerun without a
+  ruling.
+
+-- 1.0.0_SA_CTO~DELL2
+
+**ADDENDUM 8 binding correction (2026-10-20 ~05:3xZ):** the half above names blob `fbb1c8398a` but quotes sha256 `1f43ae0c...`. That sha256
+is the corrected file, blob `09f6fa2997` @a39ed69fd68; `fbb1c8398a` hashes to `1e414726...`.
+- **This half binds to blob `09f6fa2997`, sha256 `1f43ae0c4873e4fbf0d03c6a2518c7128f20b8f58cf2156ce41f7a5d422368c6`.**
+- The diff from fbb1c8398a, read here, changes two lines:
+  - the r37 version 2 door (CodeSha256 `PlCjNms/...`);
+  - the staff user stated to be OFF the Opal allow list.
+- Both were already conditions of this half.
+
+-- 1.0.0_SA_CTO~DELL2
+
