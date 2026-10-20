@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FR-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c5ff6eaad512c4634a9e664ee7cb2669bd7d37ed"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R2.md",
+    "vintage_commit": "c5ff6eaad512c4634a9e664ee7cb2669bd7d37ed",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FR-s-1.gswitch-and-attribution.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/gswitch.py",
+      "kind": "script",
+      "commit_or_etag": "19ed775f8239c3ecc319ad4841ba8809cdd2f1ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round-2 G-number switch committed on wk-NFRA_FIDUPL-2; built against fakes, nothing runs live (the order's bounds)",
+      "artifact_covered_by": [
+        "FR1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/attribute.py",
+      "kind": "script",
+      "commit_or_etag": "19ed775f8239c3ecc319ad4841ba8809cdd2f1ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "round-2 attribution sweep and account-list pager committed on wk-NFRA_FIDUPL-2; no box or AWS write in this order",
+      "artifact_covered_by": [
+        "FR1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_gswitch.py",
+      "kind": "test",
+      "commit_or_etag": "19ed775f8239c3ecc319ad4841ba8809cdd2f1ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixture-only test file (synthetic G values and labels, injected fake request object); committed with the module",
+      "artifact_covered_by": [
+        "FR1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_attribute.py",
+      "kind": "test",
+      "commit_or_etag": "19ed775f8239c3ecc319ad4841ba8809cdd2f1ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "fixture-only test file (synthetic G values, account numbers and labels, in-memory switcher fake); committed with the module",
+      "artifact_covered_by": [
+        "FR1-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FR1-AC1",
+      "criterion_verbatim": "FR1-AC1 -- the four G-switch tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr1a",
+      "output_evidence": "R1-FR1A-OK passed=4",
+      "denominator": "4 passed of 4 named tests required (test_parses_current_default_and_options, test_switch_posts_form_without_isdefault, test_switch_asserts_current_equals_requested, test_switch_failure_raises_and_names_no_value)",
+      "status": "PASS",
+      "expect": "R1-FR1A-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FR1-AC2",
+      "criterion_verbatim": "FR1-AC2 -- the five attribution tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr1b",
+      "output_evidence": "R1-FR1B-OK passed=5",
+      "denominator": "5 passed of 5 named tests required (test_sweeps_every_option_and_restores_start, test_restores_start_even_on_error, test_never_sets_default, test_summary_counts_only, test_pages_account_list_until_short_page)",
+      "status": "PASS",
+      "expect": "R1-FR1B-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "no mutant is named by the order or the reference section 11; the spec names none, so no mutation was run",
+      "expected": "N/A: the spec names no mutant",
+      "observed": "not run; the two checks are the order's whole acceptance",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "two same-input runs of python -m pytest -q -p no:cacheprovider on tests/test_gswitch.py and tests/test_attribute.py compared",
+      "observed": "run 1: 9 passed in 0.03s; run 2: 9 passed in 0.03s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live Fidelity switch, the live accountList.json paging and the row container of its response",
+      "reason": "built against fakes only by the order's bounds; recorded as NFRA_FIDUPL-D1-W2-S7 and NFRA_FIDUPL-D1-W2-S8; the live cell confirms them"
+    },
+    {
+      "item": "the status flip of NFRA_FIDUPL.TO-FR-s-1 from pending to complete",
+      "reason": "the task-order file is outside this order's paths block; recorded as NFRA_FIDUPL-D1-W2-S10; the issuer flips it"
+    },
+    {
+      "item": "the split and the daily orchestration (FR-s-2, FR-s-3 and the box hookup)",
+      "reason": "other cells of round 2; not in this order's paths"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W2-S7: the offset field past 2,000 rows is named start, an unmeasured assumption (OBSERVATION, INERT).",
+    "NFRA_FIDUPL-D1-W2-S8: the accountList.json row container is unnamed in every cited measurement, so the extractor is an injected callable (OBSERVATION, INERT).",
+    "NFRA_FIDUPL-D1-W2-S9: reference section 11 keys summary.per_label_counts by firm label, which the order bounds forbid in any output (OBSERVATION, INERT).",
+    "NFRA_FIDUPL-D1-W2-S10: the status flip of the task order is outside the paths block, so the worker cannot flip it (BLOCKING, INERT)."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~2/NFRA_FIDUPL.TO-FR-s-1.session.log",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_gswitch.py infra/aws/ec2/canonical-fidelity/tests/test_attribute.py",
+      "result": "9 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/gswitch.py infra/aws/ec2/canonical-fidelity/attribute.py infra/aws/ec2/canonical-fidelity/tests/test_gswitch.py infra/aws/ec2/canonical-fidelity/tests/test_attribute.py",
+      "result": "All checks passed!"
+    }
+  ]
+}

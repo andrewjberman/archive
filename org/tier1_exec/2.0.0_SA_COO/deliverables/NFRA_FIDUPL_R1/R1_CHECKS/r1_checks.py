@@ -617,11 +617,12 @@ def tf_plan_perg():
     m = re.search(r"Plan: (\d+) to add, (\d+) to change, 0 to destroy\.", o)
     if rc != 0 or not m or int(m.group(1)) != 1:
         return out("%s-FAIL plan rc=%s %s" % (tag, rc, [x for x in o.splitlines() if x.startswith(("Plan:", "No changes"))][:1]))
-    if "aws_ssm_parameter" not in o:
-        return out("%s-FAIL the one added resource is not the SSM parameter" % tag)
-    if "SecureString" not in open("%s/perg.tf" % TF_ROOT, encoding="utf-8").read():
-        return out("%s-FAIL the parameter is not a SecureString" % tag)
-    return out("%s-OK Plan: 1 to add, %s to change, 0 to destroy. (the SSM parameter and the box role policy)" % (tag, m.group(2)))
+    added = re.findall(r"# (aws_[a-z_]+\.[\w\[\]\"-]+) will be created", o)
+    if len(added) != 1 or not added[0].startswith("aws_secretsmanager_secret."):
+        return out("%s-FAIL the one added resource is not a Secrets Manager secret: %s" % (tag, added))
+    if "aws_secretsmanager_secret_version" in open("%s/perg.tf" % TF_ROOT, encoding="utf-8").read():
+        return out("%s-FAIL perg.tf carries a secret VERSION (a value in state)" % tag)
+    return out("%s-OK Plan: 1 to add, %s to change, 0 to destroy. (the per-G secret and the box role policy)" % (tag, m.group(2)))
 
 
 CHECKS = {
