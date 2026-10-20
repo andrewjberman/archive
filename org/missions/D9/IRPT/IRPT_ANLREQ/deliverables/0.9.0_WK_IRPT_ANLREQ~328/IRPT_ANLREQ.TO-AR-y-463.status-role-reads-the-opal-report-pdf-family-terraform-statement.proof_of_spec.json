@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-463.status-role-reads-the-opal-report-pdf-family-terraform-statement",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "e02d849d4990",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-463.status-role-reads-the-opal-report-pdf-family-terraform-statement.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-463.status-role-reads-the-opal-report-pdf-family-terraform-statement.md",
+    "group": "OTHER",
+    "vintage_commit": "e02d849d4990"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~328",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ops/iam.tf",
+      "kind": "config_data",
+      "commit_or_etag": "161d929920e96e93419fca5e1c9d497ed8009d8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Terraform source only. Not planned, not applied, not run: Terraform is not installed on this box and no AWS call was made. The statement ReadRetainedAnalysisFamiliesUnderThePolicyPrefixesOnly takes local.opal_report_family (YCHARTS_OPAL_REPORT, state/ycharts_opal_reports) in its family list, with the actions unchanged. Numstat from the cut e02d849d4990 is 7 insertions and 1 deletion: the deletion is the existing concat line the family list must change (surprise IRPT_ANLREQ-D2-W328-S2).",
+      "artifact_covered_by": [
+        "AR463-y-AC1",
+        "AR463-y-AC2",
+        "AR463-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, offline, ruff clean (ruff 0.15.11) and the commit-gate clean. Checks the iam.tf text, the registry-derived prefixes against the naming builder lib/opal_naming.py key() (loaded by path), and a real ycharts_opal_reports key from surprise row IRPT_ANLREQ-D2-S224 (fnmatch, exactly one prefix).",
+      "artifact_covered_by": [
+        "AR463-y-AC1",
+        "AR463-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, offline, ruff clean and the commit-gate clean. Measures git diff --numstat from the cut commit that added the task order to HEAD, restricted to infra/. It reports OPAL-REPORT-BOUND-BAD for the measured 7/1 and does not relax the 0-deletion bound.",
+      "artifact_covered_by": [
+        "AR463-y-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR463-y-AC1",
+      "criterion_verbatim": "AR463-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py -- expect ^OPAL-REPORT-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes real_key_covered=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py",
+      "output_evidence": "OPAL-REPORT-GRANT-OK firms=3 prefixes=3 builder_equal=yes real_key_covered=yes\nrc=0",
+      "denominator": "3 of 3 enabled client firms (data/firm_registry.json) each with a computed prefix equal to the naming builder key; 1 of 1 real ycharts_opal_reports key (surprise row IRPT_ANLREQ-D2-S224) covered by exactly one prefix",
+      "expect": "^OPAL-REPORT-GRANT-OK firms=[0-9]+ prefixes=[0-9]+ builder_equal=yes real_key_covered=yes$",
+      "status": "PASS",
+      "status_reason": "The printed line matches the expect regex exactly and rc=0. The repeated run is byte-identical (determinism control)."
+    },
+    {
+      "criterion_id": "AR463-y-AC2",
+      "criterion_verbatim": "AR463-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0",
+      "denominator": "2 of 2 in-memory mutants read BAD (table-name mutant: 4 reasons; Put-action mutant: 1 reason)",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "The printed line matches the expect regex exactly. Both mutants were also printed with their reasons, in the control block below."
+    },
+    {
+      "criterion_id": "AR463-y-AC3",
+      "criterion_verbatim": "AR463-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py -- expect ^OPAL-REPORT-BOUND-OK numstat=[0-9]+/0 files=1$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py",
+      "output_evidence": "OPAL-REPORT-BOUND-BAD numstat=7/1 files=1 cut=e02d849d4990 rows=infra/aws/terraform/investor-reporting/ops/iam.tf(+7,-1)\nrc=1",
+      "denominator": "1 of 1 changed infra path (iam.tf); 1 deletion measured against the 0 the expect requires",
+      "expect": "^OPAL-REPORT-BOUND-OK numstat=[0-9]+/0 files=1$",
+      "status": "FAIL",
+      "status_reason": "The measured deletion count is 1, not 0. The cell's mandated edit appends local.opal_report_family to the existing concat list of the one statement, which replaces the existing line; no other edit can add the family to that statement without a second deletion or a second statement, which the cell forbids. Recorded as surprise IRPT_ANLREQ-D2-W328-S2 (BLOCKING). The criterion was not relaxed to pass."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR463-y-AC2 control: --selftest makes two in-memory mutants, (1) the table name of the computed YCHARTS_OPAL_REPORT family is changed, and (2) a s3:PutObject action is added to the statement text. The control fires only when both read BAD.",
+      "expected": "Both mutants BAD; the program prints CONTROL-FIRES and exits 0.",
+      "observed": "MUTANT1 reasons: 4 (computed prefix arn:aws:s3:::opal-data-irpt/irpt/49financial/state/ycharts_opal_reports_mutant/* differs from builder ...). MUTANT2 reasons: 1 (statement ReadRetainedAnalysisFamiliesUnderThePolicyPrefixesOnly actions are not exactly s3:GetObject and s3:GetObjectVersion). Unmutated HCL reasons: none. --selftest printed CONTROL-FIRES, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 command run twice in the worktree; each stdout saved to the worker scratch (.scratch/det1.txt, .scratch/det2.txt) and compared with diff.",
+      "observed": "rc=0 and rc=0; diff rc=0, identical: OPAL-REPORT-GRANT-OK firms=3 prefixes=3 builder_equal=yes real_key_covered=yes",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan and terraform validate of the ops root",
+      "reason": "Terraform is not installed on this box and no AWS call is permitted for this order. The plan is an IB2 order under a signed pair; the expected plan is exactly 0 to add, 1 to change, 0 to destroy on aws_iam_role_policy.irpt_status (preflight of the order)."
+    },
+    {
+      "item": "the live read of the Opal report PDF by the status role",
+      "reason": "No network, no AWS and no deploy in this order. The run 7b receipt (A_E2E7B.txt) names no ycharts_opal_reports key; the real key used is the one in surprise row IRPT_ANLREQ-D2-S224."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W328-S1",
+    "IRPT_ANLREQ-D2-W328-S2",
+    "IRPT_ANLREQ-D2-W328-S3"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I (stdlib) and ruff 0.15.11",
+      "invocation": "ruff check --select E,F,N,W --line-length 120 org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/ ; bash .tools/commit-gate.sh <each script>",
+      "result": "ruff: All checks passed! (rc 0). commit-gate: pre-commit gate clean for 1 of 1 file(s) for each script (rc 0)."
+    }
+  ]
+}
