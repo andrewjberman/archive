@@ -44,7 +44,9 @@ TEST_FILES = {
         "test_trace_records_console_error_count", "test_trace_records_fingerprint_facts",
         "test_error_detection_requires_visible_text", "test_fingerprint_sets_window_chrome_and_languages",
         "test_user_agent_matches_installed_chromium_version", "test_trace_records_failed_request_shape_without_values",
-        "test_trace_records_response_error_text", "test_trace_records_third_party_failures"]),
+        "test_trace_records_response_error_text", "test_trace_records_third_party_failures",
+        "test_trace_notes_cookie_names_before_password_post", "test_preflow_runs_only_when_att_absent",
+        "test_preflow_skipped_when_att_present"]),
     "fr1a": ("%s/tests/test_gswitch.py" % CF, [
         "test_parses_current_default_and_options", "test_switch_posts_form_without_isdefault",
         "test_switch_asserts_current_equals_requested", "test_switch_failure_raises_and_names_no_value"]),
