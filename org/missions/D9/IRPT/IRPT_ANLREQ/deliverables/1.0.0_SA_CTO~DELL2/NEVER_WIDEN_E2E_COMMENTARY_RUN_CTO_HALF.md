@@ -238,3 +238,13 @@ COO half SIGNED.
 
 -- 1.0.0_SA_CTO~DELL2
 
+**ADDENDUM 8 binding correction (2026-10-20 ~05:3xZ):** the half above names blob `fbb1c8398a` but quotes sha256 `1f43ae0c...`. That sha256
+is the corrected file, blob `09f6fa2997` @a39ed69fd68; `fbb1c8398a` hashes to `1e414726...`.
+- **This half binds to blob `09f6fa2997`, sha256 `1f43ae0c4873e4fbf0d03c6a2518c7128f20b8f58cf2156ce41f7a5d422368c6`.**
+- The diff from fbb1c8398a, read here, changes two lines:
+  - the r37 version 2 door (CodeSha256 `PlCjNms/...`);
+  - the staff user stated to be OFF the Opal allow list.
+- Both were already conditions of this half.
+
+-- 1.0.0_SA_CTO~DELL2
+
