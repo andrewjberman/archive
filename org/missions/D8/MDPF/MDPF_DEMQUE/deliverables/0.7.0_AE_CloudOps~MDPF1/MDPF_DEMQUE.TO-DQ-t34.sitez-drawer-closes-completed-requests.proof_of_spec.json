@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t34",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t34.sitez-drawer-closes-completed-requests.md",
+    "group": "OTHER",
+    "vintage_commit": "ce892756f36"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "ce892756f36",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t34.sitez-drawer-closes-completed-requests.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~MDPF1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/demque/standing_drawer.py",
+      "kind": "script",
+      "commit_or_etag": "9037d7b4c2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Merged wk-t34-zq 8152a8ea42 into box/sitez at 9037d7b4c2 via safe-merge.sh; the registered task mdpf-demque-drawer-daily runs the file from the repository root (LastRunTime 2026-10-20 10:00:01 ET, LastTaskResult 0, NextRunTime 2026-10-21 10:00). The file has since moved on (latest commit 91c74decbf, DQ-t-79) and still carries the close-on-completion rule; the DQ-t-79 commit is an ancestor of box/sitez HEAD.",
+      "artifact_covered_by": [
+        "DQ9-t34-AC1",
+        "DQ9-t34-AC2"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/scripts/demque/test_demque_standing_drawer_close.py",
+      "kind": "test",
+      "commit_or_etag": "b5a231fb73a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file with the three named tests; pytest 3 passed at site Z 2026-10-20 (dq_t34_tests.py prints CL-OK).",
+      "artifact_covered_by": [
+        "DQ9-t34-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261011T1853Z_mdpf-demque-zq-t34-close_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "b6c44e748e7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 entry mdpf-demque-zq-t34-close, CLOSED 20261017T152110Z, all 3 legs proven (L1 merge, L2 first live trading-day read, L3 AC2 CLOSE-OK).",
+      "artifact_covered_by": [
+        "DQ9-t34-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t34-AC1",
+      "criterion_verbatim": "the three named tests (test_request_whose_securities_all_reached_their_end_is_closed_and_skipped, test_the_completing_fire_records_complete_not_drawn, test_no_zero_cell_drawn_line_after_completion).",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t34_tests.py",
+      "output_evidence": "CL-OK (rc=0), pytest 3 passed in 1.32s, at site Z on 2026-10-20 (after 21:47Z) at HEAD b0dda02aac. Negative arm: the same check run from an empty directory printed CL-BAD no file data\\mdpf\\scripts\\demque\\test_demque_standing_drawer_close.py (rc=1).",
+      "denominator": "3 named tests, 3 passed, 0 failed, 0 skipped",
+      "status": "PASS",
+      "expect": "CL-OK"
+    },
+    {
+      "criterion_id": "DQ9-t34-AC2",
+      "criterion_verbatim": "the REAL ledger: the TR request is closed and no 0-cell DRAWN row follows completion (as amended @ce892756f3: passes also when no COMPLETE row exists and --plan reads remaining_cells 0 at the last drawing day with no later row).",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R9_CHECKS/dq_t34_close.py",
+      "output_evidence": "CLOSE-OK the request reads complete by --plan (remaining_cells 0); last drawing day 2026-10-17, no later row; no COMPLETE row exists (Z-S7) (rc=0), run at site Z 2026-10-20 where the stored rows are; first read 2026-10-17 (ledger L3). Negative arm: the same check run from an empty directory raised FileNotFoundError on org\\missions\\D8\\MDPF\\MDPF_DEMQUE\\ledger\\BBG_ACTUALS.jsonl (rc=1), not the CLOSE-BAD form the order names for the base; the check fails closed but by a traceback.",
+      "denominator": "1 request (DEMQUE-TR-COMPARISON-DIVIDEND-PAYERS), remaining_cells 0; the 2026-10-18 and 2026-10-20 runs wrote no 0-cell DRAWN row for it (the 2026-10-20 BBG_ACTUALS rows are 3, none for this request)",
+      "status": "PASS",
+      "expect": "CLOSE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The product change was built and sealed by 0.7.0_AE_CloudOps~ZQ on branch wk-t34-zq; this seat ran no new mutant. Both check scripts were exercised on their negative arms by running each from an empty directory.",
+      "expected": "A non-zero exit and no OK token from a directory holding neither the test file nor the ledger.",
+      "observed": "AC1 printed CL-BAD (rc=1); AC2 raised FileNotFoundError (rc=1). Neither printed an OK token.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 were each read at least twice: AC2 on 2026-10-17 (ledger L3) and 2026-10-20; AC1 on 2026-10-20.",
+      "observed": "AC2 CLOSE-OK on both reads with the same last drawing day; AC1 CL-OK 3 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A COMPLETE row for the TR request",
+      "reason": "None exists. The 2026-10-17 fire recorded the request STOPPED because a later request stopped the run (row Z-S7); the order was amended so AC2 reads the same property by --plan. The drawer defect is TO-DQ-t74."
+    },
+    {
+      "item": "TO-DQ-t70 AC2",
+      "reason": "Dated to the 2026-10-24 14:00Z fire; a separate order."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-Z-S7: the 2026-10-17 fire recorded the TR request STOPPED, so no COMPLETE row can appear; AC2 amended by the issuer and reads CLOSE-OK (OBSERVATION, disposed by the issuer)."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_DEMQUE_ZQ_STANDING/",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run; the order's preflight declares NOT-APPLICABLE (no schedule created or changed)",
+      "result": "UNREAD as a tool; schedule state read directly with Get-ScheduledTaskInfo on mdpf-demque-drawer-daily (last run 2026-10-20 10:00:01 ET, result 0)."
+    }
+  ]
+}
