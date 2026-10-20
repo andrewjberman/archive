@@ -1,0 +1,14 @@
+R1 window=2026-10-20T02:33:41+0000..2026-10-20T02:50:20+0000 scanned=56 refused=2 lines=step=2 class=ValidationError; step=2 class=ValidationError retained=2
+NOTE-R1 SubmissionRefused lines 2
+R2 row1 SPY method=- resolution=- price=no receipt=no dollars=no
+R2 row2 AGG method=- resolution=- price=no receipt=no dollars=no
+R2 row3 TIMXX method=- resolution=- price=no receipt=no dollars=no
+R2 row4 ZQXWVK method=- resolution=- price=no receipt=no dollars=no
+NOTE-R2 row member names (names only): amount,basis,cells,row,symbol
+R3 validate=ADMITTED detail=-
+R4 without_ZQXWVK validate=step=5 class=PortfolioRefused detail=-
+NOTE-R2 the retained normalized_portfolios rows hold only amount, basis, cells, row and symbol (no method or resolution), so the method and resolution words above read '-'; they sit in the frozen document inside the retained request_compositions object: document/rows/0..2 SPY, AGG, TIMXX method=KEPT_BY_HISTORY; document/rows/3 ZQXWVK method=KEPT_AS_TYPED resolution=UNRESOLVED; document/findings: three TICKER_KEPT_BY_HISTORY (SPY, AGG, TIMXX); document/options/corrections/0 and disclosures/corrections/0 hold the one TICKER_NOT_FOUND equal-pair Keep for ZQXWVK; security_checks SPY, AGG, TIMXX state=KEPT
+NOTE-R3 repo HEAD schemas admit the retained composition (ADMITTED), but the live resident refused it at step 2 (R1, twice). The resident package r34l carries its OWN copy of docs/contracts/investor-reporting/v1: 22 of 25 schema files equal repo HEAD, THREE differ (AnalysisSubmissionRequest, ExportBundle, HoldingsSnapshot). The same validator over the TAR's schemas reads: COMPOSITION-REFUSED step=2 error_class=ValidationError, first error additionalProperties@browser, unexpected member name: commentary_requested
+NOTE-R3 cause: the packaged AnalysisSubmissionRequest.schema.json lacks the property commentary_requested that repo HEAD carries (added by the IB-pr-455 commit 74bbdbb3224, 'the submission admits the option'); the composition's browser object carries commentary_requested (every commentary run sets it true), so the packaged schema rejects it with additionalProperties. The refusal is NOT caused by the kept row ZQXWVK: any commentary-requested submission to the r34l resident is refused at step 2
+NOTE-R4 the control with the ZQXWVK row dropped under repo HEAD schemas reads step=5 PortfolioRefused as the order expects (the digest fields no longer bind); steps 1 to 4 pass in both R3 and R4 under HEAD schemas
+READS-DONE 4 of 4 answered
