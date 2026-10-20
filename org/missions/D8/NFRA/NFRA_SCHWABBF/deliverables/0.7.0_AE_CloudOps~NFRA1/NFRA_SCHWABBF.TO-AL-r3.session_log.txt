@@ -1,0 +1,18 @@
+NFRA_SCHWABBF.TO-AL-r3 session log -- 0.7.0_AE_CloudOps~NFRA1, 2026-10-20 ~21:0xZ to ~22:3xZ (laptop)
+
+archetype: DEPLOY
+
+21:04Z  Order read with both fence halves (COO @5af57b99d0, CTO @a9bc898596); first pin f6a3be06abf. Ledger entry opened, before-reads and a saved plan made, apply NOT run: msg 110030 said the order would be re-pinned and to wait if the apply had not started. Ledger held pre-apply; worktree removed; COO told.
+21:23Z  Re-pin a51bd5cad5f (msg 110032): the root now also creates schwab/alongside/vnc-credentials. The held entry's manifest said "no resource added", so it was closed unapplied and replaced by nfra-schwabbf-alongside-role-state-tier-vnc-20261020.
+21:4xZ  Steps 1-4 at the new pin: before-reads (live policy as rollback copy, vnc secret absent, on-box hashes), saved plan "Plan: 1 to add, 1 to change, 0 to destroy." Step 4's statement diff could not be read from the plan (the new policy embeds the new secret's ARN and prints as known after apply; the issuer's own plan has the same shape): read from iam.tf at the pin as the substitute oracle (r3/step4_after_policy_from_source.txt), row NFRA_SCHWABBF-S6.
+21:4xZ  safe-apply stopped on seven routine pending messages (all mine, acked; none [STOP]/[HALT]); HALT_ACK=1: "Apply complete! Resources: 1 added, 1 changed, 0 destroyed."
+21:5xZ  Step 6 after-reads: live policy equals the source read; vnc secret has no version; post-apply plan exit 0; simulations allowed / implicitDeny / implicitDeny / allowed / implicitDeny.
+21:5xZ  A commit with an over-wide pathspec (the whole change_management folder) sat on the shared index; I stopped it before it committed and recommitted with exact paths (6588976ce0).
+22:3xZ  Steps 7-8 after TO-AL-r4 stopped: four files uploaded, sizes equal; on-box copies refreshed, four hashes equal. Bootstrap, entitlement script and puller not run.
+
+## Compiler Tools
+deploy_ledger.py: open, hold --pre-apply, hold --release, close-leg, close all worked; the manifest of a held entry cannot be edited, so a corrected entry replaced it.
+safe-apply.sh: no sparse-cone refusal this time (cone widened at creation); the HALT-gate listed routine mail, cleared with HALT_ACK=1.
+terraform: init, plan -out, show -json, apply of the saved plan, plan -detailed-exitcode.
+iam simulate-principal-policy: one action and one resource per call; negative controls beside the positive ones; existence of the simulated secret and bucket read separately.
+Gaps: the plan cannot display a policy that embeds an unknown ARN (row S6); safe-commit takes minutes when many seats commit at once.
