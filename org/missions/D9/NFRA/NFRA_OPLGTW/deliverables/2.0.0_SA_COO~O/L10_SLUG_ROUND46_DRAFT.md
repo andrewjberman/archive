@@ -21,6 +21,8 @@
 
 ## 2. What the round delivered against the endpoint (OPEN: fill from the closes)
 
+INTERIM from NFRA1 msg 36150 (06:38Z; NFRA1's report, not yet my own read; the ledger was still OPEN, read-back to ~07:00Z): resize applied 0/1/0, `t4g.large` running, `/health` 200 at 06:24:29Z (abort line 06:30Z met), downtime 44 s; batch15 `13917ef993` live ~06:29Z, marker = release, limits 5600M/6400M, host 7813 MB, `tools/list` 103, 27 of 27, md5 walk 0 differ; the two large replies (743,469 and 585,084 characters) completed one at a time, service memory moved about 1 MB (peak ~132 MB against `MemoryHigh` 5600). The GO reached NFRA1 14 minutes late (06:03Z sent, read 06:17Z; its watcher did not wake it): the gap for `0.0.0_AB_MSTR~Z`. Replace all of this with my own `rz2.AC2.sh` read at the close.
+
 FILL at the send: whether `OG-rz-2`'s read-back shows the two large replies (`mdpf_get_aggregate_aua`, `opal_discover`) complete one at a time under `MemoryHigh` (the disarm of the CRO's row `Z-S420`); the downtime in seconds; whether `OG-ms-2`'s live read-back admits the four read tools and refuses the download tool for `08403355` against the deployed code; `OG-ev-13`'s verdict (HOLDS / FAILS_SEEN / UNDETERMINED). Already read: FWD-20's driven read passed (13 of 13 families, 59 values, eclipse schedule and depth equal the independent CLI reads); the family-depth route and its read grant are live; Alyssa's Schwab session ran from 19:00Z under grant revision 6.
 
 ## 3. Rows
