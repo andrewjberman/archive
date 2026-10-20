@@ -94,7 +94,7 @@ body = {
     "limits": ["The served read was UNARMED ONLY: no lease was written and no SSM parameter was written by this seat.", "The large replies were requested one at a time, never concurrently; memory is the service cgroup's memory.current sampled every 0.5 s during each call.",
                "The downtime is measured from this seat by a public-endpoint sampler, so it includes the sampler's step; the audit-lake read OG-ev-13 spans this window and can exclude the interval named above."],
 }
-io.open(W + "RZ2_SERVED.json", "w", encoding="utf-8", newline="\n").write(json.dumps({"body": body}, indent=1) + "\n")
+io.open(W + "RZ2_SERVED.json", "w", encoding="utf-8", newline="\n").write(json.dumps(body, indent=1) + "\n")
 io.open(W + "rz2_facts.json", "w", encoding="utf-8", newline="\n").write(json.dumps({"downtime_seconds": down["downtime_seconds"], "first_failed_sample_utc": down["first_failed_sample_utc"], "first_answer_after_utc": down["first_answer_after_utc"],
                                                                                          "large_replies": [(x["name"], x["reply_bytes"], x["max_mb"]) for x in big], "dual_count": [lines, records]}, indent=1) + "\n")
 print(json.dumps({k: body[k] for k in ("live_commit", "health_after", "marker_equals_release", "unit_memory_high", "unit_memory_max", "memory_total_mb", "tools_list", "tools_27_of_27", "nrestarts_after_deploy", "host_md5", "large_replies", "downtime")}, indent=1)[:2600])
