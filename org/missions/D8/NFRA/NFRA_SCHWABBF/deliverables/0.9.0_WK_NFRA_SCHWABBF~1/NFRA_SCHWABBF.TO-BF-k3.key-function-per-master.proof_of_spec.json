@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-k3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R3.md",
+    "vintage_commit": "6c4675f585a",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-k3.key-function-per-master.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "e8d796975f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/bronze/_monolith_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "57310f7877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 57310f7877 on branch wk-NFRA_SCHWABBF-1. The deploy of this mirror to s3://opal-data-bd/code/ is the issuer's release act, not this order; the order's Bounds say LOCAL, no S3, no deploy.",
+      "artifact_covered_by": ["BF3-k3-AC1", "BF3-k3-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/silver/_canonical_silver_lib.py",
+      "kind": "script",
+      "commit_or_etag": "57310f7877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL commit 57310f7877 on branch wk-NFRA_SCHWABBF-1. Not deployed; the silver lib is imported by the silver builders, which are other cells.",
+      "artifact_covered_by": ["BF3-k3-AC1", "BF3-k3-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_bronze_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "57310f7877",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL test file on the worker branch, rewritten first (before any key-function edit) to the per-master rule; run by the pytest invocations in acceptance.",
+      "artifact_covered_by": ["BF3-k3-AC1", "BF3-k3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF3-k3-AC1",
+      "criterion_verbatim": "set, firm-master parity with the builder, 0824/0833 parity with the pre-round function, the guards and the listers. The bar is a pytest summary line that STARTS with the passed count.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "643 passed in 2.08s\n(second run of the same command, same tree: 643 passed in 1.41s)\nDRY-RUN CONTROL, before any key-function edit, same command on the all-firm round-2 functions: 156 failed, 487 passed; the 0824/0833 key arms (test_other_masters_key_*) failed 136 of 136.",
+      "denominator": "643 passed of 643 collected; 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "BF3-k3-AC2",
+      "criterion_verbatim": "the seam probe against the REAL neighbor: the converter's own readers accept both key forms.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no -k converter_seam",
+      "output_evidence": "1 passed, 642 deselected in 1.04s",
+      "denominator": "1 passed of 1 selected",
+      "expect": "^1 passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-k-3; the worker ran none. The order's dry-run control is recorded in acceptance BF3-k3-AC1 output_evidence.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The AC1 pytest invocation run twice on the same tree; the summary lines were compared.",
+      "observed": "Run 1: '643 passed in 2.08s'. Run 2: '643 passed in 1.41s'. Counts identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deploy of the bd-tree mirror to s3://opal-data-bd/code/",
+      "reason": "Issuer release act; the order is LOCAL with no S3 access."
+    },
+    {
+      "item": "data/canonical/schwab/keyform/move_bronze_key_form.py and data/canonical/schwab/tests/test_move_bronze_key_form.py",
+      "reason": "Outside the write grant. After BF-k-3 the move test reads 10 failed, 9 passed; recorded as NFRA_SCHWABBF-W1-S2, not fixed here."
+    },
+    {
+      "item": "data/assets/scripts/silver/schwab_conversion.py and its deployed twin",
+      "reason": "READ ONLY for this cell per the order. Its readers accept both key forms as measured by AC2."
+    },
+    {
+      "item": "docs/architecture/OPAL_ASSETS_CONSOLIDATION_PRD.md and docs/architecture/OPAL_ASSETS_PRD.md",
+      "reason": "Outside the write grant. The supersession is recorded in both mirror module docstrings and in the key-function block."
+    },
+    {
+      "item": "Tracked __pycache__ .pyc files modified by the test imports",
+      "reason": "Python rewrote tracked bytecode when the modules were imported; those bytes are not in the write grant and are not staged or committed."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W1-S2: the bronze move script and its test still encode the all-firm key grammar; after the per-master rule 10 of 19 move tests fail (the move plans 0824 and 0833 into the firm form, and the plan refuses on dst equal to src). Outside the write grant; filed, not fixed.",
+    "NFRA_SCHWABBF-W1-S3: an unregistered eight-digit master resolves silently to the old form under the 'any OTHER master' rule, where the round-2 all-firm functions refused it through MASTER_FIRM. The literal spec was implemented; the silence in the spec is filed for the CTO or the issuer to choose."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile data/black_diamond/scripts/bronze/_monolith_bronze.py data/canonical/schwab/silver/_canonical_silver_lib.py data/canonical/schwab/tests/test_bronze_key_form.py",
+      "result": "rc=0, all three files compile"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --select E9,F data/black_diamond/scripts/bronze/_monolith_bronze.py data/canonical/schwab/silver/_canonical_silver_lib.py data/canonical/schwab/tests/test_bronze_key_form.py",
+      "result": "All checks passed! rc=0"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_bronze_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "643 passed (two identical-count runs)"
+    }
+  ]
+}
