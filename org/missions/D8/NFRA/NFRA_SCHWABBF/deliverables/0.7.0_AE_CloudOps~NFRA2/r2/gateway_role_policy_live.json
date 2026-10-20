@@ -1,0 +1,77 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Deny",
+            "NotAction": [
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:ListBucket"
+            ],
+            "Resource": "*",
+            "Sid": "DenyAllNonReadActions"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Deny",
+            "NotResource": [
+                "arn:aws:s3:::opal-data-assets/schwab/08242234/meta/complete/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08403355/meta/complete/*"
+            ],
+            "Sid": "DenyReadsOutsideCompletionPrefixes"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Effect": "Deny",
+            "NotResource": "arn:aws:s3:::opal-data-assets",
+            "Sid": "DenyListingOtherBuckets"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringNotLike": {
+                    "s3:prefix": [
+                        "schwab/08242234/meta/complete/*",
+                        "schwab/08335338/meta/complete/*",
+                        "schwab/08403355/meta/complete/*"
+                    ]
+                }
+            },
+            "Effect": "Deny",
+            "Resource": "arn:aws:s3:::opal-data-assets",
+            "Sid": "DenyListingOutsideCompletionPrefixes"
+        },
+        {
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::opal-data-assets/schwab/08242234/meta/complete/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08335338/meta/complete/*",
+                "arn:aws:s3:::opal-data-assets/schwab/08403355/meta/complete/*"
+            ],
+            "Sid": "AllowCompletionObjectReads"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Condition": {
+                "StringLike": {
+                    "s3:prefix": [
+                        "schwab/08242234/meta/complete/*",
+                        "schwab/08335338/meta/complete/*",
+                        "schwab/08403355/meta/complete/*"
+                    ]
+                }
+            },
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::opal-data-assets",
+            "Sid": "AllowCompletionPrefixListing"
+        }
+    ]
+}
