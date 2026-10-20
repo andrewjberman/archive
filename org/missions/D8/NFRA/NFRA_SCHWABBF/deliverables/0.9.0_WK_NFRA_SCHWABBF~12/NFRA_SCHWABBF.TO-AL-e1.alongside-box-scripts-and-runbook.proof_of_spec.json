@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-e1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "ae487c67689",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-e1.alongside-box-scripts-and-runbook.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "ae487c67689"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/keep-console.ps1",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed by this safe-commit (the folder is in the worktree cone since the issuer's sparse fix). Never executed: WORLD floor.",
+      "artifact_covered_by": ["AL1-e1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/bootstrap.ps1",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed by this safe-commit. Never run: it needs a Windows box, AWS and the secret store. Its behaviour is graded by text checks only.",
+      "artifact_covered_by": ["AL1-e1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/sdd-entitlements.ps1",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed by this safe-commit. Never run. Reads DailyMasterAccounts from UserMastersResponse, the shape the sdd-harness reference (its response handling) gives; a property-absent run exits 9 and prints the response property names.",
+      "artifact_covered_by": ["AL1-e1-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/RUNBOOK_ALONGSIDE_SITTING.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed by this safe-commit. Nothing in it has been run. Step d's install command is marked UNVERIFIED in the file.",
+      "artifact_covered_by": ["AL1-e1-AC3"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_box_scripts.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Written first and run red (12 failed, FileNotFoundError on the folder), then green against the files above. Committed by this safe-commit.",
+      "artifact_covered_by": ["AL1-e1-AC1", "AL1-e1-AC2", "AL1-e1-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL1-e1-AC1",
+      "criterion_verbatim": "the three scripts parse, are ASCII, and the bootstrap writes only its own secret and never prints the password.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no -k \"syntax or bootstrap\"",
+      "output_evidence": "......                                                                   [100%]\n6 passed, 7 deselected in 0.93s\n(rc=0). Run with -s on the syntax arm: 2 passed, no SKIP line (the powershell.exe parse arm ran). Negative control: a deliberately broken .ps1 parsed through the same Parser::ParseFile call returned rc=1 with two parse errors.",
+      "denominator": "6 passed of 13 collected in the file (-k selects 6; 7 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL1-e1-AC2",
+      "criterion_verbatim": "the entitlement read is read-only, names the four masters, and reports the denominator.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no -k \"entitlements\"",
+      "output_evidence": ".....\n5 passed, 8 deselected in 0.02s\n(rc=0)",
+      "denominator": "5 passed of 13 collected in the file (-k selects 5; 8 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL1-e1-AC3",
+      "criterion_verbatim": "the sitting runbook has the no-ingress path, the install URL, both secrets by name and no secret value.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no -k \"runbook\"",
+      "output_evidence": "..\n2 passed, 11 deselected in 0.02s\n(rc=0)",
+      "denominator": "2 passed of 13 collected in the file (-k selects 2; 11 deselected); 0 failed",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for AL-e-1; the worker ran none.",
+      "expected": "N/A",
+      "observed": "N/A: no mutant run by the worker.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The full file was run on the final tree (no -k), then each criterion's -k selection was run once on the same tree.",
+      "observed": "Full file: 13 passed in 0.9 s, rc=0. AC1 6 passed; AC2 5 passed; AC3 2 passed; each rc=0 on the final tree.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Execution of any of the three PowerShell scripts or the runbook, any AWS call, any S3 upload, any Secrets Manager read, any Schwab call",
+      "reason": "WORLD floor in the order: the files are text; the sitting is Andrew's act and the box does not exist yet."
+    },
+    {
+      "item": "infra/aws/ec2/canonical-schwab-si2/sdd-harness.ps1 (untracked reference copy placed in the worktree by the issuer)",
+      "reason": "Read-only reference, as the issuer directed by coordinator message. Not edited, not staged, not committed by this order; the safe-commit path list excludes it."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W12-S1: BLOCKING, cleared by the issuer (the worktree cone now carries infra/aws/ec2/alongside-schwab-si2; git add --dry-run of keep-console.ps1 returns rc=0). Row disposition untouched (append-only).",
+    "NFRA_SCHWABBF-W12-S2: OBSERVATION, cleared by the issuer (sdd-harness.ps1 copied as an untracked reference; the response shape is DailyMasterAccounts on UserMastersResponse, read by sdd-entitlements.ps1, which exits 9 if that property is absent). Row disposition untouched (append-only)."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_box_scripts.py -q -p no:cacheprovider --color=no",
+      "result": "13 tests: 6 under -k 'syntax or bootstrap', 5 under -k entitlements, 2 under -k runbook; 13 passed, rc=0 on the final tree"
+    },
+    {
+      "tool": "powershell.exe Parser::ParseFile",
+      "invocation": "powershell.exe -NoProfile -Command \"[System.Management.Automation.Language.Parser]::ParseFile(<path>, [ref]$null, [ref]$errs)\" for each of keep-console.ps1, bootstrap.ps1, sdd-entitlements.ps1",
+      "result": "zero parse errors on all three; the syntax arm ran (no SKIP line under -s)"
+    }
+  ]
+}
