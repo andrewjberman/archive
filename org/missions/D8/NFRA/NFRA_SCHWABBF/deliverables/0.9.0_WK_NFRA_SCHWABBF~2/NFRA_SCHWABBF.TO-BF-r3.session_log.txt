@@ -1,0 +1,14 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~2 on NFRA_SCHWABBF.TO-BF-r3 (cell BF-r-3), worktree wt-bf-2, branch wk-NFRA_SCHWABBF-2
+
+1. Identity and tree: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-2; test -d org && test -d .tools -> TREE-OK.
+2. Premises: git cat-file -t 5f1ad506a4 -> commit. Blob compare HEAD vs 5f1ad506a4 for the three paths: all three differ at HEAD (round-2 firm-form bytes present at 6c4675f585a).
+   Check script present: org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/2.0.0_SA_COO~SB/R3_CHECKS/restore_readers_check.py.
+3. Dry run at base (before restore): python restore_readers_check.py -> RESTORE-DIFF x3, "RESTORE-FAIL differing=3 of 3", rc=1 (expected FAIL).
+4. Restore: git show 5f1ad506a4:<path> > <path> for each of the three paths, no retyping. git diff --stat HEAD: 3 files changed, 164 insertions(+), 165 deletions(-).
+5. Commit: bash .tools/safe-commit.sh --author "0.9.0_WK_NFRA_SCHWABBF~2 <0.9.0_WK_NFRA_SCHWABBF~2@opal.agent>" -F .scratch/msg_bf3_r3.txt -- <the three paths> -> commit 2844394a375cf98d1b317e5766805a6d8c259159, commit-gate clean for 3 of 3, msg-verify MATCH, rc=0. Gate notices printed (not blocking): risk-reflex danger map STALE (scanned 0 of 3); client-data-check hashed account-id list ABSENT; naming-gate function-map folder missing.
+   Stray write: the first Write-tool attempt for the commit message used a POSIX-style path (/cygdrive/c/...) and reported success, but the file was not found in the worktree; the message was rewritten to the Windows path of the worktree .scratch directory and committed from there. Where the first attempt landed was not verified and was not cleaned up by this worker.
+6. Criterion AC1: python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/2.0.0_SA_COO~SB/R3_CHECKS/restore_readers_check.py -> "RESTORE-OK files=3", rc=0.
+7. Criterion AC2: python -m pytest data/canonical/schwab/tests/test_canonical_daily_date_axis.py -q -p no:cacheprovider --color=no -> "16 passed in 1.00s", rc=0.
+   Side effect noted: a tracked __pycache__ .pyc (data/canonical/schwab/silver/__pycache__/_canonical_silver_lib.cpython-312.pyc) shows modified in the worktree after the import; it is outside the grant, is not staged, and is not committed.
+8. Surprise rows filed: none.
+9. Not run, by order: the round-2 test files and tools outside the three-path grant.

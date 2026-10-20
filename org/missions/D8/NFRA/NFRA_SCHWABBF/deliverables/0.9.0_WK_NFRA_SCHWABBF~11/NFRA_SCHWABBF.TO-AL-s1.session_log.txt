@@ -1,0 +1,14 @@
+SESSION LOG -- 0.9.0_WK_NFRA_SCHWABBF~11 on NFRA_SCHWABBF.TO-AL-s1 (cell AL-s-1)
+worktree: C:/Users/AndrewBerman/Desktop/wt-al-11   branch: wk-NFRA_SCHWABBF-11   base: 05b95a2aca45a00164f55e66aa51b47c9e9f8456 (TO-AL-a1 complete)
+
+1. TREE-OK check: branch wk-NFRA_SCHWABBF-11; org, .tools and infra/aws/terraform/alongside-schwab-ec2 present.
+2. Face read: WORKER FACE and BOUNDS only (order header also read; no instructions in it).
+3. AL-a-1 addresses confirmed in the worktree: local.alongside_masters and local.alongside_firm (masters.tf), aws_instance.alongside_box (box.tf).
+4. Prior art read, read-only: canonical-schwab-ec2/monolith-daily-schedule.tf in full (the Administrator scheduled-task hand-off, the $ErrorActionPreference='Continue' reason, the events role).
+5. Test written FIRST. Dry run: fire_times/disabled 1 failed + 1 passed (fire_times reads masters.tf only, which exists); ssm_command 1 failed; role_scope/builder_names 3 failed, all on the missing schedule.tf.
+6. schedule.tf built: two variables, five module name blocks, the rule and target for_each over local.alongside_masters, the events role and its one-statement policy, one output.
+7. Test run after build: fire_times or disabled 2 passed; ssm_command 1 passed; role_scope or builder_names 3 passed; full file 6 passed.
+8. terraform fmt -check -recursive reported schedule.tf; terraform fmt schedule.tf (own file) rewrote it; fmt -check rc 0 afterwards; both test files still pass (AL-a-1 file 13 passed).
+9. Mutant control on a scratch copy (.scratch/mutant, not committed): S_M1 typed master in the command, caught by test_ssm_command_fail_loud_and_no_49f_resource; S_M2 star resource, caught by test_role_scope_one_document_one_instance_no_star; S_M3 cron collision (masters.tf in the copy), caught by test_fire_times_alongside_stagger_and_against_49f (first assertion: masters equal the four-master literal, so the stagger arm itself was not the one that fired); S_M4 default ENABLED, caught by test_disabled_default_validation_and_rule_state.
+10. Determinism: each criterion selection run twice, identical pass counts and rc.
+11. No surprise rows filed for this order.
