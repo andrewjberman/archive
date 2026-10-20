@@ -1,0 +1,15 @@
+{
+ "deny_record_present_before": false,
+ "activate_writes_deny": true,
+ "deny_emails_in_plan": 1,
+ "email_deny_records_in_store": 1,
+ "effect": "The email_deny record is read by exactly two paths in the gateway: data_entitlement.email_denial(), called by the five browser routes (/login, /sprint, /sprint/, /sprint/archive, /sprint/{day}) and by the legacy /callback consent branch (token_broker.redeem_consent), which identify the caller by e-mail alone. A record means 403 there; an unreadable store means 503. It does not touch MCP tool calls, which are keyed by tenant and object id. A master admin passes the five browser routes before the store is read (OG-en-14, route_class internal_page); the legacy /callback consent branch has no such exemption, so his legacy consent sign-in would answer 403 after the activation.",
+ "options": [
+  "Activate and accept the effect: his browser pages stay open as master admin and his MCP tool calls are unaffected; only the legacy consent sign-in (/callback) answers 403 for him.",
+  "Before the activation, add a master-admin exemption to the legacy /callback consent branch (a code change and its own release, separate from this order), then activate.",
+  "Hold the activation until the legacy consent branch is retired, keeping the held revision-1 grant meanwhile (the OG-mg-2 option (b) state).",
+  "Have the operator tool write the grant without the e-mail put (a change to ops/schwab_entitlement_admin.py and its tests, separate from this order); activate() stays unchanged until then."
+ ],
+ "delete_proposed": false,
+ "ruling_requested_of": "1.0.0_SA_CTO~Z (his half names the handling)"
+}
