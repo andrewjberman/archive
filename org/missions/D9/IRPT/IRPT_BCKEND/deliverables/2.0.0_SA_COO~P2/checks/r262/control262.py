@@ -17,7 +17,7 @@ import p262_cells as P  # noqa: E402
 GOOD = {
     "gates": {"packet_blob": P.BLOB, "both_halves_signed": True,
               "pins_equal_head": {"refresh_py": P.REFRESH_BLOB[:12], "directory_runner_py": P.RUNNER_BLOB[:12]},
-              "one_change_at_a_time": True, "ledger_opened_before_first_write": True, "outside_the_fire_band": True,
+              "one_change_at_a_time": True, "hm5_exempt_by_ruling_msg_11137": True, "hm5_members_equal_head": True, "ledger_opened_before_first_write": True, "outside_the_fire_band": True,
               "outside_the_gateway_window": True, "not_alongside_another_ib2_act": True,
               "branch_b_versions_named_before_write": {"bundle": P.BUNDLE_BEFORE, "zip_codesha256": P.ZIP_BEFORE_SHA, "zip_prior_s3_version_found": True},
               "pre_mint_tests": {"passed": 22, "failed": 0}},
@@ -47,6 +47,8 @@ NEGS = [
     ("refresh_pin_differs", "AC1", mut(["gates", "pins_equal_head", "refresh_py"], "000000000000")),
     ("runner_pin_differs", "AC1", mut(["gates", "pins_equal_head", "directory_runner_py"], "000000000000")),
     ("not_one_change_at_a_time", "AC1", mut(["gates", "one_change_at_a_time"], False)),
+    ("hm5_exemption_not_recorded", "AC1", mut(["gates", "hm5_exempt_by_ruling_msg_11137"], False)),
+    ("hm5_members_not_proved_equal_head", "AC1", mut(["gates", "hm5_members_equal_head"], False)),
     ("ledger_not_first", "AC1", mut(["gates", "ledger_opened_before_first_write"], False)),
     ("inside_fire_band", "AC1", mut(["gates", "outside_the_fire_band"], False)),
     ("inside_gateway_window", "AC1", mut(["gates", "outside_the_gateway_window"], False)),
