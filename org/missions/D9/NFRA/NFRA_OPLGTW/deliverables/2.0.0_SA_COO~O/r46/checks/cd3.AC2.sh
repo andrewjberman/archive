@@ -14,7 +14,7 @@ sent=$(git ls-tree --name-only HEAD "org/critical_paths/.open_deploys/${slug}.js
 [ -f "$REC" ] || { echo "FD_APPLIED.json absent"; echo "RESULT: FAIL"; exit 1; }
 read -r pol rule key rootp <<<"$(python -I -c "import json,sys;d=json.load(open(sys.argv[1],encoding='utf-8'));print(d.get('policy_name',''),d.get('sample_rule_arn',''),d.get('sample_status_key_arn',''),d.get('sample_root_prefix',''))" "$(native "$REC")" | tr -d '\r')"
 role=opal-gateway-role
-doc=$(aws iam get-role-policy --role-name "$role" --policy-name "$pol" --query PolicyDocument --output json | tr -d '\r')
+doc=$(.tools/aws iam get-role-policy --role-name "$role" --policy-name "$pol" --query PolicyDocument --output json | tr -d '\r')
 shape=$(printf '%s' "$doc" | python -I -c "
 import json,sys
 try:
@@ -25,9 +25,9 @@ st=d.get('Statement'); st=[st] if isinstance(st,dict) else (st or [])
 acts=sorted({a for s in st for a in ([s.get('Action')] if isinstance(s.get('Action'),str) else (s.get('Action') or []))})
 print('ok' if len(st)==4 and acts==['events:DescribeRule','s3:GetObject','s3:ListBucket'] and all(s.get('Effect')=='Allow' for s in st) else 'wrong')
 " | tr -d '\r')
-arn=$(aws iam get-role --role-name "$role" --query Role.Arn --output text | tr -d '\r')
-sim() { aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names "$1" --resource-arns "$2" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d '\r'; }
-simlist() { if [ -n "$2" ]; then aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names s3:ListBucket --resource-arns arn:aws:s3:::opal-data-assets --context-entries "ContextKeyName=s3:prefix,ContextKeyValues=$1,ContextKeyType=string" "ContextKeyName=s3:delimiter,ContextKeyValues=$2,ContextKeyType=string" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d ''; else aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names s3:ListBucket --resource-arns arn:aws:s3:::opal-data-assets --context-entries "ContextKeyName=s3:prefix,ContextKeyValues=$1,ContextKeyType=string" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d ''; fi; }
+arn=$(.tools/aws iam get-role --role-name "$role" --query Role.Arn --output text | tr -d '\r')
+sim() { .tools/aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names "$1" --resource-arns "$2" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d '\r'; }
+simlist() { if [ -n "$2" ]; then .tools/aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names s3:ListBucket --resource-arns arn:aws:s3:::opal-data-assets --context-entries "ContextKeyName=s3:prefix,ContextKeyValues=$1,ContextKeyType=string" "ContextKeyName=s3:delimiter,ContextKeyValues=$2,ContextKeyType=string" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d ''; else .tools/aws iam simulate-principal-policy --policy-source-arn "$arn" --action-names s3:ListBucket --resource-arns arn:aws:s3:::opal-data-assets --context-entries "ContextKeyName=s3:prefix,ContextKeyValues=$1,ContextKeyType=string" --query 'EvaluationResults[0].EvalDecision' --output text | tr -d ''; fi; }
 e=denied; f=allowed; if [ -n "$rootp" ]; then e=$(simlist "$rootp" "/"); f=$(simlist "$rootp" ""); fi
 a=$(sim events:DescribeRule "$rule"); b=$(sim s3:GetObject "$key"); c=$(sim events:PutRule "$rule"); d=$(sim s3:PutObject "$key")
 echo "ledger CLOSED $closed of 1; sentinel at HEAD $sent; policy $pol shape $shape; simulate DescribeRule $a, GetObject $b; root list with delimiter $e, root list with NO delimiter (negative control) $f; negative controls PutRule $c, PutObject $d"
