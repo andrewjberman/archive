@@ -202,3 +202,20 @@ C. Post-commit criteria, the round checker by absolute path from the worktree (c
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=30 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made in REPAIR 11.
+
+REPAIR 12 (issuer, 2026-10-20 ~21:20Z) -- the box signed in at 20:59Z and the authorize wait failed; every run must log out.
+A. Code (commit 343f1fba3d): _authorize accepts any 2xx; on timeout it notes authorize_seen=[path:status,...] (the last 12
+   responses on the wealthcentral or ecaap hosts whose path is an authorize call or a container page; path only). The
+   PlaywrightDriver.logout() DELETEs the authorization and the ecaap session through the context request object, notes
+   logout statuses=<code>,<code> (or logout=failed <ClassName>), and never retries. Session keeps its driver and close()
+   logs out before the context closes and rewrites the trace. open_session's failure path logs out when the password step
+   was accepted.
+B. Tests: tests/test_login_trace.py has 33 tests (the 30 and the 3 of REPAIR 12). 53 passed across the sign-in files; 33 passed
+   twice. Mutant (logout removed from Session.close, scratch copy): 1 failed, 32 passed. ruff py39 All checks passed; non-ASCII 0.
+C. Post-commit criteria, the round checker by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=33 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 12.
