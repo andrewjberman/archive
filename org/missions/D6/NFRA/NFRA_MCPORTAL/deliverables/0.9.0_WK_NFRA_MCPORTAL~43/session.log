@@ -7,4 +7,9 @@
 5. Suite after repair: 36 passed, 0 failed, rc=0, 70.47s.
 6. AC1 (issuer's zo3.AC1.sh, run as `timeout 120 bash ...` by the worker bound; the recorded invocation is the criterion's text without the bound): pytest rc=0; named tests present in sources 1 of 5; passed=36 (min 40); failed=0; RESULT: FAIL; exit=1. Second run of the same check: 36 passed in 51.55s, same verdict (determinism).
 7. Mutant (base test body restored, observed in step 2): WRITTEN where REFUSED expected, 1 failed. The test discriminates the stale state.
-8. Proof instance written and validated; see the proof_of_spec.json in this folder.
+8. Proof instance first written and validated (rc=0) with AC1 FAIL; its recorded invocation was corrected to the criterion's text (the checker had reported the bound as a violation), then re-validated rc=0.
+9. Issuer AMENDMENT 1 carried onto the branch at c52cb0ceb1 (order lines 1-70 and zo3.AC1.sh re-read). Widening rule built in lambda_function.py at f3774ac1df: _widens() against the one strong read; WIDEN-NO-CONFIRM refusal after the read and before any write unless widening_confirm is exactly True; a widening write carries widening_signoff on the record and the audit item. Four new tests added (test_widening_without_confirm_is_refused_before_any_store_write, test_widening_with_the_verified_owners_confirm_is_written_and_recorded, test_subtract_restore_and_stop_need_no_widening_confirm, test_widening_confirm_from_a_non_owner_master_admin_is_refused_before_any_store_call).
+10. Suite after the rule: 40 passed, 0 failed, rc=0 (65.94s direct; 47.47s through zo3.AC1.sh).
+11. AC1 (amended check, timeout 120): named tests present in sources 5 of 5; passed=40 (min 40); failed=0; RESULT: PASS; exit=0.
+12. Mutant on the rule: refusal replaced by `if False:`; widening-no-confirm test run alone: FAILED, 1 failed, 15 deselected, rc=1; file restored byte-equal (cmp), git status clean.
+13. Proof instance rewritten and validated with proof-of-spec-check.py (see the instance in this folder).

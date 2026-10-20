@@ -16,11 +16,21 @@
   "assignee": "0.9.0_WK_NFRA_MCPORTAL~43",
   "artifacts_produced": [
     {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "f3774ac1df8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-43, not pushed, no deploy, no AWS call. Adds WIDEN_NO_CONFIRM, _widens() and the widening_confirm check after the one strong read and before any write; a widening write carries widening_signoff on the record and on the operator_audit item.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
       "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_person_access.py",
       "kind": "test",
-      "commit_or_etag": "ba8cfc3ef39",
+      "commit_or_etag": "f3774ac1df8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-43, not pushed, no deploy, no AWS call. Only the stale test test_person_access_refused_when_record_kind_not_live was repaired in place (monkeypatch narrows acs.POLICY_RECORD_TYPES for that test). The widening rule (lambda_function.py) is NOT changed; see surprise NFRA_MCPORTAL-Z-W43-S1.",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-43, not pushed, no deploy. Four new named tests appended; the stale test repaired in place earlier (commit ba8cfc3ef39) is unchanged by this commit.",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -30,7 +40,7 @@
       "kind": "doc",
       "commit_or_etag": "9a367e600d6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-43, not pushed. One appended row NFRA_MCPORTAL-Z-W43-S1 (class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~MP); no earlier byte changed (diff is 26 insertions, 0 deletions).",
+      "deploy_evidence": "LOCAL on wk-NFRA_MCPORTAL-43, not pushed. One appended row NFRA_MCPORTAL-Z-W43-S1 (class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~MP); no earlier byte changed (diff is 26 insertions, 0 deletions). The row is not edited after filing.",
       "artifact_covered_by": []
     }
   ],
@@ -40,34 +50,30 @@
       "criterion_verbatim": "named tests present in sources 5 of 5.*failed=0.*RESULT: PASS.*exit=0",
       "method": "command",
       "invocation": "cd C:/tmp/mp-ogw-43 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zo3.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "36 passed in 51.55s\npytest rc=0; named tests present in sources 1 of 5; passed=36 (min 40); failed=0\nRESULT: FAIL\nexit=1",
-      "denominator": "named tests present in sources 1 of 5; pytest on the grant-writer tests directory 36 passed, 0 failed of 36 collected; required 40 passed",
-      "status": "FAIL",
+      "output_evidence": "40 passed in 47.47s\npytest rc=0; named tests present in sources 5 of 5; passed=40 (min 40); failed=0\nRESULT: PASS\nexit=0",
+      "denominator": "named tests present in sources 5 of 5; pytest on the grant-writer tests directory 40 passed, 0 failed of 40 collected; minimum 40 passed",
+      "status": "PASS",
       "expect": "named tests present in sources 5 of 5.*failed=0.*RESULT: PASS.*exit=0",
-      "status_reason": "Four of the five named tests are absent from the sources (only test_person_access_refused_when_record_kind_not_live is present, repaired in place). The widening rule and its tests 2-5 were not built because the widening definition (against the prior record, a store read) conflicts with the face's zero-store-call refusal; surprise NFRA_MCPORTAL-Z-W43-S1 is BLOCKING and disarm_owner 2.0.0_SA_COO~MP. Pass count 36 is below the 40 minimum. The check is not met."
+      "status_reason": "All five named tests present in test_person_access.py (the repaired stale test and the four new ones); pytest on the grant-writer tests directory 40 passed, 0 failed, rc=0; RESULT: PASS, exit=0. The check was run under a 120 s bound (timeout 120) by the worker bound; the recorded invocation is the criterion's text without it."
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Base test body (no monkeypatch of POLICY_RECORD_TYPES) run at the base commit d0ece5fe139 in the same suite: the stale assertion is exercised against the live staged tuple.",
-      "expected": "the stale test FAILS (1 failed) while the live tuple carries person_access, because the writer returns WRITTEN where REFUSED RECORD-KIND-NOT-LIVE is expected",
-      "observed": "1 failed, 35 passed; AssertionError: {'verdict': 'WRITTEN', ...}; test_person_access.py:207 (base line numbering)",
+      "description": "In lambda_function.py the widening refusal is disabled (the condition 'if widening and event.get(\"widening_confirm\") is not True:' replaced by 'if False:'), the file otherwise unchanged; the widening-without-confirm test run alone; the file then restored byte-equal (cmp) and git status clean.",
+      "expected": "the no-confirm test FAILS (1 failed) when the refusal is removed, because the writer writes an unconfirmed widening",
+      "observed": "FAILED test_widening_without_confirm_is_refused_before_any_store_write; 1 failed, 15 deselected, rc=1; file restored, cmp equal",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the grant-writer test directory run twice on the same tree after the repair (once direct, once through zo3.AC1.sh); the passed/failed summary compared",
-      "observed": "run 1: 36 passed in 70.47s; run 2: 36 passed in 51.55s; both 0 failed",
+      "method": "the grant-writer test directory run on the same tree after the rule was built, once direct (pytest) and once through zo3.AC1.sh; the passed/failed summary compared",
+      "observed": "run 1: 40 passed in 65.94s, 0 failed, rc=0; run 2: 40 passed in 47.47s, 0 failed, rc=0",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "The order's <status> flip",
-      "reason": "The worker face forbids the flip (the order file is outside the write grant and the issuer flips it), and AC1 reads FAIL, so the order is not met and must stay open."
-    },
-    {
-      "item": "The widening rule (FWD-26 writer side) and face tests 2-5",
-      "reason": "Not built. The face's definition (widening against the prior record) needs a store read; the face's WIDEN-NO-CONFIRM refusal requires zero store calls. This premise conflict is surprise NFRA_MCPORTAL-Z-W43-S1 and the face says stop on the criterion, not repair it."
+      "reason": "The worker face forbids the flip (the order file is outside the write grant and the issuer flips it). AC1 reads PASS; the flip is the issuer's."
     },
     {
       "item": "Push, deploy, AWS call, network call, vendor call",
@@ -79,14 +85,19 @@
     }
   ],
   "surprises": [
-    "NFRA_MCPORTAL-Z-W43-S1: the widening rule defined against the prior record needs a store read, and the face's WIDEN-NO-CONFIRM refusal requires zero store calls; both cannot hold, so the widening rule and face tests 2-5 are not built. Class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~MP."
+    "NFRA_MCPORTAL-Z-W43-S1: the widening rule defined against the prior record needs a store read, and the face's zero-store-call refusal conflicted with it. The issuer ruled the defect was the issuer's (AMENDMENT 1, commit c52cb0ceb1: the refusal now sits after the one strong read and before any write). The rule is built at f3774ac1df8. The row is not edited; its disposition belongs to the issuer. Class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~MP."
   ],
   "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~43/session.log",
   "compiler_tools": [
     {
       "tool": "pytest (grant-writer tests directory)",
       "invocation": "cd C:/tmp/mp-ogw-43 && timeout 115 python -m pytest infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests -q -p no:cacheprovider",
-      "result": "36 passed, 0 failed, rc=0 after the stale-test repair; base 35 passed, 1 failed"
+      "result": "40 passed, 0 failed, rc=0 after the widening rule; base 35 passed, 1 failed"
+    },
+    {
+      "tool": "python -I -m py_compile (writer source and test module)",
+      "invocation": "cd C:/tmp/mp-ogw-43 && python -I -m py_compile infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "result": "COMPILE-OK for both files"
     }
   ]
 }
