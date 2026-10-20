@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-ed-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5499b78e886",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-ed-1.round-47-the-master-admin-exemption-on-the-legacy-callback-consent-branch.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5499b78e886"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~175",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "b843804461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; the order has no deploy, release or AWS call. Adds CONSENT = consent, the class in the exemption test, and the comments.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "b843804461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; the legacy consent branch's _email_denied call gains route_class=data_entitlement.CONSENT, and the _email_denied docstring is updated.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/token_broker.py",
+      "kind": "script",
+      "commit_or_etag": "b843804461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; the one email_denial call in redeem_consent gains route_class=data_entitlement.CONSENT.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_og_ed1.py",
+      "kind": "test",
+      "commit_or_etag": "b843804461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; four offline tests, test_oged1_ac01 to test_oged1_ac04, 4 passed at HEAD 1329b7e25e2.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_scoped_consent_r253.py",
+      "kind": "test",
+      "commit_or_etag": "1329b7e25e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; amended item 5 (ruling on Z-W175-S1): the one stub lambda at line 117 gains route_class=None. No other line.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_login_admit_r24.py",
+      "kind": "test",
+      "commit_or_etag": "1329b7e25e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BUILD only; amended item 5 (ruling on Z-W175-S1): the one stub lambda at line 162 gains route_class=None. No other line.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the behaviour, graded by a script of the issuer's, independent of your tests (a master admin with a deny record is not denied on class consent; a non-admin with a deny record is 403 on class consent; an unreadable store is 503 for a non-admin; no class keeps today's verdict; a lookalike is 403; redeem_consent returns for the admin and is denied for the non-admin).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ed1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "a master admin with an active deny record, class consent: not denied, store reads 0: ok (got None reads 0)\na non-admin with a deny record, class consent: 403 and the record was read: ok\na non-admin on an unreadable store, class consent: 503: ok\nthe master admin with NO class keeps today's verdict: 403: ok\na lookalike of the admin, class consent: 403: ok\nredeem_consent for the master admin with a deny record returns: ok (got returns)\nredeem_consent for the non-admin with a deny record denied: ok (got denied)\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 behaviour checks ok (master admin None with 0 store reads; non-admin 403 with the record read; unreadable store 503; NO-class 403; lookalike 403; redeem_consent returns for the admin; redeem_consent denied for the non-admin); identical on the re-run at HEAD 1329b7e25e2",
+      "status": "PASS",
+      "expect": "(?s)class consent: not denied, store reads 0: ok.*non-admin with a deny record, class consent: 403 and the record was read: ok.*unreadable store, class consent: 503: ok.*NO class keeps today's verdict: 403: ok.*lookalike of the admin, class consent: 403: ok.*redeem_consent for the master admin with a deny record returns: ok.*redeem_consent for the non-admin with a deny record denied: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: your tests and the four neighbours pass (the one carried red, test_ogz1_ac08, is allowed).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ed1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "new file tests/test_og_ed1.py: 4 passed, 0 failed\nneighbours (5): 39 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 new tests pass; neighbours: 39 of 39 pass across the five neighbour files (test_email_deny.py, test_og_en14.py, test_scoped_consent_r253.py, test_data_entitlement_guard.py, test_login_admit_r24.py), failed names []; identical on the re-run at HEAD 1329b7e25e2. The amended order's fifth neighbour (test_login_admit_r24.py) is included",
+      "status": "PASS",
+      "expect": "(?s)new file tests/test_og_ed1\\.py: (?:[4-9]|[1-9]\\d+) passed, 0 failed.*neighbours \\(5\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (a bound): the edit is the exemption and its two call sites, against the pinned blobs (data_entitlement.py at most 12 changed lines; server.py and token_broker.py each at most 4; tests/test_og_ed1.py with at least 4 test functions).",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ed1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "app/data_entitlement.py against the pin: 3 removed, 5 added (want 1 to 12 lines, every added line matching the exemption): ok\napp/server.py against the pin: 2 removed, 3 added (want 1 to 4 lines, every added line matching the exemption): ok\napp/token_broker.py against the pin: 1 removed, 1 added (want 1 to 4 lines, every added line matching the exemption): ok\ntests/test_og_ed1.py: 4 test functions (want 4 or more): ok\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 pinned product files within bound (5, 3 and 1 added lines against limits 12, 4 and 4); 4 of at least 4 test functions; identical on the re-run at HEAD 1329b7e25e2",
+      "status": "PASS",
+      "expect": "(?s)app/data_entitlement\\.py against the pin:.*: ok.*app/server\\.py against the pin:.*: ok.*app/token_broker\\.py against the pin:.*: ok.*tests/test_og_ed1\\.py: (?:[4-9]|[1-9]\\d+) test functions.*: ok.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant control; the cell's own checks are the three criteria above.",
+      "expected": "n/a",
+      "observed": "n/a",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 each run twice: once on the working tree that became commit 1329b7e25e2, and once at HEAD 1329b7e25e2 (the proof is committed after both runs).",
+      "observed": "identical output on both runs for all three criteria",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "release, deploy, AWS call",
+      "reason": "The cell says no release, no deploy, no AWS call; none was made."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W175-S1: BLOCKING, ARMED (disarm 2.0.0_SA_COO~O): the two one-argument email_denial stubs in tests/test_scoped_consent_r253.py and tests/test_login_admit_r24.py conflicted with the required route_class= call; resolved by the issuer's amended item 5 (ruling on this row), stubs edited in commit 1329b7e25e2, AC2 now PASS."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests/test_og_ed1.py tests/test_email_deny.py tests/test_og_en14.py tests/test_scoped_consent_r253.py tests/test_data_entitlement_guard.py tests/test_login_admit_r24.py via ed1.AC2.sh",
+      "result": "new file 4 passed, 0 failed; neighbours (5): 39 passed, failed names []; ed1.AC2.sh RESULT: PASS exit=0"
+    },
+    {
+      "tool": "issuer check scripts",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/ed1.AC1.sh | ed1.AC2.sh | ed1.AC3.sh",
+      "result": "AC1 RESULT: PASS exit=0; AC2 RESULT: PASS exit=0; AC3 RESULT: PASS exit=0"
+    }
+  ]
+}
