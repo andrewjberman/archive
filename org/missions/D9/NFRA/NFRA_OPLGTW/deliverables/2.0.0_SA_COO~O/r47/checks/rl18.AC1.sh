@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-18 AC1 (round 47, the gateway release `batch17`; PHASE A): the take list of OG-rt-1 (the master-wide Schwab scope), whole from trunk, on the live ref read on the host.
 #  - W/rl18_release.json {base_sha, release_sha, trunk_sha, live_ref_host}; base_sha IS the live ref read on the host; dell1's harvest release 6575999df5 is an ancestor of base;
-#    base..release differs ONLY in the four files below (each byte-equal to its blob at trunk_sha); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh, EC2_MANIFEST.json and every .tf is byte-equal between base and release;
+#    base..release differs ONLY in the nine files below (the four of OG-rt-1 and the five of OG-ed-1) (each byte-equal to its blob at trunk_sha); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh, EC2_MANIFEST.json and every .tf is byte-equal between base and release;
 #    dell1's four harvest files are byte-equal between base and release.
-#  - W/PHASE_A_OG-rl-18.json (every host run under a HARD GUARD): tests {named_passed, named_failed 0, window_set_passed, window_set_failed 0, suite_difference_named true}, probes {rt1_ac1_ok 11, rt1_ac2_ok 11} (the 11 and 11 labelled lines of rt1.AC1 and rt1.AC2 run
+#  - W/PHASE_A_OG-rl-18.json (every host run under a HARD GUARD): tests {named_passed, named_failed 0, window_set_passed, window_set_failed 0, suite_difference_named true}, probes {rt1_ac1_ok 11, rt1_ac2_ok 11, ed1_ac1_ok 7} (the 11, 11 and 7 labelled lines of rt1.AC1, rt1.AC2 and ed1.AC1 run
 #    against the candidate tree), explicit_unchanged true (a scope with explicit account lists parses, filters and resolves as the live ref does), sentinel_grants_in_store 0 (a read-only scan of the policy records: no stored grant names ["*"] before the code is live),
 #    process_wide_state (a sentence naming what the change touches).
 #  - W/NEVER_WIDEN_ASK_OG-rl-18.md has the three halves AND a line "process-wide state this change touches:" naming the list, AND states the release-order condition (this code live before any grant names the sentinel).
@@ -18,7 +18,7 @@ git cat-file -e "${rel}^{commit}" && git cat-file -e "${base}^{commit}" && git c
 live=${RL18_LIVE_OVERRIDE:-$hostlive}
 DELL=6575999df5d22c0123abfc0c88cd1c6f1efe8c96
 git merge-base --is-ancestor "$DELL" "$base" && dellanc=yes || dellanc=no
-TAKE="app/data_entitlement.py app/account_ref.py app/integrations/schwab/integration.py tests/test_og_rt1.py"
+TAKE="app/data_entitlement.py app/account_ref.py app/integrations/schwab/integration.py tests/test_og_rt1.py app/server.py app/token_broker.py tests/test_og_ed1.py tests/test_scoped_consent_r253.py tests/test_login_admit_r24.py"
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); n=$(printf '%s\n' "$files" | grep -c .)
 allow_re="^($(for p in $TAKE; do printf '%s|' "$GW/$p" | sed 's/\./\\./g'; done | sed 's/|$//'))$"
 outside=$(printf '%s\n' "$files" | grep -vE "$allow_re" | grep -c .)
@@ -35,7 +35,7 @@ t = b.get("tests") or {}
 tests_ok = (isn(t.get("named_passed")) and t["named_passed"] >= 1 and t.get("named_failed") == 0 and isn(t.get("window_set_passed")) and t["window_set_passed"] >= 1
             and t.get("window_set_failed") == 0 and t.get("suite_difference_named") is True)
 p = b.get("probes") or {}
-p_ok = p.get("rt1_ac1_ok") == 11 and p.get("rt1_ac2_ok") == 11
+p_ok = p.get("rt1_ac1_ok") == 11 and p.get("rt1_ac2_ok") == 11 and p.get("ed1_ac1_ok") == 7
 ex_ok = b.get("explicit_unchanged") is True
 sg_ok = b.get("sentinel_grants_in_store") == 0
 pw = b.get("process_wide_state")
@@ -44,8 +44,8 @@ bignums = re.findall(r"(?<![\d.-])\d{9,}(?![\d.-])", re.sub(r'"[0-9a-f]{40,64}"'
 ok = same and tests_ok and p_ok and ex_ok and sg_ok and pw_ok and not bignums
 print("host runs on release_sha %s; tests: named passed %s failed %s, window set passed %s failed %s, suite difference named %s: %s" % (
       "equal" if same else "NOT equal", t.get("named_passed"), t.get("named_failed"), t.get("window_set_passed"), t.get("window_set_failed"), t.get("suite_difference_named"), "ok" if tests_ok else "NOT OK"))
-print("probes on the candidate tree: rt1.AC1 lines ok %s of 11, rt1.AC2 lines ok %s of 11: %s; explicit-list scope unchanged %s; stored grants naming the sentinel %s (want 0): %s" % (
-      p.get("rt1_ac1_ok"), p.get("rt1_ac2_ok"), "ok" if p_ok else "NOT OK", b.get("explicit_unchanged"), b.get("sentinel_grants_in_store"), "ok" if (ex_ok and sg_ok) else "NOT OK"))
+print("probes on the candidate tree: rt1.AC1 lines ok %s of 11, rt1.AC2 lines ok %s of 11, ed1.AC1 lines ok %s of 7: %s; explicit-list scope unchanged %s; stored grants naming the sentinel %s (want 0): %s" % (
+      p.get("rt1_ac1_ok"), p.get("rt1_ac2_ok"), p.get("ed1_ac1_ok"), "ok" if p_ok else "NOT OK", b.get("explicit_unchanged"), b.get("sentinel_grants_in_store"), "ok" if (ex_ok and sg_ok) else "NOT OK"))
 print("process-wide state this change touches, as recorded in Phase A (CVO verdict 35844): %s; digit runs of 9 or more %d (want 0)" % ("named" if pw_ok else "ABSENT or too short", len(bignums)))
 print("OK" if ok else "NO")
 PYEOF
@@ -54,15 +54,15 @@ rec=$(printf '%s' "$rec" | tr -d '\r')
 halves=$(python3 -I - "$(native "$ASK")" <<'PYEOF'
 import re, sys
 t = open(sys.argv[1], encoding="utf-8").read()
-print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) else "no")
+print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) else "no")
 PYEOF
 )
 halves=$(printf '%s' "$halves" | tr -d '\r')
 echo "base ${base:0:10} is the live ref read on the host: $([ "$base" = "$live" ] && [ -n "$live" ] && echo yes || echo no); dell1 harvest release ${DELL:0:10} is an ancestor of base: $dellanc; release ${rel:0:10}; trunk ${trunk:0:10}"
 hcar=0; hn=0; for h in harvest_research harvest_figures harvest_identity harvest_keys; do hn=$((hn+1)); a=$(git rev-parse "$base:$GW/app/$h.py" 2>/dev/null | tr -d '\r'); b2=$(git rev-parse "$rel:$GW/app/$h.py" 2>/dev/null | tr -d '\r'); [ -n "$a" ] && [ "$a" = "$b2" ] && hcar=$((hcar+1)); done
 echo "dell1's four harvest files byte-equal between the live base and the release: $hcar of $hn (want 4 of 4)"
-echo "files differing $n (want 4); outside the take list $outside (want 0); take-list files missing $missing (want 0); not byte-equal to trunk's $neq (want 0); deploy script, deploy folder, manifest or Terraform files in the diff $barred (want 0)"
+echo "files differing $n (want 9); outside the take list $outside (want 0); take-list files missing $missing (want 0); not byte-equal to trunk's $neq (want 0); deploy script, deploy folder, manifest or Terraform files in the diff $barred (want 0)"
 printf '%s\n' "$rec" | sed '$d'
-echo "ask has the three halves, the process-wide state line and the release-order condition $halves"
-[ "$hcar" = 4 ] && [ "$dellanc" = yes ] && [ -n "$live" ] && [ "$base" = "$live" ] && [ "$n" = 4 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+echo "ask has the three halves, the process-wide state line, the release-order condition and the exemption widening $halves"
+[ "$hcar" = 4 ] && [ "$dellanc" = yes ] && [ -n "$live" ] && [ "$base" = "$live" ] && [ "$n" = 9 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
