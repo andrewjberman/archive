@@ -33,7 +33,7 @@ if head != RELEASE or wrapper.get("deployed_commit") != RELEASE:
     raise SystemExit("REFUSED: the release tree HEAD or its wrapper-written manifest is not the release")
 DEPLOYED_AT = wrapper["deployed_at"]
 
-SERVED = json.load(io.open(os.path.join(ROOT, "org", "missions", "D9", "NFRA", "NFRA_OPLGTW", "deliverables", "0.7.0_AE_CloudOps~NFRA1", "RZ2_SERVED.json"), encoding="utf-8"))["body"]
+SERVED = json.load(io.open(os.path.join(ROOT, "org", "missions", "D9", "NFRA", "NFRA_OPLGTW", "deliverables", "0.7.0_AE_CloudOps~NFRA1", "RZ2_SERVED.json"), encoding="utf-8"))
 NOTE = (
     "NFRA_OPLGTW OG-rz-2 (round 46): the host was resized from t4g.small to t4g.large (in place, targeted safe-apply, main.tf blob 1cf3c199cb2c; downtime %s s) and THEN the fourteenth batched release %s was deployed at %s over %s (OG-ap-50) with DEPLOY_BASE_REF=%s "
     "under the stale-base guard, three halves signed (CTO f39cd21642, COO H1-H8, CVO 86c19380ab) on ask sha256 5dfadc6c78c3. Ten files whole from trunk 9095ce68f3: OG-rz-1 (deploy/opal-gateway.service MemoryHigh 5600M and MemoryMax 6400M, tests/test_og_un1.py, "
