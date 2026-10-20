@@ -1,0 +1,88 @@
+{
+ "schema_version": "1.0",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~IB2",
+ "controls": {
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "N/A: the order names no mutant",
+   "observed": "N/A: no mutant applied",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "one apply of one saved plan; the policy document read before and after the refused apply",
+   "observed": "IAM refused the write (LimitExceeded, maximum policy size of 10240 bytes for the role); the live document sha256 re-read equal to R0",
+   "status": "N/A-WITH-REASON"
+  }
+ },
+ "surprises": [],
+ "to_id": "IRPT_ANLREQ.TO-APPLY-AUDITGRANT.resident-role-writes-the-analysis-audit-record-ib2",
+ "spec_ref": {
+  "doc": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-AUDITGRANT.resident-role-writes-the-analysis-audit-record-ib2.md",
+  "group": "OTHER",
+  "vintage_commit": "480ceeae884"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+  "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/task_orders/IRPT_ANLREQ.TO-APPLY-AUDITGRANT.resident-role-writes-the-analysis-audit-record-ib2.md",
+  "vintage_commit": "480ceeae884"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_auditgrant/A_AFTER_AUDITGRANT.txt",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the receipt: R0 and the three C lines hold; G1 to G3 are written FAIL NOT-RUN because IAM refused the write (LimitExceeded); nothing applied; live policy unchanged",
+   "artifact_covered_by": [
+    "AUDG-AC1"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261020T2218Z_irpt-resident-audit-write-20261020_deploy_completion.md",
+   "kind": "doc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the NEVER-2 ledger, four legs, CLOSED -- STOPPED AT A, NOTHING APPLIED",
+   "artifact_covered_by": [
+    "AUDG-AC2"
+   ],
+   "commit_or_etag": "PENDING-THIS-COMMIT"
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AUDG-AC1",
+   "invocation": "grep -c -E '^(R0 baseline implicitDeny put on the audit key|C plan 0 to add 1 to change 0 to destroy|C policy diff adds exactly WriteTheAnalysisAudit and three KMS entries|C bucket is opal-data-irpt|G1 other statements byte-equal|G2 put allowed get delete implicitDeny on the audit key|G3 replan No changes)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_auditgrant/A_AFTER_AUDITGRANT.txt",
+   "expect": "^7$",
+   "output_evidence": "4\nexit code: 0\n(run 2026-10-20 from the repo root; R0 and the three C lines hold as written, G1 to G3 are FAIL lines because the apply was refused)",
+   "denominator": "1 receipt of 13 lines: 7 criterion lines (4 hold, 3 written FAIL) and 6 NOTE lines",
+   "status": "FAIL",
+   "criterion_verbatim": "grep -c -E '^(R0 baseline implicitDeny put on the audit key|C plan 0 to add 1 to change 0 to destroy|C policy diff adds exactly WriteTheAnalysisAudit and three KMS entries|C bucket is opal-data-irpt|G1 other statements byte-equal|G2 put allowed get delete implicitDeny on the audit key|G3 replan No changes)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_auditgrant/A_AFTER_AUDITGRANT.txt",
+   "method": "command"
+  },
+  {
+   "criterion_id": "AUDG-AC2",
+   "invocation": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-audit-write-20261020_deploy_completion.md",
+   "expect": "^\\*\\*Status:\\*\\* CLOSED",
+   "output_evidence": "**Status:** CLOSED -- STOPPED AT A, NOTHING APPLIED (IAM PutRolePolicy 409 LimitExceeded: the role's inline policies total 10131 of 10240 bytes and the grant adds 522; the live policy is unchanged) -- closed 20261020T222632Z\nexit code: 0\n(run against the one named ledger file; the glob form is denied by the repo search rail from this seat)",
+   "denominator": "1 ledger file, 4 legs",
+   "status": "PASS",
+   "criterion_verbatim": "grep -m1 '^\\*\\*Status' org/critical_paths/change_management/*irpt-resident-audit-write-20261020_deploy_completion.md",
+   "method": "command"
+  }
+ ],
+ "declared_exclusions": [
+  {
+   "item": "steps 5 (V after-reads G1 to G3) and the apply itself",
+   "reason": "IAM refused the write at step 4 (LimitExceeded: maximum policy size of 10240 bytes for the role); the order says to stop when a step does not read green, so nothing was applied"
+  }
+ ],
+ "session_log": "org/critical_paths/change_management/20261020T2218Z_irpt-resident-audit-write-20261020_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": "auditgrant_reads.py (boto3 iam), terraform plan and safe-apply, deploy_ledger.py",
+   "invocation": "python auditgrant_reads.py before; terraform plan -target=aws_iam_role_policy.runner_resident; safe-apply on the saved plan",
+   "result": "R0 baseline holds; plan 0/1/0 with exactly the specified statement and three KMS entries; apply refused by IAM (LimitExceeded); live policy unchanged"
+  }
+ ]
+}
