@@ -1,0 +1,8 @@
+# Step 4, Branch A statement diff -- 2026-10-20 ~21:5xZ, pin a51bd5cad5f
+Plan summary (r3/plan.txt): "Plan: 1 to add, 1 to change, 0 to destroy."
+Changes: aws_iam_role_policy.alongside_inline updated in-place; aws_secretsmanager_secret.alongside_vnc_credentials created (metadata only: no secret_version, no secret_string in the plan).
+LIMIT: the plan prints the new policy as "-> (known after apply)" because it embeds the new secret's ARN, so Terraform shows only the old document being removed, never the new statements. The issuer's own read-only plan (PLAN_READONLY_20261020_pina51bd5cad5f_ROLE_AND_VNC_SECRET.txt line 158) has the same shape. The clause "terraform show shows ONLY the statement changes" therefore cannot be read from any plan of this root.
+SUBSTITUTE ORACLE: the source that renders the policy, infra/aws/terraform/alongside-schwab-ec2/iam.tf at the pin (lines 31-130), read in full:
+  after-statements: AlongsideCodeRead, AlongsideSddCredentialsRead, AlongsideBoxSecretsWrite (secretsmanager:PutSecretValue; ec2-credentials and vnc-credentials ARNs), MonolithSchwabList, MonolithSchwabWrite, StateTierWrite (s3:PutObject; 4 masters x tables pulls and daily_pull = 8 resources in opal-data-cottonwood), DenyBdPlane, DenyCotPlane, DenyInfPlane.
+  vs live (rollback_policy_document.json): MonolithSchwabOpsWrite and MonolithSchwabMetaPullsWrite absent; AlongsideEc2CredentialsWrite renamed AlongsideBoxSecretsWrite with the second ARN; StateTierWrite added; the other 7 statement bodies unchanged in the source.
+This equals the order's expected after-set. It is a source read, not a read of the rendered document: the rendered document is read live after the apply (r3/after.txt).
