@@ -191,8 +191,12 @@ def mutants_ac2(doc, entities):
         add("a bucket no source names", lambda d: d["items"][r]["row"].update(bucket="bucket-that-no-source-names"))
         add("a vendor outside the vocabulary", lambda d: d["items"][r]["row"].update(vendor="zzz_vendor"))
         others = [i for i, it in enumerate(doc["items"]) if it.get("disposition") == "row" and i != r]
+        spare = first(doc, "c")
         if others:
             add("two items with one entity", lambda d: d["items"][others[0]]["row"].update(entity=d["items"][r]["row"]["entity"]))
+        elif spare is not None:
+            # the data holds one row item: turn a c item into a copy of it so the repeated-entity rule is still exercised
+            add("two items with one entity", lambda d: d["items"][spare].update(disposition="row", row=copy.deepcopy(d["items"][r]["row"])))
     c = first(doc, "c")
     if c is not None:
         add("a three-word reason", lambda d: d["items"][c].update(reason="too short"))
@@ -232,7 +236,10 @@ def run(cid, path):
         print("  info rows=%d c=%d" % (n_row, len(doc.get("items", [])) - n_row))
         if not base:
             for label, mut in mutants_ac2(doc, entities):
-                arm("planted mutant refused: %s" % label, bool(problems_ac2(mut, sources, entities, vendors)))
+                found = problems_ac2(mut, sources, entities, vendors)
+                if label == "two items with one entity":
+                    found = [x for x in found if "used by" in x]   # refused for the repeated entity, not for another reason
+                arm("planted mutant refused: %s" % label, bool(found))
 
 
 if __name__ == "__main__":

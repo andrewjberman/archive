@@ -16,7 +16,7 @@ REL = "C:/tmp/og-rel-batch16"
 LIVE = "C:/tmp/og-base-batch16"
 GW = "/infra/aws/ec2/opal-gateway"
 STD = "org/standards/NFRA_OPLGTW_CONTRACT.json"
-TRUNK, LIVE_SHA = "7c5c24a4781a4db4b4f0d4b21744b86a5dca626b", "13917ef993207bee6b8df0124eec5444da4d62cd"
+TRUNK, LIVE_SHA = "c0a0ee2e9c21c4b9d4d0080b095240038be09354", "13917ef993207bee6b8df0124eec5444da4d62cd"
 TAKE_TESTS = ["fc1", "sx1", "sz1", "mg3", "tp1", "ix1", "nf1", "gt0", "gt5", "rv2"]
 NAMED = ["tests/test_og_%s.py" % t for t in TAKE_TESTS] + ["tests/test_admin_people_access.py", "tests/test_admin_gateway_breakdown.py", "tests/test_admin_fabric.py", "tests/test_admin_fabric_calls.py",
          "tests/test_admin_fabric_gitstate.py", "tests/test_admin_fabric_overlap.py", "tests/test_admin_grants.py", "tests/test_admin_people.py", "tests/test_admin_refusals.py", "tests/test_admin_round2.py",
