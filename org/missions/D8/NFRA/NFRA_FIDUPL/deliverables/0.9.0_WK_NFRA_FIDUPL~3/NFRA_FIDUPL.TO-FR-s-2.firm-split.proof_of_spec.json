@@ -18,7 +18,7 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/split.py",
       "kind": "script",
-      "commit_or_etag": "7500236c81",
+      "commit_or_etag": "348abec156",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); not deployed to the box or to S3 (the live grant is FU-s-6's and the daily wiring is FR-s-5's)",
       "artifact_covered_by": ["FR2-AC1"]
@@ -26,7 +26,7 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_split.py",
       "kind": "test",
-      "commit_or_etag": "7500236c81",
+      "commit_or_etag": "348abec156",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); a test file, not deployed",
       "artifact_covered_by": ["FR2-AC1"]
@@ -35,20 +35,20 @@
   "acceptance": [
     {
       "criterion_id": "FR2-AC1",
-      "criterion_verbatim": "the nine named split tests exist and pass.",
+      "criterion_verbatim": "the ten named split tests (the nine and test_record_lists_unplaced_and_conflict_accounts) exist and pass.",
       "method": "test_suite",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr2",
-      "output_evidence": "R1-FR2-OK passed=10",
-      "denominator": "9 of 9 named tests present in test_split.py; 10 passed (the nine named plus test_cli_prints_counts_only)",
+      "output_evidence": "R1-FR2-OK passed=11",
+      "denominator": "10 of 10 named tests present in test_split.py; 11 passed (the ten named plus test_cli_prints_counts_only)",
       "status": "PASS",
       "expect": "R1-FR2-OK passed=\\d+"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Two mutants, one at a time: (1) the firm object body normalised from CRLF to LF; (2) an account under two firms classed as a firm instead of a conflict.",
-      "expected": "test_raw_line_bytes_preserved fails under (1); test_account_under_two_firms_listed_not_landed fails under (2)",
-      "observed": "(1) 1 failed: test_raw_line_bytes_preserved; (2) 1 failed: test_account_under_two_firms_listed_not_landed; both files restored byte-identical (cmp)",
+      "description": "Two mutants, one at a time, against the repaired record: (1) the record's unplaced list reverted to ordinal ids; (2) the CLI prints the first conflict account value.",
+      "expected": "test_record_lists_unplaced_and_conflict_accounts fails under (1) and under (2)",
+      "observed": "(1) 1 failed: AssertionError, the unplaced list holds unplaced-NNN ids instead of the account strings; (2) 1 failed: AssertionError, the account value appears in the printed output; both files restored byte-identical (cmp)",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -67,22 +67,22 @@
       "reason": "the staged day passed the lander's calendar check; recorded as NFRA_FIDUPL-D1-W3-S8"
     },
     {
-      "item": "the id-to-value resolution written to the work directory",
+      "item": "the id-to-value resolution of unmapped labels written to the work directory",
       "reason": "split_day fills a caller's resolution dict in memory only; the work-directory write belongs to the daily orchestration (FR-s-5)"
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W3-S5: OBSERVATION, INERT -- the record carries ordinal ids and counts only, against the order's list of conflicts and unplaced accounts; resolution stays in memory.",
-    "NFRA_FIDUPL-D1-W3-S6: OBSERVATION, INERT -- an account under one mapped and one unmapped G is unplaced (fail closed); conflicts and unplaced are judged over attributed accounts.",
-    "NFRA_FIDUPL-D1-W3-S7: OBSERVATION, INERT -- a same-day firm object with different bytes is refused, never overwritten (the lander's rule, NFRA_FIDUPL-D1-W2-S3).",
-    "NFRA_FIDUPL-D1-W3-S8: OBSERVATION, INERT -- the exit code is stricter than the order's rule (missing file, failed write, unkeyed line, listing failure); no calendar check here."
+    "NFRA_FIDUPL-D1-W3-S5: OBSERVATION, INERT -- repaired per the issuer's REPAIR: the S3 record now carries the account-number strings of conflicts and unplaced; the printed output, logs and exception messages stay counts-only.",
+    "NFRA_FIDUPL-D1-W3-S6: OBSERVATION, INERT -- an account under one mapped and one unmapped G is unplaced (fail closed); conflicts and unplaced are judged over attributed accounts. Accepted as built by the issuer.",
+    "NFRA_FIDUPL-D1-W3-S7: OBSERVATION, INERT -- a same-day firm object with different bytes is refused, never overwritten (the lander's rule, NFRA_FIDUPL-D1-W2-S3). Accepted as built by the issuer.",
+    "NFRA_FIDUPL-D1-W3-S8: OBSERVATION, INERT -- the exit code is stricter than the order's rule (missing file, failed write, unkeyed line, listing failure); no calendar check here. Accepted as built by the issuer."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~3/NFRA_FIDUPL.TO-FR-s-2.session_log.txt",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_split.py",
-      "result": "10 passed"
+      "result": "11 passed"
     },
     {
       "tool": "ruff",
@@ -92,7 +92,7 @@
     {
       "tool": "safe-commit",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~3 <0.9.0_WK_NFRA_FIDUPL~3@opal.agent>\" -F <msgfile> -- <the two code paths>",
-      "result": "rc=0; committed 7500236c81 on wk-NFRA_FIDUPL-3"
+      "result": "rc=0; committed 348abec156 on wk-NFRA_FIDUPL-3"
     }
   ]
 }

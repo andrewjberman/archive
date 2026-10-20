@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_DEMQUE.TO-DQ-t78",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t78.sitez-sweep-task.md",
+    "group": "OTHER",
+    "vintage_commit": "6e076504410"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_DEMQUE/decompositions/MDPF_DEMQUE_DECOMP.md",
+    "vintage_commit": "6e076504410",
+    "to_ref": "org/missions/D8/MDPF/MDPF_DEMQUE/task-orders/MDPF_DEMQUE.TO-DQ-t78.sitez-sweep-task.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~MDPF1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_DEMQUE_ZQ_T78_SWEEP_TASK.xml",
+      "kind": "schedule",
+      "commit_or_etag": "90734ec839",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The registered definition as exported (Export-ScheduledTask): CalendarTrigger ScheduleByDay DaysInterval 1 StartBoundary 2026-10-19T16:00:00-04:00; Exec Command the Python 3.11 interpreter, Arguments 'data/mdpf/scripts/demque/standing_drawer.py --apply --sweep', WorkingDirectory the repo root; Principal InteractiveToken. Fired at 16:00 ET the same day and wrote receipt.2026-10-19.sweep.json; Next Run Time 10/20/2026 4:00 PM. mdpf-demque-drawer-daily was not edited (Next Run Time 10/20/2026 10:00 AM, Ready).",
+      "artifact_covered_by": [
+        "DQ9-t78-AC1",
+        "DQ9-t78-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261019T1734Z_mdpf-demque-dq-t78-sweep-task-20261019_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "4c9d0c7e3b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEVER-2 entry opened before the registration with legs L1 (checkout), L2 (task), L3 (first fire); L1 and L2 closed with proof, L3 closed after the fire.",
+      "artifact_covered_by": [
+        "DQ9-t78-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "DQ9-t78-AC1",
+      "criterion_verbatim": "the task exists under the builder's name, daily, 4:00 PM, running --apply --sweep.",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t78_task.py",
+      "output_evidence": "TASK-OK mdpf-demque-sweep-daily (rc=0) after the registration. Negative arm: the same check run from an empty directory printed TASK-BAD standing_drawer --task-name --sweep rc=2 ..., the form the order names for the base.",
+      "denominator": "1 task registered; the schtasks and Get-ScheduledTask reads were taken on the one task name",
+      "status": "PASS",
+      "expect": "TASK-OK"
+    },
+    {
+      "criterion_id": "DQ9-t78-AC2",
+      "criterion_verbatim": "DATE-GATED to the first scheduled sweep after the GO: the newest sweep receipt drew more than 0 cells, no more than its daily_total_left, with no vendor-limit, refusal or PRODUCTION_SPEND_UNREAD stop.",
+      "method": "live_read",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/MDPF_DEMQUE_Q1/R10_CHECKS/dq_t78_fire.py",
+      "output_evidence": "FIRE-OK (rc=0) at 2026-10-19T20:02:49Z: newest receipt.2026-10-19.sweep.json, cells_drawn 606, daily_total_left 2481016, stop_reason EMPTY_OR_INCOMPLETE_RESPONSE. Negative arm: the same check run from an empty directory printed FIRE-BAD no sweep receipt, the form the order names for the base.",
+      "denominator": "1 scheduled sweep receipt (the first); 606 of 2481016 cells drawn, three requests (57 + 3 + 546), 143 attempts",
+      "status": "PASS",
+      "expect": "FIRE-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No product code was written or changed by this order, so no sealed mutant on a product applies. The check scripts were exercised on their negative arms by running each from an empty directory.",
+      "expected": "TASK-BAD and FIRE-BAD from a directory holding neither the drawer nor a receipt.",
+      "observed": "TASK-BAD standing_drawer --task-name --sweep rc=2 and FIRE-BAD no sweep receipt, as expected; both printed OK forms from the repository root.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 is a read of a registered task; AC2 is a read of a completed scheduled run. Neither was re-run to a different result.",
+      "observed": "AC1 TASK-OK before and after the fire; AC2 FIRE-OK on its one read.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The second and later scheduled sweeps",
+      "reason": "AC2 reads the FIRST sweep after the GO. The task is standing and fires again at 2026-10-20 16:00 ET."
+    },
+    {
+      "item": "Any draw by hand",
+      "reason": "The order bars it. The only Bloomberg draw was the scheduled 16:00 ET fire."
+    },
+    {
+      "item": "Why the first sweep drew 606 of 2481016 cells",
+      "reason": "Read-only here: the pass stopped EMPTY_OR_INCOMPLETE_RESPONSE after a 0-row window. Filed as an observation row for the issuer; no code, request or allowance file was edited."
+    }
+  ],
+  "surprises": [
+    "MDPF_DEMQUE-Z-S10: the first sweep drew 606 of 2481016 cells and stopped EMPTY_OR_INCOMPLETE_RESPONSE on a 0-row window; AC2 reads FIRE-OK as written (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/deliverables/MDPF_DEMQUE_ZQ_STANDING/",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "not run; the order's preflight declares RUN, and the measured read was the budget ledgers for 2026-10-14..19 (last production row on Fri 2026-10-16 amgt-model-block 09:13:17 ET, none after 16:00 ET) plus the existing task's schtasks read",
+      "result": "UNREAD as a tool; the step 3 measurement stands in its place, taken from the files the sweep itself reads."
+    }
+  ]
+}

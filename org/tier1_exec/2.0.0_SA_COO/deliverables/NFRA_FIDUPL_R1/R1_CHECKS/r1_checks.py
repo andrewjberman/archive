@@ -60,7 +60,9 @@ TEST_FILES = {
     "fr6": ("%s/tests/test_adapters.py" % CF, [
         "test_get_text_follows_redirect_and_returns_text", "test_post_form_sends_urlencoded_body_without_logging_values",
         "test_account_lister_pages_until_short_page", "test_extract_accounts_finds_list_by_key_not_by_container_name",
-        "test_extract_failure_names_only_keys", "test_daily_real_deps_use_adapters"]),
+        "test_extract_failure_names_only_keys", "test_daily_real_deps_use_adapters",
+        "test_extract_accounts_uses_measured_container_and_number_key", "test_lister_stops_at_available_total",
+        "test_lister_sends_session_cache_id_on_later_pages", "test_lister_fails_loud_when_short_of_available"]),
     "fr3": ("%s/tests/test_backfill.py" % CF, [
         "test_windows_walk_backward_in_chunks", "test_stops_on_entitlement_refusal_and_names_it",
         "test_stops_on_retention_limit_and_names_it", "test_stops_at_account_open_date",
