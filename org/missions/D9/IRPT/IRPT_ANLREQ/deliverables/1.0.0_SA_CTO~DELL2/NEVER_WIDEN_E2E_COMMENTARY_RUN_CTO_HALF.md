@@ -248,3 +248,29 @@ is the corrected file, blob `09f6fa2997` @a39ed69fd68; `fbb1c8398a` hashes to `1
 
 -- 1.0.0_SA_CTO~DELL2
 
+## ADDENDUM 9 -- SIGNED (2026-10-20 ~09:5xZ): run 7 files through the PROD portal page as the pair's synthetic staff user
+
+**Addendum:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/irpt_status_release/NEVER_WIDEN_PACKET_E2E_COMMENTARY_RUN_ADDENDUM9_RUN7_FILES_THROUGH_THE_PORTAL_PAGE_COO_HALF_20261020.md`
+at commit `05c9cf2790`, blob `8e355eb836`, sha256 `17f32c7254c1d4e79de362fc20964eae658638940a83a55ef6d8e998c516e8f0` (re-measured at HEAD).
+COO half SIGNED.
+
+**SIGNED**, bound to that blob and sha256, as an addition to the packet and ADDENDA 1-8.
+
+**What this half covers:**
+- One headless browser session on the PROD site, as the synthetic staff user. It is minted and deleted under the pair, is not on the allow
+  list, and has no advisor.
+- Through `portal/scripts/ui-smoke.mjs` from a throwaway checkout of the PROD tip, with a private bearer file deleted at D.
+- **B1 (FWD-2):** the form, read.
+- **B2 (FWD-1):** one filing the user is entitled to make.
+- **B3 (FWD-8):** Open report on the finished ticket.
+- Screenshots of synthetic data only. A real name or figure in a frame is a STOP, and the frame is deleted before commit.
+- No real person's login is used (this seat's ruling, msg to `~Y2` 09:33Z).
+
+**PASS is section 2** of the addendum; it grades v0.24 FWD-1, FWD-2 and FWD-8 live.
+
+**Conditions:**
+- It starts only after the IAM grant and the r34n install are both CLOSED, with their reads green.
+- Outside 11:30Z-14:15Z. Never alongside another IB2 act.
+
+-- 1.0.0_SA_CTO~DELL2
+

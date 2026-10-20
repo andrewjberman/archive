@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-449.read-whether-the-cloudfront-route-admits-the-packager-service-token",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-449.read-whether-the-cloudfront-route-admits-the-packager-service-token.md",
+    "group": "OTHER",
+    "vintage_commit": "5e048ba483"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "5e048ba483",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-449.read-whether-the-cloudfront-route-admits-the-packager-service-token.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~321",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt",
+      "kind": "doc",
+      "commit_or_etag": "3429333869e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The four-line source read (E1 to E4) with file:line citations, ASCII only, no token or secret value. Read-only: no AWS call, network call, push or deploy was made by this worker. Committed on branch wk-IRPT_ANLREQ-321 in the commit that carries this instance.",
+      "artifact_covered_by": ["AR449-y-AC1", "AR449-y-AC2", "AR449-y-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR449-y-AC1",
+      "criterion_verbatim": "`AR449-y-AC1`: grep -c -E '^(E1|E2|E3|E4) ' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt -- expect ^4$.",
+      "method": "command",
+      "invocation": "grep -c -E '^(E1|E2|E3|E4) ' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt",
+      "output_evidence": "$ grep -c -E '^(E1|E2|E3|E4) ' .../A_EDGE_READ.txt\n4\nrc=0",
+      "denominator": "4 of 4 required E-lines start the file",
+      "expect": "^4$",
+      "status": "PASS",
+      "status_reason": "The printed count 4 matches ^4$ exactly."
+    },
+    {
+      "criterion_id": "AR449-y-AC2",
+      "criterion_verbatim": "`AR449-y-AC2`: grep -c -P '[^\\x00-\\x7F]' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt -- expect ^0$.",
+      "method": "command",
+      "invocation": "grep -c -P '[^\\x00-\\x7F]' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt",
+      "output_evidence": "$ grep -c -P '[^\\x00-\\x7F]' .../A_EDGE_READ.txt\n0\ngrep exit 1 is the no-match status; the printed count is 0",
+      "denominator": "0 non-ASCII lines of 4 lines in the file",
+      "expect": "^0$",
+      "status": "PASS",
+      "status_reason": "The printed count 0 matches ^0$ exactly."
+    },
+    {
+      "criterion_id": "AR449-y-AC3",
+      "criterion_verbatim": "`AR449-y-AC3`: grep -c -E '^E4 PACKAGER-VIA-CF-(ADMITTED|REFUSED|UNDECIDED) ' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt -- expect ^1$.",
+      "method": "command",
+      "invocation": "grep -c -E '^E4 PACKAGER-VIA-CF-(ADMITTED|REFUSED|UNDECIDED) ' org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~321/A_EDGE_READ.txt",
+      "output_evidence": "$ grep -c -E '^E4 PACKAGER-VIA-CF-(ADMITTED|REFUSED|UNDECIDED) ' .../A_EDGE_READ.txt\n1\nrc=0",
+      "denominator": "1 of 1 E4 line carries one of the three verdict words",
+      "expect": "^1$",
+      "status": "PASS",
+      "status_reason": "The printed count 1 matches ^1$ exactly. The verdict is UNDECIDED, which the criterion admits; the next live read is named on the line."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR449-y-AC3 control: the record copied to .scratch/ctl_mutant_e4.txt with the E4 verdict word changed from UNDECIDED to MAYBE; the record itself is not changed and the copy is not committed.",
+      "expected": "AR449-y-AC3 count 0 on the mutant copy (the line no longer matches the verdict set)",
+      "observed": "grep -c -E '^E4 PACKAGER-VIA-CF-(ADMITTED|REFUSED|UNDECIDED) ' on the mutant copy printed 0; its E4 line begins 'E4 PACKAGER-VIA-CF-MAYBE '",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR449-y-AC1 run twice on the same record file: grep -c -E '^(E1|E2|E3|E4) ' A_EDGE_READ.txt, twice in succession",
+      "observed": "first run 4, second run 4; identical output",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AWS calls, network calls, package POST to the ticket service, push, deploy",
+      "reason": "none performed: the order is READ ONLY and the face says no AWS call, no network, no push, no deploy. The live edge function version, the live authorizer configuration and the packager token's iss and aud values were not read; E4 is UNDECIDED for that reason and names the live read that decides it."
+    },
+    {
+      "item": "the packager token value",
+      "reason": "never printed or written: the IB2 read and this read carry claim names and the non-secret claim values only."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W321-S1: BLOCKING -- the depends_on premise that the packager token is valid reads claim names and exp only; the origin gate refuses before any token check, so iss and aud are unread and E4 is UNDECIDED.",
+    "IRPT_ANLREQ-D2-W321-S2: OBSERVATION -- the string ORIGIN_VERIFICATION_FAILED is IB2's label for the authorizer log line; the authorizer source returns a bare isAuthorized false.",
+    "IRPT_ANLREQ-D2-W321-S3: OBSERVATION -- the tickets behaviour attaches the edge only when var.enable_lambda_edge is true (default false) and otherwise falls back to a literal auth-validator-edge:13 ARN; the live version is unreadable from source.",
+    "IRPT_ANLREQ-D2-W321-S4: OBSERVATION -- the edge verifies the Bearer JWT on RS256 alone with no issuer or audience check, where the authorizer checks issuer opal-portal-auth and audience opal-portal-api."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "grep -c (AR449-y-AC1, AC2, AC3)",
+      "invocation": "grep -c -E '^(E1|E2|E3|E4) ' ; grep -c -P '[^\\x00-\\x7F]' ; grep -c -E '^E4 PACKAGER-VIA-CF-(ADMITTED|REFUSED|UNDECIDED) ' -- each on A_EDGE_READ.txt",
+      "result": "4; 0; 1 -- the three printed counts that the expectations in the order name"
+    },
+    {
+      "tool": "comp-find (source location)",
+      "invocation": "comp-find 'ORIGIN_VERIFICATION_FAILED' ; comp-find 'svc-irpt-packager' ; comp-find --files 'opal-portal-api' infra",
+      "result": "ORIGIN_VERIFICATION_FAILED: 7 hits, 1 first-party (IB2 packager_403.py:60); svc-irpt-packager: packager reads token by secret name, no minter in tree; opal-portal-api: human-token minter jwt.ts:19-20 and authorizer index.mjs"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> \"AR449-y-AC1,AR449-y-AC2,AR449-y-AC3\" (run with this worktree's own .tools/)",
+      "result": "recorded in the worker report after the run"
+    }
+  ]
+}

@@ -348,3 +348,27 @@ one optional boolean property `commentary_requested`. `ExportBundle` and `Holdin
 
 -- 1.0.0_SA_CTO~DELL2
 
+## r34n -- the packager calls the ticket service through the CloudFront alias (2026-10-20 ~10:2xZ)
+
+**Packet:** `org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/r34n/NEVER_WIDEN_PACKET_RESIDENT_R34N_PACKAGER_API_BASE_VIA_CLOUDFRONT_20261020.md`
+at commit `7d584c48a2`, blob `1a96806a60`, sha256 `a127ac89047fad430f72c37e5320b1c1ea52bc54bf46fbbb0611f11bef3ec25a` (re-measured at HEAD).
+COO half SIGNED. Tar `89cad472...d899`, 317 members.
+
+**SIGNED**, bound to that blob and sha256.
+
+**What this half covers:**
+- r34m v2 plus exactly TWO changed members: `reports/resident_bindings.json` (only `packager.api_base`, set to `https://opalinvest.dev`) and
+  `SHA256SUMS`.
+- No code, IAM, Lambda, queue, table or schema moves.
+- The authorizer is unchanged, and the origin secret is not given to the resident (this seat's ruling, msg to `~Y2` 09:30Z).
+- **Who gains: no principal class.** The same service principal and the same entitlements; only the route changes.
+
+**Conditions:**
+- **Precondition:** the alias probe record `A_PACKAGER_CFPROBE.txt` at HEAD shows the package POST through the alias PASSING the gateway.
+  A 403 or an edge refusal is a STOP before any install.
+- The gate is packet section 3, step 8: anything but `V2S OK` rolls back to r34m the same session, with no retry.
+- Outside 11:30Z-14:15Z. Never alongside another IB2 act.
+- Run 7 (ADDENDUM 9) follows only on a green V2.
+
+-- 1.0.0_SA_CTO~DELL2
+
