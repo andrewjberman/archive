@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-gc-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f2b066d9ad9"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "e79820bfb66",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-gc-1.round-47-client-tools-for-alyssa-and-menachem.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/GC1_GATES.json",
+   "kind": "doc",
+   "commit_or_etag": "c5cc6023030",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Per principal: profile present, the five client tools classified (all denied:entitlements for both), the six gates read, needs_write true, person_access_can_admit false with the decide() lines cited; the write path (NFRA_MCPORTAL's grant writer, owner session) named.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/GC1_FACTS.json",
+   "kind": "doc",
+   "commit_or_etag": "c5cc6023030",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The gateway's own decide() and person_denial() on trunk code over the stored records (29 POLICY# items, 0 person_access records in the store): Alyssa and an unprofiled principal read entitlement_denied for each of the five tools and admitted if the tier were master_admin.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.7.0_AE_CloudOps~NFRA1/gc1_phasea.py",
+   "kind": "script",
+   "commit_or_etag": "c5cc6023030",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The reader: strong scan of the POLICY# partitions plus the gateway's own decide(); read only, nothing written, no person_access record written.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "(Phase A, amended: a denied principal whose gate is entitlements needs no ask, and none may be present) the facts are written per principal and the write path is named.",
+   "method": "command",
+   "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/r47/checks/gc1.AC1.sh; echo \"exit=$?\"",
+   "expect": "(?s)alyssa: five client tools classified yes.*menachem: five client tools classified yes.*write path named: mechanism and writer stated.*: ok.*RESULT: PASS.*exit=0",
+   "output_evidence": "alyssa: five client tools classified yes (denied True), needs_write True consistent with them yes, gates read 6, reason stated: ok\nmenachem: five client tools classified yes (denied True), needs_write True consistent with them yes, gates read 6, reason stated: ok\nwrite path named: mechanism and writer stated, needs_owner_session True: ok\nno person_access write is effective (a person_access record cannot admit the denied tools (person_access_can_admit false for every denied principal: the denial is decide()'s)): no ask expected, none present True: ok\nRESULT: PASS\nexit=0",
+   "denominator": "2 principals; 5 client tools each; 6 gates read; 29 POLICY# items scanned",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "determinism": {
+   "method": "AC1 was run twice against the same records, back to back.",
+   "observed": "outputs identical",
+   "status": "STABLE"
+  },
+  "mutant": {
+   "description": "The order names no mutant.",
+   "expected": "n/a",
+   "observed": "n/a",
+   "status": "N/A-SPEC-NAMES-NONE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a person_access record or an ask",
+   "reason": "Ruled in row Z-S434: decide() denies before person_access is read, so no record admits the tools; none written, no ask present."
+  },
+  {
+   "item": "the tier gate read from the host",
+   "reason": "Tier comes from deploy-time rosters; the roster facts are cited from the OG-g-1 evidence, not read from the host in this order."
+  },
+  {
+   "item": "a push",
+   "reason": "The order forbids it; the issuer drains the branch."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-Z-S432: a person_access tools_allow record cannot admit the five client tools (decide() denies first); ruled by the issuer in row NFRA_OPLGTW-Z-S434"
+ ],
+ "session_log": "Session seat 0.7.0_AE_CloudOps~NFRA1, OG-gc-1. GO msg 36189 (Phase A only); facts written and committed c5cc602303 with row Z-S432; ruling msg 36201 (row Z-S434): add person_access_can_admit false per denied principal, write no ask, run AC1, write the AC1 proof.",
+ "compiler_tools": [
+  {
+   "tool": "boto3 (dynamodb scan, strong) and the gateway's own decide()",
+   "invocation": "gc1_phasea.py",
+   "result": "PASS",
+   "note": "Roles, counts and decisions only; no tid, oid or e-mail in any record."
+  }
+ ]
+}
