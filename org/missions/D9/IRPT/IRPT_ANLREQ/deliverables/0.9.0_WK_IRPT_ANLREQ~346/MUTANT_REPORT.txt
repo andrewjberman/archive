@@ -1,0 +1,32 @@
+MUTANT_REPORT -- AR-y-472, worker 0.9.0_WK_IRPT_ANLREQ~346 (branch wk-IRPT_ANLREQ-346, route commit 9caa35f08a6)
+
+Question: does the real-shape test catch the trunk route? The test was run against the route as it stood before AR-y-472,
+which is `git show ee2c94f5532:infra/aws/lambda/investor-reporting/ops/owned_report.py`, placed in a scratch copy of the
+investor-reporting tree (.scratch/mutant/investor-reporting, gitignored). The test file is the one committed at 9caa35f08a6.
+Nothing ran against AWS or the network.
+
+Invocation (from the scratch copy's investor-reporting root):
+  python -m pytest ops/tests/test_pdf_route_real_shapes.py -v --color=no -p no:cacheprovider
+
+Positive control, the old file carries the refusal and not the fallback:
+  ops/owned_report.py (trunk copy) line 322: raise AnalysisUnavailable("ANALYSIS_PDF_NOT_RETAINED")
+  grep count of "overview" in the trunk copy: 0
+
+Deciding lines:
+  FAILED ops\tests\test_pdf_route_real_shapes.py::test_status_route_pdf_accepts_the_report_the_real_opal_writers_store
+  E           owned_report.AnalysisUnavailable: ANALYSIS_PDF_NOT_RETAINED
+  2 failed, 3 passed in 0.69s
+
+Per test on the trunk route:
+  FAILED  test_status_route_pdf_accepts_the_report_the_real_opal_writers_store  (ANALYSIS_PDF_NOT_RETAINED, trunk line 322)
+  PASSED  test_control_a_protected_ref_carrying_the_opal_sha_is_signed           (the ref branch is unchanged)
+  PASSED  test_a_protected_ref_whose_sha_differs_from_opal_artifact_raises_analysis_pdf_binding
+  FAILED  test_a_retained_overview_whose_sha_differs_from_the_report_raises_analysis_pdf_binding
+          (the trunk route answers ANALYSIS_PDF_NOT_RETAINED where the test expects ANALYSIS_PDF_BINDING: it refuses before
+           any retained artifact is read)
+  PASSED  test_a_request_with_no_retained_opal_pdf_answers_analysis_pdf_not_retained
+          (the trunk route refuses NOT_RETAINED for every report without the ref, so this one passes on the trunk too;
+           it is the negative arm, and it is green on both sides by construction)
+
+Reading: the real-shape positive test is the mutant that fires. On the route at the cut, the same test passes (44 passed
+across the three route files, see the worker report).

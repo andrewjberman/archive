@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-472.overview-pdf-route-resolves-the-retained-opal-pdf-without-a-protected-pdf-ref",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "197a491eef5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-472.overview-pdf-route-resolves-the-retained-opal-pdf-without-a-protected-pdf-ref.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-472.overview-pdf-route-resolves-the-retained-opal-pdf-without-a-protected-pdf-ref.md",
+    "group": "OTHER",
+    "vintage_commit": "197a491eef5"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~346",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/owned_report.py",
+      "kind": "code",
+      "commit_or_etag": "9caa35f08a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The pdf method adds an if opal and ref is None fallback: the retained Overview is resolved through the artifact binding under <request_id>-overview-<report opal_artifact.sha256> in family YCHARTS_OPAL_REPORT, the retained sha must equal the report's sha (ANALYSIS_PDF_BINDING otherwise), and the retained sha is signed. The protected_pdf_ref branch is unchanged. Committed LOCAL on wk-IRPT_ANLREQ-346. Nothing released or deployed.",
+      "artifact_covered_by": [
+        "AR472-y-AC1",
+        "AR472-y-AC2",
+        "AR472-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ops/tests/test_pdf_route_real_shapes.py",
+      "kind": "test",
+      "commit_or_etag": "9caa35f08a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs opal_producer.produce on the producer's own fakes with the artifacts port (the R9 put), keeps the AR-y-471 control and differing-ref negative, and adds the retained-sha binding negative and the no-retained-Overview refusal. The route's artifact port is fed from the producer's own put records.",
+      "artifact_covered_by": [
+        "AR472-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/check_pdf_route.py",
+      "kind": "script",
+      "commit_or_etag": "COMMIT-B",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only AST check of the pdf method in owned_report.py: prints PDF-ROUTE-OK when the four properties hold, PDF-ROUTE-BAD <why> otherwise; --selftest mutates the source in memory and prints CONTROL-FIRES only when the unmutated source reads OK and both mutants read BAD. Offline.",
+      "artifact_covered_by": [
+        "AR472-y-AC2",
+        "AR472-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/MUTANT_REPORT.txt",
+      "kind": "doc",
+      "commit_or_etag": "COMMIT-B",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The real-shape test run against ee2c94f5532:owned_report.py in a scratch copy: the positive test FAILS with ANALYSIS_PDF_NOT_RETAINED at trunk line 322; the record also names which tests pass on the trunk route.",
+      "artifact_covered_by": [
+        "AR472-y-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR472-y-AC1",
+      "criterion_verbatim": "AR472-y-AC1: python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_pdf_route_real_shapes.py infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider 2>&1 | tail -1 -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_pdf_route_real_shapes.py infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "44 passed in 8.87s\nrc=0 (pytest exit, read through PIPESTATUS). The determinism runs of the same invocation each printed 44 passed.",
+      "denominator": "44 of 44 tests pass across the three route test files (test_pdf_route_real_shapes.py 5, test_owned_report.py and test_commentary_pdf_binding.py the rest); 0 failed",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "The closing line matches ^[0-9]+ passed in and pytest exited 0. The real-shape test file carries its positive test, the control, the differing-ref negative, the retained-sha binding negative and the no-retained refusal, all green."
+    },
+    {
+      "criterion_id": "AR472-y-AC2",
+      "criterion_verbatim": "AR472-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/check_pdf_route.py -- expect ^PDF-ROUTE-OK opal_fallback=yes vendor_path_unchanged=yes sha_bound_to_report=yes signs_retained_sha=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/check_pdf_route.py",
+      "output_evidence": "PDF-ROUTE-OK opal_fallback=yes vendor_path_unchanged=yes sha_bound_to_report=yes signs_retained_sha=yes\nrc=0. Two runs read identically (determinism).",
+      "denominator": "1 of 1 output line; 4 of 4 properties yes",
+      "expect": "^PDF-ROUTE-OK opal_fallback=yes vendor_path_unchanged=yes sha_bound_to_report=yes signs_retained_sha=yes$",
+      "status": "PASS",
+      "status_reason": "The printed line matches the expect regex exactly and the exit is 0. The check reads owned_report.py by AST at the worktree's own repository root."
+    },
+    {
+      "criterion_id": "AR472-y-AC3",
+      "criterion_verbatim": "AR472-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/check_pdf_route.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~346/check_pdf_route.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0",
+      "denominator": "1 of 1 output line; 2 of 2 in-memory mutants read BAD (sha comparison removed; vendor branch altered); the unmutated baseline reads OK",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "The printed line is exactly CONTROL-FIRES and exit 0. A selftest that reads its baseline BAD prints CONTROL-SILENT, which this run did not."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR472-y-AC1 control: the real-shape test run against the trunk route (ee2c94f5532:owned_report.py) in a scratch copy. The positive test must FAIL; the record is MUTANT_REPORT.txt. A second mutant set, in memory, is AR472-y-AC3's selftest.",
+      "expected": "the positive real-shape test FAILS with ANALYSIS_PDF_NOT_RETAINED at the trunk line 322; the AR-y-471 control and negative still pass.",
+      "observed": "FAILED test_status_route_pdf_accepts_the_report_the_real_opal_writers_store; E owned_report.AnalysisUnavailable: ANALYSIS_PDF_NOT_RETAINED; 2 failed, 3 passed (the second failure is the new retained-sha binding test, which the trunk route answers NOT_RETAINED).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR472-y-AC1 and AR472-y-AC2 each run twice; the stdout of the two runs compared with diff after the pytest time suffix is stripped (AC1) and after the rc line (AC2).",
+      "observed": "AC1: both runs print 44 passed; diff rc=0. AC2: both runs print the PDF-ROUTE-OK line with rc=0; diff rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live artifact index and any retained Overview PDF in the store",
+      "reason": "no AWS call and no network by order. The route's fallback is proven offline on the producer's own retained put records; the live binding is the issuer's after the irpt-status release."
+    },
+    {
+      "item": "the release and deploy of the route with AR-y-470",
+      "reason": "out of this cell: the irpt-status release that ships it is a later order under a signed pair."
+    },
+    {
+      "item": "the publisher leg of _publish_opal",
+      "reason": "not executed offline (the test world needs the full repository fake); its unchanged persist is read, not run. The same exclusion as AR-y-471."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W346-S1: the route's fallback types the producer's '<request_id>-overview-<sha256>' logical-id format inline, with no named helper and no producer-side cross-check; the AR-y-472 grant cannot add one (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (Python 3.14.7, pytest, offline)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/ops/tests/test_pdf_route_real_shapes.py infra/aws/lambda/investor-reporting/ops/tests/test_owned_report.py infra/aws/lambda/investor-reporting/ops/tests/test_commentary_pdf_binding.py -q --color=no -p no:cacheprovider",
+      "result": "44 passed; also test_pdf_link.py and test_commentary_pdf_route.py: 24 passed"
+    }
+  ]
+}
