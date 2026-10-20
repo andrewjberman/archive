@@ -1,0 +1,54 @@
+NFRA_MCPINDEX TO-MX-w-1 source-compare -- worker 0.9.0_WK_NFRA_MCPINDEX~77 -- session log (ASCII)
+Worktree C:/tmp/wk-mcpindex-77, branch wk-NFRA_MCPINDEX-77, base 277ad324045. Code commit 30de010db74.
+
+[step 0] git rev-parse --abbrev-ref HEAD -> wk-NFRA_MCPINDEX-77 ; test -d org && test -d .tools -> TREE-OK
+[step 0] git sparse-checkout add workflows/gateway_battery -> rc=0 (permitted sparse change; see surprise row NFRA_MCPINDEX-Z-W77-S1)
+[step 1] wrote workflows/gateway_battery/source_compare.py and workflows/gateway_battery/tests/test_source_compare.py
+[step 1] python -I -m py_compile on both files -> COMPILE-OK
+[step 1] ruff check --target-version py39 on both files -> All checks passed! (rc 0)
+
+[step 2] bash .../round24/checks/w1.AC1.sh ; echo exit=$?
+DENOMINATOR: 12 fixture census tools; 12 cases and 12 results (tF has an error result, tI has no case); 10 tools reach the output (tA tB tC tD tE tG tH tJ tK tN); expected counts agrees=2 disagrees=1 unreadable=7
+  ok   a disagreement makes rc 1 and the file is written
+  ok   stdout line
+  ok   schema and counts
+  ok   one entry per tool with an ok result, sorted by name; an error-only tool and a tool with no result are absent
+  ok   every entry has exactly the contract keys
+  ok   every entry has an instrument and a reason that are strings
+  ok   tA: the first ok result with an as_of, both listing pages read, the date found
+  ok   tB: the answer date is not among the listed dates -> false
+  ok   tC: keys with no date token -> null with an undated reason
+  ok   tD, tE, tJ: a store, an integration and a graph source are not read here -> null naming the kind
+  ok   tG: the source whose bucket and prefix the answer_source string names is chosen (not the first), a YYYYMMDD key counts as a date
+  ok   tH: a result with no as_of -> null with a reason that names as_of
+  ok   tK: an empty listing -> null with an empty reason
+  ok   tN: a routing entry with no source -> source null, null, reason names the missing source
+ARMS: 14 ok, 0 failed
+RESULT: PASS
+exit=0
+
+[step 2] bash .../round24/checks/w1.AC2.sh ; echo exit=$?
+DENOMINATOR: 3 planted inputs (a shifted answer date, a dated listing, a dropped disagreement), 4 refusals (unknown tool, missing routing entry, missing fake file, unreadable results), determinism over 2 runs, no object read or write in the script
+  ok   planted: tA's answer date moved off the listing reads false, and the counts follow
+  ok   planted: a dated listing under tC turns null into true
+  ok   no disagreement -> exit 0 and the stdout line says so
+  ok   a result for a tool that is not in the census exits 2 and writes nothing
+  ok   a tool with results but no routing entry exits 2 and writes nothing
+  ok   a --fake file that does not exist exits 2
+  ok   an unreadable results file exits 2
+  ok   two runs on the same input give the same bytes and the same stdout
+  ok   the script holds no object read or write call (listing only)
+ARMS: 9 ok, 0 failed
+RESULT: PASS
+exit=0
+
+[step 2] bash .../round24/checks/w1.AC3.sh ; echo exit=$?
+DENOMINATOR: pytest rc=0 passed=9 (minimum 6) file=workflows\gateway_battery\tests\test_source_compare.py
+  ok   pytest
+ARMS: 1 ok, 0 failed
+RESULT: PASS
+exit=0
+
+[direct run on the fixtures] python workflows/gateway_battery/source_compare.py --census w1_census.json --routing w1_routing.json --results w1_results.json --cases w1_cases.json --fake w1_fake.json --out <scratch>
+SOURCE tools=10 agrees=2 disagrees=1 unreadable=7
+exit=1
