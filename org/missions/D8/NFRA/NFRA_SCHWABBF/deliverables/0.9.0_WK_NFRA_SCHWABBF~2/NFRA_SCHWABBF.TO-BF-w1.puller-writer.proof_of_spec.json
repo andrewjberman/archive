@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-w1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP.md",
+    "vintage_commit": "ba5640ad8d2e0d8bbde1aeaed677f39f2fff0912",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-w1.puller-writer.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ed7d0dc3dbaf31cf94c872af8d69be332c6ff044"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "b62305e4421cf96f98f1d9e98cb5e8771085b584",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on branch wk-NFRA_SCHWABBF-2 only. Not deployed to the box: deployment is release act R5 under a change record, and the first real run is R8. WORLD floor, nothing applied: no AWS call, no Schwab contact."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "b62305e4421cf96f98f1d9e98cb5e8771085b584",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only; it extracts the functions by the PowerShell AST and never runs the puller."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b62305e4421cf96f98f1d9e98cb5e8771085b584",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four surprise rows NFRA_SCHWABBF-W2-S1..S4 appended to the investigation file in the same commit; the commit-time surprise-row gate passed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF1-w1-AC1",
+      "criterion_verbatim": "the writer's directory for 3 masters x 17 types x 2 dates equals the builder's address, and the post-run guard accepts a correct run on the new layout.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k \"key_parity or landing_guard\"",
+      "output_evidence": "4 passed, 3 deselected in 3.09s",
+      "denominator": "4 of 4 selected tests passed (3 deselected by -k); test_key_parity covers 102 of 102 cases (3 masters x 17 types x 2 dates) equal to lib/opal_naming.py address() with the bucket stripped",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF1-w1-AC2",
+      "criterion_verbatim": "the single-day filter: one day kept, all days kept when empty, and a day with no file dies with exit 9 instead of exiting 0.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k only_asof",
+      "output_evidence": "3 passed, 4 deselected in 2.98s",
+      "denominator": "3 of 3 selected tests passed (4 deselected by -k); the 5-file, 3-day plan keeps 1 file for the chosen day, 5 of 5 when empty, and 0 of 5 for a day with no file (die_code 9)",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three scratch mutants of the puller (legacy yyyyMMdd key form; zero-kept filter returning exit 0; no date= token normalisation in the landed index) run against the same tests, the committed file untouched.",
+      "expected": "each mutant is caught by at least one named test",
+      "observed": "M1 legacy key form: test_key_parity fails, writer != builder on 102 of 102. M2 zero-kept exits 0: test_only_asof_zero_kept_dies_9 fails, die_code 0. M3 no normalisation: both landing_guard tests fail (shortfall and collisions on a correct run).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of each acceptance selection, pass/fail summary compared",
+      "observed": "AC1 run 1: 4 passed, 3 deselected (3.09s); run 2: 4 passed, 3 deselected (2.89s). AC2 run 1: 3 passed, 4 deselected (2.98s); run 2: 3 passed, 4 deselected (2.92s). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Deployment of sdd-daily-pull.ps1 to the box, and the scheduled runs",
+      "reason": "WORLD floor for this order: nothing deployed or run. Deployment is release act R5 under a change record; the first real run is R8."
+    },
+    {
+      "item": "The one-day backfill run (-Master 08403355 -OnlyAsOf 2023-10-17 -LookbackDays 1200)",
+      "reason": "Out of the cell. The command is documented in the script header and was not executed; no Schwab call was made."
+    },
+    {
+      "item": "The staging branch of the writer (opal-data-schwab, the retired escape hatch)",
+      "reason": "Deliberately unchanged per the order. Its grammar is kept as {master}/bronze/{type}/{yyyyMMdd} and is commented as such."
+    },
+    {
+      "item": "Schema validation of the surprise rows against org/surprise_channel/schemas/investigation_item.schema.json",
+      "reason": "The schema is absent from this sparse worktree. The commit-time surprise-row gate passed (4 new rows, OK) and is the enforcer; recorded as NFRA_SCHWABBF-W2-S4."
+    },
+    {
+      "item": "The dry-run at the base 2026-10-20 (rc 4 expected)",
+      "reason": "Not repeated: the cell's tests exist in this worktree and both selections ran with rc 0."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W2-S1: the DENOMINATOR check would raise exit 5 on every one-day -OnlyAsOf run; it now subtracts the excluded files and logs both counts.",
+    "NFRA_SCHWABBF-W2-S2: the post-run landed-index split was inline in the main flow and not testable; it is now the pure function Get-LandedIndex.",
+    "NFRA_SCHWABBF-W2-S3: during the copy-to-delete window a legacy-only file counts as landed, so the scheduled pull does not write its date= key; that copy belongs to the migration (C-MOVE).",
+    "NFRA_SCHWABBF-W2-S4: the surprise-row schema and the deliverables folder are absent from this sparse worktree; rows were checked by the commit-time gate, not the schema."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-w1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12) with Windows PowerShell 5.1 child process",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no",
+      "result": "7 passed in 5.79s; the PowerShell AST parse of the whole script inside the harness reported no parse errors"
+    },
+    {
+      "tool": "lib/opal_naming.py address() (the builder)",
+      "invocation": "python -c with sys.path lib, address('schwab', <master>, 'bronze', 'acc', 'date=2023-10-17')",
+      "result": "s3://opal-data-assets/schwab/08242234/bronze/acc/date=2023-10-17 (and the two other masters, same form)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, surprise-row-gate, surprise-corpus, to-pipeline-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_commit1.txt -- <3 paths>",
+      "result": "commit b62305e442 landed; commit-gate All checks passed; surprise-row-gate OK 4 new rows of 5 total"
+    }
+  ]
+}
