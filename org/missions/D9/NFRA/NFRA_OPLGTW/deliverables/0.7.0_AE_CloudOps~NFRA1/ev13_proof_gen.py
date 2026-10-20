@@ -44,7 +44,7 @@ inst = {
     "decomp_ref": {"doc": DEC, "vintage_commit": pin(DEC), "to_ref": TO},
     "artifacts_produced": [
         art(W + "AUDIT_LEG_24H.json", "doc", "Read-only record: window %s to %s, %d hourly rows (%d busy), %d audit-lake WARN lines, verdict %s, anomaly hour %d of %d bodies read with %d read errors. Counts only." % (R["window_start"], R["window_end"], len(R["hours"]), busy, R["journal"]["warn_lines"], R["verdict"], R["anomaly_hour"]["read"], R["anomaly_hour"]["objects"], R["anomaly_hour"]["read_errors"])),
-        art(W + "ev13_run.py", "code", "The reader: journalctl over SSM (per-hour POST /mcp lines, WARN lines), a LIST of s3://opal-mcp-audit keys per hour, a threaded read of the anomaly hour's bodies (histogram by tool or event name); no write, no gateway request."),
+        art(W + "ev13_run.py", "script", "The reader: journalctl over SSM (per-hour POST /mcp lines, WARN lines), a LIST of s3://opal-mcp-audit keys per hour, a threaded read of the anomaly hour's bodies (histogram by tool or event name); no write, no gateway request."),
     ],
     "acceptance": [{"criterion_id": "AC1", "criterion_verbatim": "the window runs at least 24 hours from the OG-ap-48 close, the journal and the hourly lake counts are present and read without error, the anomaly hour's bodies are all read and its histogram accounts for them, the throttle constant is read at the pinned sha and equals the record, the verdict equals what the rule returns from those counts, and the record holds no email, no principal and no long digit run.",
                     "method": "command", "invocation": 'bash %sev13.AC1.sh; echo "exit=$?"' % CK, "expect": exp, "output_evidence": outs[0],
