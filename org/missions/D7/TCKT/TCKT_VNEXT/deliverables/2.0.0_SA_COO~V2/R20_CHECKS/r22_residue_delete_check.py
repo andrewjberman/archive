@@ -15,10 +15,11 @@ import sys
 MANIFEST = "org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R22_DELETE/R22_DELETE_MANIFEST.json"
 RES = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r22_delete/R22_DELETE_RESULT.json"
 AWS = os.path.abspath(".tools/aws.cmd")
-ROLE = "tckt-residue-delete-r22"
+ROLE_PREFIX = "tckt-residue-delete-r22-"
+CHUNK = 12
 BUCKETS = {"opal-data-cottonwood", "opal-data-irpt"}
 DEPLOY_POLICY = "arn:aws:iam::313476888478:policy/cloudops-dell-agent-deploy-policy"
-KEYS = {"manifest_blob", "role_name", "role_created_at", "role_destroyed_at", "assume_duration_seconds", "plan_apply_summary", "plan_destroy_summary",
+KEYS = {"manifest_blob", "role_names", "role_created_at", "role_destroyed_at", "assume_duration_seconds", "plan_apply_summary", "plan_destroy_summary",
         "deleted", "role_absent_after", "deny_intact_after", "control_object", "no_other_identity"}
 
 
@@ -49,8 +50,9 @@ def result_problem(res, man, blob):
         return "missing key(s): %s" % missing
     if res["manifest_blob"] != blob:
         return "the result's manifest blob is not the manifest on disk"
-    if res["role_name"] != ROLE:
-        return "the role is not %s" % ROLE
+    n_roles = -(-len(man["objects"]) // CHUNK)
+    if res["role_names"] != [ROLE_PREFIX + str(i) for i in range(n_roles)]:
+        return "the role names are not %s0 .. %s%d (one per chunk of %d)" % (ROLE_PREFIX, ROLE_PREFIX, n_roles - 1, CHUNK)
     if not isinstance(res["assume_duration_seconds"], int) or not (900 <= res["assume_duration_seconds"] <= 900):
         return "the assumed session must be exactly 900 seconds (15 minutes)"
     if not (str(res["role_destroyed_at"]) > str(res["role_created_at"])):
@@ -115,10 +117,11 @@ def live():
             if left:
                 print("RUN-BAD a manifest key still has a version or delete marker: %s" % o["key"][-60:])
                 return 1
-        p = run("iam", "get-role", "--role-name", ROLE)
-        if p.returncode == 0 or "NoSuchEntity" not in p.stderr:
-            print("RUN-BAD the throwaway role is not ABSENT (a NoSuchEntity answer is required)")
-            return 1
+        for rn in res["role_names"]:
+            p = run("iam", "get-role", "--role-name", rn)
+            if p.returncode == 0 or "NoSuchEntity" not in p.stderr:
+                print("RUN-BAD the throwaway role %s is not ABSENT (a NoSuchEntity answer is required)" % rn)
+                return 1
         p = run("iam", "get-policy", "--policy-arn", DEPLOY_POLICY, "--query", "Policy.DefaultVersionId", "--output", "text")
         vid = p.stdout.strip()
         p = run("iam", "get-policy-version", "--policy-arn", DEPLOY_POLICY, "--version-id", vid, "--query", "PolicyVersion.Document", "--output", "json")
@@ -136,7 +139,7 @@ def live():
     except (RuntimeError, ValueError, KeyError, OSError, subprocess.SubprocessError) as e:
         print("RUN-BAD live read failed: %s" % e)
         return 1
-    print("RUN-OK (residuedelete) %d exact versions ABSENT with no marker left; the throwaway role ABSENT; the Deny still in the deploy policy; the control object PRESENT" % len(man["objects"]))
+    print("RUN-OK (residuedelete) %d exact versions ABSENT with no marker left; the throwaway roles ABSENT; the Deny still in the deploy policy; the control object PRESENT" % len(man["objects"]))
     return 0
 
 
@@ -146,7 +149,7 @@ def good_manifest():
 
 
 def good_result():
-    return {"manifest_blob": "B", "role_name": ROLE, "role_created_at": "2026-10-20T20:00:00Z", "role_destroyed_at": "2026-10-20T20:20:00Z", "assume_duration_seconds": 900,
+    return {"manifest_blob": "B", "role_names": [ROLE_PREFIX + "0"], "role_created_at": "2026-10-20T20:00:00Z", "role_destroyed_at": "2026-10-20T20:20:00Z", "assume_duration_seconds": 900,
             "plan_apply_summary": "3 to add, 0 to change, 0 to destroy", "plan_destroy_summary": "0 to add, 0 to change, 3 to destroy",
             "deleted": [{"bucket": "opal-data-cottonwood", "key": "portal/cottonwood/a/x.csv", "version_id": "v1", "deleted_at": "2026-10-20T20:05:00Z", "absent_after": True},
                         {"bucket": "opal-data-irpt", "key": "irpt/f/state/ART-1/y.csv", "version_id": "v2", "deleted_at": "2026-10-20T20:06:00Z", "absent_after": True}],
@@ -177,7 +180,8 @@ def self_test():
         return "good result refused: %s" % result_problem(r, m, "B")
     rm = {
         "other manifest": lambda d: d.update(manifest_blob="C"),
-        "other role name": lambda d: d.update(role_name="admin"),
+        "other role name": lambda d: d.update(role_names=["admin"]),
+        "a role per chunk missing": lambda d: d.update(role_names=[]),
         "long session": lambda d: d.update(assume_duration_seconds=3600),
         "role kept": lambda d: d.update(role_absent_after=False),
         "role destroyed before created": lambda d: d.update(role_destroyed_at="2026-10-20T19:00:00Z"),
