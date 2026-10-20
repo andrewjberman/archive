@@ -25,14 +25,14 @@ claude_session_runs=no
 
 display=xvfb
   Reason (M): Xvfb 21.1.13 is installed and a headed Google Chrome launches under it (r1_checks fu10x is R1-FU10X-OK). The plugin drives
-  Chrome through the extension, not through a screen, so an agent needs no viewer. No VNC server is installed (x11vnc, Xvnc, vncserver,
-  tigervncserver all absent), so no human can SEE the display today.
+  Chrome through the extension, not through a screen, so an agent needs no viewer. At the time of Part 1 no VNC server was installed (x11vnc,
+  Xvnc, vncserver, tigervncserver all absent), so no human could SEE a display; Part 1b below installed one (display :1, localhost only).
 
 needs=andrew_claude_ai_login_for_claude_code_on_the_box; andrew_signin_of_the_extension_to_the_same_account_and_org; viewable_display_for_that_one_time_extension_signin; ruling_on_a_standing_claude_ai_credential_on_the_box; ruling_on_a_machine_wide_extension_policy_vs_the_puller; ruling_on_the_documented_login_page_pause
   1. Andrew act, Claude Code: run /login on the box (a URL to open and a code to paste back; it needs an interactive SSM session). Free, uses his
      existing plan, no new spend.
   2. Andrew act, extension: sign in to the extension inside the Chrome profile. That needs a display a human can see; the box has none.
-     A VNC server (dnf, no spend) reached by SSM port forwarding (the box has no inbound port) would do it. Not installed in Part 1.
+     DONE in Part 1b: a VNC server (dnf, no spend) on display :1, localhost only, reached by SSM port forwarding (see vnc= below).
   3. Ruling: a long-lived claude.ai login stored on a server is a credential-custody decision for Andrew and the CTO, not for this seat.
   4. Ruling: ExtensionInstallForcelist is machine-wide. To avoid loading the extension into the scheduled puller's Chrome, the agent-driven
      Chrome should use its own --user-data-dir only if the same profile directory is not a hard requirement; the order asks for the SAME
@@ -44,6 +44,30 @@ needs=andrew_claude_ai_login_for_claude_code_on_the_box; andrew_signin_of_the_ex
   6. First run of Claude Code with --chrome writes the native messaging host file under ~/.config/google-chrome/NativeMessagingHosts/ and
      Chrome must be restarted once to read it (D).
 
+## Part 1b (CTO rulings 8724): a VNC display for a human, localhost only
+
+vnc=installed
+  Reason (M): tigervnc-server-minimal 1.14.1-3.amzn2023.0.6 provides /usr/bin/Xvnc, run by the systemd unit fidelity-vnc.service
+  (enabled and active): `Xvnc :1 -geometry 1440x900 -depth 24 -rfbport 5901 -localhost -SecurityTypes None -AlwaysShared`. Measured with ss -ltn:
+  it listens on 127.0.0.1:5901 and [::1]:5901 only; the RFB banner (RFB 003.008) is readable from loopback and a connection to the box's own
+  network address is refused. The security group fidelity-alongside-uploader-sg has 0 inbound rules (describe-security-groups), so the
+  port is reachable only through an SSM port forward. The same box lists sshd on 0.0.0.0:22 (the Amazon Linux default, not changed here);
+  it is likewise unreachable because of the 0 inbound rules.
+  No password was set, none printed, none stored: the VNC leg uses SecurityTypes None because access is gated by the SSM StartSession
+  permission on the instance, and anyone holding it can already run root commands through SSM. If the CTO prefers a VNC password, it is one
+  dnf-free edit of the unit plus a root-only password file; say so and I add it.
+  The display is :1, separate from the Xvfb displays the puller's checks use. The agent's Chrome is meant to run on DISPLAY=:1 with its
+  own profile /opt/fidelity-uploader/profile-agent (ruling 2); this seat created neither the profile nor any extension policy.
+
+The exact port-forward command Andrew runs from a machine that has the AWS CLI and the Session Manager plugin and his own AWS credentials with
+ssm:StartSession on this instance, then points a VNC viewer at localhost:5901:
+
+  aws ssm start-session --region us-east-1 --target i-028e830f7226cc685 --document-name AWS-StartPortForwardingSession --parameters "portNumber=5901,localPortNumber=5901"
+
+Not tested end to end: the Session Manager plugin is not installed on this seat's machine, so the forward itself was not run here; the
+box side (bind, banner, refusal on the NIC) was measured on the box. The instance role carries AmazonSSMManagedInstanceCore, which includes
+the session channel permissions.
+
 ## Reachability from the box (HTTP status only, curl)
 
 chromewebstore.google.com 200; clients2.google.com/service/update2/crx 200; registry.npmjs.org 200; dl.google.com 302; api.anthropic.com 404
@@ -54,6 +78,7 @@ chromewebstore.google.com 200; clients2.google.com/service/update2/crx 200; regi
 
 - Installed: nodejs 18.20.8 and npm 10.8.2 (dnf), @anthropic-ai/claude-code 2.1.197 (npm -g). Nothing else; no config, no login.
 - Installed earlier under TO-FU-s-10: xorg-x11-server-Xvfb 21.1.13 and google-chrome-stable 155.0.8059.84.
+- Installed in Part 1b: tigervnc-server-minimal 1.14.1 and the unit /etc/systemd/system/fidelity-vnc.service (localhost only, see above).
 - Temporary and removed: one managed policy file and one scratch Chrome profile (probe above).
 - Unchanged: /opt/fidelity-uploader (code, config.json, profile, work, venv, bridge symlinks), the instance state, the Wealthscape secret.
 
