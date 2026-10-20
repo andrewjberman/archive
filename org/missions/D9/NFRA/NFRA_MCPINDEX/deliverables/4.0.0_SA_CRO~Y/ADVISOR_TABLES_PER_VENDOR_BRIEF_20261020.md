@@ -17,8 +17,8 @@
    resolve also omits the Schwab refusal that HEAD's core would add (section 3).
 3. **Three tools are built but cannot be reached:** Schwab (no resolve, and nothing else mints its ref), Eclipse allocation
    (no tool passes `model`), and Eclipse's account path (it ignores the account-to-model bridge that does exist).
-4. **Three answers are stale or wrong for real data:** the 49F resolve bridge is 15 trading days old and misses **2,362 of
-   8,032** live 49F accounts; Orion transactions name the custodian under a column the adapter does not read; Commonwealth says
+4. **Three answers are wrong for real data:** the 49F resolve bridge misses **2,364 of 8,032** live 49F accounts (35.6% of
+   live market value). The gap is COVERAGE, not age: it survived the 2026-10-19 restore (correction, section 4.5); Orion transactions name the custodian under a column the adapter does not read; Commonwealth says
    it has no fee source while its transactions hold 1,683 Management Fee rows.
 5. **Every currency field is a dead read.** No vendor table carries a `currency` column (0 of 139 live schemas). All seven
    adapters therefore serve `currency_basis: source_absent`. That is honest, but nothing is being read.
@@ -243,7 +243,7 @@ one that carries rep/advisor attribution for Orion.
 | # | Act | Owner (disarm / specify / write) | Class |
 |---|---|---|---|
 | 1 | Diff the deployed gateway `app/` + `refs/DATA_CATALOG.yaml` against HEAD; restore Inflection serving (`firm_not_served`) | COO~MI / CTO~Z / CloudOps lane | SERVED |
-| 2 | Restore the 49F `dim_account_xref` producer cadence (15 td stale; 2,362 accounts unresolvable). Cause, per the laptop CTO (relayed 18:23Z, agentbus 46816357; record `org/tier1_exec/1.0.0_SA_CTO/deliverables/DIAG_BD49F_DIM_CONVERT_OOM_XREF_STALE_20261020.md` @b58716bd17): `opal-assets-bd49f-dim-convert` runs out of memory or times out on every trading-day run. Measured here 18:2xZ: live MemorySize 1024, Timeout 900, LastModified 2026-07-17 (`get-function-configuration`), matching `infra/aws/terraform/opal-assets/bd49f_convert.tf:113`. The OOM itself was not measured here | laptop CTO / -- / CloudOps lane (1024 -> 3008, then one invoke) | SERVED |
+| 2 | (CORRECTED ~19:50Z) The producer is RESTORED (`date=2026-10-19` written, 3008 MB), but **2,364 accounts / 35.6% of MV are still unresolvable**. The remaining act is a CTO~Z ruling that moves 49F resolve to the live BD `account_id` + `account_number` (unrealized or allocations), replacing the Schwab-matched xref (section 4.5). History: Cause, per the laptop CTO (relayed 18:23Z, agentbus 46816357; record `org/tier1_exec/1.0.0_SA_CTO/deliverables/DIAG_BD49F_DIM_CONVERT_OOM_XREF_STALE_20261020.md` @b58716bd17): `opal-assets-bd49f-dim-convert` runs out of memory or times out on every trading-day run. Measured here 18:2xZ: live MemorySize 1024, Timeout 900, LastModified 2026-07-17 (`get-function-configuration`), matching `infra/aws/terraform/opal-assets/bd49f_convert.tf:113`. The OOM itself was not measured here | laptop CTO / -- / CloudOps lane (1024 -> 3008, then one invoke) | SERVED |
 | 3 | Orion tx: read `custodianName` (TX_COLUMNS `:27`, filter `:205-207`, labels `:129-130`) | COO~MI / -- / worker | LOCAL |
 | 4 | Cottonwood: `"--"` strategy answers `no_model_assignment`, not `model_not_in_roster` (`:487-488`) | COO~MI / -- / worker | LOCAL |
 | 5 | Eclipse: pass `model` through the tool or read `fact_portfolios_simple.modelId` for the account path; drop the duplicate resolve candidate | CTO~Z ruling (contract) / COO~MI | LOCAL |
