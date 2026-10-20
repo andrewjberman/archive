@@ -28,3 +28,22 @@ Verbatim outputs of the probes and criterion invocations. No G number, account n
 
 7. Not done, by design: the SSM SecureString parameter, the box-role ssm:GetParameter grant, and the perg_parameter_name output
    (builder refusal, W6-S1). No terraform apply, no safe-apply, no rule enabled, no AWS object changed.
+
+8. Provisional SSM parameter ruling, then CTO ruling (msg 8673): the per-G list is a Secrets Manager secret. The SSM parameter
+   was NOT committed (the working copy was rewritten before the commit).
+   grade('fidelity/alongside/perg-list','SECRET') -> ('CONFORMANT', 'fidelity/alongside/perg-list')
+   grade('/fidelity/alongside/perg-list','SECRET') -> ('OUT-OF-PATTERN', 'fidelity/alongside/perg-list')   (not used: the name has no leading slash)
+
+9. Commit 1d5e861e75: perg.tf (aws_secretsmanager_secret.perg, metadata only, prevent_destroy, output perg_secret_id) and box.tf
+   (secretsmanager:GetSecretValue on the per-G secret's exact ARN beside the Wealthscape grant).
+   terraform fmt; ASCII nonascii=0 for perg.tf and box.tf.
+   Real-backend plan (read only): aws_iam_role_policy.box will be updated in-place; aws_secretsmanager_secret.perg will be created;
+   "Plan: 1 to add, 1 to change, 0 to destroy." The policy diff reads "(known after apply)" because the new statement refers to
+   the secret ARN, which exists only after create. G-number matches in the plan output: 0.
+
+10. Criteria, on the committed tree, with the main-tree checker run from this worktree (C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py):
+   R1-FU6V-OK Success! The configuration is valid.                                        (rc 0)   [FR5-AC1]
+   R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK  (rc 0)   [FR5-AC2]
+   R1-FR5P-OK Plan: 1 to add, 1 to change, 0 to destroy. (the per-G secret and the box role policy)  (rc 0)   [FR5-AC3]
+
+11. Supersedes step 7 for the per-G list: the parameter piece is now the secret of step 9; W6-S1 stays as filed.

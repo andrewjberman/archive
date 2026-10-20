@@ -19,7 +19,7 @@
       "kind": "terraform",
       "commit_or_etag": "fa72c37046",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-6. New variable schedule_enabled (bool, default false). Never applied; the real-backend plan reads No changes at the default."
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-6. New variable schedule_enabled (bool, default false). Never applied; the real-backend plan reads the switch at its default."
     },
     {
       "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
@@ -29,11 +29,25 @@
       "deploy_evidence": "Committed LOCAL. The three event rules take state = var.schedule_enabled ? ENABLED : DISABLED. Never applied."
     },
     {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/perg.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1d5e861e75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. aws_secretsmanager_secret.perg fidelity/alongside/perg-list (grade SECRET CONFORMANT), metadata only, prevent_destroy, no secret version; output perg_secret_id. Never applied."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/box.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1d5e861e75",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL. The box inline policy gains PergSecretRead: secretsmanager:GetSecretValue on the per-G secret's exact ARN, beside WealthscapeSecretRead. Never applied."
+    },
+    {
       "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "29e3dfe3c8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Surprise row NFRA_FIDUPL-D1-W6-S1 committed LOCAL on wk-NFRA_FIDUPL-6 (no SSM parameter kind in the name builder)."
+      "deploy_evidence": "Surprise row NFRA_FIDUPL-D1-W6-S1 committed LOCAL on wk-NFRA_FIDUPL-6 (no SSM parameter kind in the name builder), left as filed."
     }
   ],
   "acceptance": [
@@ -62,59 +76,62 @@
       "criterion_verbatim": "the plan adds only the SSM parameter and changes only the box role policy.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr5p",
-      "output_evidence": "R1-FR5P-FAIL plan rc=0 ['No changes. Your infrastructure matches the configuration.']",
-      "denominator": "0 of 1 intended adds planned (the SSM parameter); 0 of 1 intended changes planned (the box role policy)",
-      "status": "FAIL",
-      "status_reason": "The SSM parameter piece is stopped: the name builder has no kind for an SSM parameter (surprise NFRA_FIDUPL-D1-W6-S1), so neither the parameter nor the box role's ssm:GetParameter grant nor the perg_parameter_name output exists in the root. The plan therefore reads No changes, not Plan: 1 to add, 1 to change, 0 to destroy.",
+      "output_evidence": "R1-FR5P-OK Plan: 1 to add, 1 to change, 0 to destroy. (the per-G secret and the box role policy)",
+      "denominator": "1 of 1 added resource is aws_secretsmanager_secret.perg; 1 of 1 changed resource is the box role inline policy; 0 to destroy",
+      "status": "PASS",
       "expect": "R1-FR5P-OK Plan: 1 to add, 1 to change, 0 to destroy\\."
     }
   ],
   "controls": {
     "mutant": {
-      "description": "No mutant was run: the schedule switch was checked by its default plan (No changes) and not by flipping the variable, since a true value is an enable act outside this order.",
+      "description": "No mutant was run: the switch was checked by its default plan and not by flipping the variable, since a true value is an enable act outside this order.",
       "expected": "n/a",
       "observed": "no mutant run",
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "two same-input plan runs compared: a direct terraform plan after the switch edit, and the fr5p check on the committed tree",
-      "observed": "direct plan: No changes. Your infrastructure matches the configuration.; fr5p: plan rc=0 with the same No changes line",
+      "method": "two same-input plan runs compared: a direct terraform plan on the committed tree, and the fr5p check on the same tree",
+      "observed": "direct plan: Plan: 1 to add, 1 to change, 0 to destroy.; fr5p: Plan: 1 to add, 1 to change, 0 to destroy.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "The SSM SecureString parameter for the per-G list, the box-role ssm:GetParameter grant on it, and the perg_parameter_name output",
-      "reason": "Builder refusal: no name kind for an SSM parameter (surprise NFRA_FIDUPL-D1-W6-S1). The refusal clause stops the piece; no typed name was used."
-    },
-    {
       "item": "Enabling the three schedule rules (schedule_enabled = true), terraform apply, safe-apply, any AWS object created or changed",
       "reason": "Plan only; the switch is built at its default false, and enabling is a separate act under its own order."
     },
     {
+      "item": "Writing the per-G list value",
+      "reason": "A human writes the secret value once; this root declares no version, so no value enters git or state."
+    },
+    {
+      "item": "A kms:Decrypt grant for the per-G secret",
+      "reason": "Not in the order; the secret uses the account default key. Runtime need INFERRED, not measured here (plan only)."
+    },
+    {
       "item": "A G number, account number or firm label in any file or output",
-      "reason": "Not applicable to this order's output: none is written, and the grep of the edited files and the investigation file returned 0 G-number matches."
+      "reason": "Not applicable to this order's output: none is written; the plan output and the edited files carry 0 G-number matches."
     }
   ],
   "surprises": [
-    "NFRA_FIDUPL-D1-W6-S1: the name builder has no kind for an SSM parameter, so the per-G parameter and its box-role read grant are stopped and FR5-AC3 cannot reach its expected plan."
+    "NFRA_FIDUPL-D1-W6-S1: the name builder has no kind for an SSM parameter; the CTO ruling (msg 8673) replaced the provisional SSM name with a Secrets Manager secret, so the row is answered and left as filed."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FR-s-5.schedule-and-perg-param.session_log.txt",
   "compiler_tools": [
     {
       "tool": "terraform",
       "invocation": "terraform -chdir=infra/aws/terraform/canonical-fidelity-ec2 init -input=false; plan -input=false -no-color",
-      "result": "init rc 0; plan rc 0: No changes. Your infrastructure matches the configuration."
+      "result": "init rc 0; plan rc 0: Plan: 1 to add, 1 to change, 0 to destroy."
     },
     {
       "tool": "lib/opal_naming.py (python -I)",
-      "invocation": "name('fidelity','alongside','perg', <kind>) for kind in parameter, param, secret, config",
-      "result": "all four refused: kind is neither a NAMING_SCHEMA.json kind nor a cadence."
+      "invocation": "grade('fidelity/alongside/perg-list','SECRET')",
+      "result": "('CONFORMANT', 'fidelity/alongside/perg-list')"
     },
     {
-      "tool": "r1_checks.py",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fr5p",
-      "result": "R1-FU6V-OK; R1-FU6G-OK; R1-FR5P-FAIL (verbatim in the session log)."
+      "tool": "r1_checks.py (main tree)",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fu6v | fu6g | fr5p",
+      "result": "R1-FU6V-OK; R1-FU6G-OK; R1-FR5P-OK (verbatim in the session log)."
     }
   ]
 }
