@@ -30,7 +30,7 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_grant.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "b09e82b107143f37c7a04cdc72212709aba3f5a0",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Stdlib only, offline, ruff clean (ruff 0.15.11) and the commit-gate clean. Checks the iam.tf text, the registry-derived prefixes against the naming builder lib/opal_naming.py key() (loaded by path), and a real ycharts_opal_reports key from surprise row IRPT_ANLREQ-D2-S224 (fnmatch, exactly one prefix).",
       "artifact_covered_by": [
@@ -41,9 +41,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "e184f465ba803e6c7a8c44df8bdd458e415958a4",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib only, offline, ruff clean and the commit-gate clean. Measures git diff --numstat from the cut commit that added the task order to HEAD, restricted to infra/. It reports OPAL-REPORT-BOUND-BAD for the measured 7/1 and does not relax the 0-deletion bound.",
+      "deploy_evidence": "Stdlib only, offline, ruff clean and the commit-gate clean. Per AMENDMENT 1 of the order (trunk 6e36e3dcc2): measures git diff --numstat cumulatively from the cut commit e02d849d4990 to the last Terraform edit commit of this branch (161d929920); only ops/iam.tf may change; deletions are 0 or 1; a deletion of 1 must be the old for-family concat line replaced by that line with ', local.opal_report_family' appended inside the second list (verified by text).",
       "artifact_covered_by": [
         "AR463-y-AC3"
       ]
@@ -74,14 +74,14 @@
     },
     {
       "criterion_id": "AR463-y-AC3",
-      "criterion_verbatim": "AR463-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py -- expect ^OPAL-REPORT-BOUND-OK numstat=[0-9]+/0 files=1$",
+      "criterion_verbatim": "AR463-y-AC3: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py -- expect ^OPAL-REPORT-BOUND-OK numstat=[0-9]+/1 files=1$ (AMENDMENT 1, trunk 6e36e3dcc2)",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~328/check_opal_report_bound.py",
-      "output_evidence": "OPAL-REPORT-BOUND-BAD numstat=7/1 files=1 cut=e02d849d4990 rows=infra/aws/terraform/investor-reporting/ops/iam.tf(+7,-1)\nrc=1",
-      "denominator": "1 of 1 changed infra path (iam.tf); 1 deletion measured against the 0 the expect requires",
-      "expect": "^OPAL-REPORT-BOUND-OK numstat=[0-9]+/0 files=1$",
-      "status": "FAIL",
-      "status_reason": "The measured deletion count is 1, not 0. The cell's mandated edit appends local.opal_report_family to the existing concat list of the one statement, which replaces the existing line; no other edit can add the family to that statement without a second deletion or a second statement, which the cell forbids. Recorded as surprise IRPT_ANLREQ-D2-W328-S2 (BLOCKING). The criterion was not relaxed to pass."
+      "output_evidence": "OPAL-REPORT-BOUND-OK numstat=7/1 files=1\nrc=0",
+      "denominator": "1 of 1 changed path from the cut e02d849d4990 to the last Terraform edit 161d929920 (ops/iam.tf); 1 deletion, text-verified as the old for-family concat line replaced by that line with ', local.opal_report_family' appended in the second list; 7 insertions",
+      "expect": "^OPAL-REPORT-BOUND-OK numstat=[0-9]+/1 files=1$",
+      "status": "PASS",
+      "status_reason": "The printed line matches the amended expect regex exactly and rc=0. The bound was first read BAD (7/1 against a 0-deletion expect, surprise IRPT_ANLREQ-D2-W328-S2); the issuer amended the expect to /1 (AMENDMENT 1), and the script was changed to that bound in commit e184f465ba, not the expect relaxed by the worker."
     }
   ],
   "controls": {
