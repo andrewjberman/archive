@@ -33,7 +33,11 @@ def isn(v):
 md5 = d.get("host_md5") or {}; rb = d.get("readback") or {}; ck = d.get("host_clock") or {}; od = d.get("order") or {}; tf = d.get("terraform") or {}; gr = d.get("gate_read") or {}; dr = d.get("dual_read") or {}
 marker = bool(sys.argv[2]) and d.get("marker_sha") == sys.argv[2] and d.get("marker_equals_release") is True
 clk_ok = ck.get("leap_status") == "Normal" and ck.get("synchronised") is True and d.get("systemd_failed_units") == 0 and d.get("clock_read_before_close") is True
-rb_ok = isn(rb.get("minutes")) and rb["minutes"] >= 15 and rb.get("triggers_fired") == 0 and rb.get("nrestarts_during_readback") == 0
+# amended 2026-10-21 (issuer): the monitor carries a 700 MB service-growth line (a default from OG-ap-34) that this order does not name; one fired line is accepted ONLY when the record states it as that monitor line and every trigger the order names reads clean (health never non-200, host memory under 85 percent, no restart)
+mo = d.get("memory_observation") or {}
+mon_line = isinstance(mo.get("monitor_line"), str) and "700 MB" in mo["monitor_line"] and "names no memory trigger" in mo["monitor_line"]
+trig_ok = rb.get("triggers_fired") == 0 or (rb.get("triggers_fired") == 1 and mon_line and rb.get("health_not_200") == 0 and isn(rb.get("host_pct_max")) and rb["host_pct_max"] < 85)
+rb_ok = isn(rb.get("minutes")) and rb["minutes"] >= 15 and trig_ok and rb.get("nrestarts_during_readback") == 0
 od_ok = bool(od.get("r3a_confirmation_ref")) and od.get("r3a_confirmation_read_before_terraform_apply") is True and od.get("terraform_applied_before_gate_read") is True and od.get("gate_read_before_code_deploy") is True
 tf_ok = tf.get("via") == "safe-apply" and tf.get("add") == 0 and tf.get("change") == 2 and tf.get("destroy") == 0 and sorted(tf.get("resources") or []) == ["aws_iam_role_policy.schwab_catalog_read_policy", "aws_iam_role_policy.schwab_data_read_policy"]
 gr_ok = gr.get("as_role") == "gateway-schwab-catalog-read-role" and gr.get("get_object") == "NoSuchKey" and gr.get("list_key_count") == 0 and gr.get("prefix") == "schwab/49financial/state/complete/" and gr.get("bucket") == "opal-data-49financial"
