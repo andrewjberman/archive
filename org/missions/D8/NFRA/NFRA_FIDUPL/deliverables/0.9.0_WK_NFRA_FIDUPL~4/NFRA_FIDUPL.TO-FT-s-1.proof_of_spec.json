@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "6bd116284f5",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-1.switcher-read-and-perg-seed.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d51"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/switcher_list.py",
+      "kind": "script",
+      "commit_or_etag": "cede76602d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-4 (LOCAL); not deployed to the box or to S3 (the live read is the box command's, FT-s-1 is built on fakes)",
+      "artifact_covered_by": ["FT-s-1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/perg_seed.py",
+      "kind": "script",
+      "commit_or_etag": "cede76602d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-4 (LOCAL); not copied to /opt/fidelity-uploader and never run on the box from this order",
+      "artifact_covered_by": ["FT-s-1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_switcher_list.py",
+      "kind": "test",
+      "commit_or_etag": "cede76602d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-4 (LOCAL); a test file, not deployed",
+      "artifact_covered_by": ["FT-s-1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-1-AC1",
+      "criterion_verbatim": "the seven named tests exist and pass.",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft1",
+      "output_evidence": "R1-FT1-OK passed=7",
+      "denominator": "7 of 7 named tests present in infra/aws/ec2/canonical-fidelity/tests/test_switcher_list.py; 7 passed",
+      "status": "PASS",
+      "expect": "R1-FT1-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "firm_for_label's no-match return flipped from attributed False to True in switcher_list.py; run with -k test_unmatched_label_goes_to_alongside_unattributed; file restored from a byte copy and compared with cmp; git diff against HEAD checked empty.",
+      "expected": "test_unmatched_label_goes_to_alongside_unattributed fails under the mutant",
+      "observed": "mutant: 1 failed, 6 deselected; restored: cmp identical and git diff clean; unmutated: 1 passed, 6 deselected",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "status": "N/A-WITH-REASON",
+      "method": "N/A-WITH-REASON: the criterion is a presence-and-pass check that prints a count; the function outputs are sorted by G and the test run is repeated by the checker, not re-measured here.",
+      "observed": "not re-measured; the checker output R1-FT1-OK passed=7 and the module suite both passed at cede76602d."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live switcher read, the live secret put and any sign-in or logout",
+      "reason": "built on fakes per the order; the live seed is run on the box by the round's live cells, not from this order"
+    },
+    {
+      "item": "copying perg_seed.py to /opt/fidelity-uploader or changing config.json",
+      "reason": "outside this order's grant; the box carries the code and the pointer key through the box cells"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W4-S10: OBSERVATION, ARMED (disarm 2.0.0_SA_COO~P1) -- box/run.py ALLOWED_KEYS refuses a config.json that carries perg_secret_id, the key section 12 names; box/run.py is outside this order's grant and was not edited. perg_seed.py does not call check_pointers and is not affected."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~4/NFRA_FIDUPL.TO-FT-s-1.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft1",
+      "result": "R1-FT1-OK passed=7"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "171 passed in 3.04s"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/switcher_list.py infra/aws/ec2/canonical-fidelity/perg_seed.py infra/aws/ec2/canonical-fidelity/tests/test_switcher_list.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~4 <0.9.0_WK_NFRA_FIDUPL~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "cede76602d (code); f2f7b6b3dc (surprise row)"
+    }
+  ]
+}
