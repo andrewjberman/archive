@@ -1,0 +1,119 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-13",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "1b5d086b156",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-13.schedule-policy-document-arn.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-13.schedule-policy-document-arn.md",
+  "group": "OTHER",
+  "vintage_commit": "5bdc5d4387b"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
+   "kind": "terraform",
+   "commit_or_etag": "684e54692b8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "StartTheRunDocumentOnly gained the document/<name> ARN form; safe-apply of the whole root at 10:23Z: Plan 0 add 1 change 0 destroy, Apply complete 0 added 1 changed 0 destroyed; simulator allowed; ft13s OK.",
+   "artifact_covered_by": [
+    "FT-s-13-AC1",
+    "FT-s-13-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
+   "kind": "terraform",
+   "commit_or_etag": "684e54692b8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ListOwnCommandStar gained ssm:GetCommandInvocation (step 2B, CTO 9055); second safe-apply at 10:26Z: Plan 0 add 1 change 0 destroy, Apply complete 0 added 1 changed 0 destroyed; simulator GetCommandInvocation on * allowed; post-apply plan No changes.",
+   "artifact_covered_by": [
+    "FT-s-13-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T1020Z_nfra-fidupl-schedule-policy-document-arn-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "684e54692b8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-schedule-policy-document-arn-20261021, 2 legs, CLOSED.",
+   "artifact_covered_by": [
+    "FT-s-13-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T1027Z_nfra-fidupl-schedule-doc-manual-start-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "684e54692b8",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-schedule-doc-manual-start-20261021 (step 3B, the manual start), 1 leg, CLOSED.",
+   "artifact_covered_by": [
+    "FT-s-13-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-13-AC1",
+   "criterion_verbatim": "the schedule role is allowed to start the run on the document/ ARN form.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft13s",
+   "output_evidence": "R1-FT13S-OK schedule start allowed on the document/ ARN form",
+   "denominator": "1 of 1 simulations of the live schedule role (ssm:StartAutomationExecution on the document/ ARN, one resource per call)",
+   "status": "PASS",
+   "expect": "R1-FT13S-OK schedule start allowed"
+  },
+  {
+   "criterion_id": "FT-s-13-AC2",
+   "criterion_verbatim": "the three rules are still ENABLED.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6r",
+   "output_evidence": "R1-FT6R-OK the three schedule rules are ENABLED",
+   "denominator": "3 of 3 fidelity rules read live (list_rules NamePrefix fidelity)",
+   "status": "PASS",
+   "expect": "R1-FT6R-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read an IAM simulation and three rule states; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "each pre-apply plan was saved and applied as that file; the before simulation read implicitDeny and the after simulation allowed; CloudTrail showed AccessDenied at 09:45:22Z and 10:15:02Z before",
+   "observed": "saved plans 0/1/0 applied as is, twice; post-apply plan No changes",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the 10:45Z scheduled leg (the proof of the schedule path); a second manual start of the document",
+   "reason": "The 10:45Z leg is a scheduled event, not an act of this order; the order allows exactly one manual start (step 3B), which succeeded."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261021T1020Z_nfra-fidupl-schedule-policy-document-arn-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan> (twice)",
+   "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed (twice)."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-schedule-policy-document-arn-20261021 and nfra-fidupl-schedule-doc-manual-start-20261021; close-leg; close",
+   "result": "OK: CLOSED, all legs proven, sentinels removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft13s | ft6r | fu6g",
+   "result": "R1-FT13S-OK; R1-FT6R-OK; R1-FU6G-OK"
+  }
+ ]
+}
