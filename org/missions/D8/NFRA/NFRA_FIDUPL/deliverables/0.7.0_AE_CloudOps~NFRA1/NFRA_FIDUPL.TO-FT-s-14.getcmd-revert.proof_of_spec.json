@@ -1,0 +1,99 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-14",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "1a79c6019aa",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-14.automation-getcmd-revert.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-14.automation-getcmd-revert.md",
+  "group": "OTHER",
+  "vintage_commit": "59fd70ce218"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/automation.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b561d7bac37",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ssm:GetCommandInvocation removed from ListOwnCommandStar (STAR-OK comment true again); safe-apply of the whole root at about 10:48Z: Plan 0 add 1 change 0 destroy, Apply complete 0 added 1 changed 0 destroyed, post-apply plan No changes (rc=0); simulator on * implicitDeny; ft14a OK.",
+   "artifact_covered_by": [
+    "FT-s-14-AC1",
+    "FT-s-14-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T1033Z_nfra-fidupl-automation-getcmd-revert-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "b561d7bac37",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-automation-getcmd-revert-20261021, 2 legs, CLOSED.",
+   "artifact_covered_by": [
+    "FT-s-14-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-14-AC1",
+   "criterion_verbatim": "the automation role is no longer allowed ssm:GetCommandInvocation on *.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft14a",
+   "output_evidence": "R1-FT14A-OK the account-wide GetCommandInvocation grant is revoked (implicitDeny)",
+   "denominator": "1 of 1 simulations of the live automation role (ssm:GetCommandInvocation on *, one resource per call)",
+   "status": "PASS",
+   "expect": "R1-FT14A-OK the account-wide GetCommandInvocation grant is revoked"
+  },
+  {
+   "criterion_id": "FT-s-14-AC2",
+   "criterion_verbatim": "the three rules are still ENABLED.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6r",
+   "output_evidence": "R1-FT6R-OK the three schedule rules are ENABLED",
+   "denominator": "3 of 3 fidelity rules read live (list_rules NamePrefix fidelity)",
+   "status": "PASS",
+   "expect": "R1-FT6R-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read an IAM simulation and three rule states; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the pre-apply plan was saved and applied as that file; the before simulation read allowed (ft14a FAIL) and the after simulation implicitDeny (ft14a OK); the post-apply plan was run on the same tree",
+   "observed": "saved plan 0 add 1 change 0 destroy applied as is; post-apply plan No changes",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "waiting for the 10:45Z leg's execution to become terminal; starting an execution by hand",
+   "reason": "The 10:45Z leg started NO execution (describe-automation-executions: none since 10:40Z; CloudTrail 10:45:04Z AccessDenied for the schedule role on automation-execution/*), so the order's 'apply at once' branch applied; no manual start was made."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261021T1033Z_nfra-fidupl-automation-getcmd-revert-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+   "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-automation-getcmd-revert-20261021 (2 legs); close-leg L1, L2; close",
+   "result": "OK: CLOSED, all 2 legs proven, sentinel removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft14a | ft6r | fu6g",
+   "result": "R1-FT14A-OK; R1-FT6R-OK; R1-FU6G-OK"
+  }
+ ]
+}
