@@ -35,8 +35,7 @@ def month_ends(series):
 
 
 def monthly_returns(series, last_day, months=24):
-    me = month_ends(series)
-    me = [x for x in me if x[0] <= last_day]
+    me = month_ends([x for x in series if x[0] <= last_day])  # cut at the window end FIRST: a later bar must not become the month's level
     me = me[-(months + 1):]
     return [me[i][1] / me[i - 1][1] - 1.0 for i in range(1, len(me))]
 
@@ -98,7 +97,7 @@ def main():
         print("  %-24s %.4f" % (name, v))
     if a.pdf:
         pages = fr.pdf_pages(a.pdf)
-        sect = [i for i, tx in enumerate(pages) if "Comparison" in tx]
+        sect = [i for i, tx in enumerate(pages) if "Comparison:" in re.sub(r"\s+", "", tx)]
         text = re.sub(r"\s+", "", " ".join(pages[i] for i in sect))
         print("SECTION pages %s" % [i + 1 for i in sect])
         for name, v in found + stats:
