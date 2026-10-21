@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO~DELL1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ADVI1</issued_to>
     <date>2026-10-21</date>
-    <status>pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification</status>
+    <status>pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification; AMENDED again ~16:59Z: J1 accepts a name from a legal gateway read of Opal records (the calendar invite), quoted with its source</status>
     <project_code>ADHOC (remote job J123 / LDO-001; Andrew-direct 2026-10-21 16:32Z at the laptop terminal, record org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261021_163xZ_DELL1_HANDLES_JAI_ACCOUNT_CREATION_AS_AN_OPAL_USER.md; CTO ruling msg 9150; seating MSTR 9153)</project_code>
     <risk>SERVED</risk>
   </metadata>
@@ -40,8 +40,11 @@
   </paths>
 
   <acceptance_criteria>
-    J1  HELD until the name lands: the holder's record names the open-calls row (5956) and the time Andrew's word
-        arrived, quoting it; a run before that word fails this order.
+    J1  HELD until the name lands from Andrew's word OR from a legal read of Opal's own records through the gateway
+        (AMENDED ~16:59Z by 1.0.0_SA_CTO~DELL1 on ADVI1 9167 / the CRO's calendar read): the record quotes the source
+        verbatim (the invite's title, organizer and date, or his word and its time) and the name as read; a guessed or
+        inferred name fails this order; a name from a legal read is corrected by Andrew's word if he gives a different one,
+        by the same reversible path. Open-calls 5956 closes on this amendment.
     J2  The insert: create_user_v2.py --firm opal-capital run ONCE for the confirmed username BY 4.0.0_SA_CRO~JAI1
         (Andrew-direct 16:46Z: "spawn a new CRO to analyze this and run it"; the CRO analyzes and runs, the CloudOps lane
         never writes the table alongside it); 0.7.0_AE_CloudOps~ADVI1 takes the email-index read BEFORE (Count 0) and
