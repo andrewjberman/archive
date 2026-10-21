@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-487.audit-source-reads-the-ticket-with-an-exact-four-attribute-projection",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "2c9752b2866",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-487.audit-source-reads-the-ticket-with-an-exact-four-attribute-projection.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-487.audit-source-reads-the-ticket-with-an-exact-four-attribute-projection.md",
+    "group": "OTHER",
+    "vintage_commit": "2c9752b2866"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~361",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py",
+      "kind": "script",
+      "commit_or_etag": "4a7b8da5356",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only offline checker. Reads ticket_audit_source.py as text and parses it with ast for PROJECTED_ATTRIBUTES. Requires ProjectionExpression= in the get_item call and no ExpressionAttributeNames in the source. --selftest runs four in-memory mutants. Committed LOCAL as 4a7b8da5356 on wk-IRPT_ANLREQ-361. Nothing run against AWS, network or a release build.",
+      "artifact_covered_by": [
+        "AR487-y-AC1",
+        "AR487-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/ticket_audit_source.py",
+      "kind": "script",
+      "commit_or_etag": "0e148cb07d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The audit source. Its one get_item call sends ConsistentRead=True and ProjectionExpression of the plain names ticket_id, ticket_type, answers, created_at, built from PROJECTED_ATTRIBUTES, with no alias argument (AR-y-487 AMENDMENT 1). filer_user_type is not read and is returned as None. Committed LOCAL as 0e148cb07d9 (superseding the alias form at 6dcfac8fbe1). Not deployed; ships in a release after r34q under its own pair.",
+      "artifact_covered_by": [
+        "AR487-y-AC1",
+        "AR487-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ticket_audit_projection.py",
+      "kind": "test",
+      "commit_or_etag": "0e148cb07d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Hermetic test file with a recording fake client. Loads ticket_audit_source.py by file path, so it changes no sys.path. Its recorded-call assertion is the plain-name projection (AR-y-487 AMENDMENT 1). Committed LOCAL as 0e148cb07d9.",
+      "artifact_covered_by": [
+        "AR487-y-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR487-y-AC1",
+      "criterion_verbatim": "AR487-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py -- expect ^AUDIT-PROJECTION-OK attrs=ticket_id,ticket_type,answers,created_at projection=yes filer_user_type_read=no$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py",
+      "output_evidence": "AUDIT-PROJECTION-OK attrs=ticket_id,ticket_type,answers,created_at projection=yes filer_user_type_read=no\nrc=0 (run twice; the two stdout captures are identical, diff rc=0).",
+      "denominator": "1 of 1 printed line matches the expect; the checker tests 4 conditions on the source (PROJECTED_ATTRIBUTES is the four names in order; the get_item call carries ProjectionExpression= and ExpressionAttributeNames=; no filer_user_type read form occurs; requester and created_by occur only in the docstring or comments)",
+      "expect": "^AUDIT-PROJECTION-OK attrs=ticket_id,ticket_type,answers,created_at projection=yes filer_user_type_read=no$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR487-y-AC2",
+      "criterion_verbatim": "AR487-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0",
+      "denominator": "4 of 4 in-memory mutants read BAD (the ProjectionExpression argument removed; a fifth name added to the tuple; the found[\"filer_user_type\"] read put back; ExpressionAttributeNames put back)",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "CONTROL-FIRES is printed only when all three mutants read BAD, and the printed line matches the expect."
+    },
+    {
+      "criterion_id": "AR487-y-AC3",
+      "criterion_verbatim": "AR487-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/generate/tests/test_ticket_audit_projection.py reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/generate/tests/test_ticket_audit_projection.py reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "57 passed in 2.15s",
+      "denominator": "57 of 57 collected tests passed across the 4 files (test_audit_live_wiring.py listed third of four, last-but-one, as written; no collection error)",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "The last line matches the expect regex; the run collected and passed every test with no error."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR487-y-AC2 control: the checker's selftest mutates the source text in memory four ways. (1) the ProjectionExpression argument is removed from the get_item call; (2) a fifth name, requester, is added to PROJECTED_ATTRIBUTES; (3) found[\"filer_user_type\"] is read back into the function; (4) an ExpressionAttributeNames argument is put back into the get_item call. Each must read BAD.",
+      "expected": "All three mutants read BAD and the selftest prints CONTROL-FIRES, rc 0.",
+      "observed": "CONTROL-FIRES, rc 0 (on the amended source; run after AMENDMENT 1).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice with python -I; each stdout captured to the worker scratch folder and compared with diff.",
+      "observed": "run1 and run2 both rc=0 with the same OK line; diff rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the attribute-restricted IAM policy applied to the live opal-tickets table and the live GetItem under the resident role",
+      "reason": "out of this cell: no AWS call, no terraform (not installed on this box), no apply. The policy is sister cell AR-y-486; the applier's live read decides how DynamoDB counts the aliased names for the IAM condition."
+    },
+    {
+      "item": "the release build and deploy of ticket_audit_source.py",
+      "reason": "out of this cell: no release build, no deploy. The code ships in a release after r34q under its own pair."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W361-S1: test_audit_live_wiring.py test_1 asserts the exact recorded GetItem call, which the required projection changes; the expected call was updated and no other assertion changed (OBSERVATION, INERT). Superseded in form by S4.",
+    "IRPT_ANLREQ-D2-W361-S2: test_11 keeps its name test_11_a_user_type_the_item_carries_is_passed_through while its assertion now states the user type is not read and is None; the name was kept because no test may be renamed or deleted (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S3: a sys.path insert in the new test file, in the style of the existing audit tests, breaks test_generate_installed.py collection; the new file loads ticket_audit_source.py by file path instead, and the AC3 line as written passes (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S4: row S1 describes the superseded alias form after AMENDMENT 1; the current expected call is the plain-name projection (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S5: the complete flip at HEAD removed the worker grant before AMENDMENT 1 could land; the order was reopened at f37dc157604 (OBSERVATION, INERT)."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python (stdlib) and pytest, the worktree's interpreter",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py; the AC3 pytest line in cd infra/aws/lambda/investor-reporting",
+      "result": "AC1 printed the OK line with rc=0 on both runs; AC2 printed CONTROL-FIRES with rc=0; AC3 printed 57 passed in 2.15s. No compile or build step ran: no bun, no tsc, no terraform, no release build."
+    }
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md"
+}
