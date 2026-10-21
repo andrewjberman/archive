@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-l-2.question-set-grader",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "1b5bf868274"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.round28-GATEWAY.md",
+    "vintage_commit": "f16e1b7a0f3",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-l-2.question-set-grader.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~98",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/gateway_battery/fwd26_grade.py",
+      "kind": "script",
+      "commit_or_etag": "94f481714d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Standard-library grader (grade and ideal subcommands, contract R28.3 L2) committed on wk-NFRA_MCPINDEX-98 at 94f481714d, LOCAL; no deploy, no AWS call, no network call. Graded by l2.AC1 and l2.AC2.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "workflows/gateway_battery/tests/test_fwd26_grade.py",
+      "kind": "test",
+      "commit_or_etag": "94f481714d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eleven pytest tests on small inputs written under tmp_path, committed at 94f481714d, LOCAL. Graded by l2.AC3 (pytest rc=0 passed=11, minimum 8).",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the DENOMINATOR line (the real question set, 12 questions, 20 expected locations); the ideal control writes one pick per question and grades FWD26 questions=12 pass=12 fail=0 not_served=0 with rc 0, every item PASS with the matched location; the five single-defect mutants (listed, s2, wrong-folder, wrong-table, missing) each fail exactly the first question with class listed_first, s2_folder, wrong_folder, wrong_table and missing_pick and the other eleven pass -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round28/checks/l2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: the real question set org\\missions\\D9\\NFRA\\NFRA_MCPINDEX\\deliverables\\2.0.0_SA_COO~MI\\round28\\evidence\\FWD26_QUESTION_SET.json (12 questions, 20 expected locations); the ideal control, then each of 5 single-defect mutants planted on the first question only\n  ok   control: the question set is the accepted 12 (4 Schwab, 4 Orion, 4 Cottonwood Black Diamond)\n  ok   ideal: rc 0 and a fwd26_picks/1 file with one pick per question, each the first expected location with its table and no bucket listing\n  ok   grade of the ideal picks: rc 0 and the stdout line\n  ok   the output file: schema fwd26_grade/1, one item per question in file order, exactly the contract keys\n  ok   every item PASS with a null class and the matched location equal to the first expected location\n  ok   each item carries its question's size_classes_proposed through\n  ok   counts: exactly the contract keys, 12 questions, 12 pass, 0 fail, 0 not_served, every per-class count 0\n  ok   mutant listed: rc 1, exactly the first question FAILs with class listed_first, the other 11 PASS, counts follow\n  ok   mutant s2: rc 1, exactly the first question FAILs with class s2_folder, the other 11 PASS, counts follow\n  ok   mutant wrong-folder: rc 1, exactly the first question FAILs with class wrong_folder, the other 11 PASS, counts follow\n  ok   mutant wrong-table: rc 1, exactly the first question FAILs with class wrong_table, the other 11 PASS, counts follow\n  ok   mutant missing: rc 1, exactly the first question FAILs with class missing_pick, the other 11 PASS, counts follow\nARMS: 12 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "12 arms ok of 12 run (control, ideal, grade of the ideal, output shape, every item, size classes, counts, five single-defect mutants); the real question set holds 12 questions and 20 expected locations",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the DENOMINATOR line; the nine refusals each exit 2 with REFUSED on stderr and no file; every master folder of a Schwab question passes; an accept_also folder passes with its own table and is wrong_table with the other; a prefix without its trailing slash passes; a wrong folder after a bucket listing is listed_first; the not_served arms (plain FAIL without a md5 and with an equal md5, NOT_SERVED with a different md5, a correct pick still PASS, an unlisted question still FAIL); two runs give the same bytes; no AWS or network library -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round28/checks/l2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: the real question set (12 questions); 9 refusals, the any-folder rule on 4 question(s) with several expected locations, the accept_also rule on 1 question(s), 6 not_served arms on ['O3'], precedence, trailing slash, determinism, no network library\n  ok   control: the ideal picks grade clean (every refusal arm below has this control)\n  ok   a pick for an unknown question id exits 2 with REFUSED and writes nothing\n  ok   two picks for one question id exit 2 with REFUSED and write nothing\n  ok   a listed_bucket_first that is not a bool exits 2 with REFUSED\n  ok   a pick with no listed_bucket_first exits 2 with REFUSED\n  ok   a picks file with another schema exits 2 with REFUSED\n  ok   a questions file with another schema exits 2 with REFUSED\n  ok   a picks file that is not JSON exits 2 with REFUSED\n  ok   a --served-md5 that is not 32 hex characters exits 2 with REFUSED\n  ok   no subcommand exits 2\n  ok   S1: every one of its 3 expected locations (each master folder) PASSes\n  ok   O1: its accept_also folder with its own table PASSes\n  ok   O1: its accept_also folder with the other table is wrong_table\n  ok   S1: a prefix without its trailing slash PASSes (one slash is added before the comparison)\n  ok   precedence: a wrong folder named after a bucket listing is listed_first, not wrong_folder\n  ok   a table with surrounding spaces is trimmed and PASSes\n  ok   O3 wrong folder, no --served-md5: a plain FAIL wrong_folder\n  ok   O3 wrong folder, --served-md5 equal to the set's catalog md5: still FAIL wrong_folder\n  ok   O3 wrong folder, a different --served-md5: NOT_SERVED with class not_served; fail 0, not_served 1; rc 1\n  ok   O3 missing pick, a different --served-md5: NOT_SERVED\n  ok   O3 picked correctly, a different --served-md5: PASS (a correct pick is a pass whatever is served)\n  ok   S1 (not listed in needs_candidate_e_served) wrong folder with a different --served-md5 stays FAIL\n  ok   two grade runs on the same input give the same bytes and the same stdout\n  ok   two ideal runs give the same bytes\n  ok   the script imports no AWS, HTTP or process library and names both subcommands\nARMS: 25 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "25 arms ok of 25 run (1 control, 9 refusals, the every-master and accept_also arms, trailing slash, precedence, spaces, 6 not_served arms on O3 and S1, determinism, no network library); the real question set holds 12 questions",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DENOMINATOR line (pytest rc=0, at least 8 passed) for `test_fwd26_grade.py` -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~MI/round28/checks/l2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "DENOMINATOR: pytest rc=0 passed=11 (minimum 8) file=workflows\\gateway_battery\\tests\\test_fwd26_grade.py\n  ok   pytest\nARMS: 1 ok, 0 failed\nRESULT: PASS\nexit=0",
+      "denominator": "11 passed of 11 tests in test_fwd26_grade.py (minimum 8)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Five single-defect copies of the ideal control, each planted by ideal --mutate on the first question only (listed, s2, wrong-folder, wrong-table, missing); grade must fail exactly that question with the matching class and pass the other eleven.",
+      "expected": "rc 1 with one FAIL on the first question of class listed_first, s2_folder, wrong_folder, wrong_table, missing_pick respectively; the other eleven PASS; stdout FWD26 questions=12 pass=11 fail=1 not_served=0",
+      "observed": "l2.AC1 mutant arms listed, s2, wrong-folder, wrong-table and missing each ok (rc 1, first question FAIL with the expected class, other eleven PASS, counts follow); ARMS: 12 ok, 0 failed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs compared: grade run twice on the same ideal picks file (bytes and stdout), and ideal run twice with --mutate wrong-table (bytes); the l2.AC2 arms two grade runs on the same input give the same bytes and two ideal runs give the same bytes",
+      "observed": "both pairs byte-identical; the two grade runs print the same stdout line",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The graded run of the question set (a Claude session picking the first folder and table from the served index without listing the bucket first)",
+      "reason": "R28.4 step 2 is the issuer's drain act; this cell builds the grader script and its tests only."
+    },
+    {
+      "item": "The served status of candidate e for O3 (needs_candidate_e_served)",
+      "reason": "The live release does not hold candidate e; the grader grades O3 NOT_SERVED only when the served md5 differs, which the checks exercise on planted inputs. No live read is in scope."
+    },
+    {
+      "item": "The client-data check of work commit 94f481714d",
+      "reason": "The hashed account-id list is absent on this device, so the commit gate printed WARN and did not check it; filed as NFRA_MCPINDEX-Z-W98-S1, no action taken."
+    },
+    {
+      "item": "Any AWS, gateway or network call, deploy, push or grant",
+      "reason": "Outside the cell: the order's egress class is NONE and the script reads two local JSON files and writes one."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W98-S1: the commit gate printed WARN that the hashed account-id list is absent on this device, so commit 94f481714d was not checked for client account ids; surfaced to the issuer, no action taken."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~98/logs/l2_session.txt",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~98 <0.9.0_WK_NFRA_MCPINDEX~98@opal.agent>\" -F .scratch/msg_work.txt -- workflows/gateway_battery/fwd26_grade.py workflows/gateway_battery/tests/test_fwd26_grade.py",
+      "result": "commit-gate All checks passed (py_compile, ds-precommit, ruff py39); naming-gate NAMING-GATE: PASS 0 graded; msg-verify committed 94f481714d. WARN client-data-check: hashed account-id list ABSENT on this device."
+    },
+    {
+      "tool": "workflows/gateway_battery/fwd26_grade.py",
+      "invocation": "python workflows/gateway_battery/fwd26_grade.py ideal --questions <FWD26_QUESTION_SET.json> --out <ideal.json>; python workflows/gateway_battery/fwd26_grade.py grade --questions <FWD26_QUESTION_SET.json> --picks <ideal.json> --out <grade.json>",
+      "result": "IDEAL picks=12 mutate=none rc 0; FWD26 questions=12 pass=12 fail=0 not_served=0 rc 0 (smoke run in the worktree .scratch folder before the checks)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~98/NFRA_MCPINDEX.TO-MX-l-2.question-set-grader.proof_of_spec.json AC1,AC2,AC3",
+      "result": "rc recorded in the worker report at the time of the check"
+    }
+  ]
+}
