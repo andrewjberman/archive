@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~G2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-16</date>
-    <status>pending</status>
+    <status>complete</status><!-- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-21 (round hygiene, CTO msg ~15:10Z): every criterion invocation re-run by the issuer and matched; the proof instance reads VALID rc 0 --><!-- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-21 (round hygiene, CTO msg ~15:10Z): every criterion invocation re-run by the issuer and matched; the proof instance reads VALID rc 0 -->
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
