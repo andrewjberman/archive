@@ -1,0 +1,48 @@
+NFRA_MCPORTAL.TO-MP-zp-1 -- worker 0.9.0_WK_NFRA_MCPORTAL~46 -- session log (verbatim outputs, 2026-10-21 UTC)
+
+[preflight] git rev-parse --abbrev-ref HEAD (workspace worktree C:/tmp/mp-ogp-46): wk-NFRA_MCPORTAL-46
+[preflight] test -d org && test -d .tools && echo TREE-OK: TREE-OK
+[preflight] mcportal HEAD at start: f90f03a (branch wk-NFRA_MCPORTAL-46-mcportal)
+
+[baseline] cd mcportal && NO_COLOR=1 timeout 120 bun test src  (before any edit)
+ 89 pass
+ 0 fail
+ 505 expect() calls
+Ran 89 tests across 11 files. [191.00ms]   rc=0
+
+[commit] mcportal 98c0065 (author 0.9.0_WK_NFRA_MCPORTAL~46): stopped reads off on the opalgateway page; the audit list's write callback.
+         Test 2 (audit re-read) refused: no DOM library, see surprise row NFRA_MCPORTAL-Z-W46-S1.
+
+[measure] bun -e "console.log(typeof document, typeof window)"  ->  undefined undefined   (bun 1.3.14)
+[measure] import('react-dom/client') then createRoot({}).render(null)  ->  throws "Target container is not a DOM element."
+[measure] mcportal/package.json: no happy-dom, jsdom, linkedom, react-test-renderer or @testing-library entry; bun.lock: none
+
+[AC1] cd C:/tmp/mp-ogp-46 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zp1.AC1.sh; echo "exit=$?"
+ 90 pass
+ 0 fail
+ 534 expect() calls
+Ran 90 tests across 11 files. [185.00ms]
+bun test rc=0; named tests present in sources 1 of 2; pass=90 (min 91); fail=0
+RESULT: FAIL
+exit=1
+
+[AC2] cd C:/tmp/mp-ogp-46 && bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~MP/ogw/checks/zp1.AC2.sh; echo "exit=$?"
+tsc rc=0
+RESULT: PASS
+exit=0
+
+[build] cd mcportal && bun run build
+build rc=0 (vite: 90 modules transformed; built in 734ms)
+
+[mutant] PersonAccessView.tsx line "const readsOff = stoppedReadsOff && stopped" replaced by "const readsOff = false && stopped" (worktree only), then
+         bun test src/pages/opalgateway/opalgateway.test.tsx
+ 5 pass
+ 1 fail
+ error: expect(received).toContain(expected)      rc=1   -> FIRED-AS-EXPECTED (the stopped-reads-off test fails)
+[mutant] line restored by hand; git status clean afterwards.
+
+[determinism] bun test src/pages/opalgateway/opalgateway.test.tsx, twice, restored tree
+ run1: 6 pass, 0 fail, Ran 6 tests across 1 file. rc=0
+ run2: 6 pass, 0 fail, Ran 6 tests across 1 file. rc=0   -> STABLE
+
+[not run] any network call; any push; bun install; bun add.
