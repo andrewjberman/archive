@@ -8,6 +8,7 @@ rows' type and age readable, the claim made from the board); this check holds wh
 the filer, the picker's claim landed on exactly the chosen one and not the other, the picker did not open either ticket first, and everything synthetic is gone.
 """
 import copy
+import hashlib
 import json
 import os
 import re
@@ -22,8 +23,11 @@ PROTECTED = {"TCK-20261017-da2a1987", "TCK-20261017-5af976ff"}
 LABELS = {"service_request": "service request", "meeting_request": "meeting request", "other": "other", "trade_request": "trade request"}
 KEYS = {"browser_origin", "filer", "picker", "chosen_ticket", "other_ticket", "board_read", "chosen_basis", "claim_via", "opened_before_claim",
         "shots", "token_exp", "rows_deleted_at", "tickets_deleted_at", "tickets_absent_after", "rows_absent_after", "no_engine_call",
-        "token_printed", "shot_data_reviewed"}
-SHOT_ROLES = ["r23_board_full", "r23_board_claimed"]
+        "token_printed", "shot_data_reviewed", "private_board"}
+SHOT_ROLES = ["r23_rows_before", "r23_rows_claimed"]   # committed, clipped to the two synthetic rows
+PRIVATE_ROLES = ["r23_board_full", "r23_board_claimed"]   # the full board, kept OUTSIDE the repo (the CTO, msg 11820)
+PRIVATE_DIR = "C:/dev/_tckt_private_evidence/r23_f51/"
+SHA = re.compile(r"^[0-9a-f]{64}$")
 PNG = b"\x89PNG\r\n\x1a\n"
 TID = re.compile(r"^TCK-\d{8}-[0-9a-f]{8}$")
 AWS = os.path.abspath(".tools/aws.cmd")
@@ -70,8 +74,19 @@ def doc_problem(doc):
             return "shot %s is saved outside %s" % (role, DIR)
         if rec["viewer"] != doc["picker"]:
             return "shot %s must be taken as the picker" % role
-        if rec.get("full_page") is not True or not isinstance(rec.get("rows_visible"), int) or rec["rows_visible"] < 2:
-            return "shot %s must be a full-page board shot showing at least 2 rows" % role
+        want = ("two_synthetic_rows", 2) if role == "r23_rows_before" else ("chosen_row", 1)
+        if (rec.get("clipped_to"), rec.get("rows_visible")) != want:
+            return "shot %s must be clipped to %s (%d row(s)), unaltered, not a composite" % (role, want[0], want[1])
+    pb = doc["private_board"]
+    if not isinstance(pb, dict) or sorted(pb) != sorted(PRIVATE_ROLES):
+        return "private_board must carry exactly the roles %s" % PRIVATE_ROLES
+    for role, rec in pb.items():
+        if not isinstance(rec, dict) or not str(rec.get("path", "")).startswith(PRIVATE_DIR) or ".." in str(rec["path"]):
+            return "private shot %s is not under %s" % (role, PRIVATE_DIR)
+        if not SHA.match(str(rec.get("sha256", ""))) or not isinstance(rec.get("bytes"), int) or rec["bytes"] < 1:
+            return "private shot %s lacks a sha256 or a byte size" % role
+        if not all(isinstance(rec.get(k), int) and rec[k] > 0 for k in ("width", "height")):
+            return "private shot %s lacks its pixel size" % role
     return None
 
 
@@ -142,6 +157,11 @@ def live():
             if not raw.startswith(PNG) or len(raw) != s["bytes"]:
                 print("RUN-BAD shot %s is not a PNG of the recorded size" % role)
                 return 1
+        for role, pr in doc["private_board"].items():
+            raw = open(pr["path"], "rb").read()
+            if not raw.startswith(PNG) or len(raw) != pr["bytes"] or hashlib.sha256(raw).hexdigest() != pr["sha256"]:
+                print("RUN-BAD private shot %s is not the recorded PNG (size or sha256)" % role)
+                return 1
         for t in (doc["chosen_ticket"], doc["other_ticket"]):
             if item("opal-tickets", {"ticket_id": {"S": t}}) is not None:
                 print("RUN-BAD the synthetic ticket %s is still PRESENT" % t)
@@ -165,12 +185,14 @@ def live():
 def _good():
     f, p = "tckt-r23-filer-20261021@opal.invalid", "tckt-r23-picker-20261021@opal.invalid"
     a, b = "TCK-20261021-0123abcd", "TCK-20261021-4567ef01"
-    shots = {r: {"path": DIR + r + ".png", "bytes": 10, "origin": ORIGIN, "viewer": p, "full_page": True, "rows_visible": 3} for r in SHOT_ROLES}
+    shots = {r: {"path": DIR + r + ".png", "bytes": 10, "origin": ORIGIN, "viewer": p, "clipped_to": "two_synthetic_rows" if r == "r23_rows_before" else "chosen_row", "rows_visible": 2 if r == "r23_rows_before" else 1} for r in SHOT_ROLES}
+    private = {r: {"path": PRIVATE_DIR + r + ".png", "sha256": "a" * 64, "bytes": 10, "width": 1280, "height": 900} for r in PRIVATE_ROLES}
     doc = {"browser_origin": ORIGIN, "filer": f, "picker": p, "chosen_ticket": a, "other_ticket": b,
            "board_read": {a: {"type_label": "Service Request", "age_text": "(2 minutes)"}, b: {"type_label": "Other", "age_text": "(1 minute)"}},
            "chosen_basis": "Service Request, waiting 2 minutes, older than the Other row", "claim_via": "board", "opened_before_claim": False,
            "shots": shots, "token_exp": "2026-10-21T04:00:00Z", "rows_deleted_at": "2026-10-21T04:05:00Z", "tickets_deleted_at": "2026-10-21T04:05:30Z",
-           "tickets_absent_after": True, "rows_absent_after": True, "no_engine_call": True, "token_printed": False, "shot_data_reviewed": True}
+           "tickets_absent_after": True, "rows_absent_after": True, "no_engine_call": True, "token_printed": False, "shot_data_reviewed": True,
+           "private_board": private}
 
     def s(v):
         return {"S": v}
@@ -214,9 +236,16 @@ def self_test():
     mutate("opened first", lambda d: d.update(opened_before_claim=True))
     mutate("no basis", lambda d: d.update(chosen_basis="x"))
     mutate("no age text", lambda d: d["board_read"][d["chosen_ticket"]].update(age_text=""))
-    mutate("clipped shot", lambda d: d["shots"]["r23_board_full"].update(full_page=False))
-    mutate("one row shot", lambda d: d["shots"]["r23_board_claimed"].update(rows_visible=1))
-    mutate("shot as filer", lambda d: d["shots"]["r23_board_full"].update(viewer=d["filer"]))
+    mutate("shot not clipped", lambda d: d["shots"]["r23_rows_before"].update(clipped_to="full_board"))
+    mutate("three rows in the clip", lambda d: d["shots"]["r23_rows_claimed"].update(rows_visible=3))
+    mutate("claimed shot as two rows", lambda d: d["shots"]["r23_rows_claimed"].update(clipped_to="two_synthetic_rows", rows_visible=2))
+    mutate("before shot as one row", lambda d: d["shots"]["r23_rows_before"].update(clipped_to="chosen_row", rows_visible=1))
+    mutate("shot as filer", lambda d: d["shots"]["r23_rows_before"].update(viewer=d["filer"]))
+    mutate("private board in the repo", lambda d: d["private_board"]["r23_board_full"].update(path=DIR + "x.png"))
+    mutate("private board path escapes", lambda d: d["private_board"]["r23_board_full"].update(path=PRIVATE_DIR + "../x.png"))
+    mutate("private board no sha", lambda d: d["private_board"]["r23_board_claimed"].update(sha256="zz"))
+    mutate("private board no pixel size", lambda d: d["private_board"]["r23_board_claimed"].pop("width"))
+    mutate("private board missing", lambda d: d["private_board"].pop("r23_board_claimed"))
     mutate("same type", fr=lambda r: r["other"]["Item"]["ticket_type"].update(S="service_request"))
     mutate("analysis type", fr=lambda r: r["other"]["Item"]["ticket_type"].update(S="analysis_request"))
     mutate("label mismatch", fr=lambda r: r["other"]["Item"]["ticket_type"].update(S="meeting_request"))
@@ -229,7 +258,7 @@ def self_test():
     if bad:
         print("RUN-BAD mutants not caught: %s" % bad)
         return 1
-    print("R23-FWD5-SELFTEST-OK (25 mutants)")
+    print("R23-FWD5-SELFTEST-OK (32 mutants)")
     return 0
 
 
