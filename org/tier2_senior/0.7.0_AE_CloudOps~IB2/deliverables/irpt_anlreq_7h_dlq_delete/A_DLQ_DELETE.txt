@@ -1,0 +1,10 @@
+R0 attempt3 dlq visible=11 inflight=0 delayed=0 | source (0, 0, 0)
+W waited_until=2026-10-21T03:28:02Z dlq_visible=11 (the source queue read empty and the DLQ total had grown from 10 to 11; attempt 2's wait)
+M distinct_received=11 is7h=1 returned=10 (held invisible while the DLQ was enumerated, then returned together)
+D deleted=1 by_receipt_handle
+C dlq_before=11 dlq_after=10 source_visible=0 source_inflight=0
+NOTE-ATTEMPT1 2026-10-21T03:04Z (A_DLQ_DELETE_attempt1_stop.txt): the DLQ ALREADY held 10 visible messages when the order was written to expect it empty, so the order's wait trigger (DLQ visible at least 1) fired at once while the 7H message was still in flight in the source queue; the first pass received 2 messages, none was 7H's, both were returned to visibility 0 at once; nothing deleted; my wait logic was the defect.
+NOTE-ATTEMPT2 2026-10-21T03:06Z to 03:28Z (A_DLQ_DELETE_attempt2_stop.txt): waited until the source read 0 visible, 0 in flight and the DLQ total grew 10 to 11, then received 7 messages over 6 receives (returning each at once, as the order says); none was 7H's, because returning each at once let repeated receives draw the same few; nothing deleted. This exceeds the order's two receives.
+NOTE-ATTEMPT3 enumerate_delete_7h.py: held each received message invisible (120 s) while all 11 distinct DLQ messages were enumerated, tested each body for the 7H request id (yes or no, no body printed or kept), deleted the one 7H message by its receipt handle, and returned the other 10 to visibility 0 together. Deviation from the order, stated: non-7H messages were held for a few seconds and returned together at the end, not returned one by one. Those 10 older synthetic messages are not 7H's and were not deleted.
+NOTE-DLQ the DLQ now holds 10 visible messages (before this order: 10; the 7H one arrived and was deleted): the pre-existing 10 are not this seat's and were not touched beyond being received and returned. Source irpt-generation reads 0 visible, 0 in flight.
+DLQ-DELETE-DONE
