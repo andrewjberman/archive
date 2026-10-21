@@ -14,7 +14,7 @@ Row `AMGT_HARVST-D1-S70` (SC1's, `92eac31e166`) records task `3f57aad6f7a94e2990
 ## What it shows
 
 - The identity, the registry, the repository and the digest were correct on both pulls: both sessions authenticated, both asked for the same digest, no `AccessDenied`, no recorded error code. **This is not an IAM denial and not a missing image** (it also matches my earlier reads that the image was in ECR with one image and the canary pulled it).
-- The failed pull **never reached the layers**: zero `GetDownloadUrlForLayer`. After three manifest requests there is a 30-second gap, and then a `BatchCheckLayerAvailability` that treats the manifest digest as a layer. That second call is what the "schema1 conversion" fallback in the error text looks like from the registry's side: the agent's first resolve of the reference did not complete and it tried a legacy path, which cannot find a manifest digest among layers.
+- The failed pull **never reached the layers**: zero `GetDownloadUrlForLayer`. After three manifest requests there is a 30-second gap, and then a `BatchCheckLayerAvailability` that treats the manifest digest as a layer. My reading, NOT established: that second call fits the "schema1 conversion" fallback named in the error text (the agent's first resolve of the reference did not complete and a legacy path looked for the manifest digest among layers). CloudTrail shows the calls, not the agent's reasoning.
 - The successful pull made six manifest requests and then 29 layer URLs (28 layers and the config) in about a second.
 
 ## What it does not show
@@ -24,4 +24,4 @@ CloudTrail records ECR reads with `responseElements: null`, so it cannot say wha
 ## For the record
 
 - Repeat risk: unmeasured. The CTO's bound stands: a second failure to start under the pair stops and reports (a manifest problem would need a new push and a new digest).
-- If the scheduled fire (Fri 10:00Z) fails the same way, the stage-8 read records `TaskFailedToStart` and the CloudTrail pattern above (3 manifest calls, a gap, a layer-probe of the manifest digest, no `GetDownloadUrlForLayer`) is the signature to look for; AWS support is the next owner, not our code.
+- If the scheduled fire (Fri 10:00Z) fails the same way, the stage-8 read records `TaskFailedToStart` and the CloudTrail pattern above (3 manifest calls, a gap, a layer-probe of the manifest digest, no `GetDownloadUrlForLayer`) is the signature to compare against; the next step would be an AWS support case, and I have not established anything about our code beyond the pull step.
