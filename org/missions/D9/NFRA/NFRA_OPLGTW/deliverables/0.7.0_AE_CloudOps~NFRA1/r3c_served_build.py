@@ -31,7 +31,8 @@ def grab(text, key):
 
 
 pre, b0, b1, ap, gate, db, da, pa, dep, r3a = (load(n) for n in ("pre.json", "step1_before.json", "step1_after.json", "apply.json", "gate.json", "dual_before.json", "dual_after.json", "probe_after.json", "deploy.json", "r3a.json"))
-md5, ua, ac, auditwarn = load("host_md5_after.json"), load("unarmed_raw.json"), load("accesslog.json"), load("auditwarn.json")
+pa = pa["result"]  # r3c_host.py wraps its measurement under "result"
+md5, ua, ac, auditwarn =load("host_md5_after.json"), load("unarmed_raw.json"), load("accesslog.json"), load("auditwarn.json")
 ib, ia = load("iam_before.json"), load("iam_after.json")
 s27 = json.loads(io.open(R + "served27.txt", encoding="utf-8").read().split("--- STDOUT ---", 1)[1].split("--- STDERR", 1)[0].split("CODE_SERVED_JSON", 1)[1].strip())["body"]
 clock, lim = io.open(R + "clock.txt", encoding="utf-8").read(), io.open(R + "limits.txt", encoding="utf-8").read()
@@ -81,6 +82,7 @@ body = {
     "probe": {"armings": 0, "puts_made_by_this_seat": ua["puts_made_by_this_script"], "unarmed_status": calls[0]["status"] if all(c["status"] == 403 for c in calls) else "mixed", "unarmed_error": calls[0]["error"] if all(c["error"] == "probe_not_armed" for c in calls) else "mixed",
               "lease_parameter_absent_before": bool(ua["lease_before"]["absent"]), "lease_parameter_absent_after": bool(ua["lease_after"]["absent"]), "listener_bound": ua["state_before"]["bound"]},
     "access_log": {"window_minutes": 15, "window_start_utc": ac["window_start_utc"], "window_end_utc": ac["window_end_utc"], "post_mcp_lines_readback": jr["post_mcp_lines"], "audit_records_readback": al["records_in_window"], "method": ac["method"]},
+    "memory_observation": json.load(io.open(R + "memory_observation.json", encoding="utf-8")),
     "audit_failure_counter": {"journal_lines_readback": auditwarn["journal_lines_readback"], "counter_value": auditwarn["counter_value"], "classes_seen": auditwarn["classes_seen"]},
 }
 io.open(W + "R3C_SERVED.json", "w", encoding="utf-8", newline="\n").write(json.dumps({"body": body}, indent=1) + "\n")
