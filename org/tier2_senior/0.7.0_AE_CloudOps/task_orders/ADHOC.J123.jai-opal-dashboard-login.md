@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO~DELL1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ADVI1</issued_to>
     <date>2026-10-21</date>
-    <status>pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification; AMENDED again ~16:59Z: J1 accepts a name from a legal gateway read of Opal records (the calendar invite), quoted with its source</status>
+    <status>complete 2026-10-21 ~17:1xZ by 0.7.0_AE_CloudOps~ADVI1 (proof org/tier2_senior/0.7.0_AE_CloudOps~ADVI1/deliverables/ADHOC.J123.jai-opal-dashboard-login.proof_of_spec.json VALID rc=0; receipt msgs 9177/9178; the draft to Yang is unsent and waits on Andrew) -- was: pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification; AMENDED again ~16:59Z: J1 accepts a name from a legal gateway read of Opal records (the calendar invite), quoted with its source</status>
     <project_code>ADHOC (remote job J123 / LDO-001; Andrew-direct 2026-10-21 16:32Z at the laptop terminal, record org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261021_163xZ_DELL1_HANDLES_JAI_ACCOUNT_CREATION_AS_AN_OPAL_USER.md; CTO ruling msg 9150; seating MSTR 9153)</project_code>
     <risk>SERVED</risk>
   </metadata>
