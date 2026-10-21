@@ -11,6 +11,9 @@ All commands run from the repository root; `W` = `org/missions/D9/NFRA/NFRA_OPLG
 ## Done before the window (COO ferry 20261020T233500Z, row NFRA_MCPORTAL-Z-W2-S8): the HALT GATE
 The 119 pending inbox files were listed, searched for STOP/HALT tokens (0 in subjects and bodies) and moved into `read/`; `W/haltgate_batch16.json` holds the counts. A read-only run of the gate on the empty inbox took 1.5 s. AT THE DEPLOY: record the gate's elapsed seconds from the deploy log in the same file (`gate_elapsed_s`); any new mail first: read it, STOP-class first, move it to `read/`.
 
+## Timing (COO ferries 00:15Z, 00:38Z, 00:45Z; CTO 36254, 36259)
+Window START 06:00Z; abort line `/health` 200 by 06:30Z; window END 06:55Z. **Rollback decision point 06:38:30Z** (06:55:00Z - (720 + 149 + 120) s); put it in the ledger title when it is opened and keep `W/haltgate_batch16.json`'s `gate_elapsed_s` for the deploy's own gate seconds. **At 05:45Z, right before the deploy and right before any rollback: recount the pending inbox** (`ls org/mcp/inbox/0.7.0_AE_CloudOps/~NFRA1/*.md`); if above 0 read it to zero first (STOP-class first), move to `read/`, update the file. The inbox watcher is unreliable for this lane: read the directory directly.
+
 ## 06:00Z: the deploy
 4. Ledger: `python .tools/deploy_ledger.py open --slug nfra-oplgtw-gateway-release-batch16 --author 0.7.0_AE_CloudOps~NFRA1 --window-hours 4 --title "..." --leg "release|ec2-baked-asset|..." --leg "read-back|verify|..." --leg "proofs|verify|..."` (entry AND sentinel committed by the tool).
 5. ONE message to `0.0.0_AB_MSTR~Z`: the window and the restart (about 16 s), under 150 words.
