@@ -5,7 +5,8 @@ Stdlib only; offline; reads the source as TEXT and parses it with ast for the PR
 Prints one line and exits:
   AUDIT-PROJECTION-OK attrs=ticket_id,ticket_type,answers,created_at projection=yes filer_user_type_read=no   (rc 0)
   AUDIT-PROJECTION-BAD <why>                                                                                  (rc 1)
---selftest mutates the text in memory three ways and prints CONTROL-FIRES (rc 0) only when all three read BAD.
+--selftest mutates the text in memory four ways and prints CONTROL-FIRES (rc 0) only when all four read BAD.
+AR-y-487 AMENDMENT 1: plain attribute names; the source must carry no alias argument of the second kind.
 """
 import ast
 import io
@@ -82,8 +83,8 @@ def judge(text):
     call = _get_item_call(text)
     if call is None or "ProjectionExpression=" not in call:
         return "NO-ProjectionExpression-IN-GET-ITEM"
-    if "ExpressionAttributeNames=" not in call:
-        return "NO-ExpressionAttributeNames-IN-GET-ITEM"
+    if "ExpressionAttributeNames" in text:
+        return "ExpressionAttributeNames-PRESENT"
     for form in READ_FORMS:
         if form in text:
             return "FILER-USER-TYPE-READ-PRESENT"
@@ -100,10 +101,12 @@ def _selftest():
         print("CONTROL-SILENT base-not-clean " + base_why)
         return 1
     mutants = (
-        re.sub(r"ProjectionExpression=[^,]+,\s*", "", base, count=1),
+        re.sub(r",\s*ProjectionExpression=_PROJECTION", "", base, count=1),
         base.replace('"answers", "created_at")', '"answers", "created_at", "requester")', 1),
         base.replace("            written_at = datetime",
                      '            _read = found["filer_user_type"]\n            written_at = datetime', 1),
+        base.replace("ProjectionExpression=_PROJECTION",
+                     "ExpressionAttributeNames={}, ProjectionExpression=_PROJECTION", 1),
     )
     fired = [judge(text) is not None for text in mutants]
     if all(fired):
