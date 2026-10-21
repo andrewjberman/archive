@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-484.bindings-builder-carries-the-ticket-table-pinned-by-a-test-against-ticket-center",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "e556f5bd5dc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-484.bindings-builder-carries-the-ticket-table-pinned-by-a-test-against-ticket-center.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-484.bindings-builder-carries-the-ticket-table-pinned-by-a-test-against-ticket-center.md",
+    "group": "OTHER",
+    "vintage_commit": "e556f5bd5dc"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~352",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/build_resident_package.py",
+      "kind": "script",
+      "commit_or_etag": "907f5ba0b5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Python bindings builder. One literal line added to the bindings dict after requests_table: \"tickets_table\": \"opal-tickets\". Committed LOCAL as 907f5ba0b5b on wk-IRPT_ANLREQ-352. Nothing was planned, applied, built into a release or run against AWS; the release r34q is built by 2.0.0_SA_COO~G2.",
+      "artifact_covered_by": [
+        "AR484-y-AC1",
+        "AR484-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_tickets_table_pin.py",
+      "kind": "test",
+      "commit_or_etag": "907f5ba0b5b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Hermetic pytest module, stdlib only, 7 tests. Reads the builder and infra/aws/terraform/ticket-center/main.tf as text from the repository root (git rev-parse --show-toplevel). The pure helpers compare, refusal and the three mutants are the ones check_tickets_pin.py loads. Committed LOCAL as 907f5ba0b5b.",
+      "artifact_covered_by": [
+        "AR484-y-AC2",
+        "AR484-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py",
+      "kind": "script",
+      "commit_or_etag": "1381adf0f87",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib offline check. Prints TICKETS-PIN-OK on the real files, TICKETS-PIN-BAD <why> (rc 1) otherwise; --selftest prints CONTROL-FIRES only when all three mutants are refused. Committed LOCAL as 1381adf0f87 on wk-IRPT_ANLREQ-352; this instance pins to that commit.",
+      "artifact_covered_by": [
+        "AR484-y-AC1",
+        "AR484-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR484-y-AC1",
+      "criterion_verbatim": "AR484-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py -- expect ^TICKETS-PIN-OK builder=opal-tickets terraform=opal-tickets equal=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py",
+      "output_evidence": "TICKETS-PIN-OK builder=opal-tickets terraform=opal-tickets equal=yes\nrc=0",
+      "denominator": "1 of 1 output line matches the expect regex; 2 of 2 values equal (builder opal-tickets, Terraform table opal-tickets); 1 of 1 aws_dynamodb_table resource in ticket-center/main.tf holds ticket_id as its hash key",
+      "expect": "^TICKETS-PIN-OK builder=opal-tickets terraform=opal-tickets equal=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the single output line matches the expect regex exactly. Run twice from the repository root with identical output (see controls.determinism)."
+    },
+    {
+      "criterion_id": "AR484-y-AC2",
+      "criterion_verbatim": "AR484-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0",
+      "denominator": "3 of 3 in-memory mutants refused by the same compare() the check uses; 0 silent",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the output line is CONTROL-FIRES. The three refusals are printed in controls.mutant.observed."
+    },
+    {
+      "criterion_id": "AR484-y-AC3",
+      "criterion_verbatim": "AR484-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_resident_tickets_table_pin.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_resident_tickets_table_pin.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "7 passed in 0.40s",
+      "denominator": "7 of 7 tests passed; 0 skipped and 0 failed in the pytest summary line; the 7 are the real-file pass, the mutant refusals, the shape refusal, the hash-key selection and the all-three check",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the tail line matches ^[0-9]+ passed in  with no skipped or failed count, so no test was skipped."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR484-y-AC2 control: three in-memory mutants applied to the real builder and Terraform text through the same compare() the check and the test use: (1) builder tickets_table value changed to opal-ticket, (2) builder tickets_table line removed, (3) Terraform name of aws_dynamodb_table.opal_tickets changed to opal-tickets-v2. The control fires only when all three are refused.",
+      "expected": "all three refused: value mismatch against opal-tickets; zero tickets_table bindings; value mismatch against opal-tickets-v2; then CONTROL-FIRES rc 0.",
+      "observed": "mutant_builder_value -> builder tickets_table=opal-ticket differs from terraform name=opal-tickets (aws_dynamodb_table.opal_tickets); mutant_builder_removed -> builder carries 0 tickets_table binding(s); expected exactly one; mutant_tf_name -> builder tickets_table=opal-tickets differs from terraform name=opal-tickets-v2 (aws_dynamodb_table.opal_tickets). The three reasons were printed by an ad-hoc in-memory run of the same module (not committed); --selftest then printed CONTROL-FIRES rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 check run twice from the repository root; the two stdout captures compared with diff.",
+      "observed": "run 1 and run 2 each printed TICKETS-PIN-OK builder=opal-tickets terraform=opal-tickets equal=yes with rc=0; diff rc=0, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live DynamoDB table opal-tickets: any describe, read or write of it, and the live resident binding",
+      "reason": "no AWS call by the worker; the build is offline. The live table is read under the issuer's and IB2's own pairs."
+    },
+    {
+      "item": "the release r34q that carries resident_bindings.json, and its apply",
+      "reason": "built by 2.0.0_SA_COO~G2 and applied by IB2 under its own pair; no release build and no deploy here."
+    },
+    {
+      "item": "the second typed copy of the ticket table name at infra/aws/terraform/investor-reporting/ycharts/generate.tf (IRPT_TICKETS_TABLE)",
+      "reason": "outside this order's <paths>; the cell pins the builder against ticket-center/main.tf only. The copy is recorded as observed in row IRPT_ANLREQ-D2-W351-S1 and is not changed here."
+    },
+    {
+      "item": "the client account-id check on commits 907f5ba0b5b and 1381adf0f87",
+      "reason": "the hashed account-id list is absent on dell2, so the gate printed WARN and did not grade the commits; recorded as surprise IRPT_ANLREQ-D2-W352-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W352-S1: the client-data check printed WARN ABSENT on dell2 (hashed account-id list not present), so commits 907f5ba0b5b and 1381adf0f87 were not graded for client account ids (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W352-S2: the pre-commit risk reflex printed NOT-DECIDABLE (danger map STALE, linked worktree refused) for 907f5ba0b5b and 1381adf0f87; the diff was reviewed by reading against the order's preflight (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python 3.14.7, check_tickets_pin.py",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py",
+      "result": "TICKETS-PIN-OK builder=opal-tickets terraform=opal-tickets equal=yes, rc=0"
+    },
+    {
+      "tool": "python 3.14.7, check_tickets_pin.py --selftest",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py --selftest",
+      "result": "CONTROL-FIRES, rc=0"
+    },
+    {
+      "tool": "pytest 9.0.2",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_resident_tickets_table_pin.py -q --color=no -p no:cacheprovider",
+      "result": "7 passed in 0.40s"
+    },
+    {
+      "tool": "ruff 0.15.11",
+      "invocation": "python -m ruff check infra/aws/lambda/investor-reporting/reports/tests/test_resident_tickets_table_pin.py infra/aws/lambda/investor-reporting/reports/build_resident_package.py org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~352/check_tickets_pin.py",
+      "result": "All checks passed!, rc=0 on each of the three files"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via .tools/safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh ... (commits 907f5ba0b5b and 1381adf0f87)",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (commit 907f5ba0b5b); OK: pre-commit gate clean for 1 of 1 file(s) (commit 1381adf0f87)"
+    }
+  ]
+}
