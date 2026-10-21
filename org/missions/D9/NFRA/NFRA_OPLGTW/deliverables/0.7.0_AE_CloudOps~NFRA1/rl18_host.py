@@ -54,13 +54,14 @@ def child_probe(stage, label):
     except SystemExit:
         pass
     except Exception as exc:  # noqa: BLE001
-        err = "%s %s" % (type(exc).__name__, str(exc)[:120])
+        import traceback
+        err = "%s %s | %s" % (type(exc).__name__, str(exc)[:120], " / ".join(ln.strip() for ln in traceback.format_exc().splitlines()[-4:])[:300])
     finally:
         sys.stdout = real
     lines = [ln for ln in buf.getvalue().splitlines() if ln.strip()]
     labelled = [ln for ln in lines if ": ok" in ln or ": NOT OK" in ln or ": NO" in ln]
     ok = [ln for ln in labelled if ": ok" in ln and ": NOT OK" not in ln and not ln.rstrip().endswith(": NO")]
-    m.emit({"label": label, "lines": len(labelled), "ok": len(ok), "not_ok": [ln[:90] for ln in labelled if ln not in ok], "final": lines[-1] if lines else None, "error": err, "vm_hwm_mb": round(m.hwm_mb(), 1)})
+    m.emit({"label": label, "lines": len(labelled), "ok": len(ok), "not_ok": [ln[:90] for ln in labelled if ln not in ok], "final": lines[-1] if lines else None, "head": [ln[:160] for ln in lines[:3]], "error": err, "vm_hwm_mb": round(m.hwm_mb(), 1)})
 
 
 def child_explicit(stage):
@@ -120,11 +121,13 @@ def read_pid():
 def driver():
     expect = json.load(open("/tmp/rl18_expect.json"))
     out = {"guard": m.CGROUP_GUARD_NAME, "scratch_removed": False}
-    cand, live = "/tmp/rl18_stage_c_%d" % os.getpid(), "/tmp/rl18_stage_l_%d" % os.getpid()
+    cand_root, live_root = "/tmp/rl18_stage_c_%d" % os.getpid(), "/tmp/rl18_stage_l_%d" % os.getpid()
+    gw = "/infra/aws/ec2/opal-gateway"          # the fixtures resolve a repo root with parents[5], so the stage sits at the repo-relative depth
+    cand, live = cand_root + gw, live_root + gw
     try:
         pid0, nr0 = read_pid()
         for st in (cand, live):
-            os.makedirs(st, mode=0o700)
+            os.makedirs(st, mode=0o700, exist_ok=True)
             for d in ("app", "lib", "deploy"):
                 shutil.copytree("/opt/opal-gateway/" + d, st + "/" + d, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         for rel in OVERLAY:
@@ -157,9 +160,9 @@ def driver():
         pid1, nr1 = read_pid()
         out["service"] = {"pid_before": pid0, "pid_after": pid1, "pid_stable": pid0 == pid1, "nrestarts_before": nr0, "nrestarts_after": nr1}
     finally:
-        for st in (cand, live):
+        for st in (cand_root, live_root):
             shutil.rmtree(st, ignore_errors=True)
-        out["scratch_removed"] = not (os.path.exists(cand) or os.path.exists(live))
+        out["scratch_removed"] = not (os.path.exists(cand_root) or os.path.exists(live_root))
     return out
 
 
