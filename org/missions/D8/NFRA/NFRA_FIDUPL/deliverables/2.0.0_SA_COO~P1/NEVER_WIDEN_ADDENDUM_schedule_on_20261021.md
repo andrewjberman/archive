@@ -34,7 +34,7 @@ The three legs of 2026-10-21 (09:45Z, 10:15Z, 10:45Z) ALL FAILED before reaching
 
 | leg | CloudTrail time | resource the start was refused on | cause and fix |
 |---|---|---|---|
-| 09:45Z | 09:45:22Z | `automation-definition/<document>` target without a version suffix, then `document/<document>` | target ARN lacked `:$DEFAULT` (TO-FT-s-12, applied 09:57Z); policy lacked the `document/` form (TO-FT-s-13, applied 10:23Z) |
+| 09:45Z | 09:45:22Z | `document/<document>` (CloudTrail read by NFRA1 the same event form as 10:15Z) | policy lacked the `document/` form (TO-FT-s-13, applied 10:23Z). The target ARN also lacked `:$DEFAULT` (TO-FT-s-12, applied 09:57Z, the CTO's candidate): the suffix was changed and is harmless, but no CloudTrail event shows it as the cause |
 | 10:15Z | 10:15:02Z | `document/<document>` | the `document/` form (TO-FT-s-13) |
 | 10:45Z | 10:45:04Z | `automation-execution/*` | the third form SSM checks (TO-FT-s-15, applied 10:56Z) |
 
