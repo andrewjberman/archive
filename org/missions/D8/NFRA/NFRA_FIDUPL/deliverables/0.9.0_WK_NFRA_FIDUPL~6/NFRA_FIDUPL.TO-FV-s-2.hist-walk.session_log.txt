@@ -1,0 +1,54 @@
+SESSION LOG -- 0.9.0_WK_NFRA_FIDUPL~6 on NFRA_FIDUPL.TO-FV-s-2 (round 3, FV-s-2: hist_walk.py, the Historical export backfill walk)
+Worktree: C:/tmp/fidupl-w6 (branch wk-NFRA_FIDUPL-6). Entering HEAD: 84f1185346 (FV-s-1 REPAIR 1 closed).
+Premises: TREE-OK (org and .tools present). The order's measured facts are used as given; no live read was made (fakes only, by order).
+
+[1] Premise checks (by reading, no network)
+    backfill_main.py module level: main, _real_deps, load_config, ConfigError, new_york_day, _say, _utc, _iso, _address,
+    _split, _body, REGION, DEFAULT_CONFIG all present. LongRequestSession is NOT module level: it is a class nested in
+    _real_deps (line 745); _real_deps returns it through fetch_session. Recorded as NFRA_FIDUPL-D1-W6-S12.
+    fetch.py: STATUS_PATH, DOWNLOAD_PATH, PlaywrightSession present. land.py: land, land_psn, landing_date, SIX, LISTING,
+    SOURCE, TIER, _head, _split present. lib/trading_calendar.py: is_trading_day, prev_trading_day (strictly before).
+    Base dry-run (tree at 59f062999a7, read by git ls-tree, no checkout):
+      hist_walk.py, tests/test_hist_walk.py, tests/test_hist_walk_seam.py: 0 files present -> FV-s-2-AC1, AC2 FAIL as expected
+      tests/test_land_psn.py: 0 files present -> FV-s-2-AC3 (fv1) FAIL as expected
+      control: land.py present (1 file)
+
+[2] Build
+    hist_walk.py: TYPES, KIND, CUSTOM_CODE, LAND_NAME, STEM, SERVED, CH and the two paths; Halt, WalkError; _Run with
+    state (next_day; per type stopped, stop_reason, empty_run, earliest_landed), the per-day walk (exists check first,
+    so a landed day costs no request and no sign-in), the status-list read before the POST, Custom then Standard
+    (2 s apart), the poll (10 s, 150 s window, budget checked inside), download, stub classification (200, under 300
+    bytes, starts with <?xml, holds the does-not-exist text), per-day land (one listing for position and prices, the
+    psn file through land_psn), day-folder removal, state and partial record after every day, final record, session
+    close and signal handling as in backfill_main. Output lines per the order: SIGNIN, REQ, FILE, DAY, STOP, CLOSE, OK/ERROR.
+    Choices the order did not fix (declared in the proof): a non-200 download is DL_FAILED (no stop); an IN PROCESS row
+    at the window's end is NOROW; a skipped day does not count toward --max-days; a halt in the middle of a day restores
+    the per-type state and the byte tally to the day's start, so the day is redone on resume.
+
+[3] Checks after the build (run under timeout 120; the checker prints one verdict line each)
+    $ timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2
+    R1-FV2-OK passed=13                                                                   (rc=0)
+    $ timeout 120 python .../fidupl_round_checks.py fv2s
+    R1-FV2S-OK passed=1                                                                   (rc=0)
+    $ timeout 120 python .../fidupl_round_checks.py fv1
+    R1-FV1-OK passed=7                                                                    (rc=0)
+    $ timeout 120 python .../fidupl_round_checks.py fu4
+    R1-FU4-OK passed=16                                                                   (rc=0)
+    $ timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests
+    268 passed in 20.94s                                                                  (rc=0)
+    Grammar: PY39-OK for hist_walk.py, tests/test_hist_walk.py, tests/test_hist_walk_seam.py (ast feature_version (3,9)); zero non-ASCII bytes in each.
+
+[4] Defects found while building (both fixed before the commit; the tests caught them)
+    a. _say("STOP ..." % (...).rstrip()): the % applied to a tuple before rstrip. Fixed to format first, then strip.
+    b. The seam test routed the walk's record to the fake deps store rather than to the fake S3. Fixed by a put_record
+       that writes to the fake S3, so the record key is checked there.
+
+[5] Commits (LOCAL on wk-NFRA_FIDUPL-6)
+    01a54c5e9b  issue(NFRA_FIDUPL round 3, 0.9.0_WK_NFRA_FIDUPL~6): FV-s-2 -- hist_walk.py, the Historical export backfill walk
+                (hist_walk.py, tests/test_hist_walk.py, tests/test_hist_walk_seam.py)
+    8fce73493a  drive-log(0.9.0_WK_NFRA_FIDUPL~6): FV-s-2 surprise rows W6-S12 and W6-S13 (INVESTIGATION_v1.md)
+
+[6] Gate readings at the code commit 01a54c5e9b (recorded; no new row needed, same mechanisms as rows already filed)
+    naming-gate: NAMING ERROR function-map folder missing (NFRA_FIDUPL-D1-W6-S11)
+    client-data-check: WARN hashed account-id list ABSENT; not checked (NFRA_FIDUPL-D1-W6-S10, ARMED)
+    risk-reflex: no ANSWER STATE line printed on this commit

@@ -1,7 +1,10 @@
-"""Round-47 person_access narrowing check (OG-pa-1: Menachem's tool narrowing, written by the grant writer on Andrew's owner confirm).
+"""Round-47 person_access narrowing check (OG-pa-1: Menachem's tools_deny narrowing, written by the grant writer on Andrew's owner confirm).
 
 usage: python3 -I pacheck.py <phaseA|phaseB> <W-directory>
 Prints labelled lines and a last line OK or NO. Counts and hashes only; no tool-name list, e-mail address or identifier is printed.
+
+The narrowing is a tools_deny ADD (a narrowing needs no widening confirm; deny wins) for the 27 read_only-floor tools outside Andrew's scope:
+harvest 14, mdpf 1, dynamodb 4, portal_index 6, globgrph 2 (the CTO's ruling, msg 36304; amendment of the earlier tools_allow design).
 
 PHASE A reads W/PA1_CANDIDATE.json and W/PA1_PREFLIGHT_DECIDE.json.
 PHASE B re-reads the LIVE person_access record (a strong read through the policy partition) and W/PA1_READBACK.json.
@@ -12,7 +15,7 @@ import os
 import sys
 
 phase, W = sys.argv[1], sys.argv[2]
-WANT = {"client": 5, "schwab": 5, "etfs": 18, "portal_v2": 18}
+WANT = {"harvest": 14, "mdpf": 1, "dynamodb": 4, "portal_index": 6, "globgrph": 2}
 TOTAL = sum(WANT.values())
 
 
@@ -32,14 +35,14 @@ def phase_a():
     pr = (c or {}).get("principal") or {}
     ch = (c or {}).get("change") or {}
     ok_pr = bool(c) and pr.get("role") == "menachem" and pr.get("present") is True and bool(pr.get("pk_hash")) and bool((c.get("denominator") or {}).get("registry_tools"))
-    ok_ch = (ch.get("counts") == WANT and ch.get("tools_allow_total") == TOTAL and isinstance(ch.get("names_sha256"), str) and len(ch["names_sha256"]) == 64
+    ok_ch = (ch.get("key") == "tools_deny" and ch.get("counts") == WANT and ch.get("tools_deny_total") == TOTAL and isinstance(ch.get("names_sha256"), str) and len(ch["names_sha256"]) == 64
              and ch.get("within_limits") is True and ch.get("source") == "registry of the deployed release" and ch.get("narrows_only") is True)
     dec = (p or {}).get("menachem") or {}
-    ok_d = (bool(p) and dec.get("admit_all_non_client_candidate") is True and dec.get("client_admitted_without_per_firm_grant") is False
-            and isinstance(dec.get("refused_outside_count"), int) and dec["refused_outside_count"] >= 1 and dec.get("outside_sample_refused") is True)
+    ok_d = (bool(p) and dec.get("refused_all_candidate") is True and isinstance(dec.get("kept_sample_admitted_count"), int) and dec["kept_sample_admitted_count"] >= 4
+            and dec.get("kept_sample_all_admitted") is True)
     print("candidate: menachem present with pk_hash and a printed registry denominator: %s" % Y(ok_pr))
-    print("change: tools_allow counts client 5, schwab 5, etfs 18, portal_v2 18 (total %d), names hash, within the 64-item and 128-character limits, taken from the deployed registry, narrows only: %s" % (TOTAL, Y(ok_ch)))
-    print("decide() pre-flight with the candidate applied: admits every non-client candidate tool, admits no client_* tool without a per-firm grant, refuses the outside sample: %s" % Y(ok_d))
+    print("change: tools_deny counts harvest 14, mdpf 1, dynamodb 4, portal_index 6, globgrph 2 (total %d), names hash, within the 64-item and 128-character limits, taken from the deployed registry, narrows only: %s" % (TOTAL, Y(ok_ch)))
+    print("decide() pre-flight with the candidate applied: refuses every candidate tool and still admits the kept sample (etfs, portal-v2, opal_discover, M365): %s" % Y(ok_d))
     print("OK" if (ok_pr and ok_ch and ok_d) else "NO")
 
 
@@ -75,8 +78,8 @@ def phase_b():
         if pk and val(i, "pk") == pk and val(i, "record_type") == "person_access":
             rec = i
     names = []
-    if rec is not None and "tools_allow" in rec:
-        names = sorted(str(x) for x in td.deserialize(rec["tools_allow"]))
+    if rec is not None and "tools_deny" in rec:
+        names = sorted(str(x) for x in td.deserialize(rec["tools_deny"]))
     cand = (load("PA1_CANDIDATE.json") or {}).get("change") or {}
     sha = hashlib.sha256("\n".join(names).encode()).hexdigest() if names else ""
     status = val(rec, "status") if rec is not None else None
@@ -86,11 +89,10 @@ def phase_b():
     dec = rb.get("decide") or {}
     ok_live = rec is not None and status == "active" and len(names) == TOTAL and sha == cand.get("names_sha256")
     ok_oc = oc.get("route") == "POST /api/admin/people/{tid}/{oid}/access" and oc.get("verdict") == "written" and oc.get("by") == "owner"
-    ok_d = (dec.get("tree") == "deployed" and bool(mk) and dec.get("code_sha") == mk and dec.get("admit_all_non_client_candidate") is True
-            and dec.get("client_admitted_without_per_firm_grant") is False and dec.get("outside_sample_refused") is True)
-    print("live person_access record for menachem: active %s; tools_allow total %d (want %d); names hash equals the candidate's: %s" % (Y(status == "active"), len(names), TOTAL, Y(ok_live)))
+    ok_d = (dec.get("tree") == "deployed" and bool(mk) and dec.get("code_sha") == mk and dec.get("refused_all_candidate") is True and dec.get("kept_sample_all_admitted") is True)
+    print("live person_access record for menachem: active %s; tools_deny total %d (want %d); names hash equals the candidate's: %s" % (Y(status == "active"), len(names), TOTAL, Y(ok_live)))
     print("written by the grant writer on the owner's confirm through the People route (verdict written, by owner): %s" % Y(ok_oc))
-    print("decide() on the LIVE record against the DEPLOYED tree at the batch17 release: admits every non-client candidate tool, no client_* tool without a per-firm grant, refuses the outside sample: %s" % Y(ok_d))
+    print("decide() on the LIVE record against the DEPLOYED tree at the batch17 release: refuses every candidate tool and still admits the kept sample: %s" % Y(ok_d))
     print("OK" if (ok_live and ok_oc and ok_d) else "NO")
 
 
