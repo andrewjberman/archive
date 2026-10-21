@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "genre": "DEPLOY",
+  "to_id": "NFRA_CTLPLN.TO-APPLY-36.bd49f-dim-compaction-one-run",
+  "phase": "NON-BUILD-OTHER",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/task_orders/NFRA_CTLPLN.TO-APPLY-36.bd49f-dim-compaction-one-run.md",
+    "group": "OTHER",
+    "vintage_commit": "8616ef0dbb076a25c97cbc28d4e3d314f52389b5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D0/NFRA/NFRA_CTLPLN/decompositions/NFRA_CTLPLN_DECOMP.round30.md",
+    "vintage_commit": "8616ef0dbb076a25c97cbc28d4e3d314f52389b5",
+    "to_ref": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/task_orders/NFRA_CTLPLN.TO-APPLY-36.bd49f-dim-compaction-one-run.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~NFRA2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-10-20/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "982d0c488ded198c7bc296ac94690d44",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "one put_object by bd49f_dim_compact.py --mode apply at 2026-10-21T07:21:46Z: new VersionId 3yoa4VexY5YhzGcdRDdb6E6YKgqjusj0, 242699 B (was 313939 B), rows 288195 -> 6670, COMPACT-APPLY readback_equal=True wrote=True; head-object after (evidence/after_head.json). Tool merged at 40cecd5f66f8b7053e9189c86f549f5377c1b7f5.",
+      "artifact_covered_by": [
+        "CTco1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-10-20/data.parquet?versionId=DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH",
+      "kind": "s3_object",
+      "commit_or_etag": "35a2764ff8bfc4ec67615b891e5d2709",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the prior object version, written by the 07:05Z scheduled fire at 07:06:23Z, kept (not deleted); re-downloaded by VersionId after the apply, 313939 B, sha256 27b31393615b455130411c0eac01cc68f815b3a40a1387d1ab49fc6eed838559 equal to the BEFORE hash; this is the rollback.",
+      "artifact_covered_by": [
+        "CTco1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20261021T0719Z_bd49f-dim-compaction_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "opened OPEN at 07:19Z before any read of the key; one leg closed with proof; CLOSED; sentinel bd49f-dim-compaction.json removed",
+      "artifact_covered_by": [
+        "CTco1-AC1",
+        "CTco1-AC2",
+        "CTco1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/deliverables/TO-APPLY-36_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "carries the three criteria, the plan and apply lines whole, the listings with denominators and the rollback; evidence text files in TO-APPLY-36_evidence/ (no data object is committed)",
+      "artifact_covered_by": [
+        "CTco1-AC1",
+        "CTco1-AC2",
+        "CTco1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "CTco1-AC1",
+      "criterion_verbatim": "the tool's plan line and apply line for date 2026-10-20 (both whole lines quoted); expect: COMPACT-PLAN current_equal=True runs_equal=True merged above 0, and COMPACT-APPLY readback_equal=True wrote=True with rows_before and rows_after printed",
+      "method": "live_read",
+      "invocation": "the tool's plan line and apply line for date 2026-10-20 (both whole lines quoted)",
+      "output_evidence": "PLAN (07:20:59Z, read-only): 'COMPACT-PLAN date=2026-10-20 rows_before=288195 rows_after=6670 merged=281525 accounts=5339 current_equal=True runs_equal=True'. APPLY (07:21:37Z, once, --confirm-key blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-10-20/data.parquet): 'COMPACT-APPLY date=2026-10-20 prior_version=DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH new_version=3yoa4VexY5YhzGcdRDdb6E6YKgqjusj0 rows_before=288195 rows_after=6670 readback_equal=True wrote=True'.",
+      "denominator": "1 key planned, 1 key applied; 1 plan line, 1 apply line; 288195 rows read, 6670 written; 5339 accounts",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTco1-AC2",
+      "criterion_verbatim": "aws s3api list-objects-v2 with ETags of dim_advisor_fee_role/ and dim_account_xref/ before and after (counts printed), the compacted key excluded; expect: every other key present with an equal ETag",
+      "method": "live_read",
+      "invocation": "aws s3api list-objects-v2 with ETags of dim_advisor_fee_role/ and dim_account_xref/ before and after (counts printed), the compacted key excluded",
+      "output_evidence": "dim_advisor_fee_role/: 55 objects before, 55 after; sorted key+ETag comparison (comm): 1 before-row missing or changed, and it is the compacted key date=2026-10-20/data.parquet; the other 54 present with equal ETags (includes date=2026-09-28 and date=2026-10-19). dim_account_xref/: 55 before, 55 after, 0 before-rows missing or changed, 0 new rows.",
+      "denominator": "2 prefixes; 55 + 55 objects before, 55 + 55 after; 54 + 55 = 109 other keys compared, 109 equal",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "CTco1-AC3",
+      "criterion_verbatim": "aws s3api get-object --version-id of the prior VersionId, sha256 of the downloaded bytes against the BEFORE sha256; expect: equal, with a one-byte-changed negative control reading unequal",
+      "method": "diff",
+      "invocation": "aws s3api get-object --version-id of the prior VersionId, sha256 of the downloaded bytes against the BEFORE sha256",
+      "output_evidence": "BEFORE (07:19Z, the object as the fire wrote it, VersionId DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH, 313939 B): sha256 27b31393615b455130411c0eac01cc68f815b3a40a1387d1ab49fc6eed838559. After the apply, get-object --version-id DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH: 313939 B, sha256 27b31393615b455130411c0eac01cc68f815b3a40a1387d1ab49fc6eed838559; EQUAL. Mutant (byte 100 xor 1) 7d1d43326727bb091e828cb0f44469265695813a82bbd4bc1e36ecede72a9861, UNEQUAL (control OK).",
+      "denominator": "1 prior version downloaded and hashed against 1 BEFORE hash, 1 negative control; key versions 1 before, 2 after, 0 deleted",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "rollback_is_real": {
+      "description": "the prior object version still exists and is byte-equal to what the key held before the apply; a one-byte-changed copy of it reads unequal",
+      "expected_landed": "prior-version sha256 equals the BEFORE sha256 and the mutant reads unequal",
+      "expected_not_landed": "a prior version that is missing or differs from the BEFORE hash, or a comparator that reads equal for the mutant",
+      "observed": "prior-version sha256 27b31393... EQUAL to BEFORE; mutant 7d1d4332... UNEQUAL",
+      "status": "PASS"
+    },
+    "one_key_changed": {
+      "description": "the apply rewrote exactly one key: ETag listings of both tables before and after",
+      "expected_landed": "dim_advisor_fee_role: exactly 1 changed key (the compacted one); dim_account_xref: 0 changed",
+      "expected_not_landed": "any other key's ETag changed, or a new or missing key",
+      "observed": "dim_advisor_fee_role 1 changed (date=2026-10-20) of 55; dim_account_xref 0 changed of 55; 0 new, 0 missing in both",
+      "status": "PASS"
+    },
+    "object_changed_by_the_apply": {
+      "description": "the key itself differs before and after (head-object)",
+      "expected_landed": "a new VersionId, 242699 B, rows 6670, after a prior 313939 B / 288195-row object",
+      "expected_not_landed": "the same VersionId and ETag after the run",
+      "observed": "VersionId DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH -> 3yoa4VexY5YhzGcdRDdb6E6YKgqjusj0; ETag 35a2764f... -> 982d0c48...; 313939 B -> 242699 B",
+      "status": "PASS"
+    }
+  },
+  "never_widen_pair": {
+    "coo_half": "org/missions/D0/NFRA/NFRA_CTLPLN/deliverables/2.0.0_SA_COO~C/NEVER_WIDEN_BD49F_DIM_COMPACTION_COO_HALF_20261020.md (named by the order's preflight; blast radius: the one key, rollback per key by restoring the prior object version or copying date=2026-10-19 forward)",
+    "cto_half": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_BD49F_DIM_COMPACTION_CTO_HALF_20261020.md @dee04e1b01 (named by the order's preflight)"
+  },
+  "risk_class": "WORLD",
+  "rollback": "restore the prior object version of the one key: s3api copy-object (or get-object and put-object) of VersionId DHV5BykUPo_kPlbZZ9Umf_dJkooaLzTH (313939 B, sha256 27b31393615b455130411c0eac01cc68f815b3a40a1387d1ab49fc6eed838559) over s3://opal-data-assets/blackdiamond/49f/silver/dim_advisor_fee_role/date=2026-10-20/data.parquet; or copy date=2026-10-19/data.parquet forward. Not used: readback_equal=True and no stop applied. No version was deleted.",
+  "scope": "ONE put_object to ONE key by the compaction tool, after the issuer's GO and a LastModified gate (the fire wrote the object at 07:06:23Z, after 07:05Z). No Terraform, IAM, schedule, code or Lambda change; no invoke; no other partition or table written.",
+  "declared_exclusions": [
+    {
+      "item": "the 07:05Z-fire correctness and the daily cadence",
+      "reason": "read by the issuer (dim rows 288195 vs 288194, 5338 of 5339 effective_from kept); this order only compacts the history"
+    },
+    {
+      "item": "older partitions of the dim (date=2026-09-28 and earlier through 2026-10-19)",
+      "reason": "stay as they are, uncompacted; the order rewrites only the newest key, which carries the full history, and the listings show they were not touched"
+    },
+    {
+      "item": "deletion of any object version",
+      "reason": "forbidden by the order; the prior versions stay until Andrew confirms any delete"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~NFRA2/deliverables/TO-APPLY-36_REPORT.md",
+  "compiler_tools": [
+    {
+      "tool": "bd49f_dim_compact.py (the order's tool)",
+      "invocation": "python -I data/assets/scripts/silver/bd49f_dim_compact.py --date 2026-10-20 --mode plan, then --mode apply --confirm-key <key>, from a scratch folder",
+      "result": "COMPACT-PLAN current_equal=True runs_equal=True merged=281525; COMPACT-APPLY readback_equal=True wrote=True"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --leg 'L1|verify|...' (kind verify, tf-apply is not a valid kind), close-leg, close",
+      "result": "bd49f-dim-compaction CLOSED, 1 of 1 legs"
+    }
+  ]
+}
