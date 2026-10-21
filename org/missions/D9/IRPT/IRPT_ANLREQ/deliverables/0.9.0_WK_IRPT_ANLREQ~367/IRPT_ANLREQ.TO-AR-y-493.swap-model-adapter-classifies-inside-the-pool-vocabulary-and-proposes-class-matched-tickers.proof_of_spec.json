@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_model.py",
       "kind": "script",
-      "commit_or_etag": "643cdcf6304",
+      "commit_or_etag": "4affc4cff4f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib module with no connection, no secret and no environment read; the classifier is imported lazily from the sibling etf_classification_model. make_swap_model builds the pool vocabulary, classify refuses an out-of-vocabulary answer to None and flags confidence below the threshold, propose makes one bounded call and validates the reply. Committed LOCAL as 643cdcf6304 on wk-IRPT_ANLREQ-367. Nothing was run against a network, AWS or a model.",
+      "deploy_evidence": "Stdlib module with no connection, no secret and no environment read; the classifier is imported lazily from the sibling etf_classification_model. make_swap_model builds the pool vocabulary, classify refuses an out-of-vocabulary answer to None and flags confidence below the threshold, propose makes one bounded call and validates the reply (each element upper-cased, then matched, per the issuer's ruling on IRPT_ANLREQ-D2-W367-S1). Committed LOCAL as 4affc4cff4f on wk-IRPT_ANLREQ-367. Nothing was run against a network, AWS or a model.",
       "artifact_covered_by": [
         "AR493-y-AC1",
         "AR493-y-AC3"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_model.py",
       "kind": "test",
-      "commit_or_etag": "643cdcf6304",
+      "commit_or_etag": "4affc4cff4f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Eleven hermetic tests: a fake send records every payload; the real etf_classification_model is imported through a sys.path insertion computed from __file__. Committed LOCAL as 643cdcf6304 on wk-IRPT_ANLREQ-367.",
+      "deploy_evidence": "Eleven hermetic tests: a fake send records every payload; the real etf_classification_model is imported through a sys.path insertion computed from __file__; the propose tests admit a lower-case ticker as upper-case and drop a too-long string and a string with a space. Committed LOCAL as 4affc4cff4f on wk-IRPT_ANLREQ-367.",
       "artifact_covered_by": [
         "AR493-y-AC3"
       ]
@@ -39,9 +39,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py",
       "kind": "script",
-      "commit_or_etag": "731feef26ed",
+      "commit_or_etag": "287b509448a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib check: runs swap_model.py in-process over eight cases with a fake send and prints one SWAP-MODEL-OK or SWAP-MODEL-BAD line; --selftest applies three in-memory mutants to the module text and prints CONTROL-FIRES only when all three read BAD. No network, no secret, no model call. Committed LOCAL as 731feef26ed.",
+      "deploy_evidence": "Stdlib check: runs swap_model.py in-process over eight cases with a fake send and prints one SWAP-MODEL-OK or SWAP-MODEL-BAD line; --selftest applies three in-memory mutants to the module text and prints CONTROL-FIRES only when all three read BAD. No network, no secret, no model call. Committed LOCAL as 287b509448a (the proposals case follows the issuer's upper-case-first rule).",
       "artifact_covered_by": [
         "AR493-y-AC1",
         "AR493-y-AC2"
@@ -107,7 +107,7 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W367-S1: the cell's propose rule says keep elements that match the ticker regex after upper-casing, and its test sentence says drop lower-case strings; the adapter matches each element as given and drops a lower-case one (OBSERVATION, INERT, UNDER_INVESTIGATION).",
+    "IRPT_ANLREQ-D2-W367-S1: the cell's propose rule (upper-case, then match) and its test sentence (drop lower-case) conflicted; the issuer ruled upper-case first, so a lower-case ticker is admitted as upper-case, and the adapter was amended at 4affc4cff4f (OBSERVATION, INERT, resolved by the issuer).",
     "IRPT_ANLREQ-D2-W367-S2: swap_pass.swap_holdings at this base has no proposals parameter; the AR-y-492 port is not in this tree and this cell does not import swap_pass (OBSERVATION, INERT, UNDER_INVESTIGATION)."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
