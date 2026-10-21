@@ -31,3 +31,20 @@ REPAIR 3 (issuer, 2026-10-21 ~01:15Z; the lander's content-date helper takes the
     (position, prices, security 0; balance 3; account 16; transact 17). Test names unchanged.
 18. Module suite: 164 passed. Criterion R1-FR2-OK passed=11 (rc 0). Ruff py39 clean; 0 non-ASCII bytes.
 19. Commit abbbc4d1d2 (split.py, test_split.py) via safe-commit.sh, rc=0. No new surprise row: the repair premise held.
+
+REPAIR 4 (issuer, 2026-10-21 ~02:30Z; CTO 8936: the firm split is Andrew's deliverable 1)
+20. First act: branch wk-NFRA_FIDUPL-3, TREE-OK, base fdd09568862. Premises re-read: split.py has the REPAIR 1 record
+    lists and the REPAIR 3 two-argument content-date call already (line 170 at the base reads _content_date(data, name)).
+    Surprise row NFRA_FIDUPL-D1-W3-S9 (OBSERVATION, INERT) filed for that stale premise.
+21. split.py: NULLABLE = (prices.txt, security.txt); _validate_config accepts a null column for those two only; split_day
+    writes nothing for a file whose column is null, counts its rows and lists it under not_split (name, rows).
+    The four other names still require an integer column.
+22. tests/test_split.py: test_null_account_column_means_the_file_is_not_split and
+    test_null_account_column_allowed_only_for_prices_and_security added; the eleven earlier tests unchanged.
+23. Commit 4ab5a76420 (split.py, test_split.py) via safe-commit.sh, rc=0.
+24. Surprise rows W3-S9 (premise) and W3-S10 (BLOCKING on the TO status flip: the grant names no path to the TO file)
+    committed 22f4830cf6 via safe-commit.sh, rc=0.
+25. Mutant control: the not-split branch disabled by sed; the two null tests run: 1 failed (the means-not-split test),
+    1 passed. split.py restored from a saved copy; cmp identical; the two null tests pass again (2 passed).
+26. Criterion, main-tree checker by absolute path, cwd the worktree: R1-FR2-OK passed=13 (rc 0).
+    Module suite: 207 passed (rc 0). Ruff py39 clean; 0 non-ASCII bytes in split.py and test_split.py.

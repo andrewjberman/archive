@@ -1,0 +1,109 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-6",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "0b37a83d8df",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-6.seed-and-schedule-on.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-6.seed-and-schedule-on.md",
+  "group": "OTHER",
+  "vintage_commit": "b7ce6ec4a42"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/variables.tf",
+   "kind": "terraform",
+   "commit_or_etag": "8882cc8e498",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "schedule_enabled default true applied by safe-apply of the whole root: Plan 0 add 3 change 0 destroy, Apply complete 0 added 3 changed 0 destroyed, post-apply plan No changes (rc=0); live describe-rule shows the three rules ENABLED.",
+   "artifact_covered_by": [
+    "FT-s-6-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/NFRA_FIDUPL.TO-FT-s-6.schedule_version.md",
+   "kind": "doc",
+   "commit_or_etag": "50221eb6e19",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Secret fidelity/alongside/perg-list current version 8473b6cf-e3c0-4b5b-8dcc-94480a41b57b read by describe-secret only; the seed counts line recorded verbatim.",
+   "artifact_covered_by": [
+    "FT-s-6-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T0211Z_nfra-fidupl-schedule-on-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "8882cc8e498",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-schedule-on-20261021, 4 legs, CLOSED.",
+   "artifact_covered_by": [
+    "FT-s-6-AC1",
+    "FT-s-6-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-6-AC1",
+   "criterion_verbatim": "after the seed: the secret has a current version.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6v",
+   "output_evidence": "R1-FT6V-OK the per-G list secret has a current version 8473b6cf",
+   "denominator": "1 of 1 per-G list secret read (describe-secret, metadata only, one version AWSCURRENT)",
+   "status": "PASS",
+   "expect": "R1-FT6V-OK the per-G list secret has a current version"
+  },
+  {
+   "criterion_id": "FT-s-6-AC2",
+   "criterion_verbatim": "after the apply: the three schedule rules read ENABLED.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6r",
+   "output_evidence": "R1-FT6R-OK the three schedule rules are ENABLED",
+   "denominator": "3 of 3 fidelity-alongside-fetch-leg-N-daily rules read live (list_rules NamePrefix fidelity)",
+   "status": "PASS",
+   "expect": "R1-FT6R-OK the three schedule rules are ENABLED"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read a secret's version stages and three rule states; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the pre-apply plan was saved and applied as that file; the post-apply plan was run on the same tree; ft6r read the live rules",
+   "observed": "saved plan 0 add 3 change 0 destroy applied as is; post-apply plan No changes; rules ENABLED",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "starting the automation by hand; any second sign-in beyond the one seed run; reading the per-G secret's value; the firm split and its box config keys (mode, firm_labels, account_columns)",
+   "reason": "The order forbids hand starts and value reads; the first scheduled fire (09:45Z) is the proof; the split is the issuer's next addendum per the CTO countersign."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261021T0211Z_nfra-fidupl-schedule-on-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+   "result": "Apply complete! Resources: 0 added, 3 changed, 0 destroyed."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-schedule-on-20261021 (4 legs, 24h window); close-leg L1..L4; close",
+   "result": "OK: CLOSED, all 4 legs proven, sentinel removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6v | ft6r | fu6g",
+   "result": "R1-FT6V-OK 8473b6cf; R1-FT6R-OK; R1-FU6G-OK"
+  }
+ ]
+}
