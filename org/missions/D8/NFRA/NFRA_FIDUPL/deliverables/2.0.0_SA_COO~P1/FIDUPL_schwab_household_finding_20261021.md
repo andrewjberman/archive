@@ -173,7 +173,11 @@ Reconciliation:
 
 ## Not measured
 
-- The vendor FAM/SLM layout spec. Column semantics are PRESUMED from bytes.
+- The vendor FAM/SLM layout spec. Column semantics are PRESUMED from bytes. A DOC-band search for a FAM/SLM definition (67 DOC hits
+  over 167,815 files scanned) found none.
+- The Schwab "sub-master" account pattern (PCRA sleeve / SWTC portfolio-level accounts, many BD accounts to one Schwab sub-master).
+  A 2026-04-22 CTO ruling deferred it as a many-to-one conflict (`org/tier1_exec/1.0.0_SA_CTO/logs/2026-04-22/session_startup_reconciliation.md:40`).
+  The attribution config's `precedence` column would have to cover it; it is not measured here.
 - The meaning of the new SLM col_1 group `5fa30971`, and why SLM and FAM diverge on col_1 since July.
 - Why the 3 cottonwood `fact_acc` files hold the same 32 accounts and their SLM col_1 is 08719286 in every file. This is INFERRED to be a
   surprise; the COO should file a row in the project surprise channel (this subagent may write only this file).
