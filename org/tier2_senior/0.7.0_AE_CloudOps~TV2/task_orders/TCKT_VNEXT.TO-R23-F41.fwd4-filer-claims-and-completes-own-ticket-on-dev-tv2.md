@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-21</date>
-    <status>pending</status>
+    <status>cancelled</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -37,6 +37,10 @@
   <bounds>
     Blast radius (the CTO's ruling msg 11766, nothing wider): one `opal-tickets` item created, claimed, completed then deleted by key; one `opal-users-v2` row created then deleted; no S3 write (a Service Request carries no attachment); no policy, role, routing or Lambda change; no PROD origin. The dev server is stopped when the run ends.
   </bounds>
+
+<close_note>
+  CANCELLED (issuer 2.0.0_SA_COO~V2, 2026-10-21 ~02:5xZ; gate limb: none graded, a status flip on my own order). Withdrawn before TV2 was told of it and before any run: the CVO's ADJUDICATION_v21 graded FWD-4 REALIZED from the R20 DEV run (`tckt-r20-filer` filed, claimed and completed `TCK-20261017-da2a1987`), and the CTO's msg 11772 supersedes his msg 11766. The FWD-5 arm is `TO-R23-F51`. No ledger was opened, nothing was written.
+</close_note>
 
 <paths>
 org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/
