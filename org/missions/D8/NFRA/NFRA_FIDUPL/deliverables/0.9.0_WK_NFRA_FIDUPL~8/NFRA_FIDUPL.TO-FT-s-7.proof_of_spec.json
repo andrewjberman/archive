@@ -17,9 +17,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill_adapter.py",
       "kind": "script",
-      "commit_or_etag": "2d7e342d657",
+      "commit_or_etag": "39d0d5e6419",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at d7123e46c24 (REPAIR 1) and 2d7e342d657 (REPAIR 2). Export client over the planner (backfill.py vocabulary only): one fetch per (G, day); a non-trading day is skipped with no request (is_skipped); wait returns COMPLETED; the third consecutive empty trading day raises RetentionLimit (empty listing x3); download returns the day's listing.json bytes; folder_for gives the lander the day folder; HTTP 401/403/404 -> EntitlementRefused. Not shipped to the box by this order.",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at 39d0d5e6419 (REPAIR 6): a day with some of the six served is COMPLETED with listing.json rewritten (failure null, partial_missing, missing_reasons); a day with none served is state unserved (EMPTY, not counted toward the retention stop); retry_missing makes one retry per missing file. Not shipped to the box by this order.",
       "artifact_covered_by": [
         "FT-s-7-AC1"
       ]
@@ -27,9 +27,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill_main.py",
       "kind": "script",
-      "commit_or_etag": "b84734e328c",
+      "commit_or_etag": "39d0d5e6419",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at b84734e328c (REPAIR 5): the completion record is rewritten after every trading day under the same key with partial true (days, per_file_type so far, stop none 'walk in progress'), a failed partial write prints WARN and the walk goes on; a SIGTERM handler raises WallBudget with the stop terminated 'SIGTERM received after <last DAY or none>', the close logs out, the final record is written, rc 0, the previous handler is restored. Earlier: 43bd5427a17 (REPAIR 4), 06cc1128b87, d7123e46c24, 2d7e342d657. Not shipped to the box by this order.",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at 39d0d5e6419 (REPAIR 6): the download of the standing file runs in the browser with an idle bound of 120 s (BROWSER_DOWNLOAD_JS, a stall is 599 with its reason stalled_<secs>); one FILE line per download; the retry of the missing files at the end while more than 150 s remain; days entries name files and missing; per_file_type earliest_served and served_days; the constant transact_history_source. Earlier: 43bd5427a17, b84734e328c, 06cc1128b87, d7123e46c24, 2d7e342d657. Not shipped to the box by this order.",
       "artifact_covered_by": [
         "FT-s-7-AC1"
       ]
@@ -37,9 +37,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_backfill_adapter.py",
       "kind": "test",
-      "commit_or_etag": "b84734e328c",
+      "commit_or_etag": "39d0d5e6419",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed LOCAL at b84734e328c (REPAIR 5). Twenty-one tests, fakes only, synthetic data; includes the two REPAIR 5 tests (the record rewritten after every day, SIGTERM ends the walk with the logout) and the REPAIR 3 and REPAIR 4 tests.",
+      "deploy_evidence": "Committed LOCAL at 39d0d5e6419 (REPAIR 6). Twenty-six tests, fakes only, synthetic data; includes the five REPAIR 6 tests (browser download with the idle bound, a stalled file with the other files landed, one retry inside the budget, the record's earliest served and transact source, an unserved day that does not stop the walk) and the REPAIR 3, 4 and 5 tests. Two earlier tests moved to the new contract under new names.",
       "artifact_covered_by": [
         "FT-s-7-AC1"
       ]
@@ -71,8 +71,8 @@
       "criterion_verbatim": "FT-s-7-AC1 -- the nine named adapter tests exist and pass.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7",
-      "output_evidence": "R1-FT7-OK passed=21 (run from the worktree with the relative invocation; the main-tree checker by absolute path, C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7, cwd C:/tmp/fidupl-w8, gave the same line, rc=0)",
-      "denominator": "21 of 21 tests passing (pytest: 21 passed in the ft7 file). The seventeen named tests of the ft7 list are present as def functions: the twelve of REPAIR 3, the three of REPAIR 4 (test_every_progress_line_is_flushed, test_wall_budget_stops_the_walk_and_writes_the_record, test_request_lines_name_method_path_status_and_secs) and the two of REPAIR 5 (test_the_record_is_rewritten_after_every_day_and_marked_partial_until_the_end, test_sigterm_ends_the_walk_with_a_stop_and_the_logout)",
+      "output_evidence": "R1-FT7-OK passed=26 (run from the worktree with the relative invocation; the main-tree checker by absolute path, C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7, cwd C:/tmp/fidupl-w8, gave the same line, rc=0)",
+      "denominator": "26 of 26 tests passing (pytest: 26 passed in the ft7 file). The twenty-two named tests of the ft7 list are present as def functions: the seventeen of REPAIR 5 and the five of REPAIR 6 (test_download_reads_in_the_browser_with_an_idle_stall_bound, test_a_stalled_file_is_missing_with_its_reason_and_the_day_lands_its_other_files, test_missing_files_are_retried_once_at_the_end_inside_the_budget, test_record_names_earliest_served_per_file_type_and_the_transact_source, test_a_day_with_no_served_file_is_a_named_result_and_the_walk_goes_on)",
       "status": "PASS",
       "expect": "R1-FT7-OK passed=\\d+"
     },
@@ -95,8 +95,8 @@
       "status": "N/A-SPEC-NAMES-NONE"
     },
     "determinism": {
-      "method": "the checker invocations and the module suite run before the code commit (b84734e328c) and again after it, on the same worktree",
-      "observed": "R1-FT7-OK passed=21 and R1-FT4-OK passed=8 before and after the code commit; the module suite gave 234 passed both times",
+      "method": "the checker invocations and the module suite run before the code commit (39d0d5e6419) and again after it, on the same worktree; the browser script was also run under node against a mocked fetch (three cases, and a 7 MB multi-part case), outside the suite",
+      "observed": "R1-FT7-OK passed=26 and R1-FT4-OK passed=8 before and after the code commit; the module suite gave 239 passed both times",
       "status": "STABLE"
     }
   },
@@ -144,7 +144,7 @@
     {
       "tool": "fidupl_round_checks.py ft7 (main-tree checker, absolute path)",
       "invocation": "timeout 120 python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7",
-      "result": "R1-FT7-OK passed=21"
+      "result": "R1-FT7-OK passed=26"
     },
     {
       "tool": "fidupl_round_checks.py ft4 (main-tree checker, absolute path)",
@@ -164,7 +164,7 @@
     {
       "tool": "module test suite",
       "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
-      "result": "234 passed"
+      "result": "239 passed"
     }
   ]
 }
