@@ -1,0 +1,19 @@
+SIM after s3:PutObject on put_audit: allowed matched=irpt-audit-write-policy
+SIM after s3:GetObject on get_audit: implicitDeny matched=-
+SIM after s3:GetObjectVersion on getver_audit: implicitDeny matched=-
+SIM after s3:DeleteObject on del_audit: implicitDeny matched=-
+SIM after s3:PutObject on put_other: implicitDeny matched=-
+SIM after s3:PutObject on put_control: allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner-resident-policy
+SIM after kms:GenerateDataKey for the audit key's context (ViaService s3): allowed matched=role_irpt-ycharts-runner-role_irpt-export-render-host-evidence,irpt-audit-write-policy
+SIM after kms:GenerateDataKey control (context under ycharts_opal_reports, its own call): allowed matched=role_irpt-ycharts-runner-role_irpt-export-render-host-evidence,role_irpt-ycharts-runner-role_irpt-ycharts-runner
+INLINE after irpt-export-render-host-evidence sha256=693ccc200193f137b8f3afe5f42189b5d9a7a48a9409dfbc5d54d1420c8d69f4 (R0 693ccc200193f137b8f3afe5f42189b5d9a7a48a9409dfbc5d54d1420c8d69f4) EQUAL
+INLINE after irpt-export-render-host-parameter-fence-policy sha256=387ffb243d05165d0e769b359e22d466ba83b7f70c0a216fffeb8115978c8c07 (R0 387ffb243d05165d0e769b359e22d466ba83b7f70c0a216fffeb8115978c8c07) EQUAL
+INLINE after irpt-export-render-host-token-policy sha256=7622ce6881eb906ecb2514e4a45b4195864c8b1f23cc0d414a12cde31aa89416 (R0 7622ce6881eb906ecb2514e4a45b4195864c8b1f23cc0d414a12cde31aa89416) EQUAL
+INLINE after irpt-ycharts-runner sha256=ed04ec88adc70d9428971afd29bf30359da748391dc7d0c5b6f2728b51f111e2 (R0 ed04ec88adc70d9428971afd29bf30359da748391dc7d0c5b6f2728b51f111e2) EQUAL
+INLINE after irpt-ycharts-runner-resident-policy sha256=c970dc3594261953505415589727a4bfc7be3b004f9c148c5bfb7e1af8401b35 (R0 c970dc3594261953505415589727a4bfc7be3b004f9c148c5bfb7e1af8401b35) EQUAL
+ATTACHED after ['AmazonSSMManagedInstanceCore', 'irpt-audit-write-policy'] (R0 ['AmazonSSMManagedInstanceCore']) -> R0 plus the new policy
+POLICY default version v1: sids=['WriteTheAnalysisAudit', 'AuditEncryptionViaS3ForAuditPrefixesOnly'] write_actions=['s3:PutObject'] kms_actions=['kms:Decrypt', 'kms:GenerateDataKey'] write_resources=['arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/analysis_audit/*', 'arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/analysis_audit/*', 'arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/analysis_audit/*'] -> exactly the two statements
+ATTACHMENT entities: roles=['irpt-ycharts-runner-role'] users=0 groups=0 -> the runner role only
+G1 inline_equal=True attached_ok=True policy_exact=True runner_only=True -> inline policies unchanged
+G2 put=allowed(irpt-audit-write-policy) get=implicitDeny getversion=implicitDeny delete=implicitDeny other_family_put=implicitDeny (R0 implicitDeny) kms_audit=allowed -> put allowed get delete implicitDeny on the audit key
+VERDICT g1=True g2=True
