@@ -18,18 +18,22 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/split.py",
       "kind": "script",
-      "commit_or_etag": "348abec156",
+      "commit_or_etag": "abbbc4d1d2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); not deployed to the box or to S3 (the live grant is FU-s-6's and the daily wiring is FR-s-5's)",
-      "artifact_covered_by": ["FR2-AC1"]
+      "artifact_covered_by": [
+        "FR2-AC1"
+      ]
     },
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_split.py",
       "kind": "test",
-      "commit_or_etag": "348abec156",
+      "commit_or_etag": "abbbc4d1d2",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); a test file, not deployed",
-      "artifact_covered_by": ["FR2-AC1"]
+      "artifact_covered_by": [
+        "FR2-AC1"
+      ]
     }
   ],
   "acceptance": [
@@ -37,24 +41,24 @@
       "criterion_id": "FR2-AC1",
       "criterion_verbatim": "the ten named split tests (the nine and test_record_lists_unplaced_and_conflict_accounts) exist and pass.",
       "method": "test_suite",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr2",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr2",
       "output_evidence": "R1-FR2-OK passed=11",
-      "denominator": "10 of 10 named tests present in test_split.py; 11 passed (the ten named plus test_cli_prints_counts_only)",
+      "denominator": "10 of 10 named tests present in tests/test_split.py; 11 passed (the ten named plus test_cli_prints_counts_only)",
       "status": "PASS",
       "expect": "R1-FR2-OK passed=\\d+"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Two mutants, one at a time, against the repaired record: (1) the record's unplaced list reverted to ordinal ids; (2) the CLI prints the first conflict account value.",
-      "expected": "test_record_lists_unplaced_and_conflict_accounts fails under (1) and under (2)",
-      "observed": "(1) 1 failed: AssertionError, the unplaced list holds unplaced-NNN ids instead of the account strings; (2) 1 failed: AssertionError, the account value appears in the printed output; both files restored byte-identical (cmp)",
+      "description": "Re-run this round: the record's unplaced list reverted to ordinal ids (sed on split.py, then restored byte-identical by cmp); test_record_lists_unplaced_and_conflict_accounts run with -k.",
+      "expected": "test_record_lists_unplaced_and_conflict_accounts fails under the mutant",
+      "observed": "mutant: 1 failed, 163 deselected; restored: cmp identical; unmutated: 1 passed, 163 deselected",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "two CLI dry-run calls of split.py on one synthetic handoff with a synthetic attribution; the two outputs compared with cmp",
-      "observed": "identical; rc 0 on both runs; 12 DRYRUN dest= lines each; no synthetic account, label or G value in the output",
-      "status": "STABLE"
+      "status": "N/A-WITH-REASON",
+      "method": "N/A-WITH-REASON: REPAIR 3 changes the content-date argument and the fixtures only; the CLI output was not re-measured this round.",
+      "observed": "not re-measured in REPAIR 3; the REPAIR 2 round recorded identical dry-run output (session log, step 12)."
     }
   },
   "declared_exclusions": [
@@ -81,8 +85,8 @@
   "compiler_tools": [
     {
       "tool": "pytest",
-      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_split.py",
-      "result": "11 passed"
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "164 passed in 1.68s"
     },
     {
       "tool": "ruff",
@@ -92,7 +96,7 @@
     {
       "tool": "safe-commit",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~3 <0.9.0_WK_NFRA_FIDUPL~3@opal.agent>\" -F <msgfile> -- <the two code paths>",
-      "result": "rc=0; committed 348abec156 on wk-NFRA_FIDUPL-3"
+      "result": "rc=0; committed abbbc4d1d2 on wk-NFRA_FIDUPL-3"
     }
   ]
 }
