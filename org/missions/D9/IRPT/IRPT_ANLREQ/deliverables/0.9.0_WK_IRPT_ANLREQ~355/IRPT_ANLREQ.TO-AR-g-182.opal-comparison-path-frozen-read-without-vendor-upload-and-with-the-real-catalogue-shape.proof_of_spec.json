@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-182",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-182.opal-comparison-path-frozen-read-without-vendor-upload-and-with-the-real-catalogue-shape.md",
+    "group": "OTHER",
+    "vintage_commit": "e09dff18956"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "e09dff18956",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-182.opal-comparison-path-frozen-read-without-vendor-upload-and-with-the-real-catalogue-shape.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~355",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/frozen_worker.py",
+      "kind": "script",
+      "commit_or_etag": "7fa2577b22d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 7fa2577b22d on wk-IRPT_ANLREQ-355 only; nothing deployed. prepare() gains upload=True; upload=False skips prepare_normalized_upload (upload None) and adds comparison_keys in browser order. The default path is unchanged.",
+      "artifact_covered_by": ["AR182-g-AC1", "AR182-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "7fa2577b22d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 7fa2577b22d on wk-IRPT_ANLREQ-355 only; nothing deployed. _opal_comparables calls prepare(upload=False) and returns key (catalogue key), label (entry name), ticker (entry key for an ETF, None for a model).",
+      "artifact_covered_by": ["AR182-g-AC2", "AR182-g-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_frozen_worker.py",
+      "kind": "test",
+      "commit_or_etag": "7fa2577b22d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 7fa2577b22d. One new test (upload=False returns upload None and the browser comparison_keys; the default call still returns the upload). Fails at base e09dff18956 (red control: 4 failed, 23 passed across the two owned files with the base source in place)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_compare_ports.py",
+      "kind": "test",
+      "commit_or_etag": "7fa2577b22d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 7fa2577b22d. FakeFrozen at the retained catalogue's real shape (comparison_keys plus entries with no key, label or ticker for models); asserts prepare was called with upload=False; adds an ETF symbol case (IWM -> ticker IWM). Fails at base (3 of its tests)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cf00a5d993e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_ANLREQ-D2-W355-S1 appended (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~G2): the sparse worktree omits data/firm_registry.json. surprise-row-gate --check rc=0."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR182-g-AC1",
+      "criterion_verbatim": "the REAL FrozenCompositionWorker.prepare over stubs that serve run 7I's retained composition: the default call still refuses a holding with no provider receipt, upload=False returns upload None, variant multicomp, comparison_keys in browser order and the two catalogue entries. At base it FAILs (no upload option).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_prepare_checks.py frozen",
+      "output_evidence": "AR-PREP-frozen-OK\nrc=0, measured at HEAD cf00a5d993e in C:/dev/wk-irpt-anlreq-355 under timeout 120 (IRPT_FIRM_REGISTRY set to the HEAD copy of data/firm_registry.json, see IRPT_ANLREQ-D2-W355-S1). Base e09dff18956 measured: AR-PREP-frozen-FAIL prepare takes no upload=False option yet: FrozenCompositionWorker.prepare() got an unexpected keyword argument 'upload'.",
+      "denominator": "1 of 1 arm OK; the arm's three sub-checks (default refusal, upload=False shape, the two catalogue entries) all passed at HEAD. Base: the first sub-check failed.",
+      "expect": "^AR-PREP-frozen-OK$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR182-g-AC2",
+      "criterion_verbatim": "the REAL ResidentGenerationWorker._opal_comparables with a recording frozen stand-in: it calls prepare with upload=False and returns one {key, label, ticker} per chosen key, label the entry's name, ticker None for a model and the symbol for an ETF. At base it FAILs.",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_prepare_checks.py worker",
+      "output_evidence": "AR-PREP-worker-OK\nrc=0, measured at HEAD cf00a5d993e in C:/dev/wk-irpt-anlreq-355 under timeout 120. Base e09dff18956 measured: AR-PREP-worker-FAIL models: raised RuntimeError: the vendor upload would be prepared; model+etf: raised RuntimeError: the vendor upload would be prepared.",
+      "denominator": "2 of 2 cases OK (models-only; model plus ETF), each returning the expected {key, label, ticker} list with prepare called with upload=False. Base: 0 of 2.",
+      "expect": "^AR-PREP-worker-OK$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AR182-g-AC3",
+      "criterion_verbatim": "the two owned test files pass (25 at the base) and at least 27 ran. At base it FAILs (25 ran).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_prepare_checks.py tests",
+      "output_evidence": "AR-PREP-tests-OK passed=27\nrc=0, measured at HEAD cf00a5d993e in C:/dev/wk-irpt-anlreq-355 under timeout 120 (plain python -m pytest, IRPT_FIRM_REGISTRY set to the HEAD copy of data/firm_registry.json). Base e09dff18956 with the same environment: 25 passed (the baseline).",
+      "denominator": "27 of 27 collected tests passed in the two owned files (ycharts/generate/tests/test_frozen_worker.py and reports/tests/test_compare_ports.py); the checker requires at least 27. Base: 25 of 25 passed.",
+      "expect": "^AR-PREP-tests-OK passed=[0-9]+$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The order's difference control is the upload=False run, which skips the vendor upload; the red control (base source in place, owned tests run, then source restored to HEAD) is recorded in the artifact rows.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was made; each invocation was run once at the base and once at the committed tree (the tests arm twice at HEAD).",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "git sparse-checkout changes to the worktree (so data/firm_registry.json materializes)",
+      "reason": "Not run, per the order. The registry bytes were written with git show HEAD:data/firm_registry.json into the ignored .scratch folder and exported as IRPT_FIRM_REGISTRY for each test and checker run."
+    },
+    {
+      "item": "Deployment of the resident (Lambda) and any live run",
+      "reason": "Out of scope for this cell. Commits are local on wk-IRPT_ANLREQ-355; nothing pushed or deployed."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W355-S1: the sparse worktree omits data/firm_registry.json, so 21 of 25 baseline owned tests ERROR with IdRefused unless IRPT_FIRM_REGISTRY names a copy of the registry; worked around with the HEAD copy in .scratch, no tree change. OBSERVATION, ARMED (disarm owner 2.0.0_SA_COO~G2)."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-355; TREE-OK; HEAD e09dff18956. Baseline checker arms at e09dff18956: frozen FAIL, worker FAIL, tests FAIL (4 passed, 21 errors: IdRefused, registry absent from the sparse checkout); with IRPT_FIRM_REGISTRY set, the owned files: 25 passed. Edits: frozen_worker.py (prepare upload kwarg, comparison_keys); resident_worker.py (_opal_comparables); test_frozen_worker.py (one new test); test_compare_ports.py (FakeFrozen at the real shape, upload flag, ETF case). Commits: 7fa2577b22d (code and tests), cf00a5d993e (surprise row). Red control: base source written from e09dff18956 into the two source files, owned tests run (4 failed, 23 passed), source restored to HEAD (git diff empty). Final acceptance at cf00a5d993e: frozen rc=0, worker rc=0, tests rc=0 passed=27. ruff py39 clean; ASCII only.",
+  "compiler_tools": [
+    {
+      "tool": "ar_prepare_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_prepare_checks.py frozen | worker | tests",
+      "result": "AR-PREP-frozen-OK rc=0; AR-PREP-worker-OK rc=0; AR-PREP-tests-OK passed=27 rc=0"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 on the four owned .py files",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 new row(s), all new rows carry their step-7/step-10 fields (rc=0)"
+    }
+  ]
+}
