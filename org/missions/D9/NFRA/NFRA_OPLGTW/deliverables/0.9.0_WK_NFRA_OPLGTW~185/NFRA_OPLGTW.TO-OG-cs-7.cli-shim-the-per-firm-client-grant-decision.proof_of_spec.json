@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cs-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-7.cli-shim-the-per-firm-client-grant-decision.md",
+    "group": "OTHER",
+    "vintage_commit": "bcbef740d72"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP_CLISHIM.round48.md",
+    "vintage_commit": "bcbef740d72",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-7.cli-shim-the-per-firm-client-grant-decision.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~185",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/client_grant.py",
+      "kind": "diff",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "commit_or_etag": "9b822ff34a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new module, standard library and app.data_entitlement only; CLIENT_NAMESPACE, client_entry, client_pair_decision; on branch wk-NFRA_OPLGTW-185 (LOCAL); no release, no deploy, no call site"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cs7_client_grant.py",
+      "kind": "test_suite",
+      "artifact_covered_by": ["AC2"],
+      "commit_or_etag": "9b822ff34a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 offline test functions; 15 passed, 0 failed under python3 -I -m pytest; on branch wk-NFRA_OPLGTW-185 (LOCAL)"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "app/client_grant.py passes the issuer's ten-arm probe: the namespace and the entry builder; every client entry accepted by the person-access entry parser; a pair entry admits that pair only; a vendor entry admits every firm of that vendor; the namespace alone admits every pair; deny wins; the master admin admitted with no record; no record, stopped, revoked and non-Opal refused; a malformed vendor or firm refused even for the master admin; served-bucket folder entries cover no client pair.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs7.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "the namespace and the entry builder (opal-clients/orion/49financial | opal-clients/orion | opal-clients): ok\nevery client entry is accepted by the person-access entry parser: ok\na pair entry admits that (vendor, firm) only: ok\na vendor entry admits every firm of that vendor and no other vendor: ok\nthe namespace alone admits every pair: ok\ndeny wins: a denied pair is refused under a vendor grant, a sibling firm is not: ok\nthe master admin is admitted with no record and refused only by a live deny: ok\nno record, a stopped record, a revoked record and a non-Opal caller are refused: ok\na malformed vendor or firm is refused even for the master admin (8 of 8): ok\nserved-bucket folder entries cover no client pair, and a client entry covers no folder read: ok\nRESULT: PASS\nexit=0",
+      "denominator": "10 of 10 probe arms ok (8 of 8 malformed vendor-or-firm cases refused)",
+      "status": "PASS",
+      "expect": "(?s)the namespace and the entry builder .*: ok.*accepted by the person-access entry parser: ok.*a pair entry admits that \\(vendor, firm\\) only: ok.*a vendor entry admits every firm of that vendor .*: ok.*the namespace alone admits every pair: ok.*deny wins: .*: ok.*the master admin is admitted with no record .*: ok.*no record, a stopped record, a revoked record and a non-Opal caller are refused: ok.*a malformed vendor or firm is refused even for the master admin \\(8 of 8\\): ok.*served-bucket folder entries cover no client pair .*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Footprint under the gateway folder is exactly app/client_grant.py and tests/test_cs7_client_grant.py; that test has at least 8 test functions and passes; the two person-access neighbours (tests/test_cs1_folder_grant.py, tests/test_og_cp1.py) pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs_foot.sh org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-7.cli-shim-the-per-firm-client-grant-decision.md app/client_grant.py,tests/test_cs7_client_grant.py tests/test_cs7_client_grant.py 8 tests/test_cs1_folder_grant.py tests/test_og_cp1.py; echo \"exit=$?\"",
+      "output_evidence": "files that differ from HEAD under the gateway folder: ['app/client_grant.py', 'tests/test_cs7_client_grant.py'] (want exactly ['app/client_grant.py', 'tests/test_cs7_client_grant.py']): ok\ntests/test_cs7_client_grant.py: 15 test functions (want 8 or more): ok\nnew file tests/test_cs7_client_grant.py: 15 passed, 0 failed\nneighbours (2): 33 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "footprint 2 of 2 files exact; new file 15 test functions, 15 of 15 passed; neighbours 33 passed, 0 failed across 2 files",
+      "status": "PASS",
+      "expect": "(?s)files that differ from HEAD under the gateway folder: .*: ok.*tests/test_cs7_client_grant\\.py: (?:[89]|[1-9]\\d+) test functions.*: ok.*new file tests/test_cs7_client_grant\\.py: (?:[89]|[1-9]\\d+) passed, 0 failed.*neighbours \\(2\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "the order names no mutant control (section 4 names AC1 and AC2 only); the discriminating reads are the AC1 probe's deny-wins and malformed-key arms and the AC2 footprint exactness",
+      "expected": "not applicable: no mutant named in the order",
+      "observed": "no planted mutant was run in this cell (stated, not measured)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A-WITH-REASON: each criterion check ran once on the committed tree; no second run was made to compare outputs",
+      "observed": "AC1 rc 0; AC2 rc 0; the new test file 15 of 15 passed under pytest",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "mounting client_pair_decision on the client_* tools",
+      "reason": "the order is a pure function with no call site; mounting it narrows a profiled person who holds a client tool today and is a later order with its own CTO ruling"
+    },
+    {
+      "item": "gateway release and deploy",
+      "reason": "DECLARED-NOT-APPLICABLE in the order preflight; no AWS call, no release"
+    },
+    {
+      "item": "task order <status> flip",
+      "reason": "the order's section 6 states the flip is the issuer's; this worker reports only"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~185/NFRA_OPLGTW.TO-OG-cs-7.session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "cs7.AC1.sh (clishim/checks)",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs7.AC1.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (10 of 10 arms ok)"
+    },
+    {
+      "tool": "cs_foot.sh (clishim/checks) with r47 _gwtests.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs_foot.sh <order> app/client_grant.py,tests/test_cs7_client_grant.py tests/test_cs7_client_grant.py 8 tests/test_cs1_folder_grant.py tests/test_og_cp1.py; echo \"exit=$?\"",
+      "result": "RESULT: PASS exit=0 (footprint exact 2 of 2; new file 15 of 15; neighbours 33 passed)"
+    }
+  ]
+}
