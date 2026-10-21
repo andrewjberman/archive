@@ -253,3 +253,24 @@ C. Post-commit criteria, the round checker by absolute path from the worktree (c
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=41 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made in REPAIR 14.
+
+REPAIR 15 (issuer, 2026-10-21 ~00:10Z; CTO 8875) -- the Playwright launch forged a Windows identity on Linux; the OS-launched Chrome passed.
+A. Code (commit 84c13e9a0de, signin.py and two test files): _launch no longer passes a user agent, no longer adds the init
+   script (window.chrome, languages, plugins, webdriver), and no longer probes the installed version. The forgery constants and
+   helpers are removed (UA_TEMPLATE, HIDE_WEBDRIVER, FINGERPRINT_INIT, INIT_SCRIPT, user_agent_for, _installed_version). Kept:
+   the launch arguments (--disable-blink-features=AutomationControlled, --no-sandbox, --disable-setuid-sandbox,
+   --disable-extensions), channel chrome, headless=False, viewport, locale, timezone, the persistent profile, the Xvfb handling,
+   and every human-input, _abck and logout behavior of REPAIRS 12 to 14. The footer still reports the page's own user agent
+   and navigator.webdriver; it forges nothing.
+B. Tests: test_fingerprint_sets_window_chrome_and_languages is replaced by test_launch_adds_no_init_script;
+   test_user_agent_matches_installed_chromium_version is replaced by test_launch_passes_no_user_agent_override. The Xvfb launch
+   test no longer asserts a version probe. tests/test_signin.py asserts no user_agent and no init script. 61 passed across the
+   sign-in files; the trace file has 41 tests, 41 passed twice. Mutant (a forged user agent passed to the launch, scratch copy):
+   1 failed, 40 passed. ruff py39 All checks passed; non-ASCII 0.
+C. Post-commit criteria, the round checker by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=41 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 15.
