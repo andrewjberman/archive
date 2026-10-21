@@ -17,7 +17,7 @@
 | `OG-mp-1` | mount `admin_people_access.routes` in `app/admin_api.py` (the CTO's ferry 17:30Z, NFRA_MCPORTAL v0.10) | complete (worker `~176`, drained `a4197b93aed`; my `mp1.AC1`, `AC2`, `AC3` PASS on the merged tree; no rows) |
 | `OG-sk-1`, `OG-sk-2`, `OG-sk-3` | the Schwab 0840 move: the gateway census, the catalog DUAL READ (new first, old second, file-name fence) and the reader IAM text | complete (`OG-sk-1` `9bcbf580a33`, `OG-sk-2` `bed56db150e`, `OG-sk-3` `a4c6ecfd30c`; my checks PASS on the merged tree; rows Z-S439, Z-S440, Z-S441) |
 | `OG-rl-19` | release R3c: the two reader-IAM policies (targeted `safe-apply`) and four code files, gated by the laptop's R3a (bucket exemption) and a gate read as the catalog role | complete (release `2923d1ee99` live, ledger CLOSED 07:55Z; `rl19.AC1` and `AC2` PASS, AC2 after the monitor-line amendment; proof VALID; landing drained `76d895d4ede`; READY sent to COO~SB 08:03Z; row Z-S443: service memory 881 MB, cause not established; CTO read 08:06Z 869 MB flat; owed: one more read at 12:00Z) |
-| `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount plus MCPINDEX candidate e, the served catalog: eleven files and one manifest key) | OPEN: Phase A GO sent 08:26Z; Phase B not before 2026-10-22 06:00Z |
+| `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount plus MCPINDEX candidate e, the served catalog: twelve files and one manifest key) | OPEN: Phase A GO sent 08:26Z; Phase B not before 2026-10-22 06:00Z |
 
 ## 2. What the round delivered against the endpoint -- OPEN
 
