@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FV-s-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d517"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "59f062999a7",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FV-s-2.hist-walk.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/hist_walk.py",
+      "kind": "script",
+      "commit_or_etag": "01a54c5e9b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-6 (LOCAL) at 01a54c5e9b. The box command: main(argv, deps) walks trading days newest first; one Custom POST and one Standard A POST per day that needs them; the status list read before each POST and the NEW rows matched by fileName; stub classification; per-day land (position and prices through land.land with a listing; psn through land.land_psn); state and partial record per day; named stops (auth, refused, empty3, day_cap, budget, profile_unresolved, all_types_stopped, terminated, error).",
+      "artifact_covered_by": [
+        "FV-s-2-AC1",
+        "FV-s-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_hist_walk.py",
+      "kind": "test",
+      "commit_or_etag": "01a54c5e9b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at 01a54c5e9b. Fakes only (a fake session, fake deps, a fake clock with injected sleep and monotonic). Thirteen named tests pass.",
+      "artifact_covered_by": [
+        "FV-s-2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_hist_walk_seam.py",
+      "kind": "test",
+      "commit_or_etag": "01a54c5e9b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed at 01a54c5e9b. The one seam test runs hist_walk.main with the REAL land.land and land.land_psn against a fake S3 (FakeS3 copied from test_land.py) and a fake session; the puts are checked by content date.",
+      "artifact_covered_by": [
+        "FV-s-2-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8fce73493a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_FIDUPL-D1-W6-S12 and S13 appended at 8fce73493a; no existing row edited. The surprise-row gate passed (2 new rows of 105)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FV-s-2-AC1",
+      "criterion_verbatim": "the thirteen named walk tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2",
+      "output_evidence": "R1-FV2-OK passed=13",
+      "denominator": "13 passed in infra/aws/ec2/canonical-fidelity/tests/test_hist_walk.py; 13 of 13 named tests present and passing (test_one_custom_and_one_standard_request_per_trading_day_newest_first, test_request_bodies_carry_the_measured_keys, test_files_are_found_by_name_among_new_rows_of_the_request_day_and_downloaded, test_a_does_not_exist_stub_is_empty_with_its_text, test_three_consecutive_empties_stop_that_type_only, test_days_already_landed_are_skipped_without_a_request, test_an_auth_refusal_stops_the_run_at_once, test_a_non_success_create_answer_is_recorded_refused_and_stops_the_types_it_covers, test_state_file_resumes_the_next_run, test_day_cap_and_wall_budget_end_the_run_with_a_named_stop, test_the_record_names_earliest_landed_days_and_stop_per_type, test_main_signs_in_once_prints_day_lines_and_closes_the_session, test_profile_is_resolved_from_the_standing_rows_and_unresolved_is_a_named_stop). Base at 59f062999a7: hist_walk.py and the test files absent, so FAIL as expected.",
+      "status": "PASS",
+      "expect": "R1-FV2-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FV-s-2-AC2",
+      "criterion_verbatim": "the seam test against the real lander passes (the neighbour is real, only S3 and the session are fakes).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2s",
+      "output_evidence": "R1-FV2S-OK passed=1",
+      "denominator": "1 passed in infra/aws/ec2/canonical-fidelity/tests/test_hist_walk_seam.py; 1 of 1 named seam test present and passing (test_real_lander_lands_position_prices_and_psn_by_content_date_on_a_fake_s3). Base at 59f062999a7: the seam file absent, so FAIL as expected.",
+      "status": "PASS",
+      "expect": "R1-FV2S-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FV-s-2-AC3",
+      "criterion_verbatim": "the lander's psn tests still pass (a regression guard: this cell must not edit land.py).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv1",
+      "output_evidence": "R1-FV1-OK passed=7",
+      "denominator": "7 passed in infra/aws/ec2/canonical-fidelity/tests/test_land_psn.py; 6 of 6 named psn tests present and passing, plus the CLI test. This cell's commit 01a54c5e9b touches only hist_walk.py and the two new test files (3 files changed, all added); land.py is not edited by this cell. Base at 59f062999a7: test_land_psn.py absent, so FAIL as expected until FV-s-1 is merged.",
+      "status": "PASS",
+      "expect": "R1-FV1-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of the canonical-fidelity module (.scratch/mutant2, not committed) with hist_walk.py EMPTY_LIMIT set to 4 instead of 3, so a type stops one EMPTY day late.",
+      "expected": "test_three_consecutive_empties_stop_that_type_only fails",
+      "observed": "1 failed, 12 passed in 1.22s (rc=1). FAILED: test_three_consecutive_empties_stop_that_type_only. A first mutant run that shadowed the lib path gave 11 failed and was discarded as a harness artifact; the rerun with the worktree lib path is the one recorded.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the two checker criteria fv2 and fv2s re-run twice at HEAD 01a54c5e9b with the same invocations, compared with the first run",
+      "observed": "fv2: R1-FV2-OK passed=13 both runs; fv2s: R1-FV2S-OK passed=1 both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live walk against Fidelity: sign-in, profile list, the create calls, the poll, real downloads and a real land",
+      "reason": "Fakes only, by order. The live walk is ordered separately as TO-FV-s-3 under the CTO's go (msg 9101). The measured facts are used as given and were not re-measured here."
+    },
+    {
+      "item": "LongRequestSession as a named import",
+      "reason": "It is a class nested in backfill_main._real_deps and cannot be imported. hist_walk takes the same session through backfill_main._real_deps()['fetch_session']. Recorded as NFRA_FIDUPL-D1-W6-S12."
+    },
+    {
+      "item": "Download answers other than 200 and the does-not-exist stub",
+      "reason": "The order does not name this case. A non-200 download is recorded as DL_FAILED for that type and day (no stop, no empty count, nothing landed). Stated here as a choice."
+    },
+    {
+      "item": "An IN PROCESS row still open when the 150-second window closes",
+      "reason": "The order names only the never-appears case (NOROW). An IN PROCESS row at the window's end is also recorded NOROW, with no empty count."
+    },
+    {
+      "item": "A Python 3.9 interpreter run of the suite",
+      "reason": "No Python 3.9 interpreter on dell1. The grammar of the three new files was checked with ast.parse(feature_version=(3,9)); the suite ran under Python 3.14."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W6-S12: the order's wording names LongRequestSession as a symbol to import from backfill_main.py; that class is nested in _real_deps and cannot be imported. hist_walk reaches it through backfill_main._real_deps() deps; no edit to backfill_main.",
+    "NFRA_FIDUPL-D1-W6-S13: land.land writes one run record per call, and a two-file day folder records the four absent SIX names as failed reads, so each walked day writes a PARTIAL run record; the per-file results are correct."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FV-s-2.hist-walk.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py fv2",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2 (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FV2-OK passed=13 (rc=0) at 01a54c5e9b, twice"
+    },
+    {
+      "tool": "fidupl_round_checks.py fv2s",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2s (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FV2S-OK passed=1 (rc=0) at 01a54c5e9b, twice"
+    },
+    {
+      "tool": "fidupl_round_checks.py fv1",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv1 (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FV1-OK passed=7 (rc=0)"
+    },
+    {
+      "tool": "fidupl_round_checks.py fu4",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu4 (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FU4-OK passed=16 (rc=0)"
+    },
+    {
+      "tool": "module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests (cwd C:/tmp/fidupl-w6)",
+      "result": "268 passed in 20.94s (rc=0)"
+    },
+    {
+      "tool": "mutant run",
+      "invocation": "python -m pytest -q -p no:cacheprovider .scratch/mutant2/canonical-fidelity/tests/test_hist_walk.py (scratch copy with EMPTY_LIMIT = 4)",
+      "result": "1 failed, 12 passed in 1.22s (rc=1)"
+    },
+    {
+      "tool": "ast.parse grammar check",
+      "invocation": "python -c ast.parse(source, feature_version=(3,9)) over hist_walk.py and the two test files",
+      "result": "PY39-OK for all three; zero non-ASCII bytes in each"
+    }
+  ]
+}
