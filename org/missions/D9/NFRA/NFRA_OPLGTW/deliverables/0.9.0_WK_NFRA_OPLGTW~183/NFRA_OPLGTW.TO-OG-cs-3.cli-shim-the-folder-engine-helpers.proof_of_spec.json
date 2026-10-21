@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cs-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-3.cli-shim-the-folder-engine-helpers.md",
+    "group": "OTHER",
+    "vintage_commit": "7b027191aef"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP_CLISHIM.round48.md",
+    "vintage_commit": "7b027191aef",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-3.cli-shim-the-folder-engine-helpers.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~183",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/folder_engine.py",
+      "kind": "script",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "commit_or_etag": "1b83eddb6913797893deefb2e5f0984423976286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new pure module (no AWS call, no network, no child process); committed LOCAL on wk-NFRA_OPLGTW-183 at 1b83eddb69; no release, no deploy"
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cs3_folder_engine.py",
+      "kind": "test",
+      "artifact_covered_by": ["AC3"],
+      "commit_or_etag": "1b83eddb6913797893deefb2e5f0984423976286",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "26 collected, 22 test functions, offline; 26 passed 0 failed (two runs, identical); committed LOCAL on wk-NFRA_OPLGTW-183 at 1b83eddb69"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (the pure half): exactly the 17 sensitive probe names are dropped and the 7 look-alikes kept; kept and dropped keep the input order; sensitive_class names the class or None; a rows request becomes a rows plan with its parts; an aggregate request becomes an aggregate plan; limit: omitted is 100, 9999 is clamped to 500; refusals raise EngineError INVALID_REQUEST.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "exactly the 17 sensitive probe names are dropped and the 7 look-alikes kept (dropped 17, kept 7): ok\nkept and dropped keep the input order: ok\nsensitive_class names the class or None: ok\na rows request becomes a rows plan with its parts: ok\nan aggregate request becomes an aggregate plan: ok\nlimit: omitted is 100, 9999 is clamped to 500: ok\nrefusals raise EngineError INVALID_REQUEST (a dropped sensitive column: INVALID_REQUEST, a column outside allowed: INVALID_REQUEST, an unknown operator: INVALID_REQUEST, a limit of 0: INVALID_REQUEST, a rows request with no columns: INVALID_REQUEST, an unknown top-level key: INVALID_REQUEST): ok\nRESULT: PASS\nexit=0",
+      "denominator": "7 of 7 probe lines ok (17 dropped and 7 kept; input order; sensitive_class; rows plan; aggregate plan; limit rules; refusal kinds)",
+      "status": "PASS",
+      "expect": "(?s)exactly the 17 sensitive probe names are dropped and the 7 look-alikes kept .*: ok.*kept and dropped keep the input order: ok.*sensitive_class names the class or None: ok.*a rows request becomes a rows plan with its parts: ok.*an aggregate request becomes an aggregate plan: ok.*limit: omitted is 100, 9999 is clamped to 500: ok.*refusals raise EngineError INVALID_REQUEST .*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (the byte-bounded half): inside the caps answers None; 13 objects and 64 MiB + 1 byte answer LIMIT_EXCEEDED with a suggestion that says narrow; a 60,000-row parquet footer gives columns in file order with types, num_rows 60000, row_groups >= 1; only the footer was read (bytes read under a quarter); control: a 5-row file answers num_rows 5 and the same columns; bytes that are not parquet raise ValueError.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "inside the caps answers None (12 objects, and exactly 64 MiB): ok\n13 objects and 64 MiB + 1 byte answer LIMIT_EXCEEDED with a suggestion that says narrow: ok\na 60,000-row file: columns in file order with types, num_rows 60000, row_groups >= 1 ([('a', 'int64'), ('b', 'string'), ('email', 'string')]): ok\nonly the footer was read: 65536 bytes of 357521: ok\ncontrol: a 5-row file answers num_rows 5 and the same columns: ok\nbytes that are not parquet raise ValueError: ok\nRESULT: PASS\nexit=0",
+      "denominator": "6 of 6 probe lines ok (caps None; LIMIT_EXCEEDED at 13 objects and 64 MiB + 1; footer columns and counts; footer-only byte count 65536 of 357521; 5-row control; junk bytes ValueError)",
+      "status": "PASS",
+      "expect": "(?s)inside the caps answers None .*: ok.*13 objects and 64 MiB \\+ 1 byte answer LIMIT_EXCEEDED with a suggestion that says narrow: ok.*columns in file order with types, num_rows 60000, row_groups >= 1 .*: ok.*only the footer was read: \\d+ bytes of \\d+: ok.*control: a 5-row file answers num_rows 5 and the same columns: ok.*bytes that are not parquet raise ValueError: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the footprint is exactly the two files (app/folder_engine.py and tests/test_cs3_folder_engine.py) under the gateway folder; the new test file carries at least eight test functions and they all pass; the two engine neighbours (tests/test_schwab_engine.py, tests/test_schwab_query.py) pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs_foot.sh org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-3.cli-shim-the-folder-engine-helpers.md app/folder_engine.py,tests/test_cs3_folder_engine.py tests/test_cs3_folder_engine.py 8 tests/test_schwab_engine.py tests/test_schwab_query.py; echo \"exit=$?\"",
+      "output_evidence": "files that differ from HEAD under the gateway folder: ['app/folder_engine.py', 'tests/test_cs3_folder_engine.py'] (want exactly ['app/folder_engine.py', 'tests/test_cs3_folder_engine.py']): ok\ntests/test_cs3_folder_engine.py: 22 test functions (want 8 or more): ok\nnew file tests/test_cs3_folder_engine.py: 26 passed, 0 failed\nneighbours (2): 41 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 probe lines ok (footprint 2 of 2 files; 22 test functions against a floor of 8; 26 of 26 new tests passed; 41 neighbour tests passed, 0 failed)",
+      "status": "PASS",
+      "expect": "(?s)files that differ from HEAD under the gateway folder: .*: ok.*tests/test_cs3_folder_engine\\.py: (?:[89]|[1-9]\\d+) test functions.*: ok.*new file tests/test_cs3_folder_engine\\.py: (?:[89]|[1-9]\\d+) passed, 0 failed.*neighbours \\(2\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scratch copy of app/folder_engine.py with the email pair check removed from sensitive_class (the email token alone kept); the restored file is byte-identical to the commit",
+      "expected": "the email-class and drop-table tests fail",
+      "observed": "pytest tests/test_cs3_folder_engine.py on the mutant: 2 failed, 24 passed (FAILED ...[email] and test_drop_sensitive_drops_every_probe_and_keeps_look_alikes_in_order); restored: 26 passed",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "same-input runs: pytest tests/test_cs3_folder_engine.py run twice against the same commit",
+      "observed": "run 1: 26 passed in 1.56s; run 2: 26 passed in 1.08s",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the tools that apply the sensitive-class drop and the cli-shim release that carries it",
+      "reason": "out of this cell by the order's BOUNDS (pure functions nothing calls yet); later orders with their own never-widen halves"
+    },
+    {
+      "item": "the census of real column names across Schwab, Orion and Cottonwood Black Diamond",
+      "reason": "the issuer's disclosed reading (2): the CTO/CVO run it against the three sources; no AWS call in this cell"
+    },
+    {
+      "item": "the status flip of NFRA_OPLGTW.TO-OG-cs-3 to complete",
+      "reason": "the order's section 6 gives the flip to the issuer; the task-order file is outside this worker's write grant"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~183/NFRA_OPLGTW.TO-OG-cs-3.session_log.json",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.1.1 (python 3.14.8 local)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_cs3_folder_engine.py -q",
+      "result": "26 passed, 0 failed"
+    },
+    {
+      "tool": "issuer probes cs3.AC1.sh, cs3.AC2.sh, cs_foot.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs3.AC1.sh; cs3.AC2.sh; cs_foot.sh (see acceptance invocations)",
+      "result": "RESULT: PASS on all three, exit=0"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python3 -I .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3 --governing-order org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-3.cli-shim-the-folder-engine-helpers.md",
+      "result": "see the validation run recorded in the final report"
+    }
+  ]
+}
