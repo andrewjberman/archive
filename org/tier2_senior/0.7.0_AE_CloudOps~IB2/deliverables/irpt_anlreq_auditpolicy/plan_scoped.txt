@@ -1,0 +1,74 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_iam_policy.resident_audit_write will be created
+  + resource "aws_iam_policy" "resident_audit_write" {
+      + arn              = (known after apply)
+      + attachment_count = (known after apply)
+      + description      = "IRPT_ANLREQ TO-AR-y-478: the resident runner role puts the analysis audit record (family ANALYSIS_AUDIT, one prefix per client firm) and reads no audit record back. Put only, plus the KMS entries for those prefixes."
+      + id               = (known after apply)
+      + name             = "irpt-audit-write-policy"
+      + name_prefix      = (known after apply)
+      + path             = "/"
+      + policy           = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/analysis_audit/*",
+                          + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/analysis_audit/*",
+                          + "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/analysis_audit/*",
+                        ]
+                      + Sid      = "WriteTheAnalysisAudit"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Decrypt",
+                          + "kms:GenerateDataKey",
+                        ]
+                      + Condition = {
+                          + StringEquals = {
+                              + "kms:ViaService" = "s3.us-east-1.amazonaws.com"
+                            }
+                          + StringLike   = {
+                              + "kms:EncryptionContext:aws:s3:arn" = [
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/49financial/platinum/analysis_audit/*",
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/cottonwood/platinum/analysis_audit/*",
+                                  + "arn:aws:s3:::opal-data-irpt/irpt/inflection/platinum/analysis_audit/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111",
+                        ]
+                      + Sid       = "AuditEncryptionViaS3ForAuditPrefixesOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + policy_id        = (known after apply)
+      + tags_all         = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+    }
+
+  # aws_iam_role_policy_attachment.runner_resident_audit_write will be created
+  + resource "aws_iam_role_policy_attachment" "runner_resident_audit_write" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "irpt-ycharts-runner-role"
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
