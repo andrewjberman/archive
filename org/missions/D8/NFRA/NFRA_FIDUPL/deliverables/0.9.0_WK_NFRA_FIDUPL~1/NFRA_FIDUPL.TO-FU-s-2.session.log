@@ -274,3 +274,20 @@ C. Post-commit criteria, the round checker by absolute path from the worktree (c
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=41 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made in REPAIR 15.
+
+REPAIR 16 (issuer, 2026-10-21 ~00:40Z; URGENT) -- Fidelity signed the puller in; authorize() returned False at a first non-2xx answer.
+A. Code (commit d4a724ec9dc, signin.py and tests/test_login_trace.py): _authorize never returns False at the first non-2xx. It
+   polls through the sleep seam to the same deadline until a 2xx authorize answer (any seen), the home page, or the deadline. At
+   the deadline it returns False with the note authorize statuses=<distinct statuses> if only non-2xx answers were recorded, else
+   raises TimeoutError with authorize_seen as before. _on_response keeps every authorize status in _authorize_statuses; the
+   latest stays in _authorize_status.
+B. Tests: tests/test_login_trace.py has 42 tests (the 41 and test_authorize_keeps_polling_after_a_non_2xx_answer). 62 passed across
+   the sign-in files; 42 passed twice. Mutant (the early exit on the latest non-2xx restored, scratch copy): 1 failed, 41 passed.
+   ruff py39 All checks passed; non-ASCII 0.
+C. Post-commit criteria, the round checker by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=42 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 16.
