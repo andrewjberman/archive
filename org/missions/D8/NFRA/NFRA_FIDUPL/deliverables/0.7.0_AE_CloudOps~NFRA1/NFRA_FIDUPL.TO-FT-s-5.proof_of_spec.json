@@ -1,0 +1,101 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-5",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "0b37a83d8df",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-5.box-role-put-perg-secret.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-5.box-role-put-perg-secret.md",
+  "group": "OTHER",
+  "vintage_commit": "6bd116284f5"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/box.tf",
+   "kind": "terraform",
+   "commit_or_etag": "6739808eec4",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Statement PergSecretPut (secretsmanager:PutSecretValue on the per-G list secret ARN only) applied by safe-apply of the whole root: 0 added, 1 changed, 0 destroyed; post-apply plan No changes (rc=0); live get-role-policy shows it; ft5i reads the grant.",
+   "artifact_covered_by": [
+    "FT-s-5-AC1",
+    "FT-s-5-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T0130Z_nfra-fidupl-perg-put-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "6739808eec4",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-perg-put-20261021, 3 legs, CLOSED.",
+   "artifact_covered_by": [
+    "FT-s-5-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-5-AC1",
+   "criterion_verbatim": "the IAM simulator: put allowed on the per-G secret, not allowed on the Wealthscape credentials (a negative control).",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft5i",
+   "output_evidence": "R1-FT5I-OK the box role may put the per-G list secret and not the credentials",
+   "denominator": "2 of 2 resources simulated, one ARN per call (per-G allowed, Wealthscape credentials not allowed), on the live box role",
+   "status": "PASS",
+   "expect": "R1-FT5I-OK the box role may put the per-G list secret and not the credentials"
+  },
+  {
+   "criterion_id": "FT-s-5-AC2",
+   "criterion_verbatim": "the root's guard still passes.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu6g",
+   "output_evidence": "R1-FU6G-OK no ingress, no wildcard secret grant, no secret version, prevent_destroy present, every Resource star carries STAR-OK",
+   "denominator": "1 of 1 root guard run over the canonical-fidelity-ec2 .tf files",
+   "status": "PASS",
+   "expect": "R1-FU6G-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read an IAM simulation and a static guard; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the pre-apply plan was saved and applied as that file; the post-apply plan was run on the same tree; ft5i first read FAIL on the issuer's two-ARN simulator call (row D1-S9) and OK after the issuer's one-ARN-per-call fix, with the live grant unchanged between the two reads",
+   "observed": "saved plan 0 add 1 change 0 destroy applied as is; post-apply plan No changes",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "running the seed command, writing the per-G secret's value, any sign-in, starting the automation, stopping or starting the instance",
+   "reason": "The order forbids each; the criteria check the grant, not a run. TO-FT-s-6 owns the seed and is held for the issuer's GO."
+  }
+ ],
+ "surprises": [
+  "NFRA_FIDUPL-D1-S9: ft5i simulated two resource ARNs in one call and read FAIL on a role holding the grant; the issuer fixed the checker to one ARN per call and ft5i now reads OK."
+ ],
+ "session_log": "org/critical_paths/change_management/20261021T0130Z_nfra-fidupl-perg-put-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+   "result": "Plan 0 to add, 1 to change, 0 to destroy applied; post-apply plan No changes."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-perg-put-20261021; close-leg L1..L3; close",
+   "result": "OK: CLOSED, all 3 legs proven, sentinel removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft5i | fu6g",
+   "result": "R1-FT5I-OK; R1-FU6G-OK"
+  }
+ ]
+}
