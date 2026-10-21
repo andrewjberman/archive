@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-191",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-191.a-kept-row-left-out-of-the-figures-is-named-on-the-page.md",
+    "group": "OTHER",
+    "vintage_commit": "3a50a0bd2c9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "3a50a0bd2c9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-191.a-kept-row-left-out-of-the-figures-is-named-on-the-page.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~382",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "baddd81faf2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-382 only; nothing deployed. Adds _excluded_line(run_doc) and the build() placement of the one left-out line after the blocks of the page holding the first Top 10 Holdings element (else the first page). A run with no left-out row produces the HTML it produced before. ruff clean, py39 parse OK. AC1 RESULT AR-ENRICH2-excl-OK at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_excluded_line.py",
+      "kind": "test",
+      "commit_or_etag": "baddd81faf2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 10 tests. Before the layout change 8 failed and 2 (the absence tests) passed; at this commit 10 passed. test_layout_overview.py 50 passed at this commit. AC2 RESULT AR-ENRICH2-tests191-OK passed=10 at this commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR191-g-AC1",
+      "criterion_verbatim": "the REAL producer, over an Overview and a Multi-Comp with two UNRESOLVED holdings (one left out, one replaced), prints exactly one line `Left out of all figures: ZQXWVK, no asset class is held for it.` on the page that holds the Top 10 Holdings element, naming no replaced row and no amount; a run with no left-out row prints none. At base it FAILs (no line).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich2_checks.py excl",
+      "output_evidence": "AR-ENRICH2-excl-OK\nrc=0; measured at commit baddd81faf2 in C:/dev/wk-irpt-anlreq-382; run under timeout 120, not hit). Base, measured in a scratch copy of the tree with layout_overview.py restored from 3a50a0bd2c9 and the new test file removed: AR-ENRICH2-excl-FAIL overview: the left-out line occurs 0 times (want 1); multicomp: the left-out line occurs 0 times (want 1); rc=1.",
+      "expect": "^AR-ENRICH2-excl-OK$",
+      "denominator": "3 of 3 producer runs meet the arm: overview (the line once, on the Top 10 page, naming ZQXWVK only), multicomp (the same), clean run with one REPLACED row (no line). Base: 0 of 3.",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation; 3 of 3 producer runs at the committed tree."
+    },
+    {
+      "criterion_id": "AR191-g-AC2",
+      "criterion_verbatim": "the new test file passes with at least 4 tests. At base it FAILs (no file).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich2_checks.py tests191",
+      "output_evidence": "AR-ENRICH2-tests191-OK passed=10\nrc=0; measured at commit baddd81faf2 in C:/dev/wk-irpt-anlreq-382). Before the layout change, the same file: 8 failed, 2 passed. Base, measured in the scratch copy with the new file removed: AR-ENRICH2-tests191-FAIL rc=4 passed=0 (want rc 0 and at least 4): no tests ran in 0.00s; rc=1.",
+      "expect": "^AR-ENRICH2-tests191-OK passed=[0-9]+$",
+      "denominator": "10 of 10 tests in test_layout_excluded_line.py passed (the minimum is 4). Base: 0 of 0 collected (file absent).",
+      "status": "PASS",
+      "status_reason": "rc=0 and passed=10 >= 4 at the committed tree."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The base-code measurement in the acceptance rows is the before/after control.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was made; the invocations were run once each at the committed tree and once each at base.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-382; TREE-OK. Read the checker, the layout build(), swap_pass.py (record shape: status, proxy_for, why) and the fixture map. Wrote test_layout_excluded_line.py first: pytest gave 8 failed, 2 passed on the pre-change code. Added _excluded_line and the build placement to layout_overview.py. Owned tests: 10 passed; test_layout_overview.py: 50 passed; ruff check clean. Acceptance on the committed tree: excl rc=0 (AR-ENRICH2-excl-OK), tests191 rc=0 (passed=10). Base measured in a scratch copy under .scratch/base_tree (layout_overview.py from 3a50a0bd2c9, new test removed): excl rc=1, tests191 rc=1. Code and tests committed as baddd81faf2 via safe-commit.sh. Status flip is a separate commit made after the proof validates.",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_layout_excluded_line.py",
+      "result": "10 passed (at baddd81faf2); before the layout change: 8 failed, 2 passed"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_layout_overview.py",
+      "result": "50 passed (at baddd81faf2)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check layout_overview.py tests/test_layout_excluded_line.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~382 <0.9.0_WK_IRPT_ANLREQ~382@opal.agent>\" -F .scratch/msg-191-code.txt -- layout_overview.py tests/test_layout_excluded_line.py",
+      "result": "All checks passed! for 2 of 2 file(s); committed baddd81faf2"
+    }
+  ]
+}
