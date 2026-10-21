@@ -30,3 +30,15 @@ applied (ledger irpt-resident-audit-write-20261020).
 ## Signature
 
 SIGNED, CTO half, bound to the packet blob and sha256 above.
+
+## RE-SIGN 2026-10-21 ~00:45Z (AR-y-481 re-pin; CTO ruling @88ae067327)
+
+- **Packet:** git blob `9f065fb2a59b247318d8144c754c7bd024419121` (commit 8dff583d11), sha256 `89cfbff5dedd90b289b5582218b5695bc2db593092daacfe0af55570de57af60`.
+- **Pins, read at HEAD:** resident.tf `2e9a61e656141c8a5194fa942312c0d7aef843a8`; resident_audit_policy.tf `0e084af9b8868f3949127dc7543751ac7204229a`. The old pins f0df570515 and aa565f1c42 are VOID.
+- **What the diff shows:**
+  - resident_audit_policy.tf changes one comment line only.
+  - resident.tf adds the local `resident_audit_policy`, which selects irpt-anlreq-audit-x10-v1, and the audit prefixes now build from that row.
+- **Measured equal:** the new row's source (irpt), its ANALYSIS_AUDIT family (platinum, analysis_audit, ceiling 2555, unreferenced null) and its firms (49financial, cottonwood, inflection) equal those of the r34o-era row. So the rendered ARNs and the policy document are unchanged, and the blast radius and rollback above stand.
+- **Order:** after r34p is live and after TCKT_VNEXT.TO-R22-DL1 is terminal (one IAM apply at a time). The row flips to ACTIVE, with enforcement_ref = the commit recording this apply, before any audit row is reserved. Shipping that ACTIVE row to the resident is a later release under its own pair.
+
+RE-SIGNED, CTO half, bound to blob 9f065fb2a5 and the sha256 above. The earlier signature on blob b2e2c58200 is superseded.
