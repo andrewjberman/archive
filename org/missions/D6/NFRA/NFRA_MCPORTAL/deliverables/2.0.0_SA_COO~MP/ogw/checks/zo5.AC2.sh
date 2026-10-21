@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # MP-zo-5 AC2 (independent of the worker's file): the deployed grant writer imports at /var/task and carries its owner-key configuration.
 # A no-header invoke of set_person_access answers REFUSED NO-OWNER-HEADER: handle() checks the writer's own owner config BEFORE the
-# header (REFUSED OWNER-CONFIG-MISSING otherwise), so this answer shows the handler imported from its built package (row C-S8) and the owner key
-# is set on the function (row W3-S2). Values are never read or printed.
+# header (REFUSED OWNER-CONFIG-MISSING otherwise), so this answer shows the deployed handler imported and ran in the Lambda (row C-S8; this
+# script does not print the import path, so "/var/task" is inferred, not shown) and the owner key is set on the function (row W3-S2;
+# that it equals Andrew's oid is NOT measured here: the close run's owner-header write is that proof). Values are never read or printed.
+# Worker row Z-W45-S3 pointed out the earlier wording.
 . "$(dirname "$0")/../../pd/checks/_root.sh"
 fn=$("$AWS" lambda list-functions --query "Functions[?contains(FunctionName,'mcportal-grant-writer')].FunctionName" --output text | tr -d '\r' | tr '\t' '\n' | grep -m1 'mcportal-grant-writer')
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
