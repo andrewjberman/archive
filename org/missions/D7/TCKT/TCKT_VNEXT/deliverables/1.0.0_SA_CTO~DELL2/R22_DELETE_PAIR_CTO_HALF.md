@@ -49,3 +49,19 @@ SIGNED, CTO half, bound to the packet blob and sha256 above.
 - **Blast radius and rollback** are as above. Only the resource names changed.
 
 SIGNED, CTO half, bound to the amended blob and sha256 above. The f38bc409cb binding is superseded.
+
+## RE-SIGN 2026-10-21 ~01:16Z (irpt-only re-cut, after TV2's STOP at the first delete, msg 11694)
+
+- **Pair:** git blob `ff354d5036ecc4b042f19ac8e3b90f78b5081bb9`, sha256 `4b927bdcb1f821901b27a964d7b6c043aa12e58b876b8511c5bb9c83b6c5dd18`.
+- **Manifest:** git blob `2e8786cc4219b02a8148c480ae90a9b339ef953d`. Read here: 42 objects, all `opal-data-irpt`; 0 with a wildcard, a trailing slash or a null version id. The check is unchanged at 9b192b70ef.
+- **What changed (git diff -w against 21fa719200, 5 lines):**
+  - the manifest is now irpt only, and the cottonwood 4 are out (record `R22_COTTONWOOD_RESIDUE_RECORD.json`, blob bf48a75374);
+  - the irpt bucket policy is recorded as read: DenyInsecureTransport only, versioning on, no object lock;
+  - ONE test delete runs first, with a STOP on anything but 204 plus ABSENT;
+  - the destroy is a `-target` plan of exactly the eight resources, never a whole-root destroy;
+  - the chunk count moves from 46 to 42.
+- **Line endings** moved from CRLF to LF, so a plain diff shows every line. The whitespace-blind diff is the 5 lines above.
+- **Unchanged:** the role shape, the names, the Deny, the blast radius and the rollback.
+- **The cottonwood 4:** no edit to DenyForeignFirmPrincipals or DenyRestrictedWriteExceptBreakglass, ever. They are listed by this seat as an act for Andrew (admin-user delete of 4 synthetic objects, 31 bytes each), under his 10-16 standing word.
+
+RE-SIGNED, CTO half, bound to blob ff354d5036 and the sha256 above. The signature on 21fa719200 is superseded.
