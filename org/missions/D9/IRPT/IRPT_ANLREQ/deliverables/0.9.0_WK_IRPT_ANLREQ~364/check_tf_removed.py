@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 PATH = "infra/aws/terraform/investor-reporting/ycharts/irpt_residue_delete_r35.tf"
-BASE = "1e6073761ca"
+BASE = "4c7935fe2c8"
 BLOB = "8897a25273c8547c2ba0d6f9fdd3ce76849fdddf"
 INFRA = "infra/"
 
