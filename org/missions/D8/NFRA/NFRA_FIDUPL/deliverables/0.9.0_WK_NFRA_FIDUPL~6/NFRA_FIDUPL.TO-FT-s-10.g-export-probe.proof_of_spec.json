@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-10",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d517"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "83a888fca62",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-10.g-export-probe.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/g_export_probe.py",
+      "kind": "script",
+      "commit_or_etag": "65738f3272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-6 (LOCAL). Not deployed to the box; no live call was made. The probe is run live only under TO-FT-s-8 on the CTO go (msg 8990).",
+      "artifact_covered_by": ["FT-s-10-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_g_export_probe.py",
+      "kind": "test",
+      "commit_or_etag": "65738f3272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-6 (LOCAL). Fake-only; 6 tests pass at this commit (the four named tests and two extra).",
+      "artifact_covered_by": ["FT-s-10-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "65738f3272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_FIDUPL-D1-W6-S6 and NFRA_FIDUPL-D1-W6-S7 appended; no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-10-AC1",
+      "criterion_verbatim": "the four named probe tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft10",
+      "output_evidence": "R1-FT10-OK passed=6",
+      "denominator": "6 passed of 4 required named tests (test_g_export_probe_prints_counts_and_hashes_per_ordinal_without_values, test_g_export_probe_includes_the_start_ordinal_and_dedupes, test_g_export_probe_stops_on_auth_refusal_and_skips_restore, test_g_export_probe_closes_session_and_restores_start_g) plus two extra (test_g_export_probe_reports_a_switch_refusal_and_goes_on_to_the_next_ordinal, test_g_export_probe_reports_restore_failed_without_raising)",
+      "status": "PASS",
+      "expect": "R1-FT10-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FT-s-10-AC2",
+      "criterion_verbatim": "the daily-orchestration tests still pass (a regression guard: this cell must not touch box/run.py or box/daily.py).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr4",
+      "output_evidence": "R1-FR4-OK passed=14",
+      "denominator": "14 passed in tests/test_box_daily.py of the 5 required named daily-orchestration tests (test_daily_sequence_signin_fetch_land_attribute_split_record, test_attribution_failure_still_records_and_exits_nonzero, test_split_failure_exits_nonzero_after_land, test_config_pointers_accept_firm_labels_and_account_columns, test_main_chooses_daily_mode_from_config); this cell's diff touches neither box/run.py nor box/daily.py",
+      "status": "PASS",
+      "expect": "R1-FR4-OK passed=\\d+"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "Any live run: sign-in, Secrets Manager read, Wealthscape session, G switch, Export Status read or account.txt download",
+      "reason": "Built against fakes by order; the live run is ordered separately (TO-FT-s-8, CTO msg 8990, one sign-in)."
+    },
+    {
+      "item": "A 401 or 403 on a change-form read or a G switch as a stop condition",
+      "reason": "gswitch.GSwitcher raises GSwitchError with fixed text and no status on those answers; the stop applies to status and download answers only (surprise NFRA_FIDUPL-D1-W6-S6, ARMED, disarm owner 2.0.0_SA_COO~P1)."
+    },
+    {
+      "item": "The row scope of profiles, requests and ids_sha8, and the line-break rule of rows and line1_sha8",
+      "reason": "The order fixes neither; the probe uses all status rows and bytes.splitlines(), definitions printed in the module docstring (surprise NFRA_FIDUPL-D1-W6-S7)."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W6-S6: gswitch.GSwitcher raises GSwitchError with fixed text and no HTTP status on any non-200 change-form read or G switch answer, so the 401/403 stop cannot be applied to those requests; a refused switch is followed by the next ordinal's switch POST (ARMED; disarm owner 2.0.0_SA_COO~P1).",
+    "NFRA_FIDUPL-D1-W6-S7: TO-FT-s-10 does not fix the row scope of profiles, requests and ids_sha8, nor the line-break rule of rows and line1_sha8; the chosen definitions are printed in the module docstring and need the issuer's confirmation before a comparison with the 5009-row file."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FT-s-10.session_log.txt",
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of box/g_export_probe.py with the _AuthStop handler setting stopped = False, so the restore switch runs after a 401 or 403 (the auth-skip rule removed).",
+      "expected": "test_g_export_probe_stops_on_auth_refusal_and_skips_restore fails",
+      "observed": "1 failed, 5 passed: AssertionError on 'PROBE gexp restore=skipped' (the output shows PROBE stop: HTTP 403 then PROBE gexp restore=ok)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice on the committed probe tests at 65738f3272 (two same-input runs compared)",
+      "observed": "run 1: 6 passed in 0.08s; run 2: 6 passed in 0.16s",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py ft10",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft10",
+      "result": "R1-FT10-OK passed=6 (rc=0)"
+    },
+    {
+      "tool": "fidupl_round_checks.py fr4",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr4",
+      "result": "R1-FR4-OK passed=14 (rc=0)"
+    },
+    {
+      "tool": "pytest module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "223 passed in 2.82s (rc=0)"
+    },
+    {
+      "tool": "pyflakes",
+      "invocation": "python -m pyflakes infra/aws/ec2/canonical-fidelity/box/g_export_probe.py infra/aws/ec2/canonical-fidelity/tests/test_g_export_probe.py",
+      "result": "no output (rc=0)"
+    }
+  ]
+}
