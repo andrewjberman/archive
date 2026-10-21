@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-493.swap-model-adapter-classifies-inside-the-pool-vocabulary-and-proposes-class-matched-tickers",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "be3885c233a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-493.swap-model-adapter-classifies-inside-the-pool-vocabulary-and-proposes-class-matched-tickers.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-493.swap-model-adapter-classifies-inside-the-pool-vocabulary-and-proposes-class-matched-tickers.md",
+    "group": "OTHER",
+    "vintage_commit": "be3885c233a"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~367",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_model.py",
+      "kind": "script",
+      "commit_or_etag": "4affc4cff4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib module with no connection, no secret and no environment read; the classifier is imported lazily from the sibling etf_classification_model. make_swap_model builds the pool vocabulary, classify refuses an out-of-vocabulary answer to None and flags confidence below the threshold, propose makes one bounded call and validates the reply (each element upper-cased, then matched, per the issuer's ruling on IRPT_ANLREQ-D2-W367-S1). Committed LOCAL as 4affc4cff4f on wk-IRPT_ANLREQ-367. Nothing was run against a network, AWS or a model.",
+      "artifact_covered_by": [
+        "AR493-y-AC1",
+        "AR493-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_model.py",
+      "kind": "test",
+      "commit_or_etag": "4affc4cff4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Eleven hermetic tests: a fake send records every payload; the real etf_classification_model is imported through a sys.path insertion computed from __file__; the propose tests admit a lower-case ticker as upper-case and drop a too-long string and a string with a space. Committed LOCAL as 4affc4cff4f on wk-IRPT_ANLREQ-367.",
+      "artifact_covered_by": [
+        "AR493-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py",
+      "kind": "script",
+      "commit_or_etag": "287b509448a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib check: runs swap_model.py in-process over eight cases with a fake send and prints one SWAP-MODEL-OK or SWAP-MODEL-BAD line; --selftest applies three in-memory mutants to the module text and prints CONTROL-FIRES only when all three read BAD. No network, no secret, no model call. Committed LOCAL as 287b509448a (the proposals case follows the issuer's upper-case-first rule).",
+      "artifact_covered_by": [
+        "AR493-y-AC1",
+        "AR493-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR493-y-AC1",
+      "criterion_verbatim": "AR493-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py -- expect ^SWAP-MODEL-OK cases=8 vocab_bound=yes never_coerced=yes flag_at_0.80=yes proposals_filtered=yes symbol_only=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py",
+      "output_evidence": "SWAP-MODEL-OK cases=8 vocab_bound=yes never_coerced=yes flag_at_0.80=yes proposals_filtered=yes symbol_only=yes\nrc=0 (the printed line is the only stdout line). A second run printed the same line; diff of the two outputs rc=0.",
+      "denominator": "1 of 1 OK line; 8 of 8 cases ran (cases=8); 5 of 5 flags read yes",
+      "expect": "^SWAP-MODEL-OK cases=8 vocab_bound=yes never_coerced=yes flag_at_0.80=yes proposals_filtered=yes symbol_only=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR493-y-AC2",
+      "criterion_verbatim": "AR493-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0 (the only stdout line). The three in-memory mutants (vocabulary check removed; threshold compare flipped to <=; proposals cap removed) each read BAD on the eight-case battery.",
+      "denominator": "1 of 1 CONTROL-FIRES line; 3 of 3 mutants read BAD",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly; the line prints only when all three mutants read BAD."
+    },
+    {
+      "criterion_id": "AR493-y-AC3",
+      "criterion_verbatim": "AR493-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_model.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_model.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "11 passed in 0.13s",
+      "denominator": "11 of 11 tests passed; 0 failed; 0 errors",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the last line of pytest output matches the expect regex."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR493-y-AC2 control: --selftest mutates the module text in memory three ways (the vocabulary check removed so an out-of-vocabulary answer passes; the threshold compare flipped to <=; the proposals cap removed) and runs the eight-case battery on each. The control fires only when all three read BAD.",
+      "expected": "CONTROL-FIRES printed alone, rc 0, after all three mutants read BAD.",
+      "observed": "CONTROL-FIRES, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 command run twice; each stdout kept in the worker scratch and compared with diff.",
+      "observed": "diff rc=0; the single OK line is identical across both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live model's answers and the deployed resident bytes (the release that carries the swap leg)",
+      "reason": "out of this cell: no network, no AWS, no model call and no deploy; every model call in the tests and the check is a fake send. The release is built by 2.0.0_SA_COO~G2 and applied by IB2 under its own pair."
+    },
+    {
+      "item": "the resident binding opal_swap_model, the _swap_extras wiring and the swap_pass proposals port",
+      "reason": "not in this cell's paths: the binding and the port are the sibling cells AR-y-492 and the later wiring cell. Surprise row IRPT_ANLREQ-D2-W367-S2 records that the port is not in this tree."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W367-S1: the cell's propose rule (upper-case, then match) and its test sentence (drop lower-case) conflicted; the issuer ruled upper-case first, so a lower-case ticker is admitted as upper-case, and the adapter was amended at 4affc4cff4f (OBSERVATION, INERT, resolved by the issuer).",
+    "IRPT_ANLREQ-D2-W367-S2: swap_pass.swap_holdings at this base has no proposals parameter; the AR-y-492 port is not in this tree and this cell does not import swap_pass (OBSERVATION, INERT, UNDER_INVESTIGATION)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I check_swap_model.py (offline, in-process, fake send)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~367/check_swap_model.py",
+      "result": "SWAP-MODEL-OK cases=8 vocab_bound=yes never_coerced=yes flag_at_0.80=yes proposals_filtered=yes symbol_only=yes, rc=0"
+    },
+    {
+      "tool": "pytest 9.0.2 on the hermetic test file",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_model.py -q --color=no -p no:cacheprovider)",
+      "result": "11 passed in 0.13s"
+    },
+    {
+      "tool": "ruff 0.15.11 with target py39, and .tools/commit-gate.sh on each .py file",
+      "invocation": "python -m ruff check --target-version py39 <the three .py files>; bash .tools/commit-gate.sh <file>",
+      "result": "All checks passed on the three files; commit-gate rc=0 on each"
+    }
+  ]
+}
