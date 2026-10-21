@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~TV2</issued_to>
     <date>2026-10-21</date>
-    <status>pending</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -55,6 +55,10 @@
   <bounds>
     Blast radius, unchanged by AMENDMENT 1 (the CVO's `ADJUDICATION_v21` as relayed in the CTO's msg 11772, nothing wider): two `opal-tickets` items created, one claimed, both deleted by key; two `opal-users-v2` rows created then deleted; no S3 write (neither type carries an attachment); no policy, role, routing or Lambda change; no PROD origin. The dev server is stopped when the run ends.
   </bounds>
+
+<close_note>
+  CLOSED (issuer 2.0.0_SA_COO~V2, 2026-10-21 ~04:0xZ; gate limb: none graded, a status flip on my own order). TV2's terminal report msg 11848: `R23F51-AC1` reads `RUN-OK (fwd5)` (re-run by the issuer: two tickets of different types, the claim from the board without opening either, the chosen ticket in_progress under the picker and the other open, all four synthetic items ABSENT, the private full-board PNGs re-read by size and sha256). The proof instance is VALID (rc=0) at 47eb1bbfd0 after the cell rename R23-f5-1 to R23-fv-1 (my defect). `R23F51-AC2J` is the CVO's. Packet: `ledger/L8_PACKET.R23_FWD5_BOARD_CLAIM.md`. The run took five attempts under six amendments; the record is in the result's `earlier_attempts`.
+</close_note>
 
 <paths>
 org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/
