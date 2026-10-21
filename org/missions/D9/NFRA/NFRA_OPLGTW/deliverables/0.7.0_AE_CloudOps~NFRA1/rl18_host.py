@@ -103,6 +103,35 @@ def child_explicit(stage):
     m.emit(out)
 
 
+def child_sentinel(stage):
+    """PHASE B (the deployed tree): the sentinel scope parses (a granted master with accounts == ["*"]), is_master_wide is true for it and false for the explicit master, and a bare "*" or a "*" beside an id is refused."""
+    os.environ["MOCK_GRAPH"] = "1"
+    os.chdir(stage)
+    sys.path.insert(0, stage)
+    from app import data_entitlement as de
+    m1, m2 = "08242234", "08335338"
+    raw = {"masters": [m1, m2], "datasets": ["dim_position"], "accounts": {m1: ["7%07d" % 1], m2: ["*"]}, "dates": {"mode": "rolling_complete_window"}, "columns": {"dim_position": ["symbol"]}, "operations": ["list", "describe", "query"]}
+    out = {}
+    try:
+        sc = de.parse_scope(raw)
+        out["parses"] = True
+        out["is_master_wide"] = [de.is_master_wide(sc, m2), de.is_master_wide(sc, m1)]
+    except Exception as exc:  # noqa: BLE001
+        out["parses"], out["error"] = False, type(exc).__name__
+    refused = []
+    for bad in (["*", "7%07d" % 1], "*", []):
+        r2 = json.loads(json.dumps(raw))
+        r2["accounts"][m2] = bad
+        try:
+            de.parse_scope(r2)
+            refused.append(False)
+        except de.Malformed:
+            refused.append(True)
+    out["malformed_shapes_refused"] = refused
+    out["vm_hwm_mb"] = round(m.hwm_mb(), 1)
+    m.emit(out)
+
+
 def child_imports(stage):
     """HOST-SHAPED IMPORT CHECK: every overlay .py imports in a fresh process from the stage (the service's own lib/ and .venv); the stage's registry count."""
     import importlib
@@ -228,6 +257,8 @@ if __name__ == "__main__":
     if "--probe" in sys.argv:
         i = sys.argv.index("--probe")
         child_probe(sys.argv[i + 1], sys.argv[i + 2])
+    elif "--sentinel" in sys.argv:
+        child_sentinel(sys.argv[sys.argv.index("--sentinel") + 1])
     elif "--imports" in sys.argv:
         child_imports(sys.argv[sys.argv.index("--imports") + 1])
     elif "--explicit" in sys.argv:
