@@ -13,11 +13,11 @@
 | `OG-gm-1` | Menachem's Schwab grant | SUPERSEDED for round 47 (row Z-S433: no verified identity record, gate G-E) |
 | `OG-gv-1` | Andrew's Schwab grant to `accounts ["*"]` | OPEN: Phase A done, three halves SIGNED at ask `637db69736ab`; Phase B only after `OG-rl-18` AND the `/callback` exemption release are live |
 | `OG-ed-1` | master-admin exemption on the legacy `/callback` consent branch (the CTO half of `OG-gv-1`, option 2) | complete (worker `~175`, drained `17c53cdd2cb`; my `ed1.AC1`, `AC2`, `AC3` PASS on the merged tree; rows Z-S437) |
-| `OG-rl-17` | batch16 release | OPEN: re-cut at the cap 26 (release `8e3eddf959`, ask `291ffc35747a`), all three halves SIGNED, Phase B GO sent for window 2026-10-21 06:00Z |
+| `OG-rl-17` | batch16 release | complete (release `8e3eddf959` live, ledger CLOSED 06:44Z; `rl17.AC1`, `AC2`, `AC3` PASS on my runs, AC3 after the control amendment `7c196811f0`; proof VALID; landing drained `fc50da68c62`; rows Z-S442, Z-S444) |
 | `OG-mp-1` | mount `admin_people_access.routes` in `app/admin_api.py` (the CTO's ferry 17:30Z, NFRA_MCPORTAL v0.10) | complete (worker `~176`, drained `a4197b93aed`; my `mp1.AC1`, `AC2`, `AC3` PASS on the merged tree; no rows) |
 | `OG-sk-1`, `OG-sk-2`, `OG-sk-3` | the Schwab 0840 move: the gateway census, the catalog DUAL READ (new first, old second, file-name fence) and the reader IAM text | complete (`OG-sk-1` `9bcbf580a33`, `OG-sk-2` `bed56db150e`, `OG-sk-3` `a4c6ecfd30c`; my checks PASS on the merged tree; rows Z-S439, Z-S440, Z-S441) |
-| `OG-rl-19` | release R3c: the two reader-IAM policies (targeted `safe-apply`) and four code files, gated by the laptop's R3a (bucket exemption) and a gate read as the catalog role | OPEN: staged; 2026-10-21 07:00Z-11:30Z after batch16 |
-| `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount: ten files) | OPEN: staged, not before 2026-10-22 06:00Z |
+| `OG-rl-19` | release R3c: the two reader-IAM policies (targeted `safe-apply`) and four code files, gated by the laptop's R3a (bucket exemption) and a gate read as the catalog role | complete (release `2923d1ee99` live, ledger CLOSED 07:55Z; `rl19.AC1` and `AC2` PASS, AC2 after the monitor-line amendment; proof VALID; landing drained `76d895d4ede`; READY sent to COO~SB 08:03Z; row Z-S443: service memory 881 MB, cause not established; CTO read 08:06Z 869 MB flat; owed: one more read at 12:00Z) |
+| `OG-rl-18` | batch17 release (master-wide scope plus the `/callback` exemption plus the mount plus MCPINDEX candidate e, the served catalog: eleven files and one manifest key) | OPEN: Phase A GO sent 08:26Z; Phase B not before 2026-10-22 06:00Z |
 
 ## 2. What the round delivered against the endpoint -- OPEN
 
@@ -26,7 +26,7 @@ To fill from the live read-backs after `OG-rl-17` and `OG-rl-18` close.
 ## 3. Rows
 
 - **Rulings this round (mine):** `Z-S429`, `Z-S430`, `Z-S434` (adjudicates `Z-S431`, `Z-S432`, `Z-S433`), `Z-S435` (worker rows `W174-S1`, `W174-S2`), `Z-S437` (`W175-S1`). Filed, not ruled: `Z-S436` (relayed, see section 4).
-- **Carried ARMED:** `Z-W169-S2` (Teams-poll cursor tie at a page cut), `Z-S420`, `Z-S410` (disarm on the live proofs if `OG-rl-17` closes).
+- **Carried ARMED:** `Z-W169-S2` (Teams-poll cursor tie at a page cut), `Z-S410` (the transactions half is proven live: 2 rows; the fees half has no live read, so it stays ARMED; round 48 carries one). `Z-S420` is DISARMED in `Z-S444` on its own condition (health 200 through the read-back, 8 of 8 load calls, `rl17.AC2/AC3` PASS).
 
 ## 4. The enrichment list this seat proposes for round 48
 
