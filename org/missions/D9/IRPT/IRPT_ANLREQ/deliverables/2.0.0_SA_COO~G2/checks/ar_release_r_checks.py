@@ -107,8 +107,8 @@ def arm_record(path):
         if len(read_tar(p)) != art.get("member_count") or art.get("member_count") != MEMBERS_NOW:
             fails.append("member_count is %s (want %d and the tarball's own count)" % (art.get("member_count"), MEMBERS_NOW))
     bd = rec.get("bindings_diff") or {}
-    if bd.get("keys_added") != ["tickets_table"] or bd.get("keys_changed") != ["provenance"] or set(bd.get("provenance_keys_changed") or []) != PROV_MOVES:
-        fails.append("bindings_diff is %s want keys_added tickets_table, changed provenance %s" % (bd, sorted(PROV_MOVES)))
+    if bd.get("keys_added") != [] or bd.get("keys_changed") != ["provenance"] or set(bd.get("provenance_keys_changed") or []) != PROV_MOVES:
+        fails.append("bindings_diff is %s want no key added, changed provenance %s" % (bd, sorted(PROV_MOVES)))
     tb = rec.get("two_builds") or {}
     if not tb.get("files_compared") or tb.get("files_compared") != tb.get("identical"):
         fails.append("two_builds not identical: %s" % tb)
