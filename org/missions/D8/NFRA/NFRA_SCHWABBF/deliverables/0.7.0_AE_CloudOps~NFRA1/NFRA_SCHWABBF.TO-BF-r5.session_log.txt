@@ -1,0 +1,20 @@
+NFRA_SCHWABBF.TO-BF-r5 session log -- 0.7.0_AE_CloudOps~NFRA1, 2026-10-21 ~17:26Z to ~17:50Z (laptop)
+
+archetype: DEPLOY
+
+17:26Z  Order from 2.0.0_SA_COO~SB (msg 110159): push, key function, FIXED puller upload, in parallel with the r4 converter drain.
+17:28Z  Step 1: e2fea02fad is an ancestor of HEAD; puller line 305 reads the pipe form; box i-0f3d57a97f14727af log tail: last fire 10:45Z today (downloaded=10), no fire since; old-form keys under schwab/08403355/bronze/ with LastModified >= 13:00Z: 0 (the 10 of 10:45Z are before the R4c copy).
+17:31Z  Step 5a: function-map artifact_sha256 one-value change committed c9de8f372d (the lane did not refuse it).
+17:32Z  Step 2: deploy_ledger.py open refused the order's kinds code-deploy and s3-upload; opened with activation for both legs (row S18). Entry 2 OPEN.
+17:33Z  Step 3: my git push was refused by the LD-0367 integrator-only gate; asked 0.0.0_AB_MSTR to push. Origin box/laptop later read 60341826d01 (MSTR's box-sync), containing e2fea02fad, c9de8f372d, 35d1bfbd82b. The gate deployed nothing for _monolith_bronze.py.
+17:38Z  Amendment 2 (msg 110163): deploy that one file by the gate's own route.
+17:42Z  safe_deploy_core.deploy_file -> s3://opal-data-bd/code/bronze/_monolith_bronze.py: MATCH, ETag e59c68a31c8fc4e8dde82f57898fbff0 = repo md5, new VersionId jalNRmtiRcEu655VIh2sRGACkDAMZlTI; prior taU21QjAn1gScz8Otc9neFIw_4bLcbWg. L7 closed.
+17:43Z  Step 4: puller uploaded to s3://opal-data-assets/code/canonical-schwab-si2/sdd-daily-pull.ps1 with --sse AES256: ETag 4555d652dda8ce569ec09bdee4f5e5fe = repo md5, 51314 bytes, new VersionId va6AYiIWWEtm2HUKANz6YpyDYkgT2T1w; prior SMhvvWAbVOEv86DILTR.mBvF3uLSa0CP. L8 closed.
+17:44Z  Entry 2 CLOSED (all 2 legs proven). Entry 1 (nfra-schwabbf-0840-all-tiers-cutover-20261021) left OPEN: L6 (the 49F converter drain) is not yet proven.
+17:47Z  Old-form keys since 13:00Z re-measured: 0.
+
+## Compiler Tools
+deploy_ledger.py: open, close-leg, close.
+safe_deploy_core.py: file_to_s3_target, second_targets_for, deploy_file (the gate's own function).
+aws s3api head-object / list-object-versions: both objects before and after.
+Gaps: the ledger tool accepts no code-deploy or s3-upload kind (row S18); the pre-push gate deployed nothing for the named file (the issuer ruled amendment 2).
