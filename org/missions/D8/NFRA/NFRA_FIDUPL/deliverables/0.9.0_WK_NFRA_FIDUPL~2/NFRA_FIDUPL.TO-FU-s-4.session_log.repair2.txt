@@ -1,0 +1,23 @@
+NFRA_FIDUPL.TO-FU-s-4 -- REPAIR 2 session log
+worker 0.9.0_WK_NFRA_FIDUPL~2, worktree C:/tmp/fidupl-w2, branch wk-NFRA_FIDUPL-2
+Synthetic fixtures only. No S3 call, no AWS call, no box, no real Wealthscape file read.
+
+1. Premises re-grounded: CLASS_NOT_TRADING has no importer (comp-find --files: 3 hits, 1 DEF in land.py, 1 DOC in the order).
+   prev_trading_day is strictly-before; landing_date calls it only on a non-trading day, so it answers on-or-before.
+2. Edits: land.py (landing_date, _examine with content_as_of and content_date, CLASS_NOT_TRADING removed, per-file
+   content_as_of in the record); split.py (landing_date on each file's as-of before the firm destination);
+   tests/test_land.py (test_non_trading_day_is_failure replaced; test_run_record_carries_both_dates_per_file added);
+   tests/test_split.py (test_split_lands_a_weekend_as_of_under_the_prior_trading_day added).
+3. Lint: ruff check --target-version py39 --select E,F,W --line-length 120 on the four files: All checks passed!
+   (two E501 lines fixed before the commit.)
+4. Checks, at the code commit f4289cfcb834370933d72e4e2f2256c59985c0b0:
+   python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu4   -> R1-FU4-OK passed=16 (rc 0)
+   python .../fidupl_round_checks.py fu4d  -> R1-FU4D-OK dests=6 (rc 0)
+   python .../fidupl_round_checks.py fr2   -> R1-FR2-OK passed=14 (rc 0)
+5. Module suite: python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests -> 244 passed in 3.34s (rc 0)
+6. Mutant (scratch copy under .scratch/mut, landing_date returns day): test_land.py -> 2 failed, 14 passed.
+   The two failures: test_non_trading_as_of_lands_under_the_last_trading_day_on_or_before_it and
+   test_run_record_carries_both_dates_per_file. The scratch copy was removed.
+7. Determinism: test_land.py, two same-input runs: 16 passed in 1.01s; 16 passed in 1.11s.
+8. Commits (LOCAL on wk-NFRA_FIDUPL-2): f4289cfcb834370933d72e4e2f2256c59985c0b0 (code); 3347ba725392369b7a29be1928e8d35b49441995 (surprise rows S12-S17).
+9. The order's status line is NOT flipped: the TO file is outside the paths block (row NFRA_FIDUPL-D1-W2-S16).
