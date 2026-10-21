@@ -1,0 +1,778 @@
+{
+ "schema": "gateway_platform_labels/1",
+ "items": [
+  {
+   "tool": "client_get_allocation",
+   "adapter": "bd49f",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value is accepted only when, lower-cased with surrounding spaces stripped, it reads blackdiamond or black diamond. The check is a constant comparison and reads no column, and any other non-null value is refused platform_not_source_label.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once with no label filter, and the allocation is read for the account as if the argument were not sent.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose stripped lower-cased text is neither blackdiamond nor black diamond"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:635",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:162",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:164",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:44"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "bdcottonwood",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must equal a Custodian value present in the newest fact_allocations partition, and also one of the Custodian values of this account's own allocation rows. The match is exact and case-sensitive. Otherwise it is refused platform_not_source_label, and the value is used for nothing else on this path.",
+   "label_source": {
+    "table": "fact_allocations",
+    "column": "Custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and the account's model assignment and target weights are read from the newest partitions of each table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not a Custodian value of the partition or of this account's allocation rows"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:445",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:448",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:190",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:192"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "commonwealth",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the constant commonwealth, compared lower-cased to the adapter's PLATFORM_LABEL. Any other non-null value is refused platform_not_source_label before the account reference is read, and no label is read from data.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call goes on after the account reference parses and refuses no_allocation_source with no read, since the closed delivery has no allocation table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose lower-cased text is not commonwealth"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:305",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:95",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:29"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "eclipse",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "The platform argument is never read on this path, so no value of platform is refused platform_not_source_label. With no model key the call refuses account_not_resolved first, and with a model key it returns the model allocation, which carries no custodian label.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call behaves the same as with any value: no model key refuses account_not_resolved, and a model key returns the model allocation with a null platform label.",
+   "refusals": [],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:214",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:217",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:218",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:274"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "orion",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be an exact custodian label that the newest fact_positions partition holds, else platform_not_source_label. The account rows are then kept only when they carry that custodian, so the allocation is the one custodian's rows.",
+   "label_source": {
+    "table": "fact_positions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted every row of the account in the newest fact_positions partition is used, with no custodian filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest partition carries as its custodian"
+    },
+    {
+     "code": "account_not_resolved",
+     "when": "a platform label passes the partition check but the account has no row under that label"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:331",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:186",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:187",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:189"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "schwab",
+   "firm": "49financial",
+   "accepts_platform": false,
+   "platform_meaning": "Only an omitted platform passes: any non-null value is refused, the contract labels SmartX and BlackDiamond with platform_not_source_label and every other value with platform_enum_open, because the platform enum is open.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the allocation is derived from one partition each of dim_position and dim_balance, with no model.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform equal to SmartX or BlackDiamond is passed"
+    },
+    {
+     "code": "platform_enum_open",
+     "when": "any other non-null platform value is passed to the call"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:299",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:100",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:101"
+   ]
+  },
+  {
+   "tool": "client_get_allocation",
+   "adapter": "smartx",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the exact string smartx, the adapter's own PLATFORM_LABEL. Any other non-null value, including a case variant, is refused platform_not_source_label before any read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the model assignment, targets and weights are read for the account with no label filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not the exact string smartx"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:337",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:84",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:85",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:35"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "bd49f",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value is accepted only when, lower-cased with surrounding spaces stripped, it reads blackdiamond or black diamond. The check is a constant comparison and reads no column, and any other non-null value is refused platform_not_source_label.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once with no label filter, and the fee rows of the account are read from the live fees table in the window.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose stripped lower-cased text is neither blackdiamond nor black diamond"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:708",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:162",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:164",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:44"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "bdcottonwood",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must equal a Custodian value present in the newest fact_transactions partition, else platform_not_source_label. The Management Fee rows are then kept only when their Custodian equals it, so a value naming another custodian returns no fee rows and no refusal.",
+   "label_source": {
+    "table": "fact_transactions",
+    "column": "Custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and every Management Fee row of the account in the window of the newest partition is kept, deduplicated on TransactionID.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not a Custodian value of the newest transactions partition"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:398",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:338",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:351",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:192"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "commonwealth",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the constant commonwealth, compared lower-cased to the adapter's PLATFORM_LABEL. Any other non-null value is refused platform_not_source_label before the account reference is read, and no label is read from data.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call goes on after the account reference parses and the window check, then refuses no_fee_source with no read, since there is no fee table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose lower-cased text is not commonwealth"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:313",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:95",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:29"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "eclipse",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "The platform argument is never read on this path, so no value of platform is refused platform_not_source_label. The call refuses no_fee_source at once with zero reads, since there is no Eclipse silver fee table.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call refuses no_fee_source at once with zero reads, exactly as it does for any other platform value.",
+   "refusals": [],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:209",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:210",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:211"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "orion",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be an exact custodian label that the newest fact_transactions partition holds, else platform_not_source_label. The fee rows are then kept only when their own custodian equals it.",
+   "label_source": {
+    "table": "fact_transactions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted the account's fee rows of the window are read from the newest fact_transactions partition with no custodian filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest transactions partition carries as its custodian"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:360",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:205",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:206",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:207"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "schwab",
+   "firm": "49financial",
+   "accepts_platform": false,
+   "platform_meaning": "Only an omitted platform passes: any non-null value is refused, the contract labels SmartX and BlackDiamond with platform_not_source_label and every other value with platform_enum_open, because the platform enum is open.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the call goes on to the window check, then refuses no_fee_source with zero reads, since Schwab has no fee table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform equal to SmartX or BlackDiamond is passed"
+    },
+    {
+     "code": "platform_enum_open",
+     "when": "any other non-null platform value is passed to the call"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:377",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:100",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:101"
+   ]
+  },
+  {
+   "tool": "client_get_fees",
+   "adapter": "smartx",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the exact string smartx, the adapter's own PLATFORM_LABEL. Any other non-null value, including a case variant, is refused platform_not_source_label before any read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once, the window check runs, and the call refuses no_fee_source with zero reads, since SmartX has no fee-row table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not the exact string smartx"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:393",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:84",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:85",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:35"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "bd49f",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value is accepted only when, lower-cased with surrounding spaces stripped, it reads blackdiamond or black diamond. The check is a constant comparison and reads no column, and any other non-null value is refused platform_not_source_label.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once with no label filter, and the lots of the account are read from the live unrealized table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose stripped lower-cased text is neither blackdiamond nor black diamond"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:510",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:162",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:164",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:44"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "bdcottonwood",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must equal a Custodian value present in the newest fact_allocations partition, and also one of the Custodian values of this account's own allocation rows. The match is exact and case-sensitive. Otherwise it is refused platform_not_source_label, and the holdings rows are not filtered by the value.",
+   "label_source": {
+    "table": "fact_allocations",
+    "column": "Custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and the account's positions and cash are read from the newest holdings partition with every custodian.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not a Custodian value of the partition or of this account's allocation rows"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:280",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:283",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:190",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:192"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "commonwealth",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the constant commonwealth, compared lower-cased to the adapter's PLATFORM_LABEL. Any other non-null value is refused platform_not_source_label before the account is read, and no label is read from data.",
+   "label_source": null,
+   "omit_means": "When platform is omitted no label check runs and the account positions and valuation rows are read from the newest partitions of their tables.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose lower-cased text is not commonwealth"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:208",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:95",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:29"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "eclipse",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "The platform argument is never read on this path, so no value of platform is refused platform_not_source_label. The call refuses vendor_no_holdings at once with zero reads, since Eclipse has no holdings table.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call refuses vendor_no_holdings at once with zero reads, exactly as it does for any other platform value.",
+   "refusals": [],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:199",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:200",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:201"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "orion",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be an exact custodian label that the newest fact_positions partition holds, else platform_not_source_label. The account rows are then kept only when they carry that custodian, and an account with no row under it is refused account_not_resolved.",
+   "label_source": {
+    "table": "fact_positions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted every row of the account in the newest fact_positions partition is used, with no custodian filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest partition carries as its custodian"
+    },
+    {
+     "code": "account_not_resolved",
+     "when": "a platform label passes the partition check but the account has no row under that label"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:269",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:186",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:187",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:189"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "schwab",
+   "firm": "49financial",
+   "accepts_platform": false,
+   "platform_meaning": "Only an omitted platform passes: any non-null value is refused, the contract labels SmartX and BlackDiamond with platform_not_source_label and every other value with platform_enum_open, because the platform enum is open.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the account view is read from one partition each of dim_position and dim_balance.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform equal to SmartX or BlackDiamond is passed"
+    },
+    {
+     "code": "platform_enum_open",
+     "when": "any other non-null platform value is passed to the call"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:289",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:100",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:101"
+   ]
+  },
+  {
+   "tool": "client_get_holdings",
+   "adapter": "smartx",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the exact string smartx, the adapter's own PLATFORM_LABEL. Any other non-null value, including a case variant, is refused platform_not_source_label before any read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the positions and cash of the account are read with no label filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not the exact string smartx"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:289",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:84",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:85",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:35"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "bd49f",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value is accepted only when, lower-cased with surrounding spaces stripped, it reads blackdiamond or black diamond. The check is a constant comparison and reads no column, and any other non-null value is refused platform_not_source_label.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once with no label filter, and the account transactions of the window are read from the live transactions table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose stripped lower-cased text is neither blackdiamond nor black diamond"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:565",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:162",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:164",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:44"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "bdcottonwood",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must equal a Custodian value present in the newest fact_transactions partition, else platform_not_source_label. The account rows of the window are then kept only when their Custodian equals it, so a value naming another custodian returns an empty window and no refusal.",
+   "label_source": {
+    "table": "fact_transactions",
+    "column": "Custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and every account row of the window in the newest transactions partition is kept, deduplicated on TransactionID.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not a Custodian value of the newest transactions partition"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:372",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:338",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:351",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:192"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "commonwealth",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the constant commonwealth, compared lower-cased to the adapter's PLATFORM_LABEL. Any other non-null value is refused platform_not_source_label before the window is read, and no label is read from data.",
+   "label_source": null,
+   "omit_means": "When platform is omitted no label check runs and the account rows of the window are read from the newest transactions partition.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose lower-cased text is not commonwealth"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:263",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:95",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:29"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "eclipse",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "The platform argument is never read on this path, so no value of platform is refused platform_not_source_label. The call refuses vendor_no_transactions at once with zero reads, since no Eclipse silver table carries account transactions.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the call refuses vendor_no_transactions at once with zero reads, exactly as it does for any other platform value.",
+   "refusals": [],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:204",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:205",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:206"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "orion",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be an exact custodian label that the newest fact_transactions partition holds, else platform_not_source_label. The account rows are then kept only when their own custodian equals it, and a label with no row of the account returns an empty window rather than a refusal.",
+   "label_source": {
+    "table": "fact_transactions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted the account's Complete rows of the window are read from the newest fact_transactions partition with no custodian filter.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest transactions partition carries as its custodian"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:306",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:205",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:206",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:207"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "schwab",
+   "firm": "49financial",
+   "accepts_platform": false,
+   "platform_meaning": "Only an omitted platform passes: any non-null value is refused, the contract labels SmartX and BlackDiamond with platform_not_source_label and every other value with platform_enum_open, because the platform enum is open.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the account dim_transaction rows of the window are read, summed across the partitions in range.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform equal to SmartX or BlackDiamond is passed"
+    },
+    {
+     "code": "platform_enum_open",
+     "when": "any other non-null platform value is passed to the call"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:324",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:100",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:101"
+   ]
+  },
+  {
+   "tool": "client_get_transactions",
+   "adapter": "smartx",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the exact string smartx, the adapter's own PLATFORM_LABEL. Any other non-null value, including a case variant, is refused platform_not_source_label before any read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once, the window check runs, and the call refuses vendor_no_transactions with zero reads, since SmartX has no account-transaction table.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not the exact string smartx"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:328",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:84",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:85",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:35"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "bd49f",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value is accepted only when, lower-cased with surrounding spaces stripped, it reads blackdiamond or black diamond. The check is a constant comparison and reads no column, and any other non-null value is refused platform_not_source_label before the crosswalk is read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once with no label filter, and every account of the cross-reference whose number ends in the last-4 becomes a candidate.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose stripped lower-cased text is neither blackdiamond nor black diamond"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:471",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:162",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bd49f.py:164",
+    "infra/aws/ec2/opal-gateway/app/client_core.py:566"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "bdcottonwood",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be a Custodian value present in the newest fact_allocations partition for some account, else platform_not_source_label. A candidate is then kept only when the value is one of its own Custodian values, so a passing value can yield no candidate without a refusal.",
+   "label_source": {
+    "table": "fact_allocations",
+    "column": "Custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and every account of the partition whose number ends in the last-4 becomes a candidate, with its own Custodian labels.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not a Custodian value anywhere in the newest partition"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:229",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:252",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_bdcottonwood.py:192",
+    "infra/aws/ec2/opal-gateway/app/client_core.py:566"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "commonwealth",
+   "firm": "cottonwood",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the constant commonwealth, compared lower-cased to the adapter's PLATFORM_LABEL. Any other non-null value is refused platform_not_source_label before the crosswalk is read, and no label is read from data.",
+   "label_source": null,
+   "omit_means": "When platform is omitted no label check runs and every crosswalk account whose number ends in the last-4 becomes a candidate, each stamped with the constant commonwealth.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform whose lower-cased text is not commonwealth"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:162",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:95",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_commonwealth.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_core.py:566"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "eclipse",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be a custodian label that the newest Orion fact_positions partition holds, else platform_not_source_label. A candidate is kept only when its custodian equals the value, and a label that matches no candidate is refused no_account_match.",
+   "label_source": {
+    "table": "fact_positions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and every row of the newest Orion fact_positions partition ending in the last-4 becomes a candidate.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest partition carries as its custodian"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:155",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:154",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:156",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_eclipse.py:167"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "orion",
+   "firm": "inflection",
+   "accepts_platform": true,
+   "platform_meaning": "A platform value must be an exact custodian label that the newest fact_positions partition holds, else platform_not_source_label. Candidates are then kept only when their own custodian equals it, and a label that matches no account of the last-4 is refused no_account_match.",
+   "label_source": {
+    "table": "fact_positions",
+    "column": "custodian"
+   },
+   "omit_means": "When platform is omitted no label check runs and every account row of the partition ending in the last-4 becomes a candidate, labelled with its own custodian.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that no row of the newest partition carries as its custodian"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:230",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:231",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:242",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_orion.py:243"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "schwab",
+   "firm": "49financial",
+   "accepts_platform": false,
+   "platform_meaning": "Only an omitted platform passes: any non-null value is refused, the contract labels SmartX and BlackDiamond with platform_not_source_label and every other value with platform_enum_open, because the platform enum is open.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and the call refuses no_resolve_source with zero reads, since Schwab has no resolve source in the gateway.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform equal to SmartX or BlackDiamond is passed"
+    },
+    {
+     "code": "platform_enum_open",
+     "when": "any other non-null platform value is passed to the call"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:283",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:96",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:100",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_schwab.py:101"
+   ]
+  },
+  {
+   "tool": "client_resolve_account",
+   "adapter": "smartx",
+   "firm": "49financial",
+   "accepts_platform": true,
+   "platform_meaning": "The only accepted platform value is the exact string smartx, the adapter's own PLATFORM_LABEL. Any other non-null value, including a case variant, is refused platform_not_source_label before any read.",
+   "label_source": null,
+   "omit_means": "When platform is omitted the check returns at once and every firm account whose custodian number ends in the last-4 becomes a candidate, stamped with the constant smartx.",
+   "refusals": [
+    {
+     "code": "platform_not_source_label",
+     "when": "a non-null platform that is not the exact string smartx"
+    }
+   ],
+   "cite": "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:247",
+   "evidence": [
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:84",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:85",
+    "infra/aws/ec2/opal-gateway/app/client_adapter_smartx.py:35"
+   ]
+  }
+ ]
+}
