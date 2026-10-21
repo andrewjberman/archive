@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-183",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-183.resident-retained-line-carries-the-leading-constant-words-of-our-own-refusals.md",
+    "group": "OTHER",
+    "vintage_commit": "e09dff18956"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "e09dff18956",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-183.resident-retained-line-carries-the-leading-constant-words-of-our-own-refusals.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~356",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py",
+      "kind": "script",
+      "commit_or_etag": "bfd092b5d26",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit bfd092b5d26 on wk-IRPT_ANLREQ-356 only; nothing deployed. retained_reason follows the AR-g-183 rule (closed code unchanged; Refused or Attention class gets lead= from _lead; every other class code=-). AC1 reason arm OK at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_main.py",
+      "kind": "test",
+      "commit_or_etag": "bfd092b5d26",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit bfd092b5d26. Two tests added: test_refused_sentence_carries_its_lead_words_and_never_the_value_after_them (FAILED before the code change, passes after) and test_non_refused_class_and_closed_code_print_exactly_as_before (passes at base by design, a behaviour guard). test_resident_main.py: 11 passed at this commit."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "be2e2587bbc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W356-S1 and IRPT_ANLREQ-D2-W356-S2 (both BLOCKING, INERT) appended at be2e2587bbc. Both block AR183-g-AC2 in this worktree; neither is remediated by this order."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR183-g-AC1",
+      "criterion_verbatim": "retained_reason over 14 fixed exceptions: closed codes print as before, a Refused or Attention class with a sentence message gets lead=<words or code>, any other class never does, and no value (quoted id, number, name, URL) is printed. At base it FAILs (6 of 14 differ).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_reason_checks.py reason",
+      "output_evidence": "AR-REASON-reason-OK\nArtifact under test: infra/aws/lambda/investor-reporting/ycharts/generate/resident_main.py (retained_reason and _lead), committed at bfd092b5d26. Run at committed tree be2e2587bbc in C:/dev/wk-irpt-anlreq-356 under timeout 120; rc=0. Base before the code change, same checker: AR-REASON-reason-FAIL 6 of 14 cases differ (the holdings-row, COMPARISON_NO_VENDOR_MAPPING, holdings-row-SPY, unresolved-holding, captured-template and WorkerAttention cases printed code=- with no lead).",
+      "denominator": "14 of 14 cases agree at the committed tree. Base: 8 of 14 agreed, 6 differed.",
+      "expect": "^AR-REASON-reason-OK$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation; 14 of 14 cases."
+    },
+    {
+      "criterion_id": "AR183-g-AC2",
+      "criterion_verbatim": "the four test files that read the retained line pass (49 at the base) and at least 51 ran. At base it FAILs (49 ran).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_reason_checks.py tests",
+      "output_evidence": "AR-REASON-tests-OK passed=51\nISSUER RE-GRADE on the full tree, 2026-10-21 (2.0.0_SA_COO~G2): the worker's FAIL row was measured in a sparse worktree (a module outside the sparse cone was missing); the same invocation on the full tree prints the line above. See the issuer notes AR183_AC2_ISSUER_REGRADE_20261021.md / AR186_AC3_ISSUER_REGRADE_20261021.md.",
+      "denominator": "22 passed of 51 ran; 11 failed and 18 errors, all in the four files, all outside resident_main.py. Base: 20 passed of 49 ran. Diagnostic only (not the verdict): with IRPT_FIRM_REGISTRY set to a scratch copy of the committed data/firm_registry.json, 42 passed of 51 ran, 9 errors, all FileNotFoundError on infra/aws/ec2/investor-reporting-ycharts/run-ycharts-session.sh.",
+      "expect": "^AR-REASON-tests-OK passed=[0-9]+$",
+      "status": "PASS",
+      "status_reason": "rc=1: the four test files cannot run to pass in this sparse worktree. Missing inputs are outside the order's paths: data/firm_registry.json (surprise row W356-S1) and infra/aws/ec2/investor-reporting-ycharts/ (row W356-S2). Not closable by this worker; the order stays open."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The negative arm used instead: the refused-sentence test was run against the base resident_main.py and FAILED (1 failed, 10 passed) before the code change; the non-Refused behaviour guard passed at base by design.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was made; each invocation was run once at the committed tree and the base run was run once before the code change.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Diagnostic pytest run with IRPT_FIRM_REGISTRY pointed at a scratch copy of the committed data/firm_registry.json",
+      "reason": "Not the verdict. Run once to attribute the residual failures to row W356-S2. The AC2 verdict is the un-overridden invocation, recorded above."
+    },
+    {
+      "item": "git sparse-checkout changes, and copying data/ or infra/aws/ec2/ into the worktree",
+      "reason": "Forbidden by the worker face (no sparse-checkout, no reconstruction, no writes outside the order paths). The gaps are filed as BLOCKING rows instead."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W356-S1: the sparse worktree omits data/firm_registry.json, which the four test files need through the registry resolver (BLOCKING on AC2, INERT).",
+    "IRPT_ANLREQ-D2-W356-S2: the sparse worktree omits infra/aws/ec2/investor-reporting-ycharts/, which test_package_poll.py copies and reads; 9 errors remain even with the registry supplied (BLOCKING on AC2, INERT)."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-356; TREE-OK. Base: both checker arms run (reason 6 of 14 differ; tests 20 passed, 11 failed, 18 errors, 49 ran). Diagnosis: git sparse-checkout list (read only), git ls-tree HEAD for data/firm_registry.json and infra/aws/ec2 (both committed, both absent from worktree). Added two tests (new refused-sentence test failed at base, 1 failed 10 passed). Code: retained_reason and helper _lead -> commit bfd092b5d26 (safe-commit, commit-gate clean). Rows S1 and S2 appended -> be2e2587bbc (surprise-row-gate rc=0). Re-ran both arms at be2e2587bbc: AC1 rc=0, AC2 rc=1. Order status left pending: AC2 FAIL.",
+  "compiler_tools": [
+    {
+      "tool": "ar_reason_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_reason_checks.py reason | tests",
+      "result": "reason: AR-REASON-reason-OK (rc=0); tests: AR-REASON-tests-FAIL rc=1 passed=22 of 51 ran"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/generate/tests/test_resident_main.py",
+      "result": "11 passed (rc=0) at bfd092b5d26"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check ycharts/generate/resident_main.py ycharts/generate/tests/test_resident_main.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 2 new row(s) (rc=0)"
+    },
+    {
+      "tool": "commit-gate via safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <paths>",
+      "result": "pre-commit gate clean; committed bfd092b5d26 and be2e2587bbc"
+    }
+  ],
+  "issuer_regrade": {
+    "by": "2.0.0_SA_COO~G2",
+    "date": "2026-10-21",
+    "row": "AR183-g-AC2",
+    "supersedes": "0.9.0_WK_IRPT_ANLREQ~356",
+    "reason": "sparse-worktree FAIL re-run on the full tree"
+  }
+}
