@@ -1,0 +1,21 @@
+# step C plan, statement-level diff from the plan JSON
+non-noop: [('aws_iam_role_policy.schwab_si2_monolith_write', ['update'])]
+statements before: 4 | after: 5
+REMOVED: []
+ADDED: ['MonolithSchwabStateWrite']
+same Sid, changed body: ['MonolithSchwabList', 'MonolithSchwabWrite']
+  ADD MonolithSchwabStateWrite Allow ['s3:PutObject']: 2 resource(s)
+       arn:aws:s3:::opal-data-49financial/schwab/49financial/state/pulls/date=*/08403355.*
+       arn:aws:s3:::opal-data-49financial/schwab/49financial/state/daily_pull/date=*/08403355.*
+
+# the two statements whose body changes, resource-level
+MonolithSchwabList | Action before/after: ['s3:ListBucket'] ['s3:ListBucket'] | Effect Allow Allow
+   resources before: 1 after: 1 | REMOVED: [] | ADDED: 0
+   Condition changed:
+      before {"StringLike": {"s3:prefix": ["schwab/08242234/bronze/*", "schwab/08335338/bronze/*", "schwab/08403355/bronze/*"]}}
+      after  {"StringLike": {"s3:prefix": ["schwab/08242234/bronze/*", "schwab/08335338/bronze/*", "schwab/08403355/bronze/*", "schwab/49financial/bronze/*"]}}
+MonolithSchwabWrite | Action before/after: ['s3:PutObject'] ['s3:PutObject'] | Effect Allow Allow
+   resources before: 3 after: 4 | REMOVED: [] | ADDED: 1
+      + arn:aws:s3:::opal-data-assets/schwab/49financial/bronze/*/date=*/08403355.*
+other statements changed or removed: []
+actions in the planned policy: ['s3:ListBucket', 's3:PutObject'] | any Delete action: False

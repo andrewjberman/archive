@@ -1,0 +1,37 @@
+
+Lambda Build-and-Upload
+  Pipeline:  opal-assets
+  Bucket:    s3://opal-313476888478-lambda-artifacts/opal-assets/
+  JSON tool: node
+  Function:  opal-assets-silver-schwab (single-function mode)
+
+Found 1 function(s) to build
+
+-> opal-assets-silver-schwab
+  Source:  infra/aws/lambda/opal-assets/opal-assets-silver-schwab
+  Files:   lambda_function.py schwab_runtime.py schwab_conversion.py schwab_schemas.py schwab_projections.py conversion_manifest.py set_identity_guard.py crs_reader.py cs_reader.py silver_registry.py backfill_status.py stream_parquet.py
+  OK: import-closure -- 12 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer. (Nested lazy imports exempt by design.)
+  SKIP: manifest-index gate -- this BUILD_MANIFEST declares no declared_blobs,
+        so there is no index reference to check against (not a pass).
+  SHA256:  R6EGliwGV7QUd9cd0WdJyMZOI1BL2qt1nsN+LcqlbpA=
+  Size:    84K
+  ✓ s3://opal-313476888478-lambda-artifacts/opal-assets/opal-assets-silver-schwab.zip (write VERIFIED: size=82606, sha256 metadata match)
+
+================================================
+Complete — 1 function(s) built and uploaded
+
+Source map updated with artifact_s3_key + artifact_sha256.
+
+Next steps:
+  git add infra/aws/lambda/ci/function-map/<name>.json
+  git commit -m 'ci: upload artifacts for opal-assets'
+  cd infra/aws/terraform/opal-assets
+  .tools/terraform.exe plan    # should show Lambda updates
+  .tools/terraform.exe apply
+  .tools/terraform.exe plan    # must show No changes
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh opal-assets --version opal-assets-vX.Y.Z \
+       --author "{your-serial} <{your-serial}@opal.agent>"
+  # --author is REQUIRED for correct attribution: record-terraform-deploy
+  # commits, and its commit must be authored by a permitted agent serial.
+  # Omitting it derives the serial from .comp-graph/.agent_context (shared,
+  # best-effort) -- pass it explicitly to be sure.
