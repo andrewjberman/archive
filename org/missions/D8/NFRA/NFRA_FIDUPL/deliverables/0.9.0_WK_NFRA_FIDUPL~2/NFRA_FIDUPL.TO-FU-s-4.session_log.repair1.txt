@@ -1,0 +1,22 @@
+NFRA_FIDUPL.TO-FU-s-4 -- REPAIR 1 session log (worker 0.9.0_WK_NFRA_FIDUPL~2, worktree C:/tmp/fidupl-w2, branch wk-NFRA_FIDUPL-2)
+Values-free: counts, field indexes, test names and checker lines only. Synthetic fixtures; no real export read; no AWS, no live call, no secret.
+
+1. Tree check: branch wk-NFRA_FIDUPL-2; org and .tools present (TREE-OK).
+2. Baseline: pytest test_land.py at dcdbbe85954 -> 11 passed.
+3. Code: land.py gains DATE_COLUMN (position 0, prices 0, security 0, balance 3, account 16, transact 17), _content_date(data, name),
+   outcome / landed_count / failed_count in the run record, OUTCOME line in main. Committed ca6db5539536a2bbd8e1abc07141193ffc332357
+   (safe-commit rc=0).
+4. Tests: four new tests added and the account fixture moved to column 16; pytest test_land.py -> 15 passed.
+5. Checker, cwd the worktree, main-tree checker by absolute path:
+   fu4  -> R1-FU4-OK passed=15   (rc 0)
+   fu4d -> R1-FU4D-FAIL rc=1 dests=3 last=ERROR: failed_step=date failure_class=content date unreadable
+   Cause: the checker's synth_handoff writes the date in field 0 of all six synthetic files; balance, account and transact
+   are unreadable under the per-file columns. Filed as NFRA_FIDUPL-D1-W2-S11 (commit 4e4542eba22acbe62e2ebfd8fc11f656a4ad319b).
+   The checker is outside this grant and was not edited; the lander was not reverted to pass it.
+6. Mutant (scratch copy .scratch/mut, not committed): DATE_COLUMN balance, account, transact set to 0 -> 3 failed, 12 passed.
+7. Determinism: two runs of test_land.py -> 15 passed, 15 passed.
+8. Order status left pending at the first pass: FU4-AC2 was FAIL.
+9. Re-run after the coordinator fixed the main-tree checker (its synth_handoff now writes each file's own as-of column):
+   fu4  -> R1-FU4-OK passed=15   (rc 0)
+   fu4d -> R1-FU4D-OK dests=6    (rc 0)
+   Instance refreshed: both rows PASS; proof-of-spec-check rc=0 (VALID). Order flipped to complete in the same commit.
