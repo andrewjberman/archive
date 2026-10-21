@@ -66,7 +66,7 @@ comp-adversary: RUN -- by reading the pair (COO half packet section 3 and the CT
   </paths>
 
   <proof_of_spec>
-Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e5d/IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E-4.fresh-token-backoff-sections-read-ib2.proof_of_spec.json`.
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e5d/IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E-5D.allow-listed-principal-sections-read-ib2.proof_of_spec.json`.
     <criterion id="E2E5D-AC1" cell_refs="AR-y-439">The record holds all nineteen lines, each answered or marked not run.<invocation>grep -c -E '^(R0|A|A2|L|U|K|T|S|P1|P2|P3|P4|P5|P6|R|R2|DLQ|D) |^RUN-DONE (PASS|STOP at )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e5d/A_E2E5D.txt</invocation><expect>^19$</expect></criterion>
     <criterion id="E2E5D-AC2" cell_refs="AR-y-439">No line holds a token, a URL, a signature or a non-synthetic email address (the leak control).<invocation>grep -c -E 'eyJ[A-Za-z0-9_-]{10,}|https?://|Bearer |X-Amz-|[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com|org|net|io)' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e5d/A_E2E5D.txt</invocation><expect>^0$</expect></criterion>
     <criterion id="E2E5D-AC3" cell_refs="AR-y-439">The ledger irpt-commentary-e2e-5d-20261020 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*irpt-commentary-e2e-5d-20261020_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
