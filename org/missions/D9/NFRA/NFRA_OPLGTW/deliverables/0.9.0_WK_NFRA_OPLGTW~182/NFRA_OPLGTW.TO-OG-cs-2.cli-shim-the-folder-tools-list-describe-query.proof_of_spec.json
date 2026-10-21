@@ -17,6 +17,11 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/folder_tools.py",
       "kind": "script",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
       "commit_or_etag": "edd78166b63",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "LOCAL commit on wk-NFRA_OPLGTW-182; not pushed and not deployed (the order has no deploy scope; nothing mounts the functions yet)."
@@ -41,7 +46,7 @@
       "criterion_id": "AC1",
       "criterion_verbatim": "AC1 (cell OG-cs-2): list_folder admission and listing. Refusals answer folder_refused naming the folder with guard_denied true; refusals make ZERO S3 calls; bronze/ NOT shown; the two table prefixes; key, size and last_modified; truncated and next_start_after carried; refused for the sibling master with no S3 call; deny wins; RESULT: PASS, exit=0.",
       "method": "command",
-      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC1.sh; echo \"exit=$?\"",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC1.sh; echo \"exit=$?\"",
       "output_evidence": "refusals answer folder_refused naming the folder, guard_denied true (an unserved bucket: ok, a bronze path: ok, a raw path: ok, an Opal non-admin with no grant: ok, a non-Opal caller: ok): ok\nrefusals made ZERO S3 calls (0): ok\nmaster admin lists the master folder: silver/ shown, bronze/ NOT shown (['schwab/08335338/silver/']): ok\nthe silver folder lists its two table prefixes (['schwab/08335338/silver/dim_position/', 'schwab/08335338/silver/fact_trn/']): ok\na page carries objects with key, size and last_modified ([['key', 'last_modified', 'size']]): ok\ntruncated and next_start_after are carried when the fake says more remain: ok\na granted person lists inside the granted folder and is refused for the sibling master with no S3 call: ok\ndeny wins: a denied sub-folder is refused for a whole-bucket grant: ok\nRESULT: PASS\nexit=0",
       "denominator": "the check's own predicates: 8 predicate lines, 8 ok",
       "status": "FAIL",
@@ -52,7 +57,7 @@
       "criterion_id": "AC2",
       "criterion_verbatim": "AC2 (cell OG-cs-2): describe_object. Refusals answer folder_refused with ZERO S3 calls; columns in file order with sensitive classes dropped and named; only the footer read through ranged GETs; junk answers not_parquet and an absent object answers not_found, neither raises; RESULT: PASS, exit=0.",
       "method": "command",
-      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC2.sh; echo \"exit=$?\"",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC2.sh; echo \"exit=$?\"",
       "output_evidence": "refusals answer folder_refused, guard_denied true, an error naming the folder: ok\nrefusals made ZERO S3 calls (0): ok\ncolumns in file order, sensitive classes dropped and named (['account_id', 'tax_lot_id', 'quantity'] | dropped ['tax_id', 'email', 'date_of_birth']): ok\nevery column carries a type string, size 1490300, num_rows 60000, row_groups 6: ok\nonly the footer was read through ranged GETs: 65536 bytes of 1490300: ok\na person granted the master folder describes the object: ok\njunk answers not_parquet and an absent object answers not_found, neither raises (not_parquet | not_found): ok\nRESULT: PASS\nexit=0",
       "denominator": "the check's own predicates: 7 predicate lines, 7 ok",
       "status": "PASS",
@@ -62,7 +67,7 @@
       "criterion_id": "AC3",
       "criterion_verbatim": "AC3 (cell OG-cs-2): query_object against the real bounded engine. A refused path answers folder_refused with ZERO S3 calls; INVALID_REQUEST and LIMIT_EXCEEDED with ZERO downloads; rows and aggregate requests; the default page is 100 of 300; the next page has no overlap; cursor reuse and tampering answer INVALID_REQUEST; sibling master refused; RESULT: PASS, exit=0.",
       "method": "command",
-      "invocation": "timeout 120 bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC3.sh; echo \"exit=$?\"",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs2.AC3.sh; echo \"exit=$?\"",
       "output_evidence": "a refused path answers folder_refused with ZERO S3 calls (0): ok\na sensitive column and an unknown top-level key answer INVALID_REQUEST with ZERO downloads (INVALID_REQUEST | INVALID_REQUEST | 0): ok\n13 listed objects answer LIMIT_EXCEEDED with ZERO downloads (LIMIT_EXCEEDED | 0): ok\na rows request answers the five lowest quantities of account 3 (columns ['account_id', 'quantity'], matched 30, returned 5): ok\nan aggregate request answers one row per account with the right sum (10 groups): ok\nthe default page is 100 of 300 matching and carries next_cursor (returned 100, matched 300): ok\nthe next page continues with no overlap ([0.0]..[99.0] then [100.0]..[199.0]): ok\na cursor reused with a different request and a tampered cursor answer INVALID_REQUEST (INVALID_REQUEST | INVALID_REQUEST): ok\na person granted the master folder queries it and is refused for the sibling master (3 | folder_refused): ok\nRESULT: PASS\nexit=0",
       "denominator": "the check's own predicates: 9 predicate lines, 9 ok",
       "status": "PASS",
@@ -110,6 +115,11 @@
       "tool": "pytest",
       "invocation": "python3 -I -m pytest tests/test_cs2_folder_tools.py -q (cwd infra/aws/ec2/opal-gateway, worktree C:/tmp/wk-og-182)",
       "result": "17 passed in 11.81s, rc 0 (the second run; the first run had 7 failures, fixed in the fixtures)"
+    },
+    {
+      "tool": "criterion runs",
+      "invocation": "each criterion run as its own bash script, bounded by timeout 120 at the shell (the bound is the execution wrapper, not part of the recorded invocation)",
+      "result": "AC1 RESULT: PASS exit=0 (the expect as written does not match; see S6); AC2 RESULT: PASS exit=0; AC3 RESULT: PASS exit=0 (the first run, stdin invocation, read FAIL exit=1; see S1 and S5)"
     },
     {
       "tool": "safe-commit",
