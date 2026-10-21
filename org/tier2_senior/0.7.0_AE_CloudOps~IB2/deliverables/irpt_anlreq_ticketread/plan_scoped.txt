@@ -1,0 +1,65 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_iam_policy.resident_ticket_read will be created
+  + resource "aws_iam_policy" "resident_ticket_read" {
+      + arn              = (known after apply)
+      + attachment_count = (known after apply)
+      + description      = "IRPT_ANLREQ TO-AR-y-486: the resident runner role reads the four filed-ticket attributes the analysis audit needs (ticket_id, ticket_type, answers, created_at). GetItem only, on the ticket table only."
+      + id               = (known after apply)
+      + name             = "irpt-ticket-audit-read-policy"
+      + name_prefix      = (known after apply)
+      + path             = "/"
+      + policy           = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = [
+                          + "dynamodb:GetItem",
+                        ]
+                      + Condition = {
+                          + "ForAllValues:StringEquals" = {
+                              + "dynamodb:Attributes" = [
+                                  + "ticket_id",
+                                  + "ticket_type",
+                                  + "answers",
+                                  + "created_at",
+                                ]
+                            }
+                          + Null                        = {
+                              + "dynamodb:Attributes" = "false"
+                            }
+                          + StringEqualsIfExists        = {
+                              + "dynamodb:Select" = "SPECIFIC_ATTRIBUTES"
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/opal-tickets",
+                        ]
+                      + Sid       = "ReadTheFiledTicketForTheAuditOnly"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + policy_id        = (known after apply)
+      + tags_all         = {
+          + "ManagedBy" = "Terraform"
+          + "Project"   = "OpalPortal"
+          + "System"    = "InvestorReporting"
+        }
+    }
+
+  # aws_iam_role_policy_attachment.runner_resident_ticket_read will be created
+  + resource "aws_iam_role_policy_attachment" "runner_resident_ticket_read" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "irpt-ycharts-runner-role"
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
