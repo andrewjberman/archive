@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-7",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "0b37a83d8df",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-7.backfill-adapter-and-main.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-7.backfill-adapter-and-main.md",
+    "group": "OTHER",
+    "vintage_commit": "0b37a83d8df"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill_adapter.py",
+      "kind": "script",
+      "commit_or_etag": "cb74c7aeec8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at cb74c7aeec8. FetchDayClient, the ExportClient over fetch.fetch_day: one fetch per (G, day); empty status list -> RetentionLimit (empty listing); HTTP 401/403/404 refusal -> EntitlementRefused. Not shipped to the box by this order.",
+      "artifact_covered_by": ["FT-s-7-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill_main.py",
+      "kind": "script",
+      "commit_or_etag": "cb74c7aeec8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-8 at cb74c7aeec8. Box command: session-count rule, one lazy sign-in, backfill_run.run imported lazily, completion record at address('fidelity', scope, 'bronze', '_runs', <NY day>, 'backfill-<run id>.json'). Never run on the box; no S3 write from this order.",
+      "artifact_covered_by": ["FT-s-7-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_backfill_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "cb74c7aeec8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL at cb74c7aeec8. Nine tests (the five named plus four), fakes only, synthetic data; pytest passes 9 of 9 under the checker.",
+      "artifact_covered_by": ["FT-s-7-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-7-AC1",
+      "criterion_verbatim": "FT-s-7-AC1 -- the five named tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7",
+      "output_evidence": "R1-FT7-OK passed=9 (the authoritative run was the main-tree checker by absolute path, C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7, cwd C:/tmp/fidupl-w8, under timeout 120; the worktree copy at the relative path prints the same line; see surprise NFRA_FIDUPL-D1-W8-S8)",
+      "denominator": "9 of 9 tests passing (pytest: 9 passed). The five named tests are present as def check functions (test_empty_status_for_a_day_is_a_retention_stop, test_refusal_is_an_entitlement_stop, test_one_fetch_serves_all_six_kinds_for_a_day, test_main_signs_in_once_and_respects_the_session_cap, test_completion_record_per_file_type_earliest_volume_and_limit) plus four further tests",
+      "status": "PASS",
+      "expect": "R1-FT7-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the order names no mutant control for this cell.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the checker invocation run before the code commit and again after it, on the same worktree",
+      "observed": "R1-FT7-OK passed=9 on both runs; the module suite gave 173 passed on the committed tree",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live call: a Fidelity sign-in, a session, an export request, a Secrets Manager read, an S3 write",
+      "reason": "The order is fakes only and says nothing runs on the box or at Fidelity from it."
+    },
+    {
+      "item": "The runner backfill_run.py (FT-s-4) and its records class",
+      "reason": "Not in this worktree; built in parallel. backfill_main imports it lazily and the tests inject fakes. Recorded as surprise NFRA_FIDUPL-D1-W8-S7."
+    },
+    {
+      "item": "A G switch between G numbers within one session",
+      "reason": "fetch_day has no G parameter and the order does not name a switch. Recorded as surprise NFRA_FIDUPL-D1-W8-S1, ARMED, disarm owner 2.0.0_SA_COO~P1."
+    },
+    {
+      "item": "A trading-calendar check for holidays and weekday windows",
+      "reason": "Not in the order. Weekend and multi-day windows are refused loudly; a holiday empty listing cannot be told from retention. Recorded as surprise NFRA_FIDUPL-D1-W8-S3, ARMED."
+    },
+    {
+      "item": "Edits to fetch.py, backfill.py, land.py, signin.py and box/run.py",
+      "reason": "Outside the order's grant; the order says read them. Each premise gap is a surprise row instead."
+    },
+    {
+      "item": "The order file status flip and the proof commit",
+      "reason": "Performed as the order directs (flip to complete together with the instance and deliverables) after the criterion passed; the order file is not in the paths block."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W8-S1: fetch_day takes no G, so a multi-G run in one session fetches the signed-in G's day under every G key; the adapter never switches G. ARMED, disarm owner 2.0.0_SA_COO~P1.",
+    "NFRA_FIDUPL-D1-W8-S2: the planner's KINDS (two names), COMPLETED or EMPTY status, and EMPTY-as-skip do not match the six file-type kinds, served value and empty-as-stop the order names. INERT.",
+    "NFRA_FIDUPL-D1-W8-S3: the planner yields calendar-day 30-day windows by default and a weekday holiday returns an empty listing that reads as a retention stop; the adapter cannot see holidays. ARMED, disarm owner 2.0.0_SA_COO~P1.",
+    "NFRA_FIDUPL-D1-W8-S4: fetch_day returns the same listing for an empty status list and a partial day; the adapter counts the status rows itself through a session wrapper. INERT.",
+    "NFRA_FIDUPL-D1-W8-S5: FetchError carries the HTTP status only in its message text and a refused download never raises; the adapter parses the text and does not classify a download refusal. INERT.",
+    "NFRA_FIDUPL-D1-W8-S6: the completion record's stop enumeration has no session-cap value; a refused run is recorded as reason none with evidence session cap reached. INERT.",
+    "NFRA_FIDUPL-D1-W8-S7: reference section 12 leaves plan_inputs, the lander call shape, the records class and the session_factory pattern undefined, and backfill_run.py is absent from this worktree. INERT.",
+    "NFRA_FIDUPL-D1-W8-S8: the criterion's relative checker path reaches a worktree copy of fidupl_round_checks.py whose md5 differs from the main-tree copy the order names; both print R1-FT7-OK passed=9. INERT."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~8/NFRA_FIDUPL.TO-FT-s-7.backfill-adapter-and-main.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py ft7 (main-tree checker, run from the worktree)",
+      "invocation": "timeout 120 python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft7",
+      "result": "R1-FT7-OK passed=9"
+    },
+    {
+      "tool": "ruff (target py39)",
+      "invocation": "ruff check --target-version py39 backfill_adapter.py backfill_main.py tests/test_backfill_adapter.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "ast (feature_version 3.9) and ASCII count",
+      "invocation": "ast.parse(src, feature_version=(3, 9)) and ord(c) > 127 count, per file",
+      "result": "OK for all three files, nonascii=0 in each"
+    },
+    {
+      "tool": "module test suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "173 passed in 2.26s"
+    }
+  ]
+}
