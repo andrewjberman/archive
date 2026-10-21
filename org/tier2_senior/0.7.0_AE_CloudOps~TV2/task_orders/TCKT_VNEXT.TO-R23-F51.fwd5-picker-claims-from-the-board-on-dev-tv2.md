@@ -12,8 +12,8 @@
 <proof_genre>RUN</proof_genre>
 <placeholders>NONE</placeholders>
 <decomp_ref>
-<decomp_doc>org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R23.md</decomp_doc> (round 23): FWD-5 exercised once on DEV, cell `R23-f5-1` (the CVO's `ADJUDICATION_v21`, relayed by the CTO's msg 11772).
-<owned_cells>R23-f5-1</owned_cells>
+<decomp_doc>org/missions/D7/TCKT/TCKT_VNEXT/decompositions/TCKT_VNEXT_DECOMP_R23.md</decomp_doc> (round 23): FWD-5 exercised once on DEV, cell `R23-fv-1` (the CVO's `ADJUDICATION_v21`, relayed by the CTO's msg 11772).
+<owned_cells>R23-fv-1</owned_cells>
 </decomp_ref>
 
   <objective>
@@ -65,8 +65,8 @@ org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1
 </paths>
 
 <proof_of_spec>
-  <criterion id="R23F51-AC1" cell_refs="R23-f5-1"><invocation>python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r23_fwd5_check.py</invocation><expect>^RUN-OK \(fwd5\)</expect></criterion>
-  <criterion id="R23F51-AC2J" cell_refs="R23-f5-1" judgment="true"/>
+  <criterion id="R23F51-AC1" cell_refs="R23-fv-1"><invocation>python org/missions/D7/TCKT/TCKT_VNEXT/deliverables/2.0.0_SA_COO~V2/R20_CHECKS/r23_fwd5_check.py</invocation><expect>^RUN-OK \(fwd5\)</expect></criterion>
+  <criterion id="R23F51-AC2J" cell_refs="R23-fv-1" judgment="true"/>
 </proof_of_spec>
 `R23F51-AC1` at the issuance: FAIL as expected (`RUN-BAD cannot read the result file or the saved ticket records`: no result file; its self-test reads `R23-FWD5-SELFTEST-OK`, 25 mutants caught). The check holds the record's side: two tickets of different types by one filer, the chosen one in_progress under the picker with events created then claimed, the other open and unassigned, the board labels equal to the types, the claim made from the board without opening a ticket, the shots full-page PNGs of the recorded size taken as the picker at the DEV origin, both tickets and both rows ABSENT, the protected tickets present. `R23F51-AC2J` is the CVO's: the full-board shot shows several open requests of more than one type together, with each row's type and age readable, and the claim was made from the board.
 
@@ -74,5 +74,5 @@ org/missions/D7/TCKT/TCKT_VNEXT/surprise-channel/investigations/INVESTIGATION_v1
 comp-schedule: RUN-AS-A-READ -- the weekday band at step 2 and the IB2 notice. comp-iam: DECLARED-NOT-APPLICABLE -- the identity rows are written and deleted with the operator's credentials as in `TO-R21-RB1`; no IAM change. comp-adversary: the lens: a claim made from inside a ticket (forbidden: FWD-5 failing is reported), an identity beyond the two or a third ticket (forbidden), a client account id committed in a shot (forbidden: reviewed at step (f)), a token or key printed.
 </preflight>
 
-# pipeline-override: a RUN order to the dell2 applier for an issuer cell (R23-f5-1, FWD-5 on DEV): a live run under the CVO's ADJUDICATION_v21 and the CTO's msg 11772; not a worker cell (it holds credentials a worker subagent does not).
+# pipeline-override: a RUN order to the dell2 applier for an issuer cell (R23-fv-1, FWD-5 on DEV): a live run under the CVO's ADJUDICATION_v21 and the CTO's msg 11772; not a worker cell (it holds credentials a worker subagent does not).
 </task_order>
