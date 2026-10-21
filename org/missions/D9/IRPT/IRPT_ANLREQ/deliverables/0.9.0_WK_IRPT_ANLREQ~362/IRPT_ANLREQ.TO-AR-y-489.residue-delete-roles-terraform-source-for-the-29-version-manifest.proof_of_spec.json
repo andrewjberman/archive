@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-489.residue-delete-roles-terraform-source-for-the-29-version-manifest",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "747d9355020",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-489.residue-delete-roles-terraform-source-for-the-29-version-manifest.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-489.residue-delete-roles-terraform-source-for-the-29-version-manifest.md",
+    "group": "OTHER",
+    "vintage_commit": "747d9355020"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~362",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/irpt_residue_delete_r35.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8857d23ffc6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE new file, 80 lines, LF, ASCII, byte-equal to the fenced block of the order (the AC3 blob is 8897a25273c8547c2ba0d6f9fdd3ce76849fdddf). Three aws_iam_role and three aws_iam_role_policy resources; Action is s3:DeleteObjectVersion only; the only principal is arn:aws:iam::313476888478:user/cloudops-dell2-agent-user. Committed LOCAL on wk-IRPT_ANLREQ-362. Terraform is not installed and was not run; nothing was planned, applied or destroyed; no AWS call was made.",
+      "artifact_covered_by": [
+        "AR489-y-AC1",
+        "AR489-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py",
+      "kind": "script",
+      "commit_or_etag": "e44dd19b500",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only Python, offline. Reads the manifest at its repository path (blob 7963026db44e4760e34bb28f2b21dc141c7c3fac), the .tf as text and the order's fenced block; prints RESIDUE-ROLES-OK only when every check holds. --selftest runs five in-memory mutants. Passes commit-gate (py_compile, ds-precommit, ruff default rules). Committed LOCAL on wk-IRPT_ANLREQ-362.",
+      "artifact_covered_by": [
+        "AR489-y-AC1",
+        "AR489-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR489-y-AC1",
+      "criterion_verbatim": "AR489-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py -- expect ^RESIDUE-ROLES-OK entries=29 chunks=3 sizes=12,12,5 action=s3:DeleteObjectVersion only principal=cloudops-dell2-agent-user only no_wildcard=yes manifest_blob=7963026db4$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py",
+      "output_evidence": "RESIDUE-ROLES-OK entries=29 chunks=3 sizes=12,12,5 action=s3:DeleteObjectVersion only principal=cloudops-dell2-agent-user only no_wildcard=yes manifest_blob=7963026db4\nrc=0 (the stderr line INFO tf_blob=8897a25273c8547c2ba0d6f9fdd3ce76849fdddf is not part of the verdict).",
+      "denominator": "1 of 1 OK line; 29 of 29 manifest entries; 3 of 3 chunks (sizes 12, 12, 5); 3 of 3 aws_iam_role and 3 of 3 aws_iam_role_policy resources; 3 of 3 chunk comprehensions re-evaluated; 29 of 29 (Resource, s3:VersionId) pairs covering the manifest once",
+      "expect": "^RESIDUE-ROLES-OK entries=29 chunks=3 sizes=12,12,5 action=s3:DeleteObjectVersion only principal=cloudops-dell2-agent-user only no_wildcard=yes manifest_blob=7963026db4$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the OK line matches the expect regex exactly. The second run printed the identical line (determinism control)."
+    },
+    {
+      "criterion_id": "AR489-y-AC2",
+      "criterion_verbatim": "AR489-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nMUTANT extra-action-getobject BAD: .tf text differs from the order's fenced block; policy Action is not exactly s3:DeleteObjectVersion x3: ['\"s3:DeleteObjectVersion\", \"s3:GetObject\"', '\"s3:DeleteObjectVersion\"', '\"s3:DeleteObjectVersion\"']\nMUTANT wildcard-key BAD: manifest blob 5ef61be0faf70bc6c099d7fc7f6cda1e566a6294 is not the pinned 7963026db44e4760e34bb28f2b21dc141c7c3fac; entry 0 key carries a wildcard character or ends with /\nMUTANT principal-root BAD: .tf text differs from the order's fenced block; principal is not the one user ARN x3: ['arn:aws:iam::313476888478:root', 'arn:aws:iam::313476888478:user/cloudops-dell2-agent-user', 'arn:aws:iam::313476888478:user/cloudops-dell2-agent-user']\nMUTANT dropped-entry BAD: manifest blob b3d87a9d5899725f52261a04c1b135354bad1771 is not the pinned 7963026db44e4760e34bb28f2b21dc141c7c3fac; manifest has 28 entries, expected 29; chunklist sizes are [12, 12, 4], expected [12, 12, 5]\nMUTANT duplicate-into-chunk-1 BAD: manifest blob 26f8d20d1298c3bc2ffb0d461aa3e9a09cc6510f is not the pinned 7963026db44e4760e34bb28f2b21dc141c7c3fac; a (key, version_id) pair repeats in the manifest\nrc=0",
+      "denominator": "5 of 5 in-memory mutants read BAD (extra action, wildcard key, principal root, dropped entry, duplicate into chunk 1)",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the stdout line is exactly CONTROL-FIRES; the five MUTANT lines are on stderr and each reads BAD. A baseline that is not clean would print CONTROL-VOID instead."
+    },
+    {
+      "criterion_id": "AR489-y-AC3",
+      "criterion_verbatim": "AR489-y-AC3: git hash-object infra/aws/terraform/investor-reporting/ycharts/irpt_residue_delete_r35.tf -- expect ^[0-9a-f]{40}$",
+      "method": "command",
+      "invocation": "git hash-object infra/aws/terraform/investor-reporting/ycharts/irpt_residue_delete_r35.tf",
+      "output_evidence": "8897a25273c8547c2ba0d6f9fdd3ce76849fdddf\nrc=0",
+      "denominator": "1 of 1 blob id, 40 hex characters",
+      "expect": "^[0-9a-f]{40}$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed blob is 40 lower-case hex characters. The blob is 8897a25273c8547c2ba0d6f9fdd3ce76849fdddf (the issuer's never-widen pair pins this value)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR489-y-AC2 control: --selftest mutates the in-memory manifest and .tf five ways (an s3:GetObject action added to the first policy; a wildcard at the end of one key; the principal changed to the account root; one manifest entry dropped; one entry duplicated into chunk 1). The control fires only when all five read BAD.",
+      "expected": "five MUTANT lines each reading BAD; stdout CONTROL-FIRES; rc 0",
+      "observed": "CONTROL-FIRES on stdout, rc=0; five MUTANT lines on stderr, each BAD with its reason (see AC2 output_evidence). The baseline was clean before the mutants ran.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 command run twice, stdout kept in the worker scratch and compared with diff.",
+      "observed": "diff rc=0; the single OK line is identical in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate and terraform plan on the .tf",
+      "reason": "Terraform is not installed on this box and the order forbids running it. The .tf is checked as text (byte-equal to the order block), by the HCL-shape reads in the check, and by the offline re-evaluation of its chunk expressions. Plan, apply and destroy belong to IB2 under the never-widen pair after the CTO signs."
+    },
+    {
+      "item": "the live state of the 29 object versions and of the three roles in AWS",
+      "reason": "out of this cell: no AWS call, no network, no push, no deploy by the worker. The residue state is unseen after this write."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W362-S1: safe-commit's client-data-check printed ABSENT on this box (the hashed account-id list is not at C:\\Users\\Test\\.opal\\account_id_hashes.txt and OPAL_ACCOUNT_ID_HASHES is unset), so the two AR-y-489 commits were not checked for client account ids (OBSERVATION, ARMED; disarm_owner 2.0.0_SA_COO~Y2)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "naming-gate.py --diff --enforce (a unified diff of the new .tf, built with git diff --no-index)",
+      "invocation": "python .tools/naming-gate.py --diff .scratch/naming_r35.diff --enforce",
+      "result": "NAMING-GATE: PASS 6 graded; irpt-residue-delete-0-role, -1-role, -2-role CONFORMANT as IAM_ROLE; irpt-residue-delete-0-policy, -1-policy, -2-policy CONFORMANT as IAM_POLICY; GATE_RC=0. No registry row was added."
+    },
+    {
+      "tool": "ruff (default rules) through commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~362/check_residue_roles.py",
+      "result": "All checks passed; OK: pre-commit gate clean for 1 of 1 file(s); CG_RC=0. An explicit E501 selection flags 21 long lines, which the gate does not select."
+    }
+  ]
+}
