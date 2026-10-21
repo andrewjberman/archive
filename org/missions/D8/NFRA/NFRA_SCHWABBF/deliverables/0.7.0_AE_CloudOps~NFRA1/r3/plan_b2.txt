@@ -1,0 +1,184 @@
+aws_iam_role.silver["bd49finsurance"]: Refreshing state... [id=opal-assets-silver-bd49finsurance-role]
+aws_iam_role.silver["blackdiamond"]: Refreshing state... [id=opal-assets-silver-blackdiamond-role]
+aws_iam_role.silver["eclipse"]: Refreshing state... [id=opal-assets-silver-eclipse-role]
+aws_iam_role.silver["schwab"]: Refreshing state... [id=opal-assets-silver-schwab-role]
+aws_iam_role.silver["smartx"]: Refreshing state... [id=opal-assets-silver-smartx-role]
+aws_iam_role.silver["etf"]: Refreshing state... [id=opal-assets-silver-etf-role]
+aws_iam_role.silver["orion"]: Refreshing state... [id=opal-assets-silver-orion-role]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # aws_iam_role_policy.silver_read_schwab_firm_prefix will be created
+  + resource "aws_iam_role_policy" "silver_read_schwab_firm_prefix" {
+      + id          = (known after apply)
+      + name        = "opal-assets-silver-schwab-read-firm-prefix"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                          + "s3:GetObjectVersion",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-assets/schwab/49financial/bronze/*",
+                          + "arn:aws:s3:::opal-data-assets/schwab/cottonwood/bronze/*",
+                        ]
+                      + Sid      = "ReadSchwabFirmBronze"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "schwab/49financial/bronze/*",
+                                  + "schwab/cottonwood/bronze/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-assets"
+                      + Sid       = "ListSchwabFirmBronze"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = "opal-assets-silver-schwab-role"
+    }
+
+  # aws_iam_role_policy.silver_state_write_schwab_firm will be created
+  + resource "aws_iam_role_policy" "silver_state_write_schwab_firm" {
+      + id          = (known after apply)
+      + name        = "opal-assets-silver-schwab-state-write-firm"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                          + "s3:GetObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-49financial/schwab/49financial/state/complete/date=*/08403355.*",
+                          + "arn:aws:s3:::opal-data-49financial/schwab/49financial/state/conversions/date=*/08403355.*",
+                          + "arn:aws:s3:::opal-data-49financial/schwab/49financial/state/backfill_status/date=*/08403355.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/complete/date=*/08719286.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/conversions/date=*/08719286.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/backfill_status/date=*/08719286.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/complete/date=*/08134043.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/conversions/date=*/08134043.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/backfill_status/date=*/08134043.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/complete/date=*/08165601.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/conversions/date=*/08165601.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/backfill_status/date=*/08165601.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/complete/date=*/08480305.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/conversions/date=*/08480305.*",
+                          + "arn:aws:s3:::opal-data-cottonwood/schwab/cottonwood/state/backfill_status/date=*/08480305.*",
+                        ]
+                      + Sid      = "WriteAndVerifySchwabFirmState"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "schwab/49financial/state/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-49financial"
+                      + Sid       = "ListSchwabFirm49fState"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "schwab/cottonwood/state/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-cottonwood"
+                      + Sid       = "ListSchwabFirmCottonwoodState"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = "opal-assets-silver-schwab-role"
+    }
+
+  # aws_iam_role_policy.silver_write_schwab_firm_silver will be created
+  + resource "aws_iam_role_policy" "silver_write_schwab_firm_silver" {
+      + id          = (known after apply)
+      + name        = "opal-assets-silver-schwab-write-firm-silver"
+      + name_prefix = (known after apply)
+      + policy      = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action   = [
+                          + "s3:PutObject",
+                          + "s3:GetObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-assets/schwab/49financial/silver/*/date=*/08403355.parquet",
+                          + "arn:aws:s3:::opal-data-assets/schwab/cottonwood/silver/*/date=*/08719286.parquet",
+                          + "arn:aws:s3:::opal-data-assets/schwab/cottonwood/silver/*/date=*/08134043.parquet",
+                          + "arn:aws:s3:::opal-data-assets/schwab/cottonwood/silver/*/date=*/08165601.parquet",
+                          + "arn:aws:s3:::opal-data-assets/schwab/cottonwood/silver/*/date=*/08480305.parquet",
+                        ]
+                      + Sid      = "WriteAndVerifySchwabFirmSilver"
+                    },
+                  + {
+                      + Action    = "s3:ListBucket"
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "schwab/49financial/silver/*",
+                                  + "schwab/cottonwood/silver/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = "arn:aws:s3:::opal-data-assets"
+                      + Sid       = "ListSchwabFirmSilver"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + role        = "opal-assets-silver-schwab-role"
+    }
+
+Plan: 3 to add, 0 to change, 0 to destroy.
+
+Warning: Resource targeting is in effect
+
+You are creating a plan with the -target option, which means that the result
+of this plan may not represent all of the changes requested by the current
+configuration.
+
+The -target option is not for routine use, and is provided only for
+exceptional situations such as recovering from errors or mistakes, or when
+Terraform specifically suggests to use it as part of an error message.
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to:
+C:/Users/ANDREW~1/AppData/Local/Temp/claude/C--Users-AndrewBerman-Desktop-ajb-workspace/e8132170-7a55-49b8-ad2d-7637470cddc9/scratchpad/b2.plan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/Users/ANDREW~1/AppData/Local/Temp/claude/C--Users-AndrewBerman-Desktop-ajb-workspace/e8132170-7a55-49b8-ad2d-7637470cddc9/scratchpad/b2.plan"
