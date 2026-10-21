@@ -291,3 +291,18 @@ C. Post-commit criteria, the round checker by absolute path from the worktree (c
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=42 (rc 0)
    python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
 No live call and no sign-in were made in REPAIR 16.
+
+REPAIR 17 (issuer, 2026-10-21 ~02:20Z; worker row W5-S5) -- the session close logs out, but the daily record cannot read the statuses.
+A. Code (commit 3bd79b7f038, signin.py and tests/test_login_trace.py): PlaywrightDriver.logout() stores the two integer statuses as
+   logout_statuses (None on failure, and before it ran). Session.close() copies the driver's value to logout_statuses after the
+   logout and before the context closes; it never raises.
+B. Tests: tests/test_login_trace.py has 43 tests (the 42 and test_session_exposes_logout_statuses_after_close). Whole module suite
+   (infra/aws/ec2/canonical-fidelity/tests): 193 passed. Mutant (the copy removed, scratch copy): 1 failed, 42 passed. Trace file
+   43 passed twice. ruff py39 All checks passed; non-ASCII 0.
+C. Post-commit criteria, the round checker by absolute path from the worktree (cwd C:/tmp/fidupl-w1):
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2a -> R1-FU2A-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2b -> R1-FU2B-OK passed=4 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2c -> R1-FU2C-OK passed=8 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu2t -> R1-FU2T-OK passed=43 (rc 0)
+   python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu5b -> R1-FU5B-OK bash -n clean, browser install present, no secret export (rc 0)
+No live call and no sign-in were made in REPAIR 17.

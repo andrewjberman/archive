@@ -1,0 +1,47 @@
+NFRA_FIDUPL.TO-FT-s-2 -- worker 0.9.0_WK_NFRA_FIDUPL~5 -- worktree C:/tmp/fidupl-w5 (branch wk-NFRA_FIDUPL-5), 2026-10-21
+Code commit b0a7a9e6cc (LOCAL). Fakes only: no AWS call, no live call, no sign-in, no secret read.
+
+[1] tree check
+  git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-5
+  test -d org && test -d .tools && echo TREE-OK -> TREE-OK
+
+[2] base premises (grep of the worktree, bare pipe pattern, comp-find)
+  comp-find 'logout_statuses|perg_secret_id|perg-list' infra/aws/ec2/canonical-fidelity -> 0 hit(s) across 31 file(s) scanned
+  switcher_list.py, signin_recover.py, perg_seed.py: absent from the tree (expected; built by other workers; tests inject fakes via sys.modules)
+
+[3] the module's test file alone
+  python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_box_daily.py -> 12 passed in 0.19s (rc=0)
+
+[4] lint and compile
+  ruff check --target-version py39 box/daily.py box/run.py tests/test_box_daily.py -> All checks passed! (rc=0)
+  python -m py_compile (the three files) -> rc=0
+  non-ASCII byte count of the three files -> 0, 0, 0
+
+[5] checker criteria, main-tree checker, cwd the worktree
+  python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft2 -> R1-FT2-OK passed=12 (rc=0)
+  python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr4 -> R1-FR4-OK passed=12 (rc=0)
+  (re-run at HEAD b0a7a9e6cc: the same two lines, rc=0 each)
+
+[6] whole module suite
+  python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests -> 171 passed in 2.55s (rc=0)
+
+[7] commit
+  bash .tools/safe-commit.sh --author "0.9.0_WK_NFRA_FIDUPL~5 <0.9.0_WK_NFRA_FIDUPL~5@opal.agent>" -F .scratch/msg_ft2_code.txt -- (4 paths)
+  -> [wk-NFRA_FIDUPL-5 b0a7a9e6cc] issue(NFRA_FIDUPL round 3, 0.9.0_WK_NFRA_FIDUPL~5): FT-s-2 daily coverage record, logout statuses, one recovery attempt (fakes only)
+  -> surprise-row-gate: 3 new row(s) of 57 total checked, OK; one-writer WARN on the unsuffixed investigation file (per-box file rule, WARN until C-QUEUE)
+
+[8] coordinator addition (W4-S10): perg_secret_id pointer assertion added to test_missing_perg_secret_skips_cross_check_and_says_so
+  python -m pytest tests/test_box_daily.py -> 12 passed (rc=0); ft2 and fr4 -> R1-FT2-OK passed=12, R1-FR4-OK passed=12 (rc=0 each)
+  module suite -> 171 passed in 1.95s (rc=0); ruff py39 -> All checks passed! (rc=0)
+  commit 4ddcb5de50 test(NFRA_FIDUPL round 3, 0.9.0_WK_NFRA_FIDUPL~5): assert perg_secret_id is a pointer in check_pointers (LOCAL)
+
+[9] mutant control: scratch copy with RECOVERABLE_CLASS = none -> 2 failed, 10 passed (expected: the two recovery tests)
+[10] proof-of-spec-check FT-s-2-AC1,FT-s-2-AC2 -> VALID (rc=0) before the flip; the order status flipped pending to complete in the proof commit
+
+[11] AttachError fix (coordinator interface fact from worker ~6): the lane gate refused the commit on the complete order (row NFRA_FIDUPL-D1-W5-S8);
+  the COO reopened the order in eb9c93cf39; the fix (uncommitted patch .scratch/attach_fix.patch, verified byte-equal to the worktree diff) was committed as 332cac9bb5.
+  python -m pytest tests/test_box_daily.py -> 12 passed (rc=0); ruff py39 -> All checks passed! (rc=0); non-ASCII count 0 for the three files
+  python C:/Dev/ajb_workspace/.../fidupl_round_checks.py ft2 -> R1-FT2-OK passed=12 (rc=0)
+  python C:/Dev/ajb_workspace/.../fidupl_round_checks.py fr4 -> R1-FR4-OK passed=12 (rc=0)
+  module suite -> 171 passed in 1.69s (rc=0)
+  mutant (RECOVERABLE_CLASS = none, scratch copy) -> 2 failed, 10 passed (rc=1)
