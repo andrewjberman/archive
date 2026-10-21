@@ -1,0 +1,21 @@
+ARM role-after S1 dynamodb:GetItem opal-tickets attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> allowed matched=irpt-ticket-audit-read-policy (expect allowed)
+ARM role-after S2 dynamodb:GetItem opal-tickets attrs=none select=none -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S3a dynamodb:GetItem opal-tickets attrs=ticket_id,requester select=none -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S3b dynamodb:GetItem opal-tickets attrs=ticket_id,created_by select=none -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S4a dynamodb:Query opal-tickets attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S4b dynamodb:Scan opal-tickets attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S4c dynamodb:BatchGetItem opal-tickets attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S4d dynamodb:PutItem opal-tickets attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> implicitDeny matched=- (expect implicitDeny)
+ARM role-after S5a dynamodb:GetItem opal-users-v2 attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> allowed matched=role_irpt-ycharts-runner-role_irpt-ycharts-runner (expect implicitDeny)
+ARM role-after S5b dynamodb:GetItem opal-tickets/index/status-index attrs=ticket_id,ticket_type,answers,created_at select=SPECIFIC_ATTRIBUTES -> implicitDeny matched=- (expect implicitDeny)
+INLINE after irpt-export-render-host-evidence sha256=693ccc200193f137b8f3afe5f42189b5d9a7a48a9409dfbc5d54d1420c8d69f4 (R0 693ccc200193f137b8f3afe5f42189b5d9a7a48a9409dfbc5d54d1420c8d69f4) EQUAL
+INLINE after irpt-export-render-host-parameter-fence-policy sha256=387ffb243d05165d0e769b359e22d466ba83b7f70c0a216fffeb8115978c8c07 (R0 387ffb243d05165d0e769b359e22d466ba83b7f70c0a216fffeb8115978c8c07) EQUAL
+INLINE after irpt-export-render-host-token-policy sha256=7622ce6881eb906ecb2514e4a45b4195864c8b1f23cc0d414a12cde31aa89416 (R0 7622ce6881eb906ecb2514e4a45b4195864c8b1f23cc0d414a12cde31aa89416) EQUAL
+INLINE after irpt-ycharts-runner sha256=ed04ec88adc70d9428971afd29bf30359da748391dc7d0c5b6f2728b51f111e2 (R0 ed04ec88adc70d9428971afd29bf30359da748391dc7d0c5b6f2728b51f111e2) EQUAL
+INLINE after irpt-ycharts-runner-resident-policy sha256=c970dc3594261953505415589727a4bfc7be3b004f9c148c5bfb7e1af8401b35 (R0 c970dc3594261953505415589727a4bfc7be3b004f9c148c5bfb7e1af8401b35) EQUAL
+ATTACHED after ['AmazonSSMManagedInstanceCore', 'irpt-audit-write-policy', 'irpt-ticket-audit-read-policy'] (R0 ['AmazonSSMManagedInstanceCore', 'irpt-audit-write-policy']) -> R0 plus the new policy
+POLICY default version v1: statements=1 sids=['ReadTheFiledTicketForTheAuditOnly'] -> exactly the one statement
+ATTACHMENT entities: roles=['irpt-ycharts-runner-role'] users=0 groups=0 -> the runner role only
+G1 inline_equal=True attached_ok=True one_statement=True runner_only=True -> inline policies unchanged
+G2 arms held on the role
+VERDICT g1=True g2=True
