@@ -109,7 +109,7 @@ def arm_record(path):
     if not tb.get("files_compared") or tb.get("files_compared") != tb.get("identical"):
         fails.append("two_builds not identical: %s" % tb)
     smoke = " ".join(rec.get("import_smoke") or [])
-    if " fail=0 " not in smoke + " " or "live=86 imported=86" not in smoke:
+    if " fail=0 " not in smoke + " " or "live=87 imported=87" not in smoke:
         fails.append("import smoke reads %r" % smoke)
     g = rec.get("gate_dry_run") or {}
     if (g.get("gate1_unchanged_rc"), g.get("gate1_one_byte_rc"), g.get("gate2_unchanged_rc"), g.get("gate2_one_byte_rc")) != (0, 31, 0, 33):
@@ -193,7 +193,7 @@ def arm_tree(tar_path, pin):
         shipped = {}
         for name in ("ycharts/generate/resident_worker.py", "ycharts/research/model_source.py", "ycharts/research/opal_producer.py",
                      "ycharts/research/layout_overview.py", "reports/resident_installed.py", "ycharts/research/swap_model.py"):
-            shipped[name] = open(os.path.join(root, name), encoding="utf-8").read()
+            shipped[name] = open(os.path.join(root, name), encoding="utf-8").read() if os.path.isfile(os.path.join(root, name)) else ""
         want = (("ycharts/generate/resident_worker.py", '"ticker": key if c.get("security_type") == "etf" else None', "the typed-ETF ticker is the catalogue key"),
                 ("ycharts/research/model_source.py", "as_of_by_code", "the per-model positioning dates"),
                 ("ycharts/research/opal_producer.py", 'alloc_doc["as_of_by_code"][code]', "the producer reads each model's own date"),
