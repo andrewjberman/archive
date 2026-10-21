@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d51"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "7a0b339d3f2",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-9.paging-probe.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/paging_probe.py",
+      "kind": "script",
+      "commit_or_etag": "3c1c292658",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 3c1c292658. Not run against the live API (TO-FT-s-8 owns the live run).",
+      "artifact_covered_by": [
+        "FT-s-9-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_paging_probe.py",
+      "kind": "test",
+      "commit_or_etag": "3c1c292658",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 3c1c292658. Fake-only; 3 tests pass at this commit.",
+      "artifact_covered_by": [
+        "FT-s-9-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-9-AC1",
+      "criterion_verbatim": "the three named probe tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft9",
+      "output_evidence": "R1-FT9-OK passed=3",
+      "denominator": "3 passed of 3 named tests (test_probe_prints_counts_only_for_page_one_forms_and_prefixes, test_probe_stops_at_once_on_an_auth_refusal, test_probe_closes_the_session_and_prints_no_account_number)",
+      "status": "PASS",
+      "expect": "R1-FT9-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FT-s-9-AC2",
+      "criterion_verbatim": "the lister's thirteen tests still pass (a regression guard: this cell must not touch adapters.py).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr6",
+      "output_evidence": "R1-FR6-OK passed=13",
+      "denominator": "13 passed of 13 named adapter tests; adapters.py is not in this cell's commit",
+      "status": "PASS",
+      "expect": "R1-FR6-OK passed=\\d+"
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "The live run (one sign-in, the eleven forms and the prefix sweep against the real account list)",
+      "reason": "Owned by TO-FT-s-8 under the CTO's go; this cell is built on fakes."
+    },
+    {
+      "item": "The key names of accountListResponse.statuses entries (severity, code)",
+      "reason": "Read as the order states; unmeasured until the first live probe, and the probe prints the key-name list it sees."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FT-s-9.session_log.txt",
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of box/paging_probe.py (C:/tmp/fidupl-w5/.scratch/mutant3, not committed) with the 401/403 check replaced by a dead value.",
+      "expected": "test_probe_stops_at_once_on_an_auth_refusal fails",
+      "observed": "1 failed, 2 passed: test_probe_stops_at_once_on_an_auth_refusal (rc=1)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the two checker criteria re-run at HEAD 3c1c292658, same invocations",
+      "observed": "ft9: R1-FT9-OK passed=3 (rc=0); fr6: R1-FR6-OK passed=13 (rc=0)",
+      "status": "STABLE"
+    }
+  },
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py ft9",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft9",
+      "result": "R1-FT9-OK passed=3 (rc=0)"
+    },
+    {
+      "tool": "fidupl_round_checks.py fr6",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr6",
+      "result": "R1-FR6-OK passed=13 (rc=0)"
+    },
+    {
+      "tool": "module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "215 passed in 3.35s (rc=0)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/box/paging_probe.py infra/aws/ec2/canonical-fidelity/tests/test_paging_probe.py",
+      "result": "All checks passed! (rc=0)"
+    }
+  ]
+}
