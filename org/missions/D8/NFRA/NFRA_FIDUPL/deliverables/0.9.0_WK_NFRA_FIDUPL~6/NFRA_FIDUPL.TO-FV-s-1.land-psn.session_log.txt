@@ -1,0 +1,51 @@
+SESSION LOG -- 0.9.0_WK_NFRA_FIDUPL~6 on NFRA_FIDUPL.TO-FV-s-1 (round 3, FV-s-1: land_psn for FI<MMDDYY>.psn)
+Worktree: C:/tmp/fidupl-w6 (branch wk-NFRA_FIDUPL-6). Base HEAD before the cut: 59f062999a7.
+Premises: TREE-OK (org and .tools present). Worktree is sparse (core.sparseCheckout=true); org/surprise_channel is absent on disk.
+
+[1] Base, before any change (fv1 expected FAIL, fu4 expected PASS)
+    $ timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv1
+    R1-FV1-FAIL absent infra/aws/ec2/canonical-fidelity/tests/test_land_psn.py          (rc=0)
+    $ timeout 120 python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu4
+    R1-FU4-OK passed=16                                                                 (rc=0)
+    $ timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests
+    247 passed in 16.61s                                                                (rc=0)
+
+[2] Change: land.py gains PSN_NAME, PSN_DATE_OFFSET, _psn_content_date, _examine_psn, land_psn; main takes --psn PATH
+    as a mutually exclusive alternative to --handoff-dir. The CSV landing (land, _examine, _land_one) is not changed.
+    tests/test_land_psn.py is new: six tests (the five named, plus test_psn_cli_takes_psn_or_handoff_dir_and_dry_run_writes_nothing).
+    First post-change run of fv1: 2 failed, 4 passed. Cause: the test asserted trading_day on the public file entry;
+    land()'s public entry does not carry it (it lives at record["calendar"]["trading_day"]). Test corrected, not the lander.
+
+[3] After the change
+    $ timeout 120 python .../fidupl_round_checks.py fv1
+    R1-FV1-OK passed=6                                                                  (rc=0)
+    $ timeout 120 python .../fidupl_round_checks.py fu4
+    R1-FU4-OK passed=16                                                                 (rc=0)
+    $ timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests
+    253 passed in 17.11s                                                                (rc=0)
+    ASCII: 0 non-ASCII bytes in land.py and tests/test_land_psn.py
+    $ python -c "ast.parse(..., feature_version=(3,9))"  -> PY39-GRAMMAR-OK for both files (no 3.9 interpreter on this box)
+
+[4] Mutant control (scratch copy in .scratch/mutant, not committed): PSN_DATE_OFFSET = 16
+    $ timeout 120 python -m pytest -q -p no:cacheprovider .scratch/mutant/tests/test_land_psn.py
+    FAILED test_psn_date_is_read_from_offset_17_as_mmddyy
+    FAILED test_psn_lands_under_the_content_date_with_the_fixed_table_name
+    FAILED test_psn_existing_identical_is_skipped_and_different_is_not_overwritten
+    FAILED test_psn_non_trading_asof_lands_under_the_prior_trading_day
+    FAILED test_psn_cli_takes_psn_or_handoff_dir_and_dry_run_writes_nothing
+    5 failed, 1 passed in 0.92s                                                         (rc=1)
+    The one pass is test_psn_unreadable_date_is_a_named_failure_and_lands_nothing, which expects an unreadable date.
+
+[5] Determinism: the same two checks re-run at the commit
+    R1-FV1-OK passed=6 (rc=0); R1-FU4-OK passed=16 (rc=0). Identical to [3].
+
+[6] Commits (LOCAL on wk-NFRA_FIDUPL-6)
+    f76f55946d3  issue(NFRA_FIDUPL round 3, 0.9.0_WK_NFRA_FIDUPL~6): FV-s-1 -- land.py lands the fixed-length FI<MMDDYY>.psn
+                 (land.py, tests/test_land_psn.py)
+    d06d9c240c2  drive-log(0.9.0_WK_NFRA_FIDUPL~6): FV-s-1 surprise rows W6-S8 to W6-S11 (INVESTIGATION_v1.md)
+
+[7] Gate readings at the code commit f76f55946d3 (recorded as rows, not as clean checks)
+    risk-reflex: ANSWER STATE PARTIAL_OR_BLIND (danger map 45.3h STALE; 0 of 2 files scanned) -> NFRA_FIDUPL-D1-W6-S9
+    client-data-check: WARN hashed account-id list ABSENT; commit NOT checked for client account ids -> NFRA_FIDUPL-D1-W6-S10 (ARMED)
+    naming-gate: NAMING ERROR function-map folder missing (tracked at HEAD, outside the sparse cone) -> NFRA_FIDUPL-D1-W6-S11
+    sparse worktree: org/surprise_channel absent on disk -> NFRA_FIDUPL-D1-W6-S8

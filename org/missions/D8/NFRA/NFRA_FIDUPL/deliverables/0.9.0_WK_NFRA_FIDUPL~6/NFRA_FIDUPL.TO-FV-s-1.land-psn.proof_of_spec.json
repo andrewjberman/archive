@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FV-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d517"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "59f062999a7",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FV-s-1.land-psn.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/land.py",
+      "kind": "script",
+      "commit_or_etag": "f76f55946d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-6 (LOCAL) at f76f55946d3. Adds PSN_NAME, PSN_DATE_OFFSET, _psn_content_date (characters 17-22 of the first line as MMDDYY, year 2000+YY, None when unreadable), _examine_psn, land_psn (one run record, same keys as land(), source null) and main's mutually exclusive --psn PATH. land(), _examine and _land_one are unchanged.",
+      "artifact_covered_by": [
+        "FV-s-1-AC1",
+        "FV-s-1-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_land_psn.py",
+      "kind": "test",
+      "commit_or_etag": "f76f55946d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-6 (LOCAL) at f76f55946d3. Fake-only; six tests pass (five named plus the CLI test). Synthetic 156-character records, no real data.",
+      "artifact_covered_by": [
+        "FV-s-1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d06d9c240c2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_FIDUPL-D1-W6-S8, S9, S10 and S11 appended at d06d9c240c2; no existing row edited. The surprise-row gate passed on the commit (4 new rows of 103)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FV-s-1-AC1",
+      "criterion_verbatim": "the five named psn tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv1",
+      "output_evidence": "R1-FV1-OK passed=6",
+      "denominator": "6 passed in infra/aws/ec2/canonical-fidelity/tests/test_land_psn.py; 5 of 5 named tests present and passing (test_psn_date_is_read_from_offset_17_as_mmddyy, test_psn_lands_under_the_content_date_with_the_fixed_table_name, test_psn_unreadable_date_is_a_named_failure_and_lands_nothing, test_psn_existing_identical_is_skipped_and_different_is_not_overwritten, test_psn_non_trading_asof_lands_under_the_prior_trading_day) plus 1 CLI test. Base before the change: R1-FV1-FAIL absent (expected).",
+      "status": "PASS",
+      "expect": "R1-FV1-OK passed=\\d+"
+    },
+    {
+      "criterion_id": "FV-s-1-AC2",
+      "criterion_verbatim": "the lander's existing tests still pass (a regression guard: the CSV landing is unchanged).",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu4",
+      "output_evidence": "R1-FU4-OK passed=16",
+      "denominator": "16 passed in infra/aws/ec2/canonical-fidelity/tests/test_land.py; 15 of 15 named tests present and passing, plus test_dry_run_passes_builder_refusal_as_exit_2. Base before the change: R1-FU4-OK passed=16 (expected PASS).",
+      "status": "PASS",
+      "expect": "R1-FU4-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Scratch copy of land.py (.scratch/mutant, not committed) with PSN_DATE_OFFSET set to 16, so the as-of field is read one column early and the psn tests are run against that copy.",
+      "expected": "the offset-dependent psn tests fail (date read, landing, existing-file, non-trading and CLI tests)",
+      "observed": "5 failed, 1 passed in 0.92s (rc=1). FAILED: test_psn_date_is_read_from_offset_17_as_mmddyy, test_psn_lands_under_the_content_date_with_the_fixed_table_name, test_psn_existing_identical_is_skipped_and_different_is_not_overwritten, test_psn_non_trading_asof_lands_under_the_prior_trading_day, test_psn_cli_takes_psn_or_handoff_dir_and_dry_run_writes_nothing. The one pass is the unreadable-date test, which expects an unreadable date.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the two checker criteria re-run at HEAD f76f55946d3 after the commit, same invocations, compared with the first post-change run",
+      "observed": "fv1: R1-FV1-OK passed=6 (rc=0) both runs; fu4: R1-FU4-OK passed=16 (rc=0) both runs",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live landing of a real FI<MMDDYY>.psn file, and the 56-character balance record layout",
+      "reason": "Fakes only, by order. The live walk is ordered separately as TO-FV-s-3 under the CTO's go (msg 9101). No real Fidelity export was read; the offset-17 date is asserted on first lines of 156-character records only."
+    },
+    {
+      "item": "The run record's source field for a psn landing",
+      "reason": "Set to null: a .psn path has no listing.json to carry a source. A design choice, stated here; land() keeps its listing-derived source unchanged."
+    },
+    {
+      "item": "A Python 3.9 interpreter run of the suite",
+      "reason": "No Python 3.9 interpreter on dell1 (py -3.9 found none). The grammar of both files was checked with ast.parse(feature_version=(3,9)); the suite ran under Python 3.14."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W6-S8: the worktree C:/tmp/fidupl-w6 is a sparse checkout that omits org/surprise_channel/ (absent on disk, 43 tracked files at HEAD); the schema was read from the HEAD tree.",
+    "NFRA_FIDUPL-D1-W6-S9: the risk reflex answered PARTIAL_OR_BLIND on the code commit (danger map 45.3h stale, 0 of 2 files scanned); the commit went through with the reflex undecided.",
+    "NFRA_FIDUPL-D1-W6-S10: ARMED. The hashed account-id list is absent on dell1, so the client-data check printed WARN and did not check the code commit for client account ids; the disarm owner routes the list.",
+    "NFRA_FIDUPL-D1-W6-S11: the naming gate printed NAMING ERROR function-map folder missing on the code commit; the folder is tracked at HEAD (243 files) and absent in the sparse worktree. A repeat of NFRA_FIDUPL-D1-W2-S17."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FV-s-1.land-psn.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py fv1",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv1 (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FV1-OK passed=6 (rc=0) after the change; base at 59f062999a7: R1-FV1-FAIL absent infra/aws/ec2/canonical-fidelity/tests/test_land_psn.py (rc=0)"
+    },
+    {
+      "tool": "fidupl_round_checks.py fu4",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu4 (cwd C:/tmp/fidupl-w6, the worktree)",
+      "result": "R1-FU4-OK passed=16 (rc=0) at base and after the change"
+    },
+    {
+      "tool": "module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests (cwd C:/tmp/fidupl-w6)",
+      "result": "253 passed in 17.11s (rc=0) after the change; 247 passed in 16.61s (rc=0) at base"
+    },
+    {
+      "tool": "ast.parse grammar check",
+      "invocation": "python -c ast.parse(source, feature_version=(3,9)) over land.py and tests/test_land_psn.py",
+      "result": "PY39-GRAMMAR-OK for both files (no Python 3.9 interpreter on this box)"
+    },
+    {
+      "tool": "mutant run",
+      "invocation": "python -m pytest -q -p no:cacheprovider .scratch/mutant/tests/test_land_psn.py (scratch copy with PSN_DATE_OFFSET = 16)",
+      "result": "5 failed, 1 passed in 0.92s (rc=1)"
+    }
+  ]
+}
