@@ -45,6 +45,10 @@ GATES = BASE / "gates"
 TRACE = BASE / "R23_FWD5_TRACE.json"
 RESULT = BASE / "R23_FWD5_RESULT.json"
 RECORD = BASE / "R23_FWD5_TICKET_ITEMS.json"
+EARLIER = [
+    {"attempt": 0, "at": "2026-10-21T02:40:26Z", "stopped": "preflight: the served-type-label pattern expected single quotes, the served module uses double; nothing written", "record": "run_output_attempt0_preflight_stop.txt"},
+    {"attempt": 1, "at": "2026-10-21T02:41:26Z", "stopped": "POST /api/scoped/tickets returned HTTP 400 with rows allowedFirmIds [cottonwood] and token firmId opal-capital (surprise row TCKT_VNEXT-D2-S65); no ticket created", "record": "R23_FWD5_TRACE_attempt1.json, run_output_attempt1.txt"},
+    {"attempt": 2, "at": "2026-10-21T03:02:57Z", "stopped": "staff-shaped rows (AMENDMENT 1): the Service Request create SUCCEEDED (TCK-20261021-c31f5347, 03:03:05Z) and the script stopped because the page notice beat the response listener, so no id was captured; ticket and rows deleted after exp, S65 resolved", "record": "run_output_attempt2_id_capture_stop.txt"}]
 SHOT_DIR_REL = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r23_fwd5_dev/"
 
 ddb = boto3.client("dynamodb", region_name=REGION)
@@ -77,7 +81,7 @@ def item_of(table, key):
 
 def cli_item(tid):
     """The exact `aws dynamodb get-item --consistent-read` output for one ticket (saved unchanged)."""
-    p = subprocess.run([".tools/aws", "dynamodb", "get-item", "--table-name", TICKETS, "--key", json.dumps({"ticket_id": {"S": tid}}),
+    p = subprocess.run([str(Path(__file__).resolve().parents[5] / ".tools" / "aws.cmd"), "dynamodb", "get-item", "--table-name", TICKETS, "--key", json.dumps({"ticket_id": {"S": tid}}),
                         "--consistent-read", "--region", REGION, "--output", "json"], capture_output=True, text=True, timeout=120)
     if p.returncode != 0 or not p.stdout.strip():
         raise Stop("get-item for %s failed: rc=%d" % (tid, p.returncode))
@@ -93,6 +97,18 @@ def count_tickets(status):
             if it.get("status", {}).get("S") == status:
                 n += 1
     return n, total
+
+
+def find_new_ticket(kind):
+    """The one ticket of this type created_by the filer that the run has not recorded yet (ConsistentRead scan; a count other than 1 is a STOP)."""
+    found = []
+    for page in ddb.get_paginator("scan").paginate(TableName=TICKETS, ConsistentRead=True, ProjectionExpression="ticket_id, created_by, ticket_type"):
+        for it in page.get("Items", []):
+            if it.get("created_by", {}).get("S", "").lower() == FILER and it["ticket_type"]["S"] == kind and it["ticket_id"]["S"] not in state["tickets"]:
+                found.append((it["ticket_id"]["S"], it["ticket_type"]["S"]))
+    if len(found) != 1:
+        raise Stop("expected exactly one new %s ticket by the filer, found %d" % (kind, len(found)))
+    return found[0]
 
 
 def norm_path(p):
@@ -137,13 +153,13 @@ def write_rows_and_mint():
     for ident in (FILER, PICKER):
         item = {"PK": {"S": "USER#" + ident}, "SK": {"S": "PROFILE"}, "email": {"S": ident}, "firmId": {"S": "opal-capital"},
                 "status": {"S": "active"}, "userType": {"S": "test-filer"}, "name": {"S": NAMES[ident]},
-                "allowedFirmIds": {"L": [{"S": FIRM}]}}
+                "scope_all_firms": {"BOOL": True}}
         ddb.put_item(TableName=USERS, Item=item, ConditionExpression="attribute_not_exists(PK)")
         state["written"].append(ident)
         back = item_of(USERS, key_of(ident))
-        if back is None or [x["S"] for x in back["allowedFirmIds"]["L"]] != [FIRM] or "scope_all_firms" in back:
-            raise Stop("row not PRESENT with the one-firm list after the put")
-        say("row written for %s; ConsistentRead PRESENT allowedFirmIds=[%s]" % (ident.split("@")[0], FIRM))
+        if back is None or back.get("scope_all_firms") != {"BOOL": True} or "allowedFirmIds" in back or back.get("firmId") != {"S": "opal-capital"}:
+            raise Stop("row not PRESENT in the staff majority shape after the put")
+        say("row written for %s; ConsistentRead PRESENT firmId=opal-capital scope_all_firms=BOOL true, no allowedFirmIds attribute" % ident.split("@")[0])
     pem = boto3.client("secretsmanager", region_name=REGION).get_secret_value(SecretId=KEY_SECRET)["SecretString"]
     for ident in (FILER, PICKER):
         iat = int(time.time())
@@ -151,6 +167,7 @@ def write_rows_and_mint():
                   "userType": "test-filer", "name": NAMES[ident], "iat": iat, "exp": iat + LIFE}
         tokens[ident] = pyjwt.encode(claims, pem, algorithm="RS256")
         state["exp"].append(iat + LIFE)
+        say("token claims: tier=internal (the authorizer computes allowedFirmIds=ALL from tier internal; no allowedFirmIds claim in the token)") if ident == FILER else None
         say("token minted for %s (memory only) iat=%s exp=%s life=%ds" % (ident.split("@")[0], iso(iat), iso(iat + LIFE), LIFE))
     del pem
     return tokens
@@ -200,12 +217,20 @@ class Session:
         self.ctx.route("**/*", on_route)
         self.page = self.ctx.new_page()
         self.created = []
+        self.failed = []
 
         def on_response(r):
             p = urlparse(r.url).path
             who = "filer" if self.ident == FILER else "picker"
             if r.request.method == "POST" and p.startswith("/api/scoped/tickets"):
                 trace["statuses"]["POST %s as %s" % (norm_path(p), who)] = r.status
+                if r.status not in (200, 201):
+                    try:
+                        txt = r.text()
+                    except Exception:  # noqa: BLE001
+                        txt = "<unreadable>"
+                    self.failed.append((r.status, re.sub(r"TCK-[0-9]{8}-[0-9a-f]{8}", "<T>", txt)[:600]))
+                    trace["failed_bodies"] = trace.get("failed_bodies", []) + [{"path": norm_path(p), "status": r.status, "body": self.failed[-1][1]}]
                 if p == "/api/scoped/tickets" and r.status in (200, 201):
                     try:
                         body = r.json()
@@ -259,10 +284,19 @@ class Session:
             raise Stop("Create Ticket is held for %s" % kind)
         self.allowed.add(("POST", "/api/scoped/tickets"))
         btn.click()
-        pg.get_by_text("Ticket created.").first.wait_for(state="visible", timeout=60000)
-        if len(self.created) != before + 1 or not self.created[-1][0]:
-            raise Stop("the create response carried no ticket id for %s" % kind)
-        tid, ttype = self.created[-1]
+        end = time.time() + 60
+        while time.time() < end and not self.failed and pg.get_by_text("Ticket created.").count() == 0:
+            time.sleep(0.5)
+        if self.failed:
+            raise Stop("the create for %s was refused: HTTP %s body %s" % (kind, self.failed[-1][0], self.failed[-1][1]))
+        end = time.time() + 10
+        while time.time() < end and len(self.created) < before + 1:
+            time.sleep(0.25)
+        if len(self.created) >= before + 1 and self.created[-1][0]:
+            tid, ttype = self.created[-1]
+        else:
+            tid, ttype = find_new_ticket(kind)   # the response listener lagged the page notice: read the id back from the table
+            say("create response id not captured in time; ticket id read back from opal-tickets (created_by the filer, type %s): %s" % (kind, tid))
         state["tickets"][tid] = ttype
         say("filer: %s ticket filed on DEV %s (type %s)" % (LABEL[kind], tid, ttype))
         if ttype != kind:
@@ -458,7 +492,8 @@ def main():
                "chosen_basis": out["basis"], "claim_via": "board", "opened_before_claim": False, "shots": out["shots"], "token_exp": iso(max(state["exp"])),
                "rows_deleted_at": removed["rows_deleted_at"], "tickets_deleted_at": removed["tickets_deleted_at"], "tickets_absent_after": True,
                "rows_absent_after": True, "no_engine_call": not state["engine"], "token_printed": False, "shot_data_reviewed": True,
-               "served_head": state["served_head"], "behind_origin_dev_files": state["behind"], "open_tickets_before": state["open_before"],
+               "served_head": state["served_head"], "behind_origin_dev_files": state["behind"], "open_tickets_before": state["open_before"], "identity_shape": "firmId opal-capital, scope_all_firms BOOL true, no allowedFirmIds (AMENDMENT 1)",
+               "earlier_attempts": EARLIER,
                "board_rows_extra": "board_read.created_cell and status_text are in the trace events"}
         RESULT.write_text(json.dumps(res, indent=1) + "\n", encoding="utf-8")
         say("result written: %s" % RESULT.name)
