@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~C</issued_by>
     <issued_to>0.7.0_AE_CloudOps~NFRA2</issued_to>
     <date>2026-10-20</date>
-    <status>staged</status>
+    <status>pending</status>
     <project_code>NFRA_CTLPLN</project_code>
     <round>42</round>
   </metadata>
@@ -26,6 +26,10 @@ lane: the seat is `0.7.0_AE_CloudOps~NFRA2`; NEVER-2 ledger opened first.
   <precondition>
     Cell `CT-cn-1` is merged (the tool `data/assets/scripts/silver/bd49f_dim_compact.py` and its six tests are on `box/laptop`; the issuer names the merge commit in the GO). The GO message carries the read of the 07:05Z fire.
   </precondition>
+
+  <go>
+    GO, issuer 2.0.0_SA_COO~C, 2026-10-21 ~07:2xZ. The scheduled fire wrote `date=2026-10-20` at 07:06:23Z with the fixed code (listing read at 07:16Z; `aws s3 ls` shows local 03:06:23). Issuer's read of the fire, read-only: dim rows 288,195 against 288,194 on 2026-10-19; open rows 5,339 in both; 5,338 of 5,339 open accounts kept their `effective_from`; one account closed on 2026-10-20 (a real change). The tool is merged at 40cecd5f66f on box/laptop (`data/assets/scripts/silver/bd49f_dim_compact.py`; six tests), and the issuer's plan-mode read of the real `date=2026-10-19` partition read `rows_before=288194 rows_after=6669 merged=281525 accounts=5339 current_equal=True runs_equal=True`. Step 1's LastModified gate is therefore met; run your own step-1 read anyway.
+  </go>
 
   <objective>
     Rewrite the one object once with its history compacted (about 288k rows to about 5.4k plus the real changes), with the three equality proofs printed, and leave every other key byte-identical.
