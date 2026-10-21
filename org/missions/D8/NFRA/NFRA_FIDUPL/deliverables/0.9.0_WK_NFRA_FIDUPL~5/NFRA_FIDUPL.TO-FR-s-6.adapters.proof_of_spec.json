@@ -17,9 +17,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/adapters.py",
       "kind": "script",
-      "commit_or_etag": "11e0570e5d",
+      "commit_or_etag": "67e7099bec",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at the measured-shape repair: rows accountListResponse.accounts, key number, paging by pageResponse.available; personal fields dropped.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 67e7099bec (REPAIR 1: the eleven-form paging table and the lister.paging_form index). Not deployed; no live call.",
       "artifact_covered_by": [
         "FR6-AC1"
       ]
@@ -27,9 +27,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/box/run.py",
       "kind": "script",
-      "commit_or_etag": "c5442ea482",
+      "commit_or_etag": "67e7099bec",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL). _real_daily_deps attribute_day now builds the adapters; the refusal is deleted. run_once and the daily hookup are unchanged.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 67e7099bec: the attribute wrapper adds paging_form (the index only).",
       "artifact_covered_by": [
         "FR6-AC1",
         "FR6-AC2"
@@ -38,9 +38,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
       "kind": "test",
-      "commit_or_etag": "11e0570e5d",
+      "commit_or_etag": "67e7099bec",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at the measured-shape repair. Ten fake-only tests pass; no live call.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 67e7099bec; the two REPAIR 1 tests added, existing tests unchanged. Fake-only; 12 tests pass.",
       "artifact_covered_by": [
         "FR6-AC1"
       ]
@@ -51,6 +51,16 @@
       "commit_or_etag": "11e0570e5d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Row NFRA_FIDUPL-D1-W5-S4 appended; no existing row edited."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/box/daily.py",
+      "kind": "script",
+      "commit_or_etag": "67e7099bec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-5 (LOCAL) at 67e7099bec: one line 'OK: accountList paging form=<index>' and paging_form in the coverage record.",
+      "artifact_covered_by": [
+        "FR6-AC2"
+      ]
     }
   ],
   "acceptance": [
@@ -58,9 +68,9 @@
       "criterion_id": "FR6-AC1",
       "criterion_verbatim": "the six named adapter tests exist and pass.",
       "method": "command",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr6",
-      "output_evidence": "R1-FR6-OK passed=10",
-      "denominator": "10 passed of 10 named adapter tests (six built, four of the REPAIR: test_get_text_follows_redirect_and_returns_text, test_post_form_sends_urlencoded_body_without_logging_values, test_account_lister_pages_until_short_page, test_extract_accounts_finds_list_by_key_not_by_container_name, test_extract_failure_names_only_keys, test_daily_real_deps_use_adapters, test_extract_accounts_uses_measured_container_and_number_key, test_lister_stops_at_available_total, test_lister_sends_session_cache_id_on_later_pages, test_lister_fails_loud_when_short_of_available)",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr6",
+      "output_evidence": "R1-FR6-OK passed=12",
+      "denominator": "12 passed of 12 named adapter tests (the ten earlier, six built and four of the first repair, and the two REPAIR 1 tests test_lister_tries_other_paging_forms_and_keeps_the_one_that_yields_new_rows and test_lister_names_the_forms_tried_when_none_yields_new_rows)",
       "status": "PASS",
       "expect": "R1-FR6-OK passed=\\d+"
     },
@@ -68,9 +78,9 @@
       "criterion_id": "FR6-AC2",
       "criterion_verbatim": "the five daily-orchestration tests still pass after the wiring edit.",
       "method": "command",
-      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/r1_checks.py fr4",
-      "output_evidence": "R1-FR4-OK passed=5",
-      "denominator": "5 passed of 5 daily-orchestration tests, run unchanged after the measured-shape repair",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr4",
+      "output_evidence": "R1-FR4-OK passed=14",
+      "denominator": "5 of 5 daily-orchestration tests passing; file total 14 (the daily file as of 5030e945bb plus the one-line paging print path, unchanged tests)",
       "status": "PASS",
       "expect": "R1-FR4-OK passed=\\d+"
     }
@@ -96,14 +106,15 @@
   "surprises": [
     "NFRA_FIDUPL-D1-W5-S2: the daily attribute stage had no documented request adapter or account lister; the wiring in box/run.py supplies them (c5442ea482).",
     "NFRA_FIDUPL-D1-W5-S3: the _real_daily_deps wiring target was in box/run.py, outside the first paths block; the issuer amendment added box/run.py and the edit is committed.",
-    "NFRA_FIDUPL-D1-W5-S4: the request-side paging field names (start, sessionCacheId) are assumed from the response names; unmeasured until the first live multi-page pull."
+    "NFRA_FIDUPL-D1-W5-S4: the request-side paging field names (start, sessionCacheId) are assumed from the response names; unmeasured until the first live multi-page pull.",
+    "NFRA_FIDUPL-D1-W5-S4 came true live (CloudOps row D1-S12): page 2 under start and sessionCacheId added no rows; resolved by the paging-form table, commit 67e7099bec."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~5/NFRA_FIDUPL.TO-FR-s-6.adapters.session.log",
   "controls": {
     "mutant": {
-      "description": "Scratch copy of adapters.py with the short-of-available check disabled (if False in place of len(distinct) < available).",
-      "expected": "test_lister_fails_loud_when_short_of_available fails",
-      "observed": "1 failed, 9 passed: test_lister_fails_loud_when_short_of_available (Failed: DID NOT RAISE AdapterShapeError)",
+      "description": "Scratch copy of adapters.py (C:/tmp/fidupl-w5/.scratch/mutant2, not committed) with PAGING_FORMS restricted to forms 0 and 10 (REPAIR 1).",
+      "expected": "the two REPAIR 1 tests fail",
+      "observed": "2 failed, 10 passed: test_lister_tries_other_paging_forms_and_keeps_the_one_that_yields_new_rows and test_lister_names_the_forms_tried_when_none_yields_new_rows",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -137,6 +148,16 @@
       "tool": "ruff",
       "invocation": "python -m ruff check infra/aws/ec2/canonical-fidelity/adapters.py infra/aws/ec2/canonical-fidelity/tests/test_adapters.py",
       "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "fidupl_round_checks.py fr6",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr6 (main-tree checker, absolute path)",
+      "result": "R1-FR6-OK passed=12 (rc=0)"
+    },
+    {
+      "tool": "module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "211 passed in 3.31s (rc=0)"
     }
   ]
 }
