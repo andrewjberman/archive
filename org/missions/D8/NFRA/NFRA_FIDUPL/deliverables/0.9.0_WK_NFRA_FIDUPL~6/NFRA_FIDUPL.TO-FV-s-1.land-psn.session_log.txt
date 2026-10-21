@@ -49,3 +49,16 @@ Premises: TREE-OK (org and .tools present). Worktree is sparse (core.sparseCheck
     client-data-check: WARN hashed account-id list ABSENT; commit NOT checked for client account ids -> NFRA_FIDUPL-D1-W6-S10 (ARMED)
     naming-gate: NAMING ERROR function-map folder missing (tracked at HEAD, outside the sparse cone) -> NFRA_FIDUPL-D1-W6-S11
     sparse worktree: org/surprise_channel absent on disk -> NFRA_FIDUPL-D1-W6-S8
+
+[8] REPAIR 1 (amendment fc98439880 by 2.0.0_SA_COO~P1: land_psn run id gets a -psn suffix; fv1 names six tests)
+    Change: land_psn run_id = <%Y%m%dT%H%M%SZ> + "-psn" (record key and run_id field). land() unchanged.
+    Added test_psn_run_record_key_does_not_collide_with_the_csv_lander_record_of_the_same_second (one FakeS3:
+    land() on a six-file synthetic handoff, land_psn() on the same now and content date; two keys, both present,
+    CSV run_id 20261019T120000Z, psn run_id 20261019T120000Z-psn). Two existing run-key asserts moved to -psn.
+    First run of the new test: PARTIAL, caused by the test helper writing the row index into the date column of
+    account and transact (test helper fixed, not the lander).
+    $ timeout 120 python .../fidupl_round_checks.py fv1   -> R1-FV1-OK passed=7 (rc=0)
+    $ timeout 120 python .../fidupl_round_checks.py fu4   -> R1-FU4-OK passed=16 (rc=0)
+    $ timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests -> 254 passed in 16.40s (rc=0)
+    Mutant (PSN_DATE_OFFSET = 16, scratch copy) -> 6 failed, 1 passed in 1.18s (rc=1)
+    Commit 10c8faf9ded: issue(... FV-s-1 REPAIR 1 ...) (land.py, tests/test_land_psn.py)
