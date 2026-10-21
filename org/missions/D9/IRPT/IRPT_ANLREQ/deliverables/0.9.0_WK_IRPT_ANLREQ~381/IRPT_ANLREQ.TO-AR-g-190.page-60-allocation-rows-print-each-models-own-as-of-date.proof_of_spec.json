@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-190",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-190.page-60-allocation-rows-print-each-models-own-as-of-date.md",
+    "group": "OTHER",
+    "vintage_commit": "fb39cbb077d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "fb39cbb077d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-190.page-60-allocation-rows-print-each-models-own-as-of-date.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~381",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/model_source.py",
+      "kind": "script",
+      "commit_or_etag": "5c8ede09163",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 5c8ede09163 on wk-IRPT_ANLREQ-381 only; read_allocation returns as_of_by_code (each model's portfolios.<code>.data_as_of, file-level fallback when the key is absent, refusal when present and not a YYYY-MM-DD day). Nothing deployed: the reader reaches the host only through a later resident release (r34t)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "5c8ede09163",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 5c8ede09163 only; one line in _compare_stage: the model branch takes as_of from alloc_doc['as_of_by_code'][code]. Nothing else in the file changed. Nothing deployed.",
+      "artifact_covered_by": ["AR190-g-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_model_source.py",
+      "kind": "test",
+      "commit_or_etag": "5c8ede09163",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 5c8ede09163 only; 3 new test functions (per-code dates, file-date fallback, malformed per-portfolio date refused naming the code, parametrized over 7 bad values). Before the code edit the 2 positive tests and the 7 refusal cases failed (10 failed in the two files, 65 passed, measured in the worktree); after it the file passes."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_compare_producer.py",
+      "kind": "test",
+      "commit_or_etag": "5c8ede09163",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 5c8ede09163 only; _model_bytes gains an optional per_portfolio argument (default unchanged, existing tests unchanged); one new test asserts each model row's Basis reads its own date. Failed at base with 'Model positioning as of 2026-10-19' for Long-Term; passes after the producer edit."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "222610faa82",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit 222610faa82 only; row IRPT_ANLREQ-D2-W381-S1 appended (OBSERVATION, INERT); surprise-row-gate --check rc=0 on the file."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR190-g-AC1",
+      "criterion_verbatim": "AC1: read_allocation returns each model's own data_as_of (fallback to the file's date when absent, a malformed one refused) with the file-level as_of unchanged, and the REAL producer's allocation rows print `Model positioning as of <own date>` per model. At base it FAILs.",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich_checks.py asof",
+      "output_evidence": "AR-ENRICH-asof-OK\nrc=0 at commit 222610faa82 in C:/dev/wk-irpt-anlreq-381 (timeout 120; run twice, after the code commit and after the row commit, same result). Base before the edit at fb39cbb077d: AR-ENRICH-asof-FAIL as_of_by_code is None; a portfolio without data_as_of should take the file's date; a malformed per-portfolio data_as_of was not refused; Opal Long-Term basis is 'Model positioning as of 2026-10-19', want the model's own date 2026-08-18; Opal Ultra Long-Term basis is 'Model positioning as of 2026-10-19', want the model's own date 2026-10-08.",
+      "denominator": "6 of 6 arm checks clean at the committed tree: file-level as_of 2026-10-19 unchanged, as_of_by_code LT 2026-08-18 and ULT 2026-10-08, file-date fallback, malformed refused, and the two REAL producer Basis rows. Base: 1 of 6 (the file-level as_of already passed; the other five failed: as_of_by_code, fallback, malformed not refused, and the two Basis rows).",
+      "expect": "^AR-ENRICH-asof-OK$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation at the committed tree."
+    },
+    {
+      "criterion_id": "AR190-g-AC2",
+      "criterion_verbatim": "AC2: the two owned test files pass (65 at the base) and at least 68 ran. At base it FAILs (65 ran).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich_checks.py tests190",
+      "output_evidence": "AR-ENRICH-tests190-OK passed=75\nrc=0 at commit 222610faa82 in C:/dev/wk-irpt-anlreq-381 (timeout 120; run twice, after the code commit and after the row commit, same result). The checker runs pytest -q -p no:cacheprovider --color=no over ycharts/research/tests/test_model_source.py and test_compare_producer.py: 75 passed (65 at base plus 10 new: 2 positive test functions and 7 parametrized refusal cases in test_model_source.py, and 1 in test_compare_producer.py). Base before the edit: AR-ENRICH-tests190-FAIL rc=0 passed=65 (want at least 68).",
+      "denominator": "75 of 75 owned-file tests passed; the floor is 68 (65 base plus 3 new). Base: 65 of 65 passed, 10 new tests failing before the code edit.",
+      "expect": "^AR-ENRICH-tests190-OK passed=[0-9]+$",
+      "status": "PASS",
+      "status_reason": "rc=0, passed=75 >= 68, and the RESULT line matches the expectation at the committed tree."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The order's discrimination is the base run: both checker arms FAILed at fb39cbb077d before any edit, and the 10 new tests FAILed on the unchanged code.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was designed; each invocation was run at the code commit and again at the row commit, with identical RESULT lines.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Live positioning object read (run 7M): not run",
+      "reason": "The order's checks are offline and read no AWS; the live object's per-model data_as_of field was not read here."
+    },
+    {
+      "item": "comparables.py",
+      "reason": "Not edited, as the order states; it already prints each row's own as_of."
+    },
+    {
+      "item": "Null-valued portfolios.<code>.data_as_of",
+      "reason": "Refused as malformed rather than read as absent; the order does not say. Filed as IRPT_ANLREQ-D2-W381-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W381-S1: the order's read rule does not say whether a portfolio whose data_as_of is present as JSON null is absent or malformed; the code refuses it as malformed (key presence decides the fallback), pinned by a test."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-381; TREE-OK. Base: both checker arms run at fb39cbb077d (asof FAIL, tests190 FAIL passed=65). Base pytest with the 10 new tests on unchanged code: 10 failed, 65 passed. Edits: model_source.py, opal_producer.py, test_model_source.py, test_compare_producer.py -> safe-commit 5c8ede09163 (commit-gate clean, ruff py39 clean, ASCII). Channel row W381-S1 -> safe-commit 222610faa82 (surprise-row-gate rc=0). Acceptance re-run after 222610faa82: asof rc=0, tests190 rc=0 passed=75. Proof and status flip committed together after both PASS.",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && timeout 120 python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_model_source.py ycharts/research/tests/test_compare_producer.py",
+      "result": "base with new tests on unchanged code: 10 failed, 65 passed; at 5c8ede09163: 75 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "cd infra/aws/lambda/investor-reporting/ycharts/research && python -m ruff check --target-version py39 model_source.py opal_producer.py tests/test_model_source.py tests/test_compare_producer.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; 0 new rows of 1180 pre-existing (rc=0)"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39) via safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~381 <0.9.0_WK_IRPT_ANLREQ~381@opal.agent>\" -F <msgfile> -- <4 .py paths>",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s); committed 5c8ede09163"
+    }
+  ]
+}
