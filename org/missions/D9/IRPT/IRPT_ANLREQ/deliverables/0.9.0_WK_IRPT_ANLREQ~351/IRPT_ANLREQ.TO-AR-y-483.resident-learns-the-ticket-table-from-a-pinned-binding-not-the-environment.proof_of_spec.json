@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-483.resident-learns-the-ticket-table-from-a-pinned-binding-not-the-environment",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "2eb26945a00",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-483.resident-learns-the-ticket-table-from-a-pinned-binding-not-the-environment.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-483.resident-learns-the-ticket-table-from-a-pinned-binding-not-the-environment.md",
+    "group": "OTHER",
+    "vintage_commit": "2eb26945a00"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~351",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/resident_installed.py",
+      "kind": "script",
+      "commit_or_etag": "5adb77937a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TICKETS_TABLE_ENV and the os.environ read of IRPT_TICKETS_TABLE are removed. tickets_table is an OPTIONAL binding: absent is the pre-wiring state; present it must match [A-Za-z0-9_.-]{3,255} or load_bindings raises TICKETS_TABLE_INVALID. build_resident_runtime passes bindings.get('tickets_table') to make_packager. Committed LOCAL on wk-IRPT_ANLREQ-351. Nothing planned, applied, built or deployed.",
+      "artifact_covered_by": [
+        "AR483-y-AC1",
+        "AR483-y-AC2",
+        "AR483-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_resident_tickets_binding.py",
+      "kind": "test",
+      "commit_or_etag": "5adb77937a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Hermetic tests with a recording make_packager stand-in: a valid binding reaches make_packager; an absent binding passes None; the five malformed values refuse TICKETS_TABLE_INVALID; IRPT_TICKETS_TABLE in the environment changes nothing. 0 tests deleted or skipped.",
+      "artifact_covered_by": [
+        "AR483-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py",
+      "kind": "script",
+      "commit_or_etag": "50927c7a041",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, offline. Grades resident_installed.py for env_read, optional_binding, refusal and reaches_make_packager by reading the source text in this worktree (clean at the commit that carries the change). --selftest mutates three defects in memory and prints CONTROL-FIRES only when all three read BAD.",
+      "artifact_covered_by": [
+        "AR483-y-AC1",
+        "AR483-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "50927c7a041",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One appended row IRPT_ANLREQ-D2-W351-S1 (class BLOCKING, hazard INERT): the builder cannot write tickets_table because no file it reads or git-shows from the pin holds the table name as a value. 31 insertions, 0 deletions.",
+      "artifact_covered_by": [
+        "AR483-y-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR483-y-AC1",
+      "criterion_verbatim": "AR483-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py -- expect ^TICKETS-BINDING-OK env_read=no optional_binding=yes refusal=TICKETS_TABLE_INVALID reaches_make_packager=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py",
+      "output_evidence": "TICKETS-BINDING-OK env_read=no optional_binding=yes refusal=TICKETS_TABLE_INVALID reaches_make_packager=yes\nrc=0 (the same line on a second run; diff rc=0).",
+      "denominator": "1 of 1 verdict line; 4 of 4 facts graded (env_read, optional_binding, refusal, reaches_make_packager)",
+      "expect": "^TICKETS-BINDING-OK env_read=no optional_binding=yes refusal=TICKETS_TABLE_INVALID reaches_make_packager=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly. The four facts are computed from the source text, not printed as constants; the builder change (2) is not among the graded facts and is held by BLOCKING row IRPT_ANLREQ-D2-W351-S1."
+    },
+    {
+      "criterion_id": "AR483-y-AC2",
+      "criterion_verbatim": "AR483-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0. The stderr diagnostics (not the verdict line): mutant env_read_put_back: BAD env_read=yes; reaches_make_packager=no | mutant refusal_text_removed: BAD refusal=absent | mutant make_packager_arg_none: BAD reaches_make_packager=no.",
+      "denominator": "3 of 3 mutants read BAD; 1 of 1 control line",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the stdout line matches ^CONTROL-FIRES$. Each mutant applied to the text (none reported not-applied) and read BAD on at least one graded fact."
+    },
+    {
+      "criterion_id": "AR483-y-AC3",
+      "criterion_verbatim": "AR483-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_resident_tickets_binding.py reports/tests/test_resident_r31_packager_bindings.py reports/tests/test_resident_packager_binding.py ycharts/generate/tests/test_audit_live_wiring.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_resident_tickets_binding.py reports/tests/test_resident_r31_packager_bindings.py reports/tests/test_resident_packager_binding.py ycharts/generate/tests/test_audit_live_wiring.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "49 passed in 13.69s\n(the pytest summary line; a run before the proof gave 49 passed in 12.06s). test_audit_live_wiring.py ran last, as the order requires (sys.path leak, W350-S1); no failure, no skip.",
+      "denominator": "49 of 49 tests passed across 4 files; 0 failed; 0 skipped",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the printed summary matches ^[0-9]+ passed in . The pytest rc is hidden by the order's pipe to tail; the summary carries no failed or skipped count."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR483-y-AC2 control: three defects put back in memory on the HEAD text, one at a time: (a) the env read restored on the make_packager argument (os.environ.get IRPT_TICKETS_TABLE), (b) the refusal text TICKETS_TABLE_INVALID renamed, (c) the make_packager argument replaced by None. The control fires when all three read BAD.",
+      "expected": "CONTROL-FIRES on stdout; each mutant prints BAD on stderr; rc 0.",
+      "observed": "mutant env_read_put_back: BAD env_read=yes; reaches_make_packager=no ; mutant refusal_text_removed: BAD refusal=absent ; mutant make_packager_arg_none: BAD reaches_make_packager=no ; CONTROL-FIRES ; rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice into the worker scratch (.scratch/ac1_run1.txt and .scratch/ac1_run2.txt, not committed); each run rc 0; diff of the two stdout files.",
+      "observed": "run1-rc=0; run2-rc=0; diff rc=0; the one line is TICKETS-BINDING-OK env_read=no optional_binding=yes refusal=TICKETS_TABLE_INVALID reaches_make_packager=yes in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the builder change (2): build_resident_package.py does not write a tickets_table binding",
+      "reason": "no file the builder reads or git-shows from the pin holds the ticket table name as a value (candidate sources checked and recorded in row IRPT_ANLREQ-D2-W351-S1, class BLOCKING). The order says to stop before editing the builder and to report; the issuer takes the source question to the CTO."
+    },
+    {
+      "item": "the release build, the planned or applied resident bindings, and any AWS, network, push or deploy",
+      "reason": "out of this cell by the order: no AWS call, no network, no push, no deploy and no release build; the resident release r34q is built by 2.0.0_SA_COO~G2 and applied by IB2 under its own pair."
+    },
+    {
+      "item": "the live resident run with a tickets_table binding and a real audit attach",
+      "reason": "not seen offline: the offline tests use recording stand-ins for make_packager and the DynamoDB and S3 clients."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W351-S1: the builder cannot write tickets_table because no file it reads or git-shows from the pin holds the table name as a value; the builder is held and the row is BLOCKING (BLOCKING, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I (stdlib) and python -m pytest",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~351/check_tickets_binding.py ; (cd infra/aws/lambda/investor-reporting && python -m pytest ... -q --color=no -p no:cacheprovider)",
+      "result": "check rc=0 and CONTROL-FIRES rc=0; pytest 49 passed; commit-gate clean for the two .py files; ruff clean through commit-gate."
+    }
+  ]
+}
