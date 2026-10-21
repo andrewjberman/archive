@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-481.analysis-audit-gets-its-own-policy-row-and-the-anlreq-row-is-restored",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "883c8992265",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-481.analysis-audit-gets-its-own-policy-row-and-the-anlreq-row-is-restored.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-481.analysis-audit-gets-its-own-policy-row-and-the-anlreq-row-is-restored.md",
+    "group": "OTHER",
+    "vintage_commit": "883c8992265"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~350",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/reporting_policies.json",
+      "kind": "config_data",
+      "commit_or_etag": "728aa33c37d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-anlreq-x10-v1 restored to its text at 1c277930e66^ (diff against that commit shows only the appended row). New row irpt-anlreq-audit-x10-v1: ANALYSIS_AUDIT platinum, PENDING_ENFORCEMENT, enforcement_ref null, register_commit 705dae3202cac873a133825bee9d0381c7dd6b7f, ruling_commit 88ae0673276c9c9b0ce068c0273c6ebf25de5a48. Committed LOCAL on wk-IRPT_ANLREQ-350. Nothing applied, planned or deployed.",
+      "artifact_covered_by": [
+        "AR481-y-AC1",
+        "AR481-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/analysis_audit.py",
+      "kind": "script",
+      "commit_or_etag": "a56bde4159b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "POLICY_REVISION changed to irpt-anlreq-audit-x10-v1 in 728aa33c37d; the docstring comment naming the revision was corrected in a56bde4159 (comment text only). Nothing else in the module changed. commit-gate clean.",
+      "artifact_covered_by": [
+        "AR481-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/reports/tests/test_analysis_audit.py",
+      "kind": "test",
+      "commit_or_etag": "a56bde4159b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "POLICY_REVISION changed to irpt-anlreq-audit-x10-v1 in 728aa33c37d; the docstring comment naming the revision was corrected in a56bde4159 (comment text only). Nothing else in the module changed. commit-gate clean.",
+      "artifact_covered_by": [
+        "AR481-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_audit_live_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "728aa33c37d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The same in-memory ACTIVE fixture, added after fixed_clock. No import or sys.path line changed. No test deleted or skipped.",
+      "artifact_covered_by": [
+        "AR481-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident.tf",
+      "kind": "config_data",
+      "commit_or_etag": "728aa33c37d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New local resident_audit_policy selects irpt-anlreq-audit-x10-v1; resident_audit_write_prefixes is built from it. Bucket, source, scope, tier and table references are unchanged. Terraform not installed on this box; no plan, no apply.",
+      "artifact_covered_by": [
+        "AR481-y-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py",
+      "kind": "script",
+      "commit_or_etag": "571ce1db6e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib, offline. Reads HEAD blobs of lib/opal_naming.py and the registry at HEAD and at 1c277930e66^ into a temporary directory outside the repository, computes reporting_policy('irpt-anlreq-x10-v1') at both, and checks the row terms. Writes nothing to the repository.",
+      "artifact_covered_by": [
+        "AR481-y-AC1",
+        "AR481-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR481-y-AC1",
+      "criterion_verbatim": "AR481-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py -- expect ^AUDIT-ROW-OK old_policy_sha_equal=yes new_row=PENDING_ENFORCEMENT enforcement_ref=null register_commit=705dae32 ruling_commit=88ae0673 other_rows_unchanged=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py",
+      "output_evidence": "AUDIT-ROW-OK old_policy_sha_equal=yes new_row=PENDING_ENFORCEMENT enforcement_ref=null register_commit=705dae32 ruling_commit=88ae0673 other_rows_unchanged=yes\nrc=0. A second run printed the same line; diff of the two stdout captures rc=0.",
+      "denominator": "5 of 5 parent rows equal at HEAD (the restored row included); 14 of 14 new-row fields checked (8 CTO terms and 6 fields shared with the restored row); 1 of 1 resident_audit_write_prefixes selector names the new row",
+      "expect": "^AUDIT-ROW-OK old_policy_sha_equal=yes new_row=PENDING_ENFORCEMENT enforcement_ref=null register_commit=705dae32 ruling_commit=88ae0673 other_rows_unchanged=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR481-y-AC2",
+      "criterion_verbatim": "AR481-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0",
+      "denominator": "3 of 3 in-memory mutants read BAD (old row given ANALYSIS_AUDIT; new row ACTIVE with null enforcement_ref; new row with a 40-hex enforcement_ref); baseline read OK first",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the printed line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR481-y-AC3",
+      "criterion_verbatim": "AR481-y-AC3 (AMENDED, AMENDMENT 1 of e5982bc9db5): (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "52 passed in 1.98s\n(rc of the pytest run 0; the tail line matches the expect regex). Before the amendment the same files in the old order (test_analysis_audit.py first) printed 1 error in 0.34s at collection (rc 2), recorded in IRPT_ANLREQ-D2-W350-S1.",
+      "denominator": "52 of 52 collected tests passed; 3 of 3 named files collected in the amended order",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "The amended invocation prints 52 passed in 1.98s and matches ^[0-9]+ passed in . The sys.path leak of test_audit_live_wiring.py is outside this cell and was not fixed (AMENDMENT 1)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR481-y-AC2 control: check_audit_row.py --selftest mutates HEAD's rows in memory three ways (the old row given ANALYSIS_AUDIT again; the new row state ACTIVE with enforcement_ref null; the new row given a 40-hex enforcement_ref) and reads each through the same verdict. The control fires only when all three read BAD and the baseline reads OK.",
+      "expected": "CONTROL-FIRES",
+      "observed": "CONTROL-FIRES rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AR481-y-AC1 run twice (captures kept in the worker scratch, not committed) and compared with diff.",
+      "observed": "Runs at HEAD a56bde4159b: both AR481-y-AC1 runs printed the same AUDIT-ROW-OK line with rc=0; diff rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan or validate of resident.tf",
+      "reason": "Terraform is not installed on this box, and the order forbids any plan, apply or AWS call. The Terraform edit is checked by text (AR481-y-AC1 selector check) only."
+    },
+    {
+      "item": "the ACTIVE flip of irpt-anlreq-audit-x10-v1 and the applied audit policy",
+      "reason": "Out of this order by the CTO's terms (msg 11646): the flip is a later commit that records the applied audit policy, and no row is reserved under the new revision before it."
+    },
+    {
+      "item": "the r34p package build and the packaged registry byte equality",
+      "reason": "Built by 2.0.0_SA_COO~G2 from r34o minus this file; not run by this worker."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W350-S1: AR481-y-AC3 as named could not pass: test_audit_live_wiring.py leaks sys.path at module level and test_generate_installed.py fails to collect after it. RESOLVED-BY-AMENDMENT: the issuer amended the invocation to name test_generate_installed.py first (trunk e5982bc9db5, AMENDMENT 1); the amended AC3 passes (BLOCKING, INERT).",
+    "IRPT_ANLREQ-D2-W350-S2: analysis_audit.py docstring and resident_audit_policy.tf header comment named irpt-anlreq-x10-v1 for ANALYSIS_AUDIT. RESOLVED in a56bde4159 by the comment-only fix the amendment asked for (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I check_audit_row.py (stdlib, offline)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~350/check_audit_row.py",
+      "result": "AUDIT-ROW-OK ... rc=0 at 728aa33c37d (HEAD of wk-IRPT_ANLREQ-350 when run)."
+    },
+    {
+      "tool": "pytest 9.0.2 (worktree infra/aws/lambda/investor-reporting)",
+      "invocation": "python -m pytest reports/tests/test_analysis_audit.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_generate_installed.py -q --color=no -p no:cacheprovider",
+      "result": "collection error, '1 error in 0.34s', rc 2 (see AR481-y-AC3)."
+    },
+    {
+      "tool": "commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh <each changed or added .py file>",
+      "result": "pre-commit gate clean for 1 of 1 file(s) for each of the three edited test and code files and for check_audit_row.py."
+    }
+  ]
+}
