@@ -1,0 +1,25 @@
+0.9.0_WK_NFRA_FIDUPL~7 -- NFRA_FIDUPL.TO-FW-s-1 (api_walk.py) -- session log
+Worktree C:/tmp/fidupl-w7, branch wk-NFRA_FIDUPL-7.
+
+First build: base HEAD 7402cd0e3e1. Code commit b8c032fc2d. Proof commit 29c9270401e.
+Criteria at that build: fw1 R1-FW1-OK passed=15; fw1s R1-FW1S-OK passed=1; fv2 R1-FV2-OK passed=13.
+Module suite then: 284 passed in 22.88s (rc=0).
+
+REPAIR 1 (order block of 2026-10-21 ~17:00Z; checker amended at a42dd4e683f):
+  1. Transactions stop rule: two consecutive empty windows, or an empty window of index 5 or higher; an existing
+     empty object counts as empty; the window cap of 10 stays.
+  2. Earliest content date: transactions and realized objects carry metadata earliest (the answer's earliest row
+     date); a skipped window or range folds its metadata earliest and rows.
+  Tests: test_an_account_walks_windows_back_until_the_first_empty_window... renamed to
+  test_an_account_walks_windows_back_until_the_stop_rule_and_lands_each_by_window_end; added
+  test_two_consecutive_empty_windows_or_an_empty_window_from_the_sixth_on_end_an_account and
+  test_skipped_windows_and_ranges_still_count_toward_the_earliest_content_date.
+  Code commit dd0f7996831 (api_walk.py, tests/test_api_walk.py).
+  Criteria at the repair: fw1 R1-FW1-OK passed=17 (rc=0), twice; fw1s R1-FW1S-OK passed=1 (rc=0), twice;
+  fv2 R1-FV2-OK passed=13 (rc=0), twice.
+  Module suite: 286 passed in 22.20s (rc=0).
+  Mutant (scratch, EMPTY_RUN_END = 1): 6 failed, 11 passed (rc=1).
+  ASCII and grammar: 0 non-ASCII bytes in the three files; parse under feature_version (3, 9).
+
+The order status was reset to pending by the amend commit a42dd4e683f; it is flipped to complete again in the
+proof commit.
