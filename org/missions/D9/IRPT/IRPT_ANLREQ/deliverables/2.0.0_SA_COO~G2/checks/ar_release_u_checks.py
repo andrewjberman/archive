@@ -5,12 +5,11 @@ calls no AWS. Run from the repository root with a python that has jsonschema and
     python ar_release_s_checks.py tree    <r34u tarball> <full 40-hex pin>
     python ar_release_s_checks.py scripts <stage folder>
 
-r34u = r34t plus: (1) a typed ETF is a priced comparable (AR-g-189): ycharts/generate/resident_worker.py; (2) each Opal model's own positioning date
-(AR-g-190): ycharts/research/model_source.py, opal_producer.py; (3) the left-out holding named on the page and the six Risk Info tables as tables
-(AR-g-191, AR-g-192): ycharts/research/layout_overview.py; (4) the C-SWAP model leg (Y2 AR-y-492..494): reports/resident_installed.py, reports/build_resident_package.py,
-ycharts/research/swap_pass.py, the new ycharts/research/swap_model.py, the new etf_classification_model.py at the package root, and the optional binding
-opal_swap_model shipped {"enabled": true}. No registry move, no IAM change; the files-from list gains swap_model.py (51 lines).
-record / tree / scripts: as r34t's checker, over the nine movers and the two added members.
+r34u = r34t plus: (1) the host capture library moves to the trunk file (W328-S1: WAF_CHALLENGE ends the run with no second sign-in): the package member
+ycharts-host/ycharts_session.js (a1c28801 -> db43e9f9) and bindings capture.library_sha256; (2) the swap record carries the class pair and the model's number and a
+low-confidence sentence (AR-y-497): ycharts/research/swap_pass.py; (3) the Overview names every replaced swap under the left-out line (AR-y-498) and the comparison
+chart draws six distinct series colours (AR-g-195): ycharts/research/layout_overview.py. No member added, no registry move, no IAM change.
+record / tree / scripts: as r34t's checker, over five movers; the scripts arm also requires the host script to want the NEW library and the rollback to restore the kept old one.
 Prints one RESULT line: AR-RELS-<arm>-OK or AR-RELS-<arm>-FAIL <why>; rc 0 only on OK. ASCII only.
 """
 import hashlib
@@ -30,12 +29,13 @@ R34T_TAR = "C:/dev/irpt-release-r34t-g2/irpt-resident-0485393f3a-r34t.tar.gz"
 R34T_SHA = "35a4f044c2bcae4d567c57132b833c101ab1872d9880bafd45cb0a4afe6af21d"
 REG = "infra/logic/registry/reporting_policies.json"
 NEW_REVISION = "irpt-anlreq-audit-x10-v1"
-CHANGED = ["SHA256SUMS", "reports/build_resident_package.py", "reports/resident_bindings.json", "reports/resident_installed.py", "ycharts/generate/resident_worker.py",
-           "ycharts/research/layout_overview.py", "ycharts/research/model_source.py", "ycharts/research/opal_producer.py", "ycharts/research/swap_pass.py"]
-ADDED = ["etf_classification_model.py", "ycharts/research/swap_model.py"]
+CHANGED = ["SHA256SUMS", "reports/resident_bindings.json", "ycharts-host/ycharts_session.js", "ycharts/research/layout_overview.py", "ycharts/research/swap_pass.py"]
+ADDED = []
+LIB_OLD = "a1c2880169c5f7996cc7c5880e4fe36db90f0a2c1f5a1cd01e0d1d8153544841"
+LIB_NEW = "db43e9f9744e697098120e11dd862a1348ffea05c6307f980dc24e7ea530a216"
 SOURCE = {"SHA256SUMS": None, "reports/resident_bindings.json": None,
-          "etf_classification_model.py": "infra/aws/lambda/v2_portal/_shared/etf_classification_model.py"}
-PROV_MOVES = {"files_from_count", "files_from_sha256", "members_added", "package_pin"}
+          "ycharts-host/ycharts_session.js": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js"}
+PROV_MOVES = {"package_pin"}
 MEMBERS_NOW = 325
 FILES_FROM = 51
 
@@ -103,8 +103,8 @@ def arm_record(path):
         if len(read_tar(p)) != art.get("member_count") or art.get("member_count") != MEMBERS_NOW:
             fails.append("member_count is %s (want %d and the tarball's own count)" % (art.get("member_count"), MEMBERS_NOW))
     bd = rec.get("bindings_diff") or {}
-    if bd.get("keys_added") != ["opal_swap_model"] or bd.get("keys_changed") != ["provenance"] or set(bd.get("provenance_keys_changed") or []) != PROV_MOVES:
-        fails.append("bindings_diff is %s want opal_swap_model added, changed provenance %s" % (bd, sorted(PROV_MOVES)))
+    if bd.get("keys_added") != [] or bd.get("keys_changed") != ["capture", "provenance"] or set(bd.get("provenance_keys_changed") or []) != PROV_MOVES:
+        fails.append("bindings_diff is %s want no key added, changed capture and provenance %s" % (bd, sorted(PROV_MOVES)))
     tb = rec.get("two_builds") or {}
     if not tb.get("files_compared") or tb.get("files_compared") != tb.get("identical"):
         fails.append("two_builds not identical: %s" % tb)
@@ -143,9 +143,9 @@ def arm_tree(tar_path, pin):
     b_old = json.loads(old["reports/resident_bindings.json"])
     added_keys = sorted(set(b_new) - set(b_old))
     moved = sorted(k for k in b_new if k in b_old and b_new[k] != b_old[k])
-    if (added_keys != ["opal_swap_model"] or b_new.get("opal_swap_model") != {"enabled": True} or moved != ["provenance"] or b_new.get("tickets_table") != "opal-tickets" or b_old.get("tickets_table") != "opal-tickets"
+    if (added_keys != [] or b_new.get("opal_swap_model") != {"enabled": True} or b_old.get("opal_swap_model") != {"enabled": True} or moved != ["capture", "provenance"] or b_new["capture"].get("library_sha256") != LIB_NEW or b_old["capture"].get("library_sha256") != LIB_OLD or b_new.get("tickets_table") != "opal-tickets" or b_old.get("tickets_table") != "opal-tickets"
             or b_new["provenance"].get("package_pin") != pin or b_new["provenance"].get("files_from_count") != FILES_FROM):
-        fails.append("bindings: added %s moved %s tickets_table %r (want opal_swap_model {enabled: true} added, provenance moved, tickets_table opal-tickets in both, the pin, %d files-from)" % (
+        fails.append("bindings: added %s moved %s tickets_table %r (want opal_swap_model {enabled: true} in both, capture.library_sha256 old -> new and provenance moved, tickets_table opal-tickets in both, the pin, %d files-from)" % (
             added_keys, moved, b_new.get("tickets_table"), FILES_FROM))
     else:
         pm = {k for k in set(b_new["provenance"]) | set(b_old["provenance"]) if b_new["provenance"].get(k) != b_old["provenance"].get(k)}
@@ -192,7 +192,8 @@ def arm_tree(tar_path, pin):
                 fails.append("%s %s on the tarball: %s" % (script, arm, (r.stdout.strip() or r.stderr.strip()[-160:])[:200]))
         shipped = {}
         for name in ("ycharts/generate/resident_worker.py", "ycharts/research/model_source.py", "ycharts/research/opal_producer.py",
-                     "ycharts/research/layout_overview.py", "reports/resident_installed.py", "ycharts/research/swap_model.py"):
+                     "ycharts/research/layout_overview.py", "reports/resident_installed.py", "ycharts/research/swap_model.py", "ycharts/research/swap_pass.py",
+                     "ycharts-host/ycharts_session.js"):
             shipped[name] = open(os.path.join(root, name), encoding="utf-8").read() if os.path.isfile(os.path.join(root, name)) else ""
         want = (("ycharts/generate/resident_worker.py", '"ticker": key if c.get("security_type") == "etf" else None', "the typed-ETF ticker is the catalogue key"),
                 ("ycharts/research/model_source.py", "as_of_by_code", "the per-model positioning dates"),
@@ -201,7 +202,11 @@ def arm_tree(tar_path, pin):
                 ("ycharts/research/layout_overview.py", "Left out of all figures:", "the left-out wording"),
                 ("ycharts/research/layout_overview.py", 'acc.get("kind") == "table"', "the table elements take the column path"),
                 ("reports/resident_installed.py", "SWAP_MODEL_BINDING_INVALID", "the swap-model binding rule"),
-                ("ycharts/research/swap_model.py", "def make_swap_model(", "the swap model adapter"))
+                ("ycharts/research/swap_model.py", "def make_swap_model(", "the swap model adapter"),
+                ("ycharts/research/swap_pass.py", "model_confidence", "the model's number in the swap record (AR-y-497)"),
+                ("ycharts/research/layout_overview.py", "Replaced in all figures:", "the replaced-swap line (AR-y-498)"),
+                ("ycharts/research/layout_overview.py", '"#D95F02"', "the six chart series colours (AR-g-195)"),
+                ("ycharts-host/ycharts_session.js", "WAF_CHALLENGE", "the WAF_CHALLENGE repair of the capture library (W328-S1)"))
         for name, needle, what in want:
             if needle not in shipped[name]:
                 fails.append("the shipped %s lacks %s" % (name, what))
@@ -227,6 +232,16 @@ def arm_scripts(stage):
         text = data.decode("ascii", "replace")
         if name != "resident_host_install_0485393f3a-r34u.sh" and ("NEW=0485393f3a-r34u" not in text or "OLD=0485393f3a-r34t" not in text):
             fails.append("%s does not name NEW r34u and OLD r34t" % name)
+        if name == "resident_host_install_0485393f3a-r34u.sh" and ("WANT_LIBRARY=" + LIB_NEW not in text or "WANT_LIBRARY=" + LIB_OLD in text):
+            fails.append("the host script does not want the NEW capture library alone")
+        if name == "install_r34.sh" and ("| want " + LIB_NEW not in text or "(want " + LIB_OLD + ")" not in text):
+            fails.append("install_r34.sh V1 does not want the NEW library on the host and the OLD one in the kept copy")
+        if name == "pre_read_r34.sh" and (LIB_OLD not in text or LIB_NEW in text):
+            fails.append("pre_read_r34.sh must read the OLD library only")
+        if name == "rollback_r34.sh" and not all(s in text for s in (LIB_OLD, LIB_NEW, "ycharts_session.js.before-$NEW", "exit 13", "exit 14")):
+            fails.append("rollback_r34.sh does not restore the kept old library before the old root's installer")
+        if name == "rollback_r34.sh" and text.find("ycharts_session.js.before-$NEW $H/ycharts_session.js") > text.find("install-resident.sh"):
+            fails.append("rollback_r34.sh restores the library AFTER the old root's installer")
         if name == "resident_host_install_0485393f3a-r34u.sh":
             if "WANT_TAR=" + want not in text:
                 fails.append("the host script WANT_TAR is not the tarball sha256")
