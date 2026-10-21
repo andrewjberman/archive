@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-20</date>
-    <status>pending</status>
+    <status>complete</status><!-- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-21 (round hygiene, CTO msg ~15:10Z): every criterion invocation re-run by the issuer and matched; the proof instance reads VALID rc 0 -->
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
@@ -49,7 +49,7 @@ comp-adversary: RUN -- by reading run 7d's receipt, the CTO's rulings (msgs 1150
 Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e7e/IRPT_ANLREQ.TO-RUN-COMMENTARY-E2E-7E.overview-filing-on-the-r34o-resident-for-andrew-ib2.proof_of_spec.json`.
     <criterion id="E2E7E-AC1" cell_refs="AR-y-480">The record holds all twenty lines, each answered or marked not run.<invocation>grep -c -E '^(R0|A|A2|L|B1|B2|B3|P1|P2|P3|P4|P5|P7|R|R2|R3|R4|DLQ|D) |^RUN-DONE (PASS|STOP at )' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e7e/A_E2E7E.txt</invocation><expect>^20$</expect></criterion>
     <criterion id="E2E7E-AC2" cell_refs="AR-y-480">The run is honest about its ending (a pass, or a stop at a named hop).<invocation>grep -c -E '^RUN-DONE (PASS|STOP at [A-Z0-9]+ code=[A-Z0-9_]+)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_commentary_e2e7e/A_E2E7E.txt</invocation><expect>^1$</expect></criterion>
-    <criterion id="E2E7E-AC3" cell_refs="AR-y-480">The ledger irpt-commentary-e2e-7e-20261020 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*irpt-commentary-e2e-7e-20261020_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
+    <criterion id="E2E7E-AC3" cell_refs="AR-y-480">The ledger irpt-commentary-e2e-7e-20261020 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/20261020T2334Z_irpt-commentary-e2e-7e-20261020_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
   </proof_of_spec>
 </task_order>
 # pipeline-override: an APPLY order to a tier-2 CloudOps seat under ADDENDUM 9 as the CTO's msgs 11508, 11510, 11512 and 11521 carry it (run 7e on run 7d's terms), not a worker cell; the cell AR-y-480 is the issuer's, as for TO-RUN-COMMENTARY-E2E-7C.
