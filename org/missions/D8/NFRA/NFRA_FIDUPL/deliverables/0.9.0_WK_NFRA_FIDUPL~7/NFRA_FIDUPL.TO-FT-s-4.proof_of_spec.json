@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-4",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "6bd116284f5",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-4.backfill-runner.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-4.backfill-runner.md",
+    "group": "OTHER",
+    "vintage_commit": "6bd116284f5"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/backfill_run.py",
+      "kind": "script",
+      "commit_or_etag": "ea910790b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7 at ea910790b1. Runner built against injected collaborators (export client, lander, session factory, records). Not run on the box; no AWS, no sign-in, no export. Not shipped to /opt/fidelity-uploader by this order.",
+      "artifact_covered_by": [
+        "FT-s-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_backfill_run.py",
+      "kind": "test",
+      "commit_or_etag": "ea910790b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-NFRA_FIDUPL-7 at ea910790b1. Seven fake-only tests: the five named in FT-s-4-AC1 plus terminal-G skip and lander-failure mapping. Synthetic G strings and synthetic data only.",
+      "artifact_covered_by": [
+        "FT-s-4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "67f89d0046",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Surprise rows NFRA_FIDUPL-D1-W7-S3, NFRA_FIDUPL-D1-W7-S4, NFRA_FIDUPL-D1-W7-S5 and NFRA_FIDUPL-D1-W7-S6 committed LOCAL on wk-NFRA_FIDUPL-7 at 67f89d0046 (appended, no existing row edited); row gate OK."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-4-AC1",
+      "criterion_verbatim": "the five named tests exist and pass.",
+      "method": "command",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft4",
+      "output_evidence": "R1-FT4-OK passed=7 (run from the worktree with the main tree's checker by absolute path, C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py, rc=0)",
+      "denominator": "7 passing of 5 required: the five named tests (test_one_row_per_g_with_earliest_date_and_reason, test_run_cap_stops_the_walk_and_records_remaining, test_session_count_rule_refuses_a_third_sign_in_today, test_resumes_from_the_recorded_earliest_date, test_never_prints_g_numbers) are present and pass; two extra tests (test_terminal_g_is_not_walked_again, test_lander_failure_reads_none_and_stays_resumable) also pass",
+      "status": "PASS",
+      "expect": "R1-FT4-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No mutant was run: the order names no mutant control for this cell; the fake-only tests assert the cap, the session rule, the resume and the values-free output directly.",
+      "expected": "n/a",
+      "observed": "no mutant run",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "the same checker invocation (ft4) and the same pytest file run twice on the committed tree at ea910790b1",
+      "observed": "fidupl_round_checks.py ft4: R1-FT4-OK passed=7 on each of two runs; pytest test_backfill_run.py: 7 passed on each run",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real ExportClient adapter (the on-demand export request, wait and download)",
+      "reason": "Decomposition R3 gap 1: the adapter waits for Andrew's capture of the on-demand export. This cell builds the runner against an injected client only."
+    },
+    {
+      "item": "A production records store (load, save, sessions_today, note_session) on the box",
+      "reason": "The store is injected. Its box wiring is not in this cell's grant; the in-memory fake is the only store exercised."
+    },
+    {
+      "item": "The session factory against Wealthscape, and any sign-in",
+      "reason": "Fakes only, by the order's bounds. The live leg belongs to a later order that runs the backfill on the box."
+    },
+    {
+      "item": "Wiring of backfill_run into box/run.py or box/daily.py",
+      "reason": "Not named by this cell; outside the paths block."
+    },
+    {
+      "item": "The TO status flip to complete",
+      "reason": "The TO file is not in this order's paths block (surprise NFRA_FIDUPL-D1-W7-S6, BLOCKING). The worker cannot flip it; the instance and the criterion are complete on the worker side."
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W7-S3: the closed stop_reason set (entitlement, retention, open_date, run_cap, none) has no value for the planner's lander-failure stop, so a lander failure reads none in the row; the stored record keeps the planner's reason and stays resumable. Filed OBSERVATION, INERT.",
+    "NFRA_FIDUPL-D1-W7-S4: records needs load, save and note_session beyond the sessions_today() the reference names, so a counted sign-in has a write path and a per-kind resume record can be kept beside the row. Filed OBSERVATION, INERT.",
+    "NFRA_FIDUPL-D1-W7-S5: a final stop (entitlement, retention, account open date, 20-year cap) is not re-walked on resume, a decision against the literal resume wording; the 20-year cap is clamped from the run's own today. Filed OBSERVATION, INERT, for the COO to confirm or reverse.",
+    "NFRA_FIDUPL-D1-W7-S6: the TO status flip to complete is outside this order's paths block, so the worker cannot make it; the criterion PASSes and the instance validates. Filed BLOCKING, INERT; the COO or the gate owns the flip."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~7/NFRA_FIDUPL.TO-FT-s-4.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "fidupl_round_checks.py (main-tree checker, run from the worktree)",
+      "invocation": "python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft4",
+      "result": "R1-FT4-OK passed=7 (rc=0, two runs)"
+    },
+    {
+      "tool": "pytest, the whole canonical-fidelity module suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "171 passed in 2.97s (rc=0)"
+    },
+    {
+      "tool": "ruff (target py39)",
+      "invocation": "python -m ruff check --target-version py39 --no-cache infra/aws/ec2/canonical-fidelity/backfill_run.py infra/aws/ec2/canonical-fidelity/tests/test_backfill_run.py",
+      "result": "All checks passed! (rc=0)"
+    },
+    {
+      "tool": "ast (feature_version 3.9) and non-ASCII count",
+      "invocation": "ast.parse(src, feature_version=(3, 9)) and sum(1 for c in src if ord(c) > 127), per file",
+      "result": "ast39 OK for both files, nonascii=0 in each"
+    }
+  ]
+}
