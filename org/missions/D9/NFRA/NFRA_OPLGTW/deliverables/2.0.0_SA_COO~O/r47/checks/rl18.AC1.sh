@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-18 AC1 (round 47, the gateway release `batch17`; PHASE A): the take list of OG-rt-1 (the master-wide Schwab scope), whole from trunk, on the live ref read on the host.
 #  - W/rl18_release.json {base_sha, release_sha, trunk_sha, live_ref_host}; base_sha IS the live ref read on the host; dell1's harvest release 6575999df5 is an ancestor of base;
-#    base..release differs ONLY in the ten files below (the four of OG-rt-1, the five of OG-ed-1 and the two of OG-mp-1) (each byte-equal to its blob at trunk_sha); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh, EC2_MANIFEST.json and every .tf is byte-equal between base and release;
+#    base..release differs ONLY in the ten files below (the four of OG-rt-1, the five of OG-ed-1 and the two of OG-mp-1) (each byte-equal to its blob at trunk_sha) and in ONE KEY of EC2_MANIFEST.json (the opal-gateway mcportal_commit pin, 21ad40432cae to a577f99afc81df4a42c1740c78cf58270c8991e5); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh and every .tf is byte-equal between base and release;
 #    dell1's four harvest files are byte-equal between base and release.
 #  - W/PHASE_A_OG-rl-18.json (every host run under a HARD GUARD): tests {named_passed, named_failed 0, window_set_passed, window_set_failed 0, suite_difference_named true}, probes {rt1_ac1_ok 11, rt1_ac2_ok 11, ed1_ac1_ok 7, mp1_ac1_ok 4} (the 11, 11, 7 and 4 labelled lines of rt1.AC1, rt1.AC2, ed1.AC1 and mp1.AC1 run
 #    against the candidate tree), explicit_unchanged true (a scope with explicit account lists parses, filters and resolves as the live ref does), sentinel_grants_in_store 0 (a read-only scan of the policy records: no stored grant names ["*"] before the code is live),
@@ -19,12 +19,37 @@ live=${RL18_LIVE_OVERRIDE:-$hostlive}
 DELL=6575999df5d22c0123abfc0c88cd1c6f1efe8c96
 git merge-base --is-ancestor "$DELL" "$base" && dellanc=yes || dellanc=no
 TAKE="app/data_entitlement.py app/account_ref.py app/integrations/schwab/integration.py tests/test_og_rt1.py app/server.py app/token_broker.py tests/test_og_ed1.py tests/test_scoped_consent_r253.py tests/test_login_admit_r24.py app/admin_api.py tests/test_og_mp1.py"
+MANI=infra/aws/ec2/EC2_MANIFEST.json
 files=$(git diff --name-only "$base" "$rel" | tr -d '\r'); n=$(printf '%s\n' "$files" | grep -c .)
-allow_re="^($(for p in $TAKE; do printf '%s|' "$GW/$p" | sed 's/\./\\./g'; done | sed 's/|$//'))$"
+allow_re="^($(for p in $TAKE; do printf '%s|' "$GW/$p" | sed 's/\./\\./g'; done)$MANI)$"
 outside=$(printf '%s\n' "$files" | grep -vE "$allow_re" | grep -c .)
 missing=0; for p in $TAKE; do printf '%s\n' "$files" | grep -qx "$GW/$p" || missing=$((missing+1)); done
-neq=0; for p in $files; do a=$(git rev-parse "$rel:$p" 2>/dev/null | tr -d '\r'); b=$(git rev-parse "$trunk:$p" 2>/dev/null | tr -d '\r'); [ -n "$a" ] && [ "$a" = "$b" ] || neq=$((neq+1)); done
-barred=$(printf '%s\n' "$files" | grep -cE "$GW/deploy-to-ec2\.sh|$GW/deploy/|infra/aws/ec2/EC2_MANIFEST\.json|\.tf$")
+neq=0; for p in $files; do [ "$p" = "$MANI" ] && continue; a=$(git rev-parse "$rel:$p" 2>/dev/null | tr -d '\r'); b=$(git rev-parse "$trunk:$p" 2>/dev/null | tr -d '\r'); [ -n "$a" ] && [ "$a" = "$b" ] || neq=$((neq+1)); done
+barred=$(printf '%s\n' "$files" | grep -cE "$GW/deploy-to-ec2\.sh|$GW/deploy/|\.tf$")
+mani=$(python3 -I - "$base" "$rel" <<'PYEOF'
+import json, subprocess, sys
+def load(ref):
+    out = subprocess.run(["git", "show", "%s:infra/aws/ec2/EC2_MANIFEST.json" % ref], capture_output=True)
+    return json.loads(out.stdout.decode("utf-8"))
+a, b = load(sys.argv[1]), load(sys.argv[2])
+def flat(o, p=""):
+    if isinstance(o, dict):
+        r = {}
+        for k, v in o.items():
+            r.update(flat(v, p + "/" + k))
+        return r
+    return {p: o}
+fa, fb = flat(a), flat(b)
+changed = sorted(k for k in set(fa) | set(fb) if fa.get(k) != fb.get(k))
+want = sorted(k for k in changed if k.endswith("/opal-gateway/mcportal_commit"))
+ok = changed == want and len(want) == 1
+before = fa.get(want[0]) if want else None
+after = fb.get(want[0]) if want else None
+print("manifest keys changed %s; only the opal-gateway mcportal_commit pin: %s; pin %s -> %s" % (len(changed), "yes" if ok else "NO", (before or "")[:12], (after or "")[:12]))
+print("OK" if ok and before == "21ad40432cae0d09c5ab9d806307944baaf45cb9" and after == "a577f99afc81df4a42c1740c78cf58270c8991e5" else "NO")
+PYEOF
+)
+mani=$(printf '%s' "$mani" | tr -d '\r')
 rec=$(python3 -I - "$(native "$PA")" "$rel" <<'PYEOF'
 import json, re, sys
 raw = open(sys.argv[1], encoding="utf-8").read()
@@ -54,15 +79,16 @@ rec=$(printf '%s' "$rec" | tr -d '\r')
 halves=$(python3 -I - "$(native "$ASK")" <<'PYEOF'
 import re, sys
 t = open(sys.argv[1], encoding="utf-8").read()
-print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) and re.search(r"owner_gate\.owner_only", t) and re.search(r"(?i)over R3c.s hybrid", t) and re.search(r"(?i)R3c hunk survives", t) and re.search(r"(?i)GET", t) and re.search(r"(?i)POST", t) else "no")
+print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) and re.search(r"owner_gate\.owner_only", t) and re.search(r"(?i)over R3c.s hybrid", t) and re.search(r"(?i)R3c hunk survives", t) and re.search(r"a577f99afc81df4a42c1740c78cf58270c8991e5", t) and re.search(r"(?i)GET", t) and re.search(r"(?i)POST", t) else "no")
 PYEOF
 )
 halves=$(printf '%s' "$halves" | tr -d '\r')
 echo "base ${base:0:10} is the live ref read on the host: $([ "$base" = "$live" ] && [ -n "$live" ] && echo yes || echo no); dell1 harvest release ${DELL:0:10} is an ancestor of base: $dellanc; release ${rel:0:10}; trunk ${trunk:0:10}"
 hcar=0; hn=0; for h in harvest_research harvest_figures harvest_identity harvest_keys; do hn=$((hn+1)); a=$(git rev-parse "$base:$GW/app/$h.py" 2>/dev/null | tr -d '\r'); b2=$(git rev-parse "$rel:$GW/app/$h.py" 2>/dev/null | tr -d '\r'); [ -n "$a" ] && [ "$a" = "$b2" ] && hcar=$((hcar+1)); done
 echo "dell1's four harvest files byte-equal between the live base and the release: $hcar of $hn (want 4 of 4)"
-echo "files differing $n (want 10); outside the take list $outside (want 0); take-list files missing $missing (want 0); not byte-equal to trunk's $neq (want 0); deploy script, deploy folder, manifest or Terraform files in the diff $barred (want 0)"
+echo "files differing $n (want 11: the ten and the manifest); outside the take list and the manifest $outside (want 0); take-list files missing $missing (want 0); not byte-equal to trunk's $neq (want 0); deploy script, deploy folder or Terraform files in the diff $barred (want 0)"
+printf '%s\n' "$mani" | sed '$d'
 printf '%s\n' "$rec" | sed '$d'
 echo "ask has the three halves, the process-wide state line, the release-order condition and the exemption widening $halves"
-[ "$hcar" = 4 ] && [ "$dellanc" = yes ] && [ -n "$live" ] && [ "$base" = "$live" ] && [ "$n" = 10 ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
+[ "$hcar" = 4 ] && [ "$dellanc" = yes ] && [ -n "$live" ] && [ "$base" = "$live" ] && [ "$n" = 11 ] && [ "$(printf '%s\n' "$mani" | tail -1)" = OK ] && [ "$outside" = 0 ] && [ "$missing" = 0 ] && [ "$neq" = 0 ] && [ "$barred" = 0 ] && [ "$halves" = yes ] && [ "$(printf '%s\n' "$rec" | tail -1)" = OK ] && { echo "RESULT: PASS"; exit 0; }
 echo "RESULT: FAIL"; exit 1
