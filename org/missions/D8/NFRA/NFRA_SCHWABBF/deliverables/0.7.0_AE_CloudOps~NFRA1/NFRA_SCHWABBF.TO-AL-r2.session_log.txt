@@ -1,0 +1,20 @@
+NFRA_SCHWABBF.TO-AL-r2 session log -- 0.7.0_AE_CloudOps~NFRA1, 2026-10-21 ~14:50Z to ~17:15Z (laptop)
+
+archetype: DEPLOY
+
+14:54Z  Steps 1-3: precheck (administrator console session, both scripts on the box), entitlement read as an Administrator scheduled task: listed 4, entitled 4 of 4, not entitled 0 (r2/entitlements.json).
+15:0xZ  Step 4 as first written (OnlyAsOf 2026-10-20) and its amendments: every enumerate-only and OnlyAsOf probe over 2026-10-11..21 exited 9 (rows S14, S15). Nothing downloaded.
+15:39Z  Step 4 re-amended (msg 110138): whole 10-day window, no OnlyAsOf, 08719286 alone. The run died, exit 5, DENOMINATOR MISMATCH in-scope 71 accounted 0 (row S16). Nothing landed. Stopped per the order.
+15:48Z  Issuer named the cause (msg 110142): Select-PlanAsOf line 305 threw on a List[object] and emptied the plan.
+16:34Z  Step 3b added (msg 110149). 16:42Z: fixed puller (merged d967a5cba57) uploaded to code/alongside-schwab-si2/, fetched to the box; local and on-box sha256 equal 34cc039c...; fixed line present, bare line absent (r2/step3b_puller_refresh.txt).
+16:42Z  Step 4: 08719286 alone, 71 of 71 downloaded, landing guard ok, 7 date= partitions 2026-10-12..2026-10-20. Step 5 read before the others: 71 keys, newest D=2026-10-20, gap to prev_trading_day 0.
+16:44Z  Landing fired the converter: ManifestError, no basis label for 08719286 (row S17); COO~SB ruled the 49financial drain is judged by key family and the Cottonwood messages are left alone (msg 110151).
+16:52Z-17:02Z  Steps 4/5 for 08134043, 08165601, 08480305, one at a time: each 78 of 78 downloaded, guard ok, newest date 2026-10-20. 305 keys in all.
+17:0xZ  Thread traces (builder form), day 2026-10-20: bronze HELD for all four; silver READ rows=32 for 08165601, ABSENT for 08719286, 08134043, 08480305 at read time.
+17:1xZ  Box left clean: no Opal* scheduled task, no session lock file, administrator console session Active; the four Alongside rules DISABLED (r2/step6_*).
+
+## Compiler Tools
+aws ssm send-command (AWS-RunPowerShellScript): commands JSON from a non-shell writer; Schwab-touching steps as one-shot Administrator scheduled tasks.
+thread_trace.py --form builder: bronze and silver hops per master.
+lib/trading_calendar.py prev_trading_day: gap to the frontier.
+Gaps: the puller's enumerate mode printed no per-feed lines (row S15), and the first plan loop threw before the puller was fixed (S14-S16).

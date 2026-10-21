@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~AQ2</issued_to>
     <date>2026-10-14</date>
-    <status>complete</status>
+    <status>withdrawn -- the run executed and was recorded complete, but its criterion R28F-AC1 reads 4 of the 5 expected lines in DOOR_RESULT.txt (re-run 2026-10-21); it was never a pass as written, so the issuer 2.0.0_SA_COO~Y2 retires it from the round-43 verdict on 2026-10-21 (round hygiene) instead of grading it complete; the closed ledger and the receipts stand as history</status>
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>
