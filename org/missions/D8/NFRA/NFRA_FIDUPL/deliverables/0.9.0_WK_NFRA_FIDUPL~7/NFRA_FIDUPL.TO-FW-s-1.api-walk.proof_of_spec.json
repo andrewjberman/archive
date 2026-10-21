@@ -17,9 +17,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/api_walk.py",
       "kind": "script",
-      "commit_or_etag": "b8c032fc2d",
+      "commit_or_etag": "dd0f7996831",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-7 (LOCAL) at b8c032fc2d. The box command: main(argv, deps) signs in once, reads the book (column 0 of the newest landed account.txt), walks it over transactions (365-day windows back from one anchor to the first empty window, split at 2,000 rows), realized lots (one 30-year range split by date until totalCount matches) and open lots (one snapshot per account by New York day). Each answer lands raw as compact ASCII JSON at opal_naming.address; state saved every 25 accounts and on every stop; one run record under _runs; named stops auth, throttled, budget, terminated, error, account_cap, surface_end, all_done.",
+      "deploy_evidence": "Committed on wk-NFRA_FIDUPL-7 (LOCAL) at dd0f7996831 (REPAIR 1 of b8c032fc2d). The box command: main(argv, deps) signs in once, reads the book (column 0 of the newest landed account.txt), walks it over transactions (365-day windows back from one anchor; stop at two consecutive empty windows or an empty window of index 5 or higher; window cap 10; split at 2,000 rows), realized lots (one 30-year range split by date until totalCount matches) and open lots (one snapshot per account by New York day). Each answer lands raw as compact ASCII JSON at opal_naming.address with metadata earliest (the answer's earliest row date); a skipped window or range folds its metadata earliest. State saved every 25 accounts and on every stop; one run record under _runs; named stops auth, throttled, budget, terminated, error, account_cap, surface_end, all_done.",
       "artifact_covered_by": [
         "FW-s-1-AC1",
         "FW-s-1-AC2"
@@ -28,9 +28,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_api_walk.py",
       "kind": "test",
-      "commit_or_etag": "b8c032fc2d",
+      "commit_or_etag": "dd0f7996831",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed at b8c032fc2d. Fakes only (a fake session, fake store, fake clock, fake book reader). The fifteen named tests pass: 15 passed.",
+      "deploy_evidence": "Committed at dd0f7996831. Fakes only (a fake session, fake store, fake clock, fake book reader). The seventeen named tests pass: 17 passed (one renamed, two added by REPAIR 1).",
       "artifact_covered_by": [
         "FW-s-1-AC1"
       ]
@@ -40,7 +40,7 @@
       "kind": "test",
       "commit_or_etag": "b8c032fc2d",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Committed at b8c032fc2d. The one seam test runs api_walk.main over two synthetic accounts with the REAL opal_naming.address (no stub) and a fake S3 head and put; the three key shapes are asserted.",
+      "deploy_evidence": "Committed at b8c032fc2d and unchanged by REPAIR 1. The one seam test runs api_walk.main over two synthetic accounts with the REAL opal_naming.address (no stub) and a fake S3 head and put; the three key shapes are asserted.",
       "artifact_covered_by": [
         "FW-s-1-AC2"
       ]
@@ -56,11 +56,11 @@
   "acceptance": [
     {
       "criterion_id": "FW-s-1-AC1",
-      "criterion_verbatim": "the fifteen named walk tests exist and pass.",
+      "criterion_verbatim": "the seventeen named walk tests exist and pass.",
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fw1",
-      "output_evidence": "R1-FW1-OK passed=15",
-      "denominator": "15 passed of 15 required in infra/aws/ec2/canonical-fidelity/tests/test_api_walk.py; all 15 named tests present (accounts_are_read_from_the_newest_landed_account_file_column_zero, transaction_windows_are_consecutive_non_overlapping_and_at_most_365_days_anchored_once, an_account_walks_windows_back_until_the_first_empty_window_and_lands_each_by_window_end, a_window_with_2000_rows_is_split_in_halves, an_existing_window_is_not_fetched_again_and_an_existing_empty_window_ends_the_account, a_422_security_violation_is_no_access_recorded_and_not_retried, realized_lots_incomplete_range_is_split_by_date_until_totalcount_matches, realized_lots_land_one_object_per_account_range_by_range_end, open_lots_land_one_snapshot_per_account_by_new_york_day_and_flag_incomplete, the_state_file_resumes_done_accounts_and_the_anchor, wall_budget_and_surface_end_the_run_with_a_named_stop, an_auth_refusal_stops_at_once_and_a_429_or_503_is_a_throttled_stop, the_record_carries_counts_per_surface_and_the_earliest_content_date_per_account, main_signs_in_once_prints_progress_lines_and_closes_the_session, stdout_never_carries_an_account_number). Base 7402cd0e3e1 has no api_walk.py, so the check fails there as expected.",
+      "output_evidence": "R1-FW1-OK passed=17",
+      "denominator": "17 passed of 17 required in infra/aws/ec2/canonical-fidelity/tests/test_api_walk.py; all 17 names of the checker's fw1 list present (accounts_are_read_from_the_newest_landed_account_file_column_zero, transaction_windows_are_consecutive_non_overlapping_and_at_most_365_days_anchored_once, an_account_walks_windows_back_until_the_stop_rule_and_lands_each_by_window_end, two_consecutive_empty_windows_or_an_empty_window_from_the_sixth_on_end_an_account, skipped_windows_and_ranges_still_count_toward_the_earliest_content_date, a_window_with_2000_rows_is_split_in_halves, an_existing_window_is_not_fetched_again_and_an_existing_empty_window_ends_the_account, a_422_security_violation_is_no_access_recorded_and_not_retried, realized_lots_incomplete_range_is_split_by_date_until_totalcount_matches, realized_lots_land_one_object_per_account_range_by_range_end, open_lots_land_one_snapshot_per_account_by_new_york_day_and_flag_incomplete, the_state_file_resumes_done_accounts_and_the_anchor, wall_budget_and_surface_end_the_run_with_a_named_stop, an_auth_refusal_stops_at_once_and_a_429_or_503_is_a_throttled_stop, the_record_carries_counts_per_surface_and_the_earliest_content_date_per_account, main_signs_in_once_prints_progress_lines_and_closes_the_session, stdout_never_carries_an_account_number). The base 7402cd0e3e1 has no api_walk.py, so the check fails there as expected.",
       "status": "PASS",
       "expect": "R1-FW1-OK passed=\\d+"
     },
@@ -80,21 +80,21 @@
       "method": "command",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2",
       "output_evidence": "R1-FV2-OK passed=13",
-      "denominator": "13 passed of 13 required in infra/aws/ec2/canonical-fidelity/tests/test_hist_walk.py; the cell's diff touches none of hist_walk.py, backfill_main.py, land.py (the commit lists the four new files only).",
+      "denominator": "13 passed of 13 required in infra/aws/ec2/canonical-fidelity/tests/test_hist_walk.py; the cell's diff touches none of hist_walk.py, backfill_main.py, land.py (the cell's commits list the four or two new files only).",
       "status": "PASS",
       "expect": "R1-FV2-OK passed=\\d+"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Scratch copy of the canonical-fidelity module (.scratch/mutant, not committed) with api_walk.py's split test changed from 'if n >= ROW_CAP:' to 'if n > ROW_CAP:', so a window answer of exactly 2,000 rows is not split.",
-      "expected": "test_a_window_with_2000_rows_is_split_in_halves fails",
-      "observed": "1 failed, 14 passed in 1.38s (rc=1). FAILED: test_a_window_with_2000_rows_is_split_in_halves (AssertionError: 2 == 4).",
+      "description": "Scratch copy of the canonical-fidelity module (.scratch/mutant, not committed) with api_walk.py's EMPTY_RUN_END changed from 2 to 1, so one empty window ends a transactions account.",
+      "expected": "the stop-rule tests fail",
+      "observed": "6 failed, 11 passed in 1.42s (rc=1). Failing: test_transaction_windows_are_consecutive_non_overlapping_and_at_most_365_days_anchored_once, test_an_account_walks_windows_back_until_the_stop_rule_and_lands_each_by_window_end, test_a_window_with_2000_rows_is_split_in_halves, test_an_existing_window_is_not_fetched_again_and_an_existing_empty_window_ends_the_account, test_two_consecutive_empty_windows_or_an_empty_window_from_the_sixth_on_end_an_account, test_the_record_carries_counts_per_surface_and_the_earliest_content_date_per_account.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "the three checker criteria fw1, fw1s and fv2 re-run twice at HEAD b8c032fc2d with the same invocations, compared with the first run",
-      "observed": "fw1: R1-FW1-OK passed=15 in all three runs; fw1s: R1-FW1S-OK passed=1 in all three runs; fv2: R1-FV2-OK passed=13 in all three runs",
+      "method": "the three checker criteria fw1, fw1s and fv2 each run twice at HEAD dd0f7996831 with the same invocations, after the module suite run",
+      "observed": "fw1: R1-FW1-OK passed=17 in both runs; fw1s: R1-FW1S-OK passed=1 in both runs; fv2: R1-FV2-OK passed=13 in both runs",
       "status": "STABLE"
     }
   },
@@ -109,7 +109,7 @@
     },
     {
       "item": "The open questions S7 (account JSON type), S8 (ten-window cap), S9 (one-day capped answer), S10 (surface_end name), S11 (state entry shape) and S12 (open-lots metadata)",
-      "reason": "Filed as surprise rows for the issuer. The walk is built as the order reads or as the implementer's stated choice; none is decided here."
+      "reason": "Filed as surprise rows for the issuer. REPAIR 1 settles S7 (strings are right), S8 (the ten-window cap stays) and S10 (surface_end is an accepted stop); S9, S11 and S12 stand as filed."
     },
     {
       "item": "Schedule, IAM and deploy",
@@ -129,27 +129,27 @@
     {
       "tool": "fidupl_round_checks.py fw1",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fw1 (cwd C:/tmp/fidupl-w7, the worktree; timeout 120)",
-      "result": "R1-FW1-OK passed=15 (rc=0), three runs at b8c032fc2d"
+      "result": "R1-FW1-OK passed=17 (rc=0), two runs at dd0f7996831"
     },
     {
       "tool": "fidupl_round_checks.py fw1s",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fw1s (cwd C:/tmp/fidupl-w7, the worktree; timeout 120)",
-      "result": "R1-FW1S-OK passed=1 (rc=0), three runs at b8c032fc2d"
+      "result": "R1-FW1S-OK passed=1 (rc=0), two runs at dd0f7996831"
     },
     {
       "tool": "fidupl_round_checks.py fv2",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fv2 (cwd C:/tmp/fidupl-w7, the worktree; timeout 120)",
-      "result": "R1-FV2-OK passed=13 (rc=0), three runs at b8c032fc2d"
+      "result": "R1-FV2-OK passed=13 (rc=0), two runs at dd0f7996831"
     },
     {
       "tool": "module suite",
       "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests (cwd C:/tmp/fidupl-w7; timeout 500)",
-      "result": "284 passed in 22.88s (rc=0)"
+      "result": "286 passed in 22.20s (rc=0)"
     },
     {
       "tool": "mutant run",
-      "invocation": "python -m pytest -q -p no:cacheprovider .scratch/mutant/canonical-fidelity/tests/test_api_walk.py (scratch copy, comparison flipped to '>')",
-      "result": "1 failed, 14 passed in 1.38s (rc=1); the failing test is test_a_window_with_2000_rows_is_split_in_halves"
+      "invocation": "python -m pytest -q -p no:cacheprovider .scratch/mutant/canonical-fidelity/tests/test_api_walk.py (scratch copy, EMPTY_RUN_END = 1)",
+      "result": "6 failed, 11 passed in 1.42s (rc=1)"
     },
     {
       "tool": "ast.parse grammar and ASCII check",
