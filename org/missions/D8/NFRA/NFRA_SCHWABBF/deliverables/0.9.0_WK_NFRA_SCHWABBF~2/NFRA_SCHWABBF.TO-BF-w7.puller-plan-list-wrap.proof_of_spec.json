@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-w7",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R6.md",
+    "vintage_commit": "7c3cbb030914a38fff639d93ab2661f4f0f9bb1e",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-w7.puller-plan-list-wrap.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "cb8f734709f88e911af8e9e315aecc820124fd15"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One line changed (line 305, the first line of Select-PlanAsOf's body). Edited on branch wk-NFRA_SCHWABBF-2 only. Not uploaded: TO-BF-r5 uploads it after this merges. No AWS or Schwab contact."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test file only: the filter_list harness op and four select_plan_list arms added; the existing arms unchanged except the one harness case line that gained a semicolon. It extracts functions by the PowerShell AST and never runs the puller."
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_SCHWABBF-W2-S9 appended at byte level (the file mixes CRLF and LF); the previous last row gained its trailing comma; the commit-time surprise-row gate runs on the commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-w7-AC1",
+      "criterion_verbatim": "the plan filter handles a real List[object] in Windows PowerShell 5.1: keeps all, keeps one day, die 9 on no match, empty in and out.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py -q -p no:cacheprovider --color=no -k select_plan_list",
+      "output_evidence": "4 passed, 13 deselected in 2.39s (rc=0)",
+      "denominator": "4 of 4 selected tests passed (13 deselected by -k): a keeps all 4 when day empty; b keeps exactly the 2 rows of 2026-10-14 with excluded 2; c no match dies 9; d an empty List in and out, kept empty, die 0",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF6-w7-AC2",
+      "criterion_verbatim": "the control: the whole bronze-key test file (13 passed at the base) and the state-tier file (6 passed) still pass with the edited script.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py data/canonical/schwab/tests/test_sdd_daily_pull_state.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "23 passed in 21.38s (rc=0)",
+      "denominator": "23 of 23 collected tests passed: 17 of the bronze-key file (the 13 base tests plus the 4 new select_plan_list arms) and 6 of the state-tier file",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutant control before the fix: the four select_plan_list arms run against the script as committed at HEAD (line 305 still $all = @($planItems)), before any edit to the .ps1.",
+      "expected": "each of the four arms fails at HEAD with the Windows PowerShell 5.1 throw, and each passes after the one-line fix",
+      "observed": "At HEAD: 4 failed, 13 deselected in 2.34s (rc=1); every arm: powershell rc=1 stderr 'Argument types do not match' at '$all = @($planItems)'. After the fix: AC1 4 passed, 13 deselected (rc=0).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two runs of each acceptance selection on the same input, pass/fail summaries compared",
+      "observed": "AC1 run 1: 4 passed, 13 deselected (2.39s); run 2: 4 passed, 13 deselected (2.22s). AC2 run 1: 23 passed (21.38s); run 2: 23 passed (26.06s). Verdicts identical; timings differ.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Census verdict on sdd-daily-pull.ps1 line 519, foreach ($f in @($obj.FileDetailList))",
+      "reason": "The type of FileDetailList is set by the vendor assembly loaded as $ctAsm, which is not in the worktree, so the census could not grade the site. Left unchanged and recorded as NFRA_SCHWABBF-W2-S9."
+    },
+    {
+      "item": "The same shape in the sibling sdd-backfill-08335338.ps1 (line 114, return @($obj.FileDetailList))",
+      "reason": "Outside this order's <paths> grant. Not edited; recorded in NFRA_SCHWABBF-W2-S9 for the issuer."
+    },
+    {
+      "item": "Running the puller, any contact with Schwab or AWS, and uploading the script",
+      "reason": "WORLD floor for this order. TO-BF-r5 uploads the script after this merges."
+    },
+    {
+      "item": "Schema validation of the new surprise row against org/surprise_channel/schemas/investigation_item.schema.json",
+      "reason": "The schema is absent from this sparse worktree. The commit-time surprise-row gate is the enforcer, as recorded for NFRA_SCHWABBF-W2-S4."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W2-S9: the census cannot decide line 519 (foreach over @($obj.FileDetailList)) because the vendor type of FileDetailList is not in the worktree; a direct @() of a real List throws on this PowerShell 5.1, so the site is unchanged and unverified."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~2/NFRA_SCHWABBF.TO-BF-w7.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest (Python 3.12) with Windows PowerShell 5.1 child process; the harness parses the whole script with the PowerShell AST and throws on any parse error",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py data/canonical/schwab/tests/test_sdd_daily_pull_state.py -q -p no:cacheprovider --color=no",
+      "result": "23 passed in 21.38s; the AST parse of the edited script raised no parse error in any arm"
+    },
+    {
+      "tool": "git diff --numstat on the two edited code files",
+      "invocation": "git diff --numstat -- infra/aws/ec2/canonical-schwab-si2/sdd-daily-pull.ps1 data/canonical/schwab/tests/test_sdd_daily_pull_key_form.py",
+      "result": "1 insertion, 1 deletion for the .ps1 (line 305 only); 36 insertions, 1 deletion for the test file"
+    }
+  ]
+}
