@@ -10,8 +10,11 @@ on localhost:5174 is the CTO's: this script never starts, stops or edits it. Eve
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
+import os
 import re
+import struct
 import subprocess
 import sys
 import time
@@ -48,7 +51,9 @@ RECORD = BASE / "R23_FWD5_TICKET_ITEMS.json"
 EARLIER = [
     {"attempt": 0, "at": "2026-10-21T02:40:26Z", "stopped": "preflight: the served-type-label pattern expected single quotes, the served module uses double; nothing written", "record": "run_output_attempt0_preflight_stop.txt"},
     {"attempt": 1, "at": "2026-10-21T02:41:26Z", "stopped": "POST /api/scoped/tickets returned HTTP 400 with rows allowedFirmIds [cottonwood] and token firmId opal-capital (surprise row TCKT_VNEXT-D2-S65); no ticket created", "record": "R23_FWD5_TRACE_attempt1.json, run_output_attempt1.txt"},
-    {"attempt": 2, "at": "2026-10-21T03:02:57Z", "stopped": "staff-shaped rows (AMENDMENT 1): the Service Request create SUCCEEDED (TCK-20261021-c31f5347, 03:03:05Z) and the script stopped because the page notice beat the response listener, so no id was captured; ticket and rows deleted after exp, S65 resolved", "record": "run_output_attempt2_id_capture_stop.txt"}]
+    {"attempt": 2, "at": "2026-10-21T03:02:57Z", "stopped": "staff-shaped rows (AMENDMENT 1): the Service Request create SUCCEEDED (TCK-20261021-c31f5347, 03:03:05Z) and the script stopped because the page notice beat the response listener, so no id was captured; ticket and rows deleted after exp, S65 resolved", "record": "run_output_attempt2_id_capture_stop.txt"},
+    {"attempt": 3, "at": "2026-10-21T03:13:00Z", "stopped": "behaviour measured (both tickets filed, ids read back, claim from the board 200, items saved by hand) but step (f) found the full-page shots carried a real request's expanded panels and staff addresses: both PNGs deleted, none committed; the script's get-item call lacked .cmd (fixed); no result, no check", "record": "R23_FWD5_TRACE.json of that run (overwritten); ledger tckt-vnext-r23-f51c-20261021; surprise row TCKT_VNEXT-D2-S66"}]
+PRIVATE_DIR = "C:/dev/_tckt_private_evidence/r23_f51/"
 SHOT_DIR_REL = "org/tier2_senior/0.7.0_AE_CloudOps~TV2/deliverables/r23_fwd5_dev/"
 
 ddb = boto3.client("dynamodb", region_name=REGION)
@@ -318,14 +323,54 @@ class Session:
         return {"type_label": type_label, "age_text": age_text, "created_cell": created, "status_text": cells.nth(6).inner_text().strip(),
                 "has_claim": r.get_by_role("button", name="Claim", exact=True).count() == 1}
 
-    def shot_full(self, role, tid_tag, results):
-        name = "%s__%s__%s__localhost-5174.png" % (role, self.ident.split("@")[0], tid_tag)
-        path = BASE / name
-        self.page.screenshot(path=str(path), full_page=True)
-        size = path.stat().st_size
-        rows = self.page.locator("tbody tr:visible").count()
-        say("SHOT %s saved (FULL PAGE): %s (%d bytes, %d board rows visible)" % (role, SHOT_DIR_REL + name, size, rows))
-        results[role] = {"path": SHOT_DIR_REL + name, "bytes": size, "origin": ORIGIN, "viewer": self.ident, "full_page": True, "rows_visible": rows}
+    def private_shot(self, role, store):
+        """The FULL-BOARD shot, kept OUTSIDE the repo (the CTO's msg 11820): taken into memory, written under PRIVATE_DIR, only sha256/size/pixels recorded."""
+        raw = self.page.screenshot(full_page=True)
+        os.makedirs(PRIVATE_DIR, exist_ok=True)
+        path = PRIVATE_DIR + role + ".png"
+        with open(path, "wb") as fh:
+            fh.write(raw)
+        w, h = struct.unpack(">II", raw[16:24])
+        store[role] = {"path": path, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "width": w, "height": h}
+        say("PRIVATE SHOT %s saved OUTSIDE the repo (%d bytes, %dx%d, sha256 %s)" % (role, len(raw), w, h, store[role]["sha256"][:16]))
+        trace["shots_taken"].append("private:" + role)
+
+    def clip_shot(self, role, tids, clipped_to, store):
+        """A COMMITTED shot clipped to the given synthetic rows only. Taken into MEMORY; the rows' own DOM text is read first (type, title, requester, age, status
+        and nothing else may appear; no other table row may fall inside the clip); the PNG is written to disk only after that read passes."""
+        pg = self.page
+        rows = [self.row(t) for t in tids]
+        for t, r in zip(tids, rows):
+            r.scroll_into_view_if_needed()
+            text = " | ".join(x.strip() for x in r.locator("td").all_inner_texts())
+            say("clip review (%s): row text read before the shot: %s" % (role, re.sub(r"\s+", " ", text)[:240]))
+            cells = [x.strip() for x in r.locator("td").all_inner_texts()]
+            if cells[0] != t or cells[2] != TITLE or "TCKT R23 synthetic filer" not in cells[3] or cells[1] not in ("Service Request", "Other"):
+                raise Stop("clip review failed for %s: a row cell is not the synthetic content" % t)
+        boxes = [r.bounding_box() for r in rows]
+        sx, sy = pg.evaluate("[window.scrollX, window.scrollY]")
+        x0, y0 = min(b["x"] for b in boxes), min(b["y"] for b in boxes)
+        x1, y1 = max(b["x"] + b["width"] for b in boxes), max(b["y"] + b["height"] for b in boxes)
+        others = 0
+        own = set(tids)
+        for tr in pg.locator("tbody tr:visible").all():
+            bb = tr.bounding_box()
+            if bb is None:
+                continue
+            ttxt = tr.inner_text()
+            if any(t in ttxt for t in own):
+                continue
+            if bb["y"] < y1 - 1 and bb["y"] + bb["height"] > y0 + 1:
+                others += 1
+        if others:
+            raise Stop("clip %s would include %d other table row(s): refused, nothing written" % (role, others))
+        clip = {"x": max(0, x0 + sx - 8), "y": max(0, y0 + sy - 8), "width": x1 - x0 + 16, "height": y1 - y0 + 16}
+        raw = pg.screenshot(clip=clip, full_page=True)
+        name = "%s__%s__localhost-5174.png" % (role, self.ident.split("@")[0])
+        with open(BASE / name, "wb") as fh:
+            fh.write(raw)
+        say("SHOT %s saved (clipped to %s, %d bytes): %s" % (role, clipped_to, len(raw), SHOT_DIR_REL + name))
+        store[role] = {"path": SHOT_DIR_REL + name, "bytes": len(raw), "origin": ORIGIN, "viewer": self.ident, "clipped_to": clipped_to, "rows_visible": len(tids)}
         trace["shots_taken"].append(role)
 
 
@@ -381,16 +426,28 @@ def journey(browser, tokens, out):
             raise Stop("the board row for %s carries no Claim control (FWD-5 failing)" % t)
         if not board_read[t]["type_label"] or not board_read[t]["age_text"]:
             raise Stop("the board row for %s shows no type or no age text (FWD-5 failing)" % t)
-    shots = {}
-    ps.shot_full("r23_board_full", "board", shots)
+    shots, extra, private = {}, {}, {}
+    n_collapse = ps.page.get_by_role("button", name=re.compile(r"^(hide|collapse)", re.I)).count()
+    say("collapse controls on the picker's board: %d (none are clicked; the committed shots are clipped to synthetic rows, the full board stays private)" % n_collapse)
+    ps.private_shot("r23_board_full", private)
+    ps.clip_shot("r23_rows_before", [t_service, t_other], "two_synthetic_rows", shots)
     pick, other, basis = choose(board_read)
     say("picker chooses %s over %s: %s" % (pick, other, basis))
     ps.allowed.add(("POST", "/api/scoped/tickets/%s/claim" % pick))
     ps.row(pick).get_by_role("button", name="Claim", exact=True).click()
     ps.page.get_by_text("Claimed %s." % pick).first.wait_for(state="visible", timeout=60000)
     say("picker claimed %s FROM THE BOARD (no ticket opened); claim status %s" % (pick, trace["statuses"].get("POST /api/scoped/tickets/<T>/claim as picker")))
-    ps.shot_full("r23_board_claimed", "board", shots)
-    out.update({"picker_session": ps, "pick": pick, "other": other, "basis": basis, "board_read": board_read, "shots": shots})
+    ps.private_shot("r23_board_claimed", private)
+    ps.tab("In Progress")
+    ps.row(pick).wait_for(state="visible", timeout=60000)
+    after = ps.read_row(pick)
+    say("after the claim the chosen row on In Progress reads: type=%r status=%r age=%r" % (after["type_label"], after["status_text"], after["age_text"]))
+    ps.clip_shot("r23_rows_claimed", [pick], "chosen_row", shots)
+    ps.tab("Open")
+    ps.row(other).wait_for(state="visible", timeout=60000)
+    ps.clip_shot("r23_other_row_after_claim", [other], "other_row", extra)
+    out.update({"picker_session": ps, "pick": pick, "other": other, "basis": basis, "board_read": board_read, "shots": shots, "extra_shots": extra,
+                "private_board": private})
 
 
 def wait_review(deadline):
@@ -483,13 +540,14 @@ def main():
         if state["written"]:
             removed = remove_all()
             if stop is None:
-                review = wait_review(time.time() + 900)
+                review = wait_review(time.time() + 1500)
     TRACE.write_text(json.dumps({"stop": stop, "exp": [iso(x) for x in state["exp"]], "removed": removed, "served_head": state.get("served_head"),
                                  "open_before": state.get("open_before"), "trace": trace}, indent=1, default=str) + "\n", encoding="utf-8")
     if stop is None and removed and removed["tickets_absent_after"] and removed["rows_absent_after"] and review:
         res = {"claim": "measured", "browser_origin": out["origin"], "filer": FILER, "picker": PICKER, "chosen_ticket": out["pick"], "other_ticket": out["other"],
                "board_read": {t: {"type_label": v["type_label"], "age_text": v["age_text"]} for t, v in out["board_read"].items()},
-               "chosen_basis": out["basis"], "claim_via": "board", "opened_before_claim": False, "shots": out["shots"], "token_exp": iso(max(state["exp"])),
+               "chosen_basis": out["basis"], "claim_via": "board", "opened_before_claim": False, "shots": out["shots"], "extra_shots": out["extra_shots"],
+               "private_board": out["private_board"], "token_exp": iso(max(state["exp"])),
                "rows_deleted_at": removed["rows_deleted_at"], "tickets_deleted_at": removed["tickets_deleted_at"], "tickets_absent_after": True,
                "rows_absent_after": True, "no_engine_call": not state["engine"], "token_printed": False, "shot_data_reviewed": True,
                "served_head": state["served_head"], "behind_origin_dev_files": state["behind"], "open_tickets_before": state["open_before"], "identity_shape": "firmId opal-capital, scope_all_firms BOOL true, no allowedFirmIds (AMENDMENT 1)",
