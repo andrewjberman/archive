@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/split.py",
       "kind": "script",
-      "commit_or_etag": "abbbc4d1d2",
+      "commit_or_etag": "4ab5a764205",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); not deployed to the box or to S3 (the live grant is FU-s-6's and the daily wiring is FR-s-5's)",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL @4ab5a764205); not deployed to the box or to S3 (the live grant is FU-s-6's and the daily wiring is FR-s-5's)",
       "artifact_covered_by": [
         "FR2-AC1"
       ]
@@ -28,9 +28,9 @@
     {
       "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_split.py",
       "kind": "test",
-      "commit_or_etag": "abbbc4d1d2",
+      "commit_or_etag": "4ab5a764205",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL); a test file, not deployed",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-3 (LOCAL @4ab5a764205); a test file, not deployed",
       "artifact_covered_by": [
         "FR2-AC1"
       ]
@@ -39,26 +39,26 @@
   "acceptance": [
     {
       "criterion_id": "FR2-AC1",
-      "criterion_verbatim": "the ten named split tests (the nine and test_record_lists_unplaced_and_conflict_accounts) exist and pass.",
+      "criterion_verbatim": "the ten named split tests (the nine and test_record_lists_unplaced_and_conflict_accounts) exist and pass. [REPAIR 4 of the same order: the fr2 checker now requires twelve named tests, the nine, test_record_lists_unplaced_and_conflict_accounts, test_null_account_column_means_the_file_is_not_split and test_null_account_column_allowed_only_for_prices_and_security.]",
       "method": "test_suite",
       "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr2",
-      "output_evidence": "R1-FR2-OK passed=11",
-      "denominator": "10 of 10 named tests present in tests/test_split.py; 11 passed (the ten named plus test_cli_prints_counts_only)",
+      "output_evidence": "R1-FR2-OK passed=13 (the order's run: python C:/Dev/ajb_workspace/org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fr2 with cwd C:/tmp/fidupl-w3, rc 0; the same criterion invocation from the worktree copy, rc 0, also R1-FR2-OK passed=13; the two checker copies differ only by R1-FT8C, NFRA_FIDUPL-D1-W3-S11)",
+      "denominator": "12 of 12 named tests present in tests/test_split.py; 13 passed (the twelve named plus test_cli_prints_counts_only); module suite 207 passed (rc 0)",
       "status": "PASS",
       "expect": "R1-FR2-OK passed=\\d+"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Re-run this round: the record's unplaced list reverted to ordinal ids (sed on split.py, then restored byte-identical by cmp); test_record_lists_unplaced_and_conflict_accounts run with -k.",
-      "expected": "test_record_lists_unplaced_and_conflict_accounts fails under the mutant",
-      "observed": "mutant: 1 failed, 163 deselected; restored: cmp identical; unmutated: 1 passed, 163 deselected",
+      "description": "The not-split branch disabled (sed on split.py: the 'if cols[name] is None:' test replaced by 'if False:'), then the -k null_account tests run; split.py restored from a saved copy and cmp-identical.",
+      "expected": "test_null_account_column_means_the_file_is_not_split fails under the mutant",
+      "observed": "mutant: 1 failed (test_null_account_column_means_the_file_is_not_split), 1 passed, 11 deselected; restored: cmp identical; unmutated: 2 passed, 11 deselected",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
       "status": "N/A-WITH-REASON",
-      "method": "N/A-WITH-REASON: REPAIR 3 changes the content-date argument and the fixtures only; the CLI output was not re-measured this round.",
-      "observed": "not re-measured in REPAIR 3; the REPAIR 2 round recorded identical dry-run output (session log, step 12)."
+      "method": "N/A-WITH-REASON: the change adds a branch that writes nothing and prints nothing; the CLI output is counts only and was not re-measured this round.",
+      "observed": "not re-measured in REPAIR 4; the dry-run prints one DRYRUN line per firm per file, unchanged for the split files."
     }
   },
   "declared_exclusions": [
@@ -73,30 +73,37 @@
     {
       "item": "the id-to-value resolution of unmapped labels written to the work directory",
       "reason": "split_day fills a caller's resolution dict in memory only; the work-directory write belongs to the daily orchestration (FR-s-5)"
+    },
+    {
+      "item": "the TO status flip to complete",
+      "reason": "the grant names no path to the TO file; recorded as NFRA_FIDUPL-D1-W3-S10 (BLOCKING on the flip only)"
     }
   ],
   "surprises": [
     "NFRA_FIDUPL-D1-W3-S5: OBSERVATION, INERT -- repaired per the issuer's REPAIR: the S3 record now carries the account-number strings of conflicts and unplaced; the printed output, logs and exception messages stay counts-only.",
     "NFRA_FIDUPL-D1-W3-S6: OBSERVATION, INERT -- an account under one mapped and one unmapped G is unplaced (fail closed); conflicts and unplaced are judged over attributed accounts. Accepted as built by the issuer.",
     "NFRA_FIDUPL-D1-W3-S7: OBSERVATION, INERT -- a same-day firm object with different bytes is refused, never overwritten (the lander's rule, NFRA_FIDUPL-D1-W2-S3). Accepted as built by the issuer.",
-    "NFRA_FIDUPL-D1-W3-S8: OBSERVATION, INERT -- the exit code is stricter than the order's rule (missing file, failed write, unkeyed line, listing failure); no calendar check here. Accepted as built by the issuer."
+    "NFRA_FIDUPL-D1-W3-S8: OBSERVATION, INERT -- the exit code is stricter than the order's rule (missing file, failed write, unkeyed line, listing failure); no calendar check here. Accepted as built by the issuer.",
+    "NFRA_FIDUPL-D1-W3-S9: OBSERVATION, INERT -- the REPAIR 3 premise (split.py line 170 still calls the one-argument content-date helper) did not hold at the cut fdd09568862; the call already passes the file name and no REPAIR 3 change was needed.",
+    "NFRA_FIDUPL-D1-W3-S10: BLOCKING, INERT -- the TO status flip to complete needs a write to the task-order file, which the worker grant does not name; the status stays pending for the issuer or the gate.",
+    "NFRA_FIDUPL-D1-W3-S11: OBSERVATION, INERT -- the worktree copy of fidupl_round_checks.py differs from the main tree's copy only by an added R1-FT8C check (line 642), outside the fr2 path; fr2 prints R1-FR2-OK passed=13 from both."
   ],
   "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~3/NFRA_FIDUPL.TO-FR-s-2.session_log.txt",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
-      "result": "164 passed in 1.68s"
+      "result": "207 passed in 2.83s"
     },
     {
       "tool": "ruff",
-      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/split.py infra/aws/ec2/canonical-fidelity/tests/test_split.py",
+      "invocation": "python -m ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/split.py infra/aws/ec2/canonical-fidelity/tests/test_split.py",
       "result": "All checks passed!"
     },
     {
       "tool": "safe-commit",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~3 <0.9.0_WK_NFRA_FIDUPL~3@opal.agent>\" -F <msgfile> -- <the two code paths>",
-      "result": "rc=0; committed abbbc4d1d2 on wk-NFRA_FIDUPL-3"
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~3 <0.9.0_WK_NFRA_FIDUPL~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc=0; code committed 4ab5a764205 on wk-NFRA_FIDUPL-3; surprise rows committed 22f4830cf6 on wk-NFRA_FIDUPL-3"
     }
   ]
 }
