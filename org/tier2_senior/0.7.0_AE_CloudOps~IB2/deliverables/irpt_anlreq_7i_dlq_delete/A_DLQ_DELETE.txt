@@ -1,0 +1,10 @@
+R0 date=2026-10-21T05:06:51Z queues=irpt-generation,irpt-generation-dlq source visible=0 inflight=1 delayed=0 | dlq visible=8 inflight=0 delayed=0
+W waited_until=2026-10-21T05:32:53Z dlq_visible=9 (the source is empty and the DLQ total grew from 8 to 9)
+M received=9 is7i=1 returned=8 (held invisible while the DLQ was enumerated, then returned together)
+D deleted=1 by_receipt_handle
+C dlq_before=8 dlq_after=8 source_visible=0 source_inflight=0
+NOTE-WAIT the source irpt-generation read 0 visible and 1 in flight at R0 (05:06:51Z); the message moved at about 05:16Z to 05:32Z, and the wait trigger was the source empty with the DLQ total up by one (8 to 9), not DLQ visible at least 1, as G2 GO 11903 and the order say.
+NOTE-METHOD the attempt-3 method of the 7H delete, authorized by the order: every received message was held invisible (120 s) while all 9 distinct DLQ messages were enumerated, each body tested for the 7I request id (yes or no, no body printed or kept), the one 7I message deleted by its receipt handle, and the other 8 returned to visibility 0 together. No purge, no redrive, no queue attribute change.
+NOTE-DLQ the 8 older messages are not this seat's and were only received and returned; the DLQ holds 8 after (8 before the 7I message arrived). Source irpt-generation reads 0 visible, 0 in flight.
+NOTE-Y2 Y2 had offered to delete the message itself by receipt handle (msg 11900) unless G2 said otherwise; G2 issued the order to this seat (GO 11903) and I told Y2 I was taking it before the script ran.
+DLQ-DELETE-DONE
