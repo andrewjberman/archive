@@ -3,13 +3,13 @@
 # re-reads after the panel writes. TWO named tests exist in mcportal/src (bun 1.3.x prints a name only on FAILURE, so names are read from the sources),
 # and `bun test src` exits 0 with >=PASS_MIN pass and 0 fail (89 at mcportal f90f03a, plus these two):
 #   "a stopped person's tool and channel switches read off and are disabled on the opalgateway page, and the page says the gateway admits nothing"
-#   "the opalgateway audit list reads again after the panel writes a change"
+#   "the opalgateway audit list read key advances when a write finishes and when Refresh is pressed, and not otherwise"
 . "$(dirname "$0")/../../pc/checks/_root.sh"
 PASS_MIN="${MP_OGP_PASS_MIN:-91}"
 [ -d mcportal/src/pages ] || { echo "mcportal/src/pages absent"; echo "RESULT: FAIL"; exit 1; }
 n=0
 for t in "a stopped person's tool and channel switches read off and are disabled on the opalgateway page, and the page says the gateway admits nothing" \
-         "the opalgateway audit list reads again after the panel writes a change"; do
+         "the opalgateway audit list read key advances when a write finishes and when Refresh is pressed, and not otherwise"; do
   grep -rqF -- "$t" mcportal/src && n=$((n+1))
 done
 out=$(cd mcportal && NO_COLOR=1 timeout 110 bun test src 2>&1 | tr -d '\r' | sed -E 's/\x1b\[[0-9;]*m//g'); rc=$?
