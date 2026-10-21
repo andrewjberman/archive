@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-j7",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R6.md",
+    "vintage_commit": "bb2c9db2297",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-j7.fan-in-fence-tag-charset.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-j7.fan-in-fence-tag-charset.md",
+    "group": "OTHER",
+    "vintage_commit": "bb2c9db2297"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 608, the Purpose value of aws_iam_policy.one_way_fan_in_fence_schwab changed from 'one-way fan-in fence (schwab variant)' to 'one-way fan-in fence - schwab variant'. git diff --numstat: 1 added, 1 deleted. Text only: no terraform init, plan or apply, no aws command. The re-apply is the CloudOps act BF-r-3 step B1."
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_converter_fan_in_fence.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new arms with fan_in_fence_tag in their names: test_fan_in_fence_tag_variant_policy_values and test_fan_in_fence_tag_literal_values_all_roots. git diff --numstat: 43 added, 0 deleted. The existing arms are unchanged."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-j7-AC1",
+      "criterion_verbatim": "the variant policy's tag value is IAM-legal and every literal tag value of the two roots' files is too.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py -q -p no:cacheprovider --color=no -k fan_in_fence_tag",
+      "output_evidence": "..                                                                       [100%]\n2 passed, 10 deselected in 0.03s",
+      "denominator": "2 of 2 selected tests passed (10 deselected). With -s the arms print: tag values checked on one_way_fan_in_fence_schwab: 3; literal tag values checked across silver.tf and monolith-iam.tf: 16. Controls: the charset regex fullmatches the new Purpose and rejects the old one (parentheses).",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    },
+    {
+      "criterion_id": "BF6-j7-AC2",
+      "criterion_verbatim": "the control: the fence-variant arms (10 at the base), the grant arms (23, including the terraform fmt arm) and the build-pin arms (5) still pass with the edited silver.tf.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py data/canonical/schwab/tests/test_firm_prefix_grants.py data/canonical/schwab/tests/test_schwab_build_pin.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "........................................                                 [100%]\n40 passed in 1.32s",
+      "denominator": "40 of 40 passed: 12 fence-variant arms (10 at the base plus the 2 new tag arms), 23 grant arms, 5 build-pin arms. The base expectation was 38; the 2 new arms account for the difference.",
+      "status": "PASS",
+      "expect": "^[0-9]+ passed[ ,]"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for BF-j-7. Charset control run on the strings: the old Purpose 'one-way fan-in fence (schwab variant)' fullmatches False; the new 'one-way fan-in fence - schwab variant' fullmatches True.",
+      "expected": "N/A",
+      "observed": "old False, new True",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice (exact invocation, and with -s for the denominators) and AC2 run twice on the same tree.",
+      "observed": "AC1: 2 passed, 10 deselected, rc=0 on both runs. AC2: 40 passed, rc=0 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan, validate and apply, and any aws command",
+      "reason": "WORLD floor in the order: text-only build. Nothing applied. terraform fmt -check runs inside the existing fmt arm only."
+    },
+    {
+      "item": "Tag values read from a variable, local or merge() call",
+      "reason": "The order says these are skipped, not guessed. The literal-block parser matches only tags = { ... } blocks and skips values containing ${."
+    }
+  ],
+  "surprises": [],
+  "session_log": "none: no session log file was written; the worker report is the record",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py -q -p no:cacheprovider --color=no -k fan_in_fence_tag",
+      "result": "2 passed, 10 deselected in 0.03s, rc=0"
+    },
+    {
+      "tool": "pytest (AC2)",
+      "invocation": "timeout 120 python -m pytest data/canonical/schwab/tests/test_converter_fan_in_fence.py data/canonical/schwab/tests/test_firm_prefix_grants.py data/canonical/schwab/tests/test_schwab_build_pin.py -q -p no:cacheprovider --color=no",
+      "result": "40 passed in 1.32s, rc=0"
+    }
+  ]
+}
