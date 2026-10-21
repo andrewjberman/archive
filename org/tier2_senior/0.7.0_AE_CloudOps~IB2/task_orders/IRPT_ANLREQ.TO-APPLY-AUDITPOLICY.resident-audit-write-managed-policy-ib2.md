@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~Y2</issued_by>
     <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
     <date>2026-10-20</date>
-    <status>staged</status><!-- RE-PINNED 2026-10-21 by 2.0.0_SA_COO~Y2 after run 7e (S239) and order AR-y-481: new blobs and packet hash; held until the CTO half names the new packet blob and r34p is live -->
+    <status>complete</status><!-- flipped by issuer 2.0.0_SA_COO~Y2 2026-10-21 (round hygiene, CTO msg ~15:10Z): every criterion invocation re-run by the issuer and matched; the proof instance reads VALID rc 0 --><!-- RE-PINNED 2026-10-21 by 2.0.0_SA_COO~Y2 after run 7e (S239) and order AR-y-481: new blobs and packet hash; held until the CTO half names the new packet blob and r34p is live -->
     <project_code>IRPT_ANLREQ</project_code>
   </metadata>
 <risk>WORLD</risk>

@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-195",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-195.comparison-chart-draws-six-distinct-series-colours-with-a-contrast-check.md",
+    "group": "OTHER",
+    "vintage_commit": "2cca83f185e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "2cca83f185e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-195.comparison-chart-draws-six-distinct-series-colours-with-a-contrast-check.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~385",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "edda8fbfaff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit edda8fbfaff on wk-IRPT_ANLREQ-385 only; nothing deployed. _palette lines changed from four colours to six (two brand colours and four chart-only literals); _lines_svg and _legend_html unchanged. Ships to the host only through a later resident release (r34u) under a never-widen pair.",
+      "artifact_covered_by": ["AR195-g-AC1", "AR195-g-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_chart_palette.py",
+      "kind": "test",
+      "commit_or_etag": "edda8fbfaff",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file at edda8fbfaff: 4 tests. Measured at base (four-colour palette, before the edit): 3 failed, 1 passed (the single-line guard). At edda8fbfaff: 4 passed."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3e5ecaad1bd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows IRPT_ANLREQ-D2-W385-S1 (client-data check did not run on this box) and IRPT_ANLREQ-D2-W385-S2 (naming-gate function-map folder outside the sparse cone), both OBSERVATION, INERT. surprise-row-gate rc=0."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR195-g-AC1",
+      "criterion_verbatim": "the layout's own line chart and legend, and the REAL producer's Multi-Comp, draw distinct colours, each at least 3.0:1 against white and every pair at least 30 apart in Delta E, with the legend swatches equal to the strokes. At base it FAILs (a fifth line repeats the first colour; Long-Term and the ETF are 22.6 apart).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_palette_checks.py palette",
+      "output_evidence": "AR-PALETTE-palette-OK\nrc=0 under timeout 120, at HEAD 3e5ecaad1bd (code commit edda8fbfaff). Repeated once at the same HEAD: AR-PALETTE-palette-OK, rc=0. Base before the edit (commit 2cca83f185e): AR-PALETTE-palette-FAIL six lines: colours repeat: ['#5F3BE3', '#163372', '#0A1733', '#000000', '#5F3BE3', '#163372']; ... producer Multi-Comp: #0A1733 and #000000 are 22.6 apart in Delta E (min 30).",
+      "denominator": "2 of 2 charts: the six-line chart (6 strokes, 15 pairs) and the producer's Multi-Comp (4 strokes, 6 pairs); 10 colours in all. Measured on the shipped palette: minimum contrast 3.76:1 against white; minimum Delta E 43.7 (#D95F02 and #8A6D00, the closest of 15 pairs). Base: 0 of 2 charts PASS.",
+      "expect": "^AR-PALETTE-palette-OK$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation at the committed tree (both charts, every colour, every pair, legend equal to strokes)."
+    },
+    {
+      "criterion_id": "AR195-g-AC2",
+      "criterion_verbatim": "the new test file passes with at least 3 tests. At base it FAILs (no file).",
+      "method": "test_suite",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_palette_checks.py tests",
+      "output_evidence": "AR-PALETTE-tests-OK passed=4\nrc=0 under timeout 120, at HEAD 3e5ecaad1bd. The checker runs test_layout_chart_palette.py: 4 passed. Base before the edit: the same test file, against the four-colour palette, gave 3 failed, 1 passed (python -m pytest rc=1); the checker at base reported AR-PALETTE-tests-FAIL rc=4 passed=0 (file absent at that time).",
+      "denominator": "4 of 4 tests in test_layout_chart_palette.py pass (the checker requires at least 3). Base: 1 of 4 passed (3 FAIL on the old palette, 1 single-line guard passes on both).",
+      "expect": "^AR-PALETTE-tests-OK passed=[0-9]+$",
+      "status": "PASS",
+      "status_reason": "rc=0 and passed=4 >= 3 at the committed tree."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The base four-colour palette (commit 2cca83f185e, the pre-edit _palette) is the mutant: the palette check must FAIL on it.",
+      "expected": "AR-PALETTE-palette-FAIL (colour repeat, contrast and Delta E failures on the fifth and sixth lines)",
+      "observed": "AR-PALETTE-palette-FAIL six lines: colours repeat: ['#5F3BE3', '#163372', '#0A1733', '#000000', '#5F3BE3', '#163372']; six lines: #5F3BE3 and #5F3BE3 are 0.0 apart in Delta E (min 30); producer Multi-Comp: #0A1733 and #000000 are 22.6 apart in Delta E (min 30)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of the palette arm at HEAD 3e5ecaad1bd compared",
+      "observed": "both runs printed AR-PALETTE-palette-OK with rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "colour-vision deficiency and greyscale printing of the six lines",
+      "reason": "Not tested. Delta E and WCAG contrast do not guarantee that deuteranopic or greyscale readers separate the lines; no instrument in the order measures it."
+    },
+    {
+      "item": "re-pin of test_compare_elements.py",
+      "reason": "Not needed: test_compare_elements.py pins a local four-colour COLORS dict, not the brand palette; it passed unchanged (see session_log)."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W385-S1: the commit gate's client-data check did not run on commit edda8fbfaff (hashed account-id list absent on this box); OBSERVATION, INERT.",
+    "IRPT_ANLREQ-D2-W385-S2: the naming gate's function-map folder is outside this sparse worktree during commit edda8fbfaff; OBSERVATION, INERT."
+  ],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-385; TREE-OK. Base: both criteria run at 2cca83f185e: palette FAIL (colours repeat; 22.6 and 25.5 Delta E pairs), tests FAIL (rc=4, no file). New test file written; run at base: 3 failed, 1 passed. Edit: _palette lines -> six colours at edda8fbfaff. Four existing files after edit: test_compare_elements.py, test_layout_overview.py, test_layout_commentary.py, test_commentary_standalone_pdf.py: 90 passed in 7.45s (rc=0), no re-pin. Diagnostic (not in the listed set): test_compare_producer.py 9 passed (rc=0). ruff check on both changed .py files: All checks passed. Commit gate (safe-commit) passed at edda8fbfaff; surprise rows at 3e5ecaad1bd (surprise-row-gate rc=0). The proof and the status flip are committed together after both criteria PASS and proof-of-spec-check rc=0.",
+  "compiler_tools": [
+    {
+      "tool": "ar_palette_checks.py",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_palette_checks.py palette|tests",
+      "result": "palette AR-PALETTE-palette-OK (rc=0, twice); tests AR-PALETTE-tests-OK passed=4 (rc=0)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_layout_chart_palette.py",
+      "result": "4 passed (rc=0); at base 3 failed, 1 passed (rc=1)"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_chart_palette.py",
+      "result": "All checks passed; committed edda8fbfaff"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 2 new row(s) of 1197 total checked (rc=0); committed 3e5ecaad1bd"
+    }
+  ]
+}
