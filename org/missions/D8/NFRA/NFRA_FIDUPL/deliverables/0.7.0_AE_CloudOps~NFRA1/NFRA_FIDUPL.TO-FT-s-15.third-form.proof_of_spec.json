@@ -1,0 +1,105 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-15",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "1a79c6019aa",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-15.schedule-third-form-and-oneshot.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-15.schedule-third-form-and-oneshot.md",
+  "group": "OTHER",
+  "vintage_commit": "1a79c6019aa"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/canonical-fidelity-ec2/schedule.tf",
+   "kind": "terraform",
+   "commit_or_etag": "043a97fec81",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "StartTheRunDocumentOnly gained the automation-execution/* resource form; safe-apply of the whole root at about 10:56Z: Plan 0 add 1 change 0 destroy, Apply complete 0 added 1 changed 0 destroyed, post-apply plan No changes (rc=0); ft15s OK on all three forms.",
+   "artifact_covered_by": [
+    "FT-s-15-AC1",
+    "FT-s-15-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T1053Z_nfra-fidupl-schedule-third-form-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "043a97fec81",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-schedule-third-form-20261021, 4 legs, CLOSED (policy apply, read-back, the one-shot fire, the one-shot deletion).",
+   "artifact_covered_by": [
+    "FT-s-15-AC1",
+    "FT-s-15-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-15-AC1",
+   "criterion_verbatim": "the schedule role is allowed to start the run on all three resource forms.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft15s",
+   "output_evidence": "R1-FT15S-OK schedule start allowed on all 3 resource forms",
+   "denominator": "3 of 3 resource forms simulated allowed on the live schedule role (ssm:StartAutomationExecution, one resource per call)",
+   "status": "PASS",
+   "expect": "R1-FT15S-OK schedule start allowed on all 3 resource forms"
+  },
+  {
+   "criterion_id": "FT-s-15-AC2",
+   "criterion_verbatim": "exactly the three standing rules are ENABLED (the one-shot is deleted).",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft6r",
+   "output_evidence": "R1-FT6R-OK the three schedule rules are ENABLED",
+   "denominator": "3 of 3 fidelity rules read live after the one-shot was deleted (list-rules name-prefix fidelity-alongside-oneshot count 0)",
+   "status": "PASS",
+   "expect": "R1-FT6R-OK"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read an IAM simulation and three rule states; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "the pre-apply plan was saved and applied as that file; the before simulation read implicitDeny (ft15s FAIL) and the after allowed on all three forms; the one-shot target was read back and equal to leg-1's; the one-shot fired once and was deleted",
+   "observed": "saved plan 0 add 1 change 0 destroy applied as is; post-apply plan No changes; one-shot execution Success",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a second one-shot rule; any change to the three standing rules, their crons, states, targets or inputs; any other IAM statement",
+   "reason": "The order allows exactly one one-shot and no change to the standing rules; the one-shot succeeded, so no second was made."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/critical_paths/change_management/20261021T1053Z_nfra-fidupl-schedule-third-form-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-apply.sh",
+   "invocation": "-chdir=infra/aws/terraform/canonical-fidelity-ec2 apply <saved plan>",
+   "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed."
+  },
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-schedule-third-form-20261021 (4 legs); close-leg L1..L4; close",
+   "result": "OK: CLOSED, all 4 legs proven, sentinel removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft15s | ft6r | fu6g",
+   "result": "R1-FT15S-OK; R1-FT6R-OK; R1-FU6G-OK"
+  },
+  {
+   "tool": "aws events / aws ssm (the one-shot)",
+   "invocation": "put-rule, put-targets (copy of leg-1), read describe-automation-executions and the run record, remove-targets, delete-rule",
+   "result": "execution f355c7f9-74ea-480e-adc0-d1ab30e9ef56 Success; run record ALL_LANDED 6 of 6 skipped_existing; rule deleted, count 0"
+  }
+ ]
+}
