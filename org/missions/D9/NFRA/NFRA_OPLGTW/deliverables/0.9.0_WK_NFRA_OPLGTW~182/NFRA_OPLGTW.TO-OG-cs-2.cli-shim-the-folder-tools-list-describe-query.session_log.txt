@@ -1,0 +1,33 @@
+NFRA_OPLGTW.TO-OG-cs-2 -- session log of 0.9.0_WK_NFRA_OPLGTW~182
+worktree: C:/tmp/wk-og-182   branch: wk-NFRA_OPLGTW-182   base: bcbef740d72
+
+1. First act: branch printed wk-NFRA_OPLGTW-182; TREE-OK.
+2. Premises re-grounded: folder_grant.py, folder_engine.py, schwab/engine.py (ExecutionEngine.run_query,
+   SourceObject, JobResult, QueryPlan, EngineLimits), schwab/cursor.py (bind_key, CursorCodec, CursorError),
+   data_entitlement.py (PersonAccess); the issuer check scripts cs2.AC1/AC2/AC3.sh and their harness
+   (r47/checks/_gwtests.sh, trnspt/checks/_root.sh). Signatures match the order.
+3. Wrote app/folder_tools.py (list_folder, describe_object, query_object, split_path) and
+   tests/test_cs2_folder_tools.py (17 tests).
+4. Criteria, first pass in the worktree before the commit:
+   AC1 RESULT: PASS exit=0. AC2 RESULT: PASS exit=0.
+   AC3 (stdin invocation, python3 -I -) RESULT: FAIL exit=1: the engine's spawn child raised OSError Errno 22
+   on the <stdin> main path; every query job failed. The same body saved to a file and run as python3 -I <file>
+   printed OK on every line, exit=0.
+5. pytest, first run: 15 passed, 7 failed. Two causes, both in the test fixture: the junk object sat inside the
+   table folder, so the folder scan read it as a source; and the aggregate's matched_rows counts source rows, so
+   the order's next_cursor rule issued a cursor. Junk moved to its own folder; the aggregate test asserts the
+   observed values. pytest, second run: 17 passed, rc 0.
+6. Commit edd78166b63 via safe-commit (commit-gate passed; surprise-row-gate OK on 4 new rows).
+7. Post-commit: AC3 diagnostic run RESULT: PASS exit=0 with no traceback; criterion-form runs of AC1, AC2 and
+   AC3 each RESULT: PASS exit=0, no NOT OK lines, no traceback.
+8. Determinism: the AC3 stdin invocation read FAIL once and PASS on the three later runs, at identical module
+   bytes (folder_tools.py unchanged from the first pass). Recorded as UNSTABLE in the instance; see channel rows S1 and S5.
+9. Surprise rows S1-S5 appended to org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md.
+10. Client-data check ran ABSENT on this device (no hashed account-id list); the commit was not checked against it.
+11. AC1 expect check: the order's expect 'deny wins .*: ok' does not match the check's output line 'deny wins: ...: ok'
+    (no space after 'wins'). The check reads RESULT: PASS, exit=0; the criterion as written reads FAIL. The expect was not
+    edited. Surprise row NFRA_OPLGTW-Z-W182-S6 (BLOCKING). The instance records AC1 FAIL with the reason.
+12. The issuer's cs2.AC3.sh and cs_foot.sh changed on disk in this worktree at 17:06:07Z (uncommitted; HEAD carries the
+    stdin body, the working copy a file probe). The first AC3 FAIL ran the HEAD revision; the later PASS runs ran the
+    working copy. Surprise row NFRA_OPLGTW-Z-W182-S7 (ARMED, disarm 2.0.0_SA_COO~O); it corrects S5. The determinism control
+    compares the two same-input runs of the working copy (identical outputs): STABLE.
