@@ -1,0 +1,12 @@
+NFRA_FIDUPL.TO-FT-s-10 -- worker 0.9.0_WK_NFRA_FIDUPL~6 -- session log (fakes only; no network, no AWS, no live call)
+branch wk-NFRA_FIDUPL-6; code commit 65738f3272 (box/g_export_probe.py, tests/test_g_export_probe.py, INVESTIGATION_v1.md rows W6-S6 and W6-S7)
+
+1. worktree premise: git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-6; test -d org && test -d .tools -> TREE-OK
+2. baseline (before the build): fidupl_round_checks.py ft10 -> R1-FT10-FAIL absent infra/aws/ec2/canonical-fidelity/tests/test_g_export_probe.py (rc 0); fr4 -> R1-FR4-OK passed=14 (rc 0)
+3. syntax: ast.parse(feature_version=(3,9)) on both new files -> no error; non-ASCII characters 0 in both; python -m pyflakes on both files -> rc 0
+4. new tests: python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_g_export_probe.py -> 6 passed
+5. module suite: python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests -> 223 passed (rc 0)
+6. checks at HEAD 65738f3272: ft10 -> R1-FT10-OK passed=6 (rc 0); fr4 -> R1-FR4-OK passed=14 (rc 0)
+7. mutant (scratch copy under .scratch/mutant, not committed): the _AuthStop handler sets stopped = False -> 1 failed, 5 passed; the failure is on PROBE gexp restore=skipped (the output then shows restore=ok after PROBE stop: HTTP 403)
+8. determinism: the new test file run twice at HEAD -> 6 passed; 6 passed
+9. safe-commit: first attempt blocked by the surprise-row gate (rows lacked disposition); fixed; second attempt committed 65738f3272
