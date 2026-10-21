@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW cli-shim footprint check (shared by every cli-shim code cell). The cell's footprint and the tests around it.
 #   cs_foot.sh <order-file> <files> <new-test-file> <min-tests> <neighbour>...
-#   <files> is a comma list of paths RELATIVE to infra/aws/ec2/opal-gateway/ that the cell may write (the cell's whole footprint, tests included).
+#   <files> is a comma list of paths RELATIVE to infra/aws/ec2/opal-gateway/ that the cell may write (the cell's whole footprint, tests included); an entry ending in ? is OPTIONAL (it may differ, it need not).
 # (a) the files that differ from the commit that added <order-file> (committed, uncommitted and untracked, restricted to the gateway folder) are exactly <files>;
 # (b) <new-test-file> has at least <min-tests> test functions and passes 100 percent, and every <neighbour> test file passes (gwtests; the one carried red test_ogz1_ac08 allowed).
 . "$(dirname "$0")/../../r47/checks/_gwtests.sh"
@@ -14,10 +14,12 @@ BASE = subprocess.run(["git", "log", "--diff-filter=A", "--format=%H", "-1", "--
 names = subprocess.run(["git", "diff", "--name-only", BASE, "--", G], capture_output=True).stdout.decode().split() if BASE else []
 new = subprocess.run(["git", "ls-files", "--others", "--exclude-standard", "--", G], capture_output=True).stdout.decode().split()
 touched = sorted(set(n.split("infra/aws/ec2/opal-gateway/")[-1] for n in names + new))
-want = sorted(FILES.split(","))
-good = bool(BASE) and touched == want
+entries = FILES.split(",")
+want = sorted(e for e in entries if not e.endswith("?"))
+optional = sorted(e[:-1] for e in entries if e.endswith("?"))
+good = bool(BASE) and set(want) <= set(touched) <= set(want + optional)
 ok = ok and good
-print("files that differ from HEAD under the gateway folder: %s (want exactly %s): %s" % (touched, want, "ok" if good else "NO"))
+print("files that differ from HEAD under the gateway folder: %s (want exactly %s%s): %s" % (touched, want, (", and may add %s" % optional) if optional else "", "ok" if good else "NO"))
 try:
     n = len(re.findall(r"(?m)^def test_", open(G + "/" + NEWT, encoding="utf-8").read()))
 except OSError:
