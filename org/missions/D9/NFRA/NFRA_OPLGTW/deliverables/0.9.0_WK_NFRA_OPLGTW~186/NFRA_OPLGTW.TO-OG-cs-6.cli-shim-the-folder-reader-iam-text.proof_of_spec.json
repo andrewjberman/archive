@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cs-6",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP_CLISHIM.round48.md",
+    "vintage_commit": "bcbef740d72",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-6.cli-shim-the-folder-reader-iam-text.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "788a27f4ee7"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~186",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/folder_reader_iam.tf",
+      "kind": "terraform",
+      "commit_or_etag": "fb0d6be5182",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "text only: no terraform init, plan or apply and no AWS call in this cell; the apply is OG-cs-9 (CloudOps) under its own never-widen pair"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (the statements, read from the text, the names read back from the builder): the file exists and its braces balance; it creates one aws_iam_role gateway-folder-read-role and the policy gateway-assume-folder-reader-policy; the Allow statements name only the three served buckets (object reads on the three bucket/* forms, listing on the three bucket ARNs, no bare * resource, no action outside the three read actions); a Deny of GetObject and GetObjectVersion names all 12 bronze and raw forms; a Deny of every non-read action (NotAction) is present; the trust admits only the gateway role under an sts:ExternalId read from a secret the file declares.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs6.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "balanced, one aws_iam_role (['folder_read']), role gateway-folder-read-role and policy gateway-assume-folder-reader-policy named: ok\nthe Allow statements: object reads on exactly ['arn:aws:s3:::opal-data-assets/*', 'arn:aws:s3:::opal-data-etfs/*', 'arn:aws:s3:::opal-data-portal-v2/*'], listing on exactly the three bucket arns, no bare *, no other action (bad actions [], bare * []): ok\na Deny of GetObject and GetObjectVersion names all 12 bronze and raw forms (statement ['DenyBronzeAndRawReads']): ok\na Deny of every non-read action (NotAction) is present: ok\nthe trust admits only the gateway role under an sts:ExternalId read from a secret declared here (secrets ['folder_reader_external_id']): ok\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 probe checks ok; 12 of 12 bronze and raw Deny forms; 3 of 3 object-read ARNs; 3 of 3 listing ARNs; 1 of 1 aws_iam_role",
+      "status": "PASS",
+      "expect": "(?s)balanced, one aws_iam_role .*: ok.*the Allow statements: .*bad actions \\[\\], bare \\* \\[\\]\\): ok.*a Deny of GetObject and GetObjectVersion names all 12 bronze and raw forms .*: ok.*a Deny of every non-read action \\(NotAction\\) is present: ok.*the trust admits only the gateway role under an sts:ExternalId .*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (the footprint is exactly the one file and terraform fmt -check accepts it): the files that differ under infra/aws/terraform/opal-gateway are exactly folder_reader_iam.tf; terraform fmt -check accepts folder_reader_iam.tf.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs6.AC2.sh org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-6.cli-shim-the-folder-reader-iam-text.md; echo \"exit=$?\"",
+      "output_evidence": "files that differ under infra/aws/terraform/opal-gateway: infra/aws/terraform/opal-gateway/folder_reader_iam.tf (want exactly infra/aws/terraform/opal-gateway/folder_reader_iam.tf): ok\nterraform fmt -check accepts folder_reader_iam.tf: ok\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 footprint file (no other file under infra/aws/terraform/opal-gateway differs from the order commit); 1 of 1 fmt-checked file",
+      "status": "PASS",
+      "expect": "(?s)files that differ under infra/aws/terraform/opal-gateway: .*folder_reader_iam\\.tf \\(want exactly .*\\): ok.*terraform fmt -check accepts folder_reader_iam\\.tf: ok.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "one raw form (opal-data-etfs/*/raw/*) removed from a scratch copy of folder_reader_iam.tf; the AC1 probe logic re-run with that copy as its TF argument",
+      "expected": "the Deny check reads NOT OK and the probe reads NO",
+      "observed": "a Deny of GetObject and GetObjectVersion names all 12 bronze and raw forms (statement []): NOT OK; final line NO. Positive control on the real file: final line OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of cs6.AC1.sh compared: one on the uncommitted file before the commit, one on the file at fb0d6be5182 after it",
+      "observed": "stdout identical in both runs (the five ok lines and RESULT: PASS), exit=0 in both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform init, plan, validate and apply; any AWS call; any state file",
+      "reason": "the order's bounds: text only; the apply is a separate never-widen order to CloudOps (OG-cs-9)"
+    },
+    {
+      "item": "bucket policy and KMS grant",
+      "reason": "none by the order: the three buckets read as SSE-S3 and the file changes no bucket"
+    },
+    {
+      "item": "IAM hiding a bronze/ or raw/ prefix from ListBucket",
+      "reason": "disclosed reading (1) of the issuer notes: it cannot hide the prefix (it lists as a common prefix); the shim omits it from its list view and IAM denies every object read beneath it"
+    },
+    {
+      "item": "a folder that merely contains the words bronze or raw (raw_prices/) is not denied by IAM",
+      "reason": "disclosed reading (2) of the issuer notes: the wildcard forms deny whole path segments only, and the shim also matches whole segments"
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-Z-W186-S1: the folder reader's secret resource policy names the secret's own ARN as Resource, where schwab_reader_iam.tf uses Resource = \"*\"; the AC1 probe refuses a bare * on any Allow in the file (form only, OBSERVATION, INERT)"
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~186/command_log.jsonl",
+  "compiler_tools": [
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/opal-gateway/folder_reader_iam.tf",
+      "result": "rc=0, no diff (Terraform v1.15.8)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~186 <0.9.0_WK_NFRA_OPLGTW~186@opal.agent>\" -F <msgfile> -- infra/aws/terraform/opal-gateway/folder_reader_iam.tf",
+      "result": "rc=0, commit-gate OK for 1 of 1 file(s); commit fb0d6be5182 (LOCAL on wk-NFRA_OPLGTW-186)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise row)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~186 <0.9.0_WK_NFRA_OPLGTW~186@opal.agent>\" -F <msgfile> -- org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0, surprise-row-gate OK: 1 new row of 1224 total checked; commit edae2d641c4 (LOCAL on wk-NFRA_OPLGTW-186)"
+    }
+  ]
+}
