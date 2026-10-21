@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-BF-r2",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-r2.fence-rows-early-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "108e1417a676ba482c4bc003b041f6641d7e960f"
+  },
+  "assignee": "0.7.0_AE_CloudOps~NFRA2",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_R6.md",
+    "vintage_commit": "108e1417a676ba482c4bc003b041f6641d7e960f",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-BF-r2.fence-rows-early-apply.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "arn:aws:s3:::opal-data-49financial (bucket policy)",
+      "kind": "aws_resource",
+      "commit_or_etag": "put-bucket-policy 2026-10-20T23:15:42Z of r2/put_49f.compact.json",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "42 -> 54 statements; 12 new (DenyScopedExemption12/13/14 x their Any/Objects/Listing forms, AllowScopedExemption13/14 Objects and Listing); 0 removed; DenyForeignFirmPrincipals ArnNotLike gained quartz-si2-spike-role, opal-assets-silver-schwab-role, gateway-schwab-catalog-read-role only; 41 other statements unchanged after scalar-vs-list normalization (r2/step4_rows.txt). Before: r2/before_49f.json. After: r2/after_49f.json. Applied OUTSIDE Terraform by issuer ruling msg 110066 branch 2; the targeted plan afterwards reads this policy no-op.",
+      "artifact_covered_by": [
+        "BF6-r2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "arn:aws:s3:::opal-data-cottonwood (bucket policy)",
+      "kind": "aws_resource",
+      "commit_or_etag": "put-bucket-policy 2026-10-20T23:15:46Z of r2/put_cw.compact.json",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "7 -> 14 statements; 7 new (DenyScopedExemption2 x3, DenyScopedExemption3 x2, AllowScopedExemption2 Objects and Listing); 0 removed; DenyForeignFirmPrincipals ArnNotLike gained opal-assets-silver-schwab-role and schwab-alongside-si2-box-role only; 6 other statements unchanged after normalization. Before: r2/before_cw.json. After: r2/after_cw.json. Same ruling; targeted plan afterwards reads this policy no-op.",
+      "artifact_covered_by": [
+        "BF6-r2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.7.0_AE_CloudOps~NFRA2/r2/step5a.txt",
+      "kind": "doc",
+      "commit_or_etag": "5dcf3e6aef",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "gateway-schwab-catalog-read-role: assume-role at 23:16:45Z AccessDenied (user Andrew_Berman not authorized; trust admits only opal-gateway-role) -> NOT LIVE-TESTABLE, SIMULATED. GetObject on complete/date=2026-10-20/08403355.complete.json, ListBucket with prefix complete/, and both negative controls (pulls key, pulls prefix) all explicitDeny. Matched statement for the GetObject (r2/step5a_sim_detail.json): the role's OWN identity policy DenyReadsOutsideCompletionPrefixes (live copy r2/gateway_role_policy_live.json), not the bucket policy.",
+      "artifact_covered_by": [
+        "BF6-r2-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.7.0_AE_CloudOps~NFRA2/r2/step5b.txt",
+      "kind": "doc",
+      "commit_or_etag": "5dcf3e6aef",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "quartz-si2-spike-role SIMULATED with resource policy after_49f.json: PutObject on state/pulls/ = implicitDeny (no identity Allow on opal-data-49financial; the role's inline policies grant PutObject only under opal-data-assets), on state/complete/ = explicitDeny with source ResourcePolicy (the fence), on state/daily_pull/ = implicitDeny. Post-put targeted plan: both bucket policies no-op.",
+      "artifact_covered_by": [
+        "BF6-r2-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "BF6-r2-AC1",
+      "criterion_verbatim": "BF6-r2-AC1 -- the five fence rows are applied to the two firm-bucket policies exactly as planned; the gateway role reads the 49financial complete prefix without AccessDenied (live or marked not testable), the negative control is denied, the other principals are proven by policy read and simulation as stated; the entry is closed.",
+      "method": "live_read",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.7.0_AE_CloudOps~NFRA2/NFRA_SCHWABBF.TO-BF-r2.fence-rows-early-apply.proof_of_spec.json BF6-r2-AC1",
+      "output_evidence": "ROWS: applied exactly as planned, by put-bucket-policy of the plan's own documents (outside Terraform, issuer ruling msg 110066): 49financial 42->54 and cottonwood 7->14 statements, 0 removed, read-back equals the plan after normalization, targeted plan afterwards no-op on both policies. GATEWAY: assume-role refused, NOT LIVE-TESTABLE, SIMULATED; the read is explicitDeny by the gateway role's own identity policy, so the 'without AccessDenied' limb is NOT MET BY SEQUENCE (issuer ruling msg 110069: the gateway's grant is site Z's reader IAM update, opal-gateway root, schwab_reader_iam.tf). NEGATIVE CONTROL: denied (explicitDeny). BOX quartz-si2-spike-role: PutObject on complete denied by the bucket policy (the fence works); PutObject on pulls implicitDeny, NOT the order's 'expect allowed' limb, NOT MET BY SEQUENCE (issuer ruling msg 110069: the order's expectation was the issuer's error; the box identity grant is TO-BF-r3 step C). CONVERTER and ALONGSIDE: applied statements read (r2/step4_rows.txt); the converter's bucket side is proven by the policy read only, its identity-side Deny (row NFRA_SCHWABBF-S4) is lifted by BF-r-3. LEDGER nfra-schwabbf-fence-rows-early-20261021 CLOSED, leg L1 proven as rows-landed. CHECKER VERDICT on this instance: see the committed run; VALID (rc=0).",
+      "denominator": "2 bucket policies applied and read back of 2; 5 rows (3 on 49financial, 2 on cottonwood); 4 gateway simulations (2 positive, 2 negative controls), 0 live; 3 box simulations (pulls, complete, daily_pull); 1 ledger entry closed of 1; reads carried forward: 2 (gateway positive read, box pulls write).",
+      "status": "PASS",
+      "status_reason": "Self-referential by construction: the criterion is this instance, validated by the checker in the invocation; the facts were read from live AWS (get-bucket-policy before and after, the role policies, the simulator), not from the put's return code. PASS covers the rows landing and the fence's deny limb. TWO READS ARE NOT MET AND CARRIED FORWARD per issuer ruling msg 110069: (1) the gateway's positive read of the 49financial complete prefix (blocked by its own identity policy; needs site Z's reader IAM update before the 07:00Z gateway release reads it); (2) the box's PutObject on pulls (needs the identity grant of TO-BF-r3 step C). Neither is a defect of the rows.",
+      "expect": "VALID"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant for this live act. The discriminating controls run: live policy read before the put (equal to the baseline, so the put had something to change), negative simulations beside the positive ones, and a post-put targeted plan.",
+      "expected": "none named by the order; each read must differ between landed and not landed.",
+      "observed": "Before (r2/before_*.json, re-read live at 23:14:42Z equal to the baseline): 42 and 7 statements, none of the five rows. After (r2/after_*.json): 54 and 14 statements with the rows. Targeted plan before the put: 2 policies 'update'; after: both 'no-op'. complete-prefix write by the box role: explicitDeny by ResourcePolicy (a result the policy before the put could not produce).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: a live bucket-policy put is not same-input repeatable; the repeatable read is the post-put targeted plan.",
+      "observed": "terraform plan with the two instance targets after the put: both policies [no-op]; the remaining 10 adds are other firms' buckets that this order does not apply.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 10 firm-bucket and public-access-block creates in the shared-infra root (abidingwealth, alongside, keilfinancial, lighthousewealth, vmwealth)",
+      "reason": "Not this order's: the -target dependency pulled them into the plan and they were not applied (surprise row NFRA_SCHWABBF-S7)."
+    },
+    {
+      "item": "A live read by gateway-schwab-catalog-read-role",
+      "reason": "assume-role refused; simulated only. The gateway's own identity policy denies it; carried forward to site Z's reader IAM update (issuer ruling msg 110069)."
+    },
+    {
+      "item": "A pair half for the put-bucket-policy path",
+      "reason": "The five rows are the signed ones (COO and CTO halves named in the order); the tool differs (put-bucket-policy of the plan's own documents instead of safe-apply), by the issuer's ruling msg 110066, not by a new half."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-S7: the -target of the two bucket policies also plans 10 creates (5 firm buckets and 5 public access blocks) because the policy's for_each reference to aws_s3_bucket.lgic_firm pulls the whole resource into the target; nothing was applied by Terraform, the issuer ruled the put-bucket-policy branch."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.7.0_AE_CloudOps~NFRA2/r2/put_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "terraform (init, plan -target at the instance level, show -json, plan after the put)",
+      "invocation": "terraform plan -target=aws_s3_bucket_policy.opal_data_49financial -target='aws_s3_bucket_policy.lgic_firm[\"cottonwood\"]'",
+      "result": "10 to add, 2 to change before the put; 10 to add, 0 to change, both policies no-op after it"
+    },
+    {
+      "tool": "aws iam simulate-principal-policy (one action, one resource per call, --resource-policy file://after_49f.json)",
+      "invocation": "--policy-source-arn <role arn> --action-names <a> --resource-arns <r> [--context-entries s3:prefix]",
+      "result": "gateway: 4 of 4 explicitDeny from the role's own policy; box: pulls implicitDeny, complete explicitDeny (ResourcePolicy), daily_pull implicitDeny"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --leg 'L1|verify|...' (the order's kind tf-apply is not valid), close-leg, close",
+      "result": "nfra-schwabbf-fence-rows-early-20261021 CLOSED, 1 of 1 legs"
+    }
+  ]
+}
