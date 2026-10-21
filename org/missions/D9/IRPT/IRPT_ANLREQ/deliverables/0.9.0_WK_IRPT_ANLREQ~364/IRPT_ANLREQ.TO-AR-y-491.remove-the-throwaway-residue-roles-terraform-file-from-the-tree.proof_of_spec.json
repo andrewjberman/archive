@@ -29,9 +29,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~364/check_tf_removed.py",
       "kind": "script",
-      "commit_or_etag": "e73a77a776f",
+      "commit_or_etag": "9f26263dce1",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib-only offline check, committed as e73a77a776f. Passes the commit gate (ruff clean, no non-ASCII, no single-letter names). Judges the three predicates in the order literally.",
+      "deploy_evidence": "Stdlib-only offline check. Committed first as e73a77a776f with base 1e6073761ca; corrected per issuer AMENDMENT 1 to base 4c7935fe2c8 in 9f26263dce1 (the pin). Passes the commit gate (ruff clean, no non-ASCII, no single-letter names). Judges the three predicates in the order literally.",
       "artifact_covered_by": [
         "AR491-y-AC1",
         "AR491-y-AC2"
@@ -42,7 +42,7 @@
       "kind": "doc",
       "commit_or_etag": "268718ac623",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One appended BLOCKING / INERT row, IRPT_ANLREQ-D2-W364-S1, recording that the base 1e6073761ca is 51 commits behind HEAD and seven other infra paths changed since it, so the infra-diff predicate reads 8 lines after the deletion.",
+      "deploy_evidence": "One appended BLOCKING / INERT row, IRPT_ANLREQ-D2-W364-S1, recording that the base 1e6073761ca was 51 commits behind HEAD and seven other infra paths changed since it, so the infra-diff predicate read 8 lines after the deletion. The issuer's AMENDMENT 1 moved the base to 4c7935fe2c8.",
       "artifact_covered_by": [
         "AR491-y-AC1"
       ]
@@ -54,18 +54,17 @@
       "criterion_verbatim": "AR491-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~364/check_tf_removed.py -- expect ^RESIDUE-TF-REMOVED tracked=0 infra_changes=1 deletion=yes content_blob_in_history=8897a25273$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~364/check_tf_removed.py",
-      "output_evidence": "RESIDUE-TF-REMOVED-BAD infra diff has 8 lines, not 1; infra diff line is not a D for the path\nrc=1 (run at HEAD 268718ac623)",
-      "denominator": "1 of 3 predicates fails: the infra-diff predicate (git diff --name-status 1e6073761ca HEAD -- infra/ prints 8 lines, not 1); 2 of 3 pass (path untracked; base blob is 8897a25273)",
+      "output_evidence": "RESIDUE-TF-REMOVED tracked=0 infra_changes=1 deletion=yes content_blob_in_history=8897a25273\nrc=0 (run at HEAD 9f26263dce1)",
+      "denominator": "3 of 3 predicates pass: path untracked (tracked=0); git diff --name-status 4c7935fe2c8 HEAD -- infra/ prints exactly one line, D for the path (infra_changes=1); base blob 4c7935fe2c8:<path> is 8897a25273c8547c2ba0d6f9fdd3ce76849fdddf",
       "expect": "^RESIDUE-TF-REMOVED tracked=0 infra_changes=1 deletion=yes content_blob_in_history=8897a25273$",
-      "status": "FAIL",
-      "status_reason": "The literal expectation cannot be met at this base: 51 commits and seven other infra paths separate 1e6073761ca from HEAD, so the diff prints 8 lines after the deletion. The deletion is correct; the expectation is not edited by the worker. Surprise row IRPT_ANLREQ-D2-W364-S1 (BLOCKING, INERT) is filed for the issuer. The order stays pending."
+      "status": "PASS"
     },
     {
       "criterion_id": "AR491-y-AC2",
       "criterion_verbatim": "AR491-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~364/check_tf_removed.py --selftest -- expect ^CONTROL-FIRES$",
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~364/check_tf_removed.py --selftest",
-      "output_evidence": "CONTROL-FIRES\nrc=0 (run at HEAD 268718ac623)",
+      "output_evidence": "CONTROL-FIRES\nrc=0 (run at HEAD 9f26263dce1)",
       "denominator": "3 of 3 mutated predicates read BAD (file still tracked; second infra path in the diff; different content blob)",
       "expect": "^CONTROL-FIRES$",
       "status": "PASS",
@@ -76,12 +75,12 @@
     "mutant": {
       "description": "AR491-y-AC2 control: the three predicates mutated in memory (path still tracked; a second infra path in the diff; a different content blob). The control fires only when all three read BAD.",
       "expected": "CONTROL-FIRES, rc 0",
-      "observed": "CONTROL-FIRES rc=0",
+      "observed": "CONTROL-FIRES rc=0 at HEAD 9f26263dce1",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AR491-y-AC1 run during the build with the script uncommitted at HEAD 13596bc0b25, then again at HEAD 268718ac623; the printed line compared.",
-      "observed": "Both runs printed RESIDUE-TF-REMOVED-BAD infra diff has 8 lines, not 1; infra diff line is not a D for the path (rc=1). Identical.",
+      "method": "AR491-y-AC1 run twice at HEAD 9f26263dce1 (outputs saved in the worker scratch, not committed); the printed lines compared with diff. Before the base correction, the same check printed the BAD line at 13596bc0b25 and at 268718ac623, identical.",
+      "observed": "Both runs printed RESIDUE-TF-REMOVED tracked=0 infra_changes=1 deletion=yes content_blob_in_history=8897a25273 (rc=0); diff identical.",
       "status": "STABLE"
     }
   },
@@ -96,7 +95,7 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W364-S1: the check's infra-diff predicate expects one line at base 1e6073761ca, but seven other infra paths changed since that base, so AC1 reads BAD after the deletion (BLOCKING, INERT; the expectation is left to the issuer)."
+    "IRPT_ANLREQ-D2-W364-S1: the check's infra-diff predicate expected one line at base 1e6073761ca, but seven other infra paths had changed since that base, so AC1 read BAD after the deletion (BLOCKING, INERT); the issuer's AMENDMENT 1 moved the base to 4c7935fe2c8 and AC1 now passes."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
