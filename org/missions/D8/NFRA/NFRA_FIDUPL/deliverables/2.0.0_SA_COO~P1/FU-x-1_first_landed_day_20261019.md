@@ -41,3 +41,20 @@ Run record: `s3://opal-data-assets/fidelity/alongside/bronze/_runs/20261019/run-
 
 The lander's content-date rule reads field 0 only. It needs a per-file date column. Asked of the CRO (confirm the columns from the vendor
 profile, plus the account-number column per file). Then a lander repair on fakes, and a re-land from the files still on the box.
+
+## UPDATE 2026-10-21 01:20Z -- all six landed (re-land from the held files, no new sign-in)
+
+After FU-s-4 REPAIR 1 (per-file date column, run outcome) and FR-s-2 REPAIR 3 (split.py passes the file name) were merged and delivered
+(`fu10m` OK 01:19Z, module suite 164 passed), `land.py --handoff-dir <run 20261021T004450Z>/handoff --scope alongside` ran on the box:
+`OK: run_id=20261021T012004Z landed=3 skipped_existing=3 failed=0`, `OUTCOME: ALL_LANDED`. Run record
+`s3://opal-data-assets/fidelity/alongside/bronze/_runs/20261019/run-20261021T012004Z.json` (`source: automated`, landed_count 6, failed_count 0).
+Each key HEAD-checked, content date 20261019:
+
+| file | action | key | bytes |
+|---|---|---|---|
+| account.txt | landed | `s3://opal-data-assets/fidelity/alongside/bronze/account/20261019/account.txt` | 3,794,367 |
+| position.txt | skipped_existing | `.../bronze/position/20261019/position.txt` | 30,334,785 |
+| balance.txt | landed | `.../bronze/balance/20261019/balance.txt` | 1,221,776 |
+| prices.txt | skipped_existing | `.../bronze/prices/20261019/prices.txt` | 646,731 |
+| security.txt | skipped_existing | `.../bronze/security/20261019/security.txt` | 656,599 |
+| transact.txt | landed | `.../bronze/transact/20261019/transact.txt` | 602,207 |
