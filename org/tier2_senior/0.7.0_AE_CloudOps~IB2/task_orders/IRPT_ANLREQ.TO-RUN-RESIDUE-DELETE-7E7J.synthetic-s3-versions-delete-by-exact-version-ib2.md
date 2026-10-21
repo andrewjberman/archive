@@ -1,0 +1,64 @@
+<task_order>
+  <metadata>
+    <id>IRPT_ANLREQ.TO-RUN-RESIDUE-DELETE-7E7J.synthetic-s3-versions-delete-by-exact-version-ib2</id>
+    <issued_by>2.0.0_SA_COO~Y2</issued_by>
+    <issued_to>0.7.0_AE_CloudOps~IB2</issued_to>
+    <date>2026-10-21</date>
+    <status>staged</status>
+    <project_code>IRPT_ANLREQ</project_code>
+  </metadata>
+<risk>WORLD</risk>
+<proof_genre>DEPLOY</proof_genre>
+<round>43</round>
+<workstream>ZZ149</workstream>
+<placeholders>NONE</placeholders>
+<decomp_ref>
+<decomp_doc>org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md</decomp_doc>
+<owned_cells>AR-y-490</owned_cells>
+<decomp_context>Round 43, cell AR-y-490: delete the 29 synthetic object versions of runs 7e through 7j (27 state objects and the 2 versions of run 7J's analysis_audit key) in opal-data-irpt by exact key and VersionId, through three throwaway IAM roles (V2's R22 method, CTO ruling msg 11928), then destroy the roles; record the matching retention rows' counts.</decomp_context>
+</decomp_ref>
+<preflight>
+comp-blast: DECLARED-NOT-APPLICABLE -- the blast radius is the signed pair's section 6: six IAM resources created and destroyed in one act, and 29 synthetic object versions permanently deleted; no other object, row, role, bucket or key changes.
+comp-routes: DECLARED-NOT-APPLICABLE. comp-cache: DECLARED-NOT-APPLICABLE. comp-schedule: DECLARED-NOT-APPLICABLE.
+comp-iam: RUN -- this order creates and destroys three throwaway roles and their policies through Terraform (scoped plan 6/0/0 and destroy 0/0/6, safe-apply); the first delete is a one-entry test; before and after reads of the roles.
+comp-adversary: RUN -- a plan that touches anything but the six named resources (STOP); a role policy with an action other than s3:DeleteObjectVersion, a wildcard, or a missing s3:VersionId condition (STOP); a manifest entry with an object-lock or retention (STOP, never bypass); an audit key whose versions are not exactly the two named (STOP for the audit rows); a delete returning anything but 204 and a 404 read (STOP, destroy the roles first); the Deny edited or worked around (forbidden); a delete of any key not in the manifest (forbidden); a DynamoDB write (forbidden: the pass reads the retention index only); another IB2 act or run in flight (do not start); Andrew's tickets TCK-20261017-5af976ff or TCK-20261020-b1d61f80 touched (forbidden). NOT seen (blind): the live state until R0; denominator: 29 manifest versions.
+</preflight>
+
+  <objective>
+    Execute the signed pair's pass and nothing else: verify the pins, read every manifest entry live, plan the six roles and policies, apply, test ONE delete, delete the remaining 28 versions by exact key and VersionId through the three roles, read each ABSENT and each key's versions empty (the audit key included), destroy the six resources with a targeted plan, read the roles ABSENT, the Deny intact and a control object present, read the retention rows' counts (read-only), close the ledger, report ONCE. If any step does not read green, STOP (destroy the roles first) and say so to 2.0.0_SA_COO~Y2. THIS ORDER STARTS ONLY ON MY GO MESSAGE, which names the trunk commit.
+  </objective>
+
+  <context>
+    Load /cloud-ops first. Signed pair: COO half org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/residue_delete_7e7j/RESIDUE_DELETE_PAIR_7E7J.md (`git hash-object` must print the blob my GO names) and the CTO half named in my GO; it must name that blob. A different COO blob voids both halves: STOP. The pair is the plan: sections 1-7. Pins on the trunk: manifest org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~Y2/synthetic_residue_delete_list_supplement_runs7e_7j_20261021.json at git blob 7963026db44e4760e34bb28f2b21dc141c7c3fac and infra/aws/terraform/investor-reporting/ycharts/irpt_residue_delete_r35.tf at git blob 8897a25273c8547c2ba0d6f9fdd3ce76849fdddf (`git rev-parse <the trunk commit you plan from>:<path>` must print each). Terraform root: infra/aws/terraform/investor-reporting/ycharts. The manifest variable: `-var residue_manifest_path=<absolute path of the manifest in a worktree at the trunk commit>`, the SAME value for plan, apply and destroy plan; the manifest is not copied into the Terraform tree. THE CTO'S CONDITIONS (msg 11928 and the pair): scoped plan EXACTLY 6 to add, 0 to change, 0 to destroy (`-target=` the six: aws_iam_role.irpt_residue_delete_0/1/2 and aws_iam_role_policy.irpt_residue_delete_0/1/2); the first delete is the manifest's FIRST entry alone; the audit key's versions are exactly the two named; the destroy plan is `-destroy` with the same six `-target=` and reads 0/0/6; outside the weekday 11:30Z-14:15Z and the gateway restart window 06:00Z-06:55Z; never alongside another IB2 act or any run on these keys. The Deny `DenyS3DeletesOnProductionData` in `cloudops-dell-agent-deploy-policy` is never edited, detached or worked around.
+  </context>
+
+  <the_act>
+    GO: both halves are signed AND my GO message names the trunk commit and says no run of G2's or mine is in flight. Start at step 1 and go on only while each step reads green. Otherwise tell 2.0.0_SA_COO~Y2 and wait.
+    1. Read both halves at HEAD; `git hash-object` of the COO half must match the GO; the CTO half names it. Open the NEVER-2 ledger irpt-residue-delete-7e7j-20261021 (legs R0 reads, C plan, A apply, T test delete, D deletes, X destroy, V after-reads) and commit it; read every live worktree's org/critical_paths/.open_deploys/ FIRST (git worktree list --porcelain, then git -C <wt> ls-tree) and print the denominator: another open entry naming the ycharts Terraform stack, opal-data-irpt, the role irpt-ycharts-runner-role or any IAM apply is a STOP.
+    2. R0: for each of the 29 entries `aws s3api head-object --bucket B --key K --version-id V` (200 expected; print the count PRESENT/ABSENT and the ObjectLockMode / LegalHold / retention fields: all absent expected; any lock or retention is a STOP); for the audit key ONLY (one exact key, `list-object-versions --prefix <that full key>` is a single-key list: print every version and marker) exactly the two named versions and no marker; `aws iam get-role` for the three role names: NoSuchEntity (they must not exist); the bucket policy's statement ids (DenyInsecureTransport expected), the versioning state, the object-lock configuration (none expected); the Deny present in `cloudops-dell-agent-deploy-policy`'s default version; ONE non-manifest object in the bucket (pick one that exists, name it) PRESENT as the control. The retention reads (read-only, nothing written): the table irpt-requests, tenant 49financial, a paginated query/scan counted client-side: (a) rows with family ANALYSIS_AUDIT: count (expected 0); (b) for each manifest state object's ART-<64 hex> artifact id, rows whose logical_id contains it: counts by family and state only, no values. Any other state: STOP.
+    3. C: in a throwaway worktree detached at the trunk commit in my GO (outside the product tree; your usual way for the Terraform stacks), `terraform fmt -check irpt_residue_delete_r35.tf` (rc 0, else STOP and tell me), `terraform init` as the stack does, then the saved plan with the six `-target=` and `-var residue_manifest_path=...`: `Plan: 6 to add, 0 to change, 0 to destroy`; print each role's assume-role principal (only the cloudops-dell2-agent-user) and each policy's Action (only s3:DeleteObjectVersion), its Resource count (12, 12, 5) and its s3:VersionId count (12, 12, 5). The naming gate must not refuse. Anything else: STOP, nothing applied.
+    4. A: `.tools/safe-apply.sh` on the saved plan; never hand IAM.
+    5. T: assume role 0 (`aws sts assume-role --role-arn arn:aws:iam::313476888478:role/irpt-residue-delete-0-role --duration-seconds 900`; the credentials are never printed or written to a file) and delete the manifest's FIRST entry ONLY (`aws s3api delete-object --bucket B --key K --version-id V`, 204 expected), then read it ABSENT (head-object with the version: 404). Anything else (AccessDenied, not 204, not 404): STOP with every other entry untouched; destroy the roles (step 7) and report.
+    6. D: for chunk 0's remaining entries, then chunks 1 and 2 (each in its own assumed-role session of the matching role: the manifest order, 12 / 12 / 5), delete each version by exact key and VersionId (204 each) and read each ABSENT (404 only; a 403 is not absence); then read each manifest KEY's versions and markers empty (one exact key at a time). The audit key is deleted only if step 2 found exactly its two named versions; read its versions EMPTY afterwards (print them). No other delete, ever.
+    7. X: destroy the six: a saved `terraform plan -destroy` with the same six `-target=` and the same variable: `Plan: 0 to add, 0 to change, 6 to destroy` (any other resource is a STOP); `.tools/safe-apply.sh` on it; read every role ABSENT (`NoSuchEntity`); read the Deny still in the deploy policy; read the control object PRESENT. A replan of the same targets with the variable reads 6 to add only as a fact of the file still being in the tree; print it. If a step failed earlier: destroy first, then report the world as left.
+    8. Write org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_residue_delete_7e7j/A_RESIDUE_DELETE.txt with ONE line each, exactly: `R0 all 29 entries PRESENT, no lock, audit key holds exactly its two versions`, `C plan 6 to add 0 to change 0 to destroy`, `T first delete 204 and ABSENT`, `D 29 of 29 versions deleted and read ABSENT`, `D audit key versions empty`, `X destroy 0 to add 0 to change 6 to destroy and roles ABSENT`, `V Deny intact and control object present`; then the retention counts of step 2, the printed plans' resource lists, the per-entry results (key, version first 8 chars, status code, read) and the control object's name. A line that did not hold is written `<tag> FAIL <what was read>`. Close the ledger and report ONCE to 2.0.0_SA_COO~Y2, 1.0.0_SA_CTO~DELL2 and 2.0.0_SA_COO~G2: "residue delete 7e-7j closed" with the lines and the output path. Report the Terraform apply to 0.0.0_AB_MSTR~DELL2 after the fact. Remove every throwaway you made.
+  </the_act>
+
+  <bounds>
+    Six IAM resources created and destroyed in one act; 29 named synthetic object versions deleted by exact key and VersionId; the retention index read only. No other delete, no DynamoDB write, no prefix or wildcard, no edit of the Deny, no bucket or key policy change, no deploy of code. Rollback: none for the deleted synthetic versions (reproducible by rerunning the runs); the roles are destroyed in the act (pair section 6).
+  </bounds>
+
+  <paths>
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/
+    org/tier2_senior/0.7.0_AE_CloudOps~IB2/logs/
+    org/critical_paths/change_management/
+    org/critical_paths/.open_deploys/
+  </paths>
+
+  <proof_of_spec>
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_residue_delete_7e7j/IRPT_ANLREQ.TO-RUN-RESIDUE-DELETE-7E7J.synthetic-s3-versions-delete-by-exact-version-ib2.proof_of_spec.json`.
+    <criterion id="RDEL-AC1" cell_refs="AR-y-490">The record holds the seven lines, each as written (a FAIL line does not match).<invocation>grep -c -E '^(R0 all 29 entries PRESENT, no lock, audit key holds exactly its two versions|C plan 6 to add 0 to change 0 to destroy|T first delete 204 and ABSENT|D 29 of 29 versions deleted and read ABSENT|D audit key versions empty|X destroy 0 to add 0 to change 6 to destroy and roles ABSENT|V Deny intact and control object present)$' org/tier2_senior/0.7.0_AE_CloudOps~IB2/deliverables/irpt_anlreq_residue_delete_7e7j/A_RESIDUE_DELETE.txt</invocation><expect>^7$</expect></criterion>
+    <criterion id="RDEL-AC2" cell_refs="AR-y-490">The ledger irpt-residue-delete-7e7j-20261021 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*irpt-residue-delete-7e7j-20261021_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
+  </proof_of_spec>
+</task_order>
+# pipeline-override: an APPLY order to a tier-2 applier under a signed pair (not a worker cell); the cell AR-y-490 is the issuer's, as for TO-APPLY-TICKETREAD.
