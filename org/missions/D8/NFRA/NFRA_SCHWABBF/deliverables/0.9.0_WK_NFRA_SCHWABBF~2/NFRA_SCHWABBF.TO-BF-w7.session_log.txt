@@ -1,0 +1,12 @@
+NFRA_SCHWABBF.TO-BF-w7 -- session log, 0.9.0_WK_NFRA_SCHWABBF~2 (worktree C:\Users\AndrewBerman\Desktop\wt-bf-2, branch wk-NFRA_SCHWABBF-2)
+
+1. Tree check: git rev-parse --abbrev-ref HEAD -> wk-NFRA_SCHWABBF-2; test -d org && test -d .tools -> TREE-OK.
+2. Premises: sdd-daily-pull.ps1 line 304 Select-PlanAsOf, line 305 "$all = @($planItems)" (the order said about 304); call site line 553 "$sel = Select-PlanAsOf $plan $OnlyAsOf" (the order said about 600). Plan built as New-Object List[object] at line 534.
+3. Census of the script's @( sites: 171 literal array; 305 target; 314 pipeline; 310/316 $all.Count; 387 literal array; 474 pipeline; 487, 512, 516 literal arrays; 519 foreach over @($obj.FileDetailList) -- type not decidable in the tree, unchanged, surprise NFRA_SCHWABBF-W2-S9; 562 pipeline; 579-580 command output arrays. Guard function (line 99) takes $planItems and uses foreach only.
+4. Probe (.scratch/probe_census.ps1, Windows PowerShell 5.1): direct @($list) THREW Argument types do not match; function-argument @($p) THREW; foreach over @($list) THREW. A function named H collided with the alias h (Get-History) and was discarded.
+5. Test edits first: harness op filter_list (real List[object] built by .Add) and arms test_select_plan_list_a..d.
+6. Mutant control, script at HEAD (line 305 unedited): pytest -k select_plan_list -> "4 failed, 13 deselected in 2.34s", rc=1; every arm: "powershell rc=1 stderr=Argument types do not match ... $all = @($planItems)".
+7. Fix: line 305 -> "$all = @($planItems | ForEach-Object { $_ })". numstat sdd-daily-pull.ps1: 1 insertion, 1 deletion.
+8. AC1 after fix: "4 passed, 13 deselected in 2.39s" rc=0; rerun "4 passed, 13 deselected in 2.22s" rc=0.
+9. AC2 after fix: "23 passed in 21.38s" rc=0 (17 in key_form = 13 base + 4 new; 6 in state); rerun "23 passed in 26.06s" rc=0.
+10. Nothing run against Schwab or AWS; the puller was not executed; the script was not uploaded.
