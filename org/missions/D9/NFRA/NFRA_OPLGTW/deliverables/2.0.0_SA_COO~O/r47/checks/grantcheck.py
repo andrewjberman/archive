@@ -1,6 +1,6 @@
 """Round-47 grant checks (OG-gv-1: Andrew's Schwab grant moves to the master-wide scope; OG-gm-1: Menachem's Schwab grant, master-wide).
 
-usage: python3 -I grantcheck.py <phaseA|phaseB> <andrew|menachem> <W-directory>
+usage: python3 -I grantcheck.py <phaseA|phaseB> <andrew|menachem|menachem2> <W-directory>   (menachem2 = OG-gm-2: Menachem's Schwab grant over the THREE masters)
 Prints labelled lines and a last line OK or NO. Counts and hashes only; no account number is read into any printed line.
 
 PHASE A reads W/<P>_BEFORE.json, W/<P>_DIFF.json, W/<P>_PREFLIGHT_DECIDE.json, W/<P>_DENY.json and W/NEVER_WIDEN_ASK_OG-<o>.md (P = GV1 or GM1, o = gv-1 or gm-1).
@@ -13,10 +13,13 @@ import re
 import sys
 
 phase, who, W = sys.argv[1], sys.argv[2], sys.argv[3]
-P = {"andrew": "GV1", "menachem": "GM1"}[who]
-ORDER = {"andrew": "og-gv-1", "menachem": "og-gm-1"}[who]
-ASK = "NEVER_WIDEN_ASK_OG-%s.md" % {"andrew": "gv-1", "menachem": "gm-1"}[who]
-MASTERS = {"andrew": ("08242234", "08335338"), "menachem": ("08242234", "08335338")}[who]
+P = {"andrew": "GV1", "menachem": "GM1", "menachem2": "GM2"}[who]
+ORDER = {"andrew": "og-gv-1", "menachem": "og-gm-1", "menachem2": "og-gm-2"}[who]
+ASK = "NEVER_WIDEN_ASK_OG-%s.md" % {"andrew": "gv-1", "menachem": "gm-1", "menachem2": "gm-2"}[who]
+MASTERS = {"andrew": ("08242234", "08335338"), "menachem": ("08242234", "08335338"), "menachem2": ("08242234", "08335338", "08403355")}[who]
+ROLE = who.rstrip("2")
+MTXT = "the three masters" if who == "menachem2" else "the two original masters"
+MTXT2 = "the three masters" if who == "menachem2" else "the two originals"
 TOOLS = ("schwab_get_access", "schwab_list_files", "schwab_describe_dataset", "schwab_query")
 
 
@@ -52,13 +55,13 @@ def phase_a():
     b, d, p, dn = load(P + "_BEFORE.json"), load(P + "_DIFF.json"), load(P + "_PREFLIGHT_DECIDE.json"), load(P + "_DENY.json")
     pr = (b or {}).get("principal") or {}
     first = pr.get("first_grant") is True
-    ok_b = (bool(b) and pr.get("role") == who and bool(pr.get("pk_hash")) and isinstance(pr.get("scope_sans_accounts_sha256"), str)
+    ok_b = (bool(b) and pr.get("role") == ROLE and bool(pr.get("pk_hash")) and isinstance(pr.get("scope_sans_accounts_sha256"), str)
             and bool((b.get("denominator") or {}).get("policy_items_scanned")) and (first or isinstance(pr.get("accounts_before_counts"), dict)))
-    df = (d or {}).get(who) or {}
+    df = (d or {}).get(ROLE) or {}
     want_keys = ["accounts"] if (who == "andrew") else ["accounts", "masters"]
     ok_d = (df.get("changed_keys") == want_keys and sorted(df.get("masters_after") or []) == sorted(MASTERS)
             and all((df.get("accounts_after") or {}).get(m) == ["*"] for m in MASTERS) and df.get("rest_of_scope_matches_template") is True)
-    dec = (p or {}).get(who) or {}
+    dec = (p or {}).get(ROLE) or {}
     ok_p = bool(p) and all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and download_ok(dec) and dec.get("master_wide_parsed") is True
     de = dn or {}
     ok_dn = (isinstance(de.get("deny_record_present_before"), bool) and isinstance(de.get("activate_writes_deny"), bool) and isinstance(de.get("options"), list) and len(de["options"]) >= 2
@@ -72,8 +75,8 @@ def phase_a():
     order_sentence = bool(re.search(r"(?i)OG-rl-18.{0,120}(CLOSED|live)", ask))
     emails = len(re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", ask))
     digits = len(re.findall(r"\d{9,}", ask))
-    print("before-record: %s with pk_hash, scope hash and a printed denominator%s: %s" % (who, " (a first grant)" if first else ", per-master counts", Y(ok_b)))
-    print("diff keys %s, masters after == the two original masters, every master's accounts == ['*'], the rest of the scope equals its template: %s" % (want_keys, Y(ok_d)))
+    print("before-record: %s with pk_hash, scope hash and a printed denominator%s: %s" % (ROLE, " (a first grant)" if first else ", per-master counts", Y(ok_b)))
+    print("diff keys %s, masters after == %s, every master's accounts == ['*'], the rest of the scope equals its template: %s" % (want_keys, MTXT, Y(ok_d)))
     print("decide() pre-flight on the candidate (master-wide parser) admits the 4 read tools and %s: %s" % (DL_TEXT, Y(ok_p)))
     print("email_deny finding: present before %s, activation writes it %s, options named %s, effect stated, no delete proposed: %s" % (
         de.get("deny_record_present_before"), de.get("activate_writes_deny"), len(de.get("options") or []), Y(ok_dn)))
@@ -124,7 +127,7 @@ def phase_b():
 
     before = load(P + "_BEFORE.json") or {}
     pr = before.get("principal") or {}
-    rev, sc = grant(who)
+    rev, sc = grant(ROLE)
     sc = sc or {}
     acc = sc.get("accounts") or {}
     first = pr.get("first_grant") is True
@@ -136,7 +139,7 @@ def phase_b():
 
     rest = {k: v for k, v in sc.items() if k not in ("accounts", "masters")}
     resth = hashlib.sha256(json.dumps(rest, sort_keys=True, separators=(",", ":"), default=num).encode()).hexdigest()
-    rest_ok = resth == (load(P + "_DIFF.json") or {}).get(who, {}).get("rest_sha256_after_expected")
+    rest_ok = resth == (load(P + "_DIFF.json") or {}).get(ROLE, {}).get("rest_sha256_after_expected")
     other = "alyssa"
     orev, _ = grant(other)
     ob = (load("MG2_BEFORE.json") or {}).get("principals", [])
@@ -148,13 +151,13 @@ def phase_b():
     dec_ok = (all((dec.get("admit") or {}).get(t) is True for t in TOOLS) and download_ok(dec)
               and rb.get("tree") == "deployed" and bool(mk) and rb.get("code_sha") == mk)
     sv = rb.get("served") or {}
-    served_ok = sv.get("account_count_all_masters") == "all" and isinstance(sv.get("query_rows"), int) and sv["query_rows"] >= 1 and sv.get("as_principal") == who
-    print("%s: active %s; newer grant revision %s; masters equal the two originals %s; accounts == ['*'] for every master %s; rest of scope unchanged %s" % (
-        who, Y(who in prof), Y(newer), Y(masters_ok), Y(wide_ok), Y(rest_ok)))
+    served_ok = sv.get("account_count_all_masters") == "all" and isinstance(sv.get("query_rows"), int) and sv["query_rows"] >= 1 and sv.get("as_principal") == ROLE
+    print("%s: active %s; newer grant revision %s; masters equal %s %s; accounts == ['*'] for every master %s; rest of scope unchanged %s" % (
+        ROLE, Y(ROLE in prof), Y(newer), MTXT2, Y(masters_ok), Y(wide_ok), Y(rest_ok)))
     print("%s's grant revision as before: %s" % (other, Y(other_ok)))
     print("decide() on the LIVE grant against the DEPLOYED tree at the batch17 release: admits 4 read tools and %s: %s" % (DL_TEXT_B, Y(dec_ok)))
-    print("served read as %s through the gateway: schwab_get_access account_count 'all' for every master and one bounded schwab_query answered %s row(s): %s" % (who, sv.get("query_rows"), Y(served_ok)))
-    print("OK" if all((who in prof, newer, masters_ok, wide_ok, rest_ok, other_ok, dec_ok, served_ok)) else "NO")
+    print("served read as %s through the gateway: schwab_get_access account_count 'all' for every master and one bounded schwab_query answered %s row(s): %s" % (ROLE, sv.get("query_rows"), Y(served_ok)))
+    print("OK" if all((ROLE in prof, newer, masters_ok, wide_ok, rest_ok, other_ok, dec_ok, served_ok)) else "NO")
 
 
 phase_a() if phase == "phaseA" else phase_b()
