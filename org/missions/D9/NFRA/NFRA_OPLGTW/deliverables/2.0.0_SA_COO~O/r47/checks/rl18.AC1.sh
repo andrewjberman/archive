@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # OPLGTW OG-rl-18 AC1 (round 47, the gateway release `batch17`; PHASE A): the take list of OG-rt-1 (the master-wide Schwab scope), whole from trunk, on the live ref read on the host.
 #  - W/rl18_release.json {base_sha, release_sha, trunk_sha, live_ref_host}; base_sha IS the live ref read on the host; dell1's harvest release 6575999df5 is an ancestor of base;
-#    base..release differs ONLY in the twelve files below (the four of OG-rt-1, the five of OG-ed-1, the two of OG-mp-1 and the served catalog app/refs/DATA_CATALOG.yaml, MCPINDEX candidate e, md5 03d2dbbae1f0) (each byte-equal to its blob at trunk_sha) and in ONE KEY of EC2_MANIFEST.json (the opal-gateway mcportal_commit pin, 21ad40432cae to a577f99afc81df4a42c1740c78cf58270c8991e5); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh and every .tf is byte-equal between base and release;
+#    base..release differs ONLY in the twelve files below (the four of OG-rt-1, the five of OG-ed-1, the two of OG-mp-1 and the served catalog app/refs/DATA_CATALOG.yaml, MCPINDEX candidate e, md5 03d2dbbae1f0) (each byte-equal to its blob at trunk_sha) and in ONE KEY of EC2_MANIFEST.json (the opal-gateway mcportal_commit pin, 21ad40432cae to f939e3ee86b4f12b28e9e30d32c2d0d870a34573); every other file (the batch16 files included, whether or not batch16 is live), the unit file, deploy-to-ec2.sh and every .tf is byte-equal between base and release;
 #    dell1's four harvest files are byte-equal between base and release.
 #  - W/PHASE_A_OG-rl-18.json (every host run under a HARD GUARD): tests {named_passed, named_failed 0, window_set_passed, window_set_failed 0, suite_difference_named true}, probes {rt1_ac1_ok 11, rt1_ac2_ok 11, ed1_ac1_ok 7, mp1_ac1_ok 4} (the 11, 11, 7 and 4 labelled lines of rt1.AC1, rt1.AC2, ed1.AC1 and mp1.AC1 run
 #    against the candidate tree), explicit_unchanged true (a scope with explicit account lists parses, filters and resolves as the live ref does), sentinel_grants_in_store 0 (a read-only scan of the policy records: no stored grant names ["*"] before the code is live),
@@ -46,7 +46,7 @@ ok = changed == want and len(want) == 1
 before = fa.get(want[0]) if want else None
 after = fb.get(want[0]) if want else None
 print("manifest keys changed %s; only the opal-gateway mcportal_commit pin: %s; pin %s -> %s" % (len(changed), "yes" if ok else "NO", (before or "")[:12], (after or "")[:12]))
-print("OK" if ok and before == "21ad40432cae0d09c5ab9d806307944baaf45cb9" and after == "a577f99afc81df4a42c1740c78cf58270c8991e5" else "NO")
+print("OK" if ok and before == "21ad40432cae0d09c5ab9d806307944baaf45cb9" and after == "f939e3ee86b4f12b28e9e30d32c2d0d870a34573" else "NO")
 PYEOF
 )
 mani=$(printf '%s' "$mani" | tr -d '\r')
@@ -81,7 +81,7 @@ rec=$(printf '%s' "$rec" | tr -d '\r')
 halves=$(python3 -I - "$(native "$ASK")" <<'PYEOF'
 import re, sys
 t = open(sys.argv[1], encoding="utf-8").read()
-print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) and re.search(r"owner_gate\.owner_only", t) and re.search(r"(?i)over R3c.s hybrid", t) and re.search(r"(?i)R3c hunk survives", t) and re.search(r"a577f99afc81df4a42c1740c78cf58270c8991e5", t) and re.search(r"03d2dbbae1f0", t) and re.search(r"(?i)catalog", t) and re.search(r"(?i)GET", t) and re.search(r"(?i)POST", t) else "no")
+print("yes" if all(re.search(r"(?mi)^#+ .*%s" % h, t) for h in ("CTO", "COO", "CVO")) and re.search(r"(?i)process-wide state this change touches\s*:\s*\S", t) and re.search(r"(?i)before any grant names", t) and re.search(r"(?i)non-admin with a deny record still gets 403", t) and re.search(r"(?i)live at once", t) and re.search(r"(?i)routes are owner-gated", t) and re.search(r"(?i)gateway writes nothing itself", t) and re.search(r"owner_gate\.owner_only", t) and re.search(r"(?i)over R3c.s hybrid", t) and re.search(r"(?i)R3c hunk survives", t) and re.search(r"f939e3ee86b4f12b28e9e30d32c2d0d870a34573", t) and re.search(r"03d2dbbae1f0", t) and re.search(r"(?i)catalog", t) and re.search(r"(?i)GET", t) and re.search(r"(?i)POST", t) else "no")
 PYEOF
 )
 halves=$(printf '%s' "$halves" | tr -d '\r')
