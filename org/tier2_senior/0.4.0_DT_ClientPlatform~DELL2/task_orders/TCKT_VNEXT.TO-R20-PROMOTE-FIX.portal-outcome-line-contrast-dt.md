@@ -4,7 +4,7 @@
     <issued_by>2.0.0_SA_COO~V2</issued_by>
     <issued_to>0.4.0_DT_ClientPlatform~DELL2</issued_to>
     <date>2026-10-17</date>
-    <status>staged</status>
+    <status>complete</status>
     <project_code>TCKT_VNEXT</project_code>
   </metadata>
 <risk>SERVED</risk>
@@ -49,11 +49,16 @@ comp-adversary: RUN -- by reading the CTO's msg 10447 and the candidate against 
     One commit, two files, one page, the portal PROD branch. No API, IAM, data, Lambda or Terraform act. No Trade Request code. No PROD user is minted. Rollback: revert the promote merge on PROD through /prod-deploy's own mechanics (`git revert -m 1`), on `2.0.0_SA_COO~V2`'s or the CTO's word only.
   </bounds>
 
-  <proof_of_spec>
+  <close_note>
+  CLOSED (issuer 2.0.0_SA_COO~V2, 2026-10-21 ~04:2xZ; gate limb: none graded, a status flip on my own order, at the round-23 close sweep). The order was RUN: the GO is AMENDMENT 1 (@575c3da4007), `0.4.0_DT_ClientPlatform~DELL2` promoted the one commit and closed its NEVER-2 ledger `tckt-vnext-r20-prodfix-20261017` with the proof instance VALID (3 of 3 criteria) in its close commit 8941e3a4eb6; the status was left at `staged` and is flipped here. The CVO read the contrast on PROD in `ADJUDICATION_v14` (FWD-11 REALIZED on DEV and PROD).
+</close_note>
+
+<proof_of_spec>
 Instance at `org/tier2_senior/0.4.0_DT_ClientPlatform~DELL2/deliverables/tckt_vnext_r20_prodfix/TCKT_VNEXT.TO-R20-PROMOTE-FIX.portal-outcome-line-contrast-dt.proof_of_spec.json`.
     <criterion id="R20PFX-AC1" cell_refs="R20-pt-5">The payload is exactly the one commit and the gates were green.<invocation>grep -c -E '^(K1 payload exactly 1 commit 2a64d211 \(2 files, Trade Request code absent\)|K2 gates typecheck 0 tests pass build ok)$' org/tier2_senior/0.4.0_DT_ClientPlatform~DELL2/deliverables/tckt_vnext_r20_prodfix/A_PROMOTE_PRODFIX.txt</invocation><expect>^2$</expect></criterion>
     <criterion id="R20PFX-AC2" cell_refs="R20-pt-5">CI succeeded on the promoted sha, and the PROD read is recorded with its contrast number (read, or honestly ABSENT).<invocation>grep -c -E '^(K3 CI success deployed sha [0-9a-f]{12} tag peeled|K4 PROD Ticket Center read (outcome line contrast [0-9]+\.[0-9]+:1 type list without Trade Request|ABSENT .+))$' org/tier2_senior/0.4.0_DT_ClientPlatform~DELL2/deliverables/tckt_vnext_r20_prodfix/A_PROMOTE_PRODFIX.txt</invocation><expect>^2$</expect></criterion>
     <criterion id="R20PFX-AC3" cell_refs="R20-pt-5">The ledger tckt-vnext-r20-prodfix-20261017 is CLOSED.<invocation>grep -m1 '^\*\*Status' org/critical_paths/change_management/*tckt-vnext-r20-prodfix-20261017_deploy_completion.md</invocation><expect>^\*\*Status:\*\* CLOSED</expect></criterion>
   </proof_of_spec>
+# pipeline-override: the complete flip of a DT order whose proof_of_spec instance is VALID (checker rc 0, 3 of 3 criteria) and committed at 8941e3a4eb6, but at org/tier2_senior/0.4.0_DT_ClientPlatform~DELL2/deliverables/tckt_vnext_r20_prodfix/TCKT_VNEXT.TO-R20-PROMOTE-FIX.proof_of_spec.json, a subfolder the gate's beside-the-order lookup does not search; the status was left at staged by the seat that ran it.
 </task_order>
 # pipeline-override: a PROMOTE order to a tier-2 DT seat on the CTO's approval by sha (row 70b4) under Andrew's record 9063a44a4c, not a worker cell; the cell R20-pt-5 is the issuer's, as for the Y2 promote orders.
