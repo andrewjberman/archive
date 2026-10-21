@@ -27,3 +27,7 @@ All five elements read VALUE on the served pages with numbers equal to the recom
 ## Not claimed
 
 That the release exists, that a principal and a filing path are ready (Y2), or that the comparison reads well to a person (CVO L9).
+
+## Update 2026-10-21 (issuer): the run as it will be filed (run 7I)
+
+The filing is the IB2-driven synthetic run 7I (order `IRPT_ANLREQ.TO-RUN-FWD10-MULTICOMP-7I...`, committed d07a3e87dc), on the r34q resident once IB2 closes TO-APPLY-R34Q: two Opal models (`Opal Short-Term`, `Opal Long-Term`) ticked on the Ticket Center form, holdings `deliverables/2.0.0_SA_COO~G2/fwd10_holdings_7i.csv` (SPY 420, AGG 280, IWM 150, EFA 150; four public ETFs, the page's `Ticker,Dollars,Acct Market Value` shape). The ETF comparable is not exercised live (the catalogue holds the five Opal models only). The PDF is saved outside the repository at `C:/dev/andrew_samples/Opal_MultiComp_sample_FWD10.pdf`; the read uses `checks/fwd10_read.py` (model side) and by eye (portfolio rows, risk table, allocation). The CTO also asks the run to name the packager outcome and the audit outcome (msg 11854); the audit is expected wired but refused (the runner role cannot read `opal-tickets`), the attach standing.
