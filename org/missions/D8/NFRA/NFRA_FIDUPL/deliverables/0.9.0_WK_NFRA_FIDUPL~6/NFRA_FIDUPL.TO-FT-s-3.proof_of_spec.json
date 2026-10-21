@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_FIDUPL.TO-FT-s-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+    "vintage_commit": "6bd116284f5",
+    "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-3.in-run-signin-recovery.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/prd/NFRA_FIDUPL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "c4f8dc3d51"
+  },
+  "assignee": "0.9.0_WK_NFRA_FIDUPL~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/signin_recover.py",
+      "kind": "script",
+      "commit_or_etag": "d8d168cbaa6af0da24342e7fabcd673795de890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-6 (LOCAL) at d8d168cbaa6; not deployed to the box; no systemctl call was made",
+      "artifact_covered_by": ["FT-s-3-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/canonical-fidelity/tests/test_signin_recover.py",
+      "kind": "test",
+      "commit_or_etag": "d8d168cbaa6af0da24342e7fabcd673795de890e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed on wk-NFRA_FIDUPL-6 (LOCAL) at d8d168cbaa6; a test file, fakes only",
+      "artifact_covered_by": ["FT-s-3-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "FT-s-3-AC1",
+      "criterion_verbatim": "the five named tests exist and pass (expect R1-FT3-OK passed=\\d+).",
+      "method": "test_suite",
+      "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft3",
+      "output_evidence": "R1-FT3-OK passed=5 (run from cwd C:/tmp/fidupl-w6 with the order's relative invocation, rc=0; the COO's main-tree absolute-path run printed the same line; see NFRA_FIDUPL-D1-W6-S5)",
+      "denominator": "5 passed of the 5 named tests the checker requires (test_attach_uses_loopback_cdp_only, test_unit_started_only_if_port_closed_and_stopped_after, test_recovery_signs_in_once_and_never_loops, test_failure_raises_signin_error_with_class, test_close_logs_out)",
+      "status": "PASS",
+      "expect": "R1-FT3-OK passed=\\d+"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Forced the port probe to read closed in _ensure_unit (if False: in a scratch copy of signin_recover.py), so the unit is started even when the port is already open; the unit-start test must fire.",
+      "expected": "test_unit_started_only_if_port_closed_and_stopped_after fails",
+      "observed": "1 failed, 4 passed; FAILED test_unit_started_only_if_port_closed_and_stopped_after - AssertionError: assert [['systemctl'...ome.service']] == []",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests/test_signin_recover.py compared",
+      "observed": "run A last line '5 passed in 0.04s'; run B last line '5 passed in 0.04s'; identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live recovery against the box's fidelity-agent-chrome.service unit, port 9222, or a real sign-in",
+      "reason": "fakes only by the order's bounds; the live start is the COO's and the issuer's gate, not this cell"
+    },
+    {
+      "item": "the PlaywrightDriver selectors and request bodies against the live login page",
+      "reason": "unmeasured in the reference section 9 and proven only by FU-x-1; this cell reuses signin.PlaywrightDriver unchanged"
+    },
+    {
+      "item": "the caller wiring of recover_session in box/daily.py (FT-s-2 territory)",
+      "reason": "outside this order's <paths>; the module exposes the interface only"
+    }
+  ],
+  "surprises": [
+    "NFRA_FIDUPL-D1-W6-S2: OBSERVATION, INERT -- the status flip edits the task-order file, which the order's <paths> grant does not name; the flip is one line on that file only.",
+    "NFRA_FIDUPL-D1-W6-S3: OBSERVATION, INERT -- safe-commit printed client-data-check ABSENT for d8d168cbaa6 (the hashed account-id list is not on this device), so that commit was not graded for client account ids.",
+    "NFRA_FIDUPL-D1-W6-S4: OBSERVATION, INERT -- the worktree lacks infra/aws/lambda/ci; the naming gate printed NAMING ERROR and the commit still landed on this path.",
+    "NFRA_FIDUPL-D1-W6-S5: OBSERVATION, INERT -- the worktree's tracked round checker differs from the main-tree copy (ft7 entry and an IAM simulate change in the main tree only); the ft3 entry is identical in both."
+  ],
+  "session_log": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.9.0_WK_NFRA_FIDUPL~6/NFRA_FIDUPL.TO-FT-s-3.session_log.txt",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests",
+      "result": "169 passed in 2.85s (module suite); test_signin_recover.py alone: 5 passed"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check --target-version py39 infra/aws/ec2/canonical-fidelity/signin_recover.py infra/aws/ec2/canonical-fidelity/tests/test_signin_recover.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_FIDUPL~6 <0.9.0_WK_NFRA_FIDUPL~6@opal.agent>\" -F .scratch/msg_ft3_code.txt -- infra/aws/ec2/canonical-fidelity/signin_recover.py infra/aws/ec2/canonical-fidelity/tests/test_signin_recover.py",
+      "result": "committed d8d168cbaa6; commit-gate All checks passed; surprise-row-gate OK; msg-verify MATCH"
+    }
+  ]
+}
