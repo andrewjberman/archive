@@ -74,8 +74,9 @@ def doc_problem(doc):
             return "shot %s is saved outside %s" % (role, DIR)
         if rec["viewer"] != doc["picker"]:
             return "shot %s must be taken as the picker" % role
-        if rec.get("clipped_to") != "two_synthetic_rows" or rec.get("rows_visible") != 2:
-            return "shot %s must be clipped to exactly the two synthetic rows" % role
+        want = ("two_synthetic_rows", 2) if role == "r23_rows_before" else ("chosen_row", 1)
+        if (rec.get("clipped_to"), rec.get("rows_visible")) != want:
+            return "shot %s must be clipped to %s (%d row(s)), unaltered, not a composite" % (role, want[0], want[1])
     pb = doc["private_board"]
     if not isinstance(pb, dict) or sorted(pb) != sorted(PRIVATE_ROLES):
         return "private_board must carry exactly the roles %s" % PRIVATE_ROLES
@@ -184,7 +185,7 @@ def live():
 def _good():
     f, p = "tckt-r23-filer-20261021@opal.invalid", "tckt-r23-picker-20261021@opal.invalid"
     a, b = "TCK-20261021-0123abcd", "TCK-20261021-4567ef01"
-    shots = {r: {"path": DIR + r + ".png", "bytes": 10, "origin": ORIGIN, "viewer": p, "clipped_to": "two_synthetic_rows", "rows_visible": 2} for r in SHOT_ROLES}
+    shots = {r: {"path": DIR + r + ".png", "bytes": 10, "origin": ORIGIN, "viewer": p, "clipped_to": "two_synthetic_rows" if r == "r23_rows_before" else "chosen_row", "rows_visible": 2 if r == "r23_rows_before" else 1} for r in SHOT_ROLES}
     private = {r: {"path": PRIVATE_DIR + r + ".png", "sha256": "a" * 64, "bytes": 10, "width": 1280, "height": 900} for r in PRIVATE_ROLES}
     doc = {"browser_origin": ORIGIN, "filer": f, "picker": p, "chosen_ticket": a, "other_ticket": b,
            "board_read": {a: {"type_label": "Service Request", "age_text": "(2 minutes)"}, b: {"type_label": "Other", "age_text": "(1 minute)"}},
@@ -237,6 +238,8 @@ def self_test():
     mutate("no age text", lambda d: d["board_read"][d["chosen_ticket"]].update(age_text=""))
     mutate("shot not clipped", lambda d: d["shots"]["r23_rows_before"].update(clipped_to="full_board"))
     mutate("three rows in the clip", lambda d: d["shots"]["r23_rows_claimed"].update(rows_visible=3))
+    mutate("claimed shot as two rows", lambda d: d["shots"]["r23_rows_claimed"].update(clipped_to="two_synthetic_rows", rows_visible=2))
+    mutate("before shot as one row", lambda d: d["shots"]["r23_rows_before"].update(clipped_to="chosen_row", rows_visible=1))
     mutate("shot as filer", lambda d: d["shots"]["r23_rows_before"].update(viewer=d["filer"]))
     mutate("private board in the repo", lambda d: d["private_board"]["r23_board_full"].update(path=DIR + "x.png"))
     mutate("private board path escapes", lambda d: d["private_board"]["r23_board_full"].update(path=PRIVATE_DIR + "../x.png"))
@@ -255,7 +258,7 @@ def self_test():
     if bad:
         print("RUN-BAD mutants not caught: %s" % bad)
         return 1
-    print("R23-FWD5-SELFTEST-OK (30 mutants)")
+    print("R23-FWD5-SELFTEST-OK (32 mutants)")
     return 0
 
 
