@@ -8,6 +8,9 @@ All commands run from the repository root; `W` = `org/missions/D9/NFRA/NFRA_OPLG
 2. `python $W/rl17_callers.py 2026-10-20 2026-10-19 2026-10-18` -> `RL17_CALLERS.json` (who calls in 06:00-06:45Z; name the identities by count in the ledger title and the MSTR message).
 3. `python $W/rl17_last4.py C:/tmp/ap50_scratch/rl17/last4.json` already ran pre-window (old code refuses the fence: the D1 baseline); re-run only if the data moved.
 
+## Done before the window (COO ferry 20261020T233500Z, row NFRA_MCPORTAL-Z-W2-S8): the HALT GATE
+The 119 pending inbox files were listed, searched for STOP/HALT tokens (0 in subjects and bodies) and moved into `read/`; `W/haltgate_batch16.json` holds the counts. A read-only run of the gate on the empty inbox took 1.5 s. AT THE DEPLOY: record the gate's elapsed seconds from the deploy log in the same file (`gate_elapsed_s`); any new mail first: read it, STOP-class first, move it to `read/`.
+
 ## 06:00Z: the deploy
 4. Ledger: `python .tools/deploy_ledger.py open --slug nfra-oplgtw-gateway-release-batch16 --author 0.7.0_AE_CloudOps~NFRA1 --window-hours 4 --title "..." --leg "release|ec2-baked-asset|..." --leg "read-back|verify|..." --leg "proofs|verify|..."` (entry AND sentinel committed by the tool).
 5. ONE message to `0.0.0_AB_MSTR~Z`: the window and the restart (about 16 s), under 150 words.
