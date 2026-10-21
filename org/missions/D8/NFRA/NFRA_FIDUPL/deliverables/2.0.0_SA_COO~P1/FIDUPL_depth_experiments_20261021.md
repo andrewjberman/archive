@@ -36,3 +36,10 @@ Standard A `PBL` (`indicatorName AN`) for 2026-06-12, 2026-05-22 and 2025-10-21,
 ## 5. What lands
 
 Nothing from this session landed. The transactions and realized-lot answers are JSON from an API, not files: landing them needs a decision on a bronze table and a replay adapter (per account, one call per 365 days for transactions, paged by 500 for lots), which is a build cell.
+
+## 6. Addendum 16:21Z to 16:31Z: how the three API surfaces batch and page (one sign-in, logout 16:30:41Z, `204,400`)
+
+- **The book is 5,013 accounts** (column 0 of the landed `account.txt`); `accountList.json` stops at 2,000 rows (1,906 of them in the book). Of 60 accounts sampled OUTSIDE that list, 57 answered the transactions call with rows and 3 with an empty window (line of business `IWS` assumed): none refused. Inside the list, line of business `FCS` and `FILI` accounts answer 422 "SECURITY VIOLATION: You do not have access to the account." (the walk records `NO_ACCESS`).
+- **Transactions batching is fragile.** One account allows 366 days. A batch of accounts is limited to 93 days and 200 accounts; a batch mixing lines of business answers 500; a same-line batch of 10 equals the sum of its singles (295 rows) but a batch of 50 returns exactly 2,000 rows, a silent cap. The build therefore uses one account per call (about 0.7 s each).
+- **Realized lots:** one answer holds at most 500 lots; `offset` (values 1, 2, 3, 500, 1000, 2000 and the names pageNumber, startIndex, start, limit, pageSize) never pages: every request returns the same first 500. Batches of up to 25 accounts answer; 30 answers 500. Completeness has to come from `totalCount`, splitting the date range until `len(lots) == totalCount`.
+- **Open lots** (the unrealized surface): answer `{fbtPaginationInfoOffsetV1 {offset, limit 2000, totalCount}, openLots, openLotsErrors}`; a batch of 27 accounts answers (1,954 lots), 28 answers 500 (the 2,000 limit); the heaviest single account of 60 sampled holds 681 lots.
