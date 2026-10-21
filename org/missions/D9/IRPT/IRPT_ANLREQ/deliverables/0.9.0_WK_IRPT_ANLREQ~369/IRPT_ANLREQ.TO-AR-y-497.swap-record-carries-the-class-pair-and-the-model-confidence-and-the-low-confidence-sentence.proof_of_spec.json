@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-497.swap-record-carries-the-class-pair-and-the-model-confidence-and-the-low-confidence-sentence",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "59bf475c1ef",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-497.swap-record-carries-the-class-pair-and-the-model-confidence-and-the-low-confidence-sentence.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-497.swap-record-carries-the-class-pair-and-the-model-confidence-and-the-low-confidence-sentence.md",
+    "group": "OTHER",
+    "vintage_commit": "59bf475c1ef"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~369",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_pass.py",
+      "kind": "source",
+      "commit_or_etag": "67bb3e5e89f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_record adds asset_class, sub_asset_class and model_confidence only when classified_by is MODEL; _named appends the low-confidence sentence after any stale-pool sentence. Committed LOCAL on wk-IRPT_ANLREQ-369. Nothing deployed, no AWS call, no model call.",
+      "artifact_covered_by": [
+        "AR497-y-AC1",
+        "AR497-y-AC2",
+        "AR497-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_record_class.py",
+      "kind": "test",
+      "commit_or_etag": "67bb3e5e89f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 hermetic cases written failing-first: 18 failed and 9 passed against the unchanged swap_pass.py, then 27 passed after the change. Fakes only.",
+      "artifact_covered_by": [
+        "AR497-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~369/check_swap_record_class.py",
+      "kind": "script",
+      "commit_or_etag": "86eb8a57b60",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib only, offline. Imports swap_pass by path from this worktree. Default run prints the OK line; --selftest prints CONTROL-FIRES only when all four in-memory mutants read BAD.",
+      "artifact_covered_by": [
+        "AR497-y-AC1",
+        "AR497-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR497-y-AC1",
+      "criterion_verbatim": "AR497-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~369/check_swap_record_class.py -- expect ^SWAP-RECORD-CLASS-OK cases=7 model_rows_carry_class=yes model_confidence_float=yes other_rows_unchanged=yes low_conf_sentence=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~369/check_swap_record_class.py",
+      "output_evidence": "SWAP-RECORD-CLASS-OK cases=7 model_rows_carry_class=yes model_confidence_float=yes other_rows_unchanged=yes low_conf_sentence=yes (rc=0). A second run is byte-identical (diff rc=0).",
+      "denominator": "1 of 1 verdict line; 7 of 7 cases ran (cases=7); 4 of 4 flags yes",
+      "expect": "^SWAP-RECORD-CLASS-OK cases=7 model_rows_carry_class=yes model_confidence_float=yes other_rows_unchanged=yes low_conf_sentence=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the one stdout line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR497-y-AC2",
+      "criterion_verbatim": "AR497-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~369/check_swap_record_class.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~369/check_swap_record_class.py --selftest",
+      "output_evidence": "stdout: CONTROL-FIRES (rc=0). stderr: SELFTEST model_confidence_copy_removed read=BAD; SELFTEST three_keys_on_every_record read=BAD; SELFTEST sub_asset_class_dropped read=BAD; SELFTEST low_confidence_sentence_removed read=BAD.",
+      "denominator": "4 of 4 mutants read BAD; 4 of 4 anchors applied",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "stdout is exactly CONTROL-FIRES and all four mutants read BAD."
+    },
+    {
+      "criterion_id": "AR497-y-AC3",
+      "criterion_verbatim": "AR497-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_record_class.py ycharts/research/tests/test_swap_pass_model_ports.py ycharts/research/tests/test_swap_pass.py ycharts/research/tests/test_swap_replacement.py ycharts/research/tests/test_opal_producer_swap.py ycharts/research/tests/test_opal_producer_swap_model.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "command",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_record_class.py ycharts/research/tests/test_swap_pass_model_ports.py ycharts/research/tests/test_swap_pass.py ycharts/research/tests/test_swap_replacement.py ycharts/research/tests/test_opal_producer_swap.py ycharts/research/tests/test_opal_producer_swap_model.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "1 failed, 105 passed in 1.92s (the tail line; the pipeline rc is the tail rc). The failing test is test_swap_pass_model_ports.py::test_a_low_confidence_model_classification_is_carried_into_the_record: its exact-key assertion (lines 184-186) lists today's MODEL record keys and the record now also carries asset_class, sub_asset_class and model_confidence.",
+      "denominator": "105 of 106 tests passed across six files (27 in the new file, 79 in the five existing ones); 1 failed",
+      "expect": "^[0-9]+ passed in ",
+      "status": "FAIL",
+      "status_reason": "the tail line is '1 failed, 105 passed in 1.92s', which does not match ^[0-9]+ passed in. The one failure is an existing test that the order says must still pass and must not be edited; the conflict is recorded as IRPT_ANLREQ-D2-W369-S1 (BLOCKING, ARMED). Left open by design; the order stays pending."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR497-y-AC2 control: four in-memory mutants of swap_pass.py text (model_confidence copy removed; the three keys added to every record; sub_asset_class dropped; the low-confidence sentence removed). The control fires only when all four read BAD.",
+      "expected": "CONTROL-FIRES on stdout, rc 0, after four BAD readings.",
+      "observed": "CONTROL-FIRES (rc=0); all four mutants read BAD.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AR497-y-AC1 check run twice, stdout kept in the worker scratch and compared with diff.",
+      "observed": "diff rc=0; the one stdout line identical across both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the sibling test test_swap_pass_model_ports.py::test_a_low_confidence_model_classification_is_carried_into_the_record",
+      "reason": "not edited: the order forbids editing existing tests and the file is outside this order's paths. Its exact-key assertion conflicts with the three MODEL keys the same order requires; recorded as IRPT_ANLREQ-D2-W369-S1 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2)."
+    },
+    {
+      "item": "any push, AWS call, network call, model call, deploy or release build",
+      "reason": "out of this order: the order is offline and forbids them."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W369-S1: the three MODEL keys break test_swap_pass_model_ports.py's exact-key assertion, so AC3 cannot pass without editing that test (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~Y2).",
+    "IRPT_ANLREQ-D2-W369-S2: the order's module-docstring field-list sentence does not exist; one sentence naming the three keys was added to the module docstring (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W369-S3: the low-confidence rule's flag test and its not-from-the-model exclusion overlap only for a non-model classification carrying low_confidence True, which no code path measured sets (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest 9.0.2 (Python 3.14.7), in infra/aws/lambda/investor-reporting",
+      "invocation": "python -m pytest ycharts/research/tests/test_swap_record_class.py -q --color=no -p no:cacheprovider",
+      "result": "failing-first against the unchanged swap_pass.py: 18 failed, 9 passed (rc=1); after the change: 27 passed (rc=0)."
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh (py_compile, ds-precommit, ruff) on each changed .py",
+      "invocation": "bash .tools/commit-gate.sh <file>",
+      "result": "rc=0 on swap_pass.py, test_swap_record_class.py and check_swap_record_class.py: All checks passed."
+    }
+  ]
+}
