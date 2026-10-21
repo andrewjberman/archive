@@ -1,0 +1,23 @@
+# 2e  detail reads of two candidates, 2026-10-21T11:18:21Z
+## lambda schwab-anonymizer (get-function-configuration, ONE named resource)
+{
+    "Role": "arn:aws:iam::313476888478:role/schwab-anonymizer-lambda-role",
+    "Handler": "lambda_function.lambda_handler",
+    "Description": "",
+    "Runtime": "python3.11",
+    "Env": null,
+    "LastModified": "2025-12-23T22:59:57.000+0000"
+}
+## role of schwab-anonymizer: inline policy names and S3 resources
+role=schwab-anonymizer-lambda-role
+inline SchwabAnonymizerPolicy:
+   Allow ['secretsmanager:GetSecretValue'] arn:aws:secretsmanager:us-east-2:313476888478:secret:schwab/anonymization-key*
+   Allow ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'] arn:aws:logs:us-east-2:313476888478:log-group:/aws/lambda/schwab-anonymizer:*
+attached: 
+## role opal-schwab-monolith-remap-role: inline policies
+inline opal-schwab-monolith-remap-inline:
+   Allow ['s3:ListBucket'] ['arn:aws:s3:::opal-data-assets']
+   Allow ['s3:PutObject'] ['arn:aws:s3:::opal-data-assets/schwab/08242234/bronze/*', 'arn:aws:s3:::opal-data-assets/schwab/08335338/bronze/*']
+   Deny ['s3:*'] ['arn:aws:s3:::opal-data-bd', 'arn:aws:s3:::opal-data-bd/*']
+   Deny ['s3:*'] ['arn:aws:s3:::opal-data-cot', 'arn:aws:s3:::opal-data-cot/*']
+   Deny ['s3:*'] ['arn:aws:s3:::opal-data-inf', 'arn:aws:s3:::opal-data-inf/*']
