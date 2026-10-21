@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-486.resident-ticket-read-managed-policy-attribute-restricted-terraform-source",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "2c9752b286627802a1239bbd8e71d0079651da76",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-486.resident-ticket-read-managed-policy-attribute-restricted-terraform-source.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-486.resident-ticket-read-managed-policy-attribute-restricted-terraform-source.md",
+    "group": "OTHER",
+    "vintage_commit": "2c9752b286627802a1239bbd8e71d0079651da76"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~360",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/resident_ticket_read_policy.tf",
+      "kind": "terraform",
+      "commit_or_etag": "604767de49cafe23cf94df4ae2a7fbf0796df8fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-IRPT_ANLREQ-360 as 604767de49c. Offline source only: one aws_iam_policy (dynamodb:GetItem on the opal-tickets table, Null, ForAllValues:StringEquals and StringEqualsIfExists guards) and one attachment to aws_iam_role.runner. Not planned, not applied, not run against AWS; Terraform is not installed on this box. IB2 applies it after the CTO signs.",
+      "artifact_covered_by": [
+        "AR486-y-AC1",
+        "AR486-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py",
+      "kind": "script",
+      "commit_or_etag": "e54e7f0b45f85406e9cf39c542d880d6d8ea4e13",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed LOCAL on wk-IRPT_ANLREQ-360 as e54e7f0b45f. Stdlib only; reads the .tf as text and runs offline at its own path in the worktree. Nothing is deployed.",
+      "artifact_covered_by": [
+        "AR486-y-AC1",
+        "AR486-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR486-y-AC1",
+      "criterion_verbatim": "AR486-y-AC1 (order ACCEPTANCE, cell AR-y-486): invocation python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py; expect ^TICKET-READ-POLICY-OK actions=1 resources=1 attrs=4 null_guard=yes select=yes attachment_runner_only=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py",
+      "output_evidence": "TICKET-READ-POLICY-OK actions=1 resources=1 attrs=4 null_guard=yes select=yes attachment_runner_only=yes\nrc=0. Run twice; the two captures are identical (diff rc=0).",
+      "denominator": "6 of 6 checks hold: Action list 1 of 1 (dynamodb:GetItem only); resource 1 of 1 table/ ARN; Attributes 4 of 4 (exact set); Null guard 1 of 1; Select guard 1 of 1; attachment 1 of 1 (aws_iam_role.runner only)",
+      "status": "PASS",
+      "expect": "^TICKET-READ-POLICY-OK actions=1 resources=1 attrs=4 null_guard=yes select=yes attachment_runner_only=yes$"
+    },
+    {
+      "criterion_id": "AR486-y-AC2",
+      "criterion_verbatim": "AR486-y-AC2 (order ACCEPTANCE, cell AR-y-486): invocation python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py --selftest; expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py --selftest",
+      "output_evidence": "mutant add-query-action: BAD Action list is ['dynamodb:GetItem', 'dynamodb:Query'], expected ['dynamodb:GetItem']\nmutant add-requester-attr: BAD Attributes list is ['ticket_id', 'ticket_type', 'answers', 'created_at', 'requester'], expected exactly ['ticket_id', 'ticket_type', 'answers', 'created_at']\nmutant delete-null-guard: BAD Null guard \"dynamodb:Attributes\" = \"false\" is missing\nmutant resource-index-suffix: BAD Resource is not exactly the one table/ ARN built from local.resident_audit_tickets_table\nmutant local-other-table: BAD local resident_audit_tickets_table is ['opal-users-v2'], expected [opal-tickets]\nCONTROL-FIRES\nrc=0",
+      "denominator": "5 of 5 in-memory mutants applied and read BAD (none skipped, none passed)",
+      "status": "PASS",
+      "expect": "^CONTROL-FIRES$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR486-y-AC2 control: five in-memory mutations of the policy text (add dynamodb:Query to the actions; add requester to the attributes; delete the Null guard; end the resource with /index/*; change the local to opal-users-v2). Each must read BAD.",
+      "expected": "CONTROL-FIRES only when all five mutants read BAD",
+      "observed": "CONTROL-FIRES; the five mutant lines each read BAD (add-query-action, add-requester-attr, delete-null-guard, resource-index-suffix, local-other-table); rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 command run twice, each stdout captured to the worker scratch and compared with diff",
+      "observed": "run 1 and run 2 both print TICKET-READ-POLICY-OK actions=1 resources=1 attrs=4 null_guard=yes select=yes attachment_runner_only=yes with rc=0; diff rc=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform validate, terraform plan, and any IAM policy simulation of the policy",
+      "reason": "Terraform is not installed on this box, and the worker makes no AWS call. The simulations are the applier's (IB2), before apply."
+    },
+    {
+      "item": "the code that sends the attribute projection (the ProjectionExpression of the packager's GetItem)",
+      "reason": "It ships in a later release, not r34q (CTO ruling A, msg 11858). This cell is the policy source only."
+    },
+    {
+      "item": "the apply of the policy to irpt-ycharts-runner-role",
+      "reason": "IB2 applies it under its own never-widen pair after the CTO signs. No deploy in this cell."
+    },
+    {
+      "item": "the real dynamodb:Attributes behaviour of GetItem and the live ticket table",
+      "reason": "Not seen offline. The applier's simulations decide; this is the comp-adversary blind spot named in the order's preflight."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W360-S1: the client-data check and the risk reflex printed NOT-CHECKED on the two AR-y-486 commits (OBSERVATION, INERT, UNDER_INVESTIGATION)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -I check_ticket_read_policy.py (stdlib, offline)",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~360/check_ticket_read_policy.py",
+      "result": "TICKET-READ-POLICY-OK actions=1 resources=1 attrs=4 null_guard=yes select=yes attachment_runner_only=yes, rc=0; --selftest CONTROL-FIRES, rc=0. ruff clean via .tools/commit-gate.sh."
+    }
+  ]
+}
