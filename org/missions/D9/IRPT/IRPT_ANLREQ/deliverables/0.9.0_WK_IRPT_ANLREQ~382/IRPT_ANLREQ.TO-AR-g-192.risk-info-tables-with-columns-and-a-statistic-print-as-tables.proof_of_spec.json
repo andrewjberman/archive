@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-192",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-192.risk-info-tables-with-columns-and-a-statistic-print-as-tables.md",
+    "group": "OTHER",
+    "vintage_commit": "3a50a0bd2c9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "3a50a0bd2c9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-192.risk-info-tables-with-columns-and-a-statistic-print-as-tables.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~382",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/layout_overview.py",
+      "kind": "script",
+      "commit_or_etag": "642c67f6c70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-382 only; nothing deployed. _compute_own_series takes the column path when columns is a non-empty list and (no statistic OR kind table); one condition changed. AC1 RESULT AR-ENRICH2-p21-OK at this commit."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_own_series_columns.py",
+      "kind": "test",
+      "commit_or_etag": "642c67f6c70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three tests added: five-column table with a statistic gives one labelled entry per column; it prints a table, never the fallback sentence; a number element with a statistic and columns still yields the scalar. Before the layout change the two table tests failed (2 failed, 9 passed)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_layout_overview.py",
+      "kind": "test",
+      "commit_or_etag": "642c67f6c70",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One existing test updated (test_wired_statistics_compute_from_the_kept_benchmark_and_the_held_yield) to read the {label: number} dict; no assertion weakened. Owned pair at this commit: 61 passed. AC2 RESULT AR-ENRICH2-tests192-OK passed=61."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR192-g-AC1",
+      "criterion_verbatim": "the REAL producer's Overview over a ten-year synthetic history prints the six Risk Info elements as tables with one row per column (Alpha 1Y .. 15Y and the rest), cells a number or n/a, and the phrase 'not a readable table' occurs 0 times. At base it FAILs (5 times).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich2_checks.py p21",
+      "output_evidence": "AR-ENRICH2-p21-OK\nrc=0; measured at commit 642c67f6c70 in C:/dev/wk-irpt-anlreq-382; run under timeout 300, not hit. Base, measured in a scratch copy of the tree with layout_overview.py and the two owned test files restored from 1f45e620840: AR-ENRICH2-p21-FAIL the phrase 'not a readable table' occurs 5 times; every one of the six elements (p7.e02, p7.e03, p7.e05, p7.e06, p7.e07, p7.e08) printed no table rows; rc=1.",
+      "expect": "^AR-ENRICH2-p21-OK$",
+      "denominator": "6 of 6 Risk Info elements print a table with 5 labelled rows (30 cells, each a number or n/a); phrase count 0. Base: 0 of 6 tables, phrase count 5.",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation; 6 of 6 elements and 0 phrase occurrences at the committed tree."
+    },
+    {
+      "criterion_id": "AR192-g-AC2",
+      "criterion_verbatim": "the two owned test files pass (58 at the base) and at least 60 ran. At base it FAILs (58 ran).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_enrich2_checks.py tests192",
+      "output_evidence": "AR-ENRICH2-tests192-OK passed=61\nrc=0; measured at commit 642c67f6c70 in C:/dev/wk-irpt-anlreq-382; run under the checker's pytest call. The owned pair at this commit: 61 passed (58 at base + 3 new). Base, measured in the scratch copy: AR-ENRICH2-tests192-FAIL rc=1 passed=56: 56 passed, 1 failed, 1 skipped (58 collected). The one failure is a scratch-copy path artifact: test_no_second_classification_read_default_client_is_the_etf_classifier cannot import etf_classifications_dynamodb from the copy's location; the same test passes in the real worktree.",
+      "expect": "^AR-ENRICH2-tests192-OK passed=[0-9]+$",
+      "denominator": "61 of 61 collected tests passed in the owned pair (minimum 60). Base: 58 collected.",
+      "status": "PASS",
+      "status_reason": "rc=0 and passed=61 >= 60 at the committed tree."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The base-code measurement in the acceptance rows is the before/after control.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- no two-run comparison was made; the invocations were run once each at the committed tree and once each at base.",
+      "observed": "N/A",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "Bash: git rev-parse --abbrev-ref HEAD; test -d org && test -d .tools && echo TREE-OK -> wk-IRPT_ANLREQ-382; TREE-OK. Read the order, _compute_own_series, _column_statistics, the element renderer and the two owned test files. Added three tests to test_layout_own_series_columns.py: two table tests failed on the old code (2 failed, 9 passed). Changed the one condition in _compute_own_series. Owned pair: one expected failure (test_wired_statistics_compute_from_the_kept_benchmark_and_the_held_yield, a scalar read of a table element) updated to read the dict; 61 passed. Byte-identity tests test_layout_commentary.py and test_commentary_standalone_pdf.py: 16 passed unchanged. ruff check clean, py39 parse OK. Acceptance on the committed tree: p21 rc=0 (AR-ENRICH2-p21-OK), tests192 rc=0 (passed=61). Base measured in a scratch copy under .scratch/base_tree: p21 rc=1 (phrase 5 times), tests192 rc=1 (56 passed, 1 failed by a scratch path artifact, 1 skipped). Code and tests committed as 642c67f6c70 via safe-commit.sh. Status flip is a separate commit made after the proof validates.",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_layout_own_series_columns.py ycharts/research/tests/test_layout_overview.py",
+      "result": "61 passed (at 642c67f6c70); before the layout change the new table tests failed (2 failed, 9 passed)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "cd infra/aws/lambda/investor-reporting && python -m pytest --color=no -q -p no:cacheprovider ycharts/research/tests/test_layout_commentary.py ycharts/research/tests/test_commentary_standalone_pdf.py",
+      "result": "16 passed (byte-identity, unchanged)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "ruff check layout_overview.py tests/test_layout_overview.py tests/test_layout_own_series_columns.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "commit-gate (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_ANLREQ~382 <0.9.0_WK_IRPT_ANLREQ~382@opal.agent>\" -F .scratch/msg-192-code.txt -- layout_overview.py tests/test_layout_overview.py tests/test_layout_own_series_columns.py",
+      "result": "committed 642c67f6c70 (3 of 3 files)"
+    }
+  ]
+}
