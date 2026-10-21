@@ -1,0 +1,33 @@
+0.9.0_WK_NFRA_FIDUPL~7 -- NFRA_FIDUPL.TO-FW-s-1 (api_walk.py) -- session log
+Worktree C:/tmp/fidupl-w7, branch wk-NFRA_FIDUPL-7, base HEAD 7402cd0e3e1.
+
+First act: git rev-parse --abbrev-ref HEAD -> wk-NFRA_FIDUPL-7; test -d org && test -d .tools -> TREE-OK.
+Premises read: hist_walk.py (whole); backfill_main.py _real_deps, load_config, ConfigError, _say, _utc, _iso,
+new_york_day, _address, _body; land.py _split, _head, SOURCE, TIER; lib/opal_naming.py address().
+All present as the order names them. The check tool org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/
+fidupl_round_checks.py is present and its fw1 list names the fifteen tests.
+
+Build: infra/aws/ec2/canonical-fidelity/api_walk.py (new), tests/test_api_walk.py (fifteen named tests),
+tests/test_api_walk_seam.py (one test, real opal_naming.address). hist_walk.py, backfill_main.py, land.py,
+fetch.py, backfill_adapter.py, signin.py untouched. Code commit b8c032fc2d (LOCAL on wk-NFRA_FIDUPL-7).
+
+Criteria (each under timeout 120):
+  fw1  -> R1-FW1-OK passed=15   (rc=0)
+  fw1s -> R1-FW1S-OK passed=1   (rc=0)
+  fv2  -> R1-FV2-OK passed=13   (rc=0)
+
+Module suite: python -m pytest -q -p no:cacheprovider infra/aws/ec2/canonical-fidelity/tests
+  last line: 284 passed in 22.88s (rc=0)
+
+Mutant (scratch copy under .scratch/mutant, not committed): the split test's comparison changed from
+'if n >= ROW_CAP:' to 'if n > ROW_CAP:'. Result: 1 failed, 14 passed; the failing test is
+test_a_window_with_2000_rows_is_split_in_halves.
+
+Determinism: fw1, fw1s and fv2 each re-run twice at the code commit; the output lines were identical to the first run.
+
+ASCII and grammar: the three files carry 0 non-ASCII bytes and parse under feature_version (3, 9).
+Commit gate (safe-commit, py_compile + ds-precommit + ruff py39): All checks passed. The gate also printed a
+naming-gate NAMING ERROR for a function-map folder absent from this worktree; the commit was not refused.
+
+Surprise rows filed in the investigation file (no existing row edited):
+  NFRA_FIDUPL-D1-W7-S7 .. NFRA_FIDUPL-D1-W7-S12 (commit b8c032fc2d).
