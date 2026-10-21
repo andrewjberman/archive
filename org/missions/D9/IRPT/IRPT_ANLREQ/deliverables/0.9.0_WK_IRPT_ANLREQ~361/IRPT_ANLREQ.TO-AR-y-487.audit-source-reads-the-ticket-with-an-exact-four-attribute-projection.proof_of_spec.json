@@ -18,9 +18,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py",
       "kind": "script",
-      "commit_or_etag": "2f9606ddac3",
+      "commit_or_etag": "4a7b8da5356",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Stdlib-only offline checker. Reads ticket_audit_source.py as text and parses it with ast for PROJECTED_ATTRIBUTES. Prints AUDIT-PROJECTION-OK or AUDIT-PROJECTION-BAD; --selftest mutates the text in memory three ways. Committed LOCAL as 2f9606ddac3 on wk-IRPT_ANLREQ-361. Nothing run against AWS, network or a release build.",
+      "deploy_evidence": "Stdlib-only offline checker. Reads ticket_audit_source.py as text and parses it with ast for PROJECTED_ATTRIBUTES. Requires ProjectionExpression= in the get_item call and no ExpressionAttributeNames in the source. --selftest runs four in-memory mutants. Committed LOCAL as 4a7b8da5356 on wk-IRPT_ANLREQ-361. Nothing run against AWS, network or a release build.",
       "artifact_covered_by": [
         "AR487-y-AC1",
         "AR487-y-AC2"
@@ -29,9 +29,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/ticket_audit_source.py",
       "kind": "script",
-      "commit_or_etag": "6dcfac8fbe1",
+      "commit_or_etag": "0e148cb07d9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The audit source. Its one get_item call sends ConsistentRead=True, ProjectionExpression=#t0, #t1, #t2, #t3 and ExpressionAttributeNames built from PROJECTED_ATTRIBUTES. filer_user_type is not read and is returned as None. Committed LOCAL as 6dcfac8fbe1. Not deployed; ships in a release after r34q under its own pair.",
+      "deploy_evidence": "The audit source. Its one get_item call sends ConsistentRead=True and ProjectionExpression of the plain names ticket_id, ticket_type, answers, created_at, built from PROJECTED_ATTRIBUTES, with no alias argument (AR-y-487 AMENDMENT 1). filer_user_type is not read and is returned as None. Committed LOCAL as 0e148cb07d9 (superseding the alias form at 6dcfac8fbe1). Not deployed; ships in a release after r34q under its own pair.",
       "artifact_covered_by": [
         "AR487-y-AC1",
         "AR487-y-AC3"
@@ -40,9 +40,9 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_ticket_audit_projection.py",
       "kind": "test",
-      "commit_or_etag": "6dcfac8fbe1",
+      "commit_or_etag": "0e148cb07d9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Hermetic test file with a recording fake client. Loads ticket_audit_source.py by file path, so it changes no sys.path. Committed LOCAL as 6dcfac8fbe1.",
+      "deploy_evidence": "Hermetic test file with a recording fake client. Loads ticket_audit_source.py by file path, so it changes no sys.path. Its recorded-call assertion is the plain-name projection (AR-y-487 AMENDMENT 1). Committed LOCAL as 0e148cb07d9.",
       "artifact_covered_by": [
         "AR487-y-AC3"
       ]
@@ -66,7 +66,7 @@
       "method": "command",
       "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~361/check_audit_projection.py --selftest",
       "output_evidence": "CONTROL-FIRES\nrc=0",
-      "denominator": "3 of 3 in-memory mutants read BAD (the ProjectionExpression= argument removed; a fifth name added to the tuple; the found[\"filer_user_type\"] read put back)",
+      "denominator": "4 of 4 in-memory mutants read BAD (the ProjectionExpression argument removed; a fifth name added to the tuple; the found[\"filer_user_type\"] read put back; ExpressionAttributeNames put back)",
       "expect": "^CONTROL-FIRES$",
       "status": "PASS",
       "status_reason": "CONTROL-FIRES is printed only when all three mutants read BAD, and the printed line matches the expect."
@@ -85,9 +85,9 @@
   ],
   "controls": {
     "mutant": {
-      "description": "AR487-y-AC2 control: the checker's selftest mutates the source text in memory three ways. (1) the ProjectionExpression= argument is removed from the get_item call; (2) a fifth name, requester, is added to PROJECTED_ATTRIBUTES; (3) found[\"filer_user_type\"] is read back into the function. Each must read BAD.",
+      "description": "AR487-y-AC2 control: the checker's selftest mutates the source text in memory four ways. (1) the ProjectionExpression argument is removed from the get_item call; (2) a fifth name, requester, is added to PROJECTED_ATTRIBUTES; (3) found[\"filer_user_type\"] is read back into the function; (4) an ExpressionAttributeNames argument is put back into the get_item call. Each must read BAD.",
       "expected": "All three mutants read BAD and the selftest prints CONTROL-FIRES, rc 0.",
-      "observed": "CONTROL-FIRES, rc 0.",
+      "observed": "CONTROL-FIRES, rc 0 (on the amended source; run after AMENDMENT 1).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
@@ -107,9 +107,11 @@
     }
   ],
   "surprises": [
-    "IRPT_ANLREQ-D2-W361-S1: test_audit_live_wiring.py test_1 asserts the exact recorded GetItem call, which the required projection changes; the expected call was updated to the four-alias projection and no other assertion changed (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S1: test_audit_live_wiring.py test_1 asserts the exact recorded GetItem call, which the required projection changes; the expected call was updated and no other assertion changed (OBSERVATION, INERT). Superseded in form by S4.",
     "IRPT_ANLREQ-D2-W361-S2: test_11 keeps its name test_11_a_user_type_the_item_carries_is_passed_through while its assertion now states the user type is not read and is None; the name was kept because no test may be renamed or deleted (OBSERVATION, INERT).",
-    "IRPT_ANLREQ-D2-W361-S3: a sys.path insert in the new test file, in the style of the existing audit tests, breaks test_generate_installed.py collection; the new file loads ticket_audit_source.py by file path instead, and the AC3 line as written passes (OBSERVATION, INERT)."
+    "IRPT_ANLREQ-D2-W361-S3: a sys.path insert in the new test file, in the style of the existing audit tests, breaks test_generate_installed.py collection; the new file loads ticket_audit_source.py by file path instead, and the AC3 line as written passes (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S4: row S1 describes the superseded alias form after AMENDMENT 1; the current expected call is the plain-name projection (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W361-S5: the complete flip at HEAD removed the worker grant before AMENDMENT 1 could land; the order was reopened at f37dc157604 (OBSERVATION, INERT)."
   ],
   "compiler_tools": [
     {
