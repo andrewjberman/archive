@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-485.audit-policy-row-flips-to-active-with-the-applied-audit-policy-commit",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "7e876c89cda",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-485.audit-policy-row-flips-to-active-with-the-applied-audit-policy-commit.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-485.audit-policy-row-flips-to-active-with-the-applied-audit-policy-commit.md",
+    "group": "OTHER",
+    "vintage_commit": "7e876c89cda"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~353",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/reporting_policies.json",
+      "kind": "config_data",
+      "commit_or_etag": "75094e3feb1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two lines in one row, irpt-anlreq-audit-x10-v1: state PENDING_ENFORCEMENT -> ACTIVE and enforcement_ref null -> e3788d3f8a359b0253f45137f8ff3b1cfa075c2d. Committed LOCAL on wk-IRPT_ANLREQ-353 as 75094e3feb1. Not planned, applied, built into a release or run against AWS.",
+      "artifact_covered_by": [
+        "AR485-y-AC1",
+        "AR485-y-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py",
+      "kind": "script",
+      "commit_or_etag": "49abff82679",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib-only offline check, committed LOCAL as 49abff82679 on wk-IRPT_ANLREQ-353. It reads HEAD, the pre-flip base 382ebe4a5a9a and the cited commit with local git only, and imports lib/opal_naming.py by path. commit-gate.sh passed on it. Nothing was run against a network, AWS or PROD.",
+      "artifact_covered_by": [
+        "AR485-y-AC1",
+        "AR485-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR485-y-AC1",
+      "criterion_verbatim": "AR485-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py -- expect ^AUDIT-ACTIVE-OK state=ACTIVE enforcement_ref=e3788d3f8a other_rows_unchanged=yes audit_row_keys_changed=2 builder_accepts=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py",
+      "output_evidence": "AUDIT-ACTIVE-OK state=ACTIVE enforcement_ref=e3788d3f8a other_rows_unchanged=yes audit_row_keys_changed=2 builder_accepts=yes\nrc=0. The second run of the same command printed the same line (determinism control below).",
+      "denominator": "1 of 1 closing line; 6 of 6 reporting policy rows read at HEAD (5 other rows dict-equal to base 382ebe4a5a9a, 1 audit row changed in exactly the 2 keys state and enforcement_ref); the builder reporting_policy() call returned 1 of 1 dict",
+      "expect": "^AUDIT-ACTIVE-OK state=ACTIVE enforcement_ref=e3788d3f8a other_rows_unchanged=yes audit_row_keys_changed=2 builder_accepts=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the single output line matches the expect regex exactly. The enforcement_ref printed is the first 10 hex of e3788d3f8a359b0253f45137f8ff3b1cfa075c2d, and the checker compares the full 40-hex value against the cited commit."
+    },
+    {
+      "criterion_id": "AR485-y-AC2",
+      "criterion_verbatim": "AR485-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0. stderr, one line per in-memory mutant: 'mutant audit-active-null-ref: audit row changed keys state (must be exactly state,enforcement_ref)'; 'mutant ref-39-hex: audit row enforcement_ref is not 40 lowercase hex'; 'mutant other-row-state: other row irpt-x10-v1 differs from base'.",
+      "denominator": "1 of 1 CONTROL-FIRES line; 3 of 3 mutants read BAD (audit row ACTIVE with null ref, enforcement_ref cut to 39 hex, another row's state changed); the unmutated HEAD read OK before the mutants ran",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the stdout line is exactly CONTROL-FIRES. All three mutants read BAD and the baseline read OK, so the control fires on each of the three rules it guards."
+    },
+    {
+      "criterion_id": "AR485-y-AC3",
+      "criterion_verbatim": "AR485-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "test_suite",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest reports/tests/test_generate_installed.py ycharts/generate/tests/test_audit_live_wiring.py reports/tests/test_analysis_audit.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "52 passed in 2.22s\nrc=0 (the tail's rc; the three files are the order's named set)",
+      "denominator": "52 of 52 tests in the three named files: the tail line reports 52 passed and no failed or error count",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the printed tail line matches ^[0-9]+ passed in and carries no failure count. test_audit_live_wiring.py was run in the order's listed position."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR485-y-AC2 control: --selftest mutates the in-memory registry three ways (audit row ACTIVE with a null ref; the ref cut to 39 hex; another row's state changed) and requires each to read BAD.",
+      "expected": "CONTROL-FIRES on stdout only when all three mutants read BAD; any mutant that reads OK prints CONTROL-DOES-NOT-FIRE and exits 1.",
+      "observed": "CONTROL-FIRES on stdout; rc=0; stderr: audit-active-null-ref BAD (audit row changed keys state), ref-39-hex BAD (not 40 lowercase hex), other-row-state BAD (other row irpt-x10-v1 differs from base).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the AC1 command run twice from the worktree root, stdout of each run kept in the worker scratch and compared with diff",
+      "observed": "run1 rc=0 and run2 rc=0; diff of the two stdouts printed nothing (IDENTICAL), both the single AUDIT-ACTIVE-OK line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the live retention pass reading the ACTIVE row, and any record reserved under the policy",
+      "reason": "out of this cell: no AWS call, no deploy and no release build by the worker. The row is read offline; the apply and the reservations are the issuer's and IB2's."
+    },
+    {
+      "item": "older AR-y-481 checker check_audit_row.py, which reads PENDING_ENFORCEMENT and is expected to read BAD after this flip",
+      "reason": "kept as history per the order's grant; not edited and not run for a verdict."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W353-S1: the order's 'its controls kind is script' premise does not match the AR-y-459 reference, where script is an artifacts_produced kind and controls holds only mutant and determinism; built to the reference shape (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh (py_compile, ds-precommit, ruff py39) on check_audit_active.py",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~353/check_audit_active.py",
+      "result": "All checks passed! and 'pre-commit gate clean for 1 of 1 file(s)', rc=0. The ASCII scan of the script printed no non-ASCII line."
+    }
+  ]
+}
