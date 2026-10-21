@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-k5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "a8c1153b8cd",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-k5.converter-build-pin-bump.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/opal-assets/silver.tf",
+      "kind": "terraform",
+      "commit_or_etag": "731e05b41ada4b3caf3844f0dbfcb9b1f09122d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob at commit 731e05b41a (branch wk-NFRA_SCHWABBF-21, LOCAL). In silver_build_commit only the schwab entry changed, from 27acf60210 to be55cb3071; the etf, blackdiamond, eclipse and orion entries are byte-identical. The pin comment gained one paragraph (NFRA_SCHWABBF AL-k-5) whose last Rollback pin line names 27acf60210; every earlier comment line is kept. Nothing deployed; no terraform command run.",
+      "artifact_covered_by": ["AL5-k5-AC1"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_schwab_build_pin.py",
+      "kind": "test",
+      "commit_or_etag": "731e05b41ada4b3caf3844f0dbfcb9b1f09122d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Blob at commit 731e05b41a. Two constants changed: _PIN from 27acf60210 to be55cb3071 and _ROLLBACK from 12ecbe2b8f to 27acf60210. Every test and the other constants are unchanged; no test needed a change beyond the constants.",
+      "artifact_covered_by": ["AL5-k5-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL5-k5-AC1",
+      "criterion_verbatim": "the pin names be55cb3071, the rollback is named, the other entries are unchanged, the commit resolves and is an ancestor of HEAD, and the package equals that commit's blobs module by module.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_schwab_build_pin.py -q -p no:cacheprovider --color=no",
+      "output_evidence": "5 passed in 0.86s (rc=0). Verbatim: '.....                                                                    [100%]' then '5 passed in 0.86s'. Run after the commit at 731e05b41a with the code bytes as committed.",
+      "denominator": "5 passed of 5 collected in test_schwab_build_pin.py",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control for AL5-k5-AC1: the two constants were moved to be55cb3071 and 27acf60210 first, with silver.tf still at the old pin 27acf60210 (before the silver.tf edit). The value arms must fail on the unedited Terraform text.",
+      "expected": "test_build_pin_schwab_value_and_rollback_named and test_build_pin_value_in_no_other_entry FAIL; the other three arms pass",
+      "observed": "'2 failed, 3 passed': FAILED test_build_pin_schwab_value_and_rollback_named (schwab pin read as 27acf60210, expected be55cb3071) and FAILED test_build_pin_value_in_no_other_entry (pin be55cb3071 in no entry, holders ['schwab'] expected). Pre-edit base run with the original constants gave '1 failed, 4 passed', the failing arm test_build_pin_package_dir_byte_equal_module_by_module (conversion_manifest.py and silver_registry.py differ from 27acf60210), matching the order's dry-run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AL5-k5-AC1 invocation re-run after the commit, with the committed bytes, unchanged command.",
+      "observed": "5 passed in 0.79s, rc=0 on the second run after the commit (0.86s on the first run before it). The package-to-blob arm reads the BUILD_MANIFEST vendored_modules list and git show of be55cb3071 per module; all five arms pass on the same tree.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building and uploading the schwab converter package, applying the Lambda, any terraform command, any aws command",
+      "reason": "Order BOUNDS: nothing applied or deployed. Changing the pin alone stamps new text on old code; the build, upload and apply are a later CloudOps order under a never-widen pair. The Lambda is NOT updated by this act."
+    },
+    {
+      "item": "Editing any package file, source file or other root",
+      "reason": "Outside the write grant. The package dir infra/aws/lambda/opal-assets/opal-assets-silver-schwab/ still differs from be55cb3071 for conversion_manifest.py and silver_registry.py until the later build order; that is the reason the Lambda build is a separate act, not a defect of this one."
+    },
+    {
+      "item": "Editing the other four pin entries (etf, blackdiamond, eclipse, orion)",
+      "reason": "Order says they stay byte-identical; AC1 checks them against dee04e1b01."
+    }
+  ],
+  "surprises": [],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_schwab_build_pin.py -q -p no:cacheprovider --color=no",
+      "result": "5 passed in 0.86s, rc=0 (on commit 731e05b41a)"
+    },
+    {
+      "tool": "git",
+      "invocation": "git merge-base --is-ancestor be55cb3071 HEAD",
+      "result": "rc=0; git cat-file -t be55cb3071 printed commit"
+    }
+  ]
+}
