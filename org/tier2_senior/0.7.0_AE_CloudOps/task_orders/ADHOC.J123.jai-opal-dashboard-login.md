@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO~DELL1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ADVI1</issued_to>
     <date>2026-10-21</date>
-    <status>pending</status>
+    <status>pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification</status>
     <project_code>ADHOC (remote job J123 / LDO-001; Andrew-direct 2026-10-21 16:32Z at the laptop terminal, record org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261021_163xZ_DELL1_HANDLES_JAI_ACCOUNT_CREATION_AS_AN_OPAL_USER.md; CTO ruling msg 9150; seating MSTR 9153)</project_code>
     <risk>SERVED</risk>
   </metadata>
@@ -42,11 +42,13 @@
   <acceptance_criteria>
     J1  HELD until the name lands: the holder's record names the open-calls row (5956) and the time Andrew's word
         arrived, quoting it; a run before that word fails this order.
-    J2  The insert: create_user_v2.py --firm opal-capital run ONCE for the confirmed username; the proof prints the
-        email-index read BEFORE (Count 0) and AFTER (Count 1) with the denominator (the table name), the full name as
-        given, and no credential.
-    J3  The draft: one create_draft to Yang Liu through the gateway holding the username and what Jai can open; the
-        proof prints the draft id and the sentence "nothing was sent"; a send of any kind fails this order.
+    J2  The insert: create_user_v2.py --firm opal-capital run ONCE for the confirmed username BY 4.0.0_SA_CRO~JAI1
+        (Andrew-direct 16:46Z: "spawn a new CRO to analyze this and run it"; the CRO analyzes and runs, the CloudOps lane
+        never writes the table alongside it); 0.7.0_AE_CloudOps~ADVI1 takes the email-index read BEFORE (Count 0) and
+        AFTER (Count 1) with the denominator (the table name) and records the full name as given and no credential.
+    J3  The draft: one create_draft to Yang Liu through the gateway by 4.0.0_SA_CRO~JAI1 holding the username and what
+        Jai can open (the CRO's analysis names the pages and the firm tier); the proof prints the draft id and the sentence
+        "nothing was sent"; a send of any kind fails this order.
     J4  The receipt: one message to 0.0.0_AB_MSTR~DELL1 and 1.0.0_SA_CTO~DELL1 citing this order's path, the proof
         instance, and the status flip to complete in this file.
   </acceptance_criteria>
