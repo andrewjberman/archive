@@ -12,7 +12,7 @@ Trunk: AR-y-492 (swap pass ports), AR-y-493 (`ycharts/research/swap_model.py`), 
 For an UNRESOLVED (kept unknown) holding the producer asks the classifier lookup first; only if that answers nothing usable does the kimi-k3 model classify the symbol (no web search; the answer is bound to the pool's (class, sub-class) vocabulary and never coerced; below 0.80 is flagged `low_confidence` in the swap record, with `classified_by` MODEL and the source `kimi-k3 classification`). One bounded proposals call widens the pool; every proposal is class-checked and Yahoo-priced; the longest Yahoo history wins, ties by ticker. The model never picks.
 
 ## Proof run after it is live
-An Overview with a real-but-unregistered name from the PRD (BREIT, SREIT or KPEC), not ZQXWVK (a nonsense ticker the model correctly cannot classify, which stays NOT_ANALYSED). The issuer cuts that order (7M) when r34t is live.
+An Overview with a real-but-unregistered name from the PRD (BREIT, SREIT or KPEC), not ZQXWVK (a nonsense ticker the model correctly cannot classify, which stays NOT_ANALYSED). The issuer cuts that order (7N; G2's ETF Multi-Comp is 7M, one run at a time) when r34t is live.
 
 ## Measured IAM reads for the model leg (CTO msg 11988; measured 2026-10-21 ~10:19Z by 2.0.0_SA_COO~Y2, `iam simulate-principal-policy`, role `irpt-ycharts-runner-role`)
 The calls `swap_model` and its wiring make from the resident, and what the role's EXISTING statements say:
