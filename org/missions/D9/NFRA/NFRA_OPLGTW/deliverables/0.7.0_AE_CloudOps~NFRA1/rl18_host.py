@@ -103,6 +103,23 @@ def child_explicit(stage):
     m.emit(out)
 
 
+def child_imports(stage):
+    """HOST-SHAPED IMPORT CHECK: every overlay .py imports in a fresh process from the stage (the service's own lib/ and .venv); the stage's registry count."""
+    import importlib
+    os.environ.setdefault("MOCK_GRAPH", "1")
+    m.load_env(stage)
+    mods = [r[:-3].replace("/", ".") for r in OVERLAY if r.endswith(".py")]
+    ok, bad = [], []
+    for name in mods:
+        try:
+            importlib.import_module(name)
+            ok.append(name)
+        except BaseException as exc:  # noqa: BLE001
+            bad.append([name, type(exc).__name__])
+    from app import tools
+    m.emit({"modules": len(mods), "imported": len(ok), "failed": bad, "registry_count": len(tools.mcp._tool_manager.list_tools()), "vm_hwm_mb": round(m.hwm_mb(), 1)})
+
+
 def run_child(args, wall=120):
     cmd = ["systemd-run", "--scope", "--quiet", "-p", "MemoryMax=1400M", "-p", "MemoryHigh=1100M", "-p", "MemorySwapMax=0", "--", m.PY, m.GUARD, "--cgroup", str(wall), os.path.abspath(__file__)] + args
     p = subprocess.run(cmd, capture_output=True, text=True, timeout=wall + 60)
@@ -152,6 +169,8 @@ def driver():
             if out["pct_after_" + lab] >= m.STOP_PCT:
                 out["stop"] = "host at or above %.0f percent used after probe %s" % (m.STOP_PCT, lab)
                 return out
+        out["imports_candidate"] = run_child(["--imports", cand])
+        out["imports_live"] = run_child(["--imports", live])
         out["explicit_live"] = run_child(["--explicit", live])
         out["explicit_candidate"] = run_child(["--explicit", cand])
         keys = ("parsed", "masters", "check_scope", "resolver_candidate_list", "schwab_account_filter", "scope_summary_account_count")
@@ -209,6 +228,8 @@ if __name__ == "__main__":
     if "--probe" in sys.argv:
         i = sys.argv.index("--probe")
         child_probe(sys.argv[i + 1], sys.argv[i + 2])
+    elif "--imports" in sys.argv:
+        child_imports(sys.argv[sys.argv.index("--imports") + 1])
     elif "--explicit" in sys.argv:
         child_explicit(sys.argv[sys.argv.index("--explicit") + 1])
     elif "--driver" in sys.argv:
