@@ -5,7 +5,7 @@
     <issued_by>1.0.0_SA_CTO~DELL1</issued_by>
     <issued_to>0.7.0_AE_CloudOps~ADVI1</issued_to>
     <date>2026-10-21</date>
-    <status>complete 2026-10-21 ~17:1xZ by 0.7.0_AE_CloudOps~ADVI1 (proof org/tier2_senior/0.7.0_AE_CloudOps~ADVI1/deliverables/ADHOC.J123.jai-opal-dashboard-login.proof_of_spec.json VALID rc=0; receipt msgs 9177/9178; the draft to Yang is unsent and waits on Andrew) -- was: pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification; AMENDED again ~16:59Z: J1 accepts a name from a legal gateway read of Opal records (the calendar invite), quoted with its source</status>
+    <status>complete 2026-10-21 ~17:1xZ by 0.7.0_AE_CloudOps~ADVI1 (proof org/tier2_senior/0.7.0_AE_CloudOps~ADVI1/deliverables/ADHOC.J123.jai-opal-dashboard-login.proof_of_spec.json VALID rc=0; receipt msgs 9177/9178; the notice to Yang was SENT 17:07:54Z by 4.0.0_SA_CRO~JAI1 on Andrew-direct, see the proof's J123-J3 addendum) -- was: pending -- AMENDED 2026-10-21 ~16:5xZ by 1.0.0_SA_CTO~DELL1 on Andrew-direct 16:46Z (MSTR 9157): the run (J2) and the draft (J3) are 4.0.0_SA_CRO~JAI1's; the reads, the proof instance and the receipt (J1, J4) stay with 0.7.0_AE_CloudOps~ADVI1; no gate limb graded this modification; AMENDED again ~16:59Z: J1 accepts a name from a legal gateway read of Opal records (the calendar invite), quoted with its source</status>
     <project_code>ADHOC (remote job J123 / LDO-001; Andrew-direct 2026-10-21 16:32Z at the laptop terminal, record org/tier0_exec/0.0.0_AB_MSTR/deliverables/ANDREW_DIRECT_20261021_163xZ_DELL1_HANDLES_JAI_ACCOUNT_CREATION_AS_AN_OPAL_USER.md; CTO ruling msg 9150; seating MSTR 9153)</project_code>
     <risk>SERVED</risk>
   </metadata>
@@ -51,7 +51,11 @@
         AFTER (Count 1) with the denominator (the table name) and records the full name as given and no credential.
     J3  The draft: one create_draft to Yang Liu through the gateway by 4.0.0_SA_CRO~JAI1 holding the username and what
         Jai can open (the CRO's analysis names the pages and the firm tier); the proof prints the draft id and the sentence
-        "nothing was sent"; a send of any kind fails this order.
+        "nothing was sent"; a send of any kind fails this order -- EXCEPT on Andrew's word: AMENDED ~17:10Z by
+        1.0.0_SA_CTO~DELL1 on the CRO's 9182: Andrew-direct at the CRO's terminal, verbatim "confirm the login URL from the
+        portal route config + once we know the account is good to go send the draft to yang"; the CRO measured the routes
+        (200) and the live rows, then SENT the same text to Yang Liu at 2026-10-21T17:07:54Z. The proof records that send
+        as Andrew-authorized (quote and time) instead of "nothing was sent"; the 17:01Z draft stays unsent in Drafts.
     J4  The receipt: one message to 0.0.0_AB_MSTR~DELL1 and 1.0.0_SA_CTO~DELL1 citing this order's path, the proof
         instance, and the status flip to complete in this file.
   </acceptance_criteria>
