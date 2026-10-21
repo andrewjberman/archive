@@ -1,0 +1,100 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_FIDUPL.TO-FT-s-11",
+ "decomp_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/decompositions/NFRA_FIDUPL_DECOMP_R3.md",
+  "vintage_commit": "1a79c6019aa",
+  "to_ref": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-11.backfill-probe1.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D8/NFRA/NFRA_FIDUPL/task-orders/NFRA_FIDUPL.TO-FT-s-11.backfill-probe1.md",
+  "group": "OTHER",
+  "vintage_commit": "5a8df0d011d"
+ },
+ "assignee": "0.7.0_AE_CloudOps~NFRA1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D8/NFRA/NFRA_FIDUPL/deliverables/0.7.0_AE_CloudOps~NFRA1/NFRA_FIDUPL.TO-FT-s-11.backfill_probe1_step3F_output.md",
+   "kind": "doc",
+   "commit_or_etag": "8f2ede6a7cd",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Verbatim stdout, stderr, ft11r, the record's days list and per-file-type fields, and the S3 read-back of the step 3F run (SSM 5ad1ff0a-efad-406f-9697-173a387b91c4). The completion record itself is the S3 object s3://opal-data-assets/fidelity/alongside/bronze/_runs/20261021/backfill-20261021T112040Z.json (not in git), read by ft11r and quoted in this file.",
+   "artifact_covered_by": [
+    "FT-s-11-AC1",
+    "FT-s-11-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20261021T1115Z_nfra-fidupl-backfill-probe1-3f-20261021_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "8f2ede6a7cd",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Ledger nfra-fidupl-backfill-probe1-3f-20261021, 1 leg, CLOSED (earlier runs 3, 3B-3E and their ledgers are named in the surprise rows).",
+   "artifact_covered_by": [
+    "FT-s-11-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "FT-s-11-AC1",
+   "criterion_verbatim": "after the run the newest backfill completion record carries the backfill marker, one sign-in, no run error and a stop reason; the earliest dates per file type are printed.",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft11r",
+   "output_evidence": "R1-FT11R-OK backfill record: sign_ins=1 stop=retention earliest account:20261019,balance:None,position:None,prices:None,security:None,transact:None",
+   "denominator": "1 of 1 newest backfill completion record read (backfill-20261021T112040Z.json)",
+   "status": "PASS",
+   "expect": "R1-FT11R-OK backfill record"
+  },
+  {
+   "criterion_id": "FT-s-11-AC2",
+   "criterion_verbatim": "the box code is unchanged by the run (a regression guard).",
+   "method": "command",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py fu10m",
+   "output_evidence": "R1-FU10M-OK all 23 shipped files match the repo on the box",
+   "denominator": "23 of 23 shipped files md5-compared on the box after the run",
+   "status": "PASS",
+   "expect": "R1-FU10M-OK all"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "No mutant was run: the checks read one S3 completion record and 23 md5s; no spec name has a defined mutation here.",
+   "expected": "n/a",
+   "observed": "no mutant run",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "six live runs of the same program with the stop reason changing as the code was repaired (rows D1-S14 to D1-S18), then this run read against its own record and the S3 listing",
+   "observed": "this run ended by itself, exit 0, run_error null, stop retention; one data key landed, the rest skipped_existing",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "history older than the standing export serves (before 2026-10-19); transact.txt history",
+   "reason": "The channel returned empty listings for 2026-10-16, 10-15 and 10-14 and the run stopped on retention; transact.txt was skipped by option and its history comes by the per-account route (a separate cell)."
+  }
+ ],
+ "surprises": [
+  "NFRA_FIDUPL-D1-S14",
+  "NFRA_FIDUPL-D1-S15",
+  "NFRA_FIDUPL-D1-S16",
+  "NFRA_FIDUPL-D1-S17",
+  "NFRA_FIDUPL-D1-S18"
+ ],
+ "session_log": "org/critical_paths/change_management/20261021T1115Z_nfra-fidupl-backfill-probe1-3f-20261021_deploy_completion.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/deploy_ledger.py",
+   "invocation": "open nfra-fidupl-backfill-probe1-3f-20261021; close-leg L1; close",
+   "result": "OK: CLOSED, all 1 legs proven, sentinel removed."
+  },
+  {
+   "tool": "fidupl_round_checks.py",
+   "invocation": "python org/tier1_exec/2.0.0_SA_COO/deliverables/NFRA_FIDUPL_R1/R1_CHECKS/fidupl_round_checks.py ft11r | fu10m",
+   "result": "R1-FT11R-OK; R1-FU10M-OK all 23"
+  }
+ ]
+}
