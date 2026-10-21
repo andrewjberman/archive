@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-g-185",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-185.multicomp-portfolio-path-from-the-common-window-start-not-the-price-window-start.md",
+    "group": "OTHER",
+    "vintage_commit": "2c4c5b93913"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R60_G.md",
+    "vintage_commit": "2c4c5b93913",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-g-185.multicomp-portfolio-path-from-the-common-window-start-not-the-price-window-start.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~358",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/portfolio_series.py",
+      "kind": "script",
+      "commit_or_etag": "79f011e64ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-358 only; nothing deployed. Adds buy_and_hold_from(series_by_ticker, amounts, start_ms); buy_and_hold unchanged. AC1 and AC2 run at this tree.",
+      "artifact_covered_by": [
+        "AR185-g-AC1",
+        "AR185-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/opal_producer.py",
+      "kind": "script",
+      "commit_or_etag": "79f011e64ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local commit on wk-IRPT_ANLREQ-358 only; nothing deployed. _price_stage returns a fourth value {series, amounts}; _compare_stage takes it as price_inputs and restarts the portfolio path at the largest first date of the comparables' series. Both call sites updated; kept, prices and named unchanged.",
+      "artifact_covered_by": [
+        "AR185-g-AC1",
+        "AR185-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_portfolio_series.py",
+      "kind": "test",
+      "commit_or_etag": "79f011e64ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four buy_and_hold_from tests added (cut and open at value; filed weights at start after pre-start drift; no-base ticker excluded and named; common start equals buy_and_hold). Each fails at the base (AttributeError, 4 of 4 failed before the change).",
+      "artifact_covered_by": [
+        "AR185-g-AC1",
+        "AR185-g-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_compare_producer.py",
+      "kind": "test",
+      "commit_or_etag": "79f011e64ea",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One Multi-Comp test over 60 months of pre-window history with drift; expected value by its own arithmetic. Fails at the base (157.44168888 against 151.61008293)."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d2dce7d3c10",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_ANLREQ-D2-W358-S1 appended (OBSERVATION, INERT). No other row was edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR185-g-AC1",
+      "criterion_verbatim": "the REAL producer on a Multi-Comp whose holdings were priced over a history that starts 60 months before the models' first observation, with strong drift before it: the served 'Your portfolio' chart line ends at the level the filed amounts bought at the window start give (this file's own arithmetic), starts at 100, and the ETF line is unchanged. At base it FAILs (157.44 against 151.61).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_window_checks.py portfolio",
+      "output_evidence": "AR-WINDOW-portfolio-OK\n(rc=0; run at the code commit tree 79f011e64ea, timeout 120 s, and again on the committed tree after the row commit d2dce7d3c10). Base, before the change: AR-WINDOW-portfolio-FAIL the portfolio's last level is 157.4417, the amounts bought at the window start give 151.6101 (rc=1).",
+      "denominator": "1 of 1 arm; the Your portfolio line checked at its first point (100) and its last point, and the ETF line checked at its last point",
+      "expect": "^AR-WINDOW-portfolio-OK$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the RESULT line matches the expectation exactly."
+    },
+    {
+      "criterion_id": "AR185-g-AC2",
+      "criterion_verbatim": "the five owned producer test files pass (63 at the base) and at least 65 ran. At base it FAILs (63 ran).",
+      "method": "command",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_window_checks.py tests",
+      "output_evidence": "AR-WINDOW-tests-OK passed=68\n(rc=0; timeout 120 s, run on the committed tree after the row commit d2dce7d3c10). Base, before the change: AR-WINDOW-tests-FAIL rc=0 passed=63 (want rc 0 and at least 65) (checker rc=1).",
+      "denominator": "68 passed and 0 failed across the five owned files (test_compare_producer, test_portfolio_series, test_opal_producer_prices, test_opal_producer, test_compare_elements); threshold 65; base 63",
+      "expect": "^AR-WINDOW-tests-OK passed=[0-9]+$",
+      "status": "PASS",
+      "status_reason": "rc=0 and passed=68 is at least 65; the five new tests are the 4 portfolio_series tests and the 1 compare test (63 + 5 = 68)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant. The discriminating control is the base run: with the producer unchanged, AC1 FAILs at 157.4417 against 151.6101, and the new tests fail before the change.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice on the same code (once before the row commit, once after), each under timeout 120 s; AC2 run once after the row commit.",
+      "observed": "AR-WINDOW-portfolio-OK both times; AR-WINDOW-tests-OK passed=68.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Overview path, runs without a priced comparable, and the pricing-off and flag-false runs were not separately diffed against their prior output.",
+      "reason": "The new call sits only in _compare_stage behind the comparables and the portfolio series; the existing suite (test_opal_producer, test_opal_producer_prices, test_compare_elements, the Overview and pricing-off tests in test_compare_producer) passes unchanged in the 68-test run."
+    },
+    {
+      "item": "run.json byte equality with the pre-change run",
+      "reason": "Not measured. kept, prices and named are returned unchanged by construction; the run record is not diffed."
+    },
+    {
+      "item": "Deploy and the PROD release of the producer",
+      "reason": "Not in scope: the order deploys nothing and the release is round 60's r34s under the CTO's pair."
+    },
+    {
+      "item": "The layout's own gap sentences (AR-g-186) and layout_overview.py",
+      "reason": "Not in this order's <paths>; they are TO-AR-g-186."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W358-S1: the producer file carries a CTO HOLD ruling on workstream G (XA-20261019T231010Z-2064) that TO-AR-g-185 does not name and whose un-hold trigger is not recorded in the order; OBSERVATION, INERT; the commit was made as the order directs."
+  ],
+  "session_log": "Commands run by 0.9.0_WK_IRPT_ANLREQ~358 in C:/dev/wk-irpt-anlreq-358: branch and TREE-OK check (wk-IRPT_ANLREQ-358, TREE-OK); base run of both checks (FAIL 157.4417 against 151.6101; passed=63); new tests added and run at base (5 failed, 17 passed in the two files); buy_and_hold_from and the producer change; a first run of the checker FAILed with KeyError 'series' from a parameter-name clash, fixed by renaming the parameter to price_inputs; both checks OK (passed=68); ruff clean on the four files; commits 79f011e64ea (code and tests), d2dce7d3c10 (row, after a schema fix that removed a null disarm_owner).",
+  "compiler_tools": [
+    {
+      "tool": "python ar_window_checks.py portfolio",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_window_checks.py portfolio",
+      "result": "AR-WINDOW-portfolio-OK rc=0 (base: AR-WINDOW-portfolio-FAIL rc=1)"
+    },
+    {
+      "tool": "python ar_window_checks.py tests",
+      "invocation": "python org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/2.0.0_SA_COO~G2/checks/ar_window_checks.py tests",
+      "result": "AR-WINDOW-tests-OK passed=68 rc=0 (base: passed=63 rc=1)"
+    },
+    {
+      "tool": "ruff check",
+      "invocation": "python -m ruff check ycharts/research/portfolio_series.py ycharts/research/opal_producer.py ycharts/research/tests/test_portfolio_series.py ycharts/research/tests/test_compare_producer.py",
+      "result": "All checks passed! rc=0"
+    },
+    {
+      "tool": "surprise-row-gate",
+      "invocation": "python .tools/surprise-row-gate.py --check org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK rc=0 (before the commit; the row gate at commit then refused the null disarm_owner, fixed and committed at d2dce7d3c10)"
+    }
+  ]
+}
