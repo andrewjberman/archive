@@ -123,10 +123,11 @@ def run_battery(make_swap_model, ecm):
         return isinstance(got, dict) and got["low_confidence"] is False, "0.80 gave %r" % (got,)
 
     def c6():
-        listed = ["IVV", "ivv", "ZQXV", "BRK.B", "QQQ", "VTI", "VOO", "SCHD", "TOOLONGTICKERABC", 7, "IVV"]
+        listed = ["toolongticker1", "a b", "  ", 7, "IVV", "spy", "ZQXV", "zqxv", "BRK.B", "QQQ", "VTI", "VOO", "SCHD",
+                  "ivv"]
         send, _sent = _recorder(_chat(json.dumps({"tickers": listed})))
         got = build(send).propose("ZQXV", {"asset_class": "equity", "sub_asset_class": "USLargeCap"})
-        want = ["IVV", "BRK.B", "QQQ", "VTI", "VOO"]
+        want = ["IVV", "SPY", "BRK.B", "QQQ", "VTI"]
         return got == want, "filtered list %r" % (got,)
 
     def c7():
