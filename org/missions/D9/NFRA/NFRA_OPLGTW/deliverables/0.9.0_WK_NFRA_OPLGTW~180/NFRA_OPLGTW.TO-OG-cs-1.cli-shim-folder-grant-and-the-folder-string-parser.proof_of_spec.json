@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-cs-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-1.cli-shim-folder-grant-and-the-folder-string-parser.md",
+    "group": "OTHER",
+    "vintage_commit": "6c2d904f104"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~180",
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP_CLISHIM.round48.md",
+    "vintage_commit": "6c2d904f104",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-cs-1.cli-shim-folder-grant-and-the-folder-string-parser.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/folder_grant.py",
+      "kind": "doc",
+      "commit_or_etag": "044e6bc3cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new pure module (standard library and data_entitlement only); committed on branch wk-NFRA_OPLGTW-180; no deploy, no AWS call.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "doc",
+      "commit_or_etag": "044e6bc3cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 lines added and 2 removed in the diff against the pin 881da34cda (7 added and 1 removed by the AC2 count); channels_allow and channels_deny take a folder string through _CHANNEL_OR_FOLDER; no deploy.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_cs1_folder_grant.py",
+      "kind": "doc",
+      "commit_or_etag": "044e6bc3cac",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "26 offline tests, all passing under python3 -I -m pytest (run twice, same summary); a planted mutant that drops bronze from the refused set fails 2 of them, then the file was restored byte-identical.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~180/ac_runs.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the three issuer probes run verbatim after the code commit; exit=0 and RESULT: PASS for each.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1: the decision, graded by an issuer-written probe independent of your tests.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "SERVED_BUCKETS is exactly the three buckets: ok\nmaster_admin with no record reads a served bucket: ok\nan unserved bucket is refused for master_admin too (reason names the bucket): ok\nbronze and raw paths are refused for master_admin and under a whole-bucket grant: ok\nan Opal non-admin with allow [bucket] reads that bucket and not another: ok\na prefix grant matches inside the folder and not a sibling or a longer name: ok\ndeny wins over allow: ok\na stopped or revoked record grants nothing; no record grants nothing: ok\na non-Opal caller is refused even with an allow: ok\n'..' in the key and a leading '/' are refused: ok\na refusal carries a reason a person can act on (non-empty text): ok\nRESULT: PASS\nexit=0",
+      "denominator": "11 of 11 probe arms ok (the probe's eleven arms, from the probe's own script at the issuance commit)",
+      "status": "PASS",
+      "expect": "(?s)SERVED_BUCKETS is exactly the three buckets: ok.*bronze and raw paths are refused for master_admin and under a whole-bucket grant: ok.*a prefix grant matches inside the folder and not a sibling or a longer name: ok.*deny wins over allow: ok.*a non-Opal caller is refused even with an allow: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2: the parser accepts a folder string and nothing else loosens, plus the size bound.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "old channel ids and folder strings together parse: ok\nwrong shapes still raise Malformed (Bad Case:M, :M,  x:M, UPPER-bucket:M, a b:M, xxxxxxxxxxxx:M, opal-data-as:M, /opal-data-a:M, non-string:M): ok\nchannel logic unchanged: whoami is native, a native deny denies, a folder-only deny denies nothing by channel: ok\napp/data_entitlement.py against the pin: 7 added, 1 removed (want at most 40 and 10, and at least 3 added): ok\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 probe checks ok; 9 of 9 wrong-shape entries raise Malformed; 7 added and 1 removed lines against pin 881da34cda (bound 40 and 10)",
+      "status": "PASS",
+      "expect": "(?s)old channel ids and folder strings together parse: ok.*wrong shapes still raise Malformed .*: ok.*channel logic unchanged: whoami is native, a native deny denies, a folder-only deny denies nothing by channel: ok.*app/data_entitlement\\.py against the pin: [3-9]\\d? added, \\d+ removed .*: ok.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3: the footprint is exactly the three files, and your tests and three neighbours pass.",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "files that differ from HEAD under the gateway folder: ['app/data_entitlement.py', 'app/folder_grant.py', 'tests/test_cs1_folder_grant.py'] (want exactly ['app/data_entitlement.py', 'app/folder_grant.py', 'tests/test_cs1_folder_grant.py']): ok\ntests/test_cs1_folder_grant.py: 19 test functions (want 10 or more): ok\nnew file tests/test_cs1_folder_grant.py: 26 passed, 0 failed\nneighbours (3): 20 passed, failed names [] (allowed: test_ogz1_ac08 only)\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 footprint files exact; 19 test functions (26 cases with parametrize); 26 of 26 new tests passed; 20 of 20 neighbour tests passed (test_og_cp1, test_og_rt1, test_og_ed1)",
+      "status": "PASS",
+      "expect": "(?s)files that differ from HEAD under the gateway folder: .*: ok.*tests/test_cs1_folder_grant\\.py: (?:1\\d|[2-9]\\d) test functions.*: ok.*new file tests/test_cs1_folder_grant\\.py: (?:1\\d|[2-9]\\d|\\d{3}) passed, 0 failed.*neighbours \\(3\\): [1-9]\\d* passed, failed names \\[\\].*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In place in app/folder_grant.py, _REFUSED_SEGMENTS was reduced from (\"bronze\", \"raw\") to (\"raw\",); the new test file was run; then the file was restored from a byte copy and cmp confirmed it identical.",
+      "expected": "two tests fail: the bronze refusal under every grant and the whole-bucket grant that must not reach bronze",
+      "observed": "2 failed, 24 passed: test_rule_c_bronze_and_raw_refused_for_every_caller_and_every_grant and test_whole_bucket_grant_still_does_not_reach_bronze_or_raw; restored, cmp identical, the line reads _REFUSED_SEGMENTS = (\"bronze\", \"raw\")",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the new test file run twice under python3 -I -m pytest with the same inputs; the summary lines compared",
+      "observed": "run 1: 26 passed in 1.12s; run 2: 26 passed in 0.84s (the same count; timings differ, not verdicts)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The <status> flip of the task order to complete",
+      "reason": "section 5 of the order: the status flip is the issuer's; the order file is outside this worker's write grant (<paths>)."
+    },
+    {
+      "item": "Any release, deploy or AWS call for the gateway app; the tools that call folder_decision",
+      "reason": "bounds of the order: code and tests only; the tools and the release carrying the decision are later orders with their own never-widen halves."
+    },
+    {
+      "item": "Renaming or removing the _CHANNEL pattern, changing channel_of, person_denial or any other function in data_entitlement.py",
+      "reason": "bounds of the order: _CHANNEL stays the old channel-id pattern (portal_channels still uses it); the other functions are not edited."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~180/ac_runs.txt",
+  "compiler_tools": [
+    {
+      "tool": "cs1.AC1.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC1.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS (11 of 11 arms ok; exit=0)"
+    },
+    {
+      "tool": "cs1.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC2.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS (4 of 4 checks ok; 7 added, 1 removed against the pin; exit=0)"
+    },
+    {
+      "tool": "cs1.AC3.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/clishim/checks/cs1.AC3.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS (3 of 3 footprint files; 26 passed; neighbours 20 passed; exit=0)"
+    },
+    {
+      "tool": "python3 -I -m pytest tests/test_cs1_folder_grant.py",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python3 -I -m pytest tests/test_cs1_folder_grant.py -q -rf --color=no -p no:cacheprovider",
+      "result": "26 passed (two runs)"
+    }
+  ]
+}
