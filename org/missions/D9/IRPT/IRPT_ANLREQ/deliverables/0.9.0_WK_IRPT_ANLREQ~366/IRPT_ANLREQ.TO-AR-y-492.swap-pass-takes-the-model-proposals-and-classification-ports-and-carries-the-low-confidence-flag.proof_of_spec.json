@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_ANLREQ.TO-AR-y-492.swap-pass-takes-the-model-proposals-and-classification-ports-and-carries-the-low-confidence-flag",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/decompositions/IRPT_ANLREQ_DECOMP_R40A_Y.md",
+    "vintage_commit": "be3885c233a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-492.swap-pass-takes-the-model-proposals-and-classification-ports-and-carries-the-low-confidence-flag.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_ANLREQ/task-orders/IRPT_ANLREQ.TO-AR-y-492.swap-pass-takes-the-model-proposals-and-classification-ports-and-carries-the-low-confidence-flag.md",
+    "group": "OTHER",
+    "vintage_commit": "be3885c233a"
+  },
+  "assignee": "0.9.0_WK_IRPT_ANLREQ~366",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/swap_pass.py",
+      "kind": "script",
+      "commit_or_etag": "5edf36edf7b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "swap_holdings takes proposals=None and the classify port; _symbol_class carries the model fields; _record writes low_confidence from the classification and the MODEL source and classified_by. Committed LOCAL on wk-IRPT_ANLREQ-366 at 5edf36edf7b. Not deployed: the resident release that carries the swap leg is built by 2.0.0_SA_COO~G2 and applied by IB2 under its own pair. No AWS call, no network, no model call.",
+      "artifact_covered_by": [
+        "AR492-y-AC1",
+        "AR492-y-AC2",
+        "AR492-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/research/tests/test_swap_pass_model_ports.py",
+      "kind": "test",
+      "commit_or_etag": "5edf36edf7b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Hermetic pytest file of fakes: proposals reach the rule; wrong-class and outside-pool proposals are class-checked; raising, non-list and non-str answers give no proposal; proposals=None is byte-equal to the golden; the low-confidence record; the amount kept; determinism; the 20-proposal cap. Committed LOCAL at 5edf36edf7b with swap_pass.py.",
+      "artifact_covered_by": [
+        "AR492-y-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~366/check_swap_pass_ports.py",
+      "kind": "test",
+      "commit_or_etag": "2ed0e625c7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Stdlib offline check. Loads swap_pass.py by path from the worktree that holds it (the root is found by walking up to the directory holding .tools and infra) and runs eight cases. --selftest rewrites the module text in memory three ways and prints CONTROL-FIRES only when every rewrite fails a case. Committed LOCAL at 2ed0e625c7d.",
+      "artifact_covered_by": [
+        "AR492-y-AC1",
+        "AR492-y-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AR492-y-AC1",
+      "criterion_verbatim": "AR492-y-AC1: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~366/check_swap_pass_ports.py -- expect ^SWAP-PASS-PORTS-OK cases=8 proposals_forwarded=yes classify_forwarded=yes low_conf_carried=yes baseline_equal=yes$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~366/check_swap_pass_ports.py",
+      "output_evidence": "SWAP-PASS-PORTS-OK cases=8 proposals_forwarded=yes classify_forwarded=yes low_conf_carried=yes baseline_equal=yes\nrc=0. A second run printed the same single line (diff rc=0).",
+      "denominator": "1 of 1 stdout line matches the expect; 8 of 8 in-process cases pass",
+      "expect": "^SWAP-PASS-PORTS-OK cases=8 proposals_forwarded=yes classify_forwarded=yes low_conf_carried=yes baseline_equal=yes$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the single output line matches the expect regex exactly."
+    },
+    {
+      "criterion_id": "AR492-y-AC2",
+      "criterion_verbatim": "AR492-y-AC2: python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~366/check_swap_pass_ports.py --selftest -- expect ^CONTROL-FIRES$",
+      "method": "command",
+      "invocation": "python -I org/missions/D9/IRPT/IRPT_ANLREQ/deliverables/0.9.0_WK_IRPT_ANLREQ~366/check_swap_pass_ports.py --selftest",
+      "output_evidence": "CONTROL-FIRES\nrc=0. The verbose run of the same control read: literal-empty-proposals failed proposal_wins,wrong_class_dropped,outside_pool_class_checked,amount_kept; classify-not-forwarded failed proposal_wins,outside_pool_class_checked,amount_kept; low-confidence-literal failed low_confidence_carried.",
+      "denominator": "3 of 3 in-memory rewrites of swap_pass.py fail at least one case (4, 3 and 1 failing cases); 0 of 3 anchors missing",
+      "expect": "^CONTROL-FIRES$",
+      "status": "PASS",
+      "status_reason": "rc=0 and the one output line is CONTROL-FIRES, printed only when all three rewrites fail a case."
+    },
+    {
+      "criterion_id": "AR492-y-AC3",
+      "criterion_verbatim": "AR492-y-AC3: (cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_pass_model_ports.py ycharts/research/tests/test_swap_pass.py ycharts/research/tests/test_swap_replacement.py ycharts/research/tests/test_opal_producer_swap.py -q --color=no -p no:cacheprovider 2>&1 | tail -1) -- expect ^[0-9]+ passed in ",
+      "method": "test_suite",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_pass_model_ports.py ycharts/research/tests/test_swap_pass.py ycharts/research/tests/test_swap_replacement.py ycharts/research/tests/test_opal_producer_swap.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)",
+      "output_evidence": "67 passed in 1.75s\nrc=0 (the pipeline's tail). The existing test_swap_pass.py and test_swap_replacement.py and test_opal_producer_swap.py are unedited (git diff be3885c233a shows 0 changed lines for test_swap_pass.py and swap_replacement.py).",
+      "denominator": "67 of 67 tests pass across the four files",
+      "expect": "^[0-9]+ passed in ",
+      "status": "PASS",
+      "status_reason": "the tail line matches the expect regex; no test failed, none was skipped or deselected."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AR492-y-AC2 control: --selftest rewrites swap_pass.py in memory three ways (the literal empty proposals put back; classify not forwarded to choose_replacement; low_confidence fixed to False). Each rewrite must fail at least one of the eight cases, and only then does the control print CONTROL-FIRES.",
+      "expected": "each of the three rewrites reads BAD; CONTROL-FIRES printed; rc 0",
+      "observed": "literal-empty-proposals failed 4 cases; classify-not-forwarded failed 3 cases; low-confidence-literal failed 1 case; CONTROL-FIRES; rc=0",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice in one shell; each stdout kept and compared with diff.",
+      "observed": "diff rc=0; the single SWAP-PASS-PORTS-OK line identical in both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the swap model adapter swap_model.py (interface item 2) and the _swap_stage and resident binding wiring (interface items 3 and 4)",
+      "reason": "not in this cell's paths; the cells AR-y-493 and its successor own them. This cell injects the two ports and makes no model call."
+    },
+    {
+      "item": "the live Kimi classify and proposals answers, the resident release and any AWS, IAM or deploy step",
+      "reason": "out of this cell: no network, no AWS, no model call, no deploy, no release build. Every model answer in the checks is a fake."
+    }
+  ],
+  "surprises": [
+    "IRPT_ANLREQ-D2-W366-S1: the interface item 1 and the cell item 1 differ for a proposals list that mixes a str with a non-str element; the cell's filter is implemented, the mixed case is untested (OBSERVATION, INERT).",
+    "IRPT_ANLREQ-D2-W366-S2: safe-commit printed the client-data-check WARN (hashed account-id list absent on this box), so the code commit was not checked for client account ids (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_ANLREQ/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest (investor-reporting worktree tree, Python 3.14.7)",
+      "invocation": "(cd infra/aws/lambda/investor-reporting && python -m pytest ycharts/research/tests/test_swap_pass_model_ports.py ycharts/research/tests/test_swap_pass.py ycharts/research/tests/test_swap_replacement.py ycharts/research/tests/test_opal_producer_swap.py -q --color=no -p no:cacheprovider)",
+      "result": "67 passed in 1.75s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh <each edited .py file>",
+      "result": "All checks passed! for swap_pass.py and the new test file (commit 5edf36edf7b) and for check_swap_pass_ports.py (commit 2ed0e625c7d)."
+    }
+  ]
+}
