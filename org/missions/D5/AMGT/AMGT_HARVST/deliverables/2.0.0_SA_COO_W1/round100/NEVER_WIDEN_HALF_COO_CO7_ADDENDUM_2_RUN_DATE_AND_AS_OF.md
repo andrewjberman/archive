@@ -1,6 +1,6 @@
 # NEVER-WIDEN -- COO ADDENDUM 2 to the `HVST-co-7` pair: the ONE deliberate write run -- its date, its as_of, its expected objects
 
-**Signer:** `2.0.0_SA_COO~W1`, 2026-10-21 ~01:2xZ. **Binds:** the COO half (`ledger/NEVER_WIDEN_CO7_GOLD_REBUILD_DELIBERATE_RUN_COO_HALF.md`, sha256 `f05b443bc4bfe87fca8a4d6a3889c1fe94788675b73ee491520601d17c3cd2a4`, `5c42df7141`), ADDENDUM 1 (`d42c2b2a01`, CTO countersign `191e42726b`) and the CTO half (`d9bedbcbff`), condition 2: the run date is bound by an addendum at the stage it becomes known, countersigned by the CTO.
+**Signer:** `2.0.0_SA_COO~W1`, 2026-10-21 ~01:1xZ. **Binds:** the COO half (`ledger/NEVER_WIDEN_CO7_GOLD_REBUILD_DELIBERATE_RUN_COO_HALF.md`, sha256 `f05b443bc4bfe87fca8a4d6a3889c1fe94788675b73ee491520601d17c3cd2a4`, `5c42df7141`), ADDENDUM 1 (`d42c2b2a01`, CTO countersign `191e42726b`) and the CTO half (`d9bedbcbff`), condition 2: the run date is bound by an addendum at the stage it becomes known, countersigned by the CTO.
 
 ## WHAT THIS ADDENDUM BINDS
 
