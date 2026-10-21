@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_SCHWABBF.TO-AL-p3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/decompositions/NFRA_SCHWABBF_DECOMP_AL1.md",
+    "vintage_commit": "5bb233992d8",
+    "to_ref": "org/missions/D8/NFRA/NFRA_SCHWABBF/task-orders/NFRA_SCHWABBF.TO-AL-p3.alongside-puller-resync-listwrap.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D8/NFRA/NFRA_SCHWABBF/prd/NFRA_SCHWABBF_PRD.md",
+    "group": "C",
+    "vintage_commit": "cb8f734709f"
+  },
+  "assignee": "0.9.0_WK_NFRA_SCHWABBF~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/alongside-schwab-si2/sdd-daily-pull.ps1",
+      "kind": "script",
+      "commit_or_etag": "d9d53b53c4fad3a8362c9ef7d56ac04b8a83d027",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob cbcecde7d5006e63ffb77d24cb7e0988049ad22f at commit d9d53b53c4 (branch wk-NFRA_SCHWABBF-19, LOCAL). Rebuilt as a fresh copy of the 49F source at base 5bb233992d (the 49F Select-PlanAsOf carries the BF-w-7 List-wrap line at source line 305): 796 lines = 794 source + 2 header comment lines. The only other difference is the $Master ValidateSet line (copy line 40). Nothing uploaded, run or sent to Schwab or AWS.",
+      "artifact_covered_by": ["AL3-p3-AC1", "AL3-p3-AC2"]
+    },
+    {
+      "path_or_key": "data/canonical/schwab/tests/test_alongside_puller.py",
+      "kind": "test",
+      "commit_or_etag": "d9d53b53c4fad3a8362c9ef7d56ac04b8a83d027",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Git blob 600398f97e8e495f10875c10ec5db34ea0a6a4f0 at commit d9d53b53c4. The eight tests of the file are unchanged except one ADDED test: test_plan_list_wrap_select_planasof_accepts_a_generic_list (the copy carries the fixed line and not the bare one; Select-PlanAsOf in a child powershell.exe accepts a real System.Collections.Generic.List[object]). The state_tier tests are unchanged. Text-only; runs nothing against Schwab, S3 or AWS.",
+      "artifact_covered_by": ["AL3-p3-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~19/check_copy_diff.py",
+      "kind": "test",
+      "commit_or_etag": "35a4f284b90718079abfcab7127e88eb95d221c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One-time copy check in this deliverables folder only (blob 35a4f284b90718079abfcab7127e88eb95d221c6; copied from the ~16 worker's check script, docstring path updated to ~19; not a standing comparator, not under tests/).",
+      "artifact_covered_by": ["AL3-p3-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AL3-p3-AC1",
+      "criterion_verbatim": "the copy still accepts exactly the four Cottonwood masters, parses, and carries the state-tier functions.",
+      "method": "test_suite",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax or state_tier or plan_list_wrap\"",
+      "output_evidence": "........                                                                  [100%]\n8 passed in 0.98s\n(rc=0). Full file, same tree: 8 passed in 0.92s, rc=0. Control run before the copy was rebuilt (plan_list_wrap arm added, copy still stale at base): '.......F' with 1 failed, 7 passed, rc=1; the failure was the List-wrap assertion ('the copy's Select-PlanAsOf lacks the List-wrap fix'). The state_tier tests passed on the stale copy at base (7 passed in the three-arm selection), so they are not a failing control for this order; see surprise NFRA_SCHWABBF-W19-S1.",
+      "denominator": "8 passed of 8 collected in the file (the -k selection selects all 8: 3 master_set, 2 syntax, 2 state_tier, 1 plan_list_wrap; 0 deselected, 0 failed, 0 skipped; powershell.exe present so the parser and List-harness tests ran rather than printed SKIP).",
+      "expect": "^[0-9]+ passed[ ,]",
+      "judgment": false,
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AL3-p3-AC2",
+      "criterion_verbatim": "the one-time proof that the Alongside puller is again the 49F puller with only the master list and a header comment changed.",
+      "method": "command",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~19/check_copy_diff.py",
+      "output_evidence": "COPY-DIFF-OK changed_non_comment_lines=1\n(rc=0). Verbose hunks (-v): insert src[0:0] copy[0:2] (the two header comment lines, copy lines 1-2); replace src[37:38] copy[39:40] (the $Master ValidateSet line, copy line 40: now the four Cottonwood masters). The planItems line is copy line 307 (source line 305). Control before the rebuild: the same check script on the stale copy at base would report the bare $all = @($planItems) line as a non-comment change inside the function body; the stale copy was not re-diffed in this run.",
+      "denominator": "2 hunks of the difflib diff of 794 source lines against 796 copy lines; 1 non-comment changed line of 1 allowed; 0 delete hunks; 0 changes outside the header block other than the ValidateSet line.",
+      "expect": "^COPY-DIFF-OK changed_non_comment_lines=1$",
+      "judgment": false,
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Negative control for the plan_list_wrap arm: the stale HEAD copy's Select-PlanAsOf (the bare $all = @($planItems) line) driven by the same child powershell.exe harness with a real System.Collections.Generic.List[object] of four items (two 20261019, two 20261016).",
+      "expected": "NOFILTER kept=4 die_code=0",
+      "observed": "Stale function: 'Argument types do not match' at the bare $all = @($planItems) line (System.ArgumentException); the harness printed NOFILTER kept=1 die_code=0. The test asserts kept=4 and therefore fails on this copy; the same arm fails on the stale copy in pytest (1 failed, 7 passed).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Both acceptance invocations re-run on the same tree after the copy rebuild and the test edit.",
+      "observed": "AC1 selection: 8 passed (twice; full file also 8 passed). AC2: COPY-DIFF-OK changed_non_comment_lines=1 rc=0 (twice). Pinned: copy blob cbcecde7d5006e63ffb77d24cb7e0988049ad22f, test blob 600398f97e8e495f10875c10ec5db34ea0a6a4f0 at commit d9d53b53c4.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the puller, uploading to S3, contacting Schwab, any AWS call",
+      "reason": "WORLD floor in the order: nothing is uploaded, run or sent. The copy is text only."
+    },
+    {
+      "item": "A committed standing parity comparator between the two pullers",
+      "reason": "Vetoed by Andrew (no standing parity comparator). The check script lives in the deliverables folder only and is one-time."
+    },
+    {
+      "item": "Editing the 49F source puller or any file outside the write grant",
+      "reason": "Outside the write grant: the source is READ only (owned by ~SB); the TO order file and the deliverables folder are the only other writes."
+    },
+    {
+      "item": "The state_tier tests as a failing control",
+      "reason": "They exist and pass on the stale copy at base (the copy already carries the state-tier functions); the order's dry-run premise is recorded as surprise NFRA_SCHWABBF-W19-S1 and the state_tier tests were kept unchanged."
+    }
+  ],
+  "surprises": [
+    "NFRA_SCHWABBF-W19-S1: the order's dry-run note says the state_tier arm has no test at base and would fail against the stale copy, but the two state_tier tests already exist at base 5bb233992d and pass on the stale copy; the failing control for this order is the new plan_list_wrap arm."
+  ],
+  "session_log": "NONE: this worker writes no session log (L7 reads from git); the worker report carries the record.",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest data/canonical/schwab/tests/test_alongside_puller.py -q -p no:cacheprovider --color=no -k \"master_set or syntax or state_tier or plan_list_wrap\"",
+      "result": "8 passed in 0.98s, rc=0"
+    },
+    {
+      "tool": "difflib copy check",
+      "invocation": "python org/missions/D8/NFRA/NFRA_SCHWABBF/deliverables/0.9.0_WK_NFRA_SCHWABBF~19/check_copy_diff.py",
+      "result": "COPY-DIFF-OK changed_non_comment_lines=1, rc=0"
+    }
+  ]
+}
